@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Sítě"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikace bezdrát. displeje"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné protokolování Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Přibrždění vyhledávání Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilní data jsou vždy aktivní"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwarová akcelerace tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Zobrazovat zařízení Bluetooth bez názvů"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nelze se připojit"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Měřená"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Neměřená"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávací paměť protokol. nástroje"</string>
@@ -419,8 +421,8 @@
     <item msgid="8934126114226089439">"50 %"</item>
     <item msgid="1286113608943010849">"100 %"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"před <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="remaining_length_format" msgid="7886337596669190587">"Zbývající čas: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="charge_length_format" msgid="8978516217024434156">"Před <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"zbývá: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Malé"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Výchozí"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Velké"</string>

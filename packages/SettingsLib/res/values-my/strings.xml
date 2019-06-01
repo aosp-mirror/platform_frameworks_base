@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ကွန်ယက်များကို စကင်မလုပ်နိုင်ပါ"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"တစ်ခုမျှ မဟုတ်ပါ"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"မရှိ"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"သိမ်းဆည်းပြီး"</string>
     <string name="wifi_disconnected" msgid="8085419869003922556">"ချိတ်ဆက်မထားပါ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ပိတ်ထားသည်"</string>
@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"အလိုအလျောက်ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ"</string>
-    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> က သိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ကွန်ရက်အဆင့်သတ်မှတ်ပေးသူ မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
@@ -148,12 +148,12 @@
     <string name="tether_settings_title_all" msgid="8356136101061143841">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="user_guest" msgid="8475274842845401871">"ဧည့်သည်"</string>
-    <string name="unknown" msgid="1592123443519355854">"မသိပါ"</string>
+    <string name="unknown" msgid="1592123443519355854">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ပုံမှန်သတ်မှတ်ထားခြင်းမရှိ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"စာသားမှ အသံထွက်စေခြင်း"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"စာသားမှ စကားပြောသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"အသံအနိမ့်အမြင့်"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi ရှာဖွေခြင်း ထိန်းချုပ်မှု"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"မှတ်တမ်းကြားခံနယ် အရွယ်အစားများ"</string>
@@ -402,7 +404,7 @@
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုပါသည်"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> − အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
-    <string name="battery_info_status_unknown" msgid="196130600938058547">"မသိပါ"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"မသိ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"အားသွင်းမနေပါ"</string>

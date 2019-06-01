@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ne može skenirati mreže"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Nema"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Ništa"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Sačuvano"</string>
-    <string name="wifi_disconnected" msgid="8085419869003922556">"Veza je prekinuta"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Nije povezano"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Greška u konfiguraciji IP-a"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Niste povezani zbog slabog kvaliteta mreže"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući detaljni zapisnik za WiFi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Reguliranje skeniranja WiFi mreže"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Prijenos podataka na mobilnoj mreži je uvijek aktivan"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzavanje za povezivanje putem mobitela"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezivanje nije uspjelo"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećani nivo zapisnika za WiFi. Prikaz po SSID RSSI-ju u Biraču WiFi-ja"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Smanjuje potrošnju baterije i poboljšava performanse mreže"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"S naplatom"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez naplate"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine međumemorije zapisnika"</string>
