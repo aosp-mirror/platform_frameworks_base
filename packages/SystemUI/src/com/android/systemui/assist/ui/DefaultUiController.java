@@ -16,6 +16,8 @@
 
 package com.android.systemui.assist.ui;
 
+import static com.android.systemui.assist.AssistManager.DISMISS_REASON_INVOCATION_CANCELLED;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -91,6 +93,8 @@ public class DefaultUiController implements AssistManager.UiController {
 
     @Override // AssistManager.UiController
     public void onInvocationProgress(int type, float progress) {
+        boolean invocationWasInProgress = mInvocationInProgress;
+
         if (progress == 1) {
             animateInvocationCompletion(type, 0);
         } else if (progress == 0) {
@@ -105,16 +109,7 @@ public class DefaultUiController implements AssistManager.UiController {
         }
         mLastInvocationProgress = progress;
 
-        // Logs assistant invocation start.
-        if (!mInvocationInProgress && progress > 0.f) {
-            MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
-                    .setType(MetricsEvent.TYPE_ACTION));
-        }
-        // Logs assistant invocation cancelled.
-        if (mInvocationInProgress && progress == 0f) {
-            MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
-                    .setType(MetricsEvent.TYPE_DISMISS).setSubtype(0));
-        }
+        logInvocationProgressMetrics(type, progress, invocationWasInProgress);
     }
 
     @Override // AssistManager.UiController
@@ -140,6 +135,22 @@ public class DefaultUiController implements AssistManager.UiController {
     public void setInvocationColors(@ColorInt int color1, @ColorInt int color2,
             @ColorInt int color3, @ColorInt int color4) {
         mInvocationLightsView.setColors(color1, color2, color3, color4);
+    }
+
+    protected static void logInvocationProgressMetrics(
+            int type, float progress, boolean invocationWasInProgress) {
+        // Logs assistant invocation start.
+        if (!invocationWasInProgress && progress > 0.f) {
+            MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
+                    .setType(MetricsEvent.TYPE_ACTION)
+                    .setSubtype(Dependency.get(AssistManager.class).toLoggingSubType(type)));
+        }
+        // Logs assistant invocation cancelled.
+        if (invocationWasInProgress && progress == 0f) {
+            MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
+                    .setType(MetricsEvent.TYPE_DISMISS)
+                    .setSubtype(DISMISS_REASON_INVOCATION_CANCELLED));
+        }
     }
 
     private void updateAssistHandleVisibility() {
