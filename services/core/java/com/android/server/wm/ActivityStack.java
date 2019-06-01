@@ -4979,6 +4979,17 @@ class ActivityStack extends ConfigurationContainer {
             return true;
         }
 
+        ActivityRecord topActivity = getDisplay().topRunningActivity();
+        ActivityStack topStack = topActivity.getActivityStack();
+        if (topStack != null && topStack != this && topActivity.isState(RESUMED)) {
+            // The new top activity is already resumed, so there's a good chance that nothing will
+            // get resumed below. So, update visibility now in case the transition is closed
+            // prematurely.
+            mRootActivityContainer.ensureVisibilityAndConfig(null /* starting */,
+                    getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
+                    false /* deferResume */);
+        }
+
         mRootActivityContainer.resumeFocusedStacksTopActivities();
         return true;
     }
