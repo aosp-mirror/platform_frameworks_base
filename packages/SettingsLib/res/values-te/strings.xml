@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రామాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi స్కాన్ కుదింపు"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"బ్యాటరీ శక్తి వినియోగాన్ని తగ్గించి &amp; నెట్‌వర్క్ పనితీరును మెరుగుపరుస్తుంది"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"గణించబడుతోంది"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"గణించబడటం లేదు"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"లాగర్ బఫర్ పరిమాణాలు"</string>
@@ -451,7 +453,7 @@
     <string name="okay" msgid="1997666393121016642">"సరే"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
-    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ఎప్పటికీ"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ఎప్పటికీ వ‌ద్దు"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తర్వాత అలారం మీరు ఆ లోపల దీన్ని ఆఫ్ చేయకుంటే వినిపించదు"</string>

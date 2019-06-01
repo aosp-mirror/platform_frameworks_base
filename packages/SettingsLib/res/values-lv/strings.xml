@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Tīklošana"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Bezvadu attēlošanas sertifikācija"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Iespējot Wi‑Fi detalizēto reģistrēšanu"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi meklēšanas ierobežošana"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Vienmēr aktīvs mobilo datu savienojums"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Rādīt Bluetooth ierīces bez nosaukumiem"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nevarēja izveidot savienojumu."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Samazina akumulatora izlādi un uzlabo tīkla veiktspēju"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Maksas"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bezmaksas"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Reģistrētāja buferu lielumi"</string>
