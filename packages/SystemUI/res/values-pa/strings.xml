@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ਡਿਬੱਗਿੰਗ ਦੀ ਆਗਿਆ ਨਹੀਂ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB ਪੋਰਟ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨੂੰ ਪਾਣੀ ਅਤੇ ਧੂੜ-ਮਿੱਟੀ ਤੋਂ ਬਚਾਉਣ ਲਈ, USB ਪੋਰਟ ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ ਕੋਈ ਵੀ ਐਕਸੈਸਰੀ ਪਛਾਣੀ ਨਹੀਂ ਜਾਵੇਗੀ।\n\nUSB ਪੋਰਟ ਨੂੰ ਦੁਬਾਰਾ ਵਰਤਣਾ ਠੀਕ ਹੋਣ \'ਤੇ ਤੁਹਾਨੂੰ ਸੂਚਿਤ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"ਚਾਰਜਰਾਂ ਅਤੇ ਉਪਸਾਧਨਾਂ ਦੀ ਪਛਾਣ ਕਰਨ ਲਈ USB ਪੋਰਟ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB ਚਾਲੂ ਕਰੋ"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"ਖਾਮੋਸ਼ ਸੂਚਨਾਵਾਂ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ਸਾਰੀਆਂ ਖਾਮੋਸ਼ ਸੂਚਨਾਵਾਂ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ਹੁਣ ਚਾਲੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"ਬਲਾਕ ਕਰੋ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ਛੋਟਾ ਕਰੋ"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"ਖਾਮੋਸ਼"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ਚੁੱਪ ਰਹੋ"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"ਸੁਚੇਤਨਾ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ਸੁਚੇਤ ਰਖੋ"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"ਸਰਲ"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"ਤਰਜੀਹੀ"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ਸਿਰਫ਼ ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ ਵਿਚਲੀਆਂ ਸੂਚਨਾਵਾਂ ਨਾਲ ਧਿਆਨ ਦੇਣ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ਧੁਨੀ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ। ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਓ।"</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"ਖਮੋਸ਼"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"ਸੁਚੇਤਨਾ"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"ਤੁਹਾਨੂੰ ਬਿਨਾਂ ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਦੇ ਫੋਕਸ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ਇੱਕ ਐਪ ਦੀ ਥਾਂ \'ਤੇ ਦੂਜੀ ਐਪ ਰਾਹੀਂ ਦਿੱਤੀ ਗਈ ਸੂਚਨਾ"</string>
@@ -908,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"ਕਰਨ ਦਿਓ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"ਬੈਟਰੀ ਸੇਵਰ ਦੀ ਸਮਾਂ-ਸੂਚੀ ਤਿਆਰ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"ਬੈਟਰੀ ਖਤਮ ਹੋਣ ਦੀ ਸੰਭਾਵਨਾ \'ਤੇ ਚਾਲੂ ਹੁੰਦਾ ਹੈ"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ਬੈਟਰੀ ਸੇਵਰ ਸਮਾਂ-ਸੂਚੀ ਚਾਲੂ ਕੀਤੀ ਗਈ"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ਤੋਂ ਘੱਟ ਹੋ ਜਾਣ \'ਤੇ ਬੈਟਰੀ ਸੇਵਰ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ।"</string>
@@ -942,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ਖਾਰਜ ਕਰੋ"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>
