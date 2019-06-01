@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ୱାଇ-ଫାଇ ଭର୍ବୋସ୍‌ ଲଗିଙ୍ଗ ସକ୍ଷମ କରନ୍ତୁ"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"ୱାଇ-ଫାଇ ସ୍କାନ୍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ଆକ୍ସିଲିରେସନ୍"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"କନେକ୍ଟ କରିହେଲା ନାହିଁ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ବ୍ୟାଟେରୀ ଖର୍ଚ୍ଚ କମ୍ ଏବଂ ନେଟ୍‌ୱାର୍କ ପ୍ରଦର୍ଶନ ଉନ୍ନତ କରିଥାଏ"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"ମପାଯାଉଥିବା"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ମପାଯାଉନଥିବା"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ଲଗର୍‌ ବଫର୍‌ ସାଇଜ୍"</string>
@@ -460,7 +462,7 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ଅବଧି"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ପ୍ରତ୍ୟେକ ଥର ପଚାରନ୍ତୁ"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"ଆପଣ ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ DND ଅନ୍‌ ରହିବ"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"ଆପଣ ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ଏହିକ୍ଷଣି"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"ଏହି ଡିଭାଇସ୍‍"</string>
 </resources>

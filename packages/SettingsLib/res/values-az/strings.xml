@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Şəbəkələşmə"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Simsiz displey sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi skanlamasının tənzimlənməsi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Birləşmə üçün avadanlıq akselerasiyası"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth cihazlarını adsız göstərin"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Qoşulmaq mümkün olmadı"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Batareya istifadəsini azaldır &amp; şəbəkə performansını yaxşılaşdırır"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Ödənişli"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger bufer ölçüləri"</string>

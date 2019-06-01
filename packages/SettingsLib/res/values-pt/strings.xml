@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Não é possível verificar a existência de redes"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nenhuma"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Salva"</string>
-    <string name="wifi_disconnected" msgid="8085419869003922556">"Desconectado"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Desconectada"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desativado"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Falha de configuração de IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Não conectado devido à baixa qualidade da rede"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ativar registro detalhado de Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limitar busca por Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleração de hardware de tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sem nomes"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Não foi possível conectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de registro de Wi-Fi; mostrar conforme o RSSI do SSID no seletor de Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reduz o consumo de bateria e melhora o desempenho da rede"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamanhos de buffer de logger"</string>

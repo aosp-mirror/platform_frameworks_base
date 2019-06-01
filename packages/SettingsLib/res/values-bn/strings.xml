@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"কানেক্ট করা যায়নি"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ব্যাটারির খরচ কমায় এবং নেটওয়ার্কের পারফর্ম্যান্স উন্নত করে"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"মিটার্ড"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
