@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-Debugging nicht zulässig"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Der momentan auf diesem Gerät angemeldete Nutzer kann das USB-Debugging nicht aktivieren. Um diese Funktion verwenden zu können, wechsle zum primären Nutzer."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-Port deaktiviert"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Zum Schutz deines Geräts vor Flüssigkeiten oder Fremdkörpern ist der USB-Port zurzeit deaktiviert und erkennt kein Zubehör.\n\nDu wirst benachrichtigt, wenn der USB-Port wieder verwendet werden kann."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Erkennung von Ladegeräten und Zubehör am USB-Port aktiviert"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB aktivieren"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Weitere Informationen"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Auf Bildschirmgröße anpassen"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -462,10 +460,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht mehr anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Verwalten"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Lautlose Benachrichtigungen"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Alle lautlosen Benachrichtigungen löschen"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
@@ -542,7 +538,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"aktivieren"</string>
     <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"deaktivieren"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Ausgabegerät wechseln"</string>
-    <string name="screen_pinning_title" msgid="3273740381976175811">"Bildschirm ist fixiert"</string>
+    <string name="screen_pinning_title" msgid="3273740381976175811">"Der Bildschirm ist angpinnt"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Dazu wischst du nach oben und hältst den Bildschirm gedrückt"</string>
@@ -552,7 +548,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Startbildschirm\""</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ok"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="1022122128489278317">"Bildschirm fixiert"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Der Bildschirm ist angepinnt"</string>
     <string name="screen_pinning_exit" msgid="5187339744262325372">"Fixierung für Bildschirm aufgehoben"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
@@ -649,21 +645,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blockieren"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Weiterhin anzeigen"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimieren"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Lautlos"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Weiter lautlos bleiben"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Benachrichtigen"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Weiterhin Benachrichtigungen senden"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Benachrichtigungen deaktivieren"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Stumm"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Priorisiert"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Benachrichtigungen erscheinen nur in der Benachrichtigungsleiste. So kannst du dich besser konzentrieren. Immer lautlos."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Benachrichtigungen werden mit einem Ton und einem Statusleistensymbol angekündigt. Erscheinen auf dem Sperrbildschirm."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Lautlos"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Benachrichtigen"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Benachrichtigungen werden ohne Ton oder Vibration angekündigt, um deine Konzentration nicht zu stören."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Benachrichtigungen werden mit einem Ton oder einer Vibration angekündigt, um dich auf sie aufmerksam zu machen."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Weitergeleitete Benachrichtigung"</string>
@@ -790,8 +781,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Zum Hinzufügen von Kacheln Kachel halten und ziehen"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Zum Verschieben der Kacheln Kachel halten und ziehen"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Zum Entfernen hierher ziehen"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Du brauchst mindestens <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> Kacheln"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Bearbeiten"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Uhrzeit"</string>
   <string-array name="clock_options">
@@ -913,8 +903,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Zulassen"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Ablehnen"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tippen zum Planen des Energiesparmodus"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Aktivieren, wenn der Akku wahrscheinlich nicht mehr lange hält"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Nein danke"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Geplanter Energiesparmodus aktiviert"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Der Energiesparmodus wird bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g> %% automatisch aktiviert."</string>
@@ -947,4 +936,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Nach unten rechts verschieben"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Schließen"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

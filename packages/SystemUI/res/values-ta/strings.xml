@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB பிழைதிருத்தம் அனுமதிக்கப்படவில்லை"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"தற்போது இந்தச் சாதனத்தில் உள்நுழைந்துள்ள பயனரால் USB பிழைதிருத்தத்தை இயக்க முடியாது. இந்த அம்சத்தை இயக்க, முதன்மைப் பயனருக்கு மாறவும்."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB போர்ட் முடக்கப்பட்டது"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"தேவையற்றவையில் இருந்து உங்கள் சாதனத்தைப் பாதுகாக்க USB போர்ட் முடக்கப்பட்டுள்ளது. மேலும் எந்தத் துணைக் கருவிகளையும் அது கண்டறியாது.\n\nUSB போர்ட்டை மீண்டும் எப்போது பயன்படுத்தலாம் என்பதைப் பற்றி உங்களுக்குத் தெரிவிக்கப்படும்."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"சார்ஜர்களையும் துணைக்கருவிகளையும் கண்டறிவதற்காக USB போர்ட் இயக்கப்பட்டுள்ளது"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USBயை இயக்கு"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"மேலும் அறிக"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ஸ்கிரீன்ஷாட்"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"ஒலியில்லாத அறிவிப்புகள்"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ஒலியில்லாத அழைப்புகள் அனைத்தையும் அழிக்கும்"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"அறிவிப்புகள் இல்லை"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"தடு"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"அறிவிப்புகளைத் தொடர்ந்து காட்டு"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"சிறிதாக்கு"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"நிசப்தம்"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"அறிவிப்புகளை ஒலியின்றிக் காட்டு"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"விழிப்பூட்டல்"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"தொடர்ந்து விழிப்பூட்டு"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"அறிவிப்புகளை முடக்கு"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்த ஆப்ஸின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"ஜென்டில்"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"முன்னுரிமைப்படுத்தப்பட்டது"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"கீழ் இழுக்கும் ஷேடில் வரும் அறிவிப்புகளில் மட்டும் கவனம் செலுத்த உதவுகிறது. எப்போதும் நிசப்தம்."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ஒலி &amp; நிலைப் பட்டி ஐகான் மூலம் உங்கள் கவனத்தைப் பெறுகிறது. பூட்டுத் திரையில் காட்டும்."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"நிசப்தம்"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"விழிப்பூட்டல்"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"ஒலியோ அதிர்வோ இல்லாமல் முழு கவனம் செலுத்த உதவும்."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"ஒலியோ அதிர்வோ ஏற்படுத்தி உங்கள் கவனத்தை ஈர்க்கும்."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ப்ராக்ஸியான அறிவிப்பு"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"கட்டங்களைச் சேர்க்க, அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"கட்டங்களை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"அகற்ற, இங்கே இழுக்கவும்"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"குறைந்தது <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> கட்டங்கள் தேவை"</string>
     <string name="qs_edit" msgid="2232596095725105230">"மாற்று"</string>
     <string name="tuner_time" msgid="6572217313285536011">"நேரம்"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"அனுமதி"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"நிராகரி"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"பேட்டரி சேமிப்பானை ஆன் செய்வது தொடர்பாகத் திட்டமிட, தட்டவும்"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"பேட்டரி தீர்ந்துபோகும் நிலையில் இருக்கும் போது ஆன் செய்யப்படும்"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"வேண்டாம்"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"திட்டமிட்ட பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டது"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%%க்குக் கீழ் குறையும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆன் செய்யப்படும்."</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"கீழே வலதுபுறமாக நகர்த்து"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"மூடுக"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

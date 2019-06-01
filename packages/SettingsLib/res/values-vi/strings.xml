@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mạng"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Hạn chế quét tìm Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tăng tốc phần cứng khi chia sẻ kết nối"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Hiển thị các thiết bị Bluetooth không có tên"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Không thể kết nối"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Kích thước bộ đệm của trình ghi nhật ký"</string>

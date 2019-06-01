@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Barmoq izi belgisi"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"yuz bilan ochish qurilmasini boshqarish"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Ilova foydalanish uchun yuz namunalarini qo‘shish va o‘chirish usullarini tatbiq qilishi mumkin."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"yuz bilan ochish qurilmasidan foydalanish"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Haqiqiylikni tekshirish uchun yuz bilan ochishdan foydalanish imkonini beradi"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Yuz bilan ochish"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Yuzingizni yana qayd qiling"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Yuzingiz yanada yaxshiroq aniqlanishi uchun uni yana bir marta qayd qiling"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Yuz ravshan suratga olinmadi. Qaytadan urining."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Yana yuz bilan ochishga urining."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Yuzga oid axborot saqlanmadi. Avval eskilari tozalansin."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Yuzni aniqlash bekor qilindi."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Yuz bilan ochishni foydalanuvchi bekor qildi."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Juda ko‘p urinildi. Keyinroq qaytadan urining."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Juda koʻp urinildi. Yuz bilan ochish faolsizlantirildi."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Yuzingiz tasdiqlanmadi. Qaytadan urining."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Hali yuz bilan ochishni sozlamagansiz"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Yuz bilan ochish bu qurilmada ishlamaydi"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Yuz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Xavfsizlik sinovi rejimini faolsizlantirish uchun zavod sozlamalariga qaytaring."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB portda suyuqlik yoki parcha bor"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB port avtomatik tarzda faolsizlashtirildi. Batafsil axborot olish uchun bosing."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB portdan foydalanish mumkin"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon endi suyuqlik yoki turli parchalarni aniqlay olmaydi."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Xatoliklar hisoboti olinmoqda…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
@@ -1504,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"Keyingisini topish"</string>
     <string name="find_previous" msgid="2196723669388360506">"Oldingisini topish"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>dan manzil haqida so‘rov"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Manzil so‘rovi"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Joylashuv axboroti talabi"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) tomonidan so‘raldi"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Ha"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Yo‘q"</string>

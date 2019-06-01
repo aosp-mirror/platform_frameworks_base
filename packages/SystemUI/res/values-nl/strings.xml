@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-poort uitgeschakeld"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"De USB-poort is uitgeschakeld en detecteert geen accessoires, zodat je apparaat wordt beschermd tegen vloeistof en vuil.\n\nJe ontvangt een melding wanneer je de USB-poort weer kunt gebruiken."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB-poort kan opladers en accessoires detecteren"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB inschakelen"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Meer informatie"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Niet opnieuw weergeven"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alles wissen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Beheren"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Stille meldingen"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Alle stille meldingen wissen"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Meldingen onderbroken door \'Niet storen\'"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Nu starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Geen meldingen"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokkeren"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Blijven weergeven"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimaliseren"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Stil"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Stil blijven"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Waarschuwen"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Blijven waarschuwen"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Meldingen uitschakelen"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Meldingen van deze app blijven weergeven?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Vriendelijk"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Met prioriteit"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Helpt je focussen doordat meldingen alleen in het pull-downvenster worden weergegeven. Altijd stil."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Trekt de aandacht met geluid en een pictogram in de statusbalk. Wordt weergegeven op het vergrendelingsscherm."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Stil"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Waarschuwen"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Helpt je focussen zonder geluid of trilling."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Trekt je aandacht met geluid of trillingen."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Melding via proxy"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Houd vast en sleep om tegels toe te voegen"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Houd vast en sleep om tegels opnieuw in te delen"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Sleep hier naartoe om te verwijderen"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Je hebt minimaal <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tegels nodig"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Bewerken"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Tijd"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Toestaan"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Weigeren"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tikken om Batterijbesparing in te schakelen"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Inschakelen wanneer de batterij waarschijnlijk leeg raakt"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Nee"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Batterijbesparing is ingeschakeld"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batterijbesparing wordt automatisch ingeschakeld wanneer de batterijstatus lager is dan <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Naar rechtsonder verplaatsen"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Sluiten"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

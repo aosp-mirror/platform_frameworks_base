@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Otklanjanje grešaka na USB-u nije dozvoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može da uključi otklanjanje grešaka na USB-u. Da biste koristili ovu funkciju, prebacite na primarnog korisnika."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB port je onemogućen"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Da bi se uređaj zaštitio od tečnosti ili nečistoće, USB port je onemogućen i neće otkrivati dodatnu opremu.\n\nObavestićemo vas kada ponovo budete mogli da koristite USB port."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB port je omogućen radi otkrivanja punjača i dodatne opreme"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Omogući USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Saznajte više"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zumiraj na celom ekranu"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Razvuci na ceo ekran"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snimak ekrana"</string>
@@ -461,10 +459,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne prikazuj ponovo"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Obriši sve"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljajte"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Nečujna obaveštenja"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Obrišite sva nečujna obaveštenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Obaveštenja su pauzirana režimom Ne uznemiravaj"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Započni odmah"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nema obaveštenja"</string>
@@ -648,21 +644,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokiraj"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Nastavi da prikazuješ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Umanji"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Nečujno"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Ne uključuj zvuk"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Upozoravanje"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Nastavi sa obaveštenjima"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Isključi obaveštenja"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite li da se obaveštenja iz ove aplikacije i dalje prikazuju?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Diskretno"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Prioritetno"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Pomaže vam da se fokusirate. Obaveštenja su samo na padajućoj traci. Uvek nečujno."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Privlači vam pažnju pomoću zvuka i ikone statusne trake. Prikazuje se na zaključanom ekranu."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Nečujno"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Upozoravanje"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Pomaže vam da se koncentrišete bez zvuka ili vibracije."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Privlači vam pažnju pomoću zvuka ili vibracije."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ova obaveštenja ne mogu da se menjaju."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ova grupa obaveštenja ne može da se konfiguriše ovde"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Obaveštenje preko proksija"</string>
@@ -791,8 +782,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Zadržite i prevucite da biste dodali pločice"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Zadržite i prevucite da biste promenili raspored pločica"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovde da biste uklonili"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Minimalan broj pločica je <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Izmeni"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vreme"</string>
   <string-array name="clock_options">
@@ -914,8 +904,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dozvoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Odbij"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Dodirnite da biste napravili raspored za uštedu baterije"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Uključite ako će baterija verovatno da se isprazni"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, hvala"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Raspored za uštedu baterije je uključen"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Ušteda baterije će se automatski uključivati kada baterija padne ispod <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -948,4 +937,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Premesti dole levo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Premesti dole desno"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Odbaci"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

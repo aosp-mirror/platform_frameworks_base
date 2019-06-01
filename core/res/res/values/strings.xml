@@ -252,12 +252,15 @@
         <item>@string/wfcSpnFormat_wifi</item>
         <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
         <item>@string/wfcSpnFormat_vowifi</item>
+        <item>@string/wfcSpnFormat_spn_wifi_calling_vo_hyphen</item>
     </string-array>
 
     <!-- Spn during Wi-Fi Calling: "<operator>" -->
     <string name="wfcSpnFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
     <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi Calling" -->
     <string name="wfcSpnFormat_spn_wifi_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> WiFi Calling" -->
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen"><xliff:g id="spn" example="Operator">%s</xliff:g> WiFi Calling</string>
     <!-- Spn during Wi-Fi Calling: "WLAN Call" -->
     <string name="wfcSpnFormat_wlan_call">WLAN Call</string>
     <!-- Spn during Wi-Fi Calling: "<operator> WLAN Call" -->

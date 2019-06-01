@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Võrgundus"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi sõnaline logimine"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"WiFi-skannimise ahendamine"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Hoia mobiilne andmeside alati aktiivne"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Ühenduse jagamise riistvaraline kiirendus"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Kuva ilma nimedeta Bluetoothi seadmed"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ühendamine ebaõnnestus"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logija puhvri suurused"</string>

@@ -91,8 +91,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Prístup k SIM karte"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD zvuk"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Načúvacie pomôcky"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Pripojené k načúvacím pomôckam"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Načúvadlá"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Pripojené k načúvadlám"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Pripojené ku zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Pripojené ku zvuku telefónu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Pripojené na server pre prenos údajov"</string>
@@ -109,7 +109,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Použiť pre zvuk telefónu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Použiť na prenos súborov"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Použiť pre vstup"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Použiť pre načúvacie pomôcky"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Použiť pre načúvadlá"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Párovať"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"PÁROVAŤ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Zrušiť"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Siete"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné denníky Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Pribrzdenie vyhľadávania sietí Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardvérová akcelerácia tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nepodarilo sa pripojiť"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Znižuje používanie batérie a zlepšuje výkon siete"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávacia pamäť nástroja denníkov"</string>

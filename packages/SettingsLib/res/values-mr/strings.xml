@@ -78,7 +78,7 @@
     <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"अॅक्टिव्ह, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
     <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"अॅक्टिव्ह"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"अ‍ॅक्टिव्ह"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"मीडिया ऑडिओ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फाइल स्थानांतरण"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"वायरलेस डिस्प्ले प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाय-फाय व्हर्बोझ लॉगिंग सुरू करा"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"वाय-फाय स्कॅन थ्रॉटलिंग"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिंग हार्डवेअर प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"कनेक्ट करू शकलो नाही"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय सिलेक्टरमध्‍ये प्रति SSID RSSI दर्शवा"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"बॅटरी जलदरीतीने संपण्यापासून रोखते आणि नेटवर्क परफॉर्मन्समध्ये सुधारणा करते"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"मीटरने मोजलेले"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"मीटरने न मोजलेले"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफर आकार"</string>

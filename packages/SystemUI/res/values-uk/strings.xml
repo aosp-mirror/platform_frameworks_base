@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ви не можете вмикати налагодження USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис основного користувача."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-порт вимкнено"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Щоб захистити ваш пристрій від рідини та сміття, USB-порт вимкнено. Він не виявлятиме жодних аксесуарів.\n\nКоли USB-порт можна буде використовувати, ви отримаєте сповіщення."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Порт USB виявлятиме зарядні пристрої та аксесуари"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Увімкнути USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Докладніше"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Масштабув. на весь екран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Знімок екрана"</string>
@@ -464,10 +462,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Керувати"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Беззвучні сповіщення"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Очистити всі беззвучні сповіщення"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Режим \"Не турбувати\" призупинив сповіщення"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Почати зараз"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Сповіщень немає"</string>
@@ -651,21 +647,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Блокувати"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Показувати надалі"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Згорнути"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Без звуку"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Без звуку"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Сповіщення"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Отримувати сповіщення"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Вимкнути сповіщення"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Чи показувати сповіщення з цього додатка надалі?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Тихі сповіщення"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Пріоритетні сповіщення"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Сповіщення показуються лише на розкривній панелі, щоб не відволікати. Завжди без звуку."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Привертають увагу сигналом і значком у рядку стану. Показуються на заблокованому екрані."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Без звуку"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Зі звуком"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Не відволікає увагу звуковим сигналом або вібрацією."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Привертає увагу звуковим сигналом або вібрацією."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ці сповіщення не можна змінити."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Цю групу сповіщень не можна налаштувати тут"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Проксі-сповіщення"</string>
@@ -796,8 +787,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Перетягніть потрібні елементи, щоб додати їх"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Щоб змінити порядок елементів, перетягуйте їх"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перетягніть сюди, щоб видалити"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Мінімальна кількість фрагментів: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редагувати"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Час"</string>
   <string-array name="clock_options">
@@ -919,8 +909,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Дозволити"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Відмовити"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Торкніться, щоб увімкнути автоматичний режим економії заряду акумулятора"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Вмикати, коли заряд акумулятора закінчується"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ні, дякую"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Автоматичний режим економії заряду акумулятора ввімкнено"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Режим економії заряду акумулятора вмикається автоматично, коли рівень заряду нижчий за <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -953,4 +942,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Перемістити ліворуч униз"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Перемістити праворуч униз"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Закрити"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

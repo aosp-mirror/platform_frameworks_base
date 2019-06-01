@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon for fingeraftryk"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"administrere hardware til ansigtslås"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Tillader, at appen kan bruge metoder til at tilføje og slette ansigtsskabeloner."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"bruge hardware til ansigtslås"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Tillader, at appen bruger hardware til ansigtslås til godkendelse"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Ansigtslås"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registrer dit ansigt igen"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Registrer dit ansigt igen for at forbedre genkendelsen af det"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Der blev ikke registreret ansigtsdata. Prøv igen."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Prøv ansigtslås igen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Der kan ikke gemmes flere nye ansigter. Slet et gammelt."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Ansigtshandlingen blev annulleret."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Ansigtslås blev annulleret af brugeren."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Du har prøvet for mange gange. Prøv igen senere."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Du har brugt for mange forsøg. Ansigtslås er deaktiveret."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Ansigtet kan ikke genkendes. Prøv igen."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Du har ikke konfigureret ansigtslås."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Ansigtslås understøttes ikke på denne enhed."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ansigt <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Gendan fabriksindstillingerne for at deaktivere tilstanden Testsele."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Væske eller snavs i USB-porten"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten deaktiveres automatisk. Tryk for at få flere oplysninger."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB-porten kan bruges"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonen registrerer ikke længere væske og snavs."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Opretter fejlrapport…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vil du dele fejlrapporten?"</string>
@@ -1989,7 +1979,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Der er registreret en skadelig app"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> anmoder om tilladelse til at vise eksempler fra <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Rediger"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Telefonen vil vibrere ved opkald og notifikationer"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Telefonen vibrerer ved opkald og notifikationer"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Der afspilles ikke lyd ved opkald og notifikationer"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systemændringer"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Forstyr ikke"</string>
