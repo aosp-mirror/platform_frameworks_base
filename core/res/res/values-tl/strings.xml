@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icon ng fingerprint"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"pamahalaan ang hardware ng face unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"gamitin ang hardware ng face unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Pinapayagan ang app na gamitin ang hardware ng face unlock para sa pag-authenticate"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Hindi makakuha ng tamang face data. Subukang muli."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Subukan ulit ang face unlock."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Nakansela ang operation kaugnay ng mukha."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Kinansela ng user ang face unlock."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Masyadong maraming pagsubok. Na-disable ang face unlock."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Hindi mo pa nase-set up ang face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Hindi sinusuportahan ang face unlock sa device na ito."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Mag-factory reset para i-disable ang Test Harness Mode."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Liquid o debris sa USB port"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Awtomatikong na-disable ang USB port. Mag-tap para matuto pa."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Ayos na gamitin ang USB port"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Hindi na nakaka-detect ang telepono ng liquid o debris."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>

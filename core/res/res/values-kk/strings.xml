@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Саусақ ізі белгішесі"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"Face Unlock жабдығын басқару"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"Face Unlock жабдығын пайдалану"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Аутентификациялау үшін қолданбаға Face Unlock жабдығын пайдалануға рұқсат береді."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Бетті қайта тіркеу"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Face Unlock функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Бетті танудан бас тартылды."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Пайдаланушы Face Unlock функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Тым көп әрекет жасалды. Face Unlock функциясы өшірілді."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Face Unlock реттелмеді."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Сынақ бағдарламасы режимін өшіру үшін зауыттық күйіне қайтарыңыз."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB портына сұйықтық немесе қоқыс кірді"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB порты автоматты түрде өшірілді. Толығырақ ақпарат алу үшін түртіңіз."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB портын пайдалана беруге болады"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефон бұдан былай сұйықтықты немесе қоқысты анықтамайды."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Қате туралы есеп алынуда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
@@ -1504,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"Келесіні табу"</string>
     <string name="find_previous" msgid="2196723669388360506">"Алдыңғыны табу"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Орын туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы өтініш"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы сұрау"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Өтініш жіберген <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Иә"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Жоқ"</string>
