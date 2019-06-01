@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबगिंग की अनुमति नहीं है"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"यूएसबी पोर्ट बंद है"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"तरल चीज़ या कचरे से आपके डिवाइस की सुरक्षा करने के लिए, यूएसबी पोर्ट को बंद कर दिया गया है. साथ ही, इससे किसी भी एक्सेसरी की पहचान नहीं की जा सकेगी.\n\nयूएसबी पोर्ट का दोबारा इस्तेमाल करना सुरक्षित होने पर आपको सूचित किया जाएगा."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"चार्जर और एक्सेसरी पहचानने के लिए यूएसबी पोर्ट को चालू कर दिया गया है"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"यूएसबी चालू करें"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"ज़्यादा जानें"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन भरने के लिए खींचें"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रीनशॉट"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी को हटाएं"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"प्रबंधित करें"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"बिना आवाज़ या वाइब्रेशन वाली सूचनाएं"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं मिली"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"ब्लॉक करें"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"दिखाना जारी रखें"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"सूचनाएं छोटी करें"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"बिना आवाज़ के सूचनाएं दिखाएं"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"साइलेंट मोड में सूचनाएं पाएं"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"चेतावनी देना"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"सूचना देना जारी रखें"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"सूचनाएं बंद करें"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"बिना आवाज़ के"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"ज़रूरी"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"सिर्फ़ नीचे खिंचने वाली सूची में सूचनाएं दिखती हैं ताकि आप उन पर पूरा ध्यान दे सकें. दिखते समय आवाज़ और वाइब्रेशन हमेशा बंद रहते हैं."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"कम ज़रूरी सूचनाएं दिखती हैं. दिखते समय आवाज़ और वाइब्रेशन हमेशा बंद रहते हैं."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"कम ज़रूरी सूचनाएं दिखती हैं. दिखते समय आवाज़ और वाइब्रेशन हमेशा बंद रहते हैं."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"कम ज़रूरी सूचनाएं दिखती हैं. दिखते समय आवाज़ और वाइब्रेशन हमेशा बंद रहते हैं."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"आवाज़ और स्टेटस बार के आइकॉन की मदद से सूचनाओं पर आपका ध्यान खिंचता है. लॉक स्क्रीन पर दिखाई देता है."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"आवाज़ के बिना सूचनाएं दिखाएं"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"चेतावनी वाली सूचनाएं"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"आवाज़ या वाइब्रेशन न होने की वजह से आप काम में ध्यान लगा पाते हैं."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"आवाज़ या वाइब्रेशन होने की वजह से आपका ध्यान सूचनाओं पर जाता है."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"प्रॉक्सी सूचना"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"टाइल जोड़ने के लिए दबाएं और खींचें"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"टाइल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाने के लिए यहां खींचें और छोड़ें"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"आपके पास कम से कम <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> टाइलें होनी चाहिए"</string>
     <string name="qs_edit" msgid="2232596095725105230">"बदलाव करें"</string>
     <string name="tuner_time" msgid="6572217313285536011">"समय"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"मंज़ूरी दें"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"नामंज़ूर करें"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"बैटरी सेवर शेड्यूल करने के लिए टैप करें"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"जब बैटरी खत्म होने वाली हो तब \'बैटरी सेवर\' चालू करें"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"जी नहीं, शुक्रिया"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"शेड्यूल किया गया बैटरी सेवर चालू हो गया"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"बैटरी के <xliff:g id="PERCENTAGE">%d</xliff:g>%% से कम होने पर बैटरी सेवर अपने आप चालू हो जाएगा."</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"सबसे नीचे दाईं ओर ले जाएं"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"खारिज करें"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

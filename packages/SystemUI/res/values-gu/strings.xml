@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ડીબગિંગની મંજૂરી નથી"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"હાલમાં આ ઉપકરણમાં સાઇન ઇન થયેલ વપરાશકર્તા USB ડિબગીંગ ચાલુ કરી શકતા નથી. આ સુવિધાનો ઉપયોગ કરવા માટે પ્રાથમિક વપરાશકર્તા પર સ્વિચ કરો."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB પોર્ટ બંધ કરવામાં આવ્યો છે"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"પ્રવાહી અથવા ધૂળથી તમારા ડિવાઇસનું રક્ષણ કરવા માટે, USB પોર્ટ બંધ કરવામાં આવ્યો છે અને કોઈ ઍક્સેસરી શોધશે નહીં.\n\nજ્યારે ફરીથી USB પોર્ટને ઉપયોગમાં લેવાનું સુરક્ષિત હશે ત્યારે તમને નોટિફિકેશન આપવામાં આવશે."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"ચાર્જર અને ઍક્સેસરીની ઓળખ માટે USB પોર્ટ ચાલુ કર્યું"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB ચાલુ કરો"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"વધુ જાણો"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"સ્ક્રીનશૉટ"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"મેનેજ કરો"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"સાઇલન્ટ નોટિફિકેશન"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"હવે પ્રારંભ કરો"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"કોઈ સૂચનાઓ નથી"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"બ્લૉક કરો"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"બતાવવાનું ચાલુ રાખો"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"નાનું કરો"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"સાઇલન્ટ"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"સાઇલન્ટ મોડ ચાલુ રાખો"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"અલર્ટ કરતા રહો"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"અલર્ટ કરવાનું ચાલુ રાખો"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"નોટિફિકેશન બંધ કરો"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"સામાન્ય નોટિફિકેશન"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"મહત્ત્વના નોટિફિકેશન"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"નીચે દેખાતા શેડમાં માત્ર નોટિફિકેશન પર ફોકસ કરવામાં તમને સહાય કરે છે. હંમેશાં સાઇલન્ટ."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"પ્રાધાન્યતાવાળા નોટિફિકેશન નીચે બતાવે છે. હંમેશાં સાઇલન્ટ."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"પ્રાધાન્યતાવાળા નોટિફિકેશન નીચે બતાવે છે. હંમેશાં સાઇલન્ટ."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"પ્રાધાન્યતાવાળા નોટિફિકેશન નીચે બતાવે છે. હંમેશાં સાઇલન્ટ."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"સાઉન્ડ અને સ્ટેટસ બાર આઇકન તમારું ધ્યાન દોરે છે. લૉક સ્ક્રીન પર બતાવે છે."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"સાઇલન્ટ"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"અલર્ટ કરવાનું ચાલુ રાખો"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"તમને સાઉન્ડ અથવા વાઇબ્રેશન વિના ફોકસ કરવામાં સહાય કરે છે."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"સાઉન્ડ અથવા વાઇબ્રેશન વિના તમારું ધ્યાન દોરે છે."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"પ્રૉક્સી નોટિફિકેશન"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ટાઇલ ઉમેરવા માટે તેના પર આંગળી દબાવીને ખેંચો"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ટાઇલને ફરીથી ગોઠવવા માટે આંગળી દબાવીને ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"દૂર કરવા માટે અહીં ખેંચો"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"તમને ઓછામાં ઓછી <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ટાઇલની જરૂર છે"</string>
     <string name="qs_edit" msgid="2232596095725105230">"સંપાદિત કરો"</string>
     <string name="tuner_time" msgid="6572217313285536011">"સમય"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"મંજૂરી આપો"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"નકારો"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"બૅટરી સેવર શેડ્યૂલ કરવા માટે ટૅપ કરો"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"જ્યારે બૅટરી સંભવિત રૂપે પૂરી થવામાં હોય ત્યારે બૅટરી સેવર ચાલુ કરો"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"ના, આભાર"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"બૅટરી સેવર શેડ્યૂલ ચાલુ થયું"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"બૅટરીનું સ્તર એકવાર <xliff:g id="PERCENTAGE">%d</xliff:g>%% કરતાં ઓછું થાય તે પછી બૅટરી સેવર ઑટોમૅટિક રીતે ચાલુ થશે."</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"નીચે જમણે ખસેડો"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"છોડી દો"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

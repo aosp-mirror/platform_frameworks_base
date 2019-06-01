@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏اشکال‌زدایی USB مجاز نیست"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏کاربری که درحال حاضر در این دستگاه وارد سیستم شده است نمی‌تواند اشکال‌زدایی USB را روشن کند. برای استفاده از این قابلیت، به کاربر اصلی تغییر وضعیت دهید."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"‏درگاه USB غیرفعال شده است"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"‏برای محافظت از دستگاهتان دربرابر مایعات یا خاکروبه، درگاه USB غیرفعال شده است و هیچ‌کدام از لوازم جانبی را شناسایی نخواهد کرد.\n\nهرزمان که استفاده از درگاه USB امکان‌پذیر باشد، به شما اطلاع داده می‌شود."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"‏درگاه USB برای تشخیص شارژرها و لوازم جانبی فعال شد"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"‏فعال کردن USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"بیشتر بدانید"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگ‌نمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"عکس صفحه‌نمایش"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"پاک کردن همه موارد"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"مدیریت"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"اعلان‌های بی‌صدا"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"پاک کردن همه اعلان‌های بی‌صدا"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"اعلان‌ها توسط «مزاحم نشوید» موقتاً متوقف شدند"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"اکنون شروع شود"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"اعلانی موجود نیست"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"مسدود کردن"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"همچنان نشان داده شود"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"کوچک کردن"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"بی‌صدا"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"بی‌صدا بماند"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"هشدار دادن"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"همچنان اطلاع داده شود"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"خاموش کردن اعلان‌ها"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"نمایش اعلان از این برنامه ادامه یابد؟"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"آرام"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"دراولویت"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"با فقط نمایش اعلان در کشوی اعلان‌های پایین‌کش، به شما کمک می‌کند تمرکزتان را ازدست ندهید همیشه بی‌صدا."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"با صدا و نماد نوار وضعیت توجه شما را جلب می‌کند. در صفحه قفل نشان داده می‌شود."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"بی‌صدا"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"هشدار دادن"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"به شما کمک می‌کند بدون صدا یا لرزش تمرکز کنید."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"با صدا یا لرزش توجه شما را جلب می‌کند."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"اعلان‌های دارای پراکسی"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"برای افزودن کاشی، نگه دارید و بکشید"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"برای تغییر دادن ترتیب کاشی‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"برای حذف، به اینجا بکشید"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"حداقل به <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> کاشی نیاز دارید"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ویرایش"</string>
     <string name="tuner_time" msgid="6572217313285536011">"زمان"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"مجاز"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"رد کردن"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"نه متشکرم"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"زمان‌بندی «بهینه‌سازی باتری» روشن شد"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"وقتی شارژ باتری به زیر <xliff:g id="PERCENTAGE">%d</xliff:g>%% برسد، «بهینه‌سازی باتری» به‌طور خودکار روشن می‌شود."</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"انتقال به پایین سمت راست"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"انتقال به پایین سمت چپ"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"رد کردن"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>
