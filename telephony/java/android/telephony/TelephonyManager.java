@@ -11187,4 +11187,52 @@ public class TelephonyManager {
         }
         return true;
     }
+
+    /**
+     * Set allowing mobile data during voice call.
+     *
+     * @param allow {@code true} if allowing using data during voice call, {@code false} if
+     * disallowed
+     *
+     * @return {@code false} if the setting is changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setDataAllowedDuringVoiceCall(boolean allow) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setDataAllowedDuringVoiceCall(getSubId(), allow);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether data is allowed during voice call. Note this is for dual sim device that
+     * data might be disabled on non-default data subscription but explicitly turned on by settings.
+     *
+     * @return {@code true} if data is allowed during voice call.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isDataAllowedInVoiceCall() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isDataAllowedInVoiceCall(getSubId());
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
 }
