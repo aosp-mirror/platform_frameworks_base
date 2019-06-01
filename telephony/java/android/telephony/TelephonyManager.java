@@ -93,6 +93,8 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
 
+import dalvik.system.VMRuntime;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -107,8 +109,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import dalvik.system.VMRuntime;
 
 /**
  * Provides access to information about the telephony services on
@@ -1497,6 +1497,48 @@ public class TelephonyManager {
      */
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate if the SIM combination in DSDS has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios.
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
+            "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
+
+    /** @hide */
+    @IntDef({
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE,
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SimCombinationWarningType{}
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no SIM combination warning.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate two active SIMs are both CDMA hence there might be functional limitation.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
+
+    /**
+     * String intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate what's the name of SIM combination it has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios, and the
+     * name will be "operator1 & operator2".
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_NAMES =
+            "android.telephony.extra.SIM_COMBINATION_NAMES";
     //
     //
     // Device Info
