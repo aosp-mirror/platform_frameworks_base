@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB 디버깅이 허용되지 않음"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB 포트 비활성화됨"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"기기를 액체나 이물질로부터 보호하기 위해 USB 포트가 사용 중지되었으며 액세서리를 연결할 수 없습니다.\n\nUSB 포트를 다시 안전하게 사용할 수 있게 되면 알려 드리겠습니다."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"충전기와 액세서리를 감지할 수 있도록 USB 포트가 사용 설정됨"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB 사용"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"자세히 알아보기"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"스크린샷"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"관리"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"무음 알림"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"무음 알림 모두 삭제"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"방해 금지 모드로 일시중지된 알림"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"시작하기"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"알림 없음"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"차단"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"계속 표시하기"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"최소화"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"무음"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"계속 무음으로 알림"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"알림"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"계속 알림"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"알림 사용 중지"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"조용히 표시됨"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"우선순위 지정됨"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"풀다운 창에만 알림을 표시하여 집중에 방해가 되지 않습니다. 항상 음소거됩니다."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"소리 및 상태 표시줄 아이콘으로 주의를 끕니다. 잠금 화면에 표시됩니다."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"무음"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"주의를 끄는 알림"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"소리나 진동 없이 집중할 수 있도록 도와줍니다"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"소리나 진동으로 주의를 끕니다"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"프록시를 통한 알림"</string>
@@ -908,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"허용"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"거부"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"탭하여 절전 모드 예약"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"배터리가 소진될 것 같으면 사용 설정"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"사용 안함"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"절전 모드 예약 사용 설정됨"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 아래로 내려가면 절전 모드가 자동으로 켜집니다."</string>
@@ -942,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"왼쪽 하단으로 이동"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"오른쪽 하단으로 이동"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"닫기"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>
