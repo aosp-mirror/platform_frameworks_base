@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"شبکه"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"داده تلفن همراه همیشه فعال باشد"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"متصل نشد"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"تخلیه باتری راکاهش می‌دهد و عملکرد شبکه را بهبود می‌بخشد"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"محدودشده"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"محدودنشده"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"اندازه‌های حافظه موقت ثبت‌کننده"</string>

@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ජාලකරණය"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"නොරැහැන් සංදර්ශක සහතිකය"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"විස්තරාත්මක Wi‑Fi ලොග් කිරීම සබල කරන්න"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi ස්කෑන් අවකරණය"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"සම්බන්ධ වීමට නොහැකි විය"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"බැටරි බැසීම අඩු කරන අතර ජාල කාර්ය සාධනය වැඩි දියුණු කරයි"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"මනිනු ලැබේ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"මනින්නේ නැත"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>

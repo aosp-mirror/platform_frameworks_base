@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Сеткі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Уключыць падрабязны журнал Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Паказваць прылады Bluetooth без назваў"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не атрымалася падключыцца"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Памеры буфера журнала"</string>
