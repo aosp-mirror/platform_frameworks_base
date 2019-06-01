@@ -584,7 +584,7 @@
     <string name="face_error_canceled" msgid="283945501061931023">"Pemrosesan wajah dibatalkan."</string>
     <string name="face_error_user_canceled" msgid="5317030072349668946">"Face unlock dibatalkan oleh pengguna."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Terlalu banyak percobaan. Face unlock dinonaktifkan."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Terlalu banyak gagal. Face unlock dinonaktifkan."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
     <string name="face_error_not_enrolled" msgid="4016937174832839540">"Anda belum menyiapkan face unlock."</string>
     <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face unlock tidak didukung di perangkat ini."</string>

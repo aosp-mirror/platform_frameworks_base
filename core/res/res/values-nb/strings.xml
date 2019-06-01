@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon for fingeravtrykk"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"administrere maskinvare for Ansiktslås"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Lar appen bruke metoder for å legge til og slette ansiktmaler for bruk."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"bruke maskinvare for Ansiktslås"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Lar appen bruke maskinvare for Ansiktslås til autentisering"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registrer ansiktet ditt på nytt"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"For å forbedre gjenkjennelse, registrer ansiktet ditt på nytt"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv igjen"</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Prøv Ansiktslås igjen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Kan ikke lagre nye ansiktsdata. Slett gamle data først."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Ansikt-operasjonen ble avbrutt."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Ansiktslås ble avbrutt av brukeren."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"For mange forsøk. Prøv igjen senere."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"For mange forsøk. Ansiktslås er slått av."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Kan ikke bekrefte ansiktet. Prøv igjen."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Du har ikke konfigurert Ansiktslås."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Ansiktslås støttes ikke på denne enheten"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ansikt <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Tilbakestill enheten til fabrikkstandard for å slå av Testrammeverk-modus."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Væske eller rusk i USB-porten"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten deaktiveres automatisk. Trykk for å finne ut mer."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Trygt å bruke USB-porten"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonen oppdager ikke væsker eller rusk lenger."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kjører feilrapport …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vil du dele feilrapporten?"</string>
@@ -1907,7 +1897,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"Jobbappene dine samt varsler, data og andre funksjoner i jobbprofilen din blir slått på"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Slå på"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Denne appen er utviklet for en eldre versjon av Android og fungerer kanskje ikke som den skal. Prøv å se etter oppdateringer, eller kontakt utvikleren."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Se etter oppdatering"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Se etter oppdateringer"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Du har nye meldinger"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Åpne SMS-appen for å se"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"Enkelte funksjoner kan begrenses"</string>

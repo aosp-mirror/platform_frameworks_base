@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ícone de impressão digital"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gerenciar hardware de desbloqueio facial"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite que o app execute métodos para adicionar e excluir modelos de rosto para uso."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"usar hardware de desbloqueio facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permite que o app use o hardware de desbloqueio facial para autenticação"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registre seu rosto novamente"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Para melhorar o reconhecimento, registre seu rosto novamente"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Dados precisos não capturados. Tente novamente."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Impossível verificar rosto. Hardware indisponível."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Tente usar o desbloqueio facial novamente."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Não é possível salvar dados faciais. Exclua dados antigos."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operação facial cancelada."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Desbloqueio facial cancelado pelo usuário."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Excesso de tentativas. Tente novamente mais tarde."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Muitas tentativas. Desbloqueio facial desativado."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Não é possível verificar o rosto. Tente novamente."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"O desbloqueio facial não foi configurado."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"O desbloqueio facial não é compatível com este dispositivo."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Realize uma redefinição para configuração original para desativar o modo Arcabouço de testes."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Líquido ou detrito na porta USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"A porta USB é desativada automaticamente. Toque para saber mais."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"É seguro usar a porta USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Não há mais líquidos ou detritos detectados no smartphone."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório do bug..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
@@ -1503,7 +1493,7 @@
     <string name="find_next" msgid="5742124618942193978">"Localizar próximo"</string>
     <string name="find_previous" msgid="2196723669388360506">"Localizar anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitação de local de <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitação de local"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Pedido de localização"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitado por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
@@ -1598,7 +1588,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes da dock"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes na base"</string>
     <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fones de ouvido"</string>
     <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
