@@ -6365,6 +6365,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         if (isNewDefault) {
+            // restore permission to actual value if it becomes the default network again..
+            if (!newNetwork.isVPN()) {
+                try {
+                    mNMS.setNetworkPermission(newNetwork.network.netId,
+                                           getNetworkPermission(newNetwork.networkCapabilities));
+                } catch (RemoteException e) {
+                    loge("Exception in setNetworkPermission: " + e);
+                }
+            }
             updateDataActivityTracking(newNetwork, oldDefaultNetwork);
             // Notify system services that this network is up.
             makeDefault(newNetwork);
