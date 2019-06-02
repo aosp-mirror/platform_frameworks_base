@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Мрежи"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Безжичен дисплей"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"„Многословно“ регистр. на Wi‑Fi: Актив."</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Ограничаване на сканирането за Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Винаги активни мобилни данни"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардуерно ускорение за тетъринга"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показване на устройствата с Bluetooth без имена"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не можа да се установи връзка"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Намалява изразходването на батерията и подобрява ефективността на мрежата"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"С отчитане"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размери на регистрац. буфери"</string>

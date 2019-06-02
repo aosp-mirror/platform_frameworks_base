@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Perangkaian"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Pendikitan pengimbasan Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Tunjukkan peranti Bluetooth tanpa nama"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Tidak dapat menyambung"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Mengurangkan penyusutan bateri &amp; meningkatkan prestasi rangkaian"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Bermeter"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Tidak bermeter"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Saiz penimbal pengelog"</string>

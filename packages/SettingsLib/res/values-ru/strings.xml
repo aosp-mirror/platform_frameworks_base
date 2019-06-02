@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Сети"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Серт. беспроводн. мониторов"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Подробный журнал Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Регулирование поиска сетей Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не отключать мобильный Интернет"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Аппаратное ускорение в режиме модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показывать Bluetooth-устройства без названий"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Уменьшает расход заряда батареи и улучшает работу сетей."</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размер буфера журнала"</string>

@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Trådløs skjermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Slå på detaljert Wi-Fi-loggføring"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Begrensning av Wi‑Fi-skanning"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheter uten navn"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Bufferstørrelser for logg"</string>

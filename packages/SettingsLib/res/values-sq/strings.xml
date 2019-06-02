@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Përshpejtimi i skanimit të Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Shfaq pajisjet me Bluetooth pa emra"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nuk mund të lidhej"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Me matje"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Pa matje"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
