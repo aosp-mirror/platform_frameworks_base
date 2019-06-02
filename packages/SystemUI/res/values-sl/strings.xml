@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Odpravljanje napak s povezavo USB ni dovoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uporabnik, trenutno prijavljen v napravo, ne more vklopiti odpravljanja napak s povezavo USB. Če želite uporabljati to funkcijo, preklopite na primarnega uporabnika."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Vrata USB so onemogočena"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Zaradi zaščite naprave pred tekočino ali umazanijo so vrata USB onemogočena in ne bodo zaznala nobene dodatne opreme.\n\nKo bo znova varno uporabljati vrata USB, boste obveščeni."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Vrata USB so omogočena za zaznavanje polnilnikov in dodatne opreme"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Omogoči USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Več o tem"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek"</string>
@@ -464,10 +462,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tega ne prikaži več"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Izbriši vse"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljanje"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Tiha obvestila"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Brisanje vseh tihih obvestil"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Prikazovanje obvestil je začasno zaustavljeno z načinom »ne moti«"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Začni zdaj"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ni obvestil"</string>
@@ -651,21 +647,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokiraj"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Prikazuj še naprej"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimiraj"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Tiho"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Še naprej prikazuj brez zvoka"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Z zvočnim opozorilom"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Še naprej opozarjaj"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Izklopi obvestila"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Diskretno"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Prednostno"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Nemoteč prikaz samo na poteznem zaslonu z obvestili. Vedno tiho."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Opozarjanje z zvokom in ikono v vrstici stanja. Prikaz na zaklenjenem zaslonu."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Tiho"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Z zvočnim opozorilom"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Nemoteč prikaz brez zvoka ali vibriranja"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Pritegnitev pozornosti z zvokom ali vibriranjem"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Posredovano obvestilo"</string>
@@ -918,8 +909,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dovoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Zavrni"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Dotaknite se za načrtovanje varčevanja z energijo akumulatorja"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Vklop, če je verjetno, da se bo akumulator izpraznil"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, hvala"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Urnik varčevanja z energijo akumulatorja je vklopljen"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Varčevanje z energijo akumulatorja se bo samodejno vklopilo, ko bo energija akumulatorja pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -952,4 +942,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Premakni spodaj levo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Premakni spodaj desno"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Opusti"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

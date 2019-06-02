@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -82,13 +83,31 @@ class RollbackTestUtils {
      * Returns -1 if the package is not currently installed.
      */
     static long getInstalledVersion(String packageName) {
+        PackageInfo pi = getPackageInfo(packageName);
+        if (pi == null) {
+            return -1;
+        } else {
+            return pi.getLongVersionCode();
+        }
+    }
+
+    private static boolean isSystemAppWithoutUpdate(String packageName) {
+        PackageInfo pi = getPackageInfo(packageName);
+        if (pi == null) {
+            return false;
+        } else {
+            return ((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                    && ((pi.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0);
+        }
+    }
+
+    private static PackageInfo getPackageInfo(String packageName) {
         Context context = InstrumentationRegistry.getContext();
         PackageManager pm = context.getPackageManager();
         try {
-            PackageInfo info = pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
-            return info.getLongVersionCode();
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
         } catch (PackageManager.NameNotFoundException e) {
-            return -1;
+            return null;
         }
     }
 
@@ -109,8 +128,8 @@ class RollbackTestUtils {
      * @throws AssertionError if package can't be uninstalled.
      */
     static void uninstall(String packageName) throws InterruptedException, IOException {
-        // No need to uninstall if the package isn't installed.
-        if (getInstalledVersion(packageName) == -1) {
+        // No need to uninstall if the package isn't installed or is installed on /system.
+        if (getInstalledVersion(packageName) == -1 || isSystemAppWithoutUpdate(packageName)) {
             return;
         }
 

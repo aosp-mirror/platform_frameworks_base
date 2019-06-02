@@ -107,7 +107,7 @@ void MetricProducer::flushIfExpire(int64_t elapsedTimestampNs) {
     }
     mIsActive = evaluateActiveStateLocked(elapsedTimestampNs);
     if (!mIsActive) {
-        flushLocked(elapsedTimestampNs);
+        onActiveStateChangedLocked(elapsedTimestampNs);
     }
 }
 
@@ -143,7 +143,11 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
     }
     activation->start_ns = elapsedTimestampNs;
     activation->state = ActivationState::kActive;
+    bool oldActiveState = mIsActive;
     mIsActive = true;
+    if (!oldActiveState) { // Metric went from not active to active.
+        onActiveStateChangedLocked(elapsedTimestampNs);
+    }
 }
 
 void MetricProducer::cancelEventActivationLocked(int deactivationTrackerIndex) {
