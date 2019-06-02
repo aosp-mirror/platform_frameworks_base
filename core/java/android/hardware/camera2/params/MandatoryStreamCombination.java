@@ -28,6 +28,7 @@ import android.graphics.ImageFormat.Format;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.HashCodeHelpers;
@@ -661,6 +662,7 @@ public final class MandatoryStreamCombination {
         private List<Integer> mCapabilities;
         private int mHwLevel, mCameraId;
         private StreamConfigurationMap mStreamConfigMap;
+        private boolean mIsHiddenPhysicalCamera;
 
         private final Size kPreviewSizeBound = new Size(1920, 1088);
 
@@ -680,6 +682,8 @@ public final class MandatoryStreamCombination {
             mCapabilities = capabilities;
             mStreamConfigMap = sm;
             mHwLevel = hwLevel;
+            mIsHiddenPhysicalCamera =
+                    CameraManager.isHiddenPhysicalCamera(Integer.toString(mCameraId));
         }
 
         /**
@@ -893,8 +897,10 @@ public final class MandatoryStreamCombination {
             Size recordingMaxSize = new Size(0, 0);
             Size previewMaxSize = new Size(0, 0);
             Size vgaSize = new Size(640, 480);
-            if (isExternalCamera()) {
-                recordingMaxSize = getMaxExternalRecordingSize();
+            // For external camera, or hidden physical camera, CamcorderProfile may not be
+            // available, so get maximum recording size using stream configuration map.
+            if (isExternalCamera() || mIsHiddenPhysicalCamera) {
+                recordingMaxSize = getMaxCameraRecordingSize();
             } else {
                 recordingMaxSize = getMaxRecordingSize();
             }
@@ -1123,12 +1129,12 @@ public final class MandatoryStreamCombination {
         }
 
         /**
-         * Return the maximum supported video size for external cameras using data from
+         * Return the maximum supported video size for cameras using data from
          * the stream configuration map.
          *
          * @return Maximum supported video size.
          */
-        private @NonNull Size getMaxExternalRecordingSize() {
+        private @NonNull Size getMaxCameraRecordingSize() {
             final Size FULLHD = new Size(1920, 1080);
 
             Size[] videoSizeArr = mStreamConfigMap.getOutputSizes(

@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Ağ işlemleri"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Kablosuz ekran sertifikası"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Kablosuz ağ taramasını kısma"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering donanım hızlandırıcısı"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Adsız Bluetooth cihazlarını göster"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Bağlanılamadı"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Pili daha az harcar ve ağ performansını iyileştirir"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sayaçsız"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Günlük Kaydedici arabellek boyutları"</string>
@@ -448,7 +450,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Daha uzun süre."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Daha kısa süre."</string>
     <string name="cancel" msgid="6859253417269739139">"İptal"</string>
-    <string name="okay" msgid="1997666393121016642">"TAMAM"</string>
+    <string name="okay" msgid="1997666393121016642">"Tamam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aç"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Rahatsız Etmeyin\'i açın"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Hiçbir zaman"</string>

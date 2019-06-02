@@ -407,7 +407,8 @@ public class DisplayModeDirector {
         // the other.
         public static final int PRIORITY_APP_REQUEST_REFRESH_RATE = 1;
         public static final int PRIORITY_APP_REQUEST_SIZE = 2;
-        public static final int PRIORITY_LOW_POWER_MODE = 3;
+        public static final int PRIORITY_LOW_BRIGHTNESS = 3;
+        public static final int PRIORITY_LOW_POWER_MODE = 4;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY and/or MAX_PRIORITY as
         // appropriate, as well as priorityToString.
@@ -485,15 +486,20 @@ public class DisplayModeDirector {
                 Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
         private final Uri mLowPowerModeSetting =
                 Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE);
+        private final Uri mBrightnessSetting =
+                Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS);
 
         private final Context mContext;
         private final float mDefaultPeakRefreshRate;
+        private final int mBrightnessThreshold;
 
         SettingsObserver(@NonNull Context context, @NonNull Handler handler) {
             super(handler);
             mContext = context;
             mDefaultPeakRefreshRate = (float) context.getResources().getInteger(
                     R.integer.config_defaultPeakRefreshRate);
+            mBrightnessThreshold = context.getResources().getInteger(
+                    R.integer.config_brightnessThresholdOfPeakRefreshRate);
         }
 
         public void observe() {
@@ -502,9 +508,14 @@ public class DisplayModeDirector {
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
+            if (mBrightnessThreshold >= 0) {
+                cr.registerContentObserver(mBrightnessSetting, false /*notifyDescendants*/, this,
+                    UserHandle.USER_SYSTEM);
+            }
             synchronized (mLock) {
                 updateRefreshRateSettingLocked();
                 updateLowPowerModeSettingLocked();
+                updateBrightnessSettingLocked();
             }
         }
 
@@ -515,6 +526,8 @@ public class DisplayModeDirector {
                     updateRefreshRateSettingLocked();
                 } else if (mLowPowerModeSetting.equals(uri)) {
                     updateLowPowerModeSettingLocked();
+                } else if (mBrightnessThreshold >=0 && mBrightnessSetting.equals(uri)) {
+                    updateBrightnessSettingLocked();
                 }
             }
         }
@@ -536,6 +549,23 @@ public class DisplayModeDirector {
                     Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate);
             Vote vote = Vote.forRefreshRates(0f, peakRefreshRate);
             updateVoteLocked(Vote.PRIORITY_USER_SETTING, vote);
+        }
+
+        private void updateBrightnessSettingLocked() {
+            int brightness = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, -1);
+
+            if (brightness < 0) {
+                return;
+            }
+
+            final Vote vote;
+            if (brightness <= mBrightnessThreshold) {
+                vote = Vote.forRefreshRates(0f, 60f);
+            } else {
+                vote = null;
+            }
+            updateVoteLocked(Vote.PRIORITY_LOW_BRIGHTNESS, vote);
         }
 
         public void dumpLocked(PrintWriter pw) {

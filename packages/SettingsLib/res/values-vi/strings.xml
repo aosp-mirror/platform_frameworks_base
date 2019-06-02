@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ngoài vùng phủ sóng"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Sẽ không tự động kết nối"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"Không có quyền truy cập Internet"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Được lưu bởi <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Do <xliff:g id="NAME">%1$s</xliff:g> lưu"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Tự động được kết nối qua %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Tự động được kết nối qua nhà cung cấp dịch vụ xếp hạng mạng"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Được kết nối qua %1$s"</string>
@@ -88,7 +88,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Sử dụng để chia sẻ liên hệ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tin nhắn văn bản"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Quyền truy cập SIM"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Truy cập SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Âm thanh HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Âm thanh HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Thiết bị trợ thính"</string>
@@ -153,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Đã đặt một số ứng dụng chạy mặc định"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Chưa đặt mặc định"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Cài đặt chuyển văn bản sang lời nói"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Đầu ra văn bản thành giọng nói"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Chuyển văn bản sang lời nói"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Tốc độ lời nói"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Tốc độ đọc văn bản"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Độ cao"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mạng"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Hạn chế quét tìm Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tăng tốc phần cứng khi chia sẻ kết nối"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Hiển thị các thiết bị Bluetooth không có tên"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Không thể kết nối"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Kích thước bộ đệm của trình ghi nhật ký"</string>
