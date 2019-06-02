@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"תקשורת רשתות"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"‏אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏ויסות סריקה לנקודות Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"לא ניתן היה להתחבר"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"מפחית את קצב התרוקנות הסוללה ומשפר את ביצועי הרשת"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"נמדדת"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"גדלי מאגר של יומן רישום"</string>
@@ -407,7 +409,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"בטעינה"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"לא בטעינה"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"המכשיר מחובר, אבל לא ניתן לטעון עכשיו"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"מלא"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"מלאה"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled" msgid="9206776641295849915">"מושבת"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"מורשה"</string>

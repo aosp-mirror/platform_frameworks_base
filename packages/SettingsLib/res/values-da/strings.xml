@@ -78,7 +78,7 @@
     <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktivt – venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivt"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonopkald"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverførsel"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Netværk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivér detaljeret Wi-Fi-logføring"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Begrænsning af Wi-Fi-scanning"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er altid aktiveret"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwareacceleration ved netdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheder uden navne"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Der kunne ikke oprettes forbindelse"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reducerer batteriforbruget og forbedrer netværkets effektivitet"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Forbrugsafregnet"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Ikke forbrugsafregnet"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Størrelser for Logger-buffer"</string>

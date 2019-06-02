@@ -78,7 +78,7 @@
     <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Inatumika, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ya betri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ya betri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ya betri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ya betri"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Unaendelea"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Kimeunganishwa"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media ya sauti"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Simu"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Uhamishaji wa faili"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mtandao"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Washa Uwekaji kumbukumbu za WiFi kutumia Sauti"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Kudhibiti utafutaji wa Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Iendelee kutumia data ya simu"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Imeshindwa kuunganisha"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Hupunguza matumizi ya chaji ya betri na kuboresha utendaji wa mtandao"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Mtandao unapima data"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mtandao usiopima data"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukubwa wa kiweka bafa ya kumbukumbu"</string>

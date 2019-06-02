@@ -477,7 +477,7 @@ final class ConnectionServiceAdapterServant {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callback;
             args.arg2 = callingPackage;
-            mHandler.obtainMessage(MSG_QUERY_REMOTE_CALL_SERVICES, callback).sendToTarget();
+            mHandler.obtainMessage(MSG_QUERY_REMOTE_CALL_SERVICES, args).sendToTarget();
         }
 
         @Override

@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"網絡"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細記錄"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi 掃瞄限流"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"一律保持啟用流動數據"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"網絡共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"顯示沒有名稱的藍牙裝置"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"無法連線"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"減低耗電量並改善網絡表現"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"按用量收費"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"不限數據用量收費"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
