@@ -363,8 +363,6 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onProgress(float progress) {
-            // TODO: Make dumpstate call onProgress at 0% progress to trigger the
-            // progress notification instantly.
             checkProgressUpdated(mInfo, (int) progress);
         }
 
@@ -2195,7 +2193,7 @@ public class BugreportProgressService extends Service {
             max = CAPPED_MAX;
         }
 
-        if (newPercentage > oldPercentage) {
+        if (progress == 0 || newPercentage > oldPercentage) {
             updateProgressInfo(info, progress, max);
         }
     }
