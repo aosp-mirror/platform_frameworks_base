@@ -16,5 +16,5 @@
 package com.android.internal.util.custom;
 
 public class OverlayUtils {
-    public static String[] AllPackages = {};
+    public static String[] AllPackages = {"com.google.android.pixel.setupwizard.overlay"};
 }
