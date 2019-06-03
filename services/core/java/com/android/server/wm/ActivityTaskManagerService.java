@@ -265,6 +265,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
@@ -1540,11 +1541,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        final ActivityRecord r;
         synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
                 return true;
             }
+        }
+
+        // Carefully collect grants without holding lock
+        final NeededUriGrants resultGrants = mUgmInternal.checkGrantUriPermissionFromIntent(
+                Binder.getCallingUid(), resultData, r.packageName, r.mUserId);
+
+        synchronized (mGlobalLock) {
             // Keep track of the root activity of the task before we finish it
             final TaskRecord tr = r.getTaskRecord();
             ActivityRecord rootR = tr.getRootActivity();
@@ -1606,7 +1615,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
                     res = tr.getStack().requestFinishActivityLocked(token, resultCode,
-                            resultData, "app-request", true);
+                            resultData, resultGrants, "app-request", true);
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
                     }
@@ -2132,14 +2141,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
+        final ActivityRecord r;
+        synchronized (mGlobalLock) {
+            r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return false;
+            }
+        }
+
+        // Carefully collect grants without holding lock
+        final NeededUriGrants destGrants = mUgmInternal.checkGrantUriPermissionFromIntent(
+                Binder.getCallingUid(), destIntent, r.packageName, r.mUserId);
+        final NeededUriGrants resultGrants = mUgmInternal.checkGrantUriPermissionFromIntent(
+                Binder.getCallingUid(), resultData, r.packageName, r.mUserId);
 
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null) {
-                return r.getActivityStack().navigateUpToLocked(
-                        r, destIntent, resultCode, resultData);
-            }
-            return false;
+            return r.getActivityStack().navigateUpToLocked(
+                    r, destIntent, destGrants, resultCode, resultData, resultGrants);
         }
     }
 
@@ -6597,13 +6615,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
-                int requestCode, int resultCode, Intent data) {
+                int requestCode, int resultCode, Intent resultData) {
+            final ActivityRecord r;
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
-                if (r != null && r.getActivityStack() != null) {
-                    r.getActivityStack().sendActivityResultLocked(callingUid, r, resultWho,
-                            requestCode, resultCode, data);
+                r = ActivityRecord.isInStackLocked(activityToken);
+                if (r == null || r.getActivityStack() == null) {
+                    return;
                 }
+            }
+
+            // Carefully collect grants without holding lock
+            final NeededUriGrants resultGrants = mUgmInternal.checkGrantUriPermissionFromIntent(
+                    Binder.getCallingUid(), resultData, r.packageName, r.mUserId);
+
+            synchronized (mGlobalLock) {
+                r.getActivityStack().sendActivityResultLocked(callingUid, r, resultWho,
+                        requestCode, resultCode, resultData, resultGrants);
             }
         }
 
