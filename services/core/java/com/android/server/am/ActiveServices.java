@@ -1946,8 +1946,6 @@ public final class ActiveServices {
                                 r.binding.service.app.hasClientActivities()
                                 || r.binding.service.app.treatLikeActivity, null);
                     }
-                    mAm.updateOomAdjLocked(r.binding.service.app, false,
-                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                 }
             }
 
@@ -2906,15 +2904,15 @@ public final class ActiveServices {
 
         // Tell the service that it has been unbound.
         if (r.app != null && r.app.thread != null) {
-            for (int i=r.bindings.size()-1; i>=0; i--) {
+            boolean needOomAdj = false;
+            for (int i = r.bindings.size() - 1; i >= 0; i--) {
                 IntentBindRecord ibr = r.bindings.valueAt(i);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing down binding " + ibr
                         + ": hasBound=" + ibr.hasBound);
                 if (ibr.hasBound) {
                     try {
                         bumpServiceExecutingLocked(r, false, "bring down unbind");
-                        mAm.updateOomAdjLocked(r.app, true,
-                                OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                        needOomAdj = true;
                         ibr.hasBound = false;
                         ibr.requested = false;
                         r.app.thread.scheduleUnbindService(r,
@@ -2925,6 +2923,10 @@ public final class ActiveServices {
                         serviceProcessGoneLocked(r);
                     }
                 }
+            }
+            if (needOomAdj) {
+                mAm.updateOomAdjLocked(r.app, true,
+                        OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
         }
 
