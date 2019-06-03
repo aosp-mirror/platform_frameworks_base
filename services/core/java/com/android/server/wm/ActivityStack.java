@@ -162,6 +162,7 @@ import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.uri.NeededUriGrants;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -2780,7 +2781,7 @@ class ActivityStack extends ConfigurationContainer {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
             requestFinishActivityLocked(mLastNoHistoryActivity.appToken, Activity.RESULT_CANCELED,
-                    null, "resume-no-history", false);
+                    null, null, "resume-no-history", false);
             mLastNoHistoryActivity = null;
         }
 
@@ -3014,7 +3015,7 @@ class ActivityStack extends ConfigurationContainer {
                 // If any exception gets thrown, toss away this
                 // activity and try the next one.
                 Slog.w(TAG, "Exception thrown during resume of " + next, e);
-                requestFinishActivityLocked(next.appToken, Activity.RESULT_CANCELED, null,
+                requestFinishActivityLocked(next.appToken, Activity.RESULT_CANCELED, null, null,
                         "resume-exception", true);
                 return true;
             }
@@ -3422,7 +3423,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (DEBUG_TASKS) Slog.w(TAG_TASKS,
                             "resetTaskIntendedTask: calling finishActivity on " + p);
                     if (finishActivityLocked(
-                            p, Activity.RESULT_CANCELED, null, "reset-task", false)) {
+                            p, Activity.RESULT_CANCELED, null, null, "reset-task", false)) {
                         end--;
                         srcPos--;
                     }
@@ -3501,7 +3502,7 @@ class ActivityStack extends ConfigurationContainer {
                             continue;
                         }
                         finishActivityLocked(
-                                p, Activity.RESULT_CANCELED, null, "move-affinity", false);
+                                p, Activity.RESULT_CANCELED, null, null, "move-affinity", false);
                     }
                 } else {
                     if (taskInsertionPoint < 0) {
@@ -3535,8 +3536,8 @@ class ActivityStack extends ConfigurationContainer {
                         if (targetNdx > 0) {
                             ActivityRecord p = taskActivities.get(targetNdx - 1);
                             if (p.intent.getComponent().equals(target.intent.getComponent())) {
-                                finishActivityLocked(p, Activity.RESULT_CANCELED, null, "replace",
-                                        false);
+                                finishActivityLocked(p, Activity.RESULT_CANCELED, null, null,
+                                        "replace", false);
                             }
                         }
                     }
@@ -3596,22 +3597,21 @@ class ActivityStack extends ConfigurationContainer {
         return taskTop;
     }
 
-    void sendActivityResultLocked(int callingUid, ActivityRecord r,
-            String resultWho, int requestCode, int resultCode, Intent data) {
-
+    void sendActivityResultLocked(int callingUid, ActivityRecord r, String resultWho,
+            int requestCode, int resultCode, Intent resultData, NeededUriGrants resultGrants) {
         if (callingUid > 0) {
-            mService.mUgmInternal.grantUriPermissionFromIntent(callingUid, r.packageName,
-                    data, r.getUriPermissionsLocked(), r.mUserId);
+            mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
+                    r.getUriPermissionsLocked());
         }
 
         if (DEBUG_RESULTS) Slog.v(TAG, "Send activity result to " + r
                 + " : who=" + resultWho + " req=" + requestCode
-                + " res=" + resultCode + " data=" + data);
+                + " res=" + resultCode + " data=" + resultData);
         if (mResumedActivity == r && r.attachedToProcess()) {
             try {
                 ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
                 list.add(new ResultInfo(resultWho, requestCode,
-                        resultCode, data));
+                        resultCode, resultData));
                 mService.getLifecycleManager().scheduleTransaction(r.app.getThread(), r.appToken,
                         ActivityResultItem.obtain(list));
                 return;
@@ -3620,7 +3620,7 @@ class ActivityStack extends ConfigurationContainer {
             }
         }
 
-        r.addResultLocked(null, resultWho, requestCode, resultCode, data);
+        r.addResultLocked(null, resultWho, requestCode, resultCode, resultData);
     }
 
     /** Returns true if the task is one of the task finishing on-top of the top running task. */
@@ -3727,8 +3727,8 @@ class ActivityStack extends ConfigurationContainer {
             if (!r.finishing) {
                 if (!shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
-                    if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                            "stop-no-history", false)) {
+                    if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED,
+                            null, null, "stop-no-history", false)) {
                         // If {@link requestFinishActivityLocked} returns {@code true},
                         // {@link adjustFocusedActivityStack} would have been already called.
                         r.resumeKeyDispatchingLocked();
@@ -3784,7 +3784,7 @@ class ActivityStack extends ConfigurationContainer {
      * some reason it is being left as-is.
      */
     final boolean requestFinishActivityLocked(IBinder token, int resultCode,
-            Intent resultData, String reason, boolean oomAdj) {
+            Intent resultData, NeededUriGrants resultGrants, String reason, boolean oomAdj) {
         ActivityRecord r = isInStackLocked(token);
         if (DEBUG_RESULTS || DEBUG_STATES) Slog.v(TAG_STATES,
                 "Finishing activity token=" + token + " r="
@@ -3794,7 +3794,7 @@ class ActivityStack extends ConfigurationContainer {
             return false;
         }
 
-        finishActivityLocked(r, resultCode, resultData, reason, oomAdj);
+        finishActivityLocked(r, resultCode, resultData, resultGrants, reason, oomAdj);
         return true;
     }
 
@@ -3806,8 +3806,8 @@ class ActivityStack extends ConfigurationContainer {
                 if (r.resultTo == self && r.requestCode == requestCode) {
                     if ((r.resultWho == null && resultWho == null) ||
                         (r.resultWho != null && r.resultWho.equals(resultWho))) {
-                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, "request-sub",
-                                false);
+                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, null,
+                                "request-sub", false);
                     }
                 }
             }
@@ -3837,7 +3837,7 @@ class ActivityStack extends ConfigurationContainer {
         int activityNdx = task.mActivities.indexOf(r);
         getDisplay().mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
-        finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
+        finishActivityLocked(r, Activity.RESULT_CANCELED, null, null, reason, false);
         finishedTask = task;
         // Also terminate any activities below it that aren't yet
         // stopped, to avoid a situation where one will get
@@ -3858,7 +3858,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (!r.isActivityTypeHome() || mService.mHomeProcess != r.app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
-                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, null, reason, false);
                 }
             }
         }
@@ -3874,8 +3874,8 @@ class ActivityStack extends ConfigurationContainer {
                 for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                     ActivityRecord r = tr.mActivities.get(activityNdx);
                     if (!r.finishing) {
-                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, "finish-voice",
-                                false);
+                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, null,
+                                "finish-voice", false);
                         didOne = true;
                     }
                 }
@@ -3911,12 +3911,14 @@ class ActivityStack extends ConfigurationContainer {
             if (!Objects.equals(cur.taskAffinity, r.taskAffinity)) {
                 break;
             }
-            finishActivityLocked(cur, Activity.RESULT_CANCELED, null, "request-affinity", true);
+            finishActivityLocked(cur, Activity.RESULT_CANCELED, null, null,
+                    "request-affinity", true);
         }
         return true;
     }
 
-    private void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData) {
+    private void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData,
+            NeededUriGrants resultGrants) {
         // send the result
         ActivityRecord resultTo = r.resultTo;
         if (resultTo != null) {
@@ -3929,9 +3931,8 @@ class ActivityStack extends ConfigurationContainer {
                 }
             }
             if (r.info.applicationInfo.uid > 0) {
-                mService.mUgmInternal.grantUriPermissionFromIntent(r.info.applicationInfo.uid,
-                        resultTo.packageName, resultData,
-                        resultTo.getUriPermissionsLocked(), resultTo.mUserId);
+                mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
+                        resultTo.getUriPermissionsLocked());
             }
             resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode, resultData);
             r.resultTo = null;
@@ -3947,12 +3948,10 @@ class ActivityStack extends ConfigurationContainer {
         r.icicle = null;
     }
 
-    /**
-     * See {@link #finishActivityLocked(ActivityRecord, int, Intent, String, boolean, boolean)}
-     */
     final boolean finishActivityLocked(ActivityRecord r, int resultCode, Intent resultData,
-            String reason, boolean oomAdj) {
-        return finishActivityLocked(r, resultCode, resultData, reason, oomAdj, !PAUSE_IMMEDIATELY);
+            NeededUriGrants resultGrants, String reason, boolean oomAdj) {
+        return finishActivityLocked(r, resultCode, resultData, resultGrants, reason, oomAdj,
+                !PAUSE_IMMEDIATELY);
     }
 
     /**
@@ -3960,7 +3959,7 @@ class ActivityStack extends ConfigurationContainer {
      * list, or false if it is still in the list and will be removed later.
      */
     final boolean finishActivityLocked(ActivityRecord r, int resultCode, Intent resultData,
-            String reason, boolean oomAdj, boolean pauseImmediately) {
+            NeededUriGrants resultGrants, String reason, boolean oomAdj, boolean pauseImmediately) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
             return false;
@@ -3990,7 +3989,7 @@ class ActivityStack extends ConfigurationContainer {
 
             adjustFocusedActivityStack(r, "finishActivity");
 
-            finishActivityResultsLocked(r, resultCode, resultData);
+            finishActivityResultsLocked(r, resultCode, resultData, resultGrants);
 
             final boolean endTask = index <= 0 && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
@@ -4223,8 +4222,9 @@ class ActivityStack extends ConfigurationContainer {
         return false;
     }
 
-    final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
-            Intent resultData) {
+    final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent,
+            NeededUriGrants destGrants, int resultCode, Intent resultData,
+            NeededUriGrants resultGrants) {
         final TaskRecord task = srec.getTaskRecord();
         final ArrayList<ActivityRecord> activities = task.mActivities;
         final int start = activities.indexOf(srec);
@@ -4271,7 +4271,8 @@ class ActivityStack extends ConfigurationContainer {
         final long origId = Binder.clearCallingIdentity();
         for (int i = start; i > finishTo; i--) {
             ActivityRecord r = activities.get(i);
-            requestFinishActivityLocked(r.appToken, resultCode, resultData, "navigate-up", true);
+            requestFinishActivityLocked(r.appToken, resultCode, resultData, resultGrants,
+                    "navigate-up", true);
             // Only return the supplied result for the first activity finished
             resultCode = Activity.RESULT_CANCELED;
             resultData = null;
@@ -4285,7 +4286,7 @@ class ActivityStack extends ConfigurationContainer {
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent,
-                        srec.packageName);
+                        destGrants, srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -4309,7 +4310,7 @@ class ActivityStack extends ConfigurationContainer {
                     foundParentInTask = false;
                 }
                 requestFinishActivityLocked(parent.appToken, resultCode,
-                        resultData, "navigate-top", true);
+                        resultData, resultGrants, "navigate-top", true);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -4394,7 +4395,7 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     private void removeActivityFromHistoryLocked(ActivityRecord r, String reason) {
-        finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
+        finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null, null);
         r.makeFinishingLocked();
         if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
                 "Removing activity " + r + " from stack callers=" + Debug.getCallers(5));
@@ -5126,7 +5127,8 @@ class ActivityStack extends ConfigurationContainer {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "close-sys", true);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, null,
+                            "close-sys", true);
                 }
             }
         }
@@ -5170,8 +5172,8 @@ class ActivityStack extends ConfigurationContainer {
                     didSomething = true;
                     Slog.i(TAG, "  Force finishing activity " + r);
                     lastTask = r.getTaskRecord();
-                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
-                            true);
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, null,
+                            "force-stop", true);
                 }
             }
         }
@@ -5225,8 +5227,8 @@ class ActivityStack extends ConfigurationContainer {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
             int activityTop = activities.size() - 1;
             if (activityTop >= 0) {
-                finishActivityLocked(activities.get(activityTop), Activity.RESULT_CANCELED, null,
-                        "unhandled-back", true);
+                finishActivityLocked(activities.get(activityTop), Activity.RESULT_CANCELED,
+                        null, null, "unhandled-back", true);
             }
         }
     }
