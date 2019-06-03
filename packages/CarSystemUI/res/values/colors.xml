@@ -37,6 +37,9 @@
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#DD000000</color>
 
+    <!-- The background color of the car volume dialog -->
+    <color name="car_volume_dialog_background_color">@color/system_bar_background_opaque</color>
+
     <!-- The color of the dividing line between grouped notifications. -->
     <color name="notification_divider_color">@*android:color/notification_action_list</color>
 
