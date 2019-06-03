@@ -154,21 +154,6 @@ public class StackAnimationController extends
     /** Height of the status bar. */
     private float mStatusBarHeight;
 
-    @Override
-    protected void setLayout(PhysicsAnimationLayout layout) {
-        super.setLayout(layout);
-
-        Resources res = layout.getResources();
-        mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mIndividualBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
-        mStackStartingVerticalOffset =
-                res.getDimensionPixelSize(R.dimen.bubble_stack_starting_offset_y);
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-    }
-
     /**
      * Instantly move the first bubble to the given point, and animate the rest of the stack behind
      * it with the 'following' effect.
@@ -286,6 +271,8 @@ public class StackAnimationController extends
                 },
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
+        // If we're flinging now, there's no more touch event to catch up to.
+        mFirstBubbleSpringingToTouch = false;
         mIsMovingFromFlinging = true;
         return destinationRelativeX;
     }
@@ -656,7 +643,27 @@ public class StackAnimationController extends
 
         if (mLayout.getChildCount() > 0) {
             animationForChildAtIndex(0).translationX(mStackPosition.x).start();
+        } else {
+            // Set the start position back to the default since we're out of bubbles. New bubbles
+            // will then animate in from the start position.
+            mStackPosition = getDefaultStartPosition();
         }
+    }
+
+    @Override
+    void onChildReordered(View child, int oldIndex, int newIndex) {}
+
+    @Override
+    void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
+        Resources res = layout.getResources();
+        mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mIndividualBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
+        mStackStartingVerticalOffset =
+                res.getDimensionPixelSize(R.dimen.bubble_stack_starting_offset_y);
+        mStatusBarHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
 
     /** Moves the stack, without any animation, to the starting position. */
@@ -664,11 +671,10 @@ public class StackAnimationController extends
         // Post to ensure that the layout's width and height have been calculated.
         mLayout.setVisibility(View.INVISIBLE);
         mLayout.post(() -> {
+            setStackPosition(mRestingStackPosition == null
+                    ? getDefaultStartPosition()
+                    : mRestingStackPosition);
             mStackMovedToStartPosition = true;
-            setStackPosition(
-                    mRestingStackPosition == null
-                            ? getDefaultStartPosition()
-                            : mRestingStackPosition);
             mLayout.setVisibility(View.VISIBLE);
 
             // Animate in the top bubble now that we're visible.
@@ -707,15 +713,20 @@ public class StackAnimationController extends
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
 
-        mLayout.cancelAllAnimations();
-        cancelStackPositionAnimations();
+        // If we're not the active controller, we don't want to physically move the bubble views.
+        if (isActiveController()) {
+            mLayout.cancelAllAnimations();
+            cancelStackPositionAnimations();
 
-        // Since we're not using the chained animations, apply the offsets manually.
-        final float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-        final float yOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_Y);
-        for (int i = 0; i < mLayout.getChildCount(); i++) {
-            mLayout.getChildAt(i).setTranslationX(pos.x + (i * xOffset));
-            mLayout.getChildAt(i).setTranslationY(pos.y + (i * yOffset));
+            // Since we're not using the chained animations, apply the offsets manually.
+            final float xOffset = getOffsetForChainedPropertyAnimation(
+                    DynamicAnimation.TRANSLATION_X);
+            final float yOffset = getOffsetForChainedPropertyAnimation(
+                    DynamicAnimation.TRANSLATION_Y);
+            for (int i = 0; i < mLayout.getChildCount(); i++) {
+                mLayout.getChildAt(i).setTranslationX(pos.x + (i * xOffset));
+                mLayout.getChildAt(i).setTranslationY(pos.y + (i * yOffset));
+            }
         }
     }
 
@@ -732,6 +743,10 @@ public class StackAnimationController extends
 
     /** Animates in the given bubble. */
     private void animateInBubble(View child) {
+        if (!isActiveController()) {
+            return;
+        }
+
         child.setTranslationY(mStackPosition.y);
 
         float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
