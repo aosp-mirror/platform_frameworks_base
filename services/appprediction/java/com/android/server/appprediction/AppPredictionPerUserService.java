@@ -28,12 +28,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.appprediction.AppPredictionService;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
+
+import java.util.ArrayList;
 
 /**
  * Per-user instance of {@link AppPredictionManagerService}.
@@ -47,6 +51,17 @@ public class AppPredictionPerUserService extends
     @Nullable
     @GuardedBy("mLock")
     private RemoteAppPredictionService mRemoteService;
+
+    /**
+     * When {@code true}, remote service died but service state is kept so it's restored after
+     * the system re-binds to it.
+     */
+    @GuardedBy("mLock")
+    private boolean mZombie;
+
+    @GuardedBy("mLock")
+    private final ArrayMap<AppPredictionSessionId, AppPredictionSessionInfo> mSessionInfos =
+            new ArrayMap<>();
 
     protected AppPredictionPerUserService(AppPredictionManagerService master,
             Object lock, int userId) {
@@ -92,6 +107,16 @@ public class AppPredictionPerUserService extends
         final RemoteAppPredictionService service = getRemoteServiceLocked();
         if (service != null) {
             service.onCreatePredictionSession(context, sessionId);
+
+            mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context, () -> {
+                synchronized (mLock) {
+                    AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+                    if (sessionInfo != null) {
+                        sessionInfo.removeAllCallbacksLocked();
+                        mSessionInfos.remove(sessionId);
+                    }
+                }
+            }));
         }
     }
 
@@ -140,6 +165,11 @@ public class AppPredictionPerUserService extends
         final RemoteAppPredictionService service = getRemoteServiceLocked();
         if (service != null) {
             service.registerPredictionUpdates(sessionId, callback);
+
+            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+            if (sessionInfo != null) {
+                sessionInfo.addCallbackLocked(callback);
+            }
         }
     }
 
@@ -152,6 +182,11 @@ public class AppPredictionPerUserService extends
         final RemoteAppPredictionService service = getRemoteServiceLocked();
         if (service != null) {
             service.unregisterPredictionUpdates(sessionId, callback);
+
+            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+            if (sessionInfo != null) {
+                sessionInfo.removeCallbackLocked(callback);
+            }
         }
     }
 
@@ -174,6 +209,12 @@ public class AppPredictionPerUserService extends
         final RemoteAppPredictionService service = getRemoteServiceLocked();
         if (service != null) {
             service.onDestroyPredictionSession(sessionId);
+
+            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+            if (sessionInfo != null) {
+                sessionInfo.removeAllCallbacksLocked();
+                mSessionInfos.remove(sessionId);
+            }
         }
     }
 
@@ -182,17 +223,54 @@ public class AppPredictionPerUserService extends
         if (isDebug()) {
             Slog.d(TAG, "onFailureOrTimeout(): timed out=" + timedOut);
         }
-
         // Do nothing, we are just proxying to the prediction service
+    }
+
+    @Override
+    public void onConnectedStateChanged(boolean connected) {
+        if (isDebug()) {
+            Slog.d(TAG, "onConnectedStateChanged(): connected=" + connected);
+        }
+        if (connected) {
+            synchronized (mLock) {
+                if (mZombie) {
+                    // Sanity check - shouldn't happen
+                    if (mRemoteService == null) {
+                        Slog.w(TAG, "Cannot resurrect sessions because remote service is null");
+                        return;
+                    }
+                    mZombie = false;
+                    resurrectSessionsLocked();
+                }
+            }
+        }
     }
 
     @Override
     public void onServiceDied(RemoteAppPredictionService service) {
         if (isDebug()) {
-            Slog.d(TAG, "onServiceDied():");
+            Slog.w(TAG, "onServiceDied(): service=" + service);
+        }
+        synchronized (mLock) {
+            mZombie = true;
+        }
+        // Do nothing, eventually the system will bind to the remote service again...
+    }
+
+    /**
+     * Called after the remote service connected, it's used to restore state from a 'zombie'
+     * service (i.e., after it died).
+     */
+    private void resurrectSessionsLocked() {
+        final int numSessions = mSessionInfos.size();
+        if (isDebug()) {
+            Slog.d(TAG, "Resurrecting remote service (" + mRemoteService + ") on "
+                    + numSessions + " sessions.");
         }
 
-        // Do nothing, we are just proxying to the prediction service
+        for (AppPredictionSessionInfo sessionInfo : mSessionInfos.values()) {
+            sessionInfo.resurrectSessionLocked(this);
+        }
     }
 
     @GuardedBy("mLock")
@@ -214,5 +292,58 @@ public class AppPredictionPerUserService extends
         }
 
         return mRemoteService;
+    }
+
+    private static final class AppPredictionSessionInfo {
+        private final AppPredictionSessionId mSessionId;
+        private final AppPredictionContext mContext;
+        private final ArrayList<IPredictionCallback> mCallbacks = new ArrayList<>();
+        private final IBinder.DeathRecipient mBinderDeathHandler;
+
+        AppPredictionSessionInfo(AppPredictionSessionId id, AppPredictionContext context,
+                IBinder.DeathRecipient binderDeathHandler) {
+            mSessionId = id;
+            mContext = context;
+            mBinderDeathHandler = binderDeathHandler;
+        }
+
+        void addCallbackLocked(IPredictionCallback callback) {
+            if (mBinderDeathHandler != null) {
+                try {
+                    callback.asBinder().linkToDeath(mBinderDeathHandler, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to link to death: " + e);
+                }
+            }
+            mCallbacks.add(callback);
+        }
+
+        void removeCallbackLocked(IPredictionCallback callback) {
+            if (mBinderDeathHandler != null) {
+                callback.asBinder().unlinkToDeath(mBinderDeathHandler, 0);
+            }
+            mCallbacks.remove(callback);
+        }
+
+        void removeAllCallbacksLocked() {
+            if (mBinderDeathHandler != null) {
+                for (IPredictionCallback callback : mCallbacks) {
+                    callback.asBinder().unlinkToDeath(mBinderDeathHandler, 0);
+                }
+            }
+            mCallbacks.clear();
+        }
+
+        void resurrectSessionLocked(AppPredictionPerUserService service) {
+            if (service.isDebug()) {
+                Slog.d(TAG, "Resurrecting remote service (" + service.getRemoteServiceLocked()
+                        + ") for session Id=" + mSessionId + " and "
+                        + mCallbacks.size() + " callbacks.");
+            }
+            service.onCreatePredictionSessionLocked(mContext, mSessionId);
+            for (IPredictionCallback callback : mCallbacks) {
+                service.registerPredictionUpdatesLocked(mSessionId, callback);
+            }
+        }
     }
 }
