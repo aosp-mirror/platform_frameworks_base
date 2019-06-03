@@ -100,6 +100,7 @@ import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
+import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
 import libcore.util.EmptyArray;
 
@@ -2135,8 +2136,15 @@ public class PermissionManagerService {
 
         if (bp.isHardRestricted()
                 && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
-            Log.e(TAG, "Cannot grant restricted non-exempt permission "
+            Log.e(TAG, "Cannot grant hard restricted non-exempt permission "
                     + permName + " for package " + packageName);
+            return;
+        }
+
+        if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
+                pkg.applicationInfo, permName).canBeGranted()) {
+            Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
+                    + packageName);
             return;
         }
 
