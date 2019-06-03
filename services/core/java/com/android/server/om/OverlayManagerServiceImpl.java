@@ -651,6 +651,11 @@ final class OverlayManagerServiceImpl {
         return mDefaultOverlays;
     }
 
+    void removeIdmapForOverlay(String packageName, int userId) {
+        final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
+        removeIdmapIfPossible(oi);
+    }
+
     List<String> getEnabledOverlayPackageNames(@NonNull final String targetPackageName,
             final int userId) {
         final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
