@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -73,6 +74,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final Context mContext;
+    private final VisualStabilityManager mVisualStabilityManager;
     private final AccessibilityManager mAccessibilityManager;
 
     // Dependencies:
@@ -96,8 +98,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     protected String mKeyToRemoveOnGutsClosed;
 
     @Inject
-    public NotificationGutsManager(Context context) {
+    public NotificationGutsManager(
+            Context context,
+            VisualStabilityManager visualStabilityManager) {
         mContext = context;
+        mVisualStabilityManager = visualStabilityManager;
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
@@ -304,6 +309,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         notificationInfoView.bindNotification(
                 pmUser,
                 iNotificationManager,
+                mVisualStabilityManager,
                 packageName,
                 row.getEntry().channel,
                 row.getUniqueChannels(),
