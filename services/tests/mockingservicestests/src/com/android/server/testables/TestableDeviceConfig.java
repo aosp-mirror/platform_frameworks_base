@@ -62,8 +62,6 @@ import java.util.concurrent.Executor;
 public final class TestableDeviceConfig implements TestRule {
 
     private StaticMockitoSession mMockitoSession;
-    private Map<DeviceConfig.OnPropertyChangedListener, Pair<String, Executor>>
-            mOnPropertyChangedListenerMap = new HashMap<>();
     private Map<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>>
             mOnPropertiesChangedListenerMap = new HashMap<>();
     private Map<String, String> mKeyValueMap = new ConcurrentHashMap<>();
@@ -95,18 +93,6 @@ public final class TestableDeviceConfig implements TestRule {
                 anyString(), any(Executor.class),
                 any(DeviceConfig.OnPropertiesChangedListener.class)));
 
-        doAnswer((Answer<Void>) invocationOnMock -> {
-            String namespace = invocationOnMock.getArgument(0);
-            Executor executor = invocationOnMock.getArgument(1);
-            DeviceConfig.OnPropertyChangedListener onPropertyChangedListener =
-                    invocationOnMock.getArgument(2);
-            mOnPropertyChangedListenerMap.put(
-                    onPropertyChangedListener, new Pair<>(namespace, executor));
-            return null;
-        }).when(() -> DeviceConfig.addOnPropertyChangedListener(
-                anyString(), any(Executor.class),
-                any(DeviceConfig.OnPropertyChangedListener.class)));
-
         doAnswer((Answer<Boolean>) invocationOnMock -> {
                     String namespace = invocationOnMock.getArgument(0);
                     String name = invocationOnMock.getArgument(1);
@@ -118,13 +104,6 @@ public final class TestableDeviceConfig implements TestRule {
                             mOnPropertiesChangedListenerMap.get(listener).second.execute(
                                     () -> listener.onPropertiesChanged(
                                             getProperties(namespace, name, value)));
-                        }
-                    }
-                    for (DeviceConfig.OnPropertyChangedListener listener :
-                            mOnPropertyChangedListenerMap.keySet()) {
-                        if (namespace.equals(mOnPropertyChangedListenerMap.get(listener).first)) {
-                            mOnPropertyChangedListenerMap.get(listener).second.execute(
-                                    () -> listener.onPropertyChanged(namespace, name, value));
                         }
                     }
                     return true;
@@ -141,14 +120,12 @@ public final class TestableDeviceConfig implements TestRule {
             @Override
             protected void succeeded(Description description) {
                 mMockitoSession.finishMocking();
-                mOnPropertyChangedListenerMap.clear();
                 mOnPropertiesChangedListenerMap.clear();
             }
 
             @Override
             protected void failed(Throwable e, Description description) {
                 mMockitoSession.finishMocking(e);
-                mOnPropertyChangedListenerMap.clear();
                 mOnPropertiesChangedListenerMap.clear();
             }
         }.apply(base, description);
