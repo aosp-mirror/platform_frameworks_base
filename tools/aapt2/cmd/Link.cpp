@@ -269,6 +269,7 @@ struct ResourceFileFlattenerOptions {
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
   bool update_proguard_spec = false;
+  bool do_not_fail_on_missing_resources = false;
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
   Maybe<std::regex> regex_to_not_compress;
@@ -435,7 +436,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   xml::StripAndroidStudioAttributes(doc->root.get());
 
   XmlReferenceLinker xml_linker;
-  if (!xml_linker.Consume(context_, doc)) {
+  if (!options_.do_not_fail_on_missing_resources && !xml_linker.Consume(context_, doc)) {
     return {};
   }
 
@@ -1579,6 +1580,7 @@ class Linker {
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
     file_flattener_options.output_format = options_.output_format;
+    file_flattener_options.do_not_fail_on_missing_resources = options_.merge_only;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
 
@@ -1807,7 +1809,7 @@ class Linker {
     }
 
     ReferenceLinker linker;
-    if (!linker.Consume(context_, &final_table_)) {
+    if (!options_.merge_only && !linker.Consume(context_, &final_table_)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking references");
       return 1;
     }
@@ -1959,7 +1961,7 @@ class Linker {
       manifest_xml->file.name.package = context_->GetCompilationPackage();
 
       XmlReferenceLinker manifest_linker;
-      if (manifest_linker.Consume(context_, manifest_xml.get())) {
+      if (options_.merge_only || manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
             !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
           error = true;
@@ -2090,6 +2092,12 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     context.GetDiagnostics()->Error(
         DiagMessage()
             << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+    return 1;
+  }
+
+  if (options_.merge_only && !static_lib_) {
+    context.GetDiagnostics()->Error(
+        DiagMessage() << "the --merge-only flag can be only used when building a static library");
     return 1;
   }
 

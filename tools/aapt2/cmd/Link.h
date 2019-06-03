@@ -71,6 +71,7 @@ struct LinkOptions {
 
   // Static lib options.
   bool no_static_lib_packages = false;
+  bool merge_only = false;
 
   // AndroidManifest.xml massaging options.
   ManifestFixerOptions manifest_fixer_options;
@@ -285,6 +286,10 @@ class LinkCommand : public Command {
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
     AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
                     &trace_folder_);
+    AddOptionalSwitch("--merge-only",
+          "Only merge the resources, without verifying resource references. This flag\n"
+          "should only be used together with the --static-lib flag.",
+          &options_.merge_only);
   }
 
   int Action(const std::vector<std::string>& args) override;
