@@ -2408,6 +2408,15 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
 
+            synchronized (mNotificationLock) {
+                boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
+                        != NotificationManager.IMPORTANCE_NONE;
+
+                if (wasEnabled == enabled) {
+                    return;
+                }
+            }
+
             mPreferencesHelper.setEnabled(pkg, uid, enabled);
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
