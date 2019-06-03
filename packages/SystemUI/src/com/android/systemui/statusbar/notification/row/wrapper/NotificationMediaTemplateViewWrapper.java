@@ -295,6 +295,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         int tintColor = getNotificationHeader().getOriginalIconColor();
         mSeekBarElapsedTime.setTextColor(tintColor);
         mSeekBarTotalTime.setTextColor(tintColor);
+        mSeekBarTotalTime.setShadowLayer(1.5f, 1.5f, 1.5f, mBackgroundColor);
 
         ColorStateList tintList = ColorStateList.valueOf(tintColor);
         mSeekBar.setThumbTintList(tintList);
