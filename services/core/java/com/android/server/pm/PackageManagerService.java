@@ -15565,6 +15565,22 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         void handleReturnCode() {
             if (mVerificationCompleted && mEnableRollbackCompleted) {
+                if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
+                    String packageName = "";
+                    try {
+                        PackageLite packageInfo =
+                                new PackageParser().parsePackageLite(origin.file, 0);
+                        packageName = packageInfo.packageName;
+                    } catch (PackageParserException e) {
+                        Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(), e);
+                    }
+                    try {
+                        observer.onPackageInstalled(packageName, mRet, "Dry run", new Bundle());
+                    } catch (RemoteException e) {
+                        Slog.i(TAG, "Observer no longer exists.");
+                    }
+                    return;
+                }
                 if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                     mRet = mArgs.copyApk();
                 }
