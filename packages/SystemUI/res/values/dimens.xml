@@ -57,7 +57,7 @@
     <item name="navigation_luminance_change_threshold" type="dimen" format="float">0.05</item>
 
     <dimen name="floating_rotation_button_diameter">40dp</dimen>
-    <dimen name="floating_rotation_button_margin">4dp</dimen>
+    <dimen name="floating_rotation_button_min_margin">4dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>

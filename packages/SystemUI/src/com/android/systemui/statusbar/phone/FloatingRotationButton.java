@@ -51,9 +51,10 @@ public class FloatingRotationButton implements RotationButton {
                 R.layout.rotate_suggestion, null);
         mKeyButtonView.setVisibility(View.VISIBLE);
 
-        Resources resources = mContext.getResources();
-        mDiameter = resources.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
-        mMargin = resources.getDimensionPixelSize(R.dimen.floating_rotation_button_margin);
+        Resources res = mContext.getResources();
+        mDiameter = res.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
+        mMargin = Math.max(res.getDimensionPixelSize(R.dimen.floating_rotation_button_min_margin),
+                res.getDimensionPixelSize(R.dimen.rounded_corner_content_padding));
     }
 
     @Override
