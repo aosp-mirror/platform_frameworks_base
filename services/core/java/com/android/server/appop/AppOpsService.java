@@ -905,6 +905,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+
+            mHistoricalRegistry.clearHistory(uid, packageName);
         }
     }
 
