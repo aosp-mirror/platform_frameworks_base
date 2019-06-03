@@ -219,7 +219,7 @@ asked for it -->
             android:gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
+            <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
                 android:id="@+id/alert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -268,9 +268,9 @@ asked for it -->
                     android:ellipsize="end"
                     android:maxLines="2"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
-            </LinearLayout>
+            </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
-            <LinearLayout
+            <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
                 android:id="@+id/silence"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -321,7 +321,7 @@ asked for it -->
                     android:ellipsize="end"
                     android:maxLines="2"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
-            </LinearLayout>
+            </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
         </LinearLayout>
 
