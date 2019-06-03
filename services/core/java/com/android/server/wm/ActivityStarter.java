@@ -127,6 +127,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
@@ -549,7 +550,8 @@ class ActivityStarter {
      */
     int startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            NeededUriGrants neededGrants) {
         try {
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(r.intent);
             mLastStartReason = "startResolvedActivity";
@@ -557,7 +559,7 @@ class ActivityStarter {
             mLastStartActivityRecord[0] = r;
             mLastStartActivityResult = startActivity(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, mLastStartActivityRecord,
-                    false /* restrictedBgActivity */);
+                    false /* restrictedBgActivity */, neededGrants);
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(mLastStartActivityResult,
                     mLastStartActivityRecord[0]);
             return mLastStartActivityResult;
@@ -576,6 +578,33 @@ class ActivityStarter {
             boolean allowPendingRemoteAnimationRegistryLookup,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
 
+        // Carefully collect grants without holding lock
+        NeededUriGrants neededGrants = null;
+        if (aInfo != null) {
+            neededGrants = mService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                resolveCallingUid(mRequest.caller), intent, aInfo.applicationInfo.packageName,
+                UserHandle.getUserId(aInfo.applicationInfo.uid));
+        }
+
+        return startActivity(caller, intent, ephemeralIntent, resolvedType, aInfo, rInfo,
+                voiceSession, voiceInteractor, resultTo, resultWho, requestCode, callingPid,
+                callingUid, callingPackage, realCallingPid, realCallingUid, startFlags, options,
+                ignoreTargetSecurity, componentSpecified, outActivity, inTask, reason,
+                allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent,
+                allowBackgroundActivityStart, neededGrants);
+    }
+
+    private int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
+            String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
+            String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
+            SafeActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
+            ActivityRecord[] outActivity, TaskRecord inTask, String reason,
+            boolean allowPendingRemoteAnimationRegistryLookup,
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
+            NeededUriGrants neededGrants) {
+
         if (TextUtils.isEmpty(reason)) {
             throw new IllegalArgumentException("Need to specify a reason.");
         }
@@ -588,7 +617,7 @@ class ActivityStarter {
                 callingPid, callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
                 options, ignoreTargetSecurity, componentSpecified, mLastStartActivityRecord,
                 inTask, allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent,
-                allowBackgroundActivityStart);
+                allowBackgroundActivityStart, neededGrants);
 
         if (outActivity != null) {
             // mLastStartActivityRecord[0] is set in the call to startActivity above.
@@ -619,7 +648,8 @@ class ActivityStarter {
             SafeActivityOptions options,
             boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
             TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart,
+            NeededUriGrants neededGrants) {
         mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
@@ -754,7 +784,7 @@ class ActivityStarter {
         if (err != START_SUCCESS) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(
-                        -1, resultRecord, resultWho, requestCode, RESULT_CANCELED, null);
+                        -1, resultRecord, resultWho, requestCode, RESULT_CANCELED, null, null);
             }
             SafeActivityOptions.abort(options);
             return err;
@@ -814,12 +844,16 @@ class ActivityStarter {
             callingPid = mInterceptor.mCallingPid;
             callingUid = mInterceptor.mCallingUid;
             checkedOptions = mInterceptor.mActivityOptions;
+
+            // The interception target shouldn't get any permission grants
+            // intended for the original destination
+            neededGrants = null;
         }
 
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                        RESULT_CANCELED, null);
+                        RESULT_CANCELED, null, null);
             }
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
@@ -875,6 +909,10 @@ class ActivityStarter {
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 
+                // The permissions review target shouldn't get any permission
+                // grants intended for the original destination
+                neededGrants = null;
+
                 if (DEBUG_PERMISSIONS_REVIEW) {
                     final ActivityStack focusedStack =
                             mRootActivityContainer.getTopDisplayFocusedStack();
@@ -897,6 +935,10 @@ class ActivityStarter {
             callingPid = realCallingPid;
 
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
+
+            // The ephemeral installer shouldn't get any permission grants
+            // intended for the original destination
+            neededGrants = null;
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
@@ -923,7 +965,7 @@ class ActivityStarter {
                     realCallingPid, realCallingUid, "Activity start")) {
                 if (!(restrictedBgActivity && handleBackgroundActivityAbort(r))) {
                     mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                            sourceRecord, startFlags, stack, callerApp));
+                            sourceRecord, startFlags, stack, callerApp, neededGrants));
                 }
                 ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
@@ -934,7 +976,8 @@ class ActivityStarter {
         mController.doPendingActivityLaunches(false);
 
         final int res = startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
-                true /* doResume */, checkedOptions, inTask, outActivity, restrictedBgActivity);
+                true /* doResume */, checkedOptions, inTask, outActivity, restrictedBgActivity,
+                neededGrants);
         mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outActivity[0]);
         return res;
     }
@@ -1232,8 +1275,14 @@ class ActivityStarter {
                 }
             }
         }
+
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
+
+        // Carefully collect grants without holding lock
+        NeededUriGrants neededGrants = mService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                resolveCallingUid(mRequest.caller), intent, aInfo.applicationInfo.packageName,
+                UserHandle.getUserId(aInfo.applicationInfo.uid));
 
         synchronized (mService.mGlobalLock) {
             final ActivityStack stack = mRootActivityContainer.getTopDisplayFocusedStack();
@@ -1311,7 +1360,7 @@ class ActivityStarter {
                     callingUid, callingPackage, realCallingPid, realCallingUid, startFlags, options,
                     ignoreTargetSecurity, componentSpecified, outRecord, inTask, reason,
                     allowPendingRemoteAnimationRegistryLookup, originatingPendingIntent,
-                    allowBackgroundActivityStart);
+                    allowBackgroundActivityStart, neededGrants);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -1406,14 +1455,16 @@ class ActivityStarter {
 
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
                 IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-                int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-                ActivityRecord[] outActivity, boolean restrictedBgActivity) {
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity, boolean restrictedBgActivity,
+            NeededUriGrants neededGrants) {
         int result = START_CANCELED;
         final ActivityStack startedActivityStack;
         try {
             mService.mWindowManager.deferSurfaceLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
+                    startFlags, doResume, options, inTask, outActivity, restrictedBgActivity,
+                    neededGrants);
         } finally {
             final ActivityStack currentStack = r.getActivityStack();
             startedActivityStack = currentStack != null ? currentStack : mTargetStack;
@@ -1438,7 +1489,8 @@ class ActivityStarter {
                 final ActivityStack stack = mStartActivity.getActivityStack();
                 if (stack != null) {
                     stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
-                            null /* intentResultData */, "startActivity", true /* oomAdj */);
+                            null /* resultData */, null /* resultGrants */,
+                            "startActivity", true /* oomAdj */);
                 }
             }
             mService.mWindowManager.continueSurfaceLayout();
@@ -1467,7 +1519,7 @@ class ActivityStarter {
         if (resultRecord != null) {
             ActivityStack resultStack = resultRecord.getActivityStack();
             resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                    RESULT_CANCELED, null);
+                    RESULT_CANCELED, null, null);
         }
         // We pretend to the caller that it was really started to make it backward compatible, but
         // they will just get a cancel result.
@@ -1479,7 +1531,8 @@ class ActivityStarter {
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-            ActivityRecord[] outActivity, boolean restrictedBgActivity) {
+            ActivityRecord[] outActivity, boolean restrictedBgActivity,
+            NeededUriGrants neededGrants) {
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
                 voiceInteractor, restrictedBgActivity);
 
@@ -1629,7 +1682,7 @@ class ActivityStarter {
             if (sourceStack != null) {
                 sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
                         mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
-                        null /* data */);
+                        null /* resultData */, null /* resultGrants */);
             }
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
@@ -1696,8 +1749,8 @@ class ActivityStarter {
             return result;
         }
 
-        mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
-                mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
+        mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(neededGrants,
+                mStartActivity.getUriPermissionsLocked());
         mService.getPackageManagerInternalLocked().grantEphemeralAccess(
                 mStartActivity.mUserId, mIntent, UserHandle.getAppId(mStartActivity.appInfo.uid),
                 UserHandle.getAppId(mCallingUid));
@@ -1933,7 +1986,7 @@ class ActivityStarter {
             Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
             sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
                     mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
-                    null /* data */);
+                    null /* resultData */, null /* resultGrants */);
             mStartActivity.resultTo = null;
         }
     }
@@ -2362,8 +2415,13 @@ class ActivityStarter {
         }
 
         ActivityStack.logStartActivity(AM_NEW_INTENT, activity, activity.getTaskRecord());
-        activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+
+        Intent intent = mStartActivity.intent;
+        NeededUriGrants intentGrants = mService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                mCallingUid, intent, activity.packageName, activity.mUserId);
+        activity.deliverNewIntentLocked(mCallingUid, intent, intentGrants,
                 mStartActivity.launchedFromPackage);
+
         mIntentDelivered = true;
     }
 
@@ -2740,6 +2798,18 @@ class ActivityStarter {
                 }
             }
         }
+    }
+
+    private int resolveCallingUid(IApplicationThread caller) {
+        if (caller != null) {
+            synchronized (mService.mGlobalLock) {
+                final WindowProcessController callerApp = mService.getProcessController(caller);
+                if (callerApp != null) {
+                    return callerApp.mInfo.uid;
+                }
+            }
+        }
+        return -1;
     }
 
     private boolean isLaunchModeOneOf(int mode1, int mode2) {
