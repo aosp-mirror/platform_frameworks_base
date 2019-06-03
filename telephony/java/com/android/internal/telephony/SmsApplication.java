@@ -465,7 +465,11 @@ public final class SmsApplication {
             int userId) {
         TelephonyManager tm = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (!tm.isSmsCapable()) {
+        RoleManager roleManager = (RoleManager) context.getSystemService(Context.ROLE_SERVICE);
+        // (b/134400042) RoleManager might be null in unit tests running older mockito versions
+        // that do not support mocking final classes.
+        if (!tm.isSmsCapable() && (roleManager == null || !roleManager.isRoleAvailable(
+                RoleManager.ROLE_SMS))) {
             // No phone, no SMS
             return null;
         }
@@ -584,7 +588,11 @@ public final class SmsApplication {
     public static void setDefaultApplicationAsUser(String packageName, Context context,
             int userId) {
         TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (!tm.isSmsCapable()) {
+        RoleManager roleManager = (RoleManager) context.getSystemService(Context.ROLE_SERVICE);
+        // (b/134400042) RoleManager might be null in unit tests running older mockito versions
+        // that do not support mocking final classes.
+        if (!tm.isSmsCapable() && (roleManager == null || !roleManager.isRoleAvailable(
+                RoleManager.ROLE_SMS))) {
             // No phone, no SMS
             return;
         }
