@@ -933,7 +933,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // Init arc whenever System Audio Mode is on
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
-                && isDirectConnectToTv()) {
+                && isDirectConnectToTv() && mService.isSystemAudioActivated()) {
             if (!hasAction(ArcInitiationActionFromAvr.class)) {
                 addAndStartAction(new ArcInitiationActionFromAvr(this));
             }
