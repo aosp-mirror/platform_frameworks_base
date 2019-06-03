@@ -5564,15 +5564,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     private void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
-        int configDiff = 0;
+        int configDiff;
+        boolean equivalent;
 
-        // This flag tracks whether the new configuration is fundamentally equivalent to the
-        // existing configuration. This is necessary to determine whether non-activity
-        // callbacks should receive notice when the only changes are related to non-public fields.
-        // We do not gate calling {@link #performActivityConfigurationChanged} based on this flag
-        // as that method uses the same check on the activity config override as well.
-        final boolean equivalent = config != null && mConfiguration != null
-                && (0 == mConfiguration.diffPublicOnly(config));
         final Theme systemTheme = getSystemContext().getTheme();
         final Theme systemUiTheme = getSystemUiContext().getTheme();
 
@@ -5589,6 +5583,13 @@ public final class ActivityThread extends ClientTransactionHandler {
             if (config == null) {
                 return;
             }
+
+            // This flag tracks whether the new configuration is fundamentally equivalent to the
+            // existing configuration. This is necessary to determine whether non-activity callbacks
+            // should receive notice when the only changes are related to non-public fields.
+            // We do not gate calling {@link #performActivityConfigurationChanged} based on this
+            // flag as that method uses the same check on the activity config override as well.
+            equivalent = mConfiguration != null && (0 == mConfiguration.diffPublicOnly(config));
 
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle configuration changed: "
                     + config);
