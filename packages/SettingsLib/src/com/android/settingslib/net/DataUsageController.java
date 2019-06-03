@@ -110,13 +110,7 @@ public class DataUsageController {
     }
 
     public DataUsageInfo getDataUsageInfo() {
-        final String subscriberId = getActiveSubscriberId();
-        if (subscriberId == null) {
-            return warn("no subscriber id");
-        }
-        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
-        template = NetworkTemplate.normalize(template, getTelephonyManager()
-                .getMergedSubscriberIds());
+        NetworkTemplate template = DataUsageUtils.getMobileTemplate(mContext, mSubscriptionId);
 
         return getDataUsageInfo(template);
     }
