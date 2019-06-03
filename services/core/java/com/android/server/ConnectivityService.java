@@ -169,6 +169,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
@@ -2763,29 +2764,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private class NetworkMonitorCallbacks extends INetworkMonitorCallbacks.Stub {
-        private final NetworkAgentInfo mNai;
+        private final int mNetId;
+        private final AutodestructReference<NetworkAgentInfo> mNai;
 
         private NetworkMonitorCallbacks(NetworkAgentInfo nai) {
-            mNai = nai;
+            mNetId = nai.network.netId;
+            mNai = new AutodestructReference(nai);
         }
 
         @Override
         public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT,
-                    new Pair<>(mNai, networkMonitor)));
+                    new Pair<>(mNai.getAndDestroy(), networkMonitor)));
         }
 
         @Override
         public void notifyNetworkTested(int testResult, @Nullable String redirectUrl) {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(EVENT_NETWORK_TESTED,
-                    testResult, mNai.network.netId, redirectUrl));
+                    testResult, mNetId, redirectUrl));
         }
 
         @Override
         public void notifyPrivateDnsConfigResolved(PrivateDnsConfigParcel config) {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PRIVATE_DNS_CONFIG_RESOLVED,
-                    0, mNai.network.netId, PrivateDnsConfig.fromParcel(config)));
+                    0, mNetId, PrivateDnsConfig.fromParcel(config)));
         }
 
         @Override
@@ -2803,15 +2806,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_SHOW,
-                    mNai.network.netId,
-                    pendingIntent));
+                    mNetId, pendingIntent));
         }
 
         @Override
         public void hideProvisioningNotification() {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
-                    EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE,
-                    mNai.network.netId));
+                    EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE, mNetId));
         }
 
         @Override
