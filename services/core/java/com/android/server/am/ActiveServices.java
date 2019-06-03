@@ -3250,6 +3250,7 @@ public final class ActiveServices {
             int memFactor = mAm.mProcessStats.getMemFactorLocked();
             long now = SystemClock.uptimeMillis();
             r.tracker.setExecuting(false, memFactor, now);
+            r.tracker.setForeground(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);
             r.tracker.setStarted(false, memFactor, now);
         }
@@ -3293,8 +3294,10 @@ public final class ActiveServices {
             }
             r.executeFg = false;
             if (r.tracker != null) {
-                r.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
-                        SystemClock.uptimeMillis());
+                final int memFactor = mAm.mProcessStats.getMemFactorLocked();
+                final long now = SystemClock.uptimeMillis();
+                r.tracker.setExecuting(false, memFactor, now);
+                r.tracker.setForeground(false, memFactor, now);
                 if (finishing) {
                     r.tracker.clearCurrentOwner(r, false);
                     r.tracker = null;
