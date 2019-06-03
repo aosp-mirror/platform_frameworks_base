@@ -63,7 +63,7 @@ public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
 
     /** Debug flag. */
-    public static final boolean DEBUG = true; // STOPSHIP disable it (b/113252928)
+    public static final boolean DEBUG = false;
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
@@ -570,7 +570,7 @@ public class Watchdog extends Thread {
                         continue;
                     } else if (waitState == WAITED_HALF) {
                         if (!waitedHalf) {
-                            if (DEBUG) Slog.d(TAG, "WAITED_HALF");
+                            Slog.i(TAG, "WAITED_HALF");
                             // We've waited half the deadlock-detection interval.  Pull a stack
                             // trace and wait another half.
                             ArrayList<Integer> pids = new ArrayList<Integer>();
