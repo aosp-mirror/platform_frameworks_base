@@ -43,14 +43,14 @@ public interface UriGrantsManagerInternal {
             int callingUid, String targetPkg, Uri uri, int modeFlags, int userId);
     NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid,
             String targetPkg, Intent intent, int mode, NeededUriGrants needed, int targetUserId);
+    NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid,
+            Intent intent, String targetPkg, int targetUserId);
     /**
      * Grant Uri permissions from one app to another. This method only extends
      * permission grants if {@code callingUid} has permission to them.
      */
     void grantUriPermissionFromIntent(int callingUid,
             String targetPkg, Intent intent, int targetUserId);
-    void grantUriPermissionFromIntent(int callingUid,
-            String targetPkg, Intent intent, UriPermissionOwner owner, int targetUserId);
     void grantUriPermissionUncheckedFromIntent(
             NeededUriGrants needed, UriPermissionOwner owner);
     IBinder newUriPermissionOwner(String name);
