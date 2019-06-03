@@ -149,7 +149,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = new PhoneStateMonitor(context);
-        mHandleController = new AssistHandleBehaviorController(context, new Handler());
+        mHandleController =
+                new AssistHandleBehaviorController(context, mAssistUtils, new Handler());
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
