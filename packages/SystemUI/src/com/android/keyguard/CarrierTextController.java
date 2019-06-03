@@ -324,25 +324,13 @@ public class CarrierTextController {
         final CharSequence[] carrierNames = new CharSequence[numSubs];
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + numSubs);
 
-        boolean anySimEmergency = mKeyguardUpdateMonitor.isAnySimEmergencyAble();
         for (int i = 0; i < numSubs; i++) {
             int subId = subs.get(i).getSubscriptionId();
             carrierNames[i] = "";
             subsIds[i] = subId;
             subOrderBySlot[subs.get(i).getSimSlotIndex()] = i;
             IccCardConstants.State simState = mKeyguardUpdateMonitor.getSimState(subId);
-            ServiceState s = mKeyguardUpdateMonitor.getServiceState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
-            // If this sub is showing No service but at least one slot currently supports emergency
-            // calls, it should replace it by Emergency calls only
-            if (s != null && s.getState() != ServiceState.STATE_IN_SERVICE && !s.isEmergencyOnly()
-                    && anySimEmergency) {
-                carrierName = getContext().getText(
-                        com.android.internal.R.string.emergency_calls_only);
-                if (DEBUG) {
-                    Log.d(TAG, "Subscription " + subId + "switched to ECO");
-                }
-            }
             CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
             if (DEBUG) {
                 Log.d(TAG, "Handling (subId=" + subId + "): " + simState + " " + carrierName);
@@ -352,15 +340,16 @@ public class CarrierTextController {
                 carrierNames[i] = carrierTextForSimState;
             }
             if (simState == IccCardConstants.State.READY) {
-                if (s != null && s.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
+                ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
+                if (ss != null && ss.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
                     // hack for WFC (IWLAN) not turning off immediately once
                     // Wi-Fi is disassociated or disabled
-                    if (s.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
+                    if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
                             || (mWifiManager.isWifiEnabled()
                             && mWifiManager.getConnectionInfo() != null
                             && mWifiManager.getConnectionInfo().getBSSID() != null)) {
                         if (DEBUG) {
-                            Log.d(TAG, "SIM ready and in service: subId=" + subId + ", ss=" + s);
+                            Log.d(TAG, "SIM ready and in service: subId=" + subId + ", ss=" + ss);
                         }
                         anySimReadyAndInService = true;
                     }
