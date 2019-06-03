@@ -508,6 +508,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private boolean mDidAppSwitch;
 
+    /**
+     * Last stop app switches time, apps finished before this time cannot start background activity
+     * even if they are in grace period.
+     */
+    private long mLastStopAppSwitchesTime;
+
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
 
@@ -4731,6 +4737,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "stopAppSwitches");
         synchronized (mGlobalLock) {
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis() + APP_SWITCH_DELAY_TIME;
+            mLastStopAppSwitchesTime = SystemClock.uptimeMillis();
             mDidAppSwitch = false;
             getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
         }
@@ -4745,6 +4752,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // activity request.
             mAppSwitchesAllowedTime = 0;
         }
+    }
+
+    long getLastStopAppSwitchesTime() {
+        return mLastStopAppSwitchesTime;
     }
 
     void onStartActivitySetDidAppSwitch() {
