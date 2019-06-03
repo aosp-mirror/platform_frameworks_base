@@ -848,6 +848,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             if (shouldDrawCutout(getContext()) && hasCutout()) {
                 mBounds.addAll(mInfo.displayCutout.getBoundingRects());
                 localBounds(mBoundingRect);
+                updateGravity();
                 updateBoundingPath();
                 invalidate();
                 newVisible = VISIBLE;
@@ -898,6 +899,18 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             }
         }
 
+        private void updateGravity() {
+            LayoutParams lp = getLayoutParams();
+            if (lp instanceof FrameLayout.LayoutParams) {
+                FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) lp;
+                int newGravity = getGravity(mInfo.displayCutout);
+                if (flp.gravity != newGravity) {
+                    flp.gravity = newGravity;
+                    setLayoutParams(flp);
+                }
+            }
+        }
+
         private boolean hasCutout() {
             final DisplayCutout displayCutout = mInfo.displayCutout;
             if (displayCutout == null) {
@@ -944,21 +957,25 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         }
 
         private void localBounds(Rect out) {
-            final DisplayCutout displayCutout = mInfo.displayCutout;
+            DisplayCutout displayCutout = mInfo.displayCutout;
+            boundsFromDirection(displayCutout, getGravity(displayCutout), out);
+        }
 
+        private int getGravity(DisplayCutout displayCutout) {
             if (mStart) {
                 if (displayCutout.getSafeInsetLeft() > 0) {
-                    boundsFromDirection(displayCutout, Gravity.LEFT, out);
+                    return Gravity.LEFT;
                 } else if (displayCutout.getSafeInsetTop() > 0) {
-                    boundsFromDirection(displayCutout, Gravity.TOP, out);
+                    return Gravity.TOP;
                 }
             } else {
                 if (displayCutout.getSafeInsetRight() > 0) {
-                    boundsFromDirection(displayCutout, Gravity.RIGHT, out);
+                    return Gravity.RIGHT;
                 } else if (displayCutout.getSafeInsetBottom() > 0) {
-                    boundsFromDirection(displayCutout, Gravity.BOTTOM, out);
+                    return Gravity.BOTTOM;
                 }
             }
+            return Gravity.NO_GRAVITY;
         }
 
         @Override
