@@ -716,18 +716,31 @@ public class ChooserActivity extends ResolverActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        adjustPreviewWidth(newConfig.orientation, null);
+    }
+
+    private boolean shouldDisplayLandscape(int orientation) {
+        // Sharesheet fixes the # of items per row and therefore can not correctly lay out
+        // when in the restricted size of multi-window mode. In the future, would be nice
+        // to use minimum dp size requirements instead
+        return orientation == Configuration.ORIENTATION_LANDSCAPE && !isInMultiWindowMode();
+    }
+
+    private void adjustPreviewWidth(int orientation, View parent) {
         int width = -1;
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (shouldDisplayLandscape(orientation)) {
             width = getResources().getDimensionPixelSize(R.dimen.chooser_preview_width);
         }
 
-        updateLayoutWidth(R.id.content_preview_text_layout, width);
-        updateLayoutWidth(R.id.content_preview_title_layout, width);
-        updateLayoutWidth(R.id.content_preview_file_layout, width);
+        parent = parent == null ? getWindow().getDecorView() : parent;
+
+        updateLayoutWidth(R.id.content_preview_text_layout, width, parent);
+        updateLayoutWidth(R.id.content_preview_title_layout, width, parent);
+        updateLayoutWidth(R.id.content_preview_file_layout, width, parent);
     }
 
-    private void updateLayoutWidth(int layoutResourceId, int width) {
-        View view = findViewById(layoutResourceId);
+    private void updateLayoutWidth(int layoutResourceId, int width, View parent) {
+        View view = parent.findViewById(layoutResourceId);
         if (view != null && view.getLayoutParams() != null) {
             LayoutParams params = view.getLayoutParams();
             params.width = width;
@@ -740,18 +753,27 @@ public class ChooserActivity extends ResolverActivity {
             ViewGroup parent) {
         if (convertView != null) return convertView;
 
+        ViewGroup layout = null;
+
         switch (previewType) {
             case CONTENT_PREVIEW_TEXT:
-                return displayTextContentPreview(targetIntent, layoutInflater, parent);
+                layout = displayTextContentPreview(targetIntent, layoutInflater, parent);
+                break;
             case CONTENT_PREVIEW_IMAGE:
-                return displayImageContentPreview(targetIntent, layoutInflater, parent);
+                layout = displayImageContentPreview(targetIntent, layoutInflater, parent);
+                break;
             case CONTENT_PREVIEW_FILE:
-                return displayFileContentPreview(targetIntent, layoutInflater, parent);
+                layout = displayFileContentPreview(targetIntent, layoutInflater, parent);
+                break;
             default:
                 Log.e(TAG, "Unexpected content preview type: " + previewType);
         }
 
-        return null;
+        if (layout != null) {
+            adjustPreviewWidth(getResources().getConfiguration().orientation, layout);
+        }
+
+        return layout;
     }
 
     private ViewGroup displayTextContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
@@ -2180,9 +2202,7 @@ public class ChooserActivity extends ResolverActivity {
         if (mChooserRowAdapter.consumeLayoutRequest()
                 || mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
                 || mAdapterView.getAdapter() == null) {
-            if (mAdapterView.getAdapter() == null) {
-                mAdapterView.setAdapter(mChooserRowAdapter);
-            }
+            mAdapterView.setAdapter(mChooserRowAdapter);
 
             getMainThreadHandler().post(() -> {
                 if (mResolverDrawerLayout == null || mChooserRowAdapter == null) {
@@ -2225,9 +2245,9 @@ public class ChooserActivity extends ResolverActivity {
                     }
                 }
 
-                boolean isPortrait = getResources().getConfiguration().orientation
-                                         == Configuration.ORIENTATION_PORTRAIT;
-                if (directShareHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
+                boolean isExpandable = getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
+                if (directShareHeight != 0 && isSendAction(getTargetIntent()) && isExpandable) {
                     // make sure to leave room for direct share 4->8 expansion
                     int requiredExpansionHeight =
                             (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
@@ -2791,8 +2811,7 @@ public class ChooserActivity extends ResolverActivity {
 
         private int getMaxTargetsPerRow() {
             int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
-            if (getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_LANDSCAPE) {
+            if (shouldDisplayLandscape(getResources().getConfiguration().orientation)) {
                 maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
             }
 
@@ -3178,7 +3197,8 @@ public class ChooserActivity extends ResolverActivity {
             int orientation = getResources().getConfiguration().orientation;
             boolean canExpandDirectShare =
                     mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
-                    && orientation == Configuration.ORIENTATION_PORTRAIT;
+                    && orientation == Configuration.ORIENTATION_PORTRAIT
+                    && !isInMultiWindowMode();
 
             if (mDirectShareViewHolder != null && canExpandDirectShare) {
                 mDirectShareViewHolder.handleScroll(mAdapterView, y, oldy, getMaxTargetsPerRow());
