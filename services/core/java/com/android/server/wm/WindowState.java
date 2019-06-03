@@ -1447,10 +1447,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void clearPolicyVisibilityFlag(int policyVisibilityFlag) {
         mPolicyVisibility &= ~policyVisibilityFlag;
+        mWmService.scheduleAnimationLocked();
     }
 
     void setPolicyVisibilityFlag(int policyVisibilityFlag) {
         mPolicyVisibility |= policyVisibilityFlag;
+        mWmService.scheduleAnimationLocked();
     }
 
     private boolean isLegacyPolicyVisibility() {
@@ -3889,7 +3891,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean performShowLocked() {
         if (isHiddenFromUserLocked()) {
             if (DEBUG_VISIBILITY) Slog.w(TAG, "hiding " + this + ", belonging to " + mOwnerUid);
-            hideLw(false);
+            clearPolicyVisibilityFlag(VISIBLE_FOR_USER);
             return false;
         }
 
