@@ -99,11 +99,13 @@ bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
 //
 
 inline bool operator==(const UsageLocation& lhs, const UsageLocation& rhs) {
+  // The "source" member is ignored because we only need "name" for outputting
+  // keep rules; "source" is used for comments.
   return lhs.name == rhs.name;
 }
 
-inline int operator<(const UsageLocation& lhs, const UsageLocation& rhs) {
-  return lhs.name.compare(rhs.name);
+inline bool operator<(const UsageLocation& lhs, const UsageLocation& rhs) {
+  return lhs.name.compare(rhs.name) < 0;
 }
 
 //
