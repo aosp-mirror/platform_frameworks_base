@@ -13546,6 +13546,16 @@ public final class Settings {
                 "location_settings_link_to_permissions_enabled";
 
         /**
+         * Flag to set the waiting time for removing invisible euicc profiles inside System >
+         * Settings.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS =
+                "euicc_removing_invisible_profiles_timeout_millis";
+
+        /**
          * Flag to set the waiting time for euicc factory reset inside System > Settings
          * Type: long
          *

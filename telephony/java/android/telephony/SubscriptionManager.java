@@ -2976,10 +2976,10 @@ public class SubscriptionManager {
      * @param info the subscriptionInfo to check against.
      * @return true if this subscription should be visible to the API caller.
      *
+     * @hide
      */
-    private boolean isSubscriptionVisible(SubscriptionInfo info) {
+    public boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
-
         // If subscription is NOT grouped opportunistic subscription, it's visible.
         if (info.getGroupUuid() == null || !info.isOpportunistic()) return true;
 
