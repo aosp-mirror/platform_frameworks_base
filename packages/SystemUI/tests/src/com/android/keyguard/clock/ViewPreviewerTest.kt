@@ -47,7 +47,7 @@ class ViewPreviewerTest : SysuiTestCase() {
         val width = 100
         val height = 100
         // WHEN a preview image is created
-        val bitmap = previewer.createPreview(view, width, height)
+        val bitmap = previewer.createPreview(view, width, height)!!
         // THEN the bitmap has the expected width and height
         assertThat(bitmap.height).isEqualTo(height)
         assertThat(bitmap.width).isEqualTo(width)
