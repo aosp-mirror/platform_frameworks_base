@@ -940,7 +940,8 @@ public class ActivityStackTests extends ActivityTestsBase {
         homeStask.removeTask(homeTask, "testAdjustFocusedStack", REMOVE_TASK_MODE_DESTROYING);
 
         // Finish the only activity.
-        mStack.finishActivityLocked(topActivity, 0 /* resultCode */, null /* resultData */,
+        mStack.finishActivityLocked(topActivity, 0 /* resultCode */,
+                null /* resultData */, null /* resultGrants */,
                 "testAdjustFocusedStack", false /* oomAdj */);
         // Although home stack is empty, it should still be the focused stack.
         assertEquals(homeStask, mDefaultDisplay.getFocusedStack());
