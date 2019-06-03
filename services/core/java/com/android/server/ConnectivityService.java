@@ -2663,6 +2663,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                             (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
                             0, redirectUrlBundle);
+
+                    // If NetworkMonitor detects partial connectivity before
+                    // EVENT_PROMPT_UNVALIDATED arrives, show the partial connectivity notification
+                    // immediately. Re-notify partial connectivity silently if no internet
+                    // notification already there.
+                    if (!wasPartial && nai.partialConnectivity) {
+                        // Remove delayed message if there is a pending message.
+                        mHandler.removeMessages(EVENT_PROMPT_UNVALIDATED, nai.network);
+                        handlePromptUnvalidated(nai.network);
+                    }
+
                     if (wasValidated && !nai.lastValidated) {
                         handleNetworkUnvalidated(nai);
                     }
