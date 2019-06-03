@@ -27,6 +27,14 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "CtsPermission2TestCases",
+      "options": [
+        {
+          "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
