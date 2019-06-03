@@ -218,4 +218,9 @@
     <color name="chooser_row_divider">@color/list_divider_color_light</color>
     <color name="chooser_gradient_background">@color/loading_gradient_background_color_light</color>
     <color name="chooser_gradient_highlight">@color/loading_gradient_highlight_color_light</color>
+
+    <color name="GM2_grey_800">#ff3C4043</color>
+
+    <!-- Resolver/Chooser -->
+    <color name="resolver_text_color_secondary_dark">#ffC4C6C6</color>
 </resources>
