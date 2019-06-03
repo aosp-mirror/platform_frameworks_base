@@ -19,16 +19,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/car_volume_dialog_background_color"
+    android:paddingStart="@dimen/car_volume_item_padding_start"
+    android:paddingEnd="@dimen/car_volume_item_padding_end"
     android:minHeight="@dimen/car_volume_item_height">
 
     <!-- Primary Action. -->
     <ImageView
         android:id="@+id/primary_icon"
-        android:layout_width="@dimen/car_primary_icon_size"
+        android:layout_width="@dimen/car_volume_item_icon_size"
         android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/car_volume_item_margin_horizontal"
         android:layout_alignParentStart="true"
-        android:layout_height="@dimen/car_primary_icon_size"/>
+        android:layout_height="@dimen/car_volume_item_icon_size"/>
 
     <!-- Note: the horizontal padding and offset are set to 0 so that the track and thumb
              aligns with the proper keylines. -->
@@ -61,11 +63,10 @@
         android:background="@color/car_volume_item_divider_color"/>
     <ImageView
         android:id="@+id/supplemental_icon"
-        android:layout_width="@dimen/car_primary_icon_size"
-        android:layout_height="@dimen/car_primary_icon_size"
+        android:layout_width="@dimen/car_volume_item_icon_size"
+        android:layout_height="@dimen/car_volume_item_icon_size"
         android:background="?android:attr/selectableItemBackground"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/car_volume_item_margin_horizontal"
         android:scaleType="fitCenter"/>
 </RelativeLayout>
