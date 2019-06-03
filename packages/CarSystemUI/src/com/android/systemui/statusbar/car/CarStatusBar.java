@@ -1259,6 +1259,10 @@ public class CarStatusBar extends StatusBar implements
 
         @Override
         protected void setHeadsUpVisible() {
+            // if the Notifications panel is showing don't show the Heads up
+            if (mPanelExpanded) {
+                return;
+            }
             super.setHeadsUpVisible();
             if (mHeadsUpPanel.getVisibility() == View.VISIBLE) {
                 mStatusBarWindowController.setHeadsUpShowing(true);
