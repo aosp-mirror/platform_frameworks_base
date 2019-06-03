@@ -49,6 +49,7 @@
             android:text="@string/notification_section_header_gentle"
             android:textSize="12sp"
             android:textColor="@color/notification_section_header_label_color"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             />
         <ImageView
             android:id="@+id/btn_clear_all"
