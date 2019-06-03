@@ -94,7 +94,7 @@ public class AccessPointTest {
             new RssiCurve(-150, 10, new byte[]{Speed.FAST});
     public static final String TEST_BSSID = "00:00:00:00:00:00";
     private static final long MAX_SCORE_CACHE_AGE_MILLIS =
-            20 * DateUtils.MINUTE_IN_MILLIS;;
+            20 * DateUtils.MINUTE_IN_MILLIS;
 
     private Context mContext;
     private WifiInfo mWifiInfo;
@@ -1521,5 +1521,27 @@ public class AccessPointTest {
         provisioningCallback.onProvisioningComplete();
 
         verify(mMockConnectListener).onFailure(anyInt());
+    }
+
+    /**
+     * Verifies that isOpenNetwork returns true for SECURITY_NONE, SECURITY_OWE, and
+     * SECURITY_OWE_TRANSITION.
+     */
+    @Test
+    public void testIsOpenNetwork_returnValidResult() {
+        final Bundle bundle = new Bundle();
+        AccessPoint ap;
+
+        for (int i = 0; i < AccessPoint.SECURITY_MAX_VAL; i++) {
+            bundle.putInt("key_security", i);
+            ap = new AccessPoint(InstrumentationRegistry.getTargetContext(), bundle);
+
+            if (i == AccessPoint.SECURITY_NONE || i == AccessPoint.SECURITY_OWE
+                    || i == AccessPoint.SECURITY_OWE_TRANSITION) {
+                assertThat(ap.isOpenNetwork()).isTrue();
+            } else {
+                assertThat(ap.isOpenNetwork()).isFalse();
+            }
+        }
     }
 }
