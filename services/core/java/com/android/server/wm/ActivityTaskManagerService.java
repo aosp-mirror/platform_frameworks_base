@@ -4507,20 +4507,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceCallerIsRecentsOrHasPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
-            final TaskRecord task;
-            synchronized (mGlobalLock) {
-                task = mRootActivityContainer.anyTaskForId(taskId,
-                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
-                if (task == null) {
-                    Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
-                    return null;
-                }
-            }
-            // Don't call this while holding the lock as this operation might hit the disk.
-            return task.getSnapshot(reducedResolution);
+            return getTaskSnapshot(taskId, reducedResolution, true /* restoreFromDisk */);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution,
+            boolean restoreFromDisk) {
+        final TaskRecord task;
+        synchronized (mGlobalLock) {
+            task = mRootActivityContainer.anyTaskForId(taskId,
+                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
+            if (task == null) {
+                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                return null;
+            }
+        }
+        // Don't call this while holding the lock as this operation might hit the disk.
+        return task.getSnapshot(reducedResolution, restoreFromDisk);
     }
 
     @Override
@@ -7399,10 +7404,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution);
-            }
+        public ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
+                boolean reducedResolution) {
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution,
+                    false /* restoreFromDisk */);
         }
 
         @Override
