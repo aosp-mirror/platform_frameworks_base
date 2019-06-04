@@ -133,6 +133,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> volanie cez Wi-Fi"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Volanie cez WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> volanie cez WLAN"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1580,7 +1582,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Aplikáciu <xliff:g id="APPLICATION_NAME">%s</xliff:g> nie je možné spustiť"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Zdieľať s"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Zdieľať s aplikáciou <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Posuvné tlačidlo. Dotknite sa a podržte."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Posuvník. Pridržte."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Posunom odomknúť."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Prejsť na plochu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Prejsť na"</string>
@@ -1714,8 +1716,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skratka dostupnosti zapla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skratka dostupnosti vypla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Ak chcete používať službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, pridržte tri sekundy oba klávesy hlasitosti"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Klepnutím na tlačidlo dostupnosti vyberte požadovanú funkciu:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ak chcete zmeniť funkcie, klepnite na tlačidlo dostupnosti a podržte ho"</string>
+    <!-- no translation found for accessibility_button_prompt_text (1176658502969738564) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (8259145549733019401) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1041435574275047665) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (7003212763213614833) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (5261788874937410950) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (4969448938984394550) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Priblíženie"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>

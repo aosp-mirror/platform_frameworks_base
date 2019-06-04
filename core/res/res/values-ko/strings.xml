@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi 통화"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 통화"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 통화"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1666,8 +1668,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용하려면 두 볼륨 키를 3초 동안 길게 누르세요"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"기능을 변경하려면 접근성 버튼을 길게 터치하세요."</string>
+    <!-- no translation found for accessibility_button_prompt_text (1176658502969738564) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (8259145549733019401) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1041435574275047665) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (7003212763213614833) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (5261788874937410950) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (4969448938984394550) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"확대"</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>

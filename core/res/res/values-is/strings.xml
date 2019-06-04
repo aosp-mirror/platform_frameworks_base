@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi símtöl"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Wi-Fi símtöl með <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-símtal"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN-símtal"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1667,8 +1668,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Flýtileið aðgengisstillingar kveikti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Flýtileið aðgengisstillingar slökkti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Haltu báðum hljóðstyrkstökkunum inni í þrjár sekúndur til að nota <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Veldu eiginleika sem á að nota þegar ýtt er á aðgengishnappinn:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Haltu fingri á aðgengishnappinum til að breyta eiginleikum."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Veldu þjónustu sem á að nota þegar ýtt er á aðgengishnappinn:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Veldu þjónustu sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með tveimur fingrum):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Veldu þjónustu sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með þremur fingrum):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Til að skipta á milli þjónusta skaltu halda aðgengishnappinum inni."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Til að skipta á milli þjónusta skaltu strjúka upp með tveimur fingrum og halda inni."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Til að skipta á milli þjónusta skaltu strjúka upp með þremur fingrum og halda inni."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Stækkun"</string>
     <string name="user_switched" msgid="3768006783166984410">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>

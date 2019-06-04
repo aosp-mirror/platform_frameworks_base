@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Chamada no Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Chamada no Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Chamada por WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Chamada por WLAN de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1666,8 +1667,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"O atalho de acessibilidade ativou o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"O atalho de acessibilidade desativou o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Escolha um recurso a ser usado quando você toca no botão Acessibilidade:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Para alterar os recursos, mantenha o botão Acessibilidade pressionado."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Escolha um serviço a ser usado quando você toca no botão Acessibilidade:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Escolha um serviço a ser usado com o gesto de acessibilidade (deslizar de baixo para cima na tela com dois dedos):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Escolha um serviço a ser usado com o gesto de acessibilidade (deslizar de baixo para cima na tela com três dedos):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Para alternar entre serviços, toque no botão de acessibilidade e mantenha-o pressionado."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Para alternar entre serviços, deslize de baixo para cima na tela com dois dedos e mantenha-a pressionada."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Para alternar entre serviços, deslize de baixo para cima na tela com três dedos e mantenha-a pressionada."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliação"</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
