@@ -365,16 +365,23 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private int calculateMode(BiometricSourceType biometricSourceType) {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithBiometricAllowed();
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
-        boolean faceStayingOnKeyguard = biometricSourceType == BiometricSourceType.FACE
-                && !mKeyguardBypassController.getBypassEnabled();
+        boolean face = biometricSourceType == BiometricSourceType.FACE;
+        boolean faceStayingOnKeyguard = face && !mKeyguardBypassController.getBypassEnabled();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
                 return faceStayingOnKeyguard ? MODE_NONE : MODE_WAKE_AND_UNLOCK_PULSING;
-            } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
+            } else if (!face && (unlockingAllowed || !mUnlockMethodCache.isMethodSecure())) {
                 return MODE_WAKE_AND_UNLOCK;
+            } else if (face) {
+                if (!(mDozeScrimController.isPulsing() && !unlockingAllowed)) {
+                    Log.wtf(TAG, "Face somehow arrived when the device was not interactive");
+                }
+                // We could theoretically return MODE_NONE, but this means that the device
+                // would be not interactive, unlocked, and the user would not see the device state.
+                return MODE_ONLY_WAKE;
             } else {
                 return MODE_SHOW_BOUNCER;
             }
@@ -389,6 +396,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
                 return faceStayingOnKeyguard ? MODE_ONLY_WAKE : MODE_UNLOCK;
+            } else if (face) {
+                return MODE_NONE;
             } else if (!mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 return MODE_SHOW_BOUNCER;
             }
