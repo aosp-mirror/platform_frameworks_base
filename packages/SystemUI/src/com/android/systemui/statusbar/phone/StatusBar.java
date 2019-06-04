@@ -660,7 +660,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
-            sliceProvider.initDependencies(mMediaManager, mStatusBarStateController);
+            sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
+                    mKeyguardBypassController);
         } else {
             Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
         }
