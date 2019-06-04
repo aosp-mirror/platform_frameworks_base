@@ -510,7 +510,6 @@ public abstract class NetworkAgent extends Handler {
      * override this method.
      */
     protected void addKeepalivePacketFilter(Message msg) {
-        onSocketKeepaliveEvent(msg.arg1, SocketKeepalive.ERROR_UNSUPPORTED);
     }
 
     /**
@@ -519,7 +518,6 @@ public abstract class NetworkAgent extends Handler {
      * must override this method.
      */
     protected void removeKeepalivePacketFilter(Message msg) {
-        onSocketKeepaliveEvent(msg.arg1, SocketKeepalive.ERROR_UNSUPPORTED);
     }
 
     /**
