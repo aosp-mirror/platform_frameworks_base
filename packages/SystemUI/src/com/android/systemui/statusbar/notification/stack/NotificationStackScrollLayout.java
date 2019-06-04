@@ -477,8 +477,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private float mHorizontalPanelTranslation;
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
-    protected final NotificationGutsManager mGutsManager =
-            Dependency.get(NotificationGutsManager.class);
     private final Rect mTmpRect = new Rect();
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
@@ -625,7 +623,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         inflateFooterView();
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
         if (mAllowLongPress) {
-            setLongPressListener(mGutsManager::openGuts);
+            setLongPressListener(mNotificationGutsManager::openGuts);
         }
     }
 
@@ -6141,6 +6139,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
                 mSwipeHelper.onMenuShown(row);
+                mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                        false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                        false /* resetMenu */);
 
                 // Check to see if we want to go directly to the notfication guts
                 NotificationMenuRowPlugin provider = notificationRow.getProvider();
@@ -6148,7 +6149,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     MenuItem item = provider.menuItemToExposeOnSnap();
                     if (item != null) {
                         Point origin = provider.getRevealAnimationOrigin();
-                        mGutsManager.openGuts(row, origin.x, origin.y, item);
+                        mNotificationGutsManager.openGuts(row, origin.x, origin.y, item);
                     } else  {
                         Log.e(TAG, "Provider has shouldShowGutsOnSnapOpen, but provided no "
                                 + "menu item in menuItemtoExposeOnSnap. Skipping.");
