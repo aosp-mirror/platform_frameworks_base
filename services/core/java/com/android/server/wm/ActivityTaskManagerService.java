@@ -2393,9 +2393,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null /* intent */, "moveTaskToFront");
         if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
                 -1, callerApp, null, false, null)) {
-            boolean abort = !isBackgroundActivityStartsEnabled();
-            starter.showBackgroundActivityBlockedToast(abort, callingPackage);
-            if (abort) {
+            if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
         }
@@ -5424,13 +5422,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean isBackgroundActivityStartsEnabled() {
         return mAmInternal.isBackgroundActivityStartsEnabled();
-    }
-
-    boolean isPackageNameWhitelistedForBgActivityStarts(@Nullable String packageName) {
-        if (packageName == null) {
-            return false;
-        }
-        return mAmInternal.isPackageNameWhitelistedForBgActivityStarts(packageName);
     }
 
     void enableScreenAfterBoot(boolean booted) {
