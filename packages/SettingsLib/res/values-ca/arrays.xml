@@ -233,7 +233,7 @@
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"Desactivat"</item>
     <item msgid="675719912558941285">"Dibuixa àrea retall no rectangular en blau"</item>
-    <item msgid="1064373276095698656">"Ressalta ordres de dibuix provats en verd"</item>
+    <item msgid="1064373276095698656">"Marca ordres de dibuix provats en verd"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"Desactivat"</item>
