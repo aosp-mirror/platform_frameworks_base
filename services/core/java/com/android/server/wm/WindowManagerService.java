@@ -4405,12 +4405,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mMaxUiWidth > 0) {
                 mRoot.forAllDisplays(displayContent -> displayContent.setMaxUiWidth(mMaxUiWidth));
             }
-            final boolean changed = applyForcedPropertiesForDefaultDisplay();
+            applyForcedPropertiesForDefaultDisplay();
             mAnimator.ready();
             mDisplayReady = true;
-            if (changed) {
-                reconfigureDisplayLocked(getDefaultDisplayContentLocked());
-            }
+            // Reconfigure all displays to make sure that forced properties and
+            // DisplayWindowSettings are applied.
+            mRoot.forAllDisplays(this::reconfigureDisplayLocked);
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
         }
