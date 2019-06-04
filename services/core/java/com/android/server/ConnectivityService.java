@@ -2578,8 +2578,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (nai.everConnected) {
                         loge("ERROR: cannot call explicitlySelected on already-connected network");
                     }
-                    nai.networkMisc.explicitlySelected = (msg.arg1 == 1);
-                    nai.networkMisc.acceptUnvalidated = (msg.arg1 == 1) && (msg.arg2 == 1);
+                    nai.networkMisc.explicitlySelected = toBool(msg.arg1);
+                    nai.networkMisc.acceptUnvalidated = toBool(msg.arg1) && toBool(msg.arg2);
                     // Mark the network as temporarily accepting partial connectivity so that it
                     // will be validated (and possibly become default) even if it only provides
                     // partial internet access. Note that if user connects to partial connectivity
@@ -2587,7 +2587,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // out of wifi coverage) and if the same wifi is available again, the device
                     // will auto connect to this wifi even though the wifi has "no internet".
                     // TODO: Evaluate using a separate setting in IpMemoryStore.
-                    nai.networkMisc.acceptPartialConnectivity = (msg.arg2 == 1);
+                    nai.networkMisc.acceptPartialConnectivity = toBool(msg.arg2);
                     break;
                 }
                 case NetworkAgent.EVENT_SOCKET_KEEPALIVE: {
