@@ -71,6 +71,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private UnlockMethodCache mUnlockMethodCache;
     @Mock
     private Handler mHandler;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -83,8 +85,9 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mDependency.injectTestDependency(StatusBarWindowController.class,
                 mStatusBarWindowController);
-        mBiometricUnlockController = new TestableBiometricUnlockController(
-                false /* faceDismissesKeyguard */);
+        mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
+                mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
+                mHandler, mUpdateMonitor, 0 /* wakeUpDelay */, mKeyguardBypassController);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 
@@ -139,9 +142,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBiometricAuthenticated_whenFace_dismissingKeyguard() {
-        mBiometricUnlockController = new TestableBiometricUnlockController(
-                true /* faceDismissesKeyguard */);
+    public void onBiometricAuthenticated_whenFace_andBypass_dismissKeyguard() {
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
@@ -183,15 +185,5 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 BiometricSourceType.FACE);
         mBiometricUnlockController.onFinishedGoingToSleep(-1);
         verify(mHandler).post(any());
-    }
-
-    private class TestableBiometricUnlockController extends BiometricUnlockController {
-
-        TestableBiometricUnlockController(boolean faceDismissesKeyguard) {
-            super(mContext, mDozeScrimController,
-                    mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
-                    mHandler, mUpdateMonitor, 0 /* wakeUpDelay */,
-                    new KeyguardBypassController(faceDismissesKeyguard, mUnlockMethodCache));
-        }
     }
 }
