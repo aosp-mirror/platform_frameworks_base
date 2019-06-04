@@ -6654,7 +6654,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
-        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
+        if (!mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
         enforceFullCrossUsersPermission(userHandle);
