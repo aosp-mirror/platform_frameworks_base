@@ -429,7 +429,15 @@ public class DeviceIdleController extends SystemService
     private long mNextLightIdleDelay;
     private long mNextLightAlarmTime;
     private long mNextSensingTimeoutAlarmTime;
-    private long mCurIdleBudget;
+
+    /** How long a light idle maintenance window should last. */
+    private long mCurLightIdleBudget;
+
+    /**
+     * Start time of the current (light or full) maintenance window, in the elapsed timebase. Valid
+     * only if {@link #mState} == {@link #STATE_IDLE_MAINTENANCE} or
+     * {@link #mLightState} == {@link #LIGHT_STATE_IDLE_MAINTENANCE}.
+     */
     private long mMaintenanceStartTime;
     private long mIdleStartTime;
 
@@ -2651,9 +2659,12 @@ public class DeviceIdleController extends SystemService
             EventLogTags.writeDeviceIdle(STATE_ACTIVE, activeReason);
             mState = STATE_ACTIVE;
             mInactiveTimeout = newInactiveTimeout;
-            mCurIdleBudget = 0;
-            mMaintenanceStartTime = 0;
             resetIdleManagementLocked();
+            // Don't reset maintenance window start time if we're in a light idle maintenance window
+            // because its used in the light idle budget calculation.
+            if (mLightState != LIGHT_STATE_IDLE_MAINTENANCE) {
+                mMaintenanceStartTime = 0;
+            }
 
             if (changeLightIdle) {
                 EventLogTags.writeDeviceIdleLight(LIGHT_STATE_ACTIVE, activeReason);
@@ -2763,7 +2774,6 @@ public class DeviceIdleController extends SystemService
     private void resetIdleManagementLocked() {
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
-        mNextLightIdleDelay = 0;
         mIdleStartTime = 0;
         cancelAlarmLocked();
         cancelSensingTimeoutAlarmLocked();
@@ -2774,6 +2784,8 @@ public class DeviceIdleController extends SystemService
     }
 
     private void resetLightIdleManagementLocked() {
+        mNextLightIdleDelay = 0;
+        mCurLightIdleBudget = 0;
         cancelLightAlarmLocked();
     }
 
@@ -2816,7 +2828,7 @@ public class DeviceIdleController extends SystemService
 
         switch (mLightState) {
             case LIGHT_STATE_INACTIVE:
-                mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
+                mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
                 // Reset the upcoming idle delays.
                 mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
                 mMaintenanceStartTime = 0;
@@ -2835,10 +2847,12 @@ public class DeviceIdleController extends SystemService
                     long duration = SystemClock.elapsedRealtime() - mMaintenanceStartTime;
                     if (duration < mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET) {
                         // We didn't use up all of our minimum budget; add this to the reserve.
-                        mCurIdleBudget += (mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET-duration);
+                        mCurLightIdleBudget +=
+                                (mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET - duration);
                     } else {
                         // We used more than our minimum budget; this comes out of the reserve.
-                        mCurIdleBudget -= (duration-mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET);
+                        mCurLightIdleBudget -=
+                                (duration - mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET);
                     }
                 }
                 mMaintenanceStartTime = 0;
@@ -2862,12 +2876,12 @@ public class DeviceIdleController extends SystemService
                     mActiveIdleOpCount = 1;
                     mActiveIdleWakeLock.acquire();
                     mMaintenanceStartTime = SystemClock.elapsedRealtime();
-                    if (mCurIdleBudget < mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET) {
-                        mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
-                    } else if (mCurIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
-                        mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
+                    if (mCurLightIdleBudget < mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET) {
+                        mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
+                    } else if (mCurLightIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
+                        mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
                     }
-                    scheduleLightAlarmLocked(mCurIdleBudget);
+                    scheduleLightAlarmLocked(mCurLightIdleBudget);
                     if (DEBUG) Slog.d(TAG,
                             "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
                     mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
@@ -4360,9 +4374,9 @@ public class DeviceIdleController extends SystemService
                 TimeUtils.formatDuration(mNextLightAlarmTime, SystemClock.elapsedRealtime(), pw);
                 pw.println();
             }
-            if (mCurIdleBudget != 0) {
-                pw.print("  mCurIdleBudget=");
-                TimeUtils.formatDuration(mCurIdleBudget, pw);
+            if (mCurLightIdleBudget != 0) {
+                pw.print("  mCurLightIdleBudget=");
+                TimeUtils.formatDuration(mCurLightIdleBudget, pw);
                 pw.println();
             }
             if (mMaintenanceStartTime != 0) {

@@ -52,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -892,6 +893,54 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testLightIdleAlarmUnaffectedByMotion() {
+        setNetworkConnected(true);
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+        spyOn(mDeviceIdleController);
+
+        InOrder inOrder = inOrder(mDeviceIdleController);
+
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        // No active ops means INACTIVE should go straight to IDLE.
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT));
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET));
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET));
+
+        // Test that motion doesn't reset the idle timeout.
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
     }
 
     ///////////////// EXIT conditions ///////////////////
