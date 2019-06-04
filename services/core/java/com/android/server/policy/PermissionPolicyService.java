@@ -16,10 +16,14 @@
 
 package com.android.server.policy;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -426,20 +430,34 @@ public final class PermissionPolicyService extends SystemService {
                     mOpsToAllowIfDefault.add(new OpToUnrestrict(uid, pkg.packageName, opCode));
                 }
             } else if (permissionInfo.isSoftRestricted()) {
-                // Storage uses a special app op to decide the mount state and
-                // supports soft restriction where the restricted state allows
-                // the permission but only for accessing the medial collections.
-                if (Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)
-                        || Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
-                    if (applyRestriction) {
-                        mOpsToDefault.add(new OpToRestrict(uid,
-                                AppOpsManager.OP_LEGACY_STORAGE));
-                    } else if (pkg.applicationInfo.hasRequestedLegacyExternalStorage()) {
-                        mOpsToAllow.add(new OpToUnrestrict(uid, pkg.packageName,
-                                AppOpsManager.OP_LEGACY_STORAGE));
-                    } else {
-                        mOpsToIgnoreIfDefault.add(new OpToUnrestrict(uid, pkg.packageName,
-                                AppOpsManager.OP_LEGACY_STORAGE));
+                final SoftRestrictedPermissionPolicy policy =
+                        SoftRestrictedPermissionPolicy.forPermission(mContext, pkg.applicationInfo,
+                                permission);
+
+                final int op = policy.getAppOp();
+                if (op != OP_NONE) {
+                    switch (policy.getAppOpMode()) {
+                        case MODE_DEFAULT:
+                            mOpsToDefault.add(new OpToRestrict(uid, op));
+                            break;
+                        case MODE_ALLOWED:
+                            if (policy.shouldSetAppOpIfNotDefault()) {
+                                mOpsToAllow.add(new OpToUnrestrict(uid, pkg.packageName, op));
+                            } else {
+                                mOpsToAllowIfDefault.add(new OpToUnrestrict(uid, pkg.packageName,
+                                        op));
+                            }
+                            break;
+                        case MODE_IGNORED:
+                            if (policy.shouldSetAppOpIfNotDefault()) {
+                                Slog.wtf(LOG_TAG, "Always ignoring appops is not implemented");
+                            } else {
+                                mOpsToIgnoreIfDefault.add(new OpToUnrestrict(uid, pkg.packageName,
+                                        op));
+                            }
+                            break;
+                        case MODE_ERRORED:
+                            Slog.wtf(LOG_TAG, "Setting appop to errored is not implemented");
                     }
                 }
             }
@@ -483,7 +501,7 @@ public final class PermissionPolicyService extends SystemService {
 
             for (String permission : pkg.requestedPermissions) {
                 final int opCode = AppOpsManager.permissionToOpCode(permission);
-                if (opCode == AppOpsManager.OP_NONE) {
+                if (opCode == OP_NONE) {
                     continue;
                 }
 
@@ -515,13 +533,13 @@ public final class PermissionPolicyService extends SystemService {
                 @NonNull String packageName) {
             final int currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
                     .opToPublicName(opCode), uid, packageName);
-            if (currentMode == AppOpsManager.MODE_DEFAULT) {
+            if (currentMode == MODE_DEFAULT) {
                 mAppOpsManager.setUidMode(opCode, uid, mode);
             }
         }
 
         private void setUidModeDefault(int opCode, int uid) {
-            mAppOpsManager.setUidMode(opCode, uid, AppOpsManager.MODE_DEFAULT);
+            mAppOpsManager.setUidMode(opCode, uid, MODE_DEFAULT);
         }
 
         private class OpToRestrict {

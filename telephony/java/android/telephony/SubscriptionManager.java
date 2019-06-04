@@ -791,6 +791,14 @@ public class SubscriptionManager {
     public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
 
     /**
+     * IMSI (International Mobile Subscriber Identity).
+     * <P>Type: TEXT </P>
+     * @hide
+     */
+    //TODO: add @SystemApi
+    public static final String IMSI = "imsi";
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
@@ -2976,10 +2984,10 @@ public class SubscriptionManager {
      * @param info the subscriptionInfo to check against.
      * @return true if this subscription should be visible to the API caller.
      *
+     * @hide
      */
-    private boolean isSubscriptionVisible(SubscriptionInfo info) {
+    public boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
-
         // If subscription is NOT grouped opportunistic subscription, it's visible.
         if (info.getGroupUuid() == null || !info.isOpportunistic()) return true;
 

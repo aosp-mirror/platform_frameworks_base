@@ -215,6 +215,7 @@ import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
@@ -1599,10 +1600,11 @@ final class ActivityRecord extends ConfigurationContainer {
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
-    final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
+    final void deliverNewIntentLocked(int callingUid, Intent intent, NeededUriGrants intentGrants,
+            String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        mAtmService.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
-                intent, getUriPermissionsLocked(), mUserId);
+        mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
+                getUriPermissionsLocked());
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
         final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();

@@ -200,12 +200,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
-    /**
-     * Support up to 3 slots which is what's supported by {@link TelephonyManager#getPhoneCount}
-     */
-    private static final int SIM_SLOTS = 3;
-    private final ServiceState[] mServiceStatesBySlot = new ServiceState[SIM_SLOTS];
-
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
@@ -337,7 +331,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     handleAirplaneModeChanged();
                     break;
                 case MSG_SERVICE_STATE_CHANGE:
-                    handleServiceStateChange(msg.arg1, msg.arg2, (ServiceState) msg.obj);
+                    handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
                     break;
                 case MSG_SCREEN_TURNED_ON:
                     handleScreenTurnedOn();
@@ -1060,13 +1054,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
                 int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-                int slotId = intent.getIntExtra(PhoneConstants.SLOT_KEY, -1);
                 if (DEBUG) {
                     Log.v(TAG, "action " + action + " serviceState=" + serviceState + " subId="
                             + subId);
                 }
-                mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, slotId, serviceState)
-                        .sendToTarget();
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
                     action)) {
                 mHandler.sendEmptyMessage(MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED);
@@ -2065,14 +2058,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     @VisibleForTesting
     void handleServiceStateChange(int subId, ServiceState serviceState) {
-        handleServiceStateChange(subId, -1, serviceState);
-    }
-
-    /**
-     * Handle {@link #MSG_SERVICE_STATE_CHANGE}
-     */
-    @VisibleForTesting
-    void handleServiceStateChange(int subId, int slotId, ServiceState serviceState) {
         if (DEBUG) {
             Log.d(TAG,
                     "handleServiceStateChange(subId=" + subId + ", serviceState=" + serviceState);
@@ -2086,7 +2071,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         mServiceStates.put(subId, serviceState);
-        if (slotId >= 0 && slotId < SIM_SLOTS) mServiceStatesBySlot[slotId] = serviceState;
 
         for (int j = 0; j < mCallbacks.size(); j++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
@@ -2310,21 +2294,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public ServiceState getServiceState(int subId) {
         return mServiceStates.get(subId);
-    }
-
-    /**
-     * @return true iff at least one slot currently supports emergency calls
-     */
-    public boolean isAnySimEmergencyAble() {
-        for (int i = 0; i < SIM_SLOTS; i++) {
-            ServiceState s = mServiceStatesBySlot[i];
-            if (s != null) {
-                if (s.getState() == ServiceState.STATE_IN_SERVICE || s.isEmergencyOnly()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public void clearBiometricRecognized() {

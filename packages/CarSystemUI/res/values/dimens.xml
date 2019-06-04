@@ -98,8 +98,10 @@
     <dimen name="privacy_dialog_title_padding_start">10dp</dimen>
 
     <!-- Car volume dimens. -->
+    <dimen name="car_volume_item_icon_size">@dimen/car_primary_icon_size</dimen>
     <dimen name="car_volume_item_height">@*android:dimen/car_single_line_list_item_height</dimen>
-    <dimen name="car_volume_item_margin_horizontal">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="car_volume_item_padding_start">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="car_volume_item_padding_end">@*android:dimen/car_keyline_1</dimen>
     <dimen name="car_volume_item_seekbar_margin_vertical">@*android:dimen/car_padding_1</dimen>
     <dimen name="car_volume_item_seekbar_margin_start">@*android:dimen/car_keyline_3</dimen>
     <dimen name="car_volume_item_seekbar_margin_end">@*android:dimen/car_padding_4</dimen>

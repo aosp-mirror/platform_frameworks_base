@@ -38,6 +38,7 @@ public class SystemNotificationChannels {
     public static String CAR_MODE = "CAR_MODE";
     public static String ACCOUNT = "ACCOUNT";
     public static String DEVELOPER = "DEVELOPER";
+    public static String DEVELOPER_IMPORTANT = "DEVELOPER_IMPORTANT";
     public static String UPDATES = "UPDATES";
     public static String NETWORK_STATUS = "NETWORK_STATUS";
     public static String NETWORK_ALERTS = "NETWORK_ALERTS";
@@ -97,6 +98,13 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_LOW);
         developer.setBlockableSystem(true);
         channelsList.add(developer);
+
+        final NotificationChannel developerImportant = new NotificationChannel(
+                DEVELOPER_IMPORTANT,
+                context.getString(R.string.notification_channel_developer_important),
+                NotificationManager.IMPORTANCE_HIGH);
+        developer.setBlockableSystem(true);
+        channelsList.add(developerImportant);
 
         final NotificationChannel updates = new NotificationChannel(
                 UPDATES,

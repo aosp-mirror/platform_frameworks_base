@@ -2578,9 +2578,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
-            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q
-                    // STOPSHIP: Remove next line when API level for Q is defined.
-                    && Build.VERSION.SDK_INT > Build.VERSION_CODES.P;
+            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
 
             int preUpgradeSdkVersion = ver.sdkVersion;
 

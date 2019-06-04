@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
@@ -48,6 +49,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.RemoteCallback;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -64,6 +66,9 @@ import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Unit tests for AppOpsService. Covers functionality that is difficult to test using CTS tests
@@ -256,6 +261,46 @@ public class AppOpsServiceTest {
 
         mAppOpsService.packageRemoved(mMyUid, sMyPackageName);
         assertThat(getLoggedOps()).isNull();
+    }
+
+
+    @Test
+    public void testPackageRemovedHistoricalOps() throws InterruptedException {
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName);
+
+        AppOpsManager.HistoricalOps historicalOps = new AppOpsManager.HistoricalOps(0, 15000);
+        historicalOps.increaseAccessCount(OP_READ_SMS, mMyUid, sMyPackageName,
+                AppOpsManager.UID_STATE_PERSISTENT, 0, 1);
+
+        mAppOpsService.addHistoricalOps(historicalOps);
+
+        AtomicReference<AppOpsManager.HistoricalOps> resultOpsRef = new AtomicReference<>();
+        AtomicReference<CountDownLatch> latchRef = new AtomicReference<>(new CountDownLatch(1));
+        RemoteCallback callback = new RemoteCallback(result -> {
+            resultOpsRef.set(result.getParcelable(AppOpsManager.KEY_HISTORICAL_OPS));
+            latchRef.get().countDown();
+        });
+
+        // First, do a fetch to ensure it's written
+        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, 0, Long.MAX_VALUE, 0,
+                callback);
+
+        latchRef.get().await(5, TimeUnit.SECONDS);
+        assertThat(latchRef.get().getCount()).isEqualTo(0);
+        assertThat(resultOpsRef.get().isEmpty()).isFalse();
+
+        // Then, check it's deleted on removal
+        mAppOpsService.packageRemoved(mMyUid, sMyPackageName);
+
+        latchRef.set(new CountDownLatch(1));
+
+        mAppOpsService.getHistoricalOps(mMyUid, sMyPackageName, null, 0, Long.MAX_VALUE, 0,
+                callback);
+
+        latchRef.get().await(5, TimeUnit.SECONDS);
+        assertThat(latchRef.get().getCount()).isEqualTo(0);
+        assertThat(resultOpsRef.get().isEmpty()).isTrue();
     }
 
     @Test
