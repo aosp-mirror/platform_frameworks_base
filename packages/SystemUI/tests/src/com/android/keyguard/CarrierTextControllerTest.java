@@ -27,7 +27,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -37,7 +36,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -45,7 +43,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.internal.R;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
@@ -59,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @SmallTest
@@ -70,7 +68,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     private static final String TEST_CARRIER = "TEST_CARRIER";
     private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
     private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
-    private static final String EMERGENCY = "Emergency";
     private static final int TEST_CARRIER_ID = 1;
     private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
@@ -109,8 +106,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
         mContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
-        mContext.getOrCreateTestableResources().addOverride(
-                R.string.emergency_calls_only, EMERGENCY);
         mDependency.injectMockDependency(WakefulnessLifecycle.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
@@ -195,6 +190,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
                         CarrierTextController.CarrierTextCallbackInfo.class);
@@ -216,6 +213,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION_ROAMING);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
@@ -260,6 +259,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
                         CarrierTextController.CarrierTextCallbackInfo.class);
@@ -283,6 +284,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 .thenReturn(IccCardConstants.State.NOT_READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
                         CarrierTextController.CarrierTextCallbackInfo.class);
@@ -305,6 +308,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 .thenReturn(IccCardConstants.State.NOT_READY)
                 .thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
@@ -330,6 +335,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 .thenReturn(IccCardConstants.State.NOT_READY)
                 .thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
@@ -352,6 +358,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt()))
             .thenReturn(IccCardConstants.State.READY);
 
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
         mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText(true);
         when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
 
@@ -364,127 +371,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
         assertEquals(TEST_CARRIER_2, captor.getValue().carrierText);
-    }
-
-    @Test
-    public void testCarrierText_replaceOutOfServiceWithEmergency() {
-        reset(mCarrierTextCallback);
-
-        List<SubscriptionInfo> list = new ArrayList<>();
-        list.add(TEST_SUBSCRIPTION);
-        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        when(mKeyguardUpdateMonitor.getSimState(anyInt()))
-                .thenReturn(IccCardConstants.State.READY);
-        ServiceState s = mock(ServiceState.class);
-        when(mKeyguardUpdateMonitor.getServiceState(anyInt())).thenReturn(s);
-        when(s.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
-
-        when(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).thenReturn(true);
-
-        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
-                ArgumentCaptor.forClass(
-                        CarrierTextController.CarrierTextCallbackInfo.class);
-
-        mCarrierTextController.updateCarrierText();
-        mTestableLooper.processAllMessages();
-        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
-
-        assertEquals(1, captor.getValue().listOfCarriers.length);
-        assertEquals(EMERGENCY, captor.getValue().listOfCarriers[0]);
-    }
-
-    @Test
-    public void testCarrierText_replaceOutOfServiceWithEmergencyOnlyInNoService() {
-        reset(mCarrierTextCallback);
-
-        List<SubscriptionInfo> list = new ArrayList<>();
-        list.add(TEST_SUBSCRIPTION);
-        list.add(TEST_SUBSCRIPTION_2);
-        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        when(mKeyguardUpdateMonitor.getSimState(anyInt()))
-                .thenReturn(IccCardConstants.State.READY);
-        ServiceState sInService = mock(ServiceState.class);
-        ServiceState sOutOfService = mock(ServiceState.class);
-        when(mKeyguardUpdateMonitor.getServiceState(anyInt()))
-                .thenReturn(sInService)
-                .thenReturn(sOutOfService);
-        when(sInService.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
-        when(sOutOfService.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
-
-        when(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).thenReturn(true);
-
-        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
-                ArgumentCaptor.forClass(
-                        CarrierTextController.CarrierTextCallbackInfo.class);
-
-        mCarrierTextController.updateCarrierText();
-        mTestableLooper.processAllMessages();
-        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
-
-        assertEquals(2, captor.getValue().listOfCarriers.length);
-        assertEquals(TEST_CARRIER, captor.getValue().listOfCarriers[0]);
-        assertEquals(EMERGENCY, captor.getValue().listOfCarriers[1]);
-    }
-
-    @Test
-    public void testCarrierText_dontReplaceWithEmergencyIfNotAble() {
-        reset(mCarrierTextCallback);
-
-        List<SubscriptionInfo> list = new ArrayList<>();
-        list.add(TEST_SUBSCRIPTION);
-        list.add(TEST_SUBSCRIPTION_2);
-        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        when(mKeyguardUpdateMonitor.getSimState(anyInt()))
-                .thenReturn(IccCardConstants.State.READY);
-        ServiceState sOutOfService = mock(ServiceState.class);
-        when(mKeyguardUpdateMonitor.getServiceState(anyInt())).thenReturn(sOutOfService);
-        when(sOutOfService.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
-
-        when(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).thenReturn(false);
-
-        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
-                ArgumentCaptor.forClass(
-                        CarrierTextController.CarrierTextCallbackInfo.class);
-
-        mCarrierTextController.updateCarrierText();
-        mTestableLooper.processAllMessages();
-        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
-
-        assertEquals(2, captor.getValue().listOfCarriers.length);
-        assertEquals(TEST_CARRIER, captor.getValue().listOfCarriers[0]);
-        assertEquals(TEST_CARRIER_2, captor.getValue().listOfCarriers[1]);
-    }
-
-    @Test
-    public void testCarrierText_dontReplaceWithEmergencyIfAlreadyEmergency() {
-        reset(mCarrierTextCallback);
-
-        List<SubscriptionInfo> list = new ArrayList<>();
-        list.add(TEST_SUBSCRIPTION);
-        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        when(mKeyguardUpdateMonitor.getSimState(anyInt()))
-                .thenReturn(IccCardConstants.State.READY);
-        ServiceState sOutOfService = mock(ServiceState.class);
-        when(mKeyguardUpdateMonitor.getServiceState(anyInt())).thenReturn(sOutOfService);
-        when(sOutOfService.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
-        when(sOutOfService.isEmergencyOnly()).thenReturn(true);
-
-        when(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).thenReturn(false);
-
-        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
-                ArgumentCaptor.forClass(
-                        CarrierTextController.CarrierTextCallbackInfo.class);
-
-        mCarrierTextController.updateCarrierText();
-        mTestableLooper.processAllMessages();
-        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
-
-        assertEquals(1, captor.getValue().listOfCarriers.length);
-        assertEquals(TEST_CARRIER, captor.getValue().listOfCarriers[0]);
     }
 
     public static class TestCarrierTextController extends CarrierTextController {
