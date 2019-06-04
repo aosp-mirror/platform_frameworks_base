@@ -122,13 +122,21 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isAssistantGestureDisabled(int sysuiStateFlags) {
-        // Disable when in screen pinning, immersive, the bouncer is showing, or the notifications
-        // are interactive
+        // Disable when in screen pinning, immersive, the bouncer is showing
         int disableFlags = SYSUI_STATE_SCREEN_PINNING
                 | SYSUI_STATE_NAV_BAR_HIDDEN
-                | SYSUI_STATE_BOUNCER_SHOWING
-                | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
-        return (sysuiStateFlags & disableFlags) != 0;
+                | SYSUI_STATE_BOUNCER_SHOWING;
+        if ((sysuiStateFlags & disableFlags) != 0) {
+            return true;
+        }
+
+        // Disable when notifications are showing (only if unlocked)
+        if ((sysuiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0
+                && (sysuiStateFlags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) == 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
