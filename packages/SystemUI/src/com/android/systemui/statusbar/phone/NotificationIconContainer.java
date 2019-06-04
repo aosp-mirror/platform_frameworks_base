@@ -315,7 +315,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
-        if (child instanceof StatusBarIconView) {
+        if (mAnimationsEnabled && child instanceof StatusBarIconView) {
             boolean isReplacingIcon = isReplacingIcon(child);
             final StatusBarIconView icon = (StatusBarIconView) child;
             if (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
