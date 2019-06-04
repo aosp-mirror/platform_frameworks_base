@@ -15,6 +15,8 @@
  */
 package com.android.internal.app;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -64,8 +66,21 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         String component = Settings.Secure.getString(getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
+
+        if (isGestureNavigateEnabled()) {
+            TextView promptPrologue = findViewById(R.id.accessibility_button_prompt_prologue);
+            promptPrologue.setText(isTouchExploreOn()
+                    ? R.string.accessibility_gesture_3finger_prompt_text
+                    : R.string.accessibility_gesture_prompt_text);
+        }
+
         if (TextUtils.isEmpty(component)) {
             TextView prompt = findViewById(R.id.accessibility_button_prompt);
+            if (isGestureNavigateEnabled()) {
+                prompt.setText(isTouchExploreOn()
+                        ? R.string.accessibility_gesture_3finger_instructional_text
+                        : R.string.accessibility_gesture_instructional_text);
+            }
             prompt.setVisibility(View.VISIBLE);
         }
 
@@ -89,6 +104,16 @@ public class AccessibilityButtonChooserActivity extends Activity {
         gridview.setOnItemClickListener((parent, view, position, id) -> {
             onTargetSelected(mTargets.get(position));
         });
+    }
+
+    private boolean isGestureNavigateEnabled() {
+        return NAV_BAR_MODE_GESTURAL == getResources().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode);
+    }
+
+    private boolean isTouchExploreOn() {
+        return ((AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE))
+                .isTouchExplorationEnabled();
     }
 
     private static List<AccessibilityButtonTarget> getServiceAccessibilityButtonTargets(
