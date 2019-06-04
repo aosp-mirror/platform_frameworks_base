@@ -52,6 +52,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -118,6 +119,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private PendingIntent mPendingIntent;
     protected NotificationMediaManager mMediaManager;
     private StatusBarStateController mStatusBarStateController;
+    private KeyguardBypassController mKeyguardBypassController;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -194,11 +196,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
      */
     public void initDependencies(
             NotificationMediaManager mediaManager,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            KeyguardBypassController keyguardBypassController) {
         mMediaManager = mediaManager;
         mMediaManager.addCallback(this);
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
+        mKeyguardBypassController = keyguardBypassController;
     }
 
     @AnyThread
@@ -223,7 +227,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected boolean needsMediaLocked() {
-        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && mDozing;
+        boolean isBypass = mKeyguardBypassController != null
+                && mKeyguardBypassController.getBypassEnabled();
+        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && (mDozing || isBypass);
     }
 
     protected void addMediaLocked(ListBuilder listBuilder) {
