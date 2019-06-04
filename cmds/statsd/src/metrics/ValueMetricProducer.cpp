@@ -109,7 +109,8 @@ ValueMetricProducer::ValueMetricProducer(
       mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
                                                       : StatsdStats::kPullMaxDelayNs),
       mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()),
-      mConditionTimer(mIsActive && mCondition == ConditionState::kTrue, timeBaseNs) {
+      // Condition timer will be set in prepareFirstBucketLocked.
+      mConditionTimer(false, timeBaseNs) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
@@ -175,6 +176,9 @@ void ValueMetricProducer::prepareFirstBucketLocked() {
     if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
         pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);
     }
+    // Now that activations are processed, start the condition timer if needed.
+    mConditionTimer.onConditionChanged(mIsActive && mCondition == ConditionState::kTrue,
+                                       mCurrentBucketStartTimeNs);
 }
 
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
