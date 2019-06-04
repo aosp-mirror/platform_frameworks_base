@@ -16,11 +16,16 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:height="24dp"
-    android:tint="?android:attr/colorControlNormal"
     android:viewportHeight="24"
     android:viewportWidth="24"
     android:width="24dp" >
-    <path
-        android:fillColor="@android:color/white"
-        android:pathData="M13.51,12l3.75-3.74c0.41-0.41,0.41-1.07,0-1.48l-4.47-4.47l-0.03-0.03c-0.42-0.39-1.08-0.37-1.48,0.05 C11.1,2.52,11,2.78,11,3.04v6.44L6.95,5.43c-0.41-0.41-1.06-0.41-1.47,0c-0.41,0.41-0.41,1.06,0,1.47l5.09,5.1l-5.09,5.09 c-0.41,0.41-0.41,1.06,0,1.47c0.41,0.41,1.06,0.41,1.47,0L11,14.51v6.45c0,0.57,0.47,1.04,1.04,1.04c0.26,0,0.52-0.1,0.71-0.28 l0.05-0.05l4.46-4.46c0.41-0.41,0.41-1.07,0-1.48L13.51,12z M12.99,5.37l2.15,2.15l-2.15,2.15V5.37z M12.99,18.62v-4.3l2.15,2.15 L12.99,18.62z" />
+    <group
+        android:translateX="2.000000"
+        android:translateY="4.000000" >
+        <path
+            android:fillColor="@android:color/white"
+            android:fillType="evenOdd"
+            android:pathData="M8,8 L16,8 L16,6 L8,6 L8,8 Z M14,12 L16,12 L16,10 L14,10 L14,12 Z M4,12 L12,12 L12,10 L4,10 L4,12 Z M4,8 L6,8 L6,6 L4,6 L4,8 Z M18,0 L2,0 C0.9,0 0,0.9 0,2 L0,14 C0,15.1 0.9,16 2,16 L18,16 C19.1,16 20,15.1 20,14 L20,2 C20,0.9 19.1,0 18,0 L18,0 Z"
+            android:strokeWidth="1" />
+    </group>
 </vector>
