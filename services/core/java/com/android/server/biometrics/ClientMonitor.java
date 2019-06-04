@@ -42,12 +42,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    // Temporary fix for b/123870990. No time in this release to
-                    // introduce a new vibration type, but we need to distinguish these vibrations
-                    // from other haptic feedback vibrations. Fortunately, Alarm vibrations have
-                    // exactly the same behavior as we need
-                    // TODO: refactor within the scope of b/132170758
-                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
 
     private final Context mContext;
