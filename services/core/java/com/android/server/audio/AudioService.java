@@ -162,6 +162,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The implementation of the volume manager service.
@@ -265,6 +266,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_SET_DEVICE_STREAM_VOLUME = 26;
     private static final int MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS = 27;
     private static final int MSG_HDMI_VOLUME_CHECK = 28;
+    private static final int MSG_PLAYBACK_CONFIG_CHANGE = 29;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -1867,9 +1869,15 @@ public class AudioService extends IAudioService.Stub
 
             // Check if volume update should be send to Hearing Aid
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                Log.i(TAG, "adjustSreamVolume postSetHearingAidVolumeIndex index=" + newIndex
-                        + " stream=" + streamType);
-                mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
+                // only modify the hearing aid attenuation when the stream to modify matches
+                // the one expected by the hearing aid
+                if (streamType == getHearingAidStreamType()) {
+                    if (DEBUG_VOL) {
+                        Log.d(TAG, "adjustSreamVolume postSetHearingAidVolumeIndex index="
+                                + newIndex + " stream=" + streamType);
+                    }
+                    mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
+                }
             }
 
             // Check if volume update should be sent to Hdmi system audio.
@@ -2161,9 +2169,51 @@ public class AudioService extends IAudioService.Stub
                 return AudioSystem.STREAM_VOICE_CALL;
             case AudioSystem.MODE_NORMAL:
             default:
+                // other conditions will influence the stream type choice, read on...
                 break;
         }
+        if (mVoiceActive.get()) {
+            return AudioSystem.STREAM_VOICE_CALL;
+        }
         return AudioSystem.STREAM_MUSIC;
+    }
+
+    private AtomicBoolean mVoiceActive = new AtomicBoolean(false);
+
+    private final IPlaybackConfigDispatcher mVoiceActivityMonitor =
+            new IPlaybackConfigDispatcher.Stub() {
+        @Override
+        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+                                                 boolean flush) {
+            sendMsg(mAudioHandler, MSG_PLAYBACK_CONFIG_CHANGE, SENDMSG_REPLACE,
+                    0 /*arg1 ignored*/, 0 /*arg2 ignored*/,
+                    configs /*obj*/, 0 /*delay*/);
+        }
+    };
+
+    private void onPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
+        boolean voiceActive = false;
+        for (AudioPlaybackConfiguration config : configs) {
+            final int usage = config.getAudioAttributes().getUsage();
+            if ((usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                    || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING)
+                    && config.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                voiceActive = true;
+                break;
+            }
+        }
+        if (mVoiceActive.getAndSet(voiceActive) != voiceActive) {
+            updateHearingAidVolumeOnVoiceActivityUpdate();
+        }
+    }
+
+    private void updateHearingAidVolumeOnVoiceActivityUpdate() {
+        final int streamType = getHearingAidStreamType();
+        final int index = getStreamVolume(streamType);
+        sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_HEARING_AID,
+                mVoiceActive.get(), streamType, index));
+        mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+
     }
 
     /**
@@ -2200,10 +2250,8 @@ public class AudioService extends IAudioService.Stub
         // handling of specific interfaces goes here:
         if ((device & mAbsVolumeMultiModeCaseDevices) == AudioSystem.DEVICE_OUT_HEARING_AID) {
             final int index = getStreamVolume(streamType);
-            mModeLogger.log(new AudioEventLogger.StringEvent("setMode to "
-                    + AudioSystem.modeToString(newMode)
-                    + " causes setting HEARING_AID volume to idx:" + index
-                    + " stream:" + AudioSystem.streamToString(streamType)));
+            sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_MODE_CHANGE_HEARING_AID,
+                    newMode, streamType, index));
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
         }
     }
@@ -2269,7 +2317,8 @@ public class AudioService extends IAudioService.Stub
                 mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index / 10);
             }
 
-            if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
+            if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0
+                    && streamType == getHearingAidStreamType()) {
                 Log.i(TAG, "setStreamVolume postSetHearingAidVolumeIndex index=" + index
                         + " stream=" + streamType);
                 mDeviceBroker.postSetHearingAidVolumeIndex(index, streamType);
@@ -4345,6 +4394,11 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
                     + " (dis)connection, got " + state);
         }
+        if (state == BluetoothProfile.STATE_CONNECTED) {
+            mPlaybackMonitor.registerPlaybackCallback(mVoiceActivityMonitor, true);
+        } else {
+            mPlaybackMonitor.unregisterPlaybackCallback(mVoiceActivityMonitor);
+        }
         mDeviceBroker.postBluetoothHearingAidDeviceConnectionState(
                 device, state, suppressNoisyIntent, musicDevice, "AudioService");
     }
@@ -4832,6 +4886,7 @@ public class AudioService extends IAudioService.Stub
             pw.println((mIndexMin + 5) / 10);
             pw.print("   Max: ");
             pw.println((mIndexMax + 5) / 10);
+            pw.print("   streamVolume:"); pw.println(getStreamVolume(mStreamType));
             pw.print("   Current: ");
             for (int i = 0; i < mIndexMap.size(); i++) {
                 if (i > 0) {
@@ -5408,6 +5463,11 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_HDMI_VOLUME_CHECK:
                     onCheckVolumeCecOnHdmiConnection(msg.arg1, (String) msg.obj);
+                    break;
+
+                case MSG_PLAYBACK_CONFIG_CHANGE:
+                    onPlaybackConfigChange((List<AudioPlaybackConfiguration>) msg.obj);
+                    break;
             }
         }
     }
