@@ -199,6 +199,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             return;
         }
 
+        if (mOverlay == null || mBottomOverlay == null) {
+            return;
+        }
+
         if (mAssistHintVisible != visible) {
             mAssistHintVisible = visible;
 
