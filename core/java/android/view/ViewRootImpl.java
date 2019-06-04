@@ -1546,6 +1546,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void setWindowStopped(boolean stopped) {
+        checkThread();
         if (mStopped != stopped) {
             mStopped = stopped;
             final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
@@ -1567,7 +1568,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mStopped) {
-                if (mSurfaceHolder != null) {
+                if (mSurfaceHolder != null && mSurface.isValid()) {
                     notifySurfaceDestroyed();
                 }
                 destroySurface();
@@ -2025,9 +2026,18 @@ public final class ViewRootImpl implements ViewParent,
                 mDisplay.getRealSize(size);
                 desiredWindowWidth = size.x;
                 desiredWindowHeight = size.y;
+            } else if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
+                    || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                // For wrap content, we have to remeasure later on anyways. Use size consistent with
+                // below so we get best use of the measure cache.
+                desiredWindowWidth = dipToPx(config.screenWidthDp);
+                desiredWindowHeight = dipToPx(config.screenHeightDp);
             } else {
-                desiredWindowWidth = mWinFrame.width();
-                desiredWindowHeight = mWinFrame.height();
+                // After addToDisplay, the frame contains the frameHint from window manager, which
+                // for most windows is going to be the same size as the result of relayoutWindow.
+                // Using this here allows us to avoid remeasuring after relayoutWindow
+                desiredWindowWidth = frame.width();
+                desiredWindowHeight = frame.height();
             }
 
             // We used to use the following condition to choose 32 bits drawing caches:
@@ -2233,6 +2243,8 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean isViewVisible = viewVisibility == View.VISIBLE;
         final boolean windowRelayoutWasForced = mForceNextWindowRelayout;
+        boolean surfaceSizeChanged = false;
+
         if (mFirst || windowShouldResize || insetsChanged ||
                 viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
             mForceNextWindowRelayout = false;
@@ -2311,7 +2323,7 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean cutoutChanged = !mPendingDisplayCutout.equals(
                         mAttachInfo.mDisplayCutout);
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
-                final boolean surfaceSizeChanged = (relayoutResult
+                surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
                 surfaceChanged |= surfaceSizeChanged;
                 final boolean alwaysConsumeSystemBarsChanged =
@@ -2594,7 +2606,7 @@ public final class ViewRootImpl implements ViewParent,
             maybeHandleWindowMove(frame);
         }
 
-        if (surfaceChanged) {
+        if (surfaceSizeChanged) {
             updateBoundsSurface();
         }
 
