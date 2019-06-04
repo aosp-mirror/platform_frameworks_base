@@ -18186,10 +18186,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mConstants.mFlagActivityStartsLoggingEnabled;
         }
 
-        public boolean isPackageNameWhitelistedForBgActivityStarts(String packageName) {
-            return mConstants.mPackageNamesWhitelistedForBgActivityStarts.contains(packageName);
-        }
-
         public boolean isBackgroundActivityStartsEnabled() {
             return mConstants.mFlagBackgroundActivityStartsEnabled;
         }
