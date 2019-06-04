@@ -61,12 +61,14 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_A11Y_BUTTON_CLICKABLE = 1 << 4;
     // The navigation bar a11y button shortcut is available
     public static final int SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE = 1 << 5;
-    // The keyguard is showing
+    // The keyguard is showing and not occluded
     public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING = 1 << 6;
     // The recents feature is disabled (either by SUW/SysUI/device policy)
     public static final int SYSUI_STATE_OVERVIEW_DISABLED = 1 << 7;
     // The home feature is disabled (either by SUW/SysUI/device policy)
     public static final int SYSUI_STATE_HOME_DISABLED = 1 << 8;
+    // The keyguard is showing, but occluded
+    public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED = 1 << 9;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -76,6 +78,7 @@ public class QuickStepContract {
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
             SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE,
             SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+            SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
             SYSUI_STATE_OVERVIEW_DISABLED,
             SYSUI_STATE_HOME_DISABLED
     })
@@ -89,6 +92,8 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0 ? "navbar_hidden" : "");
         str.add((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0 ? "notif_visible" : "");
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0 ? "keygrd_visible" : "");
+        str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
+                ? "keygrd_occluded" : "");
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
