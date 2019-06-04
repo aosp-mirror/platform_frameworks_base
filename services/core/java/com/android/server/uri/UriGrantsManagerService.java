@@ -1362,21 +1362,20 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         @Override
-        public NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid, Intent intent,
-                String targetPkg, int targetUserId) {
-            synchronized (mLock) {
-                final int mode = (intent != null) ? intent.getFlags() : 0;
-                return UriGrantsManagerService.this.checkGrantUriPermissionFromIntent(
-                        callingUid, targetPkg, intent, mode, null, targetUserId);
-            }
-        }
-
-        @Override
         public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
                 int targetUserId) {
             synchronized (mLock) {
                 UriGrantsManagerService.this.grantUriPermissionFromIntent(
                         callingUid, targetPkg, intent, null, targetUserId);
+            }
+        }
+
+        @Override
+        public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
+                UriPermissionOwner owner, int targetUserId) {
+            synchronized (mLock) {
+                UriGrantsManagerService.this.grantUriPermissionFromIntent(
+                        callingUid, targetPkg, intent, owner, targetUserId);
             }
         }
 
