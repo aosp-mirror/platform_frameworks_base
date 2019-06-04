@@ -16,18 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.biometrics.BiometricSourceType;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Trace;
-import android.telephony.TelephonyManager;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -55,6 +51,7 @@ public class UnlockMethodCache {
     private boolean mTrustManaged;
     private boolean mTrusted;
     private boolean mDebugUnlocked = false;
+    private boolean mIsUnlockingWithFacePossible;
 
     private UnlockMethodCache(Context ctx) {
         mLockPatternUtils = new LockPatternUtils(ctx);
@@ -110,6 +107,10 @@ public class UnlockMethodCache {
         mListeners.remove(listener);
     }
 
+    public boolean isUnlockingWithFacePossible() {
+        return mIsUnlockingWithFacePossible;
+    }
+
     private void update(boolean updateAlways) {
         Trace.beginSection("UnlockMethodCache#update");
         int user = KeyguardUpdateMonitor.getCurrentUser();
@@ -118,13 +119,15 @@ public class UnlockMethodCache {
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
+        boolean hasEnrolledFaces = mKeyguardUpdateMonitor.isUnlockWithFacePossible(user);
         boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer ||
-                trustManaged != mTrustManaged;
+                trustManaged != mTrustManaged || mIsUnlockingWithFacePossible != hasEnrolledFaces;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanSkipBouncer = canSkipBouncer;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
+            mIsUnlockingWithFacePossible = hasEnrolledFaces;
             notifyListeners();
         }
         Trace.endSection();
