@@ -127,6 +127,26 @@ public final class SystemUiDeviceConfigFlags {
             "assist_handles_show_and_go_duration_ms";
 
     /**
+     * (long) How long, in milliseconds, to wait before showing the Assist Handles temporarily when
+     * performing a short delayed show.
+     */
+    public static final String ASSIST_HANDLES_SHOW_AND_GO_DELAYED_SHORT_DELAY_MS =
+            "assist_handles_show_and_go_delayed_short_delay_ms";
+
+    /**
+     * (long) How long, in milliseconds, to wait before showing the Assist Handles temporarily when
+     * performing a long delayed show.
+     */
+    public static final String ASSIST_HANDLES_SHOW_AND_GO_DELAYED_LONG_DELAY_MS =
+            "assist_handles_show_and_go_delayed_long_delay_ms";
+
+    /**
+     * (long) How long, in milliseconds, to wait before resetting delayed show delay times.
+     */
+    public static final String ASSIST_HANDLES_SHOW_AND_GO_DELAY_RESET_TIMEOUT_MS =
+            "assist_handles_show_and_go_delay_reset_timeout_ms";
+
+    /**
      * (long) How long, in milliseconds, to wait before displaying Assist Handles temporarily after
      * hiding them.
      */
@@ -151,6 +171,24 @@ public final class SystemUiDeviceConfigFlags {
      * taught.
      */
     public static final String ASSIST_HANDLES_LEARN_COUNT = "assist_handles_learn_count";
+
+    /**
+     * (bool) Whether to suppress handles on lockscreen."
+     */
+    public static final String ASSIST_HANDLES_SUPPRESS_ON_LOCKSCREEN =
+            "assist_handles_suppress_on_lockscreen";
+
+    /**
+     * (bool) Whether to suppress handles on launcher."
+     */
+    public static final String ASSIST_HANDLES_SUPPRESS_ON_LAUNCHER =
+            "assist_handles_suppress_on_launcher";
+
+    /**
+     * (bool) Whether to suppress handles on apps."
+     */
+    public static final String ASSIST_HANDLES_SUPPRESS_ON_APPS =
+            "assist_handles_suppress_on_apps";
 
     private SystemUiDeviceConfigFlags() { }
 }
