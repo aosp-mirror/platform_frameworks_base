@@ -45,7 +45,8 @@ public class TestableDeviceConfigTest {
     private static final long WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS = 2000; // 2 sec
 
     @Rule
-    public TestableDeviceConfig mTestableDeviceConfig = new TestableDeviceConfig();
+    public TestableDeviceConfig.TestableDeviceConfigRule
+            mTestableDeviceConfig = new TestableDeviceConfig.TestableDeviceConfigRule();
 
     @Test
     public void getProperty_empty() {
