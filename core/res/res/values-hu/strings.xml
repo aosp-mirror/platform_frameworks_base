@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-hívás"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-hívás"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN-hívás"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1666,8 +1668,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"A Kisegítő lehetőségek gyorsparancsa bekapcsolta a következő szolgáltatást: <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"A Kisegítő lehetőségek gyorsparancsa kikapcsolta a következő szolgáltatást: <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"A(z) <xliff:g id="SERVICE_NAME">%1$s</xliff:g> használatához tartsa lenyomva három másodpercig a két hangerőgombot"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Válassza ki a Kisegítő lehetőségek gombra koppintáskor használni kívánt funkciót:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"A funkciók módosításához tartsa lenyomva a Kisegítő lehetőségek gombot."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Válassza ki a kisegítő lehetőségek gombra koppintáskor használni kívánt szolgáltatást:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Válassza ki a kisegítő kézmozdulattal használni kívánt szolgáltatást (csúsztassa felfelé két ujját a képernyő aljáról):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Válassza ki a kisegítő kézmozdulattal használni kívánt szolgáltatást (csúsztassa felfelé három ujját a képernyő aljáról):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"A szolgáltatások közötti váltáshoz tartsa lenyomva a kisegítő lehetőségek gombot."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"A szolgáltatások közötti váltáshoz csúsztassa felfelé két ujját, és ne engedje el a képernyőt."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"A szolgáltatások közötti váltáshoz csúsztassa felfelé három ujját, és ne engedje el a képernyőt."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Nagyítás"</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Átváltás erre: <xliff:g id="NAME">%1$s</xliff:g>..."</string>

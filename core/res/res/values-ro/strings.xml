@@ -132,6 +132,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Apelare prin Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Apelare prin Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Apel WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Apel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1690,8 +1691,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Comanda rapidă de accesibilitate a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Comanda rapidă de accesibilitate a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Apăsați ambele butoane de volum timp de trei secunde pentru a folosi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Alegeți o funcție pe care să o folosiți când atingeți butonul Accesibilitate:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pentru a schimba funcțiile, atingeți lung butonul Accesibilitate."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Alegeți un serviciu pe care să îl folosiți când atingeți butonul de accesibilitate:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu două degete din partea de jos a ecranului):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu trei degete din partea de jos a ecranului):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pentru a comuta între servicii, atingeți lung butonul de accesibilitate."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pentru a comuta între servicii, glisați în sus cu două degete și țineți lung."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pentru a comuta între servicii, glisați în sus cu trei degete și țineți lung."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Mărire"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>

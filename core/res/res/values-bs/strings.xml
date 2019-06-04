@@ -132,6 +132,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Pozivanje putem WiFi-ja"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Pozivanje putem WiFi-ja"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN poziv"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN poziv"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WiFi"</string>
@@ -1692,8 +1693,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečica za pristupačnost je uključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečica za pristupačnost je isključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pritisnite obje tipke za podešavanje jačine zvuka i držite ih pritisnutim tri sekunde da koristite uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Da promijenite funkcije, dodirnite i držite dugme Pristupačnost."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Odaberite uslugu koja će se koristiti kada dodirnete dugme za pristupačnost:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Odaberite uslugu koja će se koristiti kada izvedete pokret za pristupačnost (s dva prsta prevucite prema gore s dna ekrana):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Odaberite uslugu koja će se koristiti kada izvedete pokret za pristupačnost (s tri prsta prevucite prema gore s dna ekrana):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Za prebacivanje između usluga dodirnite i zadržite dugme za pristupačnost."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Za prebacivanje između usluga s dva prsta prevucite prema gore i zadržite."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Za prebacivanje između usluga s tri prsta prevucite prema gore i zadržite."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Uvećanje"</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prebacivanje na korisnika <xliff:g id="NAME">%1$s</xliff:g>..."</string>

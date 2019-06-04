@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Повикување преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Повик преку WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Повик преку WLAN на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1669,8 +1670,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Кратенката за пристапност ја вклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Кратенката за пристапност ја исклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Притиснете ги и задржете ги двете копчиња за јачина на звукот во траење од три секунди за да користите <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Изберете функција за користење кога ќе го допрете копчето за „Пристапност“."</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"За променување функции, допрете го и задржете го копчето за „Пристапност“."</string>
+    <!-- no translation found for accessibility_button_prompt_text (1176658502969738564) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (8259145549733019401) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1041435574275047665) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (7003212763213614833) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (5261788874937410950) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (4969448938984394550) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Зголемување"</string>
     <string name="user_switched" msgid="3768006783166984410">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>

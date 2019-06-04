@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Κλήση Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Κλήση Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Κλήση μέσω WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Κλήση μέσω WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1666,8 +1667,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Η συντόμευση προσβασιμότητας ενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Η συντόμευση προσβασιμότητας απενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Πατήστε παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα, ώστε να χρησιμοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται κατά το πάτημα του κουμπιού \"Προσβασιμότητα\"."</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Για να αλλάξετε λειτουργίες, αγγίξτε παρατεταμένα το κουμπί \"Προσβασιμότητα\"."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται κατά το πάτημα του κουμπιού προσβασιμότητας:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Για εναλλαγή μεταξύ υπηρεσιών, αγγίξτε παρατεταμένα το κουμπί προσβασιμότητας."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με τρία δάχτυλα προς τα επάνω."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Μεγιστοποίηση"</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
