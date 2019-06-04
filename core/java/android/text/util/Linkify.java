@@ -67,6 +67,14 @@ import java.util.regex.Pattern;
  *  create <code>http://example.com</code> when the clickable URL link is
  *  created.
  *
+ *  <p class="note"><b>Note:</b> When using {@link #MAP_ADDRESSES} or {@link #ALL}
+ *  to match street addresses on API level {@link android.os.Build.VERSION_CODES#O_MR1}
+ *  and earlier, methods in this class may throw
+ *  {@link android.util.AndroidRuntimeException} or other exceptions if the
+ *  device's WebView implementation is currently being updated, because
+ *  {@link android.webkit.WebView#findAddress} is required to match street
+ *  addresses.
+ *
  * @see MatchFilter
  * @see TransformFilter
  */
@@ -95,10 +103,11 @@ public class Linkify {
 
     /**
      *  Bit field indicating that street addresses should be matched in methods that
-     *  take an options mask. Note that this uses the
-     *  {@link android.webkit.WebView#findAddress(String) findAddress()} method in
-     *  {@link android.webkit.WebView} for finding addresses, which has various
-     *  limitations and has been deprecated.
+     *  take an options mask. Note that this should be avoided, as it uses the
+     *  {@link android.webkit.WebView#findAddress(String)} method, which has various
+     *  limitations and has been deprecated: see the documentation for
+     *  {@link android.webkit.WebView#findAddress(String)} for more information.
+     *
      *  @deprecated use {@link android.view.textclassifier.TextClassifier#generateLinks(
      *  TextLinks.Request)} instead and avoid it even when targeting API levels where no alternative
      *  is available.
