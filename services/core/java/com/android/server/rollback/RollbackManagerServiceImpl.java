@@ -1079,7 +1079,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     if (info.getPackageName().equals(packageName)) {
                         mAppDataRollbackHelper.snapshotAppData(data.info.getRollbackId(), info);
                         saveRollbackData(data);
-                        return;
+                        break;
                     }
                 }
             }
@@ -1091,7 +1091,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     mAppDataRollbackHelper.snapshotAppData(rollback.data.info.getRollbackId(),
                             info);
                     saveRollbackData(rollback.data);
-                    return;
                 }
             }
         }
