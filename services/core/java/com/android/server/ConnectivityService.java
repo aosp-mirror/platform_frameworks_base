@@ -3597,21 +3597,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void showNetworkNotification(NetworkAgentInfo nai, NotificationType type) {
         final String action;
+        final boolean highPriority;
         switch (type) {
             case LOGGED_IN:
                 action = Settings.ACTION_WIFI_SETTINGS;
                 mHandler.removeMessages(EVENT_TIMEOUT_NOTIFICATION);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_TIMEOUT_NOTIFICATION,
                         nai.network.netId, 0), TIMEOUT_NOTIFICATION_DELAY_MS);
+                // High priority because it is a direct result of the user logging in to a portal.
+                highPriority = true;
                 break;
             case NO_INTERNET:
                 action = ConnectivityManager.ACTION_PROMPT_UNVALIDATED;
+                // High priority because it is only displayed for explicitly selected networks.
+                highPriority = true;
                 break;
             case LOST_INTERNET:
                 action = ConnectivityManager.ACTION_PROMPT_LOST_VALIDATION;
+                // High priority because it could help the user avoid unexpected data usage.
+                highPriority = true;
                 break;
             case PARTIAL_CONNECTIVITY:
                 action = ConnectivityManager.ACTION_PROMPT_PARTIAL_CONNECTIVITY;
+                // Don't bother the user with a high-priority notification if the network was not
+                // explicitly selected by the user.
+                highPriority = nai.networkMisc.explicitlySelected;
                 break;
             default:
                 Slog.wtf(TAG, "Unknown notification type " + type);
@@ -3628,7 +3638,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
-        mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, true);
+
+        mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, highPriority);
     }
 
     private boolean shouldPromptUnvalidated(NetworkAgentInfo nai) {
