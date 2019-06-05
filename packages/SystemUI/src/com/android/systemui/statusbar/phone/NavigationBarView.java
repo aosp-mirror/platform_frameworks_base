@@ -238,7 +238,19 @@ public class NavigationBarView extends FrameLayout implements
             info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
             return;
         }
+
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        ButtonDispatcher imeSwitchButton = getImeSwitchButton();
+        if (imeSwitchButton.getVisibility() == VISIBLE) {
+            // If the IME is not up, but the ime switch button is visible, then make sure that
+            // button is touchable
+            int[] loc = new int[2];
+            View buttonView = imeSwitchButton.getCurrentView();
+            buttonView.getLocationInWindow(loc);
+            info.touchableRegion.set(loc[0], loc[1], loc[0] + buttonView.getWidth(),
+                    loc[1] + buttonView.getHeight());
+            return;
+        }
         info.touchableRegion.setEmpty();
     };
 
