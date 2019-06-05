@@ -190,9 +190,7 @@ public class AttentionManagerService extends SystemService {
 
             final UserState userState = getOrCreateCurrentUserStateLocked();
             // lazily start the service, which should be very lightweight to start
-            if (!userState.bindLocked()) {
-                return false;
-            }
+            userState.bindLocked();
 
             // throttle frequent requests
             final AttentionCheckCache cache = userState.mAttentionCheckCache;
@@ -310,7 +308,7 @@ public class AttentionManagerService extends SystemService {
     protected UserState getOrCreateUserStateLocked(int userId) {
         UserState result = mUserStates.get(userId);
         if (result == null) {
-            result = new UserState(userId, mContext, mLock, mComponentName);
+            result = new UserState(userId, mContext, mLock, mAttentionHandler, mComponentName);
             mUserStates.put(userId, result);
         }
         return result;
@@ -456,30 +454,32 @@ public class AttentionManagerService extends SystemService {
 
     @VisibleForTesting
     protected static class UserState {
-        final ComponentName mComponentName;
-        final AttentionServiceConnection mConnection = new AttentionServiceConnection();
+        private final ComponentName mComponentName;
+        private final AttentionServiceConnection mConnection = new AttentionServiceConnection();
 
         @GuardedBy("mLock")
         IAttentionService mService;
         @GuardedBy("mLock")
-        boolean mBinding;
-        @GuardedBy("mLock")
         AttentionCheck mCurrentAttentionCheck;
         @GuardedBy("mLock")
         AttentionCheckCache mAttentionCheckCache;
+        @GuardedBy("mLock")
+        private boolean mBinding;
 
         @UserIdInt
-        final int mUserId;
-        final Context mContext;
-        final Object mLock;
+        private final int mUserId;
+        private final Context mContext;
+        private final Object mLock;
+        private final Handler mAttentionHandler;
 
-        UserState(int userId, Context context, Object lock, ComponentName componentName) {
+        UserState(int userId, Context context, Object lock, Handler handler,
+                ComponentName componentName) {
             mUserId = userId;
             mContext = Preconditions.checkNotNull(context);
             mLock = Preconditions.checkNotNull(lock);
             mComponentName = Preconditions.checkNotNull(componentName);
+            mAttentionHandler = handler;
         }
-
 
         @GuardedBy("mLock")
         private void handlePendingCallbackLocked() {
@@ -499,26 +499,25 @@ public class AttentionManagerService extends SystemService {
 
         /** Binds to the system's AttentionService which provides an actual implementation. */
         @GuardedBy("mLock")
-        private boolean bindLocked() {
+        private void bindLocked() {
             // No need to bind if service is binding or has already been bound.
             if (mBinding || mService != null) {
-                return true;
+                return;
             }
 
-            final boolean willBind;
-            final long identity = Binder.clearCallingIdentity();
-
-            try {
-                final Intent mServiceIntent = new Intent(
+            mBinding = true;
+            // mContext.bindServiceAsUser() calls into ActivityManagerService which it may already
+            // hold the lock and had called into PowerManagerService, which holds a lock.
+            // That would create a deadlock. To solve that, putting it on a handler.
+            mAttentionHandler.post(() -> {
+                final Intent serviceIntent = new Intent(
                         AttentionService.SERVICE_INTERFACE).setComponent(
                         mComponentName);
-                willBind = mContext.bindServiceAsUser(mServiceIntent, mConnection,
+                // Note: no reason to clear the calling identity, we won't have one in a handler.
+                mContext.bindServiceAsUser(serviceIntent, mConnection,
                         Context.BIND_AUTO_CREATE, UserHandle.CURRENT);
-                mBinding = willBind;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-            return willBind;
+
+            });
         }
 
         private void dump(IndentingPrintWriter pw) {
@@ -587,6 +586,7 @@ public class AttentionManagerService extends SystemService {
             super(Looper.myLooper());
         }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 // Do not occupy resources when not in use - unbind proactively.
@@ -651,7 +651,12 @@ public class AttentionManagerService extends SystemService {
                 return;
             }
 
-            mContext.unbindService(userState.mConnection);
+            mAttentionHandler.post(() -> mContext.unbindService(userState.mConnection));
+            // Note: this will set mBinding to false even though it could still be trying to bind
+            // (i.e. the runnable was posted in bindLocked but then cancelAndUnbindLocked was
+            // called before it's run yet). This is a safe state at the moment,
+            // since it will eventually, but feels like a source for confusion down the road and
+            // may cause some expensive and unnecessary work to be done.
             userState.mConnection.cleanupService();
             mUserStates.remove(userState.mUserId);
         }
