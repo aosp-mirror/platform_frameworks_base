@@ -539,6 +539,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // If the app was already visible, don't reset the waitingToShow state.
                 if (isHidden()) {
                     waitingToShow = true;
+
+                    // Let's reset the draw state in order to prevent the starting window to be
+                    // immediately dismissed when the app still has the surface.
+                    forAllWindows(w -> {
+                            if (w.mAttrs.type != TYPE_APPLICATION_STARTING) {
+                                w.mWinAnimator.resetDrawState();
+                            }
+                        },  true /* traverseTopToBottom */);
                 }
             }
 
