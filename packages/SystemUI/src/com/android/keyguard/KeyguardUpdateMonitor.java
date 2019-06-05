@@ -933,6 +933,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 == LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
     }
 
+    public boolean userNeedsStrongAuth() {
+        return mStrongAuthTracker.getStrongAuthForUser(getCurrentUser())
+                != LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+    }
+
     public boolean needsSlowUnlockTransition() {
         return mNeedsSlowUnlockTransition;
     }
