@@ -199,6 +199,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Akku bei <xliff:g id="PERCENTAGE">%1$s</xliff:g> %, noch etwa <xliff:g id="TIME">%2$s</xliff:g>, basierend auf deiner Nutzung"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />
@@ -936,8 +937,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Nach unten rechts verschieben"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Schließen"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Systemsteuerung wurde aktualisiert. Änderungen kannst du in den \"Einstellungen\" vornehmen."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Gehe zu den Einstellungen, um die Systemsteuerung zu aktualisieren"</string>
 </resources>
