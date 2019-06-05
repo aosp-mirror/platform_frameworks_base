@@ -188,6 +188,7 @@ public class BatteryStatsImpl extends BatteryStats {
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
     private static final double MILLISECONDS_IN_HOUR = 3600 * 1000;
+    private static final long MILLISECONDS_IN_YEAR = 365 * 24 * 3600 * 1000L;
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
@@ -3955,25 +3956,11 @@ public class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
     }
 
-    boolean ensureStartClockTime(final long currentTime) {
-        final long ABOUT_ONE_YEAR = 365*24*60*60*1000L;
-        if ((currentTime > ABOUT_ONE_YEAR && mStartClockTime < (currentTime-ABOUT_ONE_YEAR))
-                || (mStartClockTime > currentTime)) {
-            // If the start clock time has changed by more than a year, then presumably
-            // the previous time was completely bogus.  So we are going to figure out a
-            // new time based on how much time has elapsed since we started counting.
-            mStartClockTime = currentTime - (mClocks.elapsedRealtime()-(mRealtimeStart/1000));
-            return true;
-        }
-        return false;
-    }
-
     public void noteCurrentTimeChangedLocked() {
         final long currentTime = System.currentTimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         recordCurrentTimeChangeLocked(currentTime, elapsedRealtime, uptime);
-        ensureStartClockTime(currentTime);
     }
 
     public void noteProcessStartLocked(String name, int uid) {
@@ -6452,9 +6439,15 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public long getStartClockTime() {
         final long currentTime = System.currentTimeMillis();
-        if (ensureStartClockTime(currentTime)) {
+        if ((currentTime > MILLISECONDS_IN_YEAR
+                && mStartClockTime < (currentTime - MILLISECONDS_IN_YEAR))
+                || (mStartClockTime > currentTime)) {
+            // If the start clock time has changed by more than a year, then presumably
+            // the previous time was completely bogus.  So we are going to figure out a
+            // new time based on how much time has elapsed since we started counting.
             recordCurrentTimeChangeLocked(currentTime, mClocks.elapsedRealtime(),
                     mClocks.uptimeMillis());
+            return currentTime - (mClocks.elapsedRealtime() - (mRealtimeStart / 1000));
         }
         return mStartClockTime;
     }
@@ -14022,7 +14015,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         // Pull the clock time.  This may update the time and make a new history entry
         // if we had originally pulled a time before the RTC was set.
-        long startClockTime = getStartClockTime();
+        getStartClockTime();
 
         final long NOW_SYS = mClocks.uptimeMillis() * 1000;
         final long NOWREAL_SYS = mClocks.elapsedRealtime() * 1000;
@@ -14046,7 +14039,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mStartCount);
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(startClockTime);
+        out.writeLong(mStartClockTime);
         out.writeString(mStartPlatformVersion);
         out.writeString(mEndPlatformVersion);
         mOnBatteryTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
@@ -14759,7 +14752,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         // Pull the clock time.  This may update the time and make a new history entry
         // if we had originally pulled a time before the RTC was set.
-        long startClockTime = getStartClockTime();
+        getStartClockTime();
 
         final long uSecUptime = mClocks.uptimeMillis() * 1000;
         final long uSecRealtime = mClocks.elapsedRealtime() * 1000;
@@ -14772,7 +14765,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryStatsHistory.writeToParcel(out);
 
         out.writeInt(mStartCount);
-        out.writeLong(startClockTime);
+        out.writeLong(mStartClockTime);
         out.writeString(mStartPlatformVersion);
         out.writeString(mEndPlatformVersion);
         out.writeLong(mUptime);
