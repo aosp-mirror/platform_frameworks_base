@@ -2283,7 +2283,7 @@
          effectively and terminate the dream.  Use -1 to disable this safety feature.  -->
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
-    <integer name="config_attentionMaximumExtension">240000</integer> <!-- 4 minutes -->
+    <integer name="config_attentionMaximumExtension">330000</integer> <!-- 5 minutes and 30 sec.-->
     <!-- How long we should wait until we give up on receiving an attention API callback.  -->
     <integer name="config_attentionApiTimeout">2000</integer> <!-- 2 seconds -->
 

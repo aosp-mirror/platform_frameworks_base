@@ -11649,16 +11649,6 @@ public final class Settings {
                 = "activity_starts_logging_enabled";
 
         /**
-         * Feature flag to enable or disable the background activity starts.
-         * When disabled, apps aren't allowed to start activities unless they're in the foreground.
-         * Type: int (0 for false, 1 for true)
-         * Default: 1
-         * @hide
-         */
-        public static final String BACKGROUND_ACTIVITY_STARTS_ENABLED =
-                "background_activity_starts_enabled";
-
-        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
@@ -13549,6 +13539,16 @@ public final class Settings {
          */
         public static final String LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED =
                 "location_settings_link_to_permissions_enabled";
+
+        /**
+         * Flag to set the waiting time for removing invisible euicc profiles inside System >
+         * Settings.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS =
+                "euicc_removing_invisible_profiles_timeout_millis";
 
         /**
          * Flag to set the waiting time for euicc factory reset inside System > Settings

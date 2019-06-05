@@ -59,6 +59,8 @@
     <item>@drawable/ic_volume_bt_sco</item>
     <item>@drawable/ic_volume_media</item>
     <item>@drawable/ic_volume_media_mute</item>
+    <item>@drawable/ic_volume_odi_captions</item>
+    <item>@drawable/ic_volume_odi_captions_disabled</item>
     <item>@drawable/ic_volume_ringer</item>
     <item>@drawable/ic_volume_ringer_mute</item>
     <item>@drawable/ic_volume_ringer_vibrate</item>

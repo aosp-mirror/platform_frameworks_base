@@ -2548,9 +2548,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Reset lockout only if user has enrolled templates
             if (mInjector.hasEnrolledBiometrics()) {
                 BiometricManager bm = mContext.getSystemService(BiometricManager.class);
-                Slog.i(TAG, "Resetting lockout, length: "
-                        + authResult.gkResponse.getPayload().length);
-                bm.resetLockout(authResult.gkResponse.getPayload());
+                Slog.i(TAG, "Resetting lockout, length: " + response.getPayload().length);
+                bm.resetLockout(response.getPayload());
 
                 if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
                     mContext.getSystemService(FaceManager.class).revokeChallenge();

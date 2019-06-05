@@ -402,11 +402,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (mAllowBackgroundActivityStarts) {
             return true;
         }
-        // allow if any activity in the caller has either started or finished very recently
+        // allow if any activity in the caller has either started or finished very recently, and
+        // it must be started or finished after last stop app switches time.
         final long now = SystemClock.uptimeMillis();
         if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
                 || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
-            return true;
+            // if activity is started and finished before stop app switch time, we should not
+            // let app to be able to start background activity even it's in grace period.
+            if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
+                    || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
+                return true;
+            }
         }
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
@@ -623,7 +629,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final ActivityRecord r = activities.get(i);
             if (!r.finishing && r.isInStackLocked()) {
                 r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
-                        null, "finish-heavy", true);
+                        null, null, "finish-heavy", true);
             }
         }
     }
