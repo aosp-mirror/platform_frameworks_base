@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Wi-Fi-samtal via <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Wi-Fi-samtal med <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-samtal"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"WLAN-samtal via <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi via <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1666,8 +1667,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktiverades av Aktivera tillgänglighet snabbt"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> inaktiverades av Aktivera tillgänglighet snabbt"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Tryck och håll båda volymknapparna i tre sekunder för att använda <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Välj en funktion som ska användas när du trycker på tillgänglighetsknappen:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Tryck länge på tillgänglighetsknappen för att ändra funktioner."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Välj en tjänst som ska användas när du trycker på tillgänglighetsknappen:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Välj en tjänst som ska användas med tillgänglighetsrörelsen (svepa uppåt med två fingrar från skärmens nederkant):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Välj en tjänst som ska användas med tillgänglighetsrörelsen (svepa uppåt med tre fingrar från skärmens nederkant):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Byt mellan tjänster genom att trycka länge på tillgänglighetsknappen."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Byt mellan tjänster genom att svepa uppåt med två fingrar och hålla kvar dem."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Byt mellan tjänster genom att svepa uppåt med tre fingrar och hålla kvar dem."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Förstoring"</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Byter till <xliff:g id="NAME">%1$s</xliff:g> …"</string>

@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi қоңыраулары"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN қоңырауы"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN қоңырауы"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1667,8 +1669,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін пайдалану үшін дыбыс деңгейін реттейтін екі түймені де 3 секунд басып тұрыңыз"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын мүмкіндікті таңдаңыз:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Мүмкіндіктерді өзгерту үшін \"Арнайы мүмкіндіктер\" түймесін басып тұрыңыз."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын қызметті таңдаңыз:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (екі саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (үш саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Бір қызметтен екінші қызметке ауысу үшін арнайы мүмкіндіктер түймесін түртіп, оны ұстап тұрыңыз."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Бір қызметтен екінші қызметке ауысу үшін екі саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Бір қызметтен екінші қызметке ауысу үшін үш саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ұлғайту"</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>

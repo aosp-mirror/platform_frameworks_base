@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ukushaya kwe-Wi-Fi"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Ikholi ye-WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> ikholi ye-WLAN"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1666,8 +1668,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Isinqamuleli sokufinyelela sivule i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Isinqamuleli sokufinyelela sivale i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Cindezela uphinde ubambe bobabili okhiye bevolumu ngamasekhondi amathathu ukuze usebenzise i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Khetha isici ozosisebenzisa uma uthepha inkinobho yokufinyelela:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ukuze ushintshe izici, thinta uphinde ubambe inkinobho yokufinyelela."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Khetha isevisi ozoyisebenzisa uma uthepha inkinobho yokufinyeleleka:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Khetha isevisi ezosetshenziswa ngokuthinta kokufinyeleleka (swayiphela phezulu kusukela ngaphansi kwesikrini ngeminwe emibili):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Khetha isevisi ozoyisebenzisa ngokuthinta kokufinyeleleka (swayiphela phezulu kusukela ngaphansi kwesikrini ngeminwe emithathu):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Ukuze ushintshe phakathi kwamasevisi, thinta uphinde ubambe inkinobho yokufinyeleleka."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Ukuze ushintshe phakathi kwamasevisi, swayiphela phezulu ngeminwe emibili uphinde ubambe."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Ukuze ushintshe phakathi kwamasevisi, swayiphela phezulu ngeminwe emithathu uphinde ubambe."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ukukhuliswa"</string>
     <string name="user_switched" msgid="3768006783166984410">"Umsebenzisi wamanje <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Ishintshela ku-<xliff:g id="NAME">%1$s</xliff:g>…"</string>

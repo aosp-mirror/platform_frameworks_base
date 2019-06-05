@@ -133,6 +133,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g>: volání přes Wi-Fi"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Volání přes Wi-Fi – <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Volání přes WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g>: volání přes WLAN"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>: Wi-Fi"</string>
@@ -1714,8 +1715,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Zkratka přístupnosti zapnula službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Zkratka přístupnosti vypnula službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Chcete-li používat službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tři sekundy podržte stisknutá obě tlačítka hlasitosti"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Určete, jakou funkci aktivujete klepnutím na tlačítko Přístupnost:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Chcete-li vybrat jinou funkci, podržte tlačítko Přístupnost."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Určete, jakou službu aktivujete klepnutím na tlačítko Přístupnost:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Určete, jakou službu aktivujete pomocí gesta přístupnosti (přejetí dvěma prsty ze spodní části obrazovky nahoru):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Určete, jakou službu aktivujete pomocí gesta přístupnosti (přejetí třemi prsty ze spodní části obrazovky nahoru):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Chcete-li přepnout mezi službami, podržte tlačítko Přístupnost."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Chcete-li přepnout mezi službami, přejeďte nahoru dvěma prsty a podržte je."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Chcete-li přepnout mezi službami, přejeďte nahoru třemi prsty a podržte je."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zvětšení"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Přepínání na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>

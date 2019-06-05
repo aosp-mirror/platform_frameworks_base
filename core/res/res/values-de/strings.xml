@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> WLAN-Telefonie"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-Anruf"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN-Anruf"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WLAN"</string>
@@ -1666,8 +1668,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> wurde durch die Bedienungshilfenverknüpfung aktiviert"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> wurde durch die Bedienungshilfenverknüpfung deaktiviert"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Halten Sie beide Lautstärketasten drei Sekunden lang gedrückt, um <xliff:g id="SERVICE_NAME">%1$s</xliff:g> zu verwenden"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Wähle eine Funktion aus, die verwendet wird, wenn du auf die Schaltfläche für die Bedienungshilfen tippst:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Um die Funktionen zu ändern, halte die Schaltfläche für die Bedienungshilfen gedrückt."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Wähle einen Dienst aus, der verwendet wird, wenn du auf die Schaltfläche für die Bedienungshilfen tippst:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wähle einen Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet wird (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wähle einen Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet wird (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Wenn du zwischen den Diensten wechseln möchtest, halte die Schaltfläche für die Bedienungshilfen gedrückt."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Wenn du zwischen den Diensten wechseln möchtest, wische mit zwei Fingern nach oben und halte sie gedrückt."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Wenn du zwischen den Diensten wechseln möchtest, wische mit drei Fingern nach oben und halte sie gedrückt."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Vergrößerung"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Wechseln zu <xliff:g id="NAME">%1$s</xliff:g>…"</string>

@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> वाय-फाय कॉलिंग"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN कॉल"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN कॉल"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> वाय-फाय"</string>
@@ -1667,8 +1669,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> चालू केली"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केली"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"तुम्ही प्रवेशयोग्यता बटण दाबल्यावर वापरण्यासाठी वैशिष्ट्य निवडा:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"वैशिष्ट्ये बदलण्यासाठी, प्रवेशयोग्यता बटणाला स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"तुम्ही अ‍ॅक्सेसिबिलिटी बटण दाबल्यावर वापरण्यासाठी वैशिष्ट्य निवडा:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने दोन बोटांनी स्वाइप करा):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने तीन बोटांनी स्वाइप करा):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"सेवांदरम्यान स्विच करण्यासाठी, अ‍ॅक्सेसिबिलिटी बटणाला स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"सेवांदरम्यान स्विच करण्यासाठी, दोन बोटांनी वरच्या दिशेला स्वाइप करा आणि धरून ठेवा."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"सेवांदरम्यान स्विच करण्यासाठी, तीन बोटांनी वरच्या दिशेला स्वाइप करा आणि धरून ठेवा."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"मोठे करणे"</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>

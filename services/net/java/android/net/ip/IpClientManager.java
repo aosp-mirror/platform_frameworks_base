@@ -21,6 +21,7 @@ import android.net.NattKeepalivePacketData;
 import android.net.ProxyInfo;
 import android.net.TcpKeepalivePacketData;
 import android.net.shared.ProvisioningConfiguration;
+import android.net.util.KeepalivePacketDataUtil;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -229,7 +230,8 @@ public class IpClientManager {
     public boolean addKeepalivePacketFilter(int slot, NattKeepalivePacketData pkt) {
         final long token = Binder.clearCallingIdentity();
         try {
-            mIpClient.addNattKeepalivePacketFilter(slot, pkt.toStableParcelable());
+            mIpClient.addNattKeepalivePacketFilter(
+                    slot, KeepalivePacketDataUtil.toStableParcelable(pkt));
             return true;
         } catch (RemoteException e) {
             log("Error adding Keepalive Packet Filter ", e);

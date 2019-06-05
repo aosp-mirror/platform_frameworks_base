@@ -4308,13 +4308,6 @@
     <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
-    <!-- Activity starter -->
-    <!-- Toast message for blocking background activity starts feature running in permissive mode -->
-    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See g.co/dev/bgblock.</string>
-
-    <!-- Toast message for blocking background activity starts feature running in enforcing mode -->
-    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See g.co/dev/bgblock. </string>
-
     <!-- Keyguard strings -->
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
@@ -4498,10 +4491,18 @@
         <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. -->
-    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the Accessibility button:</string>
+    <string name="accessibility_button_prompt_text">Choose a service to use when you tap the accessibility button:</string>
+    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
+    <string name="accessibility_gesture_prompt_text">Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. -->
-    <string name="accessibility_button_instructional_text">To change features, touch &amp; hold the Accessibility button.</string>
+    <string name="accessibility_button_instructional_text">To switch between services, touch &amp; hold the accessibility button.</string>
+    <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_gesture_instructional_text">To switch between services, swipe up with two fingers and hold.</string>
+    <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_gesture_3finger_instructional_text">To switch between services, swipe up with three fingers and hold.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
