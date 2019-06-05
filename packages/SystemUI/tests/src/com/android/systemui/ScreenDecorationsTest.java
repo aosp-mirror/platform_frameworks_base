@@ -45,6 +45,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 
 import androidx.test.filters.SmallTest;
 
@@ -52,6 +53,7 @@ import com.android.systemui.R.dimen;
 import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.tuner.TunablePadding;
@@ -78,6 +80,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private TunerService mTunerService;
     private StatusBarWindowView mView;
     private TunablePaddingService mTunablePaddingService;
+    private NavigationModeController mNavigationModeController;
 
     @Before
     public void setup() {
@@ -87,6 +90,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mTunablePaddingService = mDependency.injectMockDependency(TunablePaddingService.class);
         mTunerService = mDependency.injectMockDependency(TunerService.class);
         mFragmentService = mDependency.injectMockDependency(FragmentService.class);
+        mNavigationModeController = mDependency.injectMockDependency(
+                NavigationModeController.class);
 
         mStatusBar = mock(StatusBar.class);
         mWindowManager = mock(WindowManager.class);
@@ -202,6 +207,54 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
         mScreenDecorations.onConfigurationChanged(new Configuration());
+
+        // Add 2 windows for rounded corners (top and bottom).
+        verify(mWindowManager, times(2)).addView(any(), any());
+    }
+
+    @Test
+    public void testAssistHandles() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+        when(mNavigationModeController.addListener(any())).thenReturn(
+                WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL);
+
+        mScreenDecorations.start();
+
+        // Add 2 windows for rounded corners (top and bottom).
+        verify(mWindowManager, times(2)).addView(any(), any());
+    }
+
+    @Test
+    public void testDelayedAssistHandles() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+        when(mNavigationModeController.addListener(any())).thenReturn(
+                WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON);
+
+        mScreenDecorations.start();
+
+        // No handles and no corners
+        verify(mWindowManager, never()).addView(any(), any());
+
+        mScreenDecorations.handleNavigationModeChange(
+                WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL);
 
         // Add 2 windows for rounded corners (top and bottom).
         verify(mWindowManager, times(2)).addView(any(), any());
