@@ -59,13 +59,15 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
 
     @Inject
     public SysuiColorExtractor(Context context, ConfigurationController configurationController) {
-        this(context, new Tonal(context), configurationController, true);
+        this(context, new Tonal(context), configurationController, true,
+                context.getSystemService(WallpaperManager.class));
     }
 
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type,
-            ConfigurationController configurationController, boolean registerVisibility) {
-        super(context, type, false /* immediately */);
+            ConfigurationController configurationController, boolean registerVisibility,
+            WallpaperManager wallpaperManager) {
+        super(context, type, false /* immediately */, wallpaperManager);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mWpHiddenColors = new GradientColors();
         configurationController.addCallback(this);
@@ -91,13 +93,10 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
             }
         }
 
-        WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
-        if (wallpaperManager != null) {
-            // Listen to all users instead of only the current one.
-            wallpaperManager.removeOnColorsChangedListener(this);
-            wallpaperManager.addOnColorsChangedListener(this, null /* handler */,
-                    UserHandle.USER_ALL);
-        }
+        // Listen to all users instead of only the current one.
+        wallpaperManager.removeOnColorsChangedListener(this);
+        wallpaperManager.addOnColorsChangedListener(this, null /* handler */,
+                UserHandle.USER_ALL);
     }
 
     private void updateDefaultGradients(WallpaperColors colors) {
