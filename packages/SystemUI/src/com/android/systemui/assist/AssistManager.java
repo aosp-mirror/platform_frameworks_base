@@ -258,7 +258,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         }
         int phoneState = mPhoneStateMonitor.getPhoneState();
         args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
-        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
+        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
         logStartAssist(invocationType, phoneState);
         startAssistInternal(args, assistComponent, isService);
     }
