@@ -149,6 +149,7 @@ public class FaceDialogView extends BiometricDialogView {
     private final Runnable mErrorToIdleAnimationRunnable = () -> {
         updateState(STATE_IDLE);
         mErrorText.setVisibility(View.INVISIBLE);
+        announceAccessibilityEvent();
     };
 
     public FaceDialogView(Context context,
@@ -188,6 +189,7 @@ public class FaceDialogView extends BiometricDialogView {
             mDialog.invalidateOutline();
 
             mSize = newSize;
+            announceAccessibilityEvent();
         } else if (mSize == SIZE_SMALL && newSize == SIZE_BIG) {
             mSize = SIZE_GROWING;
 
@@ -294,6 +296,7 @@ public class FaceDialogView extends BiometricDialogView {
             mErrorText.setVisibility(View.VISIBLE);
         } else {
             mErrorText.setVisibility(View.INVISIBLE);
+            announceAccessibilityEvent();
         }
     }
 
@@ -368,11 +371,13 @@ public class FaceDialogView extends BiometricDialogView {
                 mTryAgainButton.setVisibility(View.VISIBLE);
             } else {
                 mTryAgainButton.setVisibility(View.GONE);
+                announceAccessibilityEvent();
             }
         }
 
         if (show) {
             mPositiveButton.setVisibility(View.GONE);
+            announceAccessibilityEvent();
         }
     }
 
