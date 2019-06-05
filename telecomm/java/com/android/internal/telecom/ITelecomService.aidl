@@ -97,7 +97,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getSimCallManager
      */
-    PhoneAccountHandle getSimCallManager();
+    PhoneAccountHandle getSimCallManager(int subId);
 
     /**
      * @see TelecomServiceImpl#getSimCallManagerForUser
