@@ -1668,7 +1668,7 @@ public final class ProcessList {
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingRecord, seInfo, startTime);
         app.setUsingWrapper(invokeWith != null
-                || SystemProperties.get("wrap." + app.processName) != null);
+                || Zygote.getWrapProperty(app.processName) != null);
         mPendingStarts.put(startSeq, app);
 
         if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
