@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"បណ្តាញ​ក្រុមហ៊ុនសេវាទូរសព្ទ​កំពុងផ្លាស់ប្តូរ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"បើកព័ត៌មានលម្អិតអំពីថ្ម"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ថ្ម <xliff:g id="NUMBER">%d</xliff:g> ភាគរយ។"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"ថ្ម <xliff:g id="PERCENTAGE">%1$s</xliff:g> ភាគរយ អាចប្រើបាន​ប្រហែល <xliff:g id="TIME">%2$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"កំពុងសាកថ្ម <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ភាគរយ"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ការ​កំណត់​ប្រព័ន្ធ​។"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ការ​ជូន​ដំណឹង។"</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ផ្លាស់ទីទៅផ្នែកខាងក្រោមខាងឆ្វេង​"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ផ្លាស់ទីទៅផ្នែកខាងក្រោម​ខាងស្ដាំ"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ច្រានចោល"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"បានធ្វើ​បច្ចុប្បន្នភាព​ការរុករកក្នុង​ប្រព័ន្ធ។ ដើម្បីធ្វើការផ្លាស់ប្ដូរ សូមចូលទៅ​កាន់ការកំណត់។"</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"ចូល​ទៅកាន់​ការកំណត់ ដើម្បី​ធ្វើបច្ចុប្បន្នភាព​ការរុករក​ក្នុង​ប្រព័ន្ធ"</string>
 </resources>

@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"เปิดรายละเอียดแบตเตอรี่"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"แบตเตอรี่ <xliff:g id="PERCENTAGE">%1$s</xliff:g> เปอร์เซ็นต์ ใช้ได้อีกประมาณ <xliff:g id="TIME">%2$s</xliff:g> ทั้งนี้ขึ้นอยู่กับการใช้งานของคุณ"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"กำลังชาร์จแบตเตอรี่ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"การตั้งค่าระบบ"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"การแจ้งเตือน"</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ย้ายไปด้านซ้ายล่าง"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ย้ายไปด้านขาวล่าง"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ปิด"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"อัปเดตการไปยังส่วนต่างๆ ของระบบแล้ว หากต้องการเปลี่ยนแปลง ให้ไปที่การตั้งค่า"</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"ไปที่การตั้งค่าเพื่ออัปเดตการไปยังส่วนต่างๆ ของระบบ"</string>
 </resources>

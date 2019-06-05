@@ -197,6 +197,8 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"மொபைல் நிறுவன நெட்வொர்க்கை மாற்றும்"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"பேட்டரி விவரங்களைத் திறக்கும்"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"பேட்டரி சக்தி <xliff:g id="NUMBER">%d</xliff:g> சதவிகிதம் உள்ளது."</string>
+    <!-- no translation found for accessibility_battery_level_with_estimate (9033100930684311630) -->
+    <skip />
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"பேட்டரி சார்ஜ் செய்யப்படுகிறது, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> சதவீதம்."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"கணினி அமைப்பு."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"அறிவிப்புகள்."</string>
