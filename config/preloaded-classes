@@ -1105,7 +1105,6 @@ android.database.sqlite.SQLiteDatabase
 android.database.sqlite.SQLiteDatabaseConfiguration
 android.database.sqlite.SQLiteDatabaseCorruptException
 android.database.sqlite.SQLiteDatabaseLockedException
-android.database.sqlite.SQLiteDebug$Consts
 android.database.sqlite.SQLiteDebug$DbStats
 android.database.sqlite.SQLiteDebug$PagerStats
 android.database.sqlite.SQLiteDebug
