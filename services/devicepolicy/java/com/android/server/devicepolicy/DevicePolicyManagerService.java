@@ -3930,6 +3930,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isSeparateProfileChallengeAllowed(int userHandle) {
+        if (!isCallerWithSystemUid()) {
+            throw new SecurityException("Caller must be system");
+        }
         ComponentName profileOwner = getProfileOwner(userHandle);
         // Profile challenge is supported on N or newer release.
         return profileOwner != null &&
