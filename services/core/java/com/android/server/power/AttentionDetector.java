@@ -297,6 +297,7 @@ public class AttentionDetector {
 
     public void dump(PrintWriter pw) {
         pw.println("AttentionDetector:");
+        pw.println(" mIsSettingEnabled=" + mIsSettingEnabled);
         pw.println(" mMaximumExtensionMillis=" + mMaximumExtensionMillis);
         pw.println(" mMaxAttentionApiTimeoutMillis=" + mMaxAttentionApiTimeoutMillis);
         pw.println(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
