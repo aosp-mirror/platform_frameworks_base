@@ -48,6 +48,7 @@
     <item>@*android:drawable/ic_qs_dnd</item>
     <item>@*android:drawable/ic_qs_flashlight</item>
     <item>@*android:drawable/ic_qs_night_display_on</item>
+    <item>@*android:drawable/ic_qs_ui_mode_night</item>
     <item>@*android:drawable/ic_restart</item>
     <item>@*android:drawable/ic_screenshot</item>
     <item>@*android:drawable/ic_settings_bluetooth</item>
