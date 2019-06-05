@@ -2962,11 +2962,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             gnssDataListeners.put(binder, linkedListener);
             long identity = Binder.clearCallingIdentity();
             try {
-                if (gnssDataProvider == mGnssNavigationMessageProvider
+                if (gnssDataProvider == mGnssMeasurementsProvider
                         || gnssDataProvider == mGnssStatusProvider) {
                     mLocationUsageLogger.logLocationApiUsage(
                             LocationStatsEnums.USAGE_STARTED,
-                            gnssDataProvider == mGnssNavigationMessageProvider
+                            gnssDataProvider == mGnssMeasurementsProvider
                                 ? LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER
                                 : LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
                             packageName,
@@ -3003,11 +3003,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             long identity = Binder.clearCallingIdentity();
             try {
-                if (gnssDataProvider == mGnssNavigationMessageProvider
+                if (gnssDataProvider == mGnssMeasurementsProvider
                         || gnssDataProvider == mGnssStatusProvider) {
                     mLocationUsageLogger.logLocationApiUsage(
                             LocationStatsEnums.USAGE_ENDED,
-                            gnssDataProvider == mGnssNavigationMessageProvider
+                            gnssDataProvider == mGnssMeasurementsProvider
                                 ? LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER
                                 : LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
                             linkedListener.mCallerIdentity.mPackageName,

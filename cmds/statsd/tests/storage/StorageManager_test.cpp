@@ -125,6 +125,105 @@ TEST(StorageManagerTest, SortFileTest) {
     EXPECT_EQ("300_2000_123454_history", list[3].mFileName);
 }
 
+const string testDir = "/data/misc/stats-data/";
+const string file1 = testDir + "2557169347_1066_1";
+const string file2 = testDir + "2557169349_1066_1";
+const string file1_history = file1 + "_history";
+const string file2_history = file2 + "_history";
+
+bool prepareLocalHistoryTestFiles() {
+    android::base::unique_fd fd(TEMP_FAILURE_RETRY(
+            open(file1.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR)));
+    if (fd != -1) {
+        dprintf(fd, "content");
+    } else {
+        return false;
+    }
+
+    android::base::unique_fd fd2(TEMP_FAILURE_RETRY(
+            open(file2.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR)));
+    if (fd2 != -1) {
+        dprintf(fd2, "content");
+    } else {
+        return false;
+    }
+    return true;
+}
+
+void clearLocalHistoryTestFiles() {
+    TEMP_FAILURE_RETRY(remove(file1.c_str()));
+    TEMP_FAILURE_RETRY(remove(file2.c_str()));
+    TEMP_FAILURE_RETRY(remove(file1_history.c_str()));
+    TEMP_FAILURE_RETRY(remove(file2_history.c_str()));
+}
+
+bool fileExist(string name) {
+    android::base::unique_fd fd(TEMP_FAILURE_RETRY(open(name.c_str(), O_RDONLY | O_CLOEXEC)));
+    return fd != -1;
+}
+
+/* The following AppendConfigReportTests test the 4 combinations of [whether erase data] [whether
+ * the caller is adb] */
+TEST(StorageManagerTest, AppendConfigReportTest1) {
+    EXPECT_TRUE(prepareLocalHistoryTestFiles());
+
+    ProtoOutputStream out;
+    StorageManager::appendConfigMetricsReport(ConfigKey(1066, 1), &out, false /*erase?*/,
+                                              false /*isAdb?*/);
+
+    EXPECT_FALSE(fileExist(file1));
+    EXPECT_FALSE(fileExist(file2));
+
+    EXPECT_TRUE(fileExist(file1_history));
+    EXPECT_TRUE(fileExist(file2_history));
+    clearLocalHistoryTestFiles();
+}
+
+TEST(StorageManagerTest, AppendConfigReportTest2) {
+    EXPECT_TRUE(prepareLocalHistoryTestFiles());
+
+    ProtoOutputStream out;
+    StorageManager::appendConfigMetricsReport(ConfigKey(1066, 1), &out, true /*erase?*/,
+                                              false /*isAdb?*/);
+
+    EXPECT_FALSE(fileExist(file1));
+    EXPECT_FALSE(fileExist(file2));
+    EXPECT_FALSE(fileExist(file1_history));
+    EXPECT_FALSE(fileExist(file2_history));
+
+    clearLocalHistoryTestFiles();
+}
+
+TEST(StorageManagerTest, AppendConfigReportTest3) {
+    EXPECT_TRUE(prepareLocalHistoryTestFiles());
+
+    ProtoOutputStream out;
+    StorageManager::appendConfigMetricsReport(ConfigKey(1066, 1), &out, false /*erase?*/,
+                                              true /*isAdb?*/);
+
+    EXPECT_TRUE(fileExist(file1));
+    EXPECT_TRUE(fileExist(file2));
+    EXPECT_FALSE(fileExist(file1_history));
+    EXPECT_FALSE(fileExist(file2_history));
+
+    clearLocalHistoryTestFiles();
+}
+
+TEST(StorageManagerTest, AppendConfigReportTest4) {
+    EXPECT_TRUE(prepareLocalHistoryTestFiles());
+
+    ProtoOutputStream out;
+    StorageManager::appendConfigMetricsReport(ConfigKey(1066, 1), &out, true /*erase?*/,
+                                              true /*isAdb?*/);
+
+    EXPECT_FALSE(fileExist(file1));
+    EXPECT_FALSE(fileExist(file2));
+    EXPECT_FALSE(fileExist(file1_history));
+    EXPECT_FALSE(fileExist(file2_history));
+
+    clearLocalHistoryTestFiles();
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

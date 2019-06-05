@@ -48,6 +48,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -73,6 +74,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private NotificationMediaManager mNotificationMediaManager;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -82,7 +85,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
-        mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController);
+        mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController,
+                mKeyguardBypassController);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
@@ -102,10 +106,22 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBindSlice_readsMedia() {
+    public void onBindSlice_readsMedia_withoutBypass() {
         MediaMetadata metadata = mock(MediaMetadata.class);
         when(metadata.getText(any())).thenReturn("metadata");
         mProvider.onDozingChanged(true);
+        mProvider.onMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
+        mProvider.onBindSlice(mProvider.getUri());
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
+        verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
+        verify(mNotificationMediaManager).getMediaIcon();
+    }
+
+    @Test
+    public void onBindSlice_readsMedia_withBypass_notDozing() {
+        MediaMetadata metadata = mock(MediaMetadata.class);
+        when(metadata.getText(any())).thenReturn("metadata");
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
         mProvider.onMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
         mProvider.onBindSlice(mProvider.getUri());
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
