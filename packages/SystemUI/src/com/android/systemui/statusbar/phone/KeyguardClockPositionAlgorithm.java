@@ -176,7 +176,7 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getExpandedPreferredClockY() {
-        return (mHasCustomClock && !mHasVisibleNotifs) ? getPreferredClockY()
+        return (mHasCustomClock && (!mHasVisibleNotifs || mPositionLikeDark)) ? getPreferredClockY()
                 : getExpandedClockPosition();
     }
 
@@ -218,7 +218,7 @@ public class KeyguardClockPositionAlgorithm {
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        float darkAmount = mPositionLikeDark ? 1.0f : mDarkAmount;
+        float darkAmount = mPositionLikeDark && !mHasCustomClock ? 1.0f : mDarkAmount;
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 
