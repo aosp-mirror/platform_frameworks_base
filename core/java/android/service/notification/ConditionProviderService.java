@@ -77,6 +77,7 @@ public abstract class ConditionProviderService extends Service {
 
     private Provider mProvider;
     private INotificationManager mNoMan;
+    boolean mIsConnected;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -179,7 +180,7 @@ public abstract class ConditionProviderService extends Service {
         try {
             noMan.requestUnbindProvider(mProvider);
             // Disable future messages.
-            mProvider = null;
+            mIsConnected = false;
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -233,16 +234,16 @@ public abstract class ConditionProviderService extends Service {
      */
     @TestApi
     public boolean isBound() {
-        if (mProvider == null) {
+        if (!mIsConnected) {
             Log.w(TAG, "Condition provider service not yet bound.");
-            return false;
         }
-        return true;
+        return mIsConnected;
     }
 
     private final class Provider extends IConditionProvider.Stub {
         @Override
         public void onConnected() {
+            mIsConnected = true;
             mHandler.obtainMessage(H.ON_CONNECTED).sendToTarget();
         }
 
@@ -265,7 +266,7 @@ public abstract class ConditionProviderService extends Service {
         @Override
         public void handleMessage(Message msg) {
             String name = null;
-            if (!isBound()) {
+            if (!mIsConnected) {
                 return;
             }
             try {
