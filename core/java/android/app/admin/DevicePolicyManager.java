@@ -275,7 +275,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
      *
      * <p>When device owner provisioning has completed, an intent of the type
@@ -383,7 +382,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_USE_MOBILE_DATA}, optional </li>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
      *
      * @hide
@@ -423,7 +421,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
      *
      * <p>When device owner provisioning has completed, an intent of the type
@@ -1149,11 +1146,11 @@ public class DevicePolicyManager {
      * A boolean extra indicating if the education screens from the provisioning flow should be
      * skipped. If unspecified, defaults to {@code false}.
      *
+     * <p>This extra can only be set by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
      * <p>If the education screens are skipped, it is the admin application's responsibility
      * to display its own user education screens.
-     *
-     * <p>It can be used when provisioning a fully managed device via
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE}.
      */
     public static final String EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS =
             "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
@@ -2262,6 +2259,10 @@ public class DevicePolicyManager {
      *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
      *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
      * </ul>
+     *
+     * <p>If performing fully-managed device provisioning and the admin app desires to show its
+     * own education screens, the target activity can additionally return
+     * {@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS} set to <code>true</code>.
      *
      * <p>The target activity may also return the account that needs to be migrated from primary
      * user to managed profile in case of a profile owner provisioning in
