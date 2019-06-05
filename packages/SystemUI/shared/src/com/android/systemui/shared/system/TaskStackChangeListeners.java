@@ -208,6 +208,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                 0 /* unused */).sendToTarget();
     }
 
+    @Override
+    public void onSingleTaskDisplayEmpty(int displayId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_SINGLE_TASK_DISPLAY_EMPTY, displayId,
+                0 /* unused */).sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -228,6 +234,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
         private static final int ON_SINGLE_TASK_DISPLAY_DRAWN = 19;
+        private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 20;
 
 
         public H(Looper looper) {
@@ -367,6 +374,13 @@ public class TaskStackChangeListeners extends TaskStackListener {
                     case ON_SINGLE_TASK_DISPLAY_DRAWN: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onSingleTaskDisplayDrawn(msg.arg1);
+                        }
+                        break;
+                    }
+                    case ON_SINGLE_TASK_DISPLAY_EMPTY: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onSingleTaskDisplayEmpty(
+                                    msg.arg1);
                         }
                         break;
                     }
