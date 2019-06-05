@@ -5598,9 +5598,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, reason, null);
         // TODO: Switch to user app stacks here.
-        int ret = mActivityStartController.startActivities(caller, -1, callingPackage,
-                intents, resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId,
-                reason);
+        int ret = mActivityStartController.startActivities(caller, -1, 0,
+                UserHandle.USER_NULL, callingPackage, intents, resolvedTypes, resultTo,
+                SafeActivityOptions.fromBundle(bOptions), userId, reason);
         return ret;
     }
 
