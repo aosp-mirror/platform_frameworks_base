@@ -409,161 +409,185 @@ class TouchExplorer extends BaseEventStreamTransformation
      * @param rawEvent The raw (unmodified) motion event.
      * @param policyFlags The policy flags associated with the event.
      */
-    private void handleMotionEventStateTouchExploring(MotionEvent event, MotionEvent rawEvent,
-            int policyFlags) {
+    private void handleMotionEventStateTouchExploring(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
-                mAms.onTouchInteractionStart();
+            case MotionEvent.ACTION_DOWN:
+                handleActionDownStateTouchExploring(event, policyFlags);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                handleActionPointerDownStateTouchExploring();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                handleActionMoveStateTouchExploring(event, rawEvent, policyFlags);
+                break;
+            case MotionEvent.ACTION_UP:
+                handleActionUpStateTouchExploring(event, policyFlags);
+                break;
+        }
+    }
 
-                // If we still have not notified the user for the last
-                // touch, we figure out what to do. If were waiting
-                // we resent the delayed callback and wait again.
-                mSendHoverEnterAndMoveDelayed.cancel();
-                mSendHoverExitDelayed.cancel();
+    /**
+     * Handles ACTION_DOWN while in the default touch exploring state. This event represents the
+     * first finger touching the screen.
+     */
+    private void handleActionDownStateTouchExploring(MotionEvent event, int policyFlags) {
+        mAms.onTouchInteractionStart();
 
-                // If a touch exploration gesture is in progress send events for its end.
-                if (mState.isTouchExplorationInProgress()) {
-                    sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-                }
+        // If we still have not notified the user for the last
+        // touch, we figure out what to do. If were waiting
+        // we resent the delayed callback and wait again.
+        mSendHoverEnterAndMoveDelayed.cancel();
+        mSendHoverExitDelayed.cancel();
 
-                // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double tap.
-                if (!mGestureDetector.firstTapDetected()) {
-                    mSendTouchExplorationEndDelayed.forceSendAndRemove();
-                    mSendTouchInteractionEndDelayed.forceSendAndRemove();
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
-                } else {
-                    // Let gesture to handle to avoid duplicated TYPE_TOUCH_INTERACTION_END event.
-                    mSendTouchInteractionEndDelayed.cancel();
-                }
+        // If a touch exploration gesture is in progress send events for its end.
+        if (mState.isTouchExplorationInProgress()) {
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+        }
 
-                if (!mGestureDetector.firstTapDetected()
-                        && !mState.isTouchExplorationInProgress()) {
-                    if (!mSendHoverEnterAndMoveDelayed.isPending()) {
-                        // Deliver hover enter with a delay to have a chance
-                        // to detect what the user is trying to do.
-                        final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
-                        final int pointerIdBits = (1 << pointerId);
-                        mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits,
-                                policyFlags);
-                    } else {
-                        // Cache the event until we discern exploration from gesturing.
-                        mSendHoverEnterAndMoveDelayed.addEvent(event);
-                    }
-                }
-            } break;
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                // Another finger down means that if we have not started to deliver
-                // hover events, we will not have to. The code for ACTION_MOVE will
-                // decide what we will actually do next.
-                mSendHoverEnterAndMoveDelayed.cancel();
-                mSendHoverExitDelayed.cancel();
-            } break;
-            case MotionEvent.ACTION_MOVE: {
+        // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double
+        // tap.
+        if (!mGestureDetector.firstTapDetected()) {
+            mSendTouchExplorationEndDelayed.forceSendAndRemove();
+            mSendTouchInteractionEndDelayed.forceSendAndRemove();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
+        } else {
+            // Let gesture to handle to avoid duplicated TYPE_TOUCH_INTERACTION_END event.
+            mSendTouchInteractionEndDelayed.cancel();
+        }
+
+        if (!mGestureDetector.firstTapDetected() && !mState.isTouchExplorationInProgress()) {
+            if (!mSendHoverEnterAndMoveDelayed.isPending()) {
+                // Deliver hover enter with a delay to have a chance
+                // to detect what the user is trying to do.
                 final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
-                final int pointerIndex = event.findPointerIndex(pointerId);
                 final int pointerIdBits = (1 << pointerId);
-                switch (event.getPointerCount()) {
-                    case 1: {
-                        // We have not started sending events since we try to
-                        // figure out what the user is doing.
-                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
-                            // Cache the event until we discern exploration from gesturing.
-                            mSendHoverEnterAndMoveDelayed.addEvent(event);
-                        } else {
-                            if (mState.isTouchExplorationInProgress()) {
-                                sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
-                                sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits,
-                                        policyFlags);
-                            }
-                        }
-                    } break;
-                    case 2: {
-                        // More than one pointer so the user is not touch exploring
-                        // and now we have to decide whether to delegate or drag.
-                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
-                            // We have not started sending events so cancel
-                            // scheduled sending events.
-                            mSendHoverEnterAndMoveDelayed.cancel();
-                            mSendHoverExitDelayed.cancel();
-                        } else {
-                            if (mState.isTouchExplorationInProgress()) {
-                                // If the user is touch exploring the second pointer may be
-                                // performing a double tap to activate an item without need
-                                // for the user to lift his exploring finger.
-                                // It is *important* to use the distance traveled by the pointers
-                                // on the screen which may or may not be magnified.
-                                final float deltaX =
-                                        mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
-                                        - rawEvent.getX(pointerIndex);
-                                final float deltaY =
-                                        mReceivedPointerTracker.getReceivedPointerDownY(
-                                        pointerId) - rawEvent.getY(pointerIndex);
-                                final double moveDelta = Math.hypot(deltaX, deltaY);
-                                if (moveDelta < mDoubleTapSlop) {
-                                    break;
-                                }
-                                // We are sending events so send exit and gesture
-                                // end since we transition to another state.
-                                sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-                            }
-                        }
+                mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits, policyFlags);
+            } else {
+                // Cache the event until we discern exploration from gesturing.
+                mSendHoverEnterAndMoveDelayed.addEvent(event);
+            }
+        }
+    }
 
-                        // Remove move history before send injected non-move events
-                        event = MotionEvent.obtainNoHistory(event);
-                        if (isDraggingGesture(event)) {
-                            // Two pointers moving in the same direction within
-                            // a given distance perform a drag.
-                            mState.startDragging();
-                            mDraggingPointerId = pointerId;
-                            event.setEdgeFlags(
-                                    mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
-                            sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits,
-                                    policyFlags);
-                        } else {
-                            // Two pointers moving arbitrary are delegated to the view hierarchy.
-                            mState.startDelegating();
-                            sendDownForAllNotInjectedPointers(event, policyFlags);
-                        }
-                    } break;
-                    default: {
-                        // More than one pointer so the user is not touch exploring
-                        // and now we have to decide whether to delegate or drag.
-                        if (mSendHoverEnterAndMoveDelayed.isPending()) {
-                            // We have not started sending events so cancel
-                            // scheduled sending events.
-                            mSendHoverEnterAndMoveDelayed.cancel();
-                            mSendHoverExitDelayed.cancel();
-                        } else {
-                            // We are sending events so send exit and gesture
-                            // end since we transition to another state.
-                            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-                        }
-
-                        // More than two pointers are delegated to the view hierarchy.
-                        mState.startDelegating();
-                        event = MotionEvent.obtainNoHistory(event);
-                        sendDownForAllNotInjectedPointers(event, policyFlags);
-                    }
-                }
-            } break;
-            case MotionEvent.ACTION_UP: {
-                mAms.onTouchInteractionEnd();
-                final int pointerId = event.getPointerId(event.getActionIndex());
-                final int pointerIdBits = (1 << pointerId);
-
+    /**
+     * Handles ACTION_POINTER_DOWN when in the touch exploring state. This event represents an
+     * additional finger touching the screen.
+     */
+    private void handleActionPointerDownStateTouchExploring() {
+        // Another finger down means that if we have not started to deliver
+        // hover events, we will not have to. The code for ACTION_MOVE will
+        // decide what we will actually do next.
+        mSendHoverEnterAndMoveDelayed.cancel();
+        mSendHoverExitDelayed.cancel();
+    }
+    /**
+     * Handles ACTION_MOVE while in the initial touch exploring state. This is where transitions to
+     * delegating and dragging states are handled.
+     */
+    private void handleActionMoveStateTouchExploring(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
+        final int pointerIndex = event.findPointerIndex(pointerId);
+        final int pointerIdBits = (1 << pointerId);
+        switch (event.getPointerCount()) {
+            case 1:
+                // We have not started sending events since we try to
+                // figure out what the user is doing.
                 if (mSendHoverEnterAndMoveDelayed.isPending()) {
-                    // If we have not delivered the enter schedule an exit.
-                    mSendHoverExitDelayed.post(event, pointerIdBits, policyFlags);
-                } else {
-                    // The user is touch exploring so we send events for end.
+                    // Cache the event until we discern exploration from gesturing.
+                    mSendHoverEnterAndMoveDelayed.addEvent(event);
+                } else if (mState.isTouchExplorationInProgress()) {
+                    sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
+                    sendMotionEvent(
+                            event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits, policyFlags);
+                }
+                break;
+            case 2:
+                // More than one pointer so the user is not touch exploring
+                // and now we have to decide whether to delegate or drag.
+                if (mSendHoverEnterAndMoveDelayed.isPending()) {
+                    // We have not started sending events so cancel
+                    // scheduled sending events.
+                    mSendHoverEnterAndMoveDelayed.cancel();
+                    mSendHoverExitDelayed.cancel();
+                } else if (mState.isTouchExplorationInProgress()) {
+                    // If the user is touch exploring the second pointer may be
+                    // performing a double tap to activate an item without need
+                    // for the user to lift his exploring finger.
+                    // It is *important* to use the distance traveled by the pointers
+                    // on the screen which may or may not be magnified.
+                    final float deltaX =
+                            mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
+                                    - rawEvent.getX(pointerIndex);
+                    final float deltaY =
+                            mReceivedPointerTracker.getReceivedPointerDownY(pointerId)
+                                    - rawEvent.getY(pointerIndex);
+                    final double moveDelta = Math.hypot(deltaX, deltaY);
+                    if (moveDelta < mDoubleTapSlop) {
+                        break;
+                    }
+                    // We are sending events so send exit and gesture
+                    // end since we transition to another state.
                     sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                 }
 
-                if (!mSendTouchInteractionEndDelayed.isPending()) {
-                    mSendTouchInteractionEndDelayed.post();
+                // Remove move history before send injected non-move events
+                event = MotionEvent.obtainNoHistory(event);
+                if (isDraggingGesture(event)) {
+                    // Two pointers moving in the same direction within
+                    // a given distance perform a drag.
+                    mState.startDragging();
+                    mDraggingPointerId = pointerId;
+                    event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
+                    sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
+                } else {
+                    // Two pointers moving arbitrary are delegated to the view hierarchy.
+                    mState.startDelegating();
+                    sendDownForAllNotInjectedPointers(event, policyFlags);
+                }
+                break;
+            default:
+                // More than one pointer so the user is not touch exploring
+                // and now we have to decide whether to delegate or drag.
+                if (mSendHoverEnterAndMoveDelayed.isPending()) {
+                    // We have not started sending events so cancel
+                    // scheduled sending events.
+                    mSendHoverEnterAndMoveDelayed.cancel();
+                    mSendHoverExitDelayed.cancel();
+                } else {
+                    // We are sending events so send exit and gesture
+                    // end since we transition to another state.
+                    sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                 }
 
-            } break;
+                // More than two pointers are delegated to the view hierarchy.
+                mState.startDelegating();
+                event = MotionEvent.obtainNoHistory(event);
+                sendDownForAllNotInjectedPointers(event, policyFlags);
+                break;
+        }
+    }
+
+    /**
+     * Handles ACTION_UP while in the initial touch exploring state. This event represents all
+     * fingers being lifted from the screen.
+     */
+    private void handleActionUpStateTouchExploring(MotionEvent event, int policyFlags) {
+        mAms.onTouchInteractionEnd();
+        final int pointerId = event.getPointerId(event.getActionIndex());
+        final int pointerIdBits = (1 << pointerId);
+
+        if (mSendHoverEnterAndMoveDelayed.isPending()) {
+            // If we have not delivered the enter schedule an exit.
+            mSendHoverExitDelayed.post(event, pointerIdBits, policyFlags);
+        } else {
+            // The user is touch exploring so we send events for end.
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+        }
+
+        if (!mSendTouchInteractionEndDelayed.isPending()) {
+            mSendTouchInteractionEndDelayed.post();
         }
     }
 
