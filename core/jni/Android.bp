@@ -92,6 +92,7 @@ cc_library_shared {
         "libbase",
         "libcutils",
         "libharfbuzz_ng",
+        "libhwui",
         "liblog",
         "libminikin",
         "libnativehelper",
@@ -315,7 +316,6 @@ cc_library_shared {
                 "libhwbinder",
                 "libvintf",
                 "libnativewindow",
-                "libhwui",
                 "libdl",
                 "libdl_android",
                 "libstatslog",
@@ -343,9 +343,6 @@ cc_library_shared {
             ],
             include_dirs: [
                 "external/vulkan-headers/include",
-            ],
-            shared_libs: [
-                "libhwui-host",
             ],
             static_libs: [
                 "libandroidfw",
