@@ -30,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 
@@ -132,8 +133,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
-        final AppWindowToken homeAppWindow = createAppWindowToken(mDisplayContent,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+        final ActivityStack homStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final AppWindowToken homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homStack)
+                        .setCreateTask(true)
+                        .build()
+                        .mAppWindowToken;
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final AppWindowToken hiddenAppWindow = createAppWindowToken(mDisplayContent,

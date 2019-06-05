@@ -36,7 +36,7 @@ import static android.view.WindowManager.TRANSIT_UNSET;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
@@ -152,10 +152,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testLandscapeSeascapeRotationByApp() {
-        // Some plumbing to get the service ready for rotation updates.
-        mWm.mDisplayReady = true;
-        mWm.mDisplayEnabled = true;
-
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow");
@@ -185,25 +181,21 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
-        // Some plumbing to get the service ready for rotation updates.
-        mWm.mDisplayReady = true;
-        mWm.mDisplayEnabled = true;
-
-        final DisplayRotation spiedRotation = spy(mDisplayContent.getDisplayRotation());
-        mDisplayContent.setDisplayRotation(spiedRotation);
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
-        attrs.setTitle("AppWindow");
+        attrs.setTitle("RotationByPolicy");
         final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, mToken);
         mToken.addWindow(appWindow);
 
         // Set initial orientation and update.
-        performRotation(spiedRotation, Surface.ROTATION_90);
+        performRotation(displayRotation, Surface.ROTATION_90);
         appWindow.mResizeReported = false;
 
         // Update the rotation to perform 180 degree rotation and check that resize was reported.
-        performRotation(spiedRotation, Surface.ROTATION_270);
+        performRotation(displayRotation, Surface.ROTATION_270);
         assertTrue(appWindow.mResizeReported);
 
         appWindow.removeImmediately();
@@ -211,14 +203,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
         doReturn(rotationToReport).when(spiedRotation).rotationForOrientation(anyInt(), anyInt());
-        int oldRotation = mDisplayContent.getRotation();
         mWm.updateRotation(false, false);
-        // Must manually apply here since ATM doesn't know about the display during this test
-        // (meaning it can't perform the normal sendNewConfiguration flow).
-        mDisplayContent.applyRotationLocked(oldRotation, mDisplayContent.getRotation());
-        // Prevent the next rotation from being deferred by animation.
-        mWm.mAnimator.setScreenRotationAnimationLocked(mDisplayContent.getDisplayId(), null);
-        mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
     }
 
     @Test

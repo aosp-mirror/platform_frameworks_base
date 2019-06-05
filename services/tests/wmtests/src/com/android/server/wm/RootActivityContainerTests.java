@@ -97,7 +97,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testRestoringInvalidTask() {
-        ((TestActivityDisplay) mRootActivityContainer.getDefaultDisplay()).removeAllTasks();
+        mRootActivityContainer.getDefaultDisplay().removeAllTasks();
         TaskRecord task = mRootActivityContainer.anyTaskForId(0 /*taskId*/,
                 MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null, false /* onTop */);
         assertNull(task);
@@ -304,21 +304,23 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testResizeDockedStackForSplitScreenPrimary() {
-        final Rect taskSize = new Rect(0, 0, 600, 600);
+        final Rect taskSize = new Rect(0, 0, 1000, 1000);
         final Rect stackSize = new Rect(0, 0, 300, 300);
 
         // Create primary split-screen stack with a task.
-        final ActivityStack primaryStack = mRootActivityContainer.getDefaultDisplay()
-                .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
-                        true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(primaryStack).build();
+        final ActivityStack primaryStack = new StackBuilder(mRootActivityContainer)
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
+                .setOnTop(true)
+                .build();
+        final TaskRecord task = primaryStack.topTask();
 
         // Resize dock stack.
         mService.resizeDockedStack(stackSize, taskSize, null, null, null);
 
         // Verify dock stack & its task bounds if is equal as resized result.
-        assertEquals(primaryStack.getBounds(), stackSize);
-        assertEquals(task.getBounds(), taskSize);
+        assertEquals(stackSize, primaryStack.getBounds());
+        assertEquals(taskSize, task.getBounds());
     }
 
     /**
@@ -328,8 +330,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void testFindTaskToMoveToFrontWhenRecentsOnTop() {
         // Create stack/task on default display.
         final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
-        final TestActivityStack targetStack = (TestActivityStack) new StackBuilder(
-                mRootActivityContainer).setOnTop(false).build();
+        final ActivityStack targetStack = new StackBuilder(mRootActivityContainer)
+                .setOnTop(false)
+                .build();
         final TaskRecord targetTask = targetStack.getChildAt(0);
 
         // Create Recents on top of the display.
@@ -505,12 +508,10 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mockResolveSecondaryHomeActivity();
 
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
         mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
         doReturn(true).when(secondDisplay).supportsSystemDecorations();
 
-        // Create mock tasks and other necessary mocks.
-        mockTaskRecordFactory();
         doReturn(true).when(mRootActivityContainer)
                 .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
         doReturn(true).when(mRootActivityContainer).canStartHomeOnDisplay(
@@ -621,7 +622,6 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         info.applicationInfo.packageName = "android";
         info.name = ResolverActivity.class.getName();
         doReturn(info).when(mRootActivityContainer).resolveHomeActivity(anyInt(), any());
-        mockTaskRecordFactory();
 
         mRootActivityContainer.startHomeOnDisplay(0 /* userId */, "test", DEFAULT_DISPLAY);
         final ActivityRecord resolverActivity = mRootActivityContainer.topRunningActivity();

@@ -74,8 +74,9 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mRecentsAnimationController = mock(RecentsAnimationController.class);
-        doReturn(mRecentsAnimationController).when(
-                mService.mWindowManager).getRecentsAnimationController();
+        mService.mWindowManager.setRecentsAnimationController(mRecentsAnimationController);
+        doNothing().when(mService.mWindowManager).initializeRecentsAnimation(
+                anyInt(), any(), any(), anyInt(), any());
         doReturn(true).when(mService.mWindowManager).canStartRecentsAnimation();
 
         final RecentTasks recentTasks = mService.getRecentTasks();
@@ -115,8 +116,18 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     @Test
     public void testPreloadRecentsActivity() {
-        // Ensure that the fake recent component can be resolved by the recents intent.
-        mockTaskRecordFactory(builder -> builder.setComponent(mRecentsComponent));
+        final ActivityDisplay defaultDisplay = mRootActivityContainer.getDefaultDisplay();
+        final ActivityStack homeStack =
+                defaultDisplay.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+        defaultDisplay.positionChildAtTop(homeStack, false /* includingParents */);
+        ActivityRecord topRunningHomeActivity = homeStack.topRunningActivityLocked();
+        if (topRunningHomeActivity == null) {
+            topRunningHomeActivity = new ActivityBuilder(mService)
+                    .setStack(homeStack)
+                    .setCreateTask(true)
+                    .build();
+        }
+
         ActivityInfo aInfo = new ActivityInfo();
         aInfo.applicationInfo = new ApplicationInfo();
         aInfo.applicationInfo.uid = 10001;
@@ -204,6 +215,13 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         ActivityStack homeStack = display.getHomeStack();
         // Assume the home activity support recents.
         ActivityRecord targetActivity = homeStack.getTopActivity();
+        if (targetActivity == null) {
+            targetActivity = new ActivityBuilder(mService)
+                    .setCreateTask(true)
+                    .setStack(homeStack)
+                    .build();
+        }
+
         // Put another home activity in home stack.
         ActivityRecord anotherHomeActivity = new ActivityBuilder(mService)
                 .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))

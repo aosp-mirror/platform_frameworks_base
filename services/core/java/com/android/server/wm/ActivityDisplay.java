@@ -41,6 +41,7 @@ import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityDisplayProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
@@ -173,18 +174,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mService = root.mService;
         mDisplayId = display.getDisplayId();
         mDisplay = display;
-        mDisplayContent = createDisplayContent();
+        mDisplayContent = mService.mWindowManager.mRoot.createDisplayContent(mDisplay, this);
         mDisplayContent.reconfigureDisplayLocked();
-        updateBounds();
-    }
-
-    protected DisplayContent createDisplayContent() {
-        return mService.mWindowManager.mRoot.createDisplayContent(mDisplay, this);
-    }
-
-    private void updateBounds() {
-        mDisplay.getRealSize(mTmpDisplaySize);
-        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
+        onRequestedOverrideConfigurationChanged(
+                mDisplayContent.getRequestedOverrideConfiguration());
     }
 
     void onDisplayChanged() {
@@ -200,7 +193,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
 
-        updateBounds();
+        mDisplay.getRealSize(mTmpDisplaySize);
+        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
         if (mDisplayContent != null) {
             mDisplayContent.updateDisplayInfo();
             mService.mWindowManager.requestTraversal();
@@ -1539,6 +1533,17 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     /** Returns true if the display can only contain one task */
     boolean isSingleTaskInstance() {
         return mSingleTaskInstance;
+    }
+
+    @VisibleForTesting
+    void removeAllTasks() {
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = getChildAt(i);
+            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            for (int j = tasks.size() - 1; j >= 0; --j) {
+                stack.removeTask(tasks.get(j), "removeAllTasks", REMOVE_TASK_MODE_DESTROYING);
+            }
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {

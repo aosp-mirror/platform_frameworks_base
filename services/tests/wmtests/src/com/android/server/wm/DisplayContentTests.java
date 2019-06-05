@@ -83,7 +83,6 @@ import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -653,25 +652,27 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOnDescendantOrientationRequestChanged() {
         final DisplayContent dc = createNewDisplay();
-        mWm.mAtmService.mRootActivityContainer = mock(RootActivityContainer.class);
+        dc.getDisplayRotation().setFixedToUserRotation(
+                DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED);
         final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT
                 : SCREEN_ORIENTATION_LANDSCAPE;
 
-        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
-        window.getTask().mTaskRecord = mock(TaskRecord.class, ExtendedMockito.RETURNS_DEEP_STUBS);
-        window.mAppToken.setOrientation(newOrientation);
+        final ActivityStack stack =
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                        .setDisplay(dc.mAcitvityDisplay).build();
+        final ActivityRecord activity = stack.topTask().getTopActivity();
 
-        ActivityRecord activityRecord = mock(ActivityRecord.class);
-
-        assertTrue("Display should rotate to handle orientation request by default.",
-                dc.onDescendantOrientationChanged(window.mToken.token, activityRecord));
+        activity.setRequestedOrientation(newOrientation);
 
         final ArgumentCaptor<Configuration> captor = ArgumentCaptor.forClass(Configuration.class);
         verify(dc.mAcitvityDisplay).updateDisplayOverrideConfigurationLocked(captor.capture(),
-                same(activityRecord), anyBoolean(), same(null));
+                same(activity), anyBoolean(), same(null));
         final Configuration newDisplayConfig = captor.getValue();
-        assertEquals(Configuration.ORIENTATION_PORTRAIT, newDisplayConfig.orientation);
+        final int expectedOrientation = newOrientation == SCREEN_ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_PORTRAIT
+                : Configuration.ORIENTATION_LANDSCAPE;
+        assertEquals(expectedOrientation, newDisplayConfig.orientation);
     }
 
     @Test
@@ -679,22 +680,20 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
                 DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
-        mWm.mAtmService.mRootActivityContainer = mock(RootActivityContainer.class);
         final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT
                 : SCREEN_ORIENTATION_LANDSCAPE;
 
-        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
-        window.getTask().mTaskRecord = mock(TaskRecord.class, ExtendedMockito.RETURNS_DEEP_STUBS);
-        window.mAppToken.setOrientation(newOrientation);
+        final ActivityStack stack =
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                        .setDisplay(dc.mAcitvityDisplay).build();
+        final ActivityRecord activity = stack.topTask().getTopActivity();
 
-        ActivityRecord activityRecord = mock(ActivityRecord.class);
+        activity.setRequestedOrientation(newOrientation);
 
-        assertFalse("Display shouldn't rotate to handle orientation request if fixed to"
-                        + " user rotation.",
-                dc.onDescendantOrientationChanged(window.mToken.token, activityRecord));
         verify(dc.mAcitvityDisplay, never()).updateDisplayOverrideConfigurationLocked(any(),
-                eq(activityRecord), anyBoolean(), same(null));
+                eq(activity), anyBoolean(), same(null));
+        assertEquals(dc.getDisplayRotation().getUserRotation(), dc.getRotation());
     }
 
     @Test

@@ -767,11 +767,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void setOrientation(int orientation, @Nullable IBinder freezeDisplayToken,
             @Nullable ConfigurationContainer requestingContainer) {
-        final boolean changed = mOrientation != orientation;
-        mOrientation = orientation;
-        if (!changed) {
+        if (mOrientation == orientation) {
             return;
         }
+
+        mOrientation = orientation;
         final WindowContainer parent = getParent();
         if (parent != null) {
             onDescendantOrientationChanged(freezeDisplayToken, requestingContainer);

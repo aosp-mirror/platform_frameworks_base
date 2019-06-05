@@ -16,6 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Surface.ROTATION_0;
@@ -29,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
@@ -71,6 +78,7 @@ import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
+import android.view.DisplayInfo;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner.Stub;
 import android.view.RemoteAnimationAdapter;
@@ -79,7 +87,6 @@ import android.view.RemoteAnimationTarget;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,13 +103,13 @@ import java.util.concurrent.TimeUnit;
 @MediumTest
 @Presubmit
 public class ActivityRecordTests extends ActivityTestsBase {
-    private TestActivityStack mStack;
+    private ActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivity;
 
     @Before
     public void setUp() throws Exception {
-        mStack = (TestActivityStack) new StackBuilder(mRootActivityContainer).build();
+        mStack = new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
         mActivity = mTask.getTopActivity();
 
@@ -113,13 +120,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testStackCleanupOnClearingTask() {
         mActivity.setTask(null);
-        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 1);
+        verify(mStack, times(1)).onActivityRemovedFromStack(any());
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() {
         mTask.removeActivity(mActivity);
-        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(),  1);
+        verify(mStack, times(1)).onActivityRemovedFromStack(any());
     }
 
     @Test
@@ -134,7 +141,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final TaskRecord newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack)
                 .build();
         mActivity.reparent(newTask, 0, null /*reason*/);
-        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 0);
+        verify(mStack, times(0)).onActivityRemovedFromStack(any());
     }
 
     @Test
@@ -261,8 +268,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testNewParentConfigurationIncrementsSeq() {
         final Configuration newConfig = new Configuration(
                 mTask.getRequestedOverrideConfiguration());
-        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
 
         final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
         mTask.onRequestedOverrideConfigurationChanged(newConfig);
@@ -277,7 +284,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .getRequestedOverrideConfiguration();
 
         final Configuration newConfig = new Configuration();
-        newConfig.orientation = Configuration.ORIENTATION_PORTRAIT;
+        newConfig.orientation = ORIENTATION_PORTRAIT;
 
         final int prevSeq = mActivity.getMergedOverrideConfiguration().seq;
         mActivity.onRequestedOverrideConfigurationChanged(newConfig);
@@ -293,10 +300,11 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 mActivity.getConfiguration()));
 
-        mActivity.info.configChanges &= ~ActivityInfo.CONFIG_ORIENTATION;
+        mActivity.info.configChanges &= ~CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(mTask.getConfiguration());
-        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE
+                : ORIENTATION_PORTRAIT;
         mTask.onRequestedOverrideConfigurationChanged(newConfig);
 
         mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
@@ -315,13 +323,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 mActivity.getConfiguration()));
 
-        mActivity.info.configChanges &= ~ActivityInfo.CONFIG_ORIENTATION;
+        mActivity.info.configChanges &= ~CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(mTask.getConfiguration());
-        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE
+                : ORIENTATION_PORTRAIT;
         mTask.onRequestedOverrideConfigurationChanged(newConfig);
 
-        doReturn(true).when(mTask.getTask()).isDragResizing();
+        doReturn(true).when(mTask.mTask).isDragResizing();
 
         mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
@@ -355,30 +364,39 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
+        mActivity = new ActivityBuilder(mService)
+                .setTask(mTask)
+                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
+                .build();
         mActivity.setState(ActivityStack.ActivityState.RESUMED, "Testing");
 
-        mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
         mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 mActivity.getConfiguration()));
 
-        mActivity.info.configChanges |= ActivityInfo.CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(mActivity.getConfiguration());
-        newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                ? Configuration.ORIENTATION_LANDSCAPE
-                : Configuration.ORIENTATION_PORTRAIT;
+        final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
+        final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
+        if (newConfig.orientation == ORIENTATION_PORTRAIT) {
+            newConfig.orientation = ORIENTATION_LANDSCAPE;
+            newConfig.screenWidthDp = longSide;
+            newConfig.screenHeightDp = shortSide;
+        } else {
+            newConfig.orientation = ORIENTATION_PORTRAIT;
+            newConfig.screenWidthDp = shortSide;
+            newConfig.screenHeightDp = longSide;
+        }
 
         // Mimic the behavior that display doesn't handle app's requested orientation.
-        doAnswer(invocation -> {
-            mTask.onConfigurationChanged(newConfig);
-            return null;
-        }).when(mActivity.mAppWindowToken).setOrientation(anyInt(), any(), any());
+        final DisplayContent dc = mTask.mTask.getDisplayContent();
+        doReturn(false).when(dc).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
 
         final int requestedOrientation;
         switch (newConfig.orientation) {
-            case Configuration.ORIENTATION_LANDSCAPE:
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            case ORIENTATION_LANDSCAPE:
+                requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE;
                 break;
-            case Configuration.ORIENTATION_PORTRAIT:
+            case ORIENTATION_PORTRAIT:
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                 break;
             default:
@@ -421,24 +439,33 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testPushConfigurationWhenLaunchTaskBehind() throws Exception {
+        mActivity = new ActivityBuilder(mService)
+                .setTask(mTask)
+                .setLaunchTaskBehind(true)
+                .setConfigChanges(CONFIG_ORIENTATION)
+                .build();
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
 
-        final TestActivityStack stack = (TestActivityStack) new StackBuilder(mRootActivityContainer)
-                .build();
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
         try {
-            stack.setIsTranslucent(false);
+            doReturn(false).when(stack).isStackTranslucent(any());
             assertFalse(mStack.shouldBeVisible(null /* starting */));
 
-            mTask.onRequestedOverrideConfigurationChanged(mTask.getConfiguration());
             mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                     mActivity.getConfiguration()));
 
-            mActivity.mLaunchTaskBehind = true;
-            mActivity.info.configChanges |= ActivityInfo.CONFIG_ORIENTATION;
             final Configuration newConfig = new Configuration(mActivity.getConfiguration());
-            newConfig.orientation = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                    ? Configuration.ORIENTATION_LANDSCAPE
-                    : Configuration.ORIENTATION_PORTRAIT;
+            final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
+            final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
+            if (newConfig.orientation == ORIENTATION_PORTRAIT) {
+                newConfig.orientation = ORIENTATION_LANDSCAPE;
+                newConfig.screenWidthDp = longSide;
+                newConfig.screenHeightDp = shortSide;
+            } else {
+                newConfig.orientation = ORIENTATION_PORTRAIT;
+                newConfig.screenWidthDp = shortSide;
+                newConfig.screenHeightDp = longSide;
+            }
 
             mTask.onConfigurationChanged(newConfig);
 
@@ -468,6 +495,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         setupDisplayContentForCompatDisplayInsets();
         final int decorHeight = 200; // e.g. The device has cutout.
         final DisplayPolicy policy = setupDisplayAndParentSize(600, 800).getDisplayPolicy();
+        spyOn(policy);
         doAnswer(invocationOnMock -> {
             final int rotation = invocationOnMock.<Integer>getArgument(0);
             final Rect insets = invocationOnMock.<Rect>getArgument(4);
@@ -482,7 +510,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 .when(mActivity.mAppWindowToken).getOrientationIgnoreVisibility();
-        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.minAspectRatio = mActivity.info.maxAspectRatio = 1;
         ensureActivityConfiguration();
         // The parent configuration doesn't change since the first resolved configuration, so the
@@ -506,19 +534,28 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testSizeCompatMode_FixedScreenConfigurationWhenMovingToDisplay() {
         // Initialize different bounds on a new display.
-        final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
-        newDisplay.getWindowConfiguration().setAppBounds(new Rect(0, 0, 1000, 2000));
-        newDisplay.getConfiguration().densityDpi = 300;
+        final Rect newDisplayBounds = new Rect(0, 0, 1000, 2000);
+        DisplayInfo info = new DisplayInfo();
+        mService.mContext.getDisplay().getDisplayInfo(info);
+        info.logicalWidth = newDisplayBounds.width();
+        info.logicalHeight = newDisplayBounds.height();
+        info.logicalDensityDpi = 300;
+
+        final ActivityDisplay newDisplay =
+                addNewActivityDisplayAt(info, ActivityDisplay.POSITION_TOP);
 
         mTask.getConfiguration().densityDpi = 200;
-        prepareFixedAspectRatioUnresizableActivity();
+        mActivity = new ActivityBuilder(mService)
+                .setTask(mTask)
+                .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
+                .setMaxAspectRatio(1.5f)
+                .build();
 
         final Rect originalBounds = new Rect(mActivity.getBounds());
         final int originalDpi = mActivity.getConfiguration().densityDpi;
 
         // Move the non-resizable activity to the new display.
         mStack.reparent(newDisplay, true /* onTop */, false /* displayRemoved */);
-        ensureActivityConfiguration();
 
         assertEquals(originalBounds, mActivity.getBounds());
         assertEquals(originalDpi, mActivity.getConfiguration().densityDpi);
@@ -531,9 +568,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
         when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
-        mTask.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        mTask.getConfiguration().orientation = ORIENTATION_PORTRAIT;
         mActivity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         ensureActivityConfiguration();
         final Rect originalBounds = new Rect(mActivity.getBounds());
 
@@ -579,7 +616,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mTask.getWindowConfiguration().setAppBounds(new Rect(0, 0, 600, 1200));
 
         // Simulate the display changes orientation.
-        doReturn(ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION
+        doReturn(ActivityInfo.CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION
                 | ActivityInfo.CONFIG_WINDOW_CONFIGURATION)
                         .when(display).getLastOverrideConfigurationChanges();
         mActivity.onConfigurationChanged(mTask.getConfiguration());
@@ -754,24 +791,17 @@ public class ActivityRecordTests extends ActivityTestsBase {
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */
     private void prepareFixedAspectRatioUnresizableActivity() {
         setupDisplayContentForCompatDisplayInsets();
-        when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.maxAspectRatio = 1.5f;
         ensureActivityConfiguration();
     }
 
     private void setupDisplayContentForCompatDisplayInsets() {
         final Rect displayBounds = mStack.getDisplay().getBounds();
-        final DisplayContent displayContent = setupDisplayAndParentSize(
-                displayBounds.width(), displayBounds.height());
-        doReturn(mock(DisplayPolicy.class)).when(displayContent).getDisplayPolicy();
-        doReturn(mock(WmDisplayCutout.class)).when(displayContent)
-                .calculateDisplayCutoutForRotation(anyInt());
+        setupDisplayAndParentSize(displayBounds.width(), displayBounds.height());
     }
 
     private DisplayContent setupDisplayAndParentSize(int width, int height) {
-        // The DisplayContent is already a mocked object.
         final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
         displayContent.mBaseDisplayWidth = width;
         displayContent.mBaseDisplayHeight = height;

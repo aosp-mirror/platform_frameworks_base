@@ -2813,7 +2813,7 @@ class ActivityStack extends ConfigurationContainer {
         // Launching this app's activity, make sure the app is no longer
         // considered stopped.
         try {
-            AppGlobals.getPackageManager().setPackageStoppedState(
+            mService.getPackageManager().setPackageStoppedState(
                     next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
         } catch (RemoteException e1) {
         } catch (IllegalArgumentException e) {

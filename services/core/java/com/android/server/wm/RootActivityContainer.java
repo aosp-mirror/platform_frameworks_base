@@ -227,15 +227,10 @@ class RootActivityContainer extends ConfigurationContainer
         mStackSupervisor.mRootActivityContainer = this;
     }
 
-    @VisibleForTesting
-    void setWindowContainer(RootWindowContainer container) {
-        mRootWindowContainer = container;
-        mRootWindowContainer.setRootActivityContainer(this);
-    }
-
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
-        setWindowContainer(mWindowManager.mRoot);
+        mRootWindowContainer = mWindowManager.mRoot;
+        mRootWindowContainer.setRootActivityContainer(this);
         mDisplayManager = mService.mContext.getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(this, mService.mUiHandler);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -2266,7 +2261,7 @@ class RootActivityContainer extends ConfigurationContainer
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode, int callingUid,
             boolean allowed) {
-        mStackSupervisor.mRunningTasks.getTasks(maxNum, list, ignoreActivityType,
+        mStackSupervisor.getRunningTasks().getTasks(maxNum, list, ignoreActivityType,
                 ignoreWindowingMode, mActivityDisplays, callingUid, allowed);
     }
 

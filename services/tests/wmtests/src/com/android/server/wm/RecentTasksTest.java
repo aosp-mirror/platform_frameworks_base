@@ -32,7 +32,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -53,14 +53,12 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -93,11 +91,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static final int TEST_QUIET_USER_ID = 20;
     private static final UserInfo DEFAULT_USER_INFO = new UserInfo();
     private static final UserInfo QUIET_USER_INFO = new UserInfo();
-    private static int sLastTaskId = 1;
-    private static int sLastStackId = 1;
     private static final int INVALID_STACK_ID = 999;
 
-    private TestActivityTaskManagerService mTestService;
     private ActivityDisplay mDisplay;
     private ActivityDisplay mOtherDisplay;
     private ActivityDisplay mSingleTaskDisplay;
@@ -115,13 +110,29 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mTestService = new MyTestActivityTaskManagerService(mContext);
-        mRecentTasks = (TestRecentTasks) mTestService.getRecentTasks();
+
+        // Set testing displays
+        mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
+        mOtherDisplay = createNewActivityDisplay();
+        mSingleTaskDisplay = createNewActivityDisplay();
+        mSingleTaskDisplay.setDisplayToSingleTaskInstance();
+        mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
+        mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
+        mRootActivityContainer.addChild(mSingleTaskDisplay, ActivityDisplay.POSITION_TOP);
+
+        // Set the recent tasks we should use for testing in this class.
+        mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
+        spyOn(mRecentTasks);
+        mService.setRecentTasks(mRecentTasks);
         mRecentTasks.loadParametersFromResources(mContext.getResources());
-        mRunningTasks = (TestRunningTasks) mTestService.mStackSupervisor.mRunningTasks;
-        mHomeStack = mTestService.mRootActivityContainer.getDefaultDisplay().getOrCreateStack(
+
+        // Set the running tasks we should use for testing in this class.
+        mRunningTasks = new TestRunningTasks();
+        mService.mStackSupervisor.setRunningTasks(mRunningTasks);
+
+        mHomeStack = mDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
-        mStack = mTestService.mRootActivityContainer.getDefaultDisplay().createStack(
+        mStack = mDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mCallbacksRecorder = new CallbacksRecorder();
         mRecentTasks.registerCallback(mCallbacksRecorder);
@@ -723,7 +734,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         ActivityStack stack = mTasks.get(2).getStack();
         stack.moveToFront("", mTasks.get(2));
-        doReturn(stack).when(mTestService.mRootActivityContainer).getTopDisplayFocusedStack();
+        doReturn(stack).when(mService.mRootActivityContainer).getTopDisplayFocusedStack();
 
         // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
@@ -742,10 +753,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
         final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack aboveHomeStack = new MyTestActivityStack(mDisplay, supervisor);
+        final ActivityStack aboveHomeStack = mDisplay.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
         // the tasks belong in stacks above the home stack
@@ -761,11 +771,11 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBehindHomeStackTasks_expectTaskTrimmed() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
-        final ActivityStack behindHomeStack = new MyTestActivityStack(mDisplay, supervisor);
+        final ActivityStack behindHomeStack = mDisplay.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack aboveHomeStack = new MyTestActivityStack(mDisplay, supervisor);
+        final ActivityStack aboveHomeStack = mDisplay.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
         // the home stack is trimmed once a new task is added
@@ -783,10 +793,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testOtherDisplayTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
         final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack otherDisplayStack = new MyTestActivityStack(mOtherDisplay, supervisor);
+        final ActivityStack otherDisplayStack = mOtherDisplay.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
@@ -887,16 +896,16 @@ public class RecentTasksTest extends ActivityTestsBase {
         mStack.remove();
 
         // The following APIs should not restore task from recents to the active list.
-        assertNotRestoreTask(() -> mTestService.setFocusedTask(taskId));
-        assertNotRestoreTask(() -> mTestService.startSystemLockTaskMode(taskId));
-        assertNotRestoreTask(() -> mTestService.cancelTaskWindowTransition(taskId));
+        assertNotRestoreTask(() -> mService.setFocusedTask(taskId));
+        assertNotRestoreTask(() -> mService.startSystemLockTaskMode(taskId));
+        assertNotRestoreTask(() -> mService.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
-                () -> mTestService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
+                () -> mService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
         assertNotRestoreTask(
-                () -> mTestService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
+                () -> mService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
                         false/* toTop */));
         assertNotRestoreTask(
-                () -> mTestService.setTaskWindowingModeSplitScreenPrimary(taskId,
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(taskId,
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
                         false /* toTop */, false /* animate */, null /* initialBounds */,
                         true /* showRecents */));
@@ -910,7 +919,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.remove(task);
 
         TaskChangeNotificationController controller =
-                mTestService.getTaskChangeNotificationController();
+                mService.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
     }
 
@@ -923,7 +932,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         // 2 calls - Once for add and once for remove
         TaskChangeNotificationController controller =
-                mTestService.getTaskChangeNotificationController();
+                mService.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
     }
 
@@ -938,7 +947,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         // 4 calls - Twice for add and twice for remove
         TaskChangeNotificationController controller =
-                mTestService.getTaskChangeNotificationController();
+                mService.getTaskChangeNotificationController();
         verify(controller, times(4)).notifyTaskListUpdated();
     }
 
@@ -980,7 +989,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testNotRecentsComponent_denyApiAccess() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mTestService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Expect the following methods to fail due to recents component not being set
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
@@ -992,7 +1001,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testRecentsComponent_allowApiAccessWithoutPermissions() {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mTestService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
 
         // Set the recents component and ensure that the following calls do not fail
@@ -1002,62 +1011,62 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private void doTestRecentTasksApis(boolean expectCallable) {
-        assertSecurityException(expectCallable, () -> mTestService.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mTestService.removeStacksInWindowingModes(
+                () -> mService.removeStacksInWindowingModes(
                         new int[]{WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mTestService.removeStacksWithActivityTypes(
+                () -> mService.removeStacksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
-        assertSecurityException(expectCallable, () -> mTestService.removeTask(0));
+        assertSecurityException(expectCallable, () -> mService.removeTask(0));
         assertSecurityException(expectCallable,
-                () -> mTestService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
+                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTaskToStack(0, INVALID_STACK_ID, true));
+                () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.setTaskWindowingModeSplitScreenPrimary(0,
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(0,
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect(), true));
-        assertSecurityException(expectCallable, () -> mTestService.dismissSplitScreenMode(true));
-        assertSecurityException(expectCallable, () -> mTestService.dismissPip(true, 0));
+        assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
+        assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+                () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable,
-                () -> mTestService.resizeStack(INVALID_STACK_ID, new Rect(), true, true, true, 0));
+                () -> mService.resizeStack(INVALID_STACK_ID, new Rect(), true, true, true, 0));
         assertSecurityException(expectCallable,
-                () -> mTestService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
+                () -> mService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
                         new Rect()));
         assertSecurityException(expectCallable,
-                () -> mTestService.resizePinnedStack(new Rect(), new Rect()));
-        assertSecurityException(expectCallable, () -> mTestService.getAllStackInfos());
+                () -> mService.resizePinnedStack(new Rect(), new Rect()));
+        assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
         assertSecurityException(expectCallable,
-                () -> mTestService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
+                () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
         assertSecurityException(expectCallable, () -> {
             try {
-                mTestService.getFocusedStackInfo();
+                mService.getFocusedStackInfo();
             } catch (RemoteException e) {
                 // Ignore
             }
         });
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
+                () -> mService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mTestService.getTaskSnapshot(0, true));
-        assertSecurityException(expectCallable, () -> mTestService.registerTaskStackListener(null));
+                () -> mService.startActivityFromRecents(0, new Bundle()));
+        assertSecurityException(expectCallable, () -> mService.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mService.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
-                () -> mTestService.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mTestService.getTaskDescription(0));
-        assertSecurityException(expectCallable, () -> mTestService.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mTestService.startRecentsActivity(null, null,
+                () -> mService.unregisterTaskStackListener(null));
+        assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
+        assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
+        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
                 null));
-        assertSecurityException(expectCallable, () -> mTestService.cancelRecentsAnimation(true));
-        assertSecurityException(expectCallable, () -> mTestService.stopAppSwitches());
-        assertSecurityException(expectCallable, () -> mTestService.resumeAppSwitches());
+        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation(true));
+        assertSecurityException(expectCallable, () -> mService.stopAppSwitches());
+        assertSecurityException(expectCallable, () -> mService.resumeAppSwitches());
     }
 
     private void testGetTasksApis(boolean expectCallable) {
-        mTestService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
-        mTestService.getTasks(MAX_VALUE);
+        mService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
+        mService.getTasks(MAX_VALUE);
         if (expectCallable) {
             assertTrue(mRecentTasks.mLastAllowed);
             assertTrue(mRunningTasks.mLastAllowed);
@@ -1072,10 +1081,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private TaskBuilder createTaskBuilder(String packageName, String className) {
-        return new TaskBuilder(mTestService.mStackSupervisor)
+        return new TaskBuilder(mService.mStackSupervisor)
                 .setComponent(new ComponentName(packageName, className))
                 .setStack(mStack)
-                .setTaskId(sLastTaskId++)
                 .setUserId(TEST_USER_0_ID);
     }
 
@@ -1137,68 +1145,6 @@ public class RecentTasksTest extends ActivityTestsBase {
         if (noSecurityException != expectCallable) {
             fail("Expected callable: " + expectCallable + " but got no security exception: "
                     + noSecurityException);
-        }
-    }
-
-    private class MyTestActivityTaskManagerService extends TestActivityTaskManagerService {
-        MyTestActivityTaskManagerService(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected RecentTasks createRecentTasks() {
-            return spy(new TestRecentTasks(this, mTaskPersister));
-        }
-
-        @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
-            if (mTestStackSupervisor == null) {
-                mTestStackSupervisor = new MyTestActivityStackSupervisor(this, mH.getLooper());
-            }
-            return mTestStackSupervisor;
-        }
-
-        @Override
-        void createDefaultDisplay() {
-            super.createDefaultDisplay();
-            mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
-            mOtherDisplay = TestActivityDisplay.create(mTestStackSupervisor, DEFAULT_DISPLAY + 1);
-            mSingleTaskDisplay = TestActivityDisplay.create(mTestStackSupervisor,
-                    DEFAULT_DISPLAY + 2);
-            mSingleTaskDisplay.setDisplayToSingleTaskInstance();
-            mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
-            mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
-            mRootActivityContainer.addChild(mSingleTaskDisplay, ActivityDisplay.POSITION_TOP);
-        }
-    }
-
-    private class MyTestActivityStackSupervisor extends TestActivityStackSupervisor {
-        MyTestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
-            super(service, looper);
-        }
-
-        @Override
-        RunningTasks createRunningTasks() {
-            mRunningTasks = new TestRunningTasks();
-            return mRunningTasks;
-        }
-    }
-
-    private static class MyTestActivityStack extends TestActivityStack {
-        private ActivityDisplay mDisplay = null;
-
-        MyTestActivityStack(ActivityDisplay display, ActivityStackSupervisor supervisor) {
-            super(display, sLastStackId++, supervisor, WINDOWING_MODE_FULLSCREEN,
-                    ACTIVITY_TYPE_STANDARD, true /* onTop */, false /* createActivity */);
-            mDisplay = display;
-        }
-
-        @Override
-        ActivityDisplay getDisplay() {
-            if (mDisplay != null) {
-                return mDisplay;
-            }
-            return super.getDisplay();
         }
     }
 

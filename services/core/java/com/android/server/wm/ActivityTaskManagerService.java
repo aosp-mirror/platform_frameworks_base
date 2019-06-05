@@ -43,7 +43,6 @@ import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
-import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
@@ -361,7 +360,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     /**
-     * It is the same instance as {@link mGlobalLock}, just declared as a type that the
+     * It is the same instance as {@link #mGlobalLock}, just declared as a type that the
      * locked-region-code-injection does't recognize it. It is used to skip wrapping priority
      * booster for places that are already in the scope of another booster (e.g. computing oom-adj).
      *
@@ -730,7 +729,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
-        final boolean isPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
@@ -761,10 +759,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mSupportsPictureInPicture = false;
                 mSupportsMultiDisplay = false;
             }
-            mWindowManager.setForceResizableTasks(mForceResizableActivities);
-            mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
-            mWindowManager.setSupportsFreeformWindowManagement(mSupportsFreeformWindowManagement);
-            mWindowManager.setIsPc(isPc);
             mWindowManager.mRoot.onSettingsRetrieved();
             // This happens before any activities are started, so we can change global configuration
             // in-place.
@@ -821,8 +815,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 new TaskChangeNotificationController(mGlobalLock, mStackSupervisor, mH);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mH);
         mActivityStartController = new ActivityStartController(this);
-        mRecentTasks = createRecentTasks();
-        mStackSupervisor.setRecentTasks(mRecentTasks);
+        setRecentTasks(new RecentTasks(this, mStackSupervisor));
         mVrController = new VrController(mGlobalLock);
         mKeyguardController = mStackSupervisor.getKeyguardController();
     }
@@ -890,8 +883,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
-    protected RecentTasks createRecentTasks() {
-        return new RecentTasks(this, mStackSupervisor);
+    @VisibleForTesting
+    protected void setRecentTasks(RecentTasks recentTasks) {
+        mRecentTasks = recentTasks;
+        mStackSupervisor.setRecentTasks(recentTasks);
     }
 
     RecentTasks getRecentTasks() {

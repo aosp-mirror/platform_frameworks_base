@@ -329,9 +329,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
                 anyBoolean(), anyBoolean(), any(), any(), any());
 
-        // Use factory that only returns spy task.
-        mockTaskRecordFactory();
-
         if (mockGetLaunchStack) {
             // Instrument the stack and task used.
             final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
@@ -482,7 +479,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Test
     public void testTaskModeViolation() {
         final ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
-        ((TestActivityDisplay) display).removeAllTasks();
+        display.removeAllTasks();
         assertNoTasks(display);
 
         final ActivityStarter starter = prepareStarter(0);
@@ -676,18 +673,27 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(isCallingUidDeviceOwner).when(mService).isDeviceOwner(callingUid);
 
         final ActivityOptions options = spy(ActivityOptions.makeBasic());
+        ActivityRecord[] outActivity = new ActivityRecord[1];
         ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK)
                 .setCallingPackage("com.whatever.dude")
                 .setCaller(caller)
                 .setCallingUid(callingUid)
                 .setRealCallingUid(realCallingUid)
-                .setActivityOptions(new SafeActivityOptions(options));
+                .setActivityOptions(new SafeActivityOptions(options))
+                .setOutActivity(outActivity);
 
         final int result = starter.setReason("testBackgroundActivityStarts_" + name).execute();
 
         assertEquals(ActivityStarter.getExternalResult(
                 shouldHaveAborted ? START_ABORTED : START_SUCCESS), result);
         verify(options, times(shouldHaveAborted ? 1 : 0)).abort();
+
+        final ActivityRecord startedActivity = outActivity[0];
+        if (startedActivity != null && startedActivity.getTaskRecord() != null) {
+            // Remove the activity so it doesn't interfere with with subsequent activity launch
+            // tests from this method.
+            startedActivity.getTaskRecord().removeActivity(startedActivity);
+        }
     }
 
     /**

@@ -20,8 +20,6 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -38,20 +36,18 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 
 import static org.mockito.Mockito.mock;
 
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.hardware.display.DisplayManagerGlobal;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
-import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
@@ -79,10 +75,6 @@ class WindowTestsBase {
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
     private Session mMockSession;
-    // The default display is removed in {@link #setUp} and then we iterate over all displays to
-    // make sure we don't collide with any existing display. If we run into no other display, the
-    // added display should be treated as default. This cannot be the default display
-    private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
 
     /** Non-default display. */
@@ -134,27 +126,16 @@ class WindowTestsBase {
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
             mMockSession = mock(Session.class);
-            mTransaction = spy(StubTransaction.class);
 
             final Context context = getInstrumentation().getTargetContext();
 
             mWm = mSystemServicesTestRule.getWindowManagerService();
-
-            // Setup factory classes to prevent calls to native code.
-
-            // Return a spied Transaction class than can be used to verify calls.
-            mWm.mTransactionFactory = () -> mTransaction;
-            // Return a SurfaceControl.Builder class that creates mocked SurfaceControl instances.
-            mWm.mSurfaceBuilderFactory = (unused) -> new MockSurfaceControlBuilder();
-            // Return mocked Surface instances.
-            mWm.mSurfaceFactory = () -> mock(Surface.class);
+            mTransaction = mSystemServicesTestRule.mTransaction;
 
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
             mDisplayContent = createNewDisplay();
-            mWm.mDisplayEnabled = true;
-            mWm.mDisplayReady = true;
 
             // Set-up some common windows.
             mCommonWindows = new HashSet<>();
@@ -211,12 +192,6 @@ class WindowTestsBase {
                     nonCommonWindows.pollLast().removeImmediately();
                 }
 
-                for (int i = mWm.mRoot.mChildren.size() - 1; i >= 0; --i) {
-                    final DisplayContent displayContent = mWm.mRoot.mChildren.get(i);
-                    if (!displayContent.isDefaultDisplay) {
-                        displayContent.removeImmediately();
-                    }
-                }
                 // Remove app transition & window freeze timeout callbacks to prevent unnecessary
                 // actions after test.
                 mWm.getDefaultDisplayContentLocked().mAppTransition
@@ -408,13 +383,11 @@ class WindowTestsBase {
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
-    DisplayContent createNewDisplay(DisplayInfo displayInfo) {
-        final int displayId = sNextDisplayId++;
-        final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
-                displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        synchronized (mWm.mGlobalLock) {
-            return new DisplayContent(display, mWm, mock(ActivityDisplay.class));
-        }
+    DisplayContent createNewDisplay(DisplayInfo info) {
+        final ActivityDisplay display =
+                TestActivityDisplay.create(mWm.mAtmService.mStackSupervisor, info);
+        mWm.mAtmService.mRootActivityContainer.addChild(display, POSITION_TOP);
+        return display.mDisplayContent;
     }
 
     /**
@@ -428,17 +401,7 @@ class WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.state = displayState;
-        final int displayId = sNextDisplayId++;
-        final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
-                displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        synchronized (mWm.mGlobalLock) {
-            // Display creation is driven by DisplayWindowController via ActivityStackSupervisor.
-            // We skip those steps here.
-            final ActivityDisplay mockAd = mock(ActivityDisplay.class);
-            final DisplayContent displayContent = mWm.mRoot.createDisplayContent(display, mockAd);
-            displayContent.reconfigureDisplayLocked();
-            return displayContent;
-        }
+        return createNewDisplay(displayInfo);
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */

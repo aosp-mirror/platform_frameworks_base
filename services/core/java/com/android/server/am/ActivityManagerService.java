@@ -1480,8 +1480,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     public ActivityTaskManagerService mActivityTaskManager;
     @VisibleForTesting
     public ActivityTaskManagerInternal mAtmInternal;
+    UriGrantsManagerInternal mUgmInternal;
     @VisibleForTesting
-    public UriGrantsManagerInternal mUgmInternal;
+    public final ActivityManagerInternal mInternal;
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -2413,6 +2414,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+        mInternal = new LocalService();
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2566,6 +2569,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Setting background thread cpuset failed");
         }
 
+        mInternal = new LocalService();
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -2583,7 +2587,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.publish();
         mAppOpsService.publish(mContext);
         Slog.d("AppOps", "AppOpsService published");
-        LocalServices.addService(ActivityManagerInternal.class, new LocalService());
+        LocalServices.addService(ActivityManagerInternal.class, mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
         mUgmInternal.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();

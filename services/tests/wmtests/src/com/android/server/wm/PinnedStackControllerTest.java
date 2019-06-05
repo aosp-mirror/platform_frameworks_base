@@ -61,7 +61,7 @@ public class PinnedStackControllerTest extends WindowTestsBase {
 
     @Test
     public void setShelfHeight_shelfVisibilityChangedTriggered() throws RemoteException {
-        mWm.mSupportsPictureInPicture = true;
+        mWm.mAtmService.mSupportsPictureInPicture = true;
         mWm.registerPinnedStackListener(DEFAULT_DISPLAY, mIPinnedStackListener);
 
         verify(mIPinnedStackListener).onImeVisibilityChanged(false, 0);

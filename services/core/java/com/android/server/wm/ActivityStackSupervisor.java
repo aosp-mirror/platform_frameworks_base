@@ -250,7 +250,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     RecentTasks mRecentTasks;
 
     /** Helper class to abstract out logic for fetching the set of currently running tasks */
-    RunningTasks mRunningTasks;
+    private RunningTasks mRunningTasks;
 
     final ActivityStackSupervisorHandler mHandler;
     final Looper mLooper;
@@ -444,7 +444,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         mInitialized = true;
-        mRunningTasks = createRunningTasks();
+        setRunningTasks(new RunningTasks());
 
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
                 mHandler.getLooper());
@@ -485,13 +485,20 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void setRecentTasks(RecentTasks recentTasks) {
+        if (mRecentTasks != null) {
+            mRecentTasks.unregisterCallback(this);
+        }
         mRecentTasks = recentTasks;
         mRecentTasks.registerCallback(this);
     }
 
     @VisibleForTesting
-    RunningTasks createRunningTasks() {
-        return new RunningTasks();
+    void setRunningTasks(RunningTasks runningTasks) {
+        mRunningTasks = runningTasks;
+    }
+
+    RunningTasks getRunningTasks() {
+        return mRunningTasks;
     }
 
     /**
