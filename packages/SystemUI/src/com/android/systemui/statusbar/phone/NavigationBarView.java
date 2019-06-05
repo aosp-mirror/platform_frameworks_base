@@ -1095,8 +1095,13 @@ public class NavigationBarView extends FrameLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        int leftInset = insets.getSystemWindowInsetLeft();
+        int rightInset = insets.getSystemWindowInsetRight();
+        setPadding(leftInset, insets.getSystemWindowInsetTop(), rightInset,
+                insets.getSystemWindowInsetBottom());
+        // we're passing the insets onto the gesture handler since the back arrow is only
+        // conditionally added and doesn't always get all the insets.
+        mEdgeBackGestureHandler.setInsets(leftInset, rightInset);
         return super.onApplyWindowInsets(insets);
     }
 
