@@ -7098,14 +7098,28 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
-     * fullscreen opaque Activity.
+     * Convert an activity, which particularly with {@link android.R.attr#windowIsTranslucent} or
+     * {@link android.R.attr#windowIsFloating} attribute, to a fullscreen opaque activity, or
+     * convert it from opaque back to translucent.
+     *
+     * @param translucent {@code true} convert from opaque to translucent.
+     *                    {@code false} convert from translucent to opaque.
+     * @return The result of setting translucency. Return {@code true} if set successfully,
+     *         {@code false} otherwise.
+     */
+    public boolean setTranslucent(boolean translucent) {
+        if (translucent) {
+            return convertToTranslucent(null /* callback */, null /* options */);
+        } else {
+            return convertFromTranslucentInternal();
+        }
+    }
+
+    /**
+     * Convert an activity to a fullscreen opaque activity.
      * <p>
-     * Call this whenever the background of a translucent Activity has changed to become opaque.
-     * Doing so will allow the {@link android.view.Surface} of the Activity behind to be released.
-     * <p>
-     * This call has no effect on non-translucent activities or on activities with the
-     * {@link android.R.attr#windowIsFloating} attribute.
+     * Call this whenever the background of a translucent activity has changed to become opaque.
+     * Doing so will allow the {@link android.view.Surface} of the activity behind to be released.
      *
      * @see #convertToTranslucent(android.app.Activity.TranslucentConversionListener,
      * ActivityOptions)
@@ -7115,31 +7129,33 @@ public class Activity extends ContextThemeWrapper
      */
     @SystemApi
     public void convertFromTranslucent() {
+        convertFromTranslucentInternal();
+    }
+
+    private boolean convertFromTranslucentInternal() {
         try {
             mTranslucentCallback = null;
             if (ActivityTaskManager.getService().convertFromTranslucent(mToken)) {
                 WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, true);
+                return true;
             }
         } catch (RemoteException e) {
             // pass
         }
+        return false;
     }
 
     /**
-     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} back from
-     * opaque to translucent following a call to {@link #convertFromTranslucent()}.
+     * Convert an activity to a translucent activity.
      * <p>
-     * Calling this allows the Activity behind this one to be seen again. Once all such Activities
+     * Calling this allows the activity behind this one to be seen again. Once all such activities
      * have been redrawn {@link TranslucentConversionListener#onTranslucentConversionComplete} will
      * be called indicating that it is safe to make this activity translucent again. Until
      * {@link TranslucentConversionListener#onTranslucentConversionComplete} is called the image
-     * behind the frontmost Activity will be indeterminate.
-     * <p>
-     * This call has no effect on non-translucent activities or on activities with the
-     * {@link android.R.attr#windowIsFloating} attribute.
+     * behind the frontmost activity will be indeterminate.
      *
-     * @param callback the method to call when all visible Activities behind this one have been
-     * drawn and it is safe to make this Activity translucent again.
+     * @param callback the method to call when all visible activities behind this one have been
+     * drawn and it is safe to make this activity translucent again.
      * @param options activity options delivered to the activity below this one. The options
      * are retrieved using {@link #getActivityOptions}.
      * @return <code>true</code> if Window was opaque and will become translucent or
