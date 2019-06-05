@@ -1523,6 +1523,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override  // UnlockMethodCache.OnUnlockMethodChangedListener
     public void onUnlockMethodStateChanged() {
+        // Unlock method state changed. Notify KeguardMonitor
+        updateKeyguardState();
         logStateToEventlog();
     }
 
@@ -3419,9 +3421,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         checkBarModes();
         updateScrimController();
         mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
-        mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mUnlockMethodCache.isMethodSecure(),
-                mStatusBarKeyguardViewManager.isOccluded());
+        updateKeyguardState();
         Trace.endSection();
     }
 
@@ -3458,6 +3458,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mStatusBarStateController.setIsDozing(dozing);
+    }
+
+    private void updateKeyguardState() {
+        mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
+                mUnlockMethodCache.isMethodSecure(),
+                mStatusBarKeyguardViewManager.isOccluded());
     }
 
     public void onActivationReset() {
