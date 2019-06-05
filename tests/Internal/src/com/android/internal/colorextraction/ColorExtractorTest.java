@@ -47,17 +47,19 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ColorExtractorTest {
 
-    Context mContext;
+    private Context mContext;
+    private WallpaperManager mWallpaperManager;
 
     @Before
     public void setup() {
         mContext = InstrumentationRegistry.getContext();
+        mWallpaperManager = mock(WallpaperManager.class);
     }
 
     @Test
     public void ColorExtractor_extractWhenInitialized() {
         ExtractionType type = mock(Tonal.class);
-        new ColorExtractor(mContext, type, true);
+        new ColorExtractor(mContext, type, true, mWallpaperManager);
         // 1 for lock and 1 for system
         verify(type, times(2))
                 .extractInto(any(), any(), any(), any());
@@ -84,7 +86,7 @@ public class ColorExtractorTest {
                     outGradientColorsDark.set(colorsExpectedDark);
                     outGradientColorsExtraDark.set(colorsExpectedExtraDark);
                 };
-        ColorExtractor extractor = new ColorExtractor(mContext, type, true);
+        ColorExtractor extractor = new ColorExtractor(mContext, type, true, mWallpaperManager);
 
         GradientColors colors = extractor.getColors(WallpaperManager.FLAG_SYSTEM,
                 ColorExtractor.TYPE_NORMAL);
@@ -99,7 +101,8 @@ public class ColorExtractorTest {
     public void addOnColorsChangedListener_invokesListener() {
         ColorExtractor.OnColorsChangedListener mockedListeners =
                 mock(ColorExtractor.OnColorsChangedListener.class);
-        ColorExtractor extractor = new ColorExtractor(mContext, new Tonal(mContext), true);
+        ColorExtractor extractor = new ColorExtractor(mContext, new Tonal(mContext), true,
+                mWallpaperManager);
         extractor.addOnColorsChangedListener(mockedListeners);
 
         extractor.onColorsChanged(new WallpaperColors(Color.valueOf(Color.RED), null, null),
