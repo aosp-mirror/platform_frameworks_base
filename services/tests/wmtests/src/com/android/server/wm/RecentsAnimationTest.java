@@ -24,13 +24,17 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -104,6 +108,39 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
         assertFalse(recentActivity.visible);
+    }
+
+    @Test
+    public void testRestartRecentsActivity() throws Exception {
+        // Have a recents activity that is not attached to its process (ActivityRecord.app = null).
+        ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        ActivityStack recentsStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        ActivityRecord recentActivity = new ActivityBuilder(mService).setComponent(
+                mRecentsComponent).setCreateTask(true).setStack(recentsStack).build();
+        WindowProcessController app = recentActivity.app;
+        recentActivity.app = null;
+
+        // Start an activity on top.
+        new ActivityBuilder(mService).setCreateTask(true).build().getActivityStack().moveToFront(
+                "testRestartRecentsActivity");
+
+        doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */);
+        doReturn(app).when(mService).getProcessController(eq(recentActivity.processName), anyInt());
+        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        AppWarnings appWarnings = mService.getAppWarningsLocked();
+        spyOn(appWarnings);
+        doNothing().when(appWarnings).onStartActivity(any());
+
+        startRecentsActivity();
+
+        // Recents activity must be restarted, but not be resumed while running recents animation.
+        verify(mRootActivityContainer.mStackSupervisor).startSpecificActivityLocked(
+                eq(recentActivity), eq(false), anyBoolean());
+        assertThat(recentActivity.getState()).isEqualTo(PAUSED);
     }
 
     @Test
