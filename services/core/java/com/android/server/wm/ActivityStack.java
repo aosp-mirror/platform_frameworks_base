@@ -2639,7 +2639,7 @@ class ActivityStack extends ConfigurationContainer {
 
         if (!hasRunningActivity) {
             // There are no activities left in the stack, let's look somewhere else.
-            return resumeTopActivityInNextFocusableStack(prev, options, "noMoreActivities");
+            return resumeNextFocusableActivityWhenStackIsEmpty(prev, options);
         }
 
         next.delayedResume = false;
@@ -3040,21 +3040,33 @@ class ActivityStack extends ConfigurationContainer {
         return true;
     }
 
-    private boolean resumeTopActivityInNextFocusableStack(ActivityRecord prev,
-            ActivityOptions options, String reason) {
-        final ActivityStack nextFocusedStack = adjustFocusToNextFocusableStack(reason);
-        if (nextFocusedStack != null) {
-            // Try to move focus to the next visible stack with a running activity if this
-            // stack is not covering the entire screen or is on a secondary display (with no home
-            // stack).
-            return mRootActivityContainer.resumeFocusedStacksTopActivities(nextFocusedStack, prev,
-                    null /* targetOptions */);
+    /**
+     * Resume the next eligible activity in a focusable stack when this one does not have any
+     * running activities left. The focus will be adjusted to the next focusable stack and
+     * top running activities will be resumed in all focusable stacks. However, if the current stack
+     * is a home stack - we have to keep it focused, start and resume a home activity on the current
+     * display instead to make sure that the display is not empty.
+     */
+    private boolean resumeNextFocusableActivityWhenStackIsEmpty(ActivityRecord prev,
+            ActivityOptions options) {
+        final String reason = "noMoreActivities";
+
+        if (!isActivityTypeHome()) {
+            final ActivityStack nextFocusedStack = adjustFocusToNextFocusableStack(reason);
+            if (nextFocusedStack != null) {
+                // Try to move focus to the next visible stack with a running activity if this
+                // stack is not covering the entire screen or is on a secondary display with no home
+                // stack.
+                return mRootActivityContainer.resumeFocusedStacksTopActivities(nextFocusedStack,
+                        prev, null /* targetOptions */);
+            }
         }
 
-        // Let's just start up the Launcher...
+        // If the current stack is a home stack, or if focus didn't switch to a different stack -
+        // just start up the Launcher...
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
-                "resumeTopActivityInNextFocusableStack: " + reason + ", go home");
+                "resumeNextFocusableActivityWhenStackIsEmpty: " + reason + ", go home");
         return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
     }
 
