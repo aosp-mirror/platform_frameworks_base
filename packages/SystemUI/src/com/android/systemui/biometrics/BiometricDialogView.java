@@ -234,6 +234,10 @@ public abstract class BiometricDialogView extends LinearLayout {
             showTryAgainButton(false /* show */);
             mCallback.onTryAgainPressed();
         });
+
+        // Must set these in order for the back button events to be received.
+        mLayout.setFocusableInTouchMode(true);
+        mLayout.requestFocus();
     }
 
     public void onSaveState(Bundle bundle) {
