@@ -118,9 +118,7 @@ class AppTaskImpl extends IAppTask.Stub {
                         null /* intent */, "moveToFront");
                 if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
                         callingPackage, -1, -1, callerApp, null, false, null)) {
-                    boolean abort = !mService.isBackgroundActivityStartsEnabled();
-                    starter.showBackgroundActivityBlockedToast(abort, callingPackage);
-                    if (abort) {
+                    if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }
                 }

@@ -101,7 +101,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -118,9 +117,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
-import android.widget.Toast;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
@@ -1087,12 +1084,6 @@ class ActivityStarter {
                     + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
             return false;
         }
-        // don't abort if the callingPackage is temporarily whitelisted
-        if (mService.isPackageNameWhitelistedForBgActivityStarts(callingPackage)) {
-            Slog.w(TAG, "Background activity start for " + callingPackage
-                    + " temporarily whitelisted. This will not be supported in future Q builds.");
-            return false;
-        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
@@ -1115,18 +1106,6 @@ class ActivityStarter {
                     (originatingPendingIntent != null));
         }
         return true;
-    }
-
-    // TODO: remove this toast after feature development is done
-    void showBackgroundActivityBlockedToast(boolean abort, String callingPackage) {
-        final Resources res = mService.mContext.getResources();
-        final String toastMsg = res.getString(abort
-                        ? R.string.activity_starter_block_bg_activity_starts_enforcing
-                        : R.string.activity_starter_block_bg_activity_starts_permissive,
-                callingPackage);
-        mService.mUiHandler.post(() -> {
-            Toast.makeText(mService.mContext, toastMsg, Toast.LENGTH_LONG).show();
-        });
     }
 
     /**
@@ -1509,7 +1488,6 @@ class ActivityStarter {
     private boolean handleBackgroundActivityAbort(ActivityRecord r) {
         // TODO(b/131747138): Remove toast and refactor related code in Q release.
         boolean abort = !mService.isBackgroundActivityStartsEnabled();
-        showBackgroundActivityBlockedToast(abort, r.launchedFromPackage);
         if (!abort) {
             return false;
         }

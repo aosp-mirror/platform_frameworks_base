@@ -599,15 +599,7 @@ class UserController implements Handler.Callback {
 
     int stopUser(final int userId, final boolean force, final IStopUserCallback stopUserCallback,
             KeyEvictedCallback keyEvictedCallback) {
-        if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: switchUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
         if (userId < 0 || userId == UserHandle.USER_SYSTEM) {
             throw new IllegalArgumentException("Can't stop system user " + userId);
         }
@@ -1004,16 +996,8 @@ class UserController implements Handler.Callback {
             final int userId,
             final boolean foreground,
             @Nullable IProgressListener unlockListener) {
-        if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: switchUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
 
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUser");
         Slog.i(TAG, "Starting userid:" + userId + " fg:" + foreground);
 
         final int callingUid = Binder.getCallingUid();
@@ -1220,16 +1204,7 @@ class UserController implements Handler.Callback {
     }
 
     boolean unlockUser(final int userId, byte[] token, byte[] secret, IProgressListener listener) {
-        if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: unlockUser() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "unlockUser");
         final long binderToken = Binder.clearCallingIdentity();
         try {
             return unlockUserCleared(userId, token, secret, listener);
@@ -1313,6 +1288,7 @@ class UserController implements Handler.Callback {
     }
 
     boolean switchUser(final int targetUserId) {
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "switchUser");
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
         int currentUserId = getCurrentUserId();
         UserInfo targetUserInfo = getUserInfo(targetUserId);
@@ -1667,15 +1643,7 @@ class UserController implements Handler.Callback {
 
     void registerUserSwitchObserver(IUserSwitchObserver observer, String name) {
         Preconditions.checkNotNull(name, "Observer name cannot be null");
-        if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            final String msg = "Permission Denial: registerUserSwitchObserver() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + INTERACT_ACROSS_USERS_FULL;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "registerUserSwitchObserver");
         mUserSwitchObservers.register(observer, name);
     }
 
@@ -1920,6 +1888,18 @@ class UserController implements Handler.Callback {
 
     boolean exists(int userId) {
         return mInjector.getUserManager().exists(userId);
+    }
+
+    private void checkCallingPermission(String permission, String methodName) {
+        if (mInjector.checkCallingPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission denial: " + methodName
+                    + "() from pid=" + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + permission;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
     }
 
     private void enforceShellRestriction(String restriction, int userHandle) {

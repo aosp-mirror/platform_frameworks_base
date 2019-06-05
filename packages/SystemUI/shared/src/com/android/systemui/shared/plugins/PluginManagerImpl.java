@@ -215,7 +215,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Uri uri = intent.getData();
             ComponentName component = ComponentName.unflattenFromString(
                     uri.toString().substring(10));
-            if (mWhitelistedPlugins.contains(component.getPackageName())) {
+            if (isPluginWhitelisted(component)) {
                 // Don't disable whitelisted plugins as they are a part of the OS.
                 return;
             }
@@ -288,7 +288,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     /** Returns class loader specific for the given plugin. */
     public ClassLoader getClassLoader(ApplicationInfo appInfo) {
-        if (!isDebuggable && !mWhitelistedPlugins.contains(appInfo.packageName)) {
+        if (!isDebuggable && !isPluginPackageWhitelisted(appInfo.packageName)) {
             Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:"
                     + appInfo.sourceDir + ", pkg: " + appInfo.packageName);
             return null;
@@ -350,6 +350,34 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             return new PluginInstanceManager(context, action, listener, allowMultiple, looper,
                     new VersionInfo().addClass(cls), manager);
         }
+    }
+
+    private boolean isPluginPackageWhitelisted(String packageName) {
+        for (String componentNameOrPackage : mWhitelistedPlugins) {
+            ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
+            if (componentName != null) {
+                if (componentName.getPackageName().equals(packageName)) {
+                    return true;
+                }
+            } else if (componentNameOrPackage.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPluginWhitelisted(ComponentName pluginName) {
+        for (String componentNameOrPackage : mWhitelistedPlugins) {
+            ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
+            if (componentName != null) {
+                if (componentName.equals(pluginName)) {
+                    return true;
+                }
+            } else if (componentNameOrPackage.equals(pluginName.getPackageName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // This allows plugins to include any libraries or copied code they want by only including

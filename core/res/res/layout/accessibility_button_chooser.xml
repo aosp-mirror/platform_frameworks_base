@@ -40,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
+            android:id="@+id/accessibility_button_prompt_prologue"
             android:textAppearance="?attr/textAppearanceMedium"
             android:text="@string/accessibility_button_prompt_text"
             android:gravity="start|center_vertical"

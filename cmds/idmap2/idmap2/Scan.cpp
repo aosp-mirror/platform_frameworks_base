@@ -69,7 +69,10 @@ struct InputOverlay {
 
 bool VendorIsQOrLater() {
   constexpr int kQSdkVersion = 29;
-  int version = std::atoi(android::base::GetProperty("ro.vndk.version", "29").data());
+  constexpr int kBase = 10;
+  std::string version_prop = android::base::GetProperty("ro.vndk.version", "29");
+  int version = strtol(version_prop.data(), nullptr, kBase);
+
   // If the string cannot be parsed, it is a development sdk codename.
   return version >= kQSdkVersion || version == 0;
 }
