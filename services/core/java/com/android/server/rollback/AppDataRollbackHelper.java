@@ -20,7 +20,7 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.os.storage.StorageManager;
 import android.util.IntArray;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -62,7 +62,7 @@ public class AppDataRollbackHelper {
             if (isUserCredentialLocked(user)) {
                 // We've encountered a user that hasn't unlocked on a FBE device, so we can't copy
                 // across app user data until the user unlocks their device.
-                Log.v(TAG, "User: " + user + " isn't unlocked, skipping CE userdata backup.");
+                Slog.v(TAG, "User: " + user + " isn't unlocked, skipping CE userdata backup.");
                 storageFlags = Installer.FLAG_STORAGE_DE;
                 packageRollbackInfo.addPendingBackup(user);
             } else {
@@ -76,7 +76,7 @@ public class AppDataRollbackHelper {
                     packageRollbackInfo.putCeSnapshotInode(user, ceSnapshotInode);
                 }
             } catch (InstallerException ie) {
-                Log.e(TAG, "Unable to create app data snapshot for: "
+                Slog.e(TAG, "Unable to create app data snapshot for: "
                         + packageRollbackInfo.getPackageName() + ", userId: " + user, ie);
             }
         }
@@ -122,7 +122,7 @@ public class AppDataRollbackHelper {
             mInstaller.restoreAppDataSnapshot(packageRollbackInfo.getPackageName(), appId, seInfo,
                     userId, rollbackId, storageFlags);
         } catch (InstallerException ie) {
-            Log.e(TAG, "Unable to restore app data snapshot: "
+            Slog.e(TAG, "Unable to restore app data snapshot: "
                         + packageRollbackInfo.getPackageName(), ie);
         }
 
@@ -148,7 +148,7 @@ public class AppDataRollbackHelper {
                 ceSnapshotInodes.delete(user);
             }
         } catch (InstallerException ie) {
-            Log.e(TAG, "Unable to delete app data snapshot for "
+            Slog.e(TAG, "Unable to delete app data snapshot for "
                         + packageRollbackInfo.getPackageName(), ie);
         }
     }
@@ -257,7 +257,7 @@ public class AppDataRollbackHelper {
                             info.putCeSnapshotInode(userId, ceSnapshotInode);
                             pendingBackupUsers.remove(idx);
                         } catch (InstallerException ie) {
-                            Log.e(TAG,
+                            Slog.e(TAG,
                                     "Unable to create app data snapshot for: "
                                     + info.getPackageName() + ", userId: " + userId, ie);
                         }
@@ -277,7 +277,7 @@ public class AppDataRollbackHelper {
                                     Installer.FLAG_STORAGE_CE);
                             info.removeRestoreInfo(ri);
                         } catch (InstallerException ie) {
-                            Log.e(TAG, "Unable to restore app data snapshot for: "
+                            Slog.e(TAG, "Unable to restore app data snapshot for: "
                                     + info.getPackageName(), ie);
                         }
                     }
