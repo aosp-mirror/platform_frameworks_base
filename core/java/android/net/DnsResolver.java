@@ -16,7 +16,7 @@
 
 package android.net;
 
-import static android.net.NetworkUtils.getDnsNetwork;
+import static android.net.NetworkUtils.getDnsNetId;
 import static android.net.NetworkUtils.resNetworkCancel;
 import static android.net.NetworkUtils.resNetworkQuery;
 import static android.net.NetworkUtils.resNetworkResult;
@@ -333,7 +333,7 @@ public final class DnsResolver {
         final Object lock = new Object();
         final Network queryNetwork;
         try {
-            queryNetwork = (network != null) ? network : getDnsNetwork();
+            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
         } catch (ErrnoException e) {
             executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
@@ -433,7 +433,7 @@ public final class DnsResolver {
         final FileDescriptor queryfd;
         final Network queryNetwork;
         try {
-            queryNetwork = (network != null) ? network : getDnsNetwork();
+            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
             queryfd = resNetworkQuery(queryNetwork.getNetIdForResolv(), domain, CLASS_IN, nsType,
                     flags);
         } catch (ErrnoException e) {

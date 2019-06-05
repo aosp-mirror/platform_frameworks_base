@@ -113,7 +113,8 @@ public class Build {
 
     /**
      * A hardware serial number, if available. Alphanumeric only, case-insensitive.
-     * This field is always set to {@link Build#UNKNOWN}.
+     * For apps targeting SDK higher than {@link Build.VERSION_CODES#O_MR1} this
+     * field is set to {@link Build#UNKNOWN}.
      *
      * @deprecated Use {@link #getSerial()} instead.
      **/

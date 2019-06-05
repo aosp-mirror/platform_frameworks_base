@@ -19,8 +19,6 @@ package com.android.server.power;
 import static android.provider.Settings.System.ADAPTIVE_SLEEP;
 
 import android.Manifest;
-import android.app.ActivityManager;
-import android.app.SynchronousUserSwitchObserver;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.ContentResolver;
@@ -30,7 +28,6 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -56,8 +53,6 @@ public class AttentionDetector {
 
     private static final String TAG = "AttentionDetector";
     private static final boolean DEBUG = false;
-
-    private Context mContext;
 
     private boolean mIsSettingEnabled;
 
@@ -137,7 +132,6 @@ public class AttentionDetector {
     }
 
     public void systemReady(Context context) {
-        mContext = context;
         updateEnabledFromSettings(context);
         mPackageManager = context.getPackageManager();
         mContentResolver = context.getContentResolver();
@@ -146,13 +140,6 @@ public class AttentionDetector {
                 com.android.internal.R.integer.config_attentionMaximumExtension);
         mMaxAttentionApiTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionApiTimeout);
-
-        try {
-            final UserSwitchObserver observer = new UserSwitchObserver();
-            ActivityManager.getService().registerUserSwitchObserver(observer, TAG);
-        } catch (RemoteException e) {
-             // Shouldn't happen since in-process.
-        }
 
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 Settings.System.ADAPTIVE_SLEEP),
@@ -337,13 +324,6 @@ public class AttentionDetector {
         public void onFailure(int error) {
             Slog.i(TAG, "Failed to check attention: " + error + ", ID: " + mId);
             mRequested.set(false);
-        }
-    }
-
-    private final class UserSwitchObserver extends SynchronousUserSwitchObserver {
-        @Override
-        public void onUserSwitching(int newUserId) throws RemoteException {
-            updateEnabledFromSettings(mContext);
         }
     }
 }

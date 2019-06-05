@@ -19,13 +19,9 @@ package com.android.systemui.assist;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.SystemClock;
-import android.provider.DeviceConfig;
-import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -35,19 +31,12 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.StatusBarState;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Assistant handle behavior that hides the handles when the phone is dozing or in immersive mode,
  * shows the handles when on lockscreen, and shows the handles temporarily when changing tasks or
  * entering overview.
  */
 final class AssistHandleReminderExpBehavior implements BehaviorController {
-
-    private static final String LEARNING_TIME_ELAPSED_KEY = "reminder_exp_learning_time_elapsed";
-    private static final String LEARNING_EVENT_COUNT_KEY = "reminder_exp_learning_event_count";
-    private static final long DEFAULT_LEARNING_TIME_MS = TimeUnit.DAYS.toMillis(3);
-    private static final int DEFAULT_LEARNING_COUNT = 3;
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -95,15 +84,6 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private int mRunningTaskId;
     private boolean mIsNavBarHidden;
 
-    /** Whether user has learned the gesture. */
-    private boolean mIsLearned;
-    private long mLastLearningTimestamp;
-    /** Uptime while in this behavior. */
-    private long mLearningTimeElapsed;
-    /** Number of successful Assistant invocations while in this behavior. */
-    private int mLearningCount;
-
-    @Nullable private Context mContext;
     @Nullable private AssistHandleCallbacks mAssistHandleCallbacks;
 
     AssistHandleReminderExpBehavior() {
@@ -114,7 +94,6 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
-        mContext = context;
         mAssistHandleCallbacks = callbacks;
         mOnLockscreen = onLockscreen(mStatusBarStateController.getState());
         mIsDozing = mStatusBarStateController.isDozing();
@@ -123,39 +102,15 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mRunningTaskId = runningTaskInfo == null ? 0 : runningTaskInfo.taskId;
         mActivityManagerWrapper.registerTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.addCallback(mOverviewProxyListener);
-
-        mLearningTimeElapsed = Settings.Secure.getLong(
-                context.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, /* default = */ 0);
-        mLearningCount = Settings.Secure.getInt(
-                context.getContentResolver(), LEARNING_EVENT_COUNT_KEY, /* default = */ 0);
-        mLastLearningTimestamp = SystemClock.uptimeMillis();
-
-        callbackForCurrentState(/* justUnlocked = */ false);
+        callbackForCurrentState();
     }
 
     @Override
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
-        if (mContext != null) {
-            Settings.Secure.putLong(
-                    mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed);
-            Settings.Secure.putInt(
-                    mContext.getContentResolver(), LEARNING_EVENT_COUNT_KEY, mLearningCount);
-            mContext = null;
-        }
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mActivityManagerWrapper.unregisterTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
-    }
-
-    @Override
-    public void onAssistantGesturePerformed() {
-        if (mContext == null) {
-            return;
-        }
-
-        Settings.Secure.putLong(
-                mContext.getContentResolver(), LEARNING_EVENT_COUNT_KEY, ++mLearningCount);
     }
 
     private static boolean isNavBarHidden(int sysuiStateFlags) {
@@ -169,7 +124,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         }
 
         mOnLockscreen = onLockscreen;
-        callbackForCurrentState(!onLockscreen);
+        callbackForCurrentState();
     }
 
     private void handleDozingChanged(boolean isDozing) {
@@ -178,7 +133,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         }
 
         mIsDozing = isDozing;
-        callbackForCurrentState(/* justUnlocked = */ false);
+        callbackForCurrentState();
     }
 
     private void handleTaskStackTopChanged(int taskId) {
@@ -187,7 +142,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         }
 
         mRunningTaskId = taskId;
-        callbackForCurrentState(/* justUnlocked = */ false);
+        callbackForCurrentState();
     }
 
     private void handleSystemUiStateChanged(int sysuiStateFlags) {
@@ -197,11 +152,11 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         }
 
         mIsNavBarHidden = isNavBarHidden;
-        callbackForCurrentState(/* justUnlocked = */ false);
+        callbackForCurrentState();
     }
 
     private void handleOverviewShown() {
-        callbackForCurrentState(/* justUnlocked = */ false);
+        callbackForCurrentState();
     }
 
     private boolean onLockscreen(int statusBarState) {
@@ -209,29 +164,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 || statusBarState == StatusBarState.SHADE_LOCKED;
     }
 
-    private void callbackForCurrentState(boolean justUnlocked) {
-        updateLearningStatus();
-
-        if (mIsLearned) {
-            callbackForLearnedState(justUnlocked);
-        } else {
-            callbackForUnlearnedState();
-        }
-    }
-
-    private void callbackForLearnedState(boolean justUnlocked) {
-        if (mAssistHandleCallbacks == null) {
-            return;
-        }
-
-        if (mIsDozing || mIsNavBarHidden || mOnLockscreen) {
-            mAssistHandleCallbacks.hide();
-        } else if (justUnlocked) {
-            mAssistHandleCallbacks.showAndGo();
-        }
-    }
-
-    private void callbackForUnlearnedState() {
+    private void callbackForCurrentState() {
         if (mAssistHandleCallbacks == null) {
             return;
         }
@@ -243,34 +176,5 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         } else {
             mAssistHandleCallbacks.showAndGo();
         }
-    }
-
-    private void updateLearningStatus() {
-        if (mContext == null) {
-            return;
-        }
-
-        long currentTimestamp = SystemClock.uptimeMillis();
-        mLearningTimeElapsed += currentTimestamp - mLastLearningTimestamp;
-        mLastLearningTimestamp = currentTimestamp;
-        Settings.Secure.putLong(
-                mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, mLearningTimeElapsed);
-
-        mIsLearned =
-                mLearningCount >= getLearningCount() || mLearningTimeElapsed >= getLearningTimeMs();
-    }
-
-    private long getLearningTimeMs() {
-        return DeviceConfig.getLong(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.ASSIST_HANDLES_LEARN_TIME_MS,
-                DEFAULT_LEARNING_TIME_MS);
-    }
-
-    private int getLearningCount() {
-        return DeviceConfig.getInt(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.ASSIST_HANDLES_LEARN_COUNT,
-                DEFAULT_LEARNING_COUNT);
     }
 }

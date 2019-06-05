@@ -19,7 +19,6 @@ package com.android.systemui.colorextraction;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -37,10 +36,8 @@ import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Tests color extraction generation.
@@ -57,68 +54,62 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
 
-    private ColorExtractor.GradientColors mColors;
-    private SysuiColorExtractor mColorExtractor;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        mColors = new ColorExtractor.GradientColors();
-        mColors.setMainColor(Color.RED);
-        mColors.setSecondaryColor(Color.RED);
-        mColorExtractor = new SysuiColorExtractor(getContext(),
-                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
-                        outGradientColorsExtraDark) -> {
-                    outGradientColorsNormal.set(mColors);
-                    outGradientColorsDark.set(mColors);
-                    outGradientColorsExtraDark.set(mColors);
-                }, mock(ConfigurationController.class), false);
-    }
-
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
-        simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(false);
+        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
+        colors.setMainColor(Color.RED);
+        colors.setSecondaryColor(Color.RED);
 
-        ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
+        simulateEvent(extractor);
+        extractor.setWallpaperVisible(false);
+
+        ColorExtractor.GradientColors fallbackColors = extractor.getNeutralColors();
 
         for (int type : sTypes) {
             assertEquals("Not using fallback!",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
+                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
             assertNotEquals("Wallpaper visibility event should not affect lock wallpaper.",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
+                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
         }
     }
 
     @Test
     public void getColors_doesntUseFallbackIfVisible() {
-        mColors.setMainColor(Color.RED);
-        mColors.setSecondaryColor(Color.RED);
+        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
+        colors.setMainColor(Color.RED);
+        colors.setSecondaryColor(Color.RED);
 
-        simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(true);
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
+        simulateEvent(extractor);
+        extractor.setWallpaperVisible(true);
 
         for (int which : sWhich) {
             for (int type : sTypes) {
                 assertEquals("Not using extracted colors!",
-                        mColorExtractor.getColors(which, type), mColors);
+                        extractor.getColors(which, type), colors);
             }
         }
     }
 
     @Test
     public void getColors_fallbackWhenMediaIsVisible() {
-        simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(true);
-        mColorExtractor.setHasBackdrop(true);
+        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
+        colors.setMainColor(Color.RED);
+        colors.setSecondaryColor(Color.RED);
 
-        ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
+        simulateEvent(extractor);
+        extractor.setWallpaperVisible(true);
+        extractor.setHasBackdrop(true);
+
+        ColorExtractor.GradientColors fallbackColors = extractor.getNeutralColors();
 
         for (int type : sTypes) {
             assertEquals("Not using fallback!",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
+                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
             assertNotEquals("Media visibility should not affect system wallpaper.",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
+                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
         }
     }
 
@@ -135,13 +126,14 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         verify(tonal).applyFallback(any(), any());
     }
 
-    @Test
-    public void onUiModeChanged_notifiesListener() {
-        ColorExtractor.OnColorsChangedListener listener = mock(
-                ColorExtractor.OnColorsChangedListener.class);
-        mColorExtractor.addOnColorsChangedListener(listener);
-        mColorExtractor.onUiModeChanged();
-        verify(listener).onColorsChanged(any(), anyInt());
+    private SysuiColorExtractor getTestableExtractor(ColorExtractor.GradientColors colors) {
+        return new SysuiColorExtractor(getContext(),
+                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
+                        outGradientColorsExtraDark) -> {
+                    outGradientColorsNormal.set(colors);
+                    outGradientColorsDark.set(colors);
+                    outGradientColorsExtraDark.set(colors);
+                }, mock(ConfigurationController.class), false);
     }
 
     private void simulateEvent(SysuiColorExtractor extractor) {

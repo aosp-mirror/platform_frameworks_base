@@ -456,8 +456,9 @@ class GnssVisibilityControl {
         final String proxyAppPkgName = nfwNotification.mProxyAppPackageName;
         final ProxyAppState proxyAppState = mProxyAppsState.get(proxyAppPkgName);
         final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
-        final boolean isPermissionMismatched = isPermissionMismatched(proxyAppState,
-                nfwNotification);
+        final boolean isPermissionMismatched =
+                (proxyAppState == null) ? isLocationRequestAccepted
+                        : (proxyAppState.mHasLocationPermission != isLocationRequestAccepted);
         logEvent(nfwNotification, isPermissionMismatched);
 
         if (!nfwNotification.isRequestAttributedToProxyApp()) {
@@ -505,22 +506,12 @@ class GnssVisibilityControl {
 
         // Log proxy app permission mismatch between framework and GNSS HAL.
         if (isPermissionMismatched) {
-            Log.w(TAG, "Permission mismatch. Proxy app " + proxyAppPkgName
+            Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPkgName
                     + " location permission is set to " + proxyAppState.mHasLocationPermission
-                    + " and GNSS HAL enabled is set to " + mIsGpsEnabled
                     + " but GNSS non-framework location access response type is "
                     + nfwNotification.getResponseTypeAsString() + " for notification: "
                     + nfwNotification);
         }
-    }
-
-    private boolean isPermissionMismatched(ProxyAppState proxyAppState,
-            NfwNotification nfwNotification) {
-        // Non-framework non-emergency location requests must be accepted only when IGnss.hal
-        // is enabled and the proxy app has location permission.
-        final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
-        return (proxyAppState == null || !mIsGpsEnabled) ? isLocationRequestAccepted
-                        : (proxyAppState.mHasLocationPermission != isLocationRequestAccepted);
     }
 
     private void showLocationIcon(ProxyAppState proxyAppState, NfwNotification nfwNotification,

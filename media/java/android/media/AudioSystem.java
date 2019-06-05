@@ -990,9 +990,9 @@ public class AudioSystem
     public static native int setMasterBalance(float balance);
 
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
-    @UnsupportedAppUsage(trackingBug = 134049522)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)
     public static native int getPrimaryOutputSamplingRate();
-    @UnsupportedAppUsage(trackingBug = 134049522)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)
     public static native int getPrimaryOutputFrameCount();
     @UnsupportedAppUsage
     public static native int getOutputLatency(int stream);

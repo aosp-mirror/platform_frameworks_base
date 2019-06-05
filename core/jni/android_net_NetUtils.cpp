@@ -304,19 +304,13 @@ static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobjec
     jniSetFileDescriptorOfFD(env, javaFd, -1);
 }
 
-static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
-    unsigned dnsNetId = 0;
-    if (int res = getNetworkForDns(&dnsNetId) < 0) {
-        throwErrnoException(env, "getDnsNetId", -res);
-        return nullptr;
+static jint android_net_utils_getDnsNetId(JNIEnv *env, jobject thiz) {
+    int dnsNetId = getNetworkForDns();
+    if (dnsNetId < 0) {
+        throwErrnoException(env, "getDnsNetId", -dnsNetId);
     }
-    bool privateDnsBypass = dnsNetId & NETID_USE_LOCAL_NAMESERVERS;
 
-    static jclass class_Network = MakeGlobalRefOrDie(
-            env, FindClassOrDie(env, "android/net/Network"));
-    static jmethodID ctor = env->GetMethodID(class_Network, "<init>", "(IZ)V");
-    return env->NewObject(
-            class_Network, ctor, dnsNetId & ~NETID_USE_LOCAL_NAMESERVERS, privateDnsBypass);
+    return dnsNetId;
 }
 
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
@@ -375,7 +369,7 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
-    { "getDnsNetwork", "()Landroid/net/Network;", (void*) android_net_utils_getDnsNetwork },
+    { "getDnsNetId", "()I", (void*) android_net_utils_getDnsNetId },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)

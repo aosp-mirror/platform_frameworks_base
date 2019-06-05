@@ -90,7 +90,7 @@ private:
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 
-    PaintCoW&& filterBitmap(PaintCoW&& paint);
+    PaintCoW&& filterBitmap(PaintCoW&& paint, sk_sp<SkColorFilter> colorSpaceFilter);
 };
 
 }  // namespace skiapipeline

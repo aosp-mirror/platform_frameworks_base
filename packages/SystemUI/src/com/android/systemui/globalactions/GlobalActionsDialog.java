@@ -551,7 +551,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
-            super(com.android.systemui.R.drawable.ic_emergency_star,
+            super(R.drawable.ic_faster_emergency,
                     R.string.global_action_emergency);
         }
 
@@ -1588,13 +1588,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 // Disable rotation suggestions, if enabled
                 setRotationSuggestionsEnabled(false);
 
-                FrameLayout panelContainer =
-                        findViewById(com.android.systemui.R.id.global_actions_panel_container);
+                FrameLayout panelContainer = new FrameLayout(mContext);
                 FrameLayout.LayoutParams panelParams =
                         new FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT);
+                                FrameLayout.LayoutParams.WRAP_CONTENT);
                 panelContainer.addView(mPanelController.getPanelContent(), panelParams);
+                addContentView(
+                        panelContainer,
+                        new ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT));
                 mBackgroundDrawable = mPanelController.getBackgroundDrawable();
                 mScrimAlpha = 1f;
             }
@@ -1602,10 +1606,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private void initializeLayout() {
             setContentView(getGlobalActionsLayoutId(mContext));
-            fixNavBarClipping();
             mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
-            ((View) mGlobalActionsLayout.getParent()).setOnClickListener(view -> dismiss());
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -1626,15 +1628,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
-        }
-
-        private void fixNavBarClipping() {
-            ViewGroup content = findViewById(android.R.id.content);
-            content.setClipChildren(false);
-            content.setClipToPadding(false);
-            ViewGroup contentParent = (ViewGroup) content.getParent();
-            contentParent.setClipChildren(false);
-            contentParent.setClipToPadding(false);
         }
 
         private int getGlobalActionsLayoutId(Context context) {

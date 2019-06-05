@@ -54,8 +54,8 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mLayout.setActiveController(mStackController);
-        addOneMoreThanBubbleLimitBubbles();
+        mLayout.setController(mStackController);
+        addOneMoreThanRenderLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
     }
 

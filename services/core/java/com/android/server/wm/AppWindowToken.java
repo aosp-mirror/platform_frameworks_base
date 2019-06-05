@@ -1733,13 +1733,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return;
         }
 
-        Task task = getTask();
-        if (mThumbnail == null && task != null && !hasCommittedReparentToAnimationLeash()) {
-            SurfaceControl.ScreenshotGraphicBuffer snapshot =
-                    mWmService.mTaskSnapshotController.createTaskSnapshot(
-                            task, 1 /* scaleFraction */);
+        if (mThumbnail == null && getTask() != null) {
+            final TaskSnapshotController snapshotCtrl = mWmService.mTaskSnapshotController;
+            final ArraySet<Task> tasks = new ArraySet<>();
+            tasks.add(getTask());
+            snapshotCtrl.snapshotTasks(tasks);
+            snapshotCtrl.addSkipClosingAppSnapshotTasks(tasks);
+            final ActivityManager.TaskSnapshot snapshot = snapshotCtrl.getSnapshot(
+                    getTask().mTaskId, getTask().mUserId, false /* restoreFromDisk */,
+                    false /* reducedResolution */);
             if (snapshot != null) {
-                mThumbnail = new AppWindowThumbnail(t, this, snapshot.getGraphicBuffer(),
+                mThumbnail = new AppWindowThumbnail(t, this, snapshot.getSnapshot(),
                         true /* relative */);
             }
         }
@@ -2854,7 +2858,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
         t.hide(mTransitChangeLeash);
-        t.remove(mTransitChangeLeash);
+        t.reparent(mTransitChangeLeash, null);
         mTransitChangeLeash = null;
         if (cancel) {
             onAnimationLeashLost(t);

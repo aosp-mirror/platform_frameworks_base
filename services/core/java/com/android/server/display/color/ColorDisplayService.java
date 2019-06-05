@@ -394,9 +394,7 @@ public final class ColorDisplayService extends SystemService {
     private void tearDown() {
         Slog.d(TAG, "tearDown: currentUser=" + mCurrentUser);
 
-        if (mContentObserver != null) {
-            getContext().getContentResolver().unregisterContentObserver(mContentObserver);
-        }
+        getContext().getContentResolver().unregisterContentObserver(mContentObserver);
 
         if (mNightDisplayTintController.isAvailable(getContext())) {
             if (mNightDisplayAutoMode != null) {

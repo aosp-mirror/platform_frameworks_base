@@ -25,12 +25,12 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
-import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -247,7 +247,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public final Nat464Xlat clatd;
 
     // Set after asynchronous creation of the NetworkMonitor.
-    private volatile NetworkMonitorManager mNetworkMonitor;
+    private volatile INetworkMonitor mNetworkMonitor;
 
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
@@ -278,7 +278,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * Inform NetworkAgentInfo that a new NetworkMonitor was created.
      */
     public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
-        mNetworkMonitor = new NetworkMonitorManager(networkMonitor);
+        mNetworkMonitor = networkMonitor;
     }
 
     /**
@@ -290,9 +290,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      */
     public void setNetworkCapabilities(NetworkCapabilities nc) {
         networkCapabilities = nc;
-        final NetworkMonitorManager nm = mNetworkMonitor;
+        final INetworkMonitor nm = mNetworkMonitor;
         if (nm != null) {
-            nm.notifyNetworkCapabilitiesChanged(nc);
+            try {
+                nm.notifyNetworkCapabilitiesChanged(nc);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error notifying NetworkMonitor of updated NetworkCapabilities", e);
+            }
         }
     }
 
@@ -313,11 +317,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
-     * Get the NetworkMonitorManager in this NetworkAgentInfo.
+     * Get the INetworkMonitor in this NetworkAgentInfo.
      *
      * <p>This will be null before {@link #onNetworkMonitorCreated(INetworkMonitor)} is called.
      */
-    public NetworkMonitorManager networkMonitor() {
+    public INetworkMonitor networkMonitor() {
         return mNetworkMonitor;
     }
 

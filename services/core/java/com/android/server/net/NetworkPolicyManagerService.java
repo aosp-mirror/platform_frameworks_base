@@ -217,7 +217,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -1354,15 +1353,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-                }
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+
                 break;
             }
             case TYPE_LIMIT: {
@@ -1382,15 +1375,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setSmallIcon(R.drawable.stat_notify_disabled_data);
 
                 final Intent intent = buildNetworkOverLimitIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-                }
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
             case TYPE_LIMIT_SNOOZED: {
@@ -1413,15 +1399,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setChannelId(SystemNotificationChannels.NETWORK_STATUS);
 
                 final Intent intent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-                }
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
             case TYPE_RAPID: {
@@ -1440,15 +1419,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-                }
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
             default: {
@@ -5290,10 +5262,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static boolean getBooleanDefeatingNullable(@Nullable PersistableBundle bundle,
             String key, boolean defaultValue) {
         return (bundle != null) ? bundle.getBoolean(key, defaultValue) : defaultValue;
-    }
-
-    private static boolean isHeadlessSystemUserBuild() {
-        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
     }
 
     private class NotificationId {

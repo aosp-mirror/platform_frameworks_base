@@ -18156,20 +18156,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        // The arguments here are untyped because the base ActivityManagerInternal class
-        // doesn't have compile-time visiblity into ActivityServiceConnectionHolder or
-        // ConnectionRecord.
         @Override
-        public void disconnectActivityFromServices(Object connectionHolder, Object conns) {
-            // 'connectionHolder' is an untyped ActivityServiceConnectionsHolder
-            // 'conns' is an untyped HashSet<ConnectionRecord>
-            final ActivityServiceConnectionsHolder holder =
-                    (ActivityServiceConnectionsHolder) connectionHolder;
-            final HashSet<ConnectionRecord> toDisconnect = (HashSet<ConnectionRecord>) conns;
+        public void disconnectActivityFromServices(Object connectionHolder) {
             synchronized(ActivityManagerService.this) {
-                for (ConnectionRecord cr : toDisconnect) {
-                    mServices.removeConnectionLocked(cr, null, holder);
-                }
+                final ActivityServiceConnectionsHolder c =
+                        (ActivityServiceConnectionsHolder) connectionHolder;
+                c.forEachConnection(cr -> mServices.removeConnectionLocked(
+                        (ConnectionRecord) cr, null, c));
             }
         }
 

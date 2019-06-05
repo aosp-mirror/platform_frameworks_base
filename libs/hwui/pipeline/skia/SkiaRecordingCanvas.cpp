@@ -161,7 +161,8 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // Recording Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
+SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint,
+                                                         sk_sp<SkColorFilter> colorSpaceFilter) {
     bool fixBlending = false;
     bool fixAA = false;
     if (paint) {
@@ -171,11 +172,21 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
         fixAA = paint->isAntiAlias();
     }
 
-    if (fixBlending || fixAA) {
+    if (fixBlending || fixAA || colorSpaceFilter) {
         SkPaint& tmpPaint = paint.writeable();
 
         if (fixBlending) {
             tmpPaint.setBlendMode(SkBlendMode::kDstOut);
+        }
+
+        if (colorSpaceFilter) {
+            if (tmpPaint.getColorFilter()) {
+                tmpPaint.setColorFilter(SkColorFilter::MakeComposeFilter(
+                        tmpPaint.refColorFilter(), std::move(colorSpaceFilter)));
+            } else {
+                tmpPaint.setColorFilter(std::move(colorSpaceFilter));
+            }
+            LOG_ALWAYS_FATAL_IF(!tmpPaint.getColorFilter());
         }
 
         // disabling AA on bitmap draws matches legacy HWUI behavior
@@ -187,7 +198,7 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImage(image, left, top, filterBitmap(paint), bitmap.palette());
+    mRecorder.drawImage(image, left, top, filterPaint(paint), bitmap.palette());
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
@@ -201,7 +212,7 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
     concat(matrix);
 
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImage(image, 0, 0, filterBitmap(paint), bitmap.palette());
+    mRecorder.drawImage(image, 0, 0, filterPaint(paint), bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
@@ -214,7 +225,7 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImageRect(image, srcRect, dstRect, filterBitmap(paint),
+    mRecorder.drawImageRect(image, srcRect, dstRect, filterPaint(paint),
                             SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
         !dstRect.isEmpty()) {
@@ -252,7 +263,7 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
         filteredPaint.writeable().setFilterQuality(kLow_SkFilterQuality);
     }
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImageLattice(image, lattice, dst, filterBitmap(std::move(filteredPaint)),
+    mRecorder.drawImageLattice(image, lattice, dst, filterPaint(std::move(filteredPaint)),
                                bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());

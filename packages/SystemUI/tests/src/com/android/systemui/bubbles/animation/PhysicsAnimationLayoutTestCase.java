@@ -56,6 +56,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
 
     Handler mMainThreadHandler;
 
+    int mMaxRenderedBubbles;
     int mSystemWindowInsetSize = 50;
     int mCutoutInsetSize = 100;
 
@@ -68,8 +69,6 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
     @Mock
     private DisplayCutout mCutout;
 
-    private int mMaxBubbles;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -80,7 +79,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         mLayout.setTop(0);
         mLayout.setBottom(mHeight);
 
-        mMaxBubbles =
+        mMaxRenderedBubbles =
                 getContext().getResources().getInteger(R.integer.bubbles_max_rendered);
         mMainThreadHandler = new Handler(Looper.getMainLooper());
 
@@ -97,8 +96,8 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
     }
 
     /** Add one extra bubble over the limit, so we can make sure it's gone/chains appropriately. */
-    void addOneMoreThanBubbleLimitBubbles() throws InterruptedException {
-        for (int i = 0; i < mMaxBubbles + 1; i++) {
+    void addOneMoreThanRenderLimitBubbles() throws InterruptedException {
+        for (int i = 0; i < mMaxRenderedBubbles + 1; i++) {
             final View newView = new FrameLayout(mContext);
             mLayout.addView(newView, 0);
             mViews.add(0, newView);
@@ -139,13 +138,6 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
-        protected boolean isActiveController(PhysicsAnimationController controller) {
-            // Return true since otherwise all test controllers will be seen as inactive since they
-            // are wrapped by MainThreadAnimationControllerWrapper.
-            return true;
-        }
-
-        @Override
         public boolean post(Runnable action) {
             return mMainThreadHandler.post(action);
         }
@@ -156,9 +148,9 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
-        public void setActiveController(PhysicsAnimationController controller) {
+        public void setController(PhysicsAnimationController controller) {
             runOnMainThreadAndBlock(
-                    () -> super.setActiveController(
+                    () -> super.setController(
                             new MainThreadAnimationControllerWrapper(controller)));
         }
 
@@ -275,15 +267,8 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
             }
 
             @Override
-            void onChildReordered(View child, int oldIndex, int newIndex) {
-                runOnMainThreadAndBlock(
-                        () -> mWrappedController.onChildReordered(child, oldIndex, newIndex));
-            }
-
-            @Override
-            void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
-                runOnMainThreadAndBlock(
-                        () -> mWrappedController.onActiveControllerForLayout(layout));
+            protected void setChildVisibility(View child, int index, int visibility) {
+                mWrappedController.setChildVisibility(child, index, visibility);
             }
 
             @Override

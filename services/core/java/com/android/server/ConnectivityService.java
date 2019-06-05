@@ -91,7 +91,6 @@ import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
-import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
@@ -170,7 +169,6 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
@@ -1787,7 +1785,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // caller type. Need to re-factor NetdEventListenerService to allow multiple
             // NetworkMonitor registrants.
             if (nai != null && nai.satisfies(mDefaultRequest)) {
-                nai.networkMonitor().notifyDnsResponse(returnCode);
+                Binder.withCleanCallingIdentity(() ->
+                        nai.networkMonitor().notifyDnsResponse(returnCode));
             }
         }
 
@@ -2764,31 +2763,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private class NetworkMonitorCallbacks extends INetworkMonitorCallbacks.Stub {
-        private final int mNetId;
-        private final AutodestructReference<NetworkAgentInfo> mNai;
+        private final NetworkAgentInfo mNai;
 
         private NetworkMonitorCallbacks(NetworkAgentInfo nai) {
-            mNetId = nai.network.netId;
-            mNai = new AutodestructReference(nai);
+            mNai = nai;
         }
 
         @Override
         public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT,
-                    new Pair<>(mNai.getAndDestroy(), networkMonitor)));
+                    new Pair<>(mNai, networkMonitor)));
         }
 
         @Override
         public void notifyNetworkTested(int testResult, @Nullable String redirectUrl) {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(EVENT_NETWORK_TESTED,
-                    testResult, mNetId, redirectUrl));
+                    testResult, mNai.network.netId, redirectUrl));
         }
 
         @Override
         public void notifyPrivateDnsConfigResolved(PrivateDnsConfigParcel config) {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PRIVATE_DNS_CONFIG_RESOLVED,
-                    0, mNetId, PrivateDnsConfig.fromParcel(config)));
+                    0, mNai.network.netId, PrivateDnsConfig.fromParcel(config)));
         }
 
         @Override
@@ -2806,13 +2803,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_SHOW,
-                    mNetId, pendingIntent));
+                    mNai.network.netId,
+                    pendingIntent));
         }
 
         @Override
         public void hideProvisioningNotification() {
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
-                    EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE, mNetId));
+                    EVENT_PROVISIONING_NOTIFICATION, PROVISIONING_NOTIFICATION_HIDE,
+                    mNai.network.netId));
         }
 
         @Override
@@ -2854,7 +2853,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Notify the NetworkAgentInfo/NetworkMonitor in case NetworkMonitor needs to cancel or
         // schedule DNS resolutions. If a DNS resolution is required the
         // result will be sent back to us.
-        nai.networkMonitor().notifyPrivateDnsChanged(cfg.toParcel());
+        try {
+            nai.networkMonitor().notifyPrivateDnsChanged(cfg.toParcel());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
 
         // With Private DNS bypass support, we can proceed to update the
         // Private DNS config immediately, even if we're in strict mode
@@ -3020,7 +3023,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Disable wakeup packet monitoring for each interface.
             wakeupModifyInterface(iface, nai.networkCapabilities, false);
         }
-        nai.networkMonitor().notifyNetworkDisconnected();
+        try {
+            nai.networkMonitor().notifyNetworkDisconnected();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
         mNetworkAgentInfos.remove(nai.messenger);
         nai.clatd.update();
         synchronized (mNetworkForNetId) {
@@ -3433,7 +3440,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             //
             // TODO: NetworkMonitor does not refer to the "never ask again" bit. The bit is stored
             // per network. Therefore, NetworkMonitor may still do https probe.
-            nai.networkMonitor().setAcceptPartialConnectivity();
+            try {
+                nai.networkMonitor().setAcceptPartialConnectivity();
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
         }
     }
 
@@ -3465,7 +3476,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
             if (nai == null) return;
             if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) return;
-            nai.networkMonitor().launchCaptivePortalApp();
+            try {
+                nai.networkMonitor().launchCaptivePortalApp();
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
         });
     }
 
@@ -3500,7 +3515,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @Override
-        public void appResponse(final int response) {
+        public void appResponse(final int response) throws RemoteException {
             if (response == CaptivePortal.APP_RETURN_WANTED_AS_IS) {
                 enforceSettingsPermission();
             }
@@ -3510,9 +3525,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (nai == null) return;
 
             // nai.networkMonitor() is thread-safe
-            final NetworkMonitorManager nm = nai.networkMonitor();
+            final INetworkMonitor nm = nai.networkMonitor();
             if (nm == null) return;
-            nm.notifyCaptivePortalAppFinished(response);
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                nm.notifyCaptivePortalAppFinished(response);
+            } finally {
+                // Not using Binder.withCleanCallingIdentity() to keep the checked RemoteException
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
@@ -4083,7 +4105,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (isNetworkWithLinkPropertiesBlocked(lp, uid, false)) {
             return;
         }
-        nai.networkMonitor().forceReevaluation(uid);
+        try {
+            nai.networkMonitor().forceReevaluation(uid);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -5516,7 +5542,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Start or stop DNS64 detection and 464xlat according to network state.
             networkAgent.clatd.update();
             notifyIfacesChangedForNetworkStats();
-            networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
+            try {
+                networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
             if (networkAgent.everConnected) {
                 notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
             }
@@ -6500,11 +6530,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // command must be sent after updating LinkProperties to maximize chances of
             // NetworkMonitor seeing the correct LinkProperties when starting.
             // TODO: pass LinkProperties to the NetworkMonitor in the notifyNetworkConnected call.
-            if (networkAgent.networkMisc.acceptPartialConnectivity) {
-                networkAgent.networkMonitor().setAcceptPartialConnectivity();
+            try {
+                if (networkAgent.networkMisc.acceptPartialConnectivity) {
+                    networkAgent.networkMonitor().setAcceptPartialConnectivity();
+                }
+                networkAgent.networkMonitor().notifyNetworkConnected(
+                        networkAgent.linkProperties, networkAgent.networkCapabilities);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
             }
-            networkAgent.networkMonitor().notifyNetworkConnected(
-                    networkAgent.linkProperties, networkAgent.networkCapabilities);
             scheduleUnvalidatedPrompt(networkAgent);
 
             // Whether a particular NetworkRequest listen should cause signal strength thresholds to

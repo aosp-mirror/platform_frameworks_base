@@ -17,12 +17,10 @@
 package com.android.systemui.bubbles.animation;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -139,37 +137,25 @@ public class PhysicsAnimationLayout extends FrameLayout {
          */
         abstract void onChildRemoved(View child, int index, Runnable finishRemoval);
 
-        /** Called when a child view has been reordered in the view hierachy. */
-        abstract void onChildReordered(View child, int oldIndex, int newIndex);
-
-        /**
-         * Called when the controller is set as the active animation controller for the given
-         * layout. Once active, the controller can start animations using the animator instances
-         * returned by {@link #animationForChild}.
-         *
-         * While all animations started by the previous controller will be cancelled, the new
-         * controller should not make any assumptions about the state of the layout or its children.
-         * Their translation, alpha, scale, etc. values may have been changed by the previous
-         * controller and should be reset here if relevant.
-         */
-        abstract void onActiveControllerForLayout(PhysicsAnimationLayout layout);
-
         protected PhysicsAnimationLayout mLayout;
 
         PhysicsAnimationController() { }
 
-        /** Whether this controller is the currently active controller for its associated layout. */
-        protected boolean isActiveController() {
-            return this == mLayout.mController;
-        }
-
         protected void setLayout(PhysicsAnimationLayout layout) {
             this.mLayout = layout;
-            onActiveControllerForLayout(layout);
         }
 
         protected PhysicsAnimationLayout getLayout() {
             return mLayout;
+        }
+
+        /**
+         * Sets the child's visibility when it moves beyond or within the limits set by a call to
+         * {@link PhysicsAnimationLayout#setMaxRenderedChildren}. This can be overridden to animate
+         * this transition.
+         */
+        protected void setChildVisibility(View child, int index, int visibility) {
+            child.setVisibility(visibility);
         }
 
         /**
@@ -183,9 +169,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 animator = mLayout.new PhysicsPropertyAnimator(child);
                 child.setTag(R.id.physics_animator_tag, animator);
             }
-
-            animator.clearAnimator();
-            animator.setAssociatedController(this);
 
             return animator;
         }
@@ -252,17 +235,32 @@ public class PhysicsAnimationLayout extends FrameLayout {
             new HashMap<>();
 
     /** The currently active animation controller. */
-    @Nullable protected PhysicsAnimationController mController;
+    private PhysicsAnimationController mController;
+
+    /**
+     * The maximum number of children to render and animate at a time. See
+     * {@link #setMaxRenderedChildren}.
+     */
+    private int mMaxRenderedChildren = 5;
 
     public PhysicsAnimationLayout(Context context) {
         super(context);
     }
 
     /**
+     * The maximum number of children to render and animate at a time. Any child views added beyond
+     * this limit will be set to {@link View#GONE}. If any animations attempt to run on the view,
+     * the corresponding property will be set with no animation.
+     */
+    public void setMaxRenderedChildren(int max) {
+        this.mMaxRenderedChildren = max;
+    }
+
+    /**
      * Sets the animation controller and constructs or reconfigures the layout's physics animations
      * to meet the controller's specifications.
      */
-    public void setActiveController(PhysicsAnimationController controller) {
+    public void setController(PhysicsAnimationController controller) {
         cancelAllAnimations();
         mEndActionForProperty.clear();
 
@@ -314,17 +312,50 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        addViewInternal(child, index, params, false /* isReorder */);
+        super.addView(child, index, params);
+
+        // Set up animations for the new view, if the controller is set. If it isn't set, we'll be
+        // setting up animations for all children when setController is called.
+        if (mController != null) {
+            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
+                setUpAnimationForChild(property, child, index);
+            }
+
+            mController.onChildAdded(child, index);
+        }
+
+        setChildrenVisibility();
     }
 
     @Override
     public void removeView(View view) {
+        removeViewAndThen(view, /* callback */ null);
+    }
+
+    @Override
+    public void removeViewAt(int index) {
+        removeView(getChildAt(index));
+    }
+
+    /** Immediately moves the view from wherever it currently is, to the given index. */
+    public void moveViewTo(View view, int index) {
+        super.removeView(view);
+        addView(view, index);
+    }
+
+    /**
+     * Let the controller know that this view should be removed, and then call the callback once the
+     * controller has finished any removal animations and the view has actually been removed.
+     */
+    public void removeViewAndThen(View view, Runnable callback) {
         if (mController != null) {
             final int index = indexOfChild(view);
 
             // Remove the view and add it back as a transient view so we can animate it out.
             super.removeView(view);
             addTransientView(view, index);
+
+            setChildrenVisibility();
 
             // Tell the controller to animate this view out, and call the callback when it's
             // finished.
@@ -333,28 +364,19 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 // any are still running and then remove it.
                 cancelAnimationsOnView(view);
                 removeTransientView(view);
+
+                if (callback != null) {
+                    callback.run();
+                }
             });
         } else {
             // Without a controller, nobody will animate this view out, so it gets an unceremonious
             // departure.
             super.removeView(view);
-        }
-    }
 
-    @Override
-    public void removeViewAt(int index) {
-        removeView(getChildAt(index));
-    }
-
-    /** Immediately re-orders the view to the given index. */
-    public void reorderView(View view, int index) {
-        final int oldIndex = indexOfChild(view);
-
-        super.removeView(view);
-        addViewInternal(view, index, view.getLayoutParams(), true /* isReorder */);
-
-        if (mController != null) {
-            mController.onChildReordered(view, oldIndex, index);
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
 
@@ -405,10 +427,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         }
     }
 
-    protected boolean isActiveController(PhysicsAnimationController controller) {
-        return mController == controller;
-    }
-
     /** Whether the first child would be left of center if translated to the given x value. */
     protected boolean isFirstChildXLeftOfCenter(float x) {
         if (getChildCount() > 0) {
@@ -432,26 +450,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return "ALPHA";
         } else {
             return "Unknown animation property.";
-        }
-    }
-
-    /**
-     * Adds a view to the layout. If this addition is not the result of a call to
-     * {@link #reorderView}, this will also notify the controller via
-     * {@link PhysicsAnimationController#onChildAdded} and set up animations for the view.
-     */
-    private void addViewInternal(
-            View child, int index, ViewGroup.LayoutParams params, boolean isReorder) {
-        super.addView(child, index, params);
-
-        // Set up animations for the new view, if the controller is set. If it isn't set, we'll be
-        // setting up animations for all children when setActiveController is called.
-        if (mController != null && !isReorder) {
-            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-                setUpAnimationForChild(property, child, index);
-            }
-
-            mController.onChildAdded(child, index);
         }
     }
 
@@ -483,22 +481,55 @@ public class PhysicsAnimationLayout extends FrameLayout {
         SpringAnimation newAnim = new SpringAnimation(child, property);
         newAnim.addUpdateListener((animation, value, velocity) -> {
             final int indexOfChild = indexOfChild(child);
-            final int nextAnimInChain = mController.getNextAnimationInChain(property, indexOfChild);
+            final int nextAnimInChain =
+                    mController.getNextAnimationInChain(property, indexOfChild);
 
             if (nextAnimInChain == PhysicsAnimationController.NONE || indexOfChild < 0) {
                 return;
             }
 
-            final float offset = mController.getOffsetForChainedPropertyAnimation(property);
-            if (nextAnimInChain < getChildCount()) {
-                getAnimationAtIndex(property, nextAnimInChain)
+            final int animIndex = indexOfChild(child);
+            final float offset =
+                    mController.getOffsetForChainedPropertyAnimation(property);
+
+            // If this property's animations should be chained, then check to see if there is a
+            // subsequent animation within the rendering limit, and if so, tell it to animate to
+            // this animation's new value (plus the offset).
+            if (nextAnimInChain < Math.min(getChildCount(), mMaxRenderedChildren)) {
+                getAnimationAtIndex(property, animIndex + 1)
                         .animateToFinalPosition(value + offset);
+            } else if (nextAnimInChain < getChildCount()) {
+                // If the next child view is not rendered, update the property directly without
+                // animating it, so that the view is still in the correct state if it later
+                // becomes visible.
+                for (int i = nextAnimInChain; i < getChildCount(); i++) {
+                    // 'value' here is the value of the last child within the rendering limit,
+                    // not the first child's value - so we want to subtract the last child's
+                    // index when calculating the offset.
+                    property.setValue(getChildAt(i), value + offset * (i - animIndex));
+                }
             }
         });
 
         newAnim.setSpring(mController.getSpringForce(property, child));
         newAnim.addEndListener(new AllAnimationsForPropertyFinishedEndListener(property));
         child.setTag(getTagIdForProperty(property), newAnim);
+    }
+
+    /** Hides children beyond the max rendering count. */
+    private void setChildrenVisibility() {
+        for (int i = 0; i < getChildCount(); i++) {
+            final int targetVisibility = i < mMaxRenderedChildren ? View.VISIBLE : View.GONE;
+            final View targetView = getChildAt(i);
+
+            if (targetView.getVisibility() != targetVisibility) {
+                if (mController != null) {
+                    mController.setChildVisibility(targetView, i, targetVisibility);
+                } else {
+                    targetView.setVisibility(targetVisibility);
+                }
+            }
+        }
     }
 
     /** Return a stable ID to use as a tag key for the given property's animations. */
@@ -561,7 +592,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
         private View mView;
 
         /** Start velocity to use for all property animations. */
-        private float mDefaultStartVelocity = -Float.MAX_VALUE;
+        private float mDefaultStartVelocity = 0f;
 
         /** Start delay to use when start is called. */
         private long mStartDelay = 0;
@@ -594,15 +625,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
          */
         private Map<DynamicAnimation.ViewProperty, Float> mAnimatedProperties = new HashMap<>();
 
-        /**
-         * All of the initial property values that have been set. These values will be instantly set
-         * when {@link #start} is called, just before the animation begins.
-         */
-        private Map<DynamicAnimation.ViewProperty, Float> mInitialPropertyValues = new HashMap<>();
-
-        /** The animation controller that last retrieved this animator instance. */
-        private PhysicsAnimationController mAssociatedController;
-
         protected PhysicsPropertyAnimator(View view) {
             this.mView = view;
         }
@@ -622,7 +644,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Set the view's alpha value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator alpha(float from, float to, Runnable... endActions) {
-            mInitialPropertyValues.put(DynamicAnimation.ALPHA, from);
+            mView.setAlpha(from);
             return alpha(to, endActions);
         }
 
@@ -634,7 +656,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
         /** Set the view's translationX value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator translationX(
                 float from, float to, Runnable... endActions) {
-            mInitialPropertyValues.put(DynamicAnimation.TRANSLATION_X, from);
+            mView.setTranslationX(from);
             return translationX(to, endActions);
         }
 
@@ -646,7 +668,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
         /** Set the view's translationY value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator translationY(
                 float from, float to, Runnable... endActions) {
-            mInitialPropertyValues.put(DynamicAnimation.TRANSLATION_Y, from);
+            mView.setTranslationY(from);
             return translationY(to, endActions);
         }
 
@@ -668,7 +690,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Set the view's scaleX value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator scaleX(float from, float to, Runnable... endActions) {
-            mInitialPropertyValues.put(DynamicAnimation.SCALE_X, from);
+            mView.setScaleX(from);
             return scaleX(to, endActions);
         }
 
@@ -679,7 +701,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Set the view's scaleY value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator scaleY(float from, float to, Runnable... endActions) {
-            mInitialPropertyValues.put(DynamicAnimation.SCALE_Y, from);
+            mView.setScaleY(from);
             return scaleY(to, endActions);
         }
 
@@ -728,13 +750,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * animated property on every child (including chained animations) have ended.
          */
         public void start(Runnable... after) {
-            if (!isActiveController(mAssociatedController)) {
-                Log.w(TAG, "Only the active animation controller is allowed to start animations. "
-                        + "Use PhysicsAnimationLayout#setActiveController to set the active "
-                        + "animation controller.");
-                return;
-            }
-
             final Set<DynamicAnimation.ViewProperty> properties = getAnimatedProperties();
 
             // If there are end actions, set an end listener on the layout for all the properties
@@ -776,10 +791,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             // Actually start the animations.
             for (DynamicAnimation.ViewProperty property : properties) {
-                if (mInitialPropertyValues.containsKey(property)) {
-                    property.setValue(mView, mInitialPropertyValues.get(property));
-                }
-
                 final SpringForce defaultSpringForce = mController.getSpringForce(property, mView);
                 animateValueForChild(
                         property,
@@ -792,7 +803,14 @@ public class PhysicsAnimationLayout extends FrameLayout {
                         mEndActionsForProperty.get(property));
             }
 
-            clearAnimator();
+            // Clear out the animator.
+            mAnimatedProperties.clear();
+            mPositionStartVelocities.clear();
+            mDefaultStartVelocity = 0;
+            mStartDelay = 0;
+            mStiffness = -1;
+            mDampingRatio = -1;
+            mEndActionsForProperty.clear();
         }
 
         /** Returns the set of properties that will animate once {@link #start} is called. */
@@ -829,49 +847,19 @@ public class PhysicsAnimationLayout extends FrameLayout {
                     });
                 }
 
-                final SpringForce animationSpring = animation.getSpring();
+                animation.getSpring().setStiffness(stiffness);
+                animation.getSpring().setDampingRatio(dampingRatio);
 
-                if (animationSpring == null) {
-                    return;
+                if (startVel > 0) {
+                    animation.setStartVelocity(startVel);
                 }
-
-                final Runnable configureAndStartAnimation = () -> {
-                    animationSpring.setStiffness(stiffness);
-                    animationSpring.setDampingRatio(dampingRatio);
-
-                    if (startVel > -Float.MAX_VALUE) {
-                        animation.setStartVelocity(startVel);
-                    }
-
-                    animationSpring.setFinalPosition(value);
-                    animation.start();
-                };
 
                 if (startDelay > 0) {
-                    postDelayed(configureAndStartAnimation, startDelay);
+                    postDelayed(() -> animation.animateToFinalPosition(value), startDelay);
                 } else {
-                    configureAndStartAnimation.run();
+                    animation.animateToFinalPosition(value);
                 }
             }
-        }
-
-        private void clearAnimator() {
-            mInitialPropertyValues.clear();
-            mAnimatedProperties.clear();
-            mPositionStartVelocities.clear();
-            mDefaultStartVelocity = -Float.MAX_VALUE;
-            mStartDelay = 0;
-            mStiffness = -1;
-            mDampingRatio = -1;
-            mEndActionsForProperty.clear();
-        }
-
-        /**
-         * Sets the controller that last retrieved this animator instance, so that we can prevent
-         * {@link #start} from actually starting animations if called by a non-active controller.
-         */
-        private void setAssociatedController(PhysicsAnimationController controller) {
-            mAssociatedController = controller;
         }
     }
 

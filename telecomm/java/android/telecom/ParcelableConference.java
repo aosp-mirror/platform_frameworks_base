@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -43,10 +42,6 @@ public final class ParcelableConference implements Parcelable {
     private StatusHints mStatusHints;
     private Bundle mExtras;
     private long mConnectElapsedTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
-    private final Uri mAddress;
-    private final int mAddressPresentation;
-    private final String mCallerDisplayName;
-    private final int mCallerDisplayNamePresentation;
 
     public ParcelableConference(
             PhoneAccountHandle phoneAccount,
@@ -59,11 +54,7 @@ public final class ParcelableConference implements Parcelable {
             long connectTimeMillis,
             long connectElapsedTimeMillis,
             StatusHints statusHints,
-            Bundle extras,
-            Uri address,
-            int addressPresentation,
-            String callerDisplayName,
-            int callerDisplayNamePresentation) {
+            Bundle extras) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = connectionCapabilities;
@@ -75,10 +66,6 @@ public final class ParcelableConference implements Parcelable {
         mStatusHints = statusHints;
         mExtras = extras;
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
-        mAddress = address;
-        mAddressPresentation = addressPresentation;
-        mCallerDisplayName = callerDisplayName;
-        mCallerDisplayNamePresentation = callerDisplayNamePresentation;
     }
 
     @Override
@@ -147,14 +134,6 @@ public final class ParcelableConference implements Parcelable {
         return mExtras;
     }
 
-    public Uri getHandle() {
-        return mAddress;
-    }
-
-    public int getHandlePresentation() {
-        return mAddressPresentation;
-    }
-
     public static final @android.annotation.NonNull Parcelable.Creator<ParcelableConference> CREATOR =
             new Parcelable.Creator<ParcelableConference> () {
         @Override
@@ -173,15 +152,10 @@ public final class ParcelableConference implements Parcelable {
             Bundle extras = source.readBundle(classLoader);
             int properties = source.readInt();
             long connectElapsedTimeMillis = source.readLong();
-            Uri address = source.readParcelable(classLoader);
-            int addressPresentation = source.readInt();
-            String callerDisplayName = source.readString();
-            int callerDisplayNamePresentation = source.readInt();
 
             return new ParcelableConference(phoneAccount, state, capabilities, properties,
                     connectionIds, videoCallProvider, videoState, connectTimeMillis,
-                    connectElapsedTimeMillis, statusHints, extras, address, addressPresentation,
-                    callerDisplayName, callerDisplayNamePresentation);
+                    connectElapsedTimeMillis, statusHints, extras);
         }
 
         @Override
@@ -211,9 +185,5 @@ public final class ParcelableConference implements Parcelable {
         destination.writeBundle(mExtras);
         destination.writeInt(mConnectionProperties);
         destination.writeLong(mConnectElapsedTimeMillis);
-        destination.writeParcelable(mAddress, 0);
-        destination.writeInt(mAddressPresentation);
-        destination.writeString(mCallerDisplayName);
-        destination.writeInt(mCallerDisplayNamePresentation);
     }
 }

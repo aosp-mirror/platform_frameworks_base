@@ -953,21 +953,30 @@ public class Vpn {
             return false;
         }
 
-        agent.sendLinkProperties(makeLinkProperties());
+        LinkProperties lp = makeLinkProperties();
+        final boolean hadInternetCapability = mNetworkCapabilities.hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        final boolean willHaveInternetCapability = providesRoutesToMostDestinations(lp);
+        if (hadInternetCapability != willHaveInternetCapability) {
+            // A seamless handover would have led to a change to INTERNET capability, which
+            // is supposed to be immutable for a given network. In this case bail out and do not
+            // perform handover.
+            Log.i(TAG, "Handover not possible due to changes to INTERNET capability");
+            return false;
+        }
+
+        agent.sendLinkProperties(lp);
         return true;
     }
 
     private void agentConnect() {
         LinkProperties lp = makeLinkProperties();
 
-        // VPN either provide a default route (IPv4 or IPv6 or both), or they are a split tunnel
-        // that falls back to the default network, which by definition provides INTERNET (unless
-        // there is no default network, in which case none of this matters in any sense).
-        // Also, it guarantees that when a VPN applies to an app, the VPN will always be reported
-        // as the network by getDefaultNetwork and registerDefaultNetworkCallback. This in turn
-        // protects the invariant that apps calling CM#bindProcessToNetwork(getDefaultNetwork())
-        // the same as if they use the default network.
-        mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        if (providesRoutesToMostDestinations(lp)) {
+            mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        } else {
+            mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        }
 
         mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
 
@@ -1837,11 +1846,10 @@ public class Vpn {
         if (!profile.searchDomains.isEmpty()) {
             config.searchDomains = Arrays.asList(profile.searchDomains.split(" +"));
         }
-        startLegacyVpn(config, racoon, mtpd, profile);
+        startLegacyVpn(config, racoon, mtpd);
     }
 
-    private synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd,
-            VpnProfile profile) {
+    private synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
         stopLegacyVpnPrivileged();
 
         // Prepare for the new request.
@@ -1849,7 +1857,7 @@ public class Vpn {
         updateState(DetailedState.CONNECTING, "startLegacyVpn");
 
         // Start a new LegacyVpnRunner and we are done!
-        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd, profile);
+        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
         mLegacyVpnRunner.start();
     }
 
@@ -1915,7 +1923,6 @@ public class Vpn {
         private final String mOuterInterface;
         private final AtomicInteger mOuterConnection =
                 new AtomicInteger(ConnectivityManager.TYPE_NONE);
-        private final VpnProfile mProfile;
 
         private long mBringupStartTime = -1;
 
@@ -1942,7 +1949,7 @@ public class Vpn {
             }
         };
 
-        LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd, VpnProfile profile) {
+        public LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd) {
             super(TAG);
             mConfig = config;
             mDaemons = new String[] {"racoon", "mtpd"};
@@ -1957,8 +1964,6 @@ public class Vpn {
             // we will leave the VPN up.  We should check that it's still there/connected after
             // registering
             mOuterInterface = mConfig.interfaze;
-
-            mProfile = profile;
 
             if (!TextUtils.isEmpty(mOuterInterface)) {
                 final ConnectivityManager cm = ConnectivityManager.from(mContext);
@@ -2172,7 +2177,7 @@ public class Vpn {
                 }
 
                 // Add a throw route for the VPN server endpoint, if one was specified.
-                String endpoint = parameters[5].isEmpty() ? mProfile.server : parameters[5];
+                String endpoint = parameters[5];
                 if (!endpoint.isEmpty()) {
                     try {
                         InetAddress addr = InetAddress.parseNumericAddress(endpoint);

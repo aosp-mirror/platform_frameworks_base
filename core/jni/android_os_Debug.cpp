@@ -258,7 +258,7 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
         } else if (base::StartsWith(name, "[anon:libc_malloc]")) {
             which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[stack")) {
-            which_heap = HEAP_STACK;
+            which_heap = HEAP_NATIVE;
         } else if (base::EndsWith(name, ".so")) {
             which_heap = HEAP_SO;
             is_swappable = true;

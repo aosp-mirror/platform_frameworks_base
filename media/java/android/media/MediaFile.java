@@ -220,6 +220,7 @@ public class MediaFile {
             case "audio/mpegurl":
             case "application/x-mpegurl":
             case "application/vnd.apple.mpegurl":
+            case "video/x-ms-asf":
             case "audio/x-scpls":
                 return true;
             default:

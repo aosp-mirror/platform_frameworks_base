@@ -200,20 +200,16 @@ public class BtHelper {
 
     /*package*/ synchronized void setAvrcpAbsoluteVolumeSupported(boolean supported) {
         mAvrcpAbsVolSupported = supported;
-        Log.i(TAG, "setAvrcpAbsoluteVolumeSupported supported=" + supported);
     }
 
     /*package*/ synchronized void setAvrcpAbsoluteVolumeIndex(int index) {
         if (mA2dp == null) {
             if (AudioService.DEBUG_VOL) {
-                AudioService.sVolumeLogger.log(new AudioEventLogger.StringEvent(
-                        "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp").printLog(TAG));
+                Log.d(TAG, "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp");
                 return;
             }
         }
         if (!mAvrcpAbsVolSupported) {
-            AudioService.sVolumeLogger.log(new AudioEventLogger.StringEvent(
-                    "setAvrcpAbsoluteVolumeIndex: abs vol not supported ").printLog(TAG));
             return;
         }
         if (AudioService.DEBUG_VOL) {

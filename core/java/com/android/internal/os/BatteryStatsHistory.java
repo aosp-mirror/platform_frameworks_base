@@ -28,6 +28,7 @@ import com.android.internal.util.ParseUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -137,12 +138,11 @@ public class BatteryStatsHistory {
         if (!dedup.isEmpty()) {
             mFileNumbers.addAll(dedup);
             Collections.sort(mFileNumbers);
-            setActiveFile(mFileNumbers.get(mFileNumbers.size() - 1));
         } else {
             // No file found, default to have file 0.
             mFileNumbers.add(0);
-            setActiveFile(0);
         }
+        createActiveFile();
     }
 
     /**
@@ -157,15 +157,22 @@ public class BatteryStatsHistory {
         mHistoryBuffer = historyBuffer;
     }
     /**
-     * Set the active file that mHistoryBuffer is backed up into.
-     *
-     * @param fileNumber the history file that mHistoryBuffer is backed up into.
+     * The highest numbered history file is active file that mHistoryBuffer is backed up into.
+     * If file does not exists, truncate() creates a empty file.
      */
-    private void setActiveFile(int fileNumber) {
-        mActiveFile = getFile(fileNumber);
+    private void createActiveFile() {
+        final AtomicFile file = getFile(mFileNumbers.get(mFileNumbers.size() - 1));
         if (DEBUG) {
-            Slog.d(TAG, "activeHistoryFile:" + mActiveFile.getBaseFile().getPath());
+            Slog.d(TAG, "activeHistoryFile:" + file.getBaseFile().getPath());
         }
+        if (!file.exists()) {
+            try {
+                file.truncate();
+            } catch (IOException e) {
+                Slog.e(TAG, "Error creating history file "+ file.getBaseFile().getPath(), e);
+            }
+        }
+        mActiveFile = file;
     }
 
     /**
@@ -182,7 +189,7 @@ public class BatteryStatsHistory {
      * When {@link #mHistoryBuffer} reaches {@link BatteryStatsImpl.Constants#MAX_HISTORY_BUFFER},
      * create next history file.
      */
-    public void startNextFile() {
+    public void createNextFile() {
         if (mFileNumbers.isEmpty()) {
             Slog.wtf(TAG, "mFileNumbers should never be empty");
             return;
@@ -191,7 +198,7 @@ public class BatteryStatsHistory {
         // number plus one.
         final int next = mFileNumbers.get(mFileNumbers.size() - 1) + 1;
         mFileNumbers.add(next);
-        setActiveFile(next);
+        createActiveFile();
 
         // if free disk space is less than 100MB, delete oldest history file.
         if (!hasFreeDiskSpace()) {
@@ -217,7 +224,7 @@ public class BatteryStatsHistory {
         }
         mFileNumbers.clear();
         mFileNumbers.add(0);
-        setActiveFile(0);
+        createActiveFile();
     }
 
     /**

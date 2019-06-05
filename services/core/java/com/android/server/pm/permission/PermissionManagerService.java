@@ -1173,14 +1173,6 @@ public class PermissionManagerService {
                                     }
                                 }
 
-                                if (hardRestricted
-                                        && (flags & FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-                                    // Applying a hard restriction implies revoking it. This might
-                                    // lead to a system-fixed, revoked permission.
-                                    flags &= ~FLAG_PERMISSION_SYSTEM_FIXED;
-                                    wasChanged = true;
-                                }
-
                                 if (wasChanged) {
                                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                                 }

@@ -131,7 +131,7 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
         ));
 
         // Ensure the callback runs at least once
-        mWrapper.mOnUpdateTimerTick.run();
+        mWrapper.mUpdatePlaybackUi.run();
 
         verify(mMetricsLogger).write(argThat(logMaker ->
                 logMaker.getCategory() == MetricsEvent.MEDIA_NOTIFICATION_SEEKBAR

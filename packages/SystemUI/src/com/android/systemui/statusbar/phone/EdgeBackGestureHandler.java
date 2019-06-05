@@ -33,14 +33,13 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.ISystemGestureExclusionListener;
-import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -54,6 +53,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 
@@ -165,14 +165,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mEdgeWidth = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_backGestureInset);
 
-        // Reduce the default touch slop to ensure that we can intercept the gesture
-        // before the app starts to react to it.
-        // TODO(b/130352502) Tune this value and extract into a constant
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 0.75f;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
 
         mNavBarHeight = res.getDimensionPixelSize(R.dimen.navigation_bar_frame_height);
-        mMinArrowPosition = res.getDimensionPixelSize(R.dimen.navigation_edge_arrow_min_y);
+        mMinArrowPosition = res.getDimensionPixelSize(
+                R.dimen.navigation_edge_arrow_min_y);
         mFingerOffset = res.getDimensionPixelSize(R.dimen.navigation_edge_finger_offset);
     }
 
@@ -252,8 +250,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // Register input event receiver
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "edge-swipe", mDisplayId);
-            mInputEventReceiver = new SysUiInputEventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper());
+            mInputEventReceiver = new InputEventReceiver(mInputMonitor.getInputChannel(),
+                    Looper.getMainLooper(), Choreographer.getMainThreadInstance(),
+                    this::onInputEvent);
 
             // Add a nav bar panel window
             mEdgePanel = new NavigationBarEdgePanel(mContext);
@@ -440,16 +439,5 @@ public class EdgeBackGestureHandler implements DisplayListener {
             ev.setDisplayId(bubbleDisplayId);
         }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    }
-
-    class SysUiInputEventReceiver extends InputEventReceiver {
-        SysUiInputEventReceiver(InputChannel channel, Looper looper) {
-            super(channel, looper);
-        }
-
-        public void onInputEvent(InputEvent event) {
-            EdgeBackGestureHandler.this.onInputEvent(event);
-            finishInputEvent(event, true);
-        }
     }
 }
