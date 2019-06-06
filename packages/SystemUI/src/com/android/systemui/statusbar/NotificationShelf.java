@@ -63,15 +63,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
             = SystemProperties.getBoolean("debug.icon_scroll_animations", true);
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
-    private static final long SHELF_IN_TRANSLATION_DURATION = 200;
 
     private NotificationIconContainer mShelfIcons;
     private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mIconAppearTopPadding;
-    private int mShelfAppearTranslation;
-    private float mDarkShelfPadding;
-    private float mDarkShelfIconSize;
+    private float mHiddenShelfIconSize;
     private int mStatusBarHeight;
     private int mStatusBarPaddingStart;
     private AmbientState mAmbientState;
@@ -140,8 +137,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         mStatusBarPaddingStart = res.getDimensionPixelOffset(R.dimen.status_bar_padding_start);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
-        mShelfAppearTranslation = res.getDimensionPixelSize(R.dimen.shelf_appear_translation);
-        mDarkShelfPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         layoutParams.height = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
@@ -152,7 +147,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
-        mDarkShelfIconSize = res.getDimensionPixelOffset(R.dimen.dark_shelf_icon_size);
+        mHiddenShelfIconSize = res.getDimensionPixelOffset(R.dimen.hidden_shelf_icon_size);
         mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
 
         if (!mShowNotificationShelf) {
@@ -164,33 +159,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         initDimens();
-    }
-
-    @Override
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark == dark) return;
-        super.setDark(dark, fade, delay);
-        mShelfIcons.setDark(dark, fade, delay);
-        updateInteractiveness();
-        updateOutline();
-    }
-
-    /**
-     * Alpha animation with translation played when this view is visible on AOD.
-     */
-    public void fadeInTranslating() {
-        mShelfIcons.setTranslationY(-mShelfAppearTranslation);
-        mShelfIcons.setAlpha(0);
-        mShelfIcons.animate()
-                .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(0)
-                .setDuration(SHELF_IN_TRANSLATION_DURATION)
-                .start();
-        mShelfIcons.animate()
-                .alpha(1)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(SHELF_IN_TRANSLATION_DURATION)
-                .start();
     }
 
     @Override
@@ -219,11 +187,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.copyFrom(lastViewState);
             viewState.height = getIntrinsicHeight();
 
-            float awakenTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - viewState.height,
+            viewState.yTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - viewState.height,
                     getFullyClosedTranslation());
-            float yRatio = mAmbientState.hasPulsingNotifications() ?
-                    0 : mAmbientState.getDarkAmount();
-            viewState.yTranslation = awakenTranslation + mDarkShelfPadding * yRatio;
             viewState.zTranslation = ambientState.getBaseZHeight();
             // For the small display size, it's not enough to make the icon not covered by
             // the top cutout so the denominator add the height of cutout.
@@ -452,7 +417,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         StatusBarIconView icon = row.getEntry().expandedIcon;
         float shelfIconPosition = getTranslationY() + icon.getTop() + icon.getTranslationY();
-        if (shelfIconPosition < maxTop && !mAmbientState.isFullyDark()) {
+        if (shelfIconPosition < maxTop && !mAmbientState.isFullyHidden()) {
             int top = (int) (maxTop - shelfIconPosition);
             Rect clipRect = new Rect(0, top, icon.getWidth(), Math.max(top, icon.getHeight()));
             icon.setClipBounds(clipRect);
@@ -666,8 +631,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             iconState.translateContent = false;
         }
         float transitionAmount;
-        if (mAmbientState.isDarkAtAll() && !row.isInShelf()) {
-            transitionAmount = mAmbientState.isFullyDark() ? 1 : 0;
+        if (mAmbientState.isHiddenAtAll() && !row.isInShelf()) {
+            transitionAmount = mAmbientState.isFullyHidden() ? 1 : 0;
         } else if (isLastChild || !USE_ANIMATIONS_WHEN_OPENING || iconState.useFullTransitionAmount
                 || iconState.useLinearTransitionAmount) {
             transitionAmount = iconTransitionAmount;
@@ -717,7 +682,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         notificationIconPosition += iconTopPadding;
         float shelfIconPosition = getTranslationY() + icon.getTop();
-        float iconSize = mDark ? mDarkShelfIconSize : mIconSize;
+        float iconSize = mDozing ? mHiddenShelfIconSize : mIconSize;
         shelfIconPosition += (icon.getHeight() - icon.getIconScale() * iconSize) / 2.0f;
         float iconYTranslation = NotificationUtils.interpolate(
                 notificationIconPosition - shelfIconPosition,
@@ -794,12 +759,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     @Override
     protected boolean needsOutline() {
-        return !mHideBackground && !mDark && super.needsOutline();
+        return !mHideBackground && super.needsOutline();
     }
 
     @Override
     protected boolean shouldHideBackground() {
-        return super.shouldHideBackground() || mHideBackground || mDark;
+        return super.shouldHideBackground() || mHideBackground;
     }
 
     @Override
@@ -910,8 +875,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void updateInteractiveness() {
-        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf
-                && !mDark;
+        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
@@ -929,7 +893,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public void setAnimationsEnabled(boolean enabled) {
         mAnimationsEnabled = enabled;
-        mCollapsedIcons.setAnimationsEnabled(enabled);
         if (!enabled) {
             // we need to wait with enabling the animations until the first frame has passed
             mShelfIcons.setAnimationsEnabled(false);
