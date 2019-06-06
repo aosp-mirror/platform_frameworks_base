@@ -10,3 +10,16 @@ cc_library_host_static {
         export_proto_headers: true,
     },
 }
+
+java_binary {
+    name: "am",
+    wrapper: "am",
+    srcs: [
+        "src/**/*.java",
+        "proto/**/*.proto",
+    ],
+    proto: {
+        plugin: "javastream",
+    },
+    static_libs: ["libprotobuf-java-lite"],
+}
