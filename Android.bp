@@ -843,15 +843,22 @@ java_library {
     plugins: ["unsupportedappusage-annotation-processor"],
 }
 
-// A host library including just UnsupportedAppUsage.java so that the annotation
-// processor can also use this annotation.
-java_library_host {
+// A library including just UnsupportedAppUsage.java classes.
+//
+// Provided for target so that libraries can use it without depending on
+// the whole of framework or the core platform API.
+//
+// Built for host so that the annotation processor can also use this annotation.
+java_library {
     name: "unsupportedappusage-annotation",
+    host_supported: true,
     srcs: [
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         ":unsupportedappusage_annotation_files",
     ],
+
+    sdk_version: "core_current",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
