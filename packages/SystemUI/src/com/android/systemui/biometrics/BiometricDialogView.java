@@ -39,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -75,6 +76,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected static final int STATE_PENDING_CONFIRMATION = 3;
     protected static final int STATE_AUTHENTICATED = 4;
 
+    private final AccessibilityManager mAccessibilityManager;
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
     private final WindowManager mWindowManager;
@@ -153,6 +155,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         super(context);
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
@@ -522,12 +525,14 @@ public abstract class BiometricDialogView extends LinearLayout {
     // Every time a view becomes invisible we need to announce an accessibility event.
     // This is due to an issue in the framework, b/132298701 recommended this workaround.
     protected void announceAccessibilityEvent() {
+        if (!mAccessibilityManager.isEnabled()) {
+            return;
+        }
         AccessibilityEvent event = AccessibilityEvent.obtain();
         event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         event.setContentChangeTypes(CONTENT_CHANGE_TYPE_SUBTREE);
         mDialog.sendAccessibilityEventUnchecked(event);
         mDialog.notifySubtreeAccessibilityStateChanged(mDialog, mDialog,
                 CONTENT_CHANGE_TYPE_SUBTREE);
-        event.recycle();
     }
 }
