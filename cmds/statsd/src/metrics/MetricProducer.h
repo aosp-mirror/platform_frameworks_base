@@ -407,8 +407,8 @@ protected:
     // whether the metric producer is ready to generate metrics.
     std::unordered_map<int, std::shared_ptr<Activation>> mEventActivationMap;
 
-    // Maps index of atom matcher for deactivation to Activation struct.
-    std::unordered_map<int, std::shared_ptr<Activation>> mEventDeactivationMap;
+    // Maps index of atom matcher for deactivation to a list of Activation structs.
+    std::unordered_map<int, std::vector<std::shared_ptr<Activation>>> mEventDeactivationMap;
 
     bool mIsActive;
 
@@ -422,6 +422,7 @@ protected:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
