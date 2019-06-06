@@ -39,8 +39,7 @@ import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import androidx.dynamicanimation.animation.DynamicAnimation;
-import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
@@ -67,9 +66,6 @@ public class BubbleFlyoutView extends FrameLayout {
 
     private final ViewGroup mFlyoutTextContainer;
     private final TextView mFlyoutText;
-    /** Spring animation for the flyout. */
-    private final SpringAnimation mFlyoutSpring =
-            new SpringAnimation(this, DynamicAnimation.TRANSLATION_X);
 
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
     private final float mNewDotRadius;
@@ -141,7 +137,7 @@ public class BubbleFlyoutView extends FrameLayout {
     private static final float DOT_SCALE = 0.8f;
 
     /** Callback to run when the flyout is hidden. */
-    private Runnable mOnHide;
+    @Nullable private Runnable mOnHide;
 
     public BubbleFlyoutView(Context context) {
         super(context);
@@ -209,17 +205,16 @@ public class BubbleFlyoutView extends FrameLayout {
         super.onDraw(canvas);
     }
 
-    /** Configures the flyout and animates it in. */
-    void showFlyout(
+    /** Configures the flyout, collapsed into to dot form. */
+    void setupFlyoutStartingAsDot(
             CharSequence updateMessage, PointF stackPos, float parentWidth,
-            boolean arrowPointingLeft, int dotColor, Runnable onHide) {
+            boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
+            @Nullable Runnable onHide) {
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
 
-        setCollapsePercent(0f);
-        setAlpha(0f);
-        setVisibility(VISIBLE);
+        setCollapsePercent(1f);
 
         // Set the flyout TextView's max width in terms of percent, and then subtract out the
         // padding so that the entire flyout view will be the desired width (rather than the
@@ -245,14 +240,6 @@ public class BubbleFlyoutView extends FrameLayout {
                     ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
                     : stackPos.x - getWidth() - mFlyoutSpaceFromBubble;
 
-            // Translate towards the stack slightly.
-            setTranslationX(
-                    mRestingTranslationX + (arrowPointingLeft ? -mBubbleSize : mBubbleSize));
-
-            // Fade in the entire flyout and spring it to its normal position.
-            animate().alpha(1f);
-            mFlyoutSpring.animateToFinalPosition(mRestingTranslationX);
-
             // Calculate the difference in size between the flyout and the 'dot' so that we can
             // transform into the dot later.
             mFlyoutToDotWidthDelta = getWidth() - mNewDotSize;
@@ -271,12 +258,17 @@ public class BubbleFlyoutView extends FrameLayout {
                     getHeight() / 2f
                             - mBubbleSize / 2f
                             + mOriginalDotSize / 2;
+
+            if (onLayoutComplete != null) {
+                onLayoutComplete.run();
+            }
         });
     }
 
     /**
-     * Hides the flyout and runs the optional callback passed into showFlyout. The flyout has been
-     * animated into the 'new' dot by the time we call this, so no animations are needed.
+     * Hides the flyout and runs the optional callback passed into setupFlyoutStartingAsDot.
+     * The flyout has been animated into the 'new' dot by the time we call this, so no animations
+     * are needed.
      */
     void hideFlyout() {
         if (mOnHide != null) {

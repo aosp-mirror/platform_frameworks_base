@@ -56,6 +56,10 @@ public class StackAnimationController extends
     /** Translation factor (multiplied by stack offset) to use for bubbles being animated in/out. */
     private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
+    /** Values to use for animating bubbles in. */
+    private static final float ANIMATE_IN_STIFFNESS = 1000f;
+    private static final int ANIMATE_IN_START_DELAY = 25;
+
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
      */
@@ -643,7 +647,7 @@ public class StackAnimationController extends
         } else if (isStackPositionSet() && mLayout.indexOfChild(child) == 0) {
             // Otherwise, animate the bubble in if it's the newest bubble. If we're adding a bubble
             // to the back of the stack, it'll be largely invisible so don't bother animating it in.
-            animateInBubble(child);
+            animateInBubble(child, index);
         }
     }
 
@@ -697,7 +701,7 @@ public class StackAnimationController extends
 
             // Animate in the top bubble now that we're visible.
             if (mLayout.getChildCount() > 0) {
-                animateInBubble(mLayout.getChildAt(0));
+                animateInBubble(mLayout.getChildAt(0), 0 /* index */);
             }
         });
     }
@@ -760,21 +764,34 @@ public class StackAnimationController extends
     }
 
     /** Animates in the given bubble. */
-    private void animateInBubble(View child) {
+    private void animateInBubble(View child, int index) {
         if (!isActiveController()) {
             return;
         }
 
-        child.setTranslationY(mStackPosition.y);
+        final float xOffset =
+                getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
 
-        float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
+        // Position the new bubble in the correct position, scaled down completely.
+        child.setTranslationX(mStackPosition.x + xOffset * index);
+        child.setTranslationY(mStackPosition.y);
+        child.setScaleX(0f);
+        child.setScaleY(0f);
+
+        // Push the subsequent views out of the way, if there are subsequent views.
+        if (index + 1 < mLayout.getChildCount()) {
+            animationForChildAtIndex(index + 1)
+                    .translationX(mStackPosition.x + xOffset * (index + 1))
+                    .withStiffness(SpringForce.STIFFNESS_LOW)
+                    .start();
+        }
+
+        // Scale in the new bubble, slightly delayed.
         animationForChild(child)
-                .scaleX(ANIMATE_IN_STARTING_SCALE /* from */, 1f /* to */)
-                .scaleY(ANIMATE_IN_STARTING_SCALE /* from */, 1f /* to */)
-                .alpha(0f /* from */, 1f /* to */)
-                .translationX(
-                        mStackPosition.x - ANIMATE_TRANSLATION_FACTOR * xOffset /* from */,
-                        mStackPosition.x /* to */)
+                .scaleX(1f)
+                .scaleY(1f)
+                .withStiffness(ANIMATE_IN_STIFFNESS)
+                .withStartDelay(mLayout.getChildCount() > 1 ? ANIMATE_IN_START_DELAY : 0)
                 .start();
     }
 

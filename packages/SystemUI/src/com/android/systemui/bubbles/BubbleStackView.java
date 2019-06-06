@@ -288,6 +288,11 @@ public class BubbleStackView extends FrameLayout {
     private float mFlyoutDragDeltaX = 0f;
 
     /**
+     * Runnable that animates in the flyout. This reference is needed to cancel delayed postings.
+     */
+    private Runnable mAnimateInFlyout;
+
+    /**
      * End listener for the flyout spring that either posts a runnable to hide the flyout, or hides
      * it immediately.
      */
@@ -370,7 +375,7 @@ public class BubbleStackView extends FrameLayout {
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
 
         mFlyoutTransitionSpring.setSpring(new SpringForce()
-                .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .setStiffness(SpringForce.STIFFNESS_LOW)
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
@@ -1092,6 +1097,19 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
+     * Set when the flyout is tapped, so that we can expand the bubble associated with the flyout
+     * once it collapses.
+     */
+    @Nullable private Bubble mBubbleToExpandAfterFlyoutCollapse = null;
+
+    void onFlyoutTapped() {
+        mBubbleToExpandAfterFlyoutCollapse = mBubbleData.getSelectedBubble();
+
+        mFlyout.removeCallbacks(mHideFlyout);
+        mHideFlyout.run();
+    }
+
+    /**
      * Called when the flyout drag has finished, and returns true if the gesture successfully
      * dismissed the flyout.
      */
@@ -1288,6 +1306,12 @@ public class BubbleStackView extends FrameLayout {
     /** Animates the flyout collapsed (to dot), or the reverse, starting with the given velocity. */
     private void animateFlyoutCollapsed(boolean collapsed, float velX) {
         final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
+        // If the flyout was tapped, we want a higher stiffness for the collapse animation so it's
+        // faster.
+        mFlyoutTransitionSpring.getSpring().setStiffness(
+                (mBubbleToExpandAfterFlyoutCollapse != null)
+                        ? SpringForce.STIFFNESS_MEDIUM
+                        : SpringForce.STIFFNESS_LOW);
         mFlyoutTransitionSpring
                 .setStartValue(mFlyoutDragDeltaX)
                 .setStartVelocity(velX)
@@ -1329,8 +1353,10 @@ public class BubbleStackView extends FrameLayout {
         if (updateMessage == null
                 || isExpanded()
                 || mIsExpansionAnimating
-                || mIsGestureInProgress) {
-            // Skip the message if none exists, we're expanded or animating expansion.
+                || mIsGestureInProgress
+                || mBubbleToExpandAfterFlyoutCollapse != null) {
+            // Skip the message if none exists, we're expanded or animating expansion, or we're
+            // about to expand a bubble from the previous tapped flyout.
             return;
         }
 
@@ -1339,18 +1365,14 @@ public class BubbleStackView extends FrameLayout {
             bubble.getIconView().setSuppressDot(
                     true /* suppressDot */, false /* animate */);
 
+            mFlyout.removeCallbacks(mAnimateInFlyout);
             mFlyoutDragDeltaX = 0f;
-            mFlyout.setAlpha(0f);
 
             if (mAfterFlyoutHides != null) {
                 mAfterFlyoutHides.run();
             }
 
             mAfterFlyoutHides = () -> {
-                if (bubble.getIconView() == null) {
-                    return;
-                }
-
                 final boolean suppressDot = !bubble.showBubbleDot();
                 // If we're going to suppress the dot, make it visible first so it'll
                 // visibly animate away.
@@ -1365,7 +1387,15 @@ public class BubbleStackView extends FrameLayout {
                 bubble.getIconView().setSuppressDot(
                         suppressDot /* suppressDot */,
                         suppressDot /* animate */);
+
+                if (mBubbleToExpandAfterFlyoutCollapse != null) {
+                    mBubbleData.setSelectedBubble(mBubbleToExpandAfterFlyoutCollapse);
+                    mBubbleData.setExpanded(true);
+                    mBubbleToExpandAfterFlyoutCollapse = null;
+                }
             };
+
+            mFlyout.setVisibility(INVISIBLE);
 
             // Post in case layout isn't complete and getWidth returns 0.
             post(() -> {
@@ -1375,10 +1405,29 @@ public class BubbleStackView extends FrameLayout {
                     return;
                 }
 
-                mFlyout.showFlyout(
+                final Runnable afterShow = () -> {
+                    mAnimateInFlyout = () -> {
+                        mFlyout.setVisibility(VISIBLE);
+                        bubble.getIconView().setSuppressDot(
+                                true /* suppressDot */, false /* animate */);
+                        mFlyoutDragDeltaX =
+                                mStackAnimationController.isStackOnLeftSide()
+                                        ? -mFlyout.getWidth()
+                                        : mFlyout.getWidth();
+                        animateFlyoutCollapsed(false /* collapsed */, 0 /* velX */);
+                        mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
+                    };
+
+                    mFlyout.postDelayed(mAnimateInFlyout, 200);
+                };
+
+                mFlyout.setupFlyoutStartingAsDot(
                         updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
                         mStackAnimationController.isStackOnLeftSide(),
-                        bubble.getIconView().getBadgeColor(), mAfterFlyoutHides);
+                        bubble.getIconView().getBadgeColor(),
+                        afterShow,
+                        mAfterFlyoutHides);
+                mFlyout.bringToFront();
             });
         }
 
@@ -1393,6 +1442,7 @@ public class BubbleStackView extends FrameLayout {
             mAfterFlyoutHides.run();
         }
 
+        mFlyout.removeCallbacks(mAnimateInFlyout);
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.hideFlyout();
     }
