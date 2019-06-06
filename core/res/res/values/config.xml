@@ -3279,7 +3279,8 @@
          various workspace stacks.
          0 - Nav bar is always opaque when either the freeform stack or docked stack is visible.
          1 - Nav bar is always translucent when the freeform stack is visible, otherwise always
-         opaque.
+             opaque.
+         2 - Nav bar is never forced opaque.
          -->
     <integer name="config_navBarOpacityMode">0</integer>
 
