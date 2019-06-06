@@ -37,12 +37,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.os.RemoteCallback;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -68,10 +71,13 @@ public class AppOpsServiceTest {
     private File mAppOpsFile;
     private Context mContext;
     private Handler mHandler;
+    private AppOpsManager mAppOpsManager;
     private AppOpsService mAppOpsService;
     private String mMyPackageName;
     private int mMyUid;
     private long mTestStartMillis;
+
+    private static String sDefaultAppopHistoryParameters;
 
     @Before
     public void setUp() {
@@ -88,9 +94,27 @@ public class AppOpsServiceTest {
         mMyPackageName = mContext.getOpPackageName();
         mMyUid = Process.myUid();
 
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mAppOpsService = new AppOpsService(mAppOpsFile, mHandler);
+        mAppOpsService.mHistoricalRegistry.systemReady(mContext.getContentResolver());
         mAppOpsService.mContext = mContext;
         mTestStartMillis = System.currentTimeMillis();
+    }
+
+    @BeforeClass
+    public static void configureDesiredAppopHistoryParameters() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        sDefaultAppopHistoryParameters = Settings.Global.getString(context.getContentResolver(),
+                Settings.Global.APPOP_HISTORY_PARAMETERS);
+        Settings.Global.putString(InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.APPOP_HISTORY_PARAMETERS, null);
+    }
+
+    @AfterClass
+    public static void restoreDefaultAppopHistoryParameters() {
+        Settings.Global.putString(InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.APPOP_HISTORY_PARAMETERS,
+                sDefaultAppopHistoryParameters);
     }
 
     @Test
