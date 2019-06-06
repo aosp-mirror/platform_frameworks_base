@@ -167,6 +167,18 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("assertNoNetworkStackRollbackCommitted");
     }
 
+    /**
+     * Tests rolling back user data where there are multiple rollbacks for that package.
+     */
+    @Test
+    public void testPreviouslyAbandonedRollbacks() throws Exception {
+        runPhase("testPreviouslyAbandonedRollbacksEnableRollback");
+        getDevice().reboot();
+        runPhase("testPreviouslyAbandonedRollbacksCommitRollback");
+        getDevice().reboot();
+        runPhase("testPreviouslyAbandonedRollbacksCheckUserdataRollback");
+    }
+
     private String getNetworkStackPath() throws DeviceNotAvailableException {
         // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
         return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");

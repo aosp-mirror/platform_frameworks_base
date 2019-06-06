@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInstaller;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 
@@ -33,6 +34,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
+import com.android.cts.install.lib.LocalIntentSender;
 import com.android.cts.install.lib.TestApp;
 import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
@@ -206,5 +208,41 @@ public class StagedRollbackTest {
         ComponentName comp = intent.resolveSystemService(
                 InstrumentationRegistry.getContext().getPackageManager(), 0);
         return comp.getPackageName();
+    }
+
+    @Test
+    public void testPreviouslyAbandonedRollbacksEnableRollback() throws Exception {
+        Uninstall.packages(TestApp.A);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+
+        int sessionId = Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
+        PackageInstaller pi = InstrumentationRegistry.getContext().getPackageManager()
+                .getPackageInstaller();
+        pi.abandonSession(sessionId);
+
+        // Remove the first intent sender result, so that the next staged install session does not
+        // erroneously think that it has itself been abandoned.
+        // TODO(b/136260017): Restructure LocalIntentSender to negate the need for this step.
+        LocalIntentSender.getIntentSenderResult();
+        Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
+    }
+
+    @Test
+    public void testPreviouslyAbandonedRollbacksCommitRollback() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        InstallUtils.processUserData(TestApp.A);
+
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getAvailableRollbacks(), TestApp.A);
+        RollbackUtils.rollback(rollback.getRollbackId());
+    }
+
+    @Test
+    public void testPreviouslyAbandonedRollbacksCheckUserdataRollback() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
+        Uninstall.packages(TestApp.A);
     }
 }
