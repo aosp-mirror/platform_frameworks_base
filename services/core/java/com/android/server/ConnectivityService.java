@@ -3631,20 +3631,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, true);
     }
 
+    private boolean shouldPromptUnvalidated(NetworkAgentInfo nai) {
+        // Don't prompt if the network is validated, and don't prompt on captive portals
+        // because we're already prompting the user to sign in.
+        if (nai.everValidated || nai.everCaptivePortalDetected) {
+            return false;
+        }
+
+        // If a network has partial connectivity, always prompt unless the user has already accepted
+        // partial connectivity and selected don't ask again. This ensures that if the device
+        // automatically connects to a network that has partial Internet access, the user will
+        // always be able to use it, either because they've already chosen "don't ask again" or
+        // because we have prompt them.
+        if (nai.partialConnectivity && !nai.networkMisc.acceptPartialConnectivity) {
+            return true;
+        }
+
+        // If a network has no Internet access, only prompt if the network was explicitly selected
+        // and if the user has not already told us to use the network regardless of whether it
+        // validated or not.
+        if (nai.networkMisc.explicitlySelected && !nai.networkMisc.acceptUnvalidated) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void handlePromptUnvalidated(Network network) {
         if (VDBG || DDBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
 
-        // Only prompt if the network is unvalidated or network has partial internet connectivity
-        // and was explicitly selected by the user, and if we haven't already been told to switch
-        // to it regardless of whether it validated or not. Also don't prompt on captive portals
-        // because we're already prompting the user to sign in.
-        if (nai == null || nai.everValidated || nai.everCaptivePortalDetected
-                || !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated
-                // TODO: Once the value of acceptPartialConnectivity is moved to IpMemoryStore,
-                // we should reevaluate how to handle acceptPartialConnectivity when network just
-                // connected.
-                || nai.networkMisc.acceptPartialConnectivity) {
+        if (nai == null || !shouldPromptUnvalidated(nai)) {
             return;
         }
         // TODO: Evaluate if it's needed to wait 8 seconds for triggering notification when
