@@ -614,6 +614,7 @@ std::unique_ptr<Attribute> BinaryResourceParser::ParseAttr(const ResourceNameRef
     if (attr->type_mask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
       Attribute::Symbol symbol;
       symbol.value = util::DeviceToHost32(map_entry.value.data);
+      symbol.type = map_entry.value.dataType;
       symbol.symbol = Reference(util::DeviceToHost32(map_entry.name.ident));
       attr->symbols.push_back(std::move(symbol));
     }

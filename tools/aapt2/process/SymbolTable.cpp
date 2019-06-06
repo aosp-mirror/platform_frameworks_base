@@ -313,6 +313,7 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
       symbol.symbol.name = parsed_name.value();
       symbol.symbol.id = ResourceId(map_entry.key);
       symbol.value = map_entry.value.data;
+      symbol.type = map_entry.value.dataType;
       s->attribute->symbols.push_back(std::move(symbol));
     }
   }

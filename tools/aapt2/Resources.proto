@@ -388,6 +388,9 @@ message Attribute {
 
     // The value of the enum/flag.
     uint32 value = 4;
+
+    // The data type of the enum/flag as defined in android::Res_value.
+    uint32 type = 5;
   }
 
   // Bitmask of formats allowed for an attribute.

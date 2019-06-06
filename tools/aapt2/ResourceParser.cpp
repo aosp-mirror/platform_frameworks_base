@@ -1387,7 +1387,7 @@ Maybe<Attribute::Symbol> ResourceParser::ParseEnumOrFlagItem(
 
   return Attribute::Symbol{
       Reference(ResourceNameRef({}, ResourceType::kId, maybe_name.value())),
-      val.data};
+      val.data, val.dataType};
 }
 
 bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
