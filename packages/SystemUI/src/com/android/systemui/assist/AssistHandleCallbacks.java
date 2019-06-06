@@ -29,6 +29,13 @@ public interface AssistHandleCallbacks {
      */
     void showAndGo();
 
+    /**
+     * Same as show and go, but will not do anything until a delay has elapsed.
+     *
+     * Will be cancelled if another command is given during the delay.
+     */
+    void showAndGoDelayed(long delayMs, boolean hideIfShowing);
+
     /** Show the Assistant handles. */
     void showAndStay();
 }
