@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.phone.NotificationIconAreaController
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,7 +60,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mNotificationVisibleAmount = 0.0f
     private var mNotificationsVisible = false
     private var mNotificationsVisibleForExpansion = false
-    private var mDarkAnimator: ObjectAnimator? = null
+    private var mVisibilityAnimator: ObjectAnimator? = null
     private var mVisibilityAmount = 0.0f
     private var mLinearVisibilityAmount = 0.0f
     private var mWakingUp = false
@@ -71,6 +72,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 field = value
             }
         }
+
+    lateinit var iconAreaController : NotificationIconAreaController
 
     var pulsing: Boolean = false
         set(value) {
@@ -129,7 +132,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return
         }
         mNotificationsVisible = visible
-        mDarkAnimator?.cancel();
+        mVisibilityAnimator?.cancel();
         if (animate) {
             notifyAnimationStart(visible)
             startVisibilityAnimation(increaseSpeed)
@@ -155,7 +158,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mLinearDozeAmount = linear
         mDozeAmount = eased
         mStackScroller.setDozeAmount(mDozeAmount)
-        updateDarkAmount()
+        updateHideAmount()
         if (changed && linear == 0.0f) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false);
             setNotificationsVisibleForExpansion(visible = false, animate = false,
@@ -188,15 +191,15 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 Interpolators.FAST_OUT_SLOW_IN_REVERSE
         }
         val target = if (mNotificationsVisible) 1.0f else 0.0f
-        val darkAnimator = ObjectAnimator.ofFloat(this, mNotificationVisibility, target)
-        darkAnimator.setInterpolator(Interpolators.LINEAR)
+        val visibilityAnimator = ObjectAnimator.ofFloat(this, mNotificationVisibility, target)
+        visibilityAnimator.setInterpolator(Interpolators.LINEAR)
         var duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
         if (increaseSpeed) {
             duration = (duration.toFloat() / 1.5F).toLong();
         }
-        darkAnimator.setDuration(duration)
-        darkAnimator.start()
-        mDarkAnimator = darkAnimator
+        visibilityAnimator.setDuration(duration)
+        visibilityAnimator.start()
+        mVisibilityAnimator = visibilityAnimator
     }
 
     private fun setVisibilityAmount(visibilityAmount: Float) {
@@ -204,7 +207,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mVisibilityAmount = mVisibilityInterpolator.getInterpolation(
                 visibilityAmount)
         handleAnimationFinished();
-        updateDarkAmount()
+        updateHideAmount()
     }
 
     private fun handleAnimationFinished() {
@@ -218,14 +221,15 @@ class NotificationWakeUpCoordinator @Inject constructor(
         return mStackScroller.pulseHeight
     }
 
-    private fun updateDarkAmount() {
+    private fun updateHideAmount() {
         val linearAmount = Math.min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
         val amount = Math.min(1.0f - mVisibilityAmount, mDozeAmount)
-        mStackScroller.setDarkAmount(linearAmount, amount)
+        mStackScroller.setHideAmount(linearAmount, amount)
+        iconAreaController.setFullyHidden(linearAmount == 1.0f);
     }
 
     private fun notifyAnimationStart(awake: Boolean) {
-        mStackScroller.notifyDarkAnimationStart(!awake)
+        mStackScroller.notifyHideAnimationStart(!awake)
     }
 
     override fun onDozingChanged(isDozing: Boolean) {

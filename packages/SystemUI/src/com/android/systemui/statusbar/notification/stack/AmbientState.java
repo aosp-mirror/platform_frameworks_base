@@ -79,7 +79,7 @@ public class AmbientState {
     private int mIntrinsicPadding;
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
-    private float mDarkAmount;
+    private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
@@ -180,23 +180,23 @@ public class AmbientState {
         mDimmed = dimmed;
     }
 
-    /** In dark mode, we draw as little as possible, assuming a black background */
+    /** While dozing, we draw as little as possible, assuming a black background */
     public void setDozing(boolean dozing) {
         mDozing = dozing;
     }
 
-    /** Dark ratio of the status bar **/
-    public void setDarkAmount(float darkAmount) {
-        if (darkAmount == 1.0f && mDarkAmount != darkAmount) {
-            // Whenever we are fully dark, let's reset the pulseHeight again
+    /** Hide ratio of the status bar **/
+    public void setHideAmount(float hidemount) {
+        if (hidemount == 1.0f && mHideAmount != hidemount) {
+            // Whenever we are fully hidden, let's reset the pulseHeight again
             mPulseHeight = MAX_PULSE_HEIGHT;
         }
-        mDarkAmount = darkAmount;
+        mHideAmount = hidemount;
     }
 
-    /** Returns the dark ratio of the status bar */
-    public float getDarkAmount() {
-        return mDarkAmount;
+    /** Returns the hide ratio of the status bar */
+    public float getHideAmount() {
+        return mHideAmount;
     }
 
     public void setHideSensitive(boolean hideSensitive) {
@@ -295,7 +295,7 @@ public class AmbientState {
     }
 
     public boolean isPulseExpanding() {
-        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mDarkAmount != 1.0f;
+        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mHideAmount != 1.0f;
     }
 
     public boolean isShadeExpanded() {
@@ -481,14 +481,15 @@ public class AmbientState {
     }
 
     /**
-     * @return {@code true } when shade is completely dark: in AOD or ambient display.
+     * @return {@code true } when shade is completely hidden: in AOD, ambient display or when
+     * bypassing.
      */
-    public boolean isFullyDark() {
-        return mDarkAmount == 1;
+    public boolean isFullyHidden() {
+        return mHideAmount == 1;
     }
 
-    public boolean isDarkAtAll() {
-        return mDarkAmount != 0;
+    public boolean isHiddenAtAll() {
+        return mHideAmount != 0;
     }
 
     public void setAppearing(boolean appearing) {
