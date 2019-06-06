@@ -16,11 +16,12 @@
 
 package android.mtp;
 
-import com.android.internal.util.Preconditions;
-
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.ByteStringUtils;
+
+import com.android.internal.util.Preconditions;
+
+import libcore.util.HexEncoding;
 
 import java.io.FileDescriptor;
 import java.util.Random;
@@ -103,7 +104,7 @@ public class MtpServer implements Runnable {
         byte[] randomBytes = new byte[sID_LEN_BYTES];
 
         randomVal.nextBytes(randomBytes);
-        return ByteStringUtils.toHexString(randomBytes);
+        return HexEncoding.encodeToString(randomBytes);
     }
 
     public void start() {
