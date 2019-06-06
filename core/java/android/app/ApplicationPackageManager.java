@@ -2754,12 +2754,11 @@ public class ApplicationPackageManager extends PackageManager {
     public Drawable loadUnbadgedItemIcon(@NonNull PackageItemInfo itemInfo,
             @Nullable ApplicationInfo appInfo) {
         if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
-            Bitmap bitmap = getUserManager().getUserIcon(itemInfo.showUserIcon);
-            if (bitmap == null) {
-                return UserIcons.getDefaultUserIcon(
-                        mContext.getResources(), itemInfo.showUserIcon, /* light= */ false);
-            }
-            return new BitmapDrawable(bitmap);
+            // Indicates itemInfo is for a different user (e.g. a profile's parent), so use a 
+            // generic user icon (users generally lack permission to view each other's actual icons)
+            int targetUserId = itemInfo.showUserIcon;
+            return UserIcons.getDefaultUserIcon(
+                    mContext.getResources(), targetUserId, /* light= */ false);
         }
         Drawable dr = null;
         if (itemInfo.packageName != null) {
