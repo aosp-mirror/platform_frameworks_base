@@ -118,14 +118,16 @@ public final class LabeledIntent {
             return null;
         }
         Intent resolvedIntent = new Intent(intent);
-        resolvedIntent.setComponent(new ComponentName(packageName, className));
         resolvedIntent.putExtra(
                 TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER,
                 getFromTextClassifierExtra(textLanguagesBundle));
-
         boolean shouldShowIcon = false;
         Icon icon = null;
         if (!"android".equals(packageName)) {
+            // We only set the component name when the package name is not resolved to "android"
+            // to workaround a bug that explicit intent with component name == ResolverActivity
+            // can't be launched on keyguard.
+            resolvedIntent.setComponent(new ComponentName(packageName, className));
             if (resolveInfo.activityInfo.getIconResource() != 0) {
                 icon = Icon.createWithResource(
                         packageName, resolveInfo.activityInfo.getIconResource());
