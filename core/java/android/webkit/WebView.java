@@ -1603,9 +1603,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Gets the first substring consisting of the address of a physical
-     * location. Currently, only addresses in the United States are detected,
-     * and consist of:
+     * Gets the first substring which appears to be the address of a physical
+     * location. Only addresses in the United States can be detected, which
+     * must consist of:
      * <ul>
      *   <li>a house number</li>
      *   <li>a street name</li>
@@ -1621,9 +1621,17 @@ public class WebView extends AbsoluteLayout
      * or abbreviated using USPS standards. The house number may not exceed
      * five digits.
      *
+     * <p class="note"><b>Note:</b> This function is deprecated and should be
+     * avoided on all API levels, as it cannot detect addresses outside of the
+     * United States and has a high rate of false positives. On API level
+     * {@link android.os.Build.VERSION_CODES#O_MR1} and earlier, it also causes
+     * the entire WebView implementation to be loaded and initialized, which
+     * can throw {@link android.util.AndroidRuntimeException} or other exceptions
+     * if the WebView implementation is currently being updated.
+     *
      * @param addr the string to search for addresses
      * @return the address, or if no address is found, {@code null}
-     * @deprecated this method is superseded by {@link TextClassifier#generateLinks(
+     * @deprecated This method is superseded by {@link TextClassifier#generateLinks(
      * android.view.textclassifier.TextLinks.Request)}. Avoid using this method even when targeting
      * API levels where no alternative is available.
      */
