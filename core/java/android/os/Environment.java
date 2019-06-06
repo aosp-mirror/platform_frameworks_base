@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -25,6 +26,7 @@ import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
@@ -1159,11 +1161,36 @@ public class Environment {
      */
     public static boolean isExternalStorageLegacy(@NonNull File path) {
         final Context context = AppGlobals.getInitialApplication();
+        final int uid = context.getApplicationInfo().uid;
+        if (Process.isIsolated(uid)) {
+            return false;
+        }
+
+        final PackageManager packageManager = context.getPackageManager();
+        if (packageManager.isInstantApp()) {
+            return false;
+        }
+
+        if (packageManager.checkPermission(Manifest.permission.WRITE_MEDIA_STORAGE,
+                context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        if (packageManager.checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
+        final String[] packagesForUid = packageManager.getPackagesForUid(uid);
+        for (String packageName : packagesForUid) {
+            if (appOps.checkOpNoThrow(AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
+                    uid, packageName) == AppOpsManager.MODE_ALLOWED) {
+                return true;
+            }
+        }
 
         return appOps.checkOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
-                context.getApplicationInfo().uid,
-                context.getOpPackageName()) == AppOpsManager.MODE_ALLOWED;
+                uid, context.getOpPackageName()) == AppOpsManager.MODE_ALLOWED;
     }
 
     static File getDirectory(String variableName, String defaultPath) {
