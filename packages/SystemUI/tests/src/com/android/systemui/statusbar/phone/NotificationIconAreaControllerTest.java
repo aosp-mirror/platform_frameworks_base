@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MOD
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -27,6 +28,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -36,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -48,6 +51,10 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     StatusBar mStatusBar;
     @Mock
+    StatusBarWindowView mStatusBarWindowView;
+    @Mock
+    NotificationIconContainer mIconContainer;
+    @Mock
     StatusBarStateController mStatusBarStateController;
     @Mock
     private NotificationMediaManager mMediaManager;
@@ -56,7 +63,9 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
+        when(mStatusBar.getStatusBarWindow()).thenReturn(mStatusBarWindowView);
+        when(mStatusBarWindowView.findViewById(R.id.clock_notification_icon_container)).thenReturn(
+                mIconContainer);
         mController = new NotificationIconAreaController(mContext, mStatusBar,
                 mStatusBarStateController, mListener, mMediaManager);
     }

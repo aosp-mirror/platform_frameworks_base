@@ -103,7 +103,7 @@ public class NotificationContentView extends FrameLayout {
     private int mClipTopAmount;
     private int mContentHeight;
     private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
-    private boolean mDark;
+    private boolean mDozing;
     private boolean mAnimate;
     private boolean mIsHeadsUp;
     private boolean mLegacy;
@@ -1130,12 +1130,12 @@ public class NotificationContentView extends FrameLayout {
         return mIsContentExpandable;
     }
 
-    public void setDark(boolean dark, boolean fade, long delay) {
+    public void setDozing(boolean dozing, boolean fade, long delay) {
         if (mContractedChild == null) {
             return;
         }
-        mDark = dark;
-        selectLayout(!dark && fade /* animate */, false /* force */);
+        mDozing = dozing;
+        selectLayout(!dozing && fade /* animate */, false /* force */);
     }
 
     public void setHeadsUp(boolean headsUp) {
@@ -1208,7 +1208,7 @@ public class NotificationContentView extends FrameLayout {
         applyMediaTransfer(entry);
         updateLegacy();
         mForceSelectNextLayout = true;
-        setDark(mDark, false /* animate */, 0 /* delay */);
+        setDozing(mDozing, false /* animate */, 0 /* delay */);
         mPreviousExpandedRemoteInputIntent = null;
         mPreviousHeadsUpRemoteInputIntent = null;
     }
