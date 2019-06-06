@@ -4960,6 +4960,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * android.text.util.Linkify#ALL Linkify.ALL} and peers for
      * possible values.
      *
+     * <p class="note"><b>Note:</b>
+     * {@link android.text.util.Linkify#MAP_ADDRESSES Linkify.MAP_ADDRESSES}
+     * is deprecated and should be avoided; see its documentation.
+     *
      * @attr ref android.R.styleable#TextView_autoLink
      */
     @android.view.RemotableViewMethod
