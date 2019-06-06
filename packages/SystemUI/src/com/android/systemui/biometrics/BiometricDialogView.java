@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -36,6 +38,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -72,6 +76,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected static final int STATE_PENDING_CONFIRMATION = 3;
     protected static final int STATE_AUTHENTICATED = 4;
 
+    private final AccessibilityManager mAccessibilityManager;
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
     private final WindowManager mWindowManager;
@@ -150,6 +155,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         super(context);
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
@@ -228,6 +234,10 @@ public abstract class BiometricDialogView extends LinearLayout {
             showTryAgainButton(false /* show */);
             mCallback.onTryAgainPressed();
         });
+
+        // Must set these in order for the back button events to be received.
+        mLayout.setFocusableInTouchMode(true);
+        mLayout.requestFocus();
     }
 
     public void onSaveState(Bundle bundle) {
@@ -280,6 +290,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
         if (TextUtils.isEmpty(subtitleText)) {
             mSubtitleText.setVisibility(View.GONE);
+            announceAccessibilityEvent();
         } else {
             mSubtitleText.setVisibility(View.VISIBLE);
             mSubtitleText.setText(subtitleText);
@@ -289,6 +300,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                 mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
         if (TextUtils.isEmpty(descriptionText)) {
             mDescriptionText.setVisibility(View.GONE);
+            announceAccessibilityEvent();
         } else {
             mDescriptionText.setVisibility(View.VISIBLE);
             mDescriptionText.setText(descriptionText);
@@ -447,12 +459,14 @@ public abstract class BiometricDialogView extends LinearLayout {
         if (newState == STATE_PENDING_CONFIRMATION) {
             mHandler.removeMessages(MSG_RESET_MESSAGE);
             mErrorText.setVisibility(View.INVISIBLE);
+            announceAccessibilityEvent();
             mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(true);
         } else if (newState == STATE_AUTHENTICATED) {
             mPositiveButton.setVisibility(View.GONE);
             mNegativeButton.setVisibility(View.GONE);
             mErrorText.setVisibility(View.INVISIBLE);
+            announceAccessibilityEvent();
         }
 
         if (newState == STATE_PENDING_CONFIRMATION || newState == STATE_AUTHENTICATED) {
@@ -471,14 +485,20 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     public void restoreState(Bundle bundle) {
         mRestoredState = bundle;
-        mTryAgainButton.setVisibility(bundle.getInt(KEY_TRY_AGAIN_VISIBILITY));
-        mPositiveButton.setVisibility(bundle.getInt(KEY_CONFIRM_VISIBILITY));
+        final int tryAgainVisibility = bundle.getInt(KEY_TRY_AGAIN_VISIBILITY);
+        mTryAgainButton.setVisibility(tryAgainVisibility);
+        final int confirmVisibility = bundle.getInt(KEY_CONFIRM_VISIBILITY);
+        mPositiveButton.setVisibility(confirmVisibility);
         mState = bundle.getInt(KEY_STATE);
         mErrorText.setText(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
         mErrorText.setContentDescription(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
-        mErrorText.setVisibility(bundle.getInt(KEY_ERROR_TEXT_VISIBILITY));
+        final int errorTextVisibility = bundle.getInt(KEY_ERROR_TEXT_VISIBILITY);
+        mErrorText.setVisibility(errorTextVisibility);
+        if (errorTextVisibility == View.INVISIBLE || tryAgainVisibility == View.INVISIBLE
+                || confirmVisibility == View.INVISIBLE) {
+            announceAccessibilityEvent();
+        }
         mErrorText.setTextColor(bundle.getInt(KEY_ERROR_TEXT_COLOR));
-
         if (bundle.getBoolean(KEY_ERROR_TEXT_IS_TEMPORARY)) {
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RESET_MESSAGE),
                     BiometricPrompt.HIDE_DIALOG_DELAY);
@@ -500,5 +520,19 @@ public abstract class BiometricDialogView extends LinearLayout {
         lp.setTitle("BiometricDialogView");
         lp.token = mWindowToken;
         return lp;
+    }
+
+    // Every time a view becomes invisible we need to announce an accessibility event.
+    // This is due to an issue in the framework, b/132298701 recommended this workaround.
+    protected void announceAccessibilityEvent() {
+        if (!mAccessibilityManager.isEnabled()) {
+            return;
+        }
+        AccessibilityEvent event = AccessibilityEvent.obtain();
+        event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        event.setContentChangeTypes(CONTENT_CHANGE_TYPE_SUBTREE);
+        mDialog.sendAccessibilityEventUnchecked(event);
+        mDialog.notifySubtreeAccessibilityStateChanged(mDialog, mDialog,
+                CONTENT_CHANGE_TYPE_SUBTREE);
     }
 }

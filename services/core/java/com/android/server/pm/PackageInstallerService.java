@@ -617,7 +617,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             mStagingManager.createSession(session);
         }
 
-        mCallbacks.notifySessionCreated(session.sessionId, session.userId);
+        if ((session.params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+            mCallbacks.notifySessionCreated(session.sessionId, session.userId);
+        }
         writeSessionsAsync();
         return sessionId;
     }
@@ -1210,16 +1212,25 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     class InternalCallback {
         public void onSessionBadgingChanged(PackageInstallerSession session) {
-            mCallbacks.notifySessionBadgingChanged(session.sessionId, session.userId);
+            if ((session.params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+                mCallbacks.notifySessionBadgingChanged(session.sessionId, session.userId);
+            }
+
             writeSessionsAsync();
         }
 
         public void onSessionActiveChanged(PackageInstallerSession session, boolean active) {
-            mCallbacks.notifySessionActiveChanged(session.sessionId, session.userId, active);
+            if ((session.params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+                mCallbacks.notifySessionActiveChanged(session.sessionId, session.userId,
+                        active);
+            }
         }
 
         public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
-            mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
+            if ((session.params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+                mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId,
+                        progress);
+            }
         }
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
@@ -1232,7 +1243,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         public void onSessionFinished(final PackageInstallerSession session, boolean success) {
-            mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            if ((session.params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+                mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            }
 
             mInstallHandler.post(new Runnable() {
                 @Override

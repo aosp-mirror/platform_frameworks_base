@@ -564,7 +564,8 @@ status_t IncidentService::dump(int fd, const Vector<String16>& args) {
     int skipped[] = SKIPPED_SECTIONS;
     for (const Section** section = SECTION_LIST; *section; section++) {
         const int id = (*section)->id;
-        if (std::find(std::begin(skipped), std::end(skipped), id) == std::end(skipped)) {
+        if (std::find(std::begin(skipped), std::end(skipped), id) == std::end(skipped)
+                && !section_requires_specific_mention(id)) {
             incidentArgs.addSection(id);
         }
     }
