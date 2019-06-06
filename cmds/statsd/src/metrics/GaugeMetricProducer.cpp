@@ -283,14 +283,9 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     writeFieldValueTreeToStream(mAtomId, *(atom.mFields), protoOutput);
                     protoOutput->end(atomsToken);
                 }
-                const bool truncateTimestamp =
-                        android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.find(
-                                mAtomId) ==
-                        android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.end();
                 for (const auto& atom : bucket.mGaugeAtoms) {
-                    const int64_t elapsedTimestampNs =  truncateTimestamp ?
-                        truncateTimestampNsToFiveMinutes(atom.mElapsedTimestamps) :
-                            atom.mElapsedTimestamps;
+                    const int64_t elapsedTimestampNs =
+                            truncateTimestampIfNecessary(mAtomId, atom.mElapsedTimestamps);
                     protoOutput->write(
                         FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
                         (long long)elapsedTimestampNs);
