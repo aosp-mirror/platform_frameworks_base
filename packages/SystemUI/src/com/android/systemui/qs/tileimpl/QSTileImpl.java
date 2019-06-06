@@ -111,10 +111,31 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
+    /**
+     * Provides a new {@link TState} of the appropriate type to use between this tile and the
+     * corresponding view.
+     *
+     * @return new state to use by the tile.
+     */
     public abstract TState newTileState();
 
+    /**
+     * Handles clicks by the user.
+     *
+     * Calls to the controller should be made here to set the new state of the device.
+     */
     abstract protected void handleClick();
 
+    /**
+     * Update state of the tile based on device state
+     *
+     * Called whenever the state of the tile needs to be updated, either after user
+     * interaction or from callbacks from the controller. It populates {@code state} with the
+     * information to display to the user.
+     *
+     * @param state {@link TState} to populate with information to display
+     * @param arg additional arguments needed to populate {@code state}
+     */
     abstract protected void handleUpdateState(TState state, Object arg);
 
     /**
@@ -179,6 +200,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         return mHost;
     }
 
+    /**
+     * Return the {@link QSIconView} to be used by this tile's view.
+     *
+     * @param context view context for the view
+     * @return icon view for this tile
+     */
     public QSIconView createTileView(Context context) {
         return new QSIconViewImpl(context);
     }
@@ -300,11 +327,20 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mCallbacks.clear();
     }
 
+    /**
+     * Handles secondary click on the tile.
+     *
+     * Defaults to {@link QSTileImpl#handleClick}
+     */
     protected void handleSecondaryClick() {
         // Default to normal click.
         handleClick();
     }
 
+    /**
+     * Handles long click on the tile by launching the {@link Intent} defined in
+     * {@link QSTileImpl#getLongClickIntent}
+     */
     protected void handleLongClick() {
         if (mQSSettingsPanelOption == QSSettingsPanel.USE_DETAIL) {
             showDetail(true);
@@ -314,6 +350,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 getLongClickIntent(), 0);
     }
 
+    /**
+     * Returns an intent to be launched when the tile is long pressed.
+     *
+     * @return the intent to launch
+     */
     public abstract Intent getLongClickIntent();
 
     protected void handleRefreshState(Object arg) {
@@ -429,6 +470,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         }
     }
 
+    /**
+     * Provides a default label for the tile.
+     * @return default label for the tile.
+     */
     public abstract CharSequence getTileLabel();
 
     public static int getColorForState(Context context, int state) {
