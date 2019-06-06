@@ -629,7 +629,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final ActivityRecord r = activities.get(i);
             if (!r.finishing && r.isInStackLocked()) {
                 r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
-                        null, null, "finish-heavy", true);
+                        null, "finish-heavy", true);
             }
         }
     }

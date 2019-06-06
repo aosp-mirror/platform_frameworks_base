@@ -569,16 +569,21 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         switch (behavior) {
             case BEHAVIOR_ALERTING:
-                alert.setSelected(true);
-                silence.setSelected(false);
                 mPriorityDescriptionView.setVisibility(VISIBLE);
                 mSilentDescriptionView.setVisibility(GONE);
+                post(() -> {
+                    alert.setSelected(true);
+                    silence.setSelected(false);
+                });
                 break;
             case BEHAVIOR_SILENT:
-                alert.setSelected(false);
-                silence.setSelected(true);
+
                 mSilentDescriptionView.setVisibility(VISIBLE);
                 mPriorityDescriptionView.setVisibility(GONE);
+                post(() -> {
+                    alert.setSelected(false);
+                    silence.setSelected(true);
+                });
                 break;
             default:
                 throw new IllegalArgumentException("Unrecognized alerting behavior: " + behavior);

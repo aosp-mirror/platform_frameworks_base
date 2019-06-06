@@ -140,7 +140,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.UserState;
-import com.android.server.uri.NeededUriGrants;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -404,17 +403,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final int startFlags;
         final ActivityStack stack;
         final WindowProcessController callerApp;
-        final NeededUriGrants neededGrants;
 
-        PendingActivityLaunch(ActivityRecord r, ActivityRecord sourceRecord,
-                int startFlags, ActivityStack stack, WindowProcessController callerApp,
-                NeededUriGrants neededGrants) {
-            this.r = r;
-            this.sourceRecord = sourceRecord;
-            this.startFlags = startFlags;
-            this.stack = stack;
-            this.callerApp = callerApp;
-            this.neededGrants = neededGrants;
+        PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
+                int _startFlags, ActivityStack _stack, WindowProcessController app) {
+            r = _r;
+            sourceRecord = _sourceRecord;
+            startFlags = _startFlags;
+            stack = _stack;
+            callerApp = app;
         }
 
         void sendErrorResult(String message) {
@@ -878,8 +874,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     Slog.e(TAG, "Second failure launching "
                             + r.intent.getComponent().flattenToShortString() + ", giving up", e);
                     proc.appDied();
-                    stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED,
-                            null, null, "2nd-crash", false);
+                    stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
+                            "2nd-crash", false);
                     return false;
                 }
 
@@ -1024,7 +1020,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1,
                         resultRecord, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null, null);
+                        Activity.RESULT_CANCELED, null);
             }
             final String msg;
             if (actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {

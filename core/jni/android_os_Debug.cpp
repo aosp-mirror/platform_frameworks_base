@@ -289,14 +289,14 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
         } else if (base::EndsWith(name, ".oat")) {
             which_heap = HEAP_OAT;
             is_swappable = true;
-        } else if (base::EndsWith(name, ".art")) {
+        } else if (base::EndsWith(name, ".art") || base::EndsWith(name, ".art]")) {
             which_heap = HEAP_ART;
             // Handle system@framework@boot* and system/framework/boot*
             if ((strstr(name.c_str(), "@boot") != nullptr) ||
                     (strstr(name.c_str(), "/boot"))) {
-                sub_heap = HEAP_DEX_BOOT_VDEX;
+                sub_heap = HEAP_ART_BOOT;
             } else {
-                sub_heap = HEAP_DEX_APP_VDEX;
+                sub_heap = HEAP_ART_APP;
             }
             is_swappable = true;
         } else if (base::StartsWith(name, "/dev/")) {

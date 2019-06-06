@@ -176,6 +176,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean inPendingTransaction;
     boolean allDrawn;
     private boolean mLastAllDrawn;
+    private boolean mUseTransferredAnimation;
 
     // Set to true when this app creates a surface while in the middle of an animation. In that
     // case do not clear allDrawn until the animation completes.
@@ -618,9 +619,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             boolean runningAppAnimation = false;
 
             if (transit != WindowManager.TRANSIT_UNSET) {
-                if (applyAnimationLocked(lp, transit, visible, isVoiceInteraction)) {
-                    delayed = runningAppAnimation = true;
+                if (mUseTransferredAnimation) {
+                    runningAppAnimation = isReallyAnimating();
+                } else if (applyAnimationLocked(lp, transit, visible, isVoiceInteraction)) {
+                    runningAppAnimation = true;
                 }
+                delayed = runningAppAnimation;
                 final WindowState window = findMainWindow();
                 if (window != null && accessibilityController != null) {
                     accessibilityController.onAppWindowTransitionLocked(window, transit);
@@ -667,6 +671,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 getDisplayContent().getInputMonitor().updateInputWindowsLw(false /*force*/);
             }
         }
+        mUseTransferredAnimation = false;
 
         if (isReallyAnimating()) {
             delayed = true;
@@ -1531,9 +1536,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 transferAnimation(fromToken);
 
                 // When transferring an animation, we no longer need to apply an animation to the
-                // the token we transfer the animation over. Thus, remove the animation from
-                // pending opening apps.
-                getDisplayContent().mOpeningApps.remove(this);
+                // the token we transfer the animation over. Thus, set this flag to indicate we've
+                // transferred the animation.
+                mUseTransferredAnimation = true;
 
                 mWmService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);

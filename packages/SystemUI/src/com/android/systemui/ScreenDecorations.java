@@ -77,8 +77,10 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarTransitions;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.tuner.TunablePadding;
 import com.android.systemui.tuner.TunerService;
@@ -125,6 +127,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
     private Handler mHandler;
     private boolean mAssistHintBlocked = false;
     private boolean mIsReceivingNavBarColor = false;
+    private boolean mInGesturalMode;
 
     /**
      * Converts a set of {@link Rect}s into a {@link Region}
@@ -149,6 +152,28 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         mHandler.post(this::startOnScreenDecorationsThread);
         setupStatusBarPaddingIfNeeded();
         putComponent(ScreenDecorations.class, this);
+        mInGesturalMode = QuickStepContract.isGesturalMode(
+                Dependency.get(NavigationModeController.class)
+                        .addListener(this::handleNavigationModeChange));
+    }
+
+    @VisibleForTesting
+    void handleNavigationModeChange(int navigationMode) {
+        if (!mHandler.getLooper().isCurrentThread()) {
+            mHandler.post(() -> handleNavigationModeChange(navigationMode));
+            return;
+        }
+        boolean inGesturalMode = QuickStepContract.isGesturalMode(navigationMode);
+        if (mInGesturalMode != inGesturalMode) {
+            mInGesturalMode = inGesturalMode;
+
+            if (mInGesturalMode && mOverlay == null) {
+                setupDecorations();
+                if (mOverlay != null) {
+                    updateLayoutParams();
+                }
+            }
+        }
     }
 
     private void fade(View view, boolean fadeIn, boolean isLeft) {
@@ -232,6 +257,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
                     break;
             }
         }
+        updateWindowVisibilities();
     }
 
     /**
@@ -256,11 +282,15 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         return thread.getThreadHandler();
     }
 
+    private boolean shouldHostHandles() {
+        return mInGesturalMode;
+    }
+
     private void startOnScreenDecorationsThread() {
         mRotation = RotationUtils.getExactRotation(mContext);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         updateRoundedCornerRadii();
-        if (hasRoundedCorners() || shouldDrawCutout()) {
+        if (hasRoundedCorners() || shouldDrawCutout() || shouldHostHandles()) {
             setupDecorations();
         }
 
@@ -565,7 +595,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         boolean visibleForCutout = shouldDrawCutout()
                 && overlay.findViewById(R.id.display_cutout).getVisibility() == View.VISIBLE;
         boolean visibleForRoundedCorners = hasRoundedCorners();
-        overlay.setVisibility(visibleForCutout || visibleForRoundedCorners
+        boolean visibleForHandles = overlay.findViewById(R.id.assist_hint_left).getVisibility()
+                == View.VISIBLE || overlay.findViewById(R.id.assist_hint_right).getVisibility()
+                == View.VISIBLE;
+        overlay.setVisibility(visibleForCutout || visibleForRoundedCorners || visibleForHandles
                 ? View.VISIBLE : View.GONE);
     }
 
@@ -688,10 +721,6 @@ public class ScreenDecorations extends SystemUI implements Tunable,
                 setSize(mOverlay.findViewById(R.id.right), sizeTop);
                 setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
                 setSize(mBottomOverlay.findViewById(R.id.right), sizeBottom);
-                setSize(mOverlay.findViewById(R.id.assist_hint_left), sizeTop * 2);
-                setSize(mOverlay.findViewById(R.id.assist_hint_right), sizeTop * 2);
-                setSize(mBottomOverlay.findViewById(R.id.assist_hint_left), sizeBottom * 2);
-                setSize(mBottomOverlay.findViewById(R.id.assist_hint_right), sizeBottom * 2);
             }
         });
     }

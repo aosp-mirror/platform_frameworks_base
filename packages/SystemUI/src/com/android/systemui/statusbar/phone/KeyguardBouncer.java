@@ -54,7 +54,7 @@ import java.io.PrintWriter;
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
-    static final long BOUNCER_FACE_DELAY = 800;
+    static final long BOUNCER_FACE_DELAY = 1200;
     static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
     static final float EXPANSION_HIDDEN = 1f;
     static final float EXPANSION_VISIBLE = 0f;
@@ -68,6 +68,7 @@ public class KeyguardBouncer {
     private final Handler mHandler;
     private final BouncerExpansionCallback mExpansionCallback;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -95,7 +96,7 @@ public class KeyguardBouncer {
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
-            BouncerExpansionCallback expansionCallback,
+            BouncerExpansionCallback expansionCallback, UnlockMethodCache unlockMethodCache,
             KeyguardUpdateMonitor keyguardUpdateMonitor, Handler handler) {
         mContext = context;
         mCallback = callback;
@@ -106,6 +107,7 @@ public class KeyguardBouncer {
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mExpansionCallback = expansionCallback;
         mHandler = handler;
+        mUnlockMethodCache = unlockMethodCache;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
     }
 
@@ -168,7 +170,8 @@ public class KeyguardBouncer {
 
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
-        if (mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
+        if (mUnlockMethodCache.isUnlockingWithFacePossible() && !needsFullscreenBouncer()
+                && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
             mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
         } else {
             DejankUtils.postAfterTraversal(mShowRunnable);

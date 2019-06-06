@@ -20,8 +20,8 @@ import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
-import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
@@ -34,17 +34,19 @@ import com.android.settingslib.Utils;
  * corners.
  */
 public class CornerHandleView extends View {
-    private static final boolean ALLOW_TUNING = false;
-    private static final int ANGLE_DEGREES = 50;
-    private static final float STROKE_DP = 2.5f;
+    private static final float STROKE_DP_LARGE = 2f;
+    private static final float STROKE_DP_SMALL = 1.95f;
     // Radius to use if none is available.
     private static final int FALLBACK_RADIUS_DP = 15;
+    private static final float MARGIN_DP = 8;
+    private static final int MAX_ARC_DEGREES = 90;
+    // Arc length along the phone's perimeter used to measure the desired angle.
+    private static final float ARC_LENGTH_DP = 31f;
 
     private Paint mPaint;
     private int mLightColor;
     private int mDarkColor;
-    private RectF mOval;
-
+    private Path mPath;
 
     public CornerHandleView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,18 +57,46 @@ public class CornerHandleView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(getStrokePx());
 
-        final int dualToneDarkTheme = Utils.getThemeAttr(mContext,
-                R.attr.darkIconTheme);
-        final int dualToneLightTheme = Utils.getThemeAttr(mContext,
-                R.attr.lightIconTheme);
+        final int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(mContext, R.attr.lightIconTheme);
         Context lightContext = new ContextThemeWrapper(mContext, dualToneLightTheme);
         Context darkContext = new ContextThemeWrapper(mContext, dualToneDarkTheme);
-        mLightColor = Utils.getColorAttrDefaultColor(lightContext,
-                R.attr.singleToneColor);
-        mDarkColor = Utils.getColorAttrDefaultColor(darkContext,
-                R.attr.singleToneColor);
+        mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
 
-        updateOval();
+        updatePath();
+    }
+
+    private void updatePath() {
+        mPath = new Path();
+
+        float marginPx = getMarginPx();
+        float radiusPx = getInnerRadiusPx();
+        float halfStrokePx = getStrokePx() / 2f;
+        float angle = getAngle();
+        float startAngle = 180 + ((90 - angle) / 2);
+        RectF circle = new RectF(marginPx + halfStrokePx,
+                marginPx + halfStrokePx,
+                marginPx + 2 * radiusPx - halfStrokePx,
+                marginPx + 2 * radiusPx - halfStrokePx);
+
+        if (angle >= 90f) {
+            float innerCircumferenceDp = convertPixelToDp(radiusPx * 2 * (float) Math.PI,
+                    mContext);
+            float arcDp = innerCircumferenceDp * getAngle() / 360f;
+            // Add additional "arms" to the two ends of the arc. The length computation is
+            // hand-tuned.
+            float lineLengthPx = convertDpToPixel((ARC_LENGTH_DP - arcDp - MARGIN_DP) / 2,
+                    mContext);
+
+            mPath.moveTo(marginPx + halfStrokePx, marginPx + radiusPx + lineLengthPx);
+            mPath.lineTo(marginPx + halfStrokePx, marginPx + radiusPx);
+            mPath.arcTo(circle, startAngle, angle);
+            mPath.moveTo(marginPx + radiusPx, marginPx + halfStrokePx);
+            mPath.lineTo(marginPx + radiusPx + lineLengthPx, marginPx + halfStrokePx);
+        } else {
+            mPath.arcTo(circle, startAngle, angle);
+        }
     }
 
     /**
@@ -83,50 +113,40 @@ public class CornerHandleView extends View {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        if (ALLOW_TUNING) {
-            mPaint.setStrokeWidth(getStrokePx());
-            updateOval();
-        }
-
-        canvas.drawArc(mOval, 180 + ((90 - getAngle()) / 2), getAngle(), false,
-                mPaint);
+        canvas.drawPath(mPath, mPaint);
     }
 
-    // TODO(b/133834204): Remove tweaking of corner handles
     private static float convertDpToPixel(float dp, Context context) {
         return dp * ((float) context.getResources().getDisplayMetrics().densityDpi
                 / DisplayMetrics.DENSITY_DEFAULT);
     }
 
-    private void updateOval() {
-        mOval = new RectF(getMarginPx() - (getStrokePx() / 2.f),
-                getMarginPx() - (getStrokePx() / 2.f),
-                getMarginPx() + (2 * (getRadiusPx()) + (getStrokePx() / 2.f)),
-                getMarginPx() + 2 * getRadiusPx() + (getStrokePx() / 2.f));
+    private static float convertPixelToDp(float px, Context context) {
+        return px * DisplayMetrics.DENSITY_DEFAULT
+                / ((float) context.getResources().getDisplayMetrics().densityDpi);
     }
 
-    private int getAngle() {
-        if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_ANGLE_DEGREES", ANGLE_DEGREES);
-        } else {
-            return ANGLE_DEGREES;
+    private float getAngle() {
+        // Measure a length of ARC_LENGTH_DP along the *screen's* perimeter, get the angle and cap
+        // it at 90.
+        float circumferenceDp = convertPixelToDp((
+                getOuterRadiusPx()) * 2 * (float) Math.PI, mContext);
+        float angleDeg = (ARC_LENGTH_DP / circumferenceDp) * 360;
+        if (angleDeg > MAX_ARC_DEGREES) {
+            angleDeg = MAX_ARC_DEGREES;
         }
+        return angleDeg;
     }
 
-    private int getMarginPx() {
-        // Hand-derived function to map radiusPx to the margin amount.
-        // https://www.wolframalpha.com/input/?i=0.001402+*+x+%5E2%E2%88%920.08661+*+x%2B17.20+from+40+to+180
-        int radius = getRadiusPx();
-        int marginPx = (int) (0.001402f * radius * radius - 0.08661f * radius + 17.2f);
-        if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_MARGIN_PX", marginPx);
-        } else {
-            return marginPx;
-        }
+    private float getMarginPx() {
+        return convertDpToPixel(MARGIN_DP, mContext);
     }
 
-    private int getRadiusPx() {
+    private float getInnerRadiusPx() {
+        return getOuterRadiusPx() - getMarginPx();
+    }
+
+    private float getOuterRadiusPx() {
         // Attempt to get the bottom corner radius, otherwise fall back on the generic or top
         // values. If none are available, use the FALLBACK_RADIUS_DP.
         int radius = getResources().getDimensionPixelSize(
@@ -142,19 +162,12 @@ public class CornerHandleView extends View {
         if (radius == 0) {
             radius = (int) convertDpToPixel(FALLBACK_RADIUS_DP, mContext);
         }
-        if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_RADIUS_PX", radius);
-        } else {
-            return radius;
-        }
+        return radius;
     }
 
-    private int getStrokePx() {
-        if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_STROKE_PX",
-                    (int) convertDpToPixel(STROKE_DP, getContext()));
-        } else {
-            return (int) convertDpToPixel(STROKE_DP, getContext());
-        }
+    private float getStrokePx() {
+        // Use a slightly smaller stroke if we need to cover the full corner angle.
+        return convertDpToPixel((getAngle() < 90) ? STROKE_DP_LARGE : STROKE_DP_SMALL,
+                getContext());
     }
 }

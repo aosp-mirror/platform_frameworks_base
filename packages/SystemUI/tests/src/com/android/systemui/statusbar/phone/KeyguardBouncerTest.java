@@ -82,6 +82,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
+    private UnlockMethodCache mUnlockMethodCache;
+    @Mock
     private Handler mHandler;
 
     private KeyguardBouncer mBouncer;
@@ -96,7 +98,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         when(mKeyguardHostView.getHeight()).thenReturn(500);
         mBouncer = new KeyguardBouncer(getContext(), mViewMediatorCallback,
                 mLockPatternUtils, container, mDismissCallbackRegistry, mFalsingManager,
-                mExpansionCallback, mKeyguardUpdateMonitor, mHandler) {
+                mExpansionCallback, mUnlockMethodCache, mKeyguardUpdateMonitor, mHandler) {
             @Override
             protected void inflateView() {
                 super.inflateView();
@@ -377,7 +379,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Test
     public void testShow_delaysIfFaceAuthIsRunning() {
-        when(mKeyguardUpdateMonitor.isFaceDetectionRunning()).thenReturn(true);
+        when(mUnlockMethodCache.isUnlockingWithFacePossible()).thenReturn(true);
         mBouncer.show(true /* reset */);
 
         ArgumentCaptor<Runnable> showRunnable = ArgumentCaptor.forClass(Runnable.class);
