@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Променување на мрежата на операторот"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Отвори ги деталите за батеријата"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија <xliff:g id="NUMBER">%d</xliff:g> проценти."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Батерија <xliff:g id="PERCENTAGE">%1$s</xliff:g> отсто, уште околу <xliff:g id="TIME">%2$s</xliff:g> според вашето користење"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Полнење на батеријата, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Поставки на систем."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Известувања"</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Премести долу лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Премести долу десно"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Отфрли"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Навигацијата на системот е ажурирана. За да извршите промени, одете во „Поставки“."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
 </resources>
