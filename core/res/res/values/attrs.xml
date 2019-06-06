@@ -1560,7 +1560,8 @@
         <flag name="email" value="0x02" />
         <!-- Match phone numbers. -->
         <flag name="phone" value="0x04" />
-        <!-- Match map addresses. -->
+        <!-- Match map addresses.
+             Deprecated: see {@link android.text.util.Linkify#MAP_ADDRESSES}. -->
         <flag name="map" value="0x08" />
         <!-- Match all patterns (equivalent to web|email|phone|map). -->
         <flag name="all" value="0x0f" />
