@@ -83,7 +83,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             setFixedSizeAllowed(true);
-            setOffsetNotificationsEnabled(false);
+            setOffsetNotificationsEnabled(true);
             updateSurfaceSize();
         }
 
@@ -93,6 +93,12 @@ public class ImageWallpaper extends WallpaperService {
             int width = Math.max(MIN_SURFACE_WIDTH, frameSize.getWidth());
             int height = Math.max(MIN_SURFACE_HEIGHT, frameSize.getHeight());
             holder.setFixedSize(width, height);
+        }
+
+        @Override
+        public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
+                float yOffsetStep, int xPixelOffset, int yPixelOffset) {
+            mRenderer.updateOffsets(xOffset, yOffset);
         }
 
         @Override
