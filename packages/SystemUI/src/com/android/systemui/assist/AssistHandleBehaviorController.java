@@ -198,7 +198,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private boolean handlesUnblocked(boolean ignoreThreshold) {
         long timeSinceHidden = SystemClock.elapsedRealtime() - mHandlesLastHiddenAt;
-        boolean notThrottled = ignoreThreshold || timeSinceHidden > getShownFrequencyThreshold();
+        boolean notThrottled = ignoreThreshold || timeSinceHidden >= getShownFrequencyThreshold();
         ComponentName assistantComponent =
                 mAssistUtils.getAssistComponentForUser(KeyguardUpdateMonitor.getCurrentUser());
         return notThrottled && assistantComponent != null;
