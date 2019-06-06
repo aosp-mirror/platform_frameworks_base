@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.hardware.face.FaceManager
 import android.provider.Settings
-import com.android.internal.annotations.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.tuner.TunerService
 
@@ -58,11 +57,5 @@ class KeyguardBypassController {
                                         KeyguardUpdateMonitor.getCurrentUser()) != 0
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
-    }
-
-    @VisibleForTesting
-    constructor(bypassEnabled: Boolean, unlockMethodCache: UnlockMethodCache) {
-        this.bypassEnabled = bypassEnabled
-        this.unlockMethodCache = unlockMethodCache
     }
 }
