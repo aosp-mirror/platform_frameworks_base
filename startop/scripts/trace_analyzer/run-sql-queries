@@ -1,0 +1,79 @@
+#!/bin/bash
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <db-file>"
+fi
+
+DB_TARGET=$1
+
+if ! [[ -f $DB_TARGET ]]; then
+  echo "ERROR: File '$DB_TARGET' does not exist." >&2
+  exit 1
+fi
+
+exec_sql_file() {
+  local filename="$1"
+  if ! [[ -f $filename ]]; then
+    echo "ERROR: Can't exec SQL file, '$filename' does not exist." >&2
+    return 1
+  fi
+
+  sqlite3 "$DB_TARGET" < "$DIR"/"$filename"
+}
+
+exec_sql_file_quiet() {
+  exec_sql_file "$@" > /dev/null
+}
+
+# Some views/tables need other views already created, so order does matter.
+# x -> y , means x depends on y.
+
+# View: tracing_mark_writes
+# Table: tracing_mark_write_split_array -> tracing_mark_writes
+exec_sql_file_quiet "queries_all.sql"
+
+# Table: tracing_mark_write_split -> tracing_mark_write_split_array
+exec_sql_file_quiet "queries_mark_write_join.sql"
+
+# View: start_procs -> tracing_mark_write_split
+exec_sql_file_quiet "queries_get_procs.sql"
+
+# View: sched_switch_next_comm_pids
+exec_sql_file_quiet "queries_get_comm_and_pids.sql"
+
+# View: start_process_ui_threads -> start_procs, sched_switch_next_comm_pids
+exec_sql_file_quiet "queries_get_ui_threads.sql"
+
+# View: launch_durations_named -> tracing_mark_write_split
+exec_sql_file_quiet "queries_app_launch_spans_with_name.sql"
+
+# View: sched_switch_iowaits_pre
+# View: sched_switch_iowaits -> sched_switch_iowaits_pre
+# Table: blocking_durations -> sched_switch_iowaits
+exec_sql_file_quiet "queries_find_sched_switch_unblocked.sql"
+
+# View: blocked_iowait_for_app_launches -> launch_durations_named, blocking_durations
+exec_sql_file_quiet "queries_block_launch.sql"
+
+#####
+#####
+#####
+
+# Final queries
+
+exec_sql_file "queries_pretty_print_block_launch.sql"
