@@ -16,25 +16,28 @@
 
 package com.android.tests.rollback;
 
-import static com.android.tests.rollback.RollbackTestUtils.assertRollbackInfoEquals;
-import static com.android.tests.rollback.RollbackTestUtils.getUniqueRollbackInfoForPackage;
+import static com.android.cts.rollback.lib.RollbackInfoSubject.assertThat;
+import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoForPackage;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 
 import androidx.test.InstrumentationRegistry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import com.android.cts.install.lib.Install;
+import com.android.cts.install.lib.InstallUtils;
+import com.android.cts.install.lib.TestApp;
+import com.android.cts.install.lib.Uninstall;
+import com.android.cts.rollback.lib.Rollback;
+import com.android.cts.rollback.lib.RollbackUtils;
+
 import static org.junit.Assert.fail;
 
 import org.junit.After;
@@ -55,9 +58,6 @@ import org.junit.runners.JUnit4;
 public class StagedRollbackTest {
 
     private static final String TAG = "RollbackTest";
-    private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
-    private static final String TEST_APP_A_V1 = "RollbackTestAppAv1.apk";
-    private static final String TEST_APP_A_CRASHING_V2 = "RollbackTestAppACrashingV2.apk";
     private static final String NETWORK_STACK_CONNECTOR_CLASS =
             "android.net.INetworkStackConnector";
 
@@ -66,7 +66,7 @@ public class StagedRollbackTest {
      */
     @Before
     public void adoptShellPermissions() {
-        RollbackTestUtils.adoptShellPermissionIdentity(
+        InstallUtils.adoptShellPermissionIdentity(
                 Manifest.permission.INSTALL_PACKAGES,
                 Manifest.permission.DELETE_PACKAGES,
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
@@ -78,7 +78,7 @@ public class StagedRollbackTest {
      */
     @After
     public void dropShellPermissions() {
-        RollbackTestUtils.dropShellPermissionIdentity();
+        InstallUtils.dropShellPermissionIdentity();
     }
 
     /**
@@ -87,14 +87,14 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnlyEnableRollback() throws Exception {
-        RollbackTestUtils.uninstall(TEST_APP_A);
-        assertEquals(-1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        Uninstall.packages(TestApp.A);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
 
-        RollbackTestUtils.install(TEST_APP_A_V1, false);
-        assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
-        RollbackTestUtils.processUserData(TEST_APP_A);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
 
-        RollbackTestUtils.installStaged(true, TEST_APP_A_CRASHING_V2);
+        Install.single(TestApp.ACrashing2).setEnableRollback().setStaged().commit();
 
         // At this point, the host test driver will reboot the device and run
         // testBadApkOnlyConfirmEnableRollback().
@@ -106,14 +106,16 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnlyConfirmEnableRollback() throws Exception {
-        assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
-        RollbackTestUtils.processUserData(TEST_APP_A);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        InstallUtils.processUserData(TestApp.A);
 
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
         RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                rm.getAvailableRollbacks(), TEST_APP_A);
-        assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
-        assertTrue(rollback.isStaged());
+                rm.getAvailableRollbacks(), TestApp.A);
+        assertThat(rollback).isNotNull();
+        assertThat(rollback).packagesContainsExactly(
+                Rollback.from(TestApp.A2).to(TestApp.A1));
+        assertThat(rollback.isStaged()).isTrue();
 
         // At this point, the host test driver will run
         // testBadApkOnlyTriggerRollback().
@@ -128,11 +130,10 @@ public class StagedRollbackTest {
     public void testBadApkOnlyTriggerRollback() throws Exception {
         BroadcastReceiver crashCountReceiver = null;
         Context context = InstrumentationRegistry.getContext();
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
         try {
-            // Crash TEST_APP_A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
-            crashCountReceiver = RollbackTestUtils.sendCrashBroadcast(context, TEST_APP_A, 5);
+            // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
+            crashCountReceiver = RollbackUtils.sendCrashBroadcast(context, TestApp.A, 5);
         } finally {
             if (crashCountReceiver != null) {
                 context.unregisterReceiver(crashCountReceiver);
@@ -153,48 +154,51 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnlyConfirmRollback() throws Exception {
-        assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
-        RollbackTestUtils.processUserData(TEST_APP_A);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
 
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
         RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
-        assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback, new VersionedPackage(TEST_APP_A, 2));
-        assertTrue(rollback.isStaged());
-        assertNotEquals(-1, rollback.getCommittedSessionId());
+                rm.getRecentlyCommittedRollbacks(), TestApp.A);
+        assertThat(rollback).isNotNull();
+        assertThat(rollback).packagesContainsExactly(
+                Rollback.from(TestApp.A2).to(TestApp.A1));
+        assertThat(rollback).causePackagesContainsExactly(TestApp.ACrashing2);
+        assertThat(rollback).isStaged();
+        assertThat(rollback.getCommittedSessionId()).isNotEqualTo(-1);
     }
 
     @Test
     public void resetNetworkStack() throws Exception {
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
         String networkStack = getNetworkStackPackageName();
 
         rm.expireRollbackForPackage(networkStack);
-        RollbackTestUtils.uninstall(networkStack);
+        Uninstall.packages(networkStack);
 
-        assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        networkStack));
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        networkStack)).isNull();
     }
 
     @Test
     public void assertNetworkStackRollbackAvailable() throws Exception {
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
-        assertNotNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        getNetworkStackPackageName()));
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        getNetworkStackPackageName())).isNotNull();
     }
 
     @Test
     public void assertNetworkStackRollbackCommitted() throws Exception {
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
-        assertNotNull(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName()));
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName())).isNotNull();
     }
 
     @Test
     public void assertNoNetworkStackRollbackCommitted() throws Exception {
-        RollbackManager rm = RollbackTestUtils.getRollbackManager();
-        assertNull(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName()));
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName())).isNull();
     }
 
     private String getNetworkStackPackageName() {
