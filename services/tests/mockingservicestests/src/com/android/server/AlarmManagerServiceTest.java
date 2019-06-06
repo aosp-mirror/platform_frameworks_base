@@ -1032,6 +1032,16 @@ public class AlarmManagerServiceTest {
         assertEquals(-1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, -1));
     }
 
+    @Test
+    public void alarmCountOnPendingIntentCancel() {
+        final PendingIntent pi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 123, pi);
+        verify(pi).registerCancelListener(mService.mOperationCancelListener);
+        assertEquals(1, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        mService.mOperationCancelListener.onCancelled(pi);
+        assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+    }
+
     @After
     public void tearDown() {
         if (mMockingSession != null) {
