@@ -85,7 +85,7 @@ public class ExpandableViewState extends ViewState {
 
     public int height;
     public boolean dimmed;
-    public boolean dark;
+    public boolean dozing;
     public boolean hideSensitive;
     public boolean belowSpeedBump;
     public boolean inShelf;
@@ -121,7 +121,7 @@ public class ExpandableViewState extends ViewState {
             ExpandableViewState svs = (ExpandableViewState) viewState;
             height = svs.height;
             dimmed = svs.dimmed;
-            dark = svs.dark;
+            dozing = svs.dozing;
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;
             clipTopAmount = svs.clipTopAmount;
@@ -158,8 +158,8 @@ public class ExpandableViewState extends ViewState {
             // apply below shelf speed bump
             expandableView.setBelowSpeedBump(this.belowSpeedBump);
 
-            // apply dark
-            expandableView.setDark(this.dark, false /* animate */, 0 /* delay */);
+            // apply dozing
+            expandableView.setDozing(this.dozing, false /* animate */, 0 /* delay */);
 
             // apply clipping
             float oldClipTopAmount = expandableView.getClipTopAmount();
@@ -209,8 +209,8 @@ public class ExpandableViewState extends ViewState {
         expandableView.setHideSensitive(this.hideSensitive, animationFilter.animateHideSensitive,
                 properties.delay, properties.duration);
 
-        // start dark animation
-        expandableView.setDark(this.dark, animationFilter.animateDark, properties.delay);
+        // start dozing animation
+        expandableView.setDozing(this.dozing, animationFilter.animateDozing, properties.delay);
 
         if (properties.wasAdded(child) && !hidden) {
             expandableView.performAddAnimation(properties.delay, properties.duration,

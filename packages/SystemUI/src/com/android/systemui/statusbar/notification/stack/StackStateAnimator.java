@@ -172,7 +172,7 @@ public class StackStateAnimator {
                         || viewState.alpha != child.getAlpha()
                         || viewState.height != child.getActualHeight()
                         || viewState.clipTopAmount != child.getClipTopAmount()
-                        || viewState.dark != child.isDark())) {
+                        || viewState.dozing != child.isDozing())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
                     + calculateChildAnimationDelay(viewState);
         }
