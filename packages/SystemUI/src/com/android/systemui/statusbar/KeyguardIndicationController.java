@@ -43,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -118,6 +119,13 @@ public class KeyguardIndicationController implements StateListener,
 
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
+    private final ViewClippingUtil.ClippingParameters mClippingParams =
+            new ViewClippingUtil.ClippingParameters() {
+                @Override
+                public boolean shouldFinish(View view) {
+                    return view == mIndicationArea;
+                }
+            };
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -413,6 +421,7 @@ public class KeyguardIndicationController implements StateListener,
                 R.integer.wired_charging_keyguard_text_animation_duration_down);
         textView.animate().cancel();
         float translation = textView.getTranslationY();
+        ViewClippingUtil.setClippingDeactivated(textView, true, mClippingParams);
         textView.animate()
                 .translationYBy(yTranslation)
                 .setInterpolator(Interpolators.LINEAR)
@@ -434,6 +443,8 @@ public class KeyguardIndicationController implements StateListener,
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (mCancelled) {
+                            ViewClippingUtil.setClippingDeactivated(textView, false,
+                                    mClippingParams);
                             return;
                         }
                         textView.animate()
@@ -444,6 +455,12 @@ public class KeyguardIndicationController implements StateListener,
                                     @Override
                                     public void onAnimationCancel(Animator animation) {
                                         textView.setTranslationY(translation);
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        ViewClippingUtil.setClippingDeactivated(textView, false,
+                                                mClippingParams);
                                     }
                                 });
                     }
