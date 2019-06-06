@@ -804,6 +804,7 @@ filegroup {
         "core/java/android/os/IIncidentManager.aidl",
         "core/java/android/os/IIncidentReportStatusListener.aidl",
     ],
+    path: "core/java",
 }
 
 filegroup {
@@ -821,6 +822,7 @@ filegroup {
         "core/java/android/os/IExternalVibrationController.aidl",
         "core/java/android/os/IExternalVibratorService.aidl",
     ],
+    path: "core/java",
 }
 
 java_library {
