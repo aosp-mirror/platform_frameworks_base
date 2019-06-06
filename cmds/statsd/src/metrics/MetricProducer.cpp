@@ -124,7 +124,8 @@ void MetricProducer::addActivation(int activationTrackerIndex, const ActivationT
             std::make_shared<Activation>(activationType, ttl_seconds * NS_PER_SEC);
     mEventActivationMap.emplace(activationTrackerIndex, activation);
     if (-1 != deactivationTrackerIndex) {
-        mEventDeactivationMap.emplace(deactivationTrackerIndex, activation);
+        auto& deactivationList = mEventDeactivationMap[deactivationTrackerIndex];
+        deactivationList.push_back(activation);
     }
 }
 
@@ -155,7 +156,9 @@ void MetricProducer::cancelEventActivationLocked(int deactivationTrackerIndex) {
     if (it == mEventDeactivationMap.end()) {
         return;
     }
-    it->second->state = ActivationState::kNotActive;
+    for (auto activationToCancelIt : it->second)  {
+        activationToCancelIt->state = ActivationState::kNotActive;
+    }
 }
 
 void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
