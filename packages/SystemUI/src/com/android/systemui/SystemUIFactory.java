@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
@@ -140,8 +141,8 @@ public class SystemUIFactory {
             KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
-                expansionCallback, KeyguardUpdateMonitor.getInstance(context),
-                new Handler(Looper.getMainLooper()));
+                expansionCallback, UnlockMethodCache.getInstance(context),
+                KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
