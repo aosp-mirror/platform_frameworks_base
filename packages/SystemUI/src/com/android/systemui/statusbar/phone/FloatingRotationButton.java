@@ -73,8 +73,7 @@ public class FloatingRotationButton implements RotationButton {
             return false;
         }
         mIsShowing = true;
-        int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(mDiameter, mDiameter,
                 mMargin, mMargin, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
                 PixelFormat.TRANSLUCENT);
