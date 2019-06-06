@@ -35,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,12 +45,14 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.os.RemoteCallback;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -93,24 +96,9 @@ public class AppOpsServiceTest {
     private long mTestStartMillis;
     private StaticMockitoSession mMockingSession;
 
-    @Before
-    public void mockPackageManagerInternalGetApplicationInfo() {
-        mMockingSession = mockitoSession()
-                .strictness(Strictness.LENIENT)
-                .spyStatic(LocalServices.class)
-                .startMocking();
-
-        // Mock LocalServices.getService(PackageManagerInternal.class).getApplicationInfo dependency
-        // needed by AppOpsService
-        PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
-        when(mockPackageManagerInternal.getApplicationInfo(eq(sMyPackageName), anyInt(), anyInt(),
-                anyInt())).thenReturn(sContext.getApplicationInfo());
-        doReturn(mockPackageManagerInternal).when(
-                () -> LocalServices.getService(PackageManagerInternal.class));
-    }
-
     private void setupAppOpsService() {
         mAppOpsService = new AppOpsService(mAppOpsFile, mHandler);
+        mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
         mAppOpsService.mContext = spy(sContext);
 
         // Always approve all permission checks
@@ -131,13 +119,36 @@ public class AppOpsServiceTest {
         mHandler = new Handler(handlerThread.getLooper());
         mMyUid = Process.myUid();
 
+        initializeStaticMocks();
+
         setupAppOpsService();
+
         mTestStartMillis = System.currentTimeMillis();
     }
 
     @After
     public void resetStaticMocks() {
         mMockingSession.finishMocking();
+    }
+
+    private void initializeStaticMocks() {
+        mMockingSession = mockitoSession()
+                .strictness(Strictness.LENIENT)
+                .spyStatic(LocalServices.class)
+                .spyStatic(Settings.Global.class)
+                .startMocking();
+
+        // Mock LocalServices.getService(PackageManagerInternal.class).getApplicationInfo dependency
+        // needed by AppOpsService
+        PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
+        when(mockPackageManagerInternal.getApplicationInfo(eq(sMyPackageName), anyInt(), anyInt(),
+                anyInt())).thenReturn(sContext.getApplicationInfo());
+        doReturn(mockPackageManagerInternal).when(
+                () -> LocalServices.getService(PackageManagerInternal.class));
+
+        // Mock behavior to use specific Settings.Global.APPOP_HISTORY_PARAMETERS
+        doReturn(null).when(() -> Settings.Global.getString(any(ContentResolver.class),
+                eq(Settings.Global.APPOP_HISTORY_PARAMETERS)));
     }
 
     @Test
@@ -344,7 +355,7 @@ public class AppOpsServiceTest {
     }
 
     @Test
-    public void testUidProcStateChange_cachedToFgs() throws Exception {
+    public void testUidProcStateChange_cachedToFgs() {
         setupProcStateTests();
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -357,7 +368,7 @@ public class AppOpsServiceTest {
     }
 
     @Test
-    public void testUidProcStateChange_cachedToFgsLocation() throws Exception {
+    public void testUidProcStateChange_cachedToFgsLocation() {
         setupProcStateTests();
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
