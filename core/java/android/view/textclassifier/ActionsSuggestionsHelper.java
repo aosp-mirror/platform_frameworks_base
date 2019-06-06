@@ -19,7 +19,9 @@ package android.view.textclassifier;
 import android.annotation.Nullable;
 import android.app.Person;
 import android.app.RemoteAction;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -200,10 +202,12 @@ public final class ActionsSuggestionsHelper {
         if (remoteAction == null) {
             return null;
         }
+        Intent actionIntent = ExtrasUtils.getActionIntent(conversationAction.getExtras());
+        ComponentName componentName = actionIntent.getComponent();
+        // Action without a component name will be considered as from the same app.
+        String packageName = componentName == null ? null : componentName.getPackageName();
         return new Pair<>(
-                conversationAction.getAction().getTitle().toString(),
-                ExtrasUtils.getActionIntent(
-                        conversationAction.getExtras()).getComponent().getPackageName());
+                conversationAction.getAction().getTitle().toString(), packageName);
     }
 
     private static final class PersonEncoder {

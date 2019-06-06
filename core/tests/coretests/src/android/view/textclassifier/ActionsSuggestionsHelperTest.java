@@ -208,6 +208,36 @@ public class ActionsSuggestionsHelperTest {
         assertThat(conversationActions.get(2).getAction()).isNull();
     }
 
+    @Test
+    public void testDeduplicateActions_nullComponent() {
+        Bundle phoneExtras = new Bundle();
+        Intent phoneIntent = new Intent(Intent.ACTION_DIAL);
+        ExtrasUtils.putActionIntent(phoneExtras, phoneIntent);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                InstrumentationRegistry.getTargetContext(),
+                0,
+                phoneIntent,
+                0);
+        Icon icon = Icon.createWithData(new byte[0], 0, 0);
+        ConversationAction action =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(icon, "label", "1", pendingIntent))
+                        .setExtras(phoneExtras)
+                        .build();
+        ConversationAction actionWithSameLabel =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(
+                                icon, "label", "2", pendingIntent))
+                        .setExtras(phoneExtras)
+                        .build();
+
+        List<ConversationAction> conversationActions =
+                ActionsSuggestionsHelper.removeActionsWithDuplicates(
+                        Arrays.asList(action, actionWithSameLabel));
+
+        assertThat(conversationActions).isEmpty();
+    }
+
     public void createLabeledIntentResult_null() {
         ActionsSuggestionsModel.ActionSuggestion nativeSuggestion =
                 new ActionsSuggestionsModel.ActionSuggestion(
