@@ -748,6 +748,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void handleFaceAuthenticated(int authUserId) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFaceAuthenticated");
         try {
+            if (mGoingToSleep) {
+                Log.d(TAG, "Aborted successful auth because device is going to sleep.");
+                return;
+            }
             final int userId;
             try {
                 userId = ActivityManager.getService().getCurrentUser().id;
