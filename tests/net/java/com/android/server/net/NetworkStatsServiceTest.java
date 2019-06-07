@@ -931,65 +931,6 @@ public class NetworkStatsServiceTest {
     }
 
     @Test
-    public void vpnRewriteTrafficThroughItself() throws Exception {
-        // WiFi network is connected and VPN is using WiFi (which has TEST_IFACE).
-        expectDefaultSettings();
-        NetworkState[] networkStates = new NetworkState[] {buildWifiState(), buildVpnState()};
-        VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
-
-        mService.forceUpdateIfaces(
-                new Network[] {WIFI_NETWORK, VPN_NETWORK},
-                vpnInfos,
-                networkStates,
-                getActiveIface(networkStates));
-        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
-        // overhead per packet):
-        //
-        // 1000 bytes (100 packets) were sent, and 2000 bytes (200 packets) were received by UID_RED
-        // over VPN.
-        // 500 bytes (50 packets) were sent, and 1000 bytes (100 packets) were received by UID_BLUE
-        // over VPN.
-        //
-        // VPN UID rewrites packets read from TUN back to TUN, plus some of its own traffic
-        // (100 bytes).
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 5)
-                .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 2000L, 200L, 1000L, 100L, 1L)
-                .addValues(TUN_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 1000L, 100L, 500L, 50L, 1L)
-                // VPN rewrites all the packets read from TUN + 100 additional bytes of VPN's
-                // own traffic.
-                .addValues(TUN_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 0L, 0L, 1600L, 160L, 2L)
-                // VPN sent 1760 bytes over WiFi in foreground (SET_FOREGROUND) i.e. 1600
-                // bytes (160 packets) + 1 byte/packet overhead (=160 bytes).
-                .addValues(TEST_IFACE, UID_VPN, SET_FOREGROUND, TAG_NONE, 0L, 0L, 1760L, 176L, 1L)
-                // VPN received 3300 bytes over WiFi in background (SET_DEFAULT) i.e. 3000 bytes
-                // (300 packets) + 1 byte/packet encryption overhead (=300 bytes).
-                .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 3300L, 300L, 0L, 0L, 1L));
-
-        forcePollAndWaitForIdle();
-
-        // Verify increased TUN usage by UID_VPN does not get attributed to other apps.
-        NetworkStats tunStats =
-                mService.getDetailedUidStats(new String[] {TUN_IFACE});
-        assertValues(
-                tunStats, TUN_IFACE, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL, 2000L, 200L, 1000L, 100L, 1);
-        assertValues(
-                tunStats, TUN_IFACE, UID_BLUE, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL, 1000L, 100L, 500L, 50L, 1);
-        assertValues(
-                tunStats, TUN_IFACE, UID_VPN, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL, 0L, 0L, 1600L, 160L, 2);
-
-        // Verify correct attribution over WiFi.
-        assertUidTotal(sTemplateWifi, UID_RED, 2000L, 200L, 1000L, 100L, 1);
-        assertUidTotal(sTemplateWifi, UID_BLUE, 1000L, 100L, 500L, 50L, 1);
-        assertUidTotal(sTemplateWifi, UID_VPN, 300L, 0L, 260L, 26L, 2);
-    }
-
-    @Test
     public void vpnWithOneUnderlyingIface() throws Exception {
         // WiFi network is connected and VPN is using WiFi (which has TEST_IFACE).
         expectDefaultSettings();
@@ -1005,29 +946,25 @@ public class NetworkStatsServiceTest {
                 getActiveIface(networkStates));
         // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
         // overhead per packet):
-        // 1000 bytes (100 packets) were sent, and 2000 bytes (200 packets) were received by UID_RED
-        // over VPN.
-        // 500 bytes (50 packets) were sent, and 1000 bytes (100 packets) were received by UID_BLUE
-        // over VPN.
-        // VPN sent 1650 bytes (150 packets), and received 3300 (300 packets) over WiFi.
-        // Of 1650 bytes sent over WiFi, expect 1000 bytes attributed to UID_RED, 500 bytes
-        // attributed to UID_BLUE, and 150 bytes attributed to UID_VPN.
-        // Of 3300 bytes received over WiFi, expect 2000 bytes attributed to UID_RED, 1000 bytes
-        // attributed to UID_BLUE, and 300 bytes attributed to UID_VPN.
+        // 1000 bytes (100 packets) were sent/received by UID_RED over VPN.
+        // 500 bytes (50 packets) were sent/received by UID_BLUE over VPN.
+        // VPN sent/received 1650 bytes (150 packets) over WiFi.
+        // Of 1650 bytes over WiFi, expect 1000 bytes attributed to UID_RED, 500 bytes attributed to
+        // UID_BLUE, and 150 bytes attributed to UID_VPN for both rx/tx traffic.
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 3)
-                .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 2000L, 200L, 1000L, 100L, 1L)
-                .addValues(TUN_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 1000L, 100L, 500L, 50L, 1L)
-                // VPN received 3300 bytes over WiFi in background (SET_DEFAULT).
-                .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 3300L, 300L, 0L, 0L, 1L)
+                .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1000L, 100L, 1000L, 100L, 1L)
+                .addValues(TUN_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 500L, 50L, 500L, 50L, 1L)
+                // VPN received 1650 bytes over WiFi in background (SET_DEFAULT).
+                .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 1650L, 150L, 0L, 0L, 1L)
                 // VPN sent 1650 bytes over WiFi in foreground (SET_FOREGROUND).
                 .addValues(TEST_IFACE, UID_VPN, SET_FOREGROUND, TAG_NONE, 0L, 0L, 1650L, 150L, 1L));
 
         forcePollAndWaitForIdle();
 
-        assertUidTotal(sTemplateWifi, UID_RED, 2000L, 200L, 1000L, 100L, 1);
-        assertUidTotal(sTemplateWifi, UID_BLUE, 1000L, 100L, 500L, 50L, 1);
-        assertUidTotal(sTemplateWifi, UID_VPN, 300L, 0L, 150L, 0L, 2);
+        assertUidTotal(sTemplateWifi, UID_RED, 1000L, 100L, 1000L, 100L, 1);
+        assertUidTotal(sTemplateWifi, UID_BLUE, 500L, 50L, 500L, 50L, 1);
+        assertUidTotal(sTemplateWifi, UID_VPN, 150L, 0L, 150L, 0L, 2);
     }
 
     @Test
@@ -1131,28 +1068,24 @@ public class NetworkStatsServiceTest {
                 getActiveIface(networkStates));
         // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
         // overhead per packet):
-        // 1000 bytes (100 packets) were sent, and 500 bytes (50 packets) received by UID_RED over
-        // VPN.
-        // VPN sent 660 bytes (60 packets) over WiFi and 440 bytes (40 packets) over Cell.
-        // And, it received 330 bytes (30 packets) over WiFi and 220 bytes (20 packets) over Cell.
-        // For UID_RED, expect 600 bytes attributed over WiFi and 400 bytes over Cell for sent (tx)
-        // traffic. For received (rx) traffic, expect 300 bytes over WiFi and 200 bytes over Cell.
-        //
-        // For UID_VPN, expect 60 bytes attributed over WiFi and 40 bytes over Cell for tx traffic.
-        // And, 30 bytes over WiFi and 20 bytes over Cell for rx traffic.
+        // 1000 bytes (100 packets) were sent/received by UID_RED over VPN.
+        // VPN sent/received 660 bytes (60 packets) over WiFi and 440 bytes (40 packets) over Cell.
+        // For UID_RED, expect 600 bytes attributed over WiFi and 400 bytes over Cell for both
+        // rx/tx.
+        // For UID_VPN, expect 60 bytes attributed over WiFi and 40 bytes over Cell for both rx/tx.
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 3)
-              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 500L, 50L, 1000L, 100L, 2L)
-              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 330L, 30L, 660L, 60L, 1L)
-              .addValues(TEST_IFACE2, UID_VPN, SET_DEFAULT, TAG_NONE, 220L, 20L, 440L, 40L, 1L));
+              .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1000L, 100L, 1000L, 100L, 2L)
+              .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 660L, 60L, 660L, 60L, 1L)
+              .addValues(TEST_IFACE2, UID_VPN, SET_DEFAULT, TAG_NONE, 440L, 40L, 440L, 40L, 1L));
 
         forcePollAndWaitForIdle();
 
-        assertUidTotal(sTemplateWifi, UID_RED, 300L, 30L, 600L, 60L, 1);
-        assertUidTotal(sTemplateWifi, UID_VPN, 30L, 0L, 60L, 0L, 1);
+        assertUidTotal(sTemplateWifi, UID_RED, 600L, 60L, 600L, 60L, 1);
+        assertUidTotal(sTemplateWifi, UID_VPN, 60L, 0L, 60L, 0L, 1);
 
-        assertUidTotal(buildTemplateMobileWildcard(), UID_RED, 200L, 20L, 400L, 40L, 1);
-        assertUidTotal(buildTemplateMobileWildcard(), UID_VPN, 20L, 0L, 40L, 0L, 1);
+        assertUidTotal(buildTemplateMobileWildcard(), UID_RED, 400L, 40L, 400L, 40L, 1);
+        assertUidTotal(buildTemplateMobileWildcard(), UID_VPN, 40L, 0L, 40L, 0L, 1);
     }
 
     @Test
