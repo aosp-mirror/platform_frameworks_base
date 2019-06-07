@@ -222,6 +222,9 @@
     <!-- to change themes - light or dark -->
     <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
 
+    <!-- Listen app op changes -->
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
+
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
