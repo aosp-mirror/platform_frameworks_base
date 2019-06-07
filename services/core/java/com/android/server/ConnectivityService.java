@@ -4383,7 +4383,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * @return VPN information for accounting, or null if we can't retrieve all required
-     *         information, e.g underlying ifaces.
+     *         information, e.g primary underlying iface.
      */
     @Nullable
     private VpnInfo createVpnInfo(Vpn vpn) {
@@ -4395,24 +4395,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // see VpnService.setUnderlyingNetworks()'s javadoc about how to interpret
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
-            NetworkAgentInfo defaultNai = getDefaultNetwork();
-            if (defaultNai != null && defaultNai.linkProperties != null) {
-                underlyingNetworks = new Network[] { defaultNai.network };
+            NetworkAgentInfo defaultNetwork = getDefaultNetwork();
+            if (defaultNetwork != null && defaultNetwork.linkProperties != null) {
+                info.primaryUnderlyingIface = getDefaultNetwork().linkProperties.getInterfaceName();
+            }
+        } else if (underlyingNetworks.length > 0) {
+            LinkProperties linkProperties = getLinkProperties(underlyingNetworks[0]);
+            if (linkProperties != null) {
+                info.primaryUnderlyingIface = linkProperties.getInterfaceName();
             }
         }
-        if (underlyingNetworks != null && underlyingNetworks.length > 0) {
-            List<String> interfaces = new ArrayList<>();
-            for (Network network : underlyingNetworks) {
-                LinkProperties lp = getLinkProperties(network);
-                if (lp != null) {
-                    interfaces.add(lp.getInterfaceName());
-                }
-            }
-            if (!interfaces.isEmpty()) {
-                info.underlyingIfaces = interfaces.toArray(new String[interfaces.size()]);
-            }
-        }
-        return info.underlyingIfaces == null ? null : info;
+        return info.primaryUnderlyingIface == null ? null : info;
     }
 
     /**
