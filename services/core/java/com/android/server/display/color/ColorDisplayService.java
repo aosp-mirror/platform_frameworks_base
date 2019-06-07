@@ -465,12 +465,16 @@ public final class ColorDisplayService extends SystemService {
                     .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
         }
 
+        // dtm.setColorMode() needs to be called before
+        // updateDisplayWhiteBalanceStatus(), this is because the latter calls
+        // DisplayTransformManager.needsLinearColorMatrix(), therefore it is dependent
+        // on the state of DisplayTransformManager.
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
+
         if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
             updateDisplayWhiteBalanceStatus();
         }
-
-        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-        dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
     }
 
     private void onAccessibilityActivated() {
