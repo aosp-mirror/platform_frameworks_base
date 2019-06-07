@@ -45,10 +45,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.UserHandle;   // duped to avoid merge conflict
-import android.os.UserManager;  // out of order to avoid merge conflict
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -573,6 +572,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }
+    }
+
+    @Override
+    public void blockRollbackManager(long millis) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                "blockRollbackManager");
+        getHandler().post(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                // ignored.
+            }
+        });
     }
 
     void onUnlockUser(int userId) {
