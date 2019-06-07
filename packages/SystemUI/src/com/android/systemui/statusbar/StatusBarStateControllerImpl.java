@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
+import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.GuardedBy;
@@ -75,6 +76,16 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     // Record the HISTORY_SIZE most recent states
     private int mHistoryIndex = 0;
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
+
+    /**
+     * Current SystemUiVisibility
+     */
+    private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+
+    /**
+     * If the device is currently pulsing (AOD2).
+     */
+    private boolean mPulsing;
 
     /**
      * If the device is currently dozing or not.
@@ -290,6 +301,30 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     @Override
     public boolean isKeyguardRequested() {
         return mKeyguardRequested;
+    }
+
+    @Override
+    public void setSystemUiVisibility(int visibility) {
+        if (mSystemUiVisibility != visibility) {
+            mSystemUiVisibility = visibility;
+            synchronized (mListeners) {
+                for (RankedListener rl : new ArrayList<>(mListeners)) {
+                    rl.mListener.onSystemUiVisibilityChanged(mSystemUiVisibility);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setPulsing(boolean pulsing) {
+        if (mPulsing != pulsing) {
+            mPulsing = pulsing;
+            synchronized (mListeners) {
+                for (RankedListener rl : new ArrayList<>(mListeners)) {
+                    rl.mListener.onPulsingChanged(pulsing);
+                }
+            }
+        }
     }
 
     /**
