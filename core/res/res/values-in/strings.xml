@@ -1612,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", aman"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Aktivitas latar belakang yang dimulai dari <xliff:g id="PACKAGENAME">%1$s</xliff:g> akan diblokir di build Q di masa mendatang. Lihat g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Aktivitas latar belakang yang dimulai dari <xliff:g id="PACKAGENAME">%1$s</xliff:g> diblokir. Lihat g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Pola?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pola Salah"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Sandi Salah"</string>
@@ -1670,9 +1668,9 @@
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Pilih layanan yang akan digunakan saat menge-tap tombol aksesibilitas:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Pilih layanan yang akan digunakan dengan gestur aksesibilitas (geser ke atas dari bawah layar dengan dua jari):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Pilih layanan yang akan digunakan dengan gestur aksesibilitas (geser ke atas dari bawah layar dengan tiga jari):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Sentuh &amp; tahan tombol aksesibilitas untuk beralih di antara layanan."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Geser dengan dua jari dan tahan untuk beralih di antara layanan."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Geser ke atas dengan tiga jari dan tahan untuk beralih di antara layanan."</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Sentuh &amp; tahan tombol aksesibilitas untuk beralih layanan."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Geser dengan dua jari dan tahan untuk beralih layanan."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Geser ke atas dengan tiga jari dan tahan untuk beralih layanan."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Pembesaran"</string>
     <string name="user_switched" msgid="3768006783166984410">"Pengguna saat ini <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Beralih ke <xliff:g id="NAME">%1$s</xliff:g>…"</string>
