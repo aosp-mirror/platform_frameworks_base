@@ -302,9 +302,25 @@ public class SubscriptionManager {
      * subscription.
      *
      * Default value is 0.
+     *
+     * @deprecated Replaced by {@link #DATA_ENABLED_OVERRIDE_RULES}
+     * @hide
      */
-    /** @hide */
+    @Deprecated
     public static final String WHITE_LISTED_APN_DATA = "white_listed_apn_data";
+
+    /**
+     * TelephonyProvider column name data_enabled_override_rules.
+     * It's a list of rules for overriding data enabled settings. The syntax is
+     * For example, "mms=nonDefault" indicates enabling data for mms in non-default subscription.
+     * "default=nonDefault&inVoiceCall" indicates enabling data for internet in non-default
+     * subscription and while is in voice call.
+     *
+     * Default value is empty string.
+     *
+     * @hide
+     */
+    public static final String DATA_ENABLED_OVERRIDE_RULES = "data_enabled_override_rules";
 
     /**
      * This constant is to designate a subscription as a Local-SIM Subscription.
