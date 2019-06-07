@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Pagtawag Gamit ang Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Pagtawag Gamit ang WiFi ng <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Pagtawag Gamit ang WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Pagtawag Gamit ang WLAN ng <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1611,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", secure"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Iba-block ang pagsisimula ng aktibidad sa background na ito mula sa <xliff:g id="PACKAGENAME">%1$s</xliff:g> sa mga Q build sa hinaharap. Tingnan ang g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Na-block ang pagsisimula ng aktibidad sa background mula sa <xliff:g id="PACKAGENAME">%1$s</xliff:g>. Tingnan ang g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nakalimutan ang Pattern"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Maling Pattern"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Maling Password"</string>
@@ -1666,8 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Na-on ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Na-off ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pindutin nang matagal ang parehong volume key sa loob ng tatlong segundo para magamit ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pumili ng feature na gagamitin kapag na-tap mo ang button ng Pagiging Accessible:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Upang baguhin ang mga feature, pindutin nang matagal ang button ng Pagiging Naa-access."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Pumili ng serbisyong gagamitin kapag na-tap mo ang button ng pagiging accessible:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Pumili ng serbisyong gagamitin sa galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang dalawang daliri):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Pumili ng serbisyong gagamitin sa galaw ng pagiging accessible (pag-swipe pataas mula sa ibaba ng screen gamit ang tatlong daliri):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Para magpalipat-lipat sa mga serbisyo, pindutin nang matagal ang button ng pagiging accessible."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Para magpalipat-lipat sa mga serbisyo, mag-swipe pataas gamit ang dalawang daliri at i-hold."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Para magpalipat-lipat sa mga serbisyo, mag-swipe pataas gamit ang tatlong daliri at i-hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Pag-magnify"</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Lumilipat kay <xliff:g id="NAME">%1$s</xliff:g>…"</string>

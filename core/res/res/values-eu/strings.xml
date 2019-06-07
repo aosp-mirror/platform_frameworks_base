@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> operadorearen wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> wifia"</string>
@@ -1545,8 +1546,8 @@
     <string name="storage_internal" msgid="3570990907910199483">"Barneko biltegiratze partekatua"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
-    <string name="storage_usb_drive" msgid="6261899683292244209">"USB unitatea"</string>
-    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB unitatea"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB bidezko unitatea"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> enpresaren USB bidezko unitatea"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
     <string name="data_usage_warning_title" msgid="6499834033204801605">"Datuen erabileraren abisua"</string>
@@ -1612,8 +1613,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segurua"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> paketearen atzeko planoko jardueraren abio hau blokeatu egingo da Q bertsioaren etorkizuneko konpilazioetan. Joan g.co/dev/bgblock helbidera."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Blokeatu da <xliff:g id="PACKAGENAME">%1$s</xliff:g> paketearen atzeko planoko jardueraren abioa. Joan g.co/dev/bgblock helbidera."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Eredua ahaztu zaizu"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Eredu okerra"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Pasahitz okerra"</string>
@@ -1667,8 +1666,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu du"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu du"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> erabiltzeko, eduki sakatuta bolumen-tekla biak hiru segundoz"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoia sakatzean:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Eginbideak aldatzeko, eduki sakatuta Erabilerraztasuna botoia."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Aukeratu zer zerbitzu erabili nahi duzun Erabilerraztasuna botoia sakatzean:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Aukeratu zer zerbitzu erabili nahi duzun erabilerraztasun-keinua egitean (hau da, bi hatz pantailaren behealdetik gora pasatuz gero):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Aukeratu zer zerbitzu erabili nahi duzun erabilerraztasun-keinua egitean (hau da, hiru hatz pantailaren behealdetik gora pasatuz gero):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Zerbitzu batetik bestera aldatzeko, eduki sakatuta Erabilerraztasuna botoia."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Zerbitzu batetik bestera aldatzeko, pasatu bi hatz pantailaren behealdetik gora eta eduki sakatuta une batez."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Zerbitzu batetik bestera aldatzeko, pasatu hiru hatz pantailaren behealdetik gora eta eduki sakatuta une batez."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Lupa"</string>
     <string name="user_switched" msgid="3768006783166984410">"Uneko erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailera aldatzen…"</string>
