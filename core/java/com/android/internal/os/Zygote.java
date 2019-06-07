@@ -523,9 +523,6 @@ public final class Zygote {
         Credentials peerCredentials = null;
         ZygoteArguments args = null;
 
-        // Load resources
-        ZygoteInit.nativePreloadGraphicsDriver();
-
         // Change the priority to max before calling accept so we can respond to new specialization
         // requests as quickly as possible.  This will be reverted to the default priority in the
         // native specialization code.
