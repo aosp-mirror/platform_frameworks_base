@@ -1767,8 +1767,7 @@ class AlarmManagerService extends SystemService {
                                 + ", callingPackage: " + callingPackage;
                 mHandler.obtainMessage(AlarmHandler.UNREGISTER_CANCEL_LISTENER,
                         operation).sendToTarget();
-                // STOPSHIP (b/128866264): Just to catch breakages. Remove before final release.
-                Slog.wtf(TAG, errorMsg);
+                Slog.w(TAG, errorMsg);
                 throw new IllegalStateException(errorMsg);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
