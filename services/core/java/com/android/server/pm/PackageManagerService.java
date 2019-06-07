@@ -15018,7 +15018,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 params.handleStartCopy();
                 if (params.mRet != INSTALL_SUCCEEDED) {
                     mRet = params.mRet;
-                    break;
                 }
             }
         }
@@ -15029,7 +15028,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 params.handleReturnCode();
                 if (params.mRet != INSTALL_SUCCEEDED) {
                     mRet = params.mRet;
-                    break;
                 }
             }
         }
