@@ -398,6 +398,8 @@ public class ResolverActivity extends Activity {
                 mSystemWindowInsets.bottom));
         ((ListView) mAdapterView).addFooterView(mFooterSpacer);
 
+        resetButtonBar();
+
         return insets.consumeSystemWindowInsets();
     }
 

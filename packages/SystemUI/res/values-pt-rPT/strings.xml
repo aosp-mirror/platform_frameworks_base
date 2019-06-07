@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Rede do operador em mudança."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalhes da bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria a <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Bateria a <xliff:g id="PERCENTAGE">%1$s</xliff:g> por cento, resta(m) cerca de <xliff:g id="TIME">%2$s</xliff:g> com base na sua utilização."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"A bateria está a carregar, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> por cento."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Definições do sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificações."</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mover p/ parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mover parte inferior direita"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ignorar"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"A navegação no sistema foi atualizada. Para efetuar alterações, aceda às Definições."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Aceda às Definições para atualizar a navegação no sistema."</string>
 </resources>

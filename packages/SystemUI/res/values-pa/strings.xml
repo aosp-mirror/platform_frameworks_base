@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"ਕੈਰੀਅਰ ਨੈੱਟਵਰਕ ਦੀ ਬਦਲੀ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ਬੈਟਰੀ ਵੇਰਵੇ ਖੋਲ੍ਹੋ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ਬੈਟਰੀ <xliff:g id="NUMBER">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ ਹੈ।"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"ਬੈਟਰੀ <xliff:g id="PERCENTAGE">%1$s</xliff:g> ਫ਼ੀਸਦ, ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ਬੈਟਰੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ਪ੍ਰਤੀਸ਼ਤ।"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ।"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ਸੂਚਨਾਵਾਂ।"</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ਖਾਰਜ ਕਰੋ"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
 </resources>
