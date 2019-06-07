@@ -194,5 +194,23 @@ IncidentReportArgs::merge(const IncidentReportArgs& that)
     }
 }
 
+// stub
+void
+IncidentReportArgs::setPrivacyPolicy(int)
+{
+}
+
+// stub
+void
+IncidentReportArgs::setReceiverPkg(const string&)
+{
+}
+
+// stub
+void
+IncidentReportArgs::setReceiverCls(const string&)
+{
+}
+
 }
 }
