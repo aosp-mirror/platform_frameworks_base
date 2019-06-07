@@ -288,7 +288,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            PendingIntent chooserAction = PendingIntent.getBroadcast(context, 0,
+            // Make sure pending intents for the system user are still unique across users
+            // by setting the (otherwise unused) request code to the current user id.
+            int requestCode = context.getUserId();
+
+            PendingIntent chooserAction = PendingIntent.getBroadcast(context, requestCode,
                     new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
             Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
@@ -297,10 +301,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             // Create a share action for the notification
-            PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, 0,
+            PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                     new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
                             .putExtra(EXTRA_ACTION_INTENT, sharingChooserIntent)
-                            .putExtra(EXTRA_DISALLOW_ENTER_PIP, true),
+                            .putExtra(EXTRA_DISALLOW_ENTER_PIP, true)
+                            .setAction(Intent.ACTION_SEND),
                     PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
             Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_share,
@@ -320,10 +325,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             // Create a edit action
-            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, 1,
+            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                     new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
                             .putExtra(EXTRA_ACTION_INTENT, editIntent)
-                            .putExtra(EXTRA_CANCEL_NOTIFICATION, editIntent.getComponent() != null),
+                            .putExtra(EXTRA_CANCEL_NOTIFICATION, editIntent.getComponent() != null)
+                            .setAction(Intent.ACTION_EDIT),
                     PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
             Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_edit,
@@ -331,7 +337,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mNotificationBuilder.addAction(editActionBuilder.build());
 
             // Create a delete action for the notification
-            PendingIntent deleteAction = PendingIntent.getBroadcast(context, 0,
+            PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
                     new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
                             .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
