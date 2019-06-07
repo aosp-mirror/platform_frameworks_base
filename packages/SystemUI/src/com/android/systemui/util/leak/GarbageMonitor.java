@@ -66,7 +66,11 @@ public class GarbageMonitor {
     private static final String FORCE_ENABLE_LEAK_REPORTING = "sysui_force_enable_leak_reporting";
 
     private static final boolean HEAP_TRACKING_ENABLED = Build.IS_DEBUGGABLE;
-    private static final boolean ENABLE_AM_HEAP_LIMIT = true; // use ActivityManager.setHeapLimit
+
+    // whether to use ActivityManager.setHeapLimit
+    private static final boolean ENABLE_AM_HEAP_LIMIT = Build.IS_DEBUGGABLE;
+    // heap limit value, in KB (overrides R.integer.watch_heap_limit)
+    private static final String SETTINGS_KEY_AM_HEAP_LIMIT = "systemui_am_heap_limit";
 
     private static final String TAG = "GarbageMonitor";
 
@@ -112,7 +116,9 @@ public class GarbageMonitor {
         mDumpTruck = new DumpTruck(mContext);
 
         if (ENABLE_AM_HEAP_LIMIT) {
-            mHeapLimit = mContext.getResources().getInteger(R.integer.watch_heap_limit);
+            mHeapLimit = Settings.Global.getInt(context.getContentResolver(),
+                    SETTINGS_KEY_AM_HEAP_LIMIT,
+                    mContext.getResources().getInteger(R.integer.watch_heap_limit));
         }
     }
 
@@ -342,6 +348,9 @@ public class GarbageMonitor {
 
     public static class MemoryTile extends QSTileImpl<QSTile.State> {
         public static final String TILE_SPEC = "dbg:mem";
+
+        // Tell QSTileHost.java to toss this into the default tileset?
+        public static final boolean ADD_TO_DEFAULT_ON_DEBUGGABLE_BUILDS = true;
 
         private final GarbageMonitor gm;
         private ProcessMemInfo pmi;
