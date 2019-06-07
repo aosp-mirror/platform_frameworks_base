@@ -39,7 +39,6 @@ class Bubble {
     private final String mKey;
     private final String mGroupId;
     private String mAppName;
-    private final BubbleExpandedView.OnBubbleBlockedListener mListener;
 
     private boolean mInflated;
     public NotificationEntry entry;
@@ -57,16 +56,10 @@ class Bubble {
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(Context context, NotificationEntry e) {
-        this (context, e, null);
-    }
-
-    Bubble(Context context, NotificationEntry e,
-            BubbleExpandedView.OnBubbleBlockedListener listener) {
         entry = e;
         mKey = e.key;
         mLastUpdated = e.notification.getPostTime();
         mGroupId = groupId(e);
-        mListener = listener;
 
         mPm = context.getPackageManager();
         ApplicationInfo info;
@@ -122,7 +115,6 @@ class Bubble {
         expandedView = (BubbleExpandedView) inflater.inflate(
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
         expandedView.setEntry(entry, stackView, mAppName);
-        expandedView.setOnBlockedListener(mListener);
 
         mInflated = true;
     }
