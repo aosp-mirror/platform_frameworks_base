@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"‏تماس ازطریق Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"‏تماس Wi‑Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"‏تماس ازطریق WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"‏تماس ازطریق WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1611,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"هم‌پوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"، امن"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"‏شروع فعالیت پس‌زمینه<xliff:g id="PACKAGENAME">%1$s</xliff:g> در نسخه‌های Q آینده مسدود خواهد شد. به g.co/dev/bgblock مراجعه کنید."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"‏شروع فعالیت پس‌زمینه <xliff:g id="PACKAGENAME">%1$s</xliff:g> مسدود شده است. به g.co/dev/bgblock مراجعه کنید."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"الگوی اشتباه"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"گذرواژه اشتباه"</string>
@@ -1666,8 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"قابلیتی را انتخاب کنید که هنگام ضربه زدن روی دکمه «دسترس‌پذیری» استفاده می‌شود:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"برای تغییر دادن قابلیت‌ها، دکمه «دسترس‌پذیری» را لمس کنید و نگه‌دارید."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"سرویسی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"برای جابه‌جایی بین سرویس‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه‌دارید."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"برای جابه‌جایی بین سرویس‌ها، با دو انگشت صفحه را تند به بالا بکشید و نگه‌دارید."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"برای جابه‌جایی بین سرویس‌ها، با سه انگشت صفحه را تند به بالا بکشید و نگه‌دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"درشت‌نمایی"</string>
     <string name="user_switched" msgid="3768006783166984410">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
