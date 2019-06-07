@@ -2378,10 +2378,29 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void cancelNotificationWithTag(String pkg, String tag, int id, int userId) {
-            checkCallerIsSystemOrSameApp(pkg);
+        public void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id,
+                int userId) {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
+
+            // ensure opPkg is delegate if does not match pkg
+            resolveNotificationUid(opPkg, pkg, Binder.getCallingUid(), userId);
+
+            // if opPkg is not the same as pkg, make sure the notification given was posted
+            // by opPkg
+            if (!Objects.equals(pkg, opPkg)) {
+                synchronized (mNotificationLock) {
+                    // Look for the notification, searching both the posted and enqueued lists.
+                    NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
+                    if (r != null) {
+                        if (!Objects.equals(opPkg, r.sbn.getOpPkg())) {
+                            throw new SecurityException(opPkg + " does not have permission to "
+                                    + "cancel a notification they did not post " + tag + " " + id);
+                        }
+                    }
+                }
+            }
+
             // Don't allow client applications to cancel foreground service notis or autobundled
             // summaries.
             final int mustNotHaveFlags = isCallingUidSystem() ? 0 :

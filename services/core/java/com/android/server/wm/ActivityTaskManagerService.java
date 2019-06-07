@@ -5683,7 +5683,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
         try {
-            inm.cancelNotificationWithTag("android", null,
+            inm.cancelNotificationWithTag("android", "android", null,
                     SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION, userId);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error canceling notification for service", e);
