@@ -1016,6 +1016,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         TypedArray a = theme.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.TextViewAppearance, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.TextViewAppearance,
+                attrs, a, defStyleAttr, defStyleRes);
         TypedArray appearance = null;
         int ap = a.getResourceId(
                 com.android.internal.R.styleable.TextViewAppearance_textAppearance, -1);
@@ -1023,6 +1025,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (ap != -1) {
             appearance = theme.obtainStyledAttributes(
                     ap, com.android.internal.R.styleable.TextAppearance);
+            saveAttributeDataForStyleable(context, com.android.internal.R.styleable.TextAppearance,
+                    null, appearance, 0, ap);
         }
         if (appearance != null) {
             readTextAppearance(context, appearance, attributes, false /* styleArray */);
