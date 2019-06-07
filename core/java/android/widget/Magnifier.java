@@ -1035,7 +1035,7 @@ public final class Magnifier {
             // Destroy the renderer. This will not proceed until pending frame callbacks complete.
             mRenderer.destroy();
             mSurface.destroy();
-            mSurfaceControl.remove();
+            new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
             mSurfaceSession.kill();
             mHandler.removeCallbacks(mMagnifierUpdater);
             if (mBitmap != null) {
