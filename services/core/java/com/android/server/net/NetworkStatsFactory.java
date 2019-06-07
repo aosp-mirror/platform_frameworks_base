@@ -263,10 +263,6 @@ public class NetworkStatsFactory {
         return stats;
     }
 
-    /**
-     * @deprecated Use NetworkStatsService#getDetailedUidStats which also accounts for
-     * VPN traffic
-     */
     public NetworkStats readNetworkStatsDetail() throws IOException {
         return readNetworkStatsDetail(UID_ALL, null, TAG_ALL, null);
     }
