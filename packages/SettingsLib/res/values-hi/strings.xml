@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाई-फ़ाई वर्बोस लॉगिंग चालू करें"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"वाई-फ़ाई के लिए स्कैन की संख्या कम करें"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा हमेशा चालू"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"हार्डवेयर से तेज़ी लाने के लिए टेदर करें"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"बिना नाम वाले ब्लूटूथ डिवाइस दिखाएं"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई लॉगिंग का स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"बैटरी की खपत कम और नेटवर्क की परफ़ॉर्मेंस बेहतर होती है"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफ़र आकार"</string>

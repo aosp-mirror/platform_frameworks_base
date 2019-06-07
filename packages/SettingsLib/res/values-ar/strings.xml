@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏تقييد البحث عن شبكات Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"عرض أجهزة البلوتوث بدون أسماء"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"تعذّر الاتصال"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>

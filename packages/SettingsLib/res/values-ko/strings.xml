@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"네트워크"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi 상세 로깅 사용"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi 검색 제한"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"항상 모바일 데이터 활성화"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"테더링 하드웨어 가속"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"이름이 없는 블루투스 기기 표시"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"연결할 수 없음"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"배터리 소모를 줄이고 네트워크 성능을 개선합니다."</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"종량제 네트워크"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>

@@ -325,6 +325,15 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             } catch (RemoteException e) {
                 Log.e(this, e, "Exception trying to query for remote CSs");
             }
+        } else {
+            try {
+                // This is not an error condition, so just pass back an empty list.
+                // This happens when querying from a remote connection service, not the connection
+                // manager itself.
+                callback.onResult(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+            } catch (RemoteException e) {
+                Log.e(this, e, "Exception trying to query for remote CSs");
+            }
         }
     }
 
