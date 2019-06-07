@@ -322,7 +322,7 @@ class AutomaticBrightnessController {
         }
         changed |= setLightSensorEnabled(enable && !dozing);
         if (changed) {
-            updateAutoBrightness(false /*sendUpdate*/);
+            updateAutoBrightness(false /*sendUpdate*/, userInitiatedChange);
         }
     }
 
@@ -667,7 +667,7 @@ class AutomaticBrightnessController {
                         "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", " +
                         "mAmbientLux=" + mAmbientLux);
             }
-            updateAutoBrightness(true);
+            updateAutoBrightness(true /* sendUpdate */, false /* isManuallySet */);
         }
 
         long nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
@@ -697,7 +697,7 @@ class AutomaticBrightnessController {
                         + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", "
                         + "mAmbientLux=" + mAmbientLux);
             }
-            updateAutoBrightness(true);
+            updateAutoBrightness(true /* sendUpdate */, false /* isManuallySet */);
             nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
             nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
         }
@@ -717,7 +717,7 @@ class AutomaticBrightnessController {
         mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX, nextTransitionTime);
     }
 
-    private void updateAutoBrightness(boolean sendUpdate) {
+    private void updateAutoBrightness(boolean sendUpdate, boolean isManuallySet) {
         if (!mAmbientLuxValid) {
             return;
         }
@@ -732,6 +732,7 @@ class AutomaticBrightnessController {
         // in which case we ignore the new screen brightness if it doesn't differ enough from the
         // previous one.
         if (mScreenAutoBrightness != -1
+                && !isManuallySet
                 && newScreenAutoBrightness > mScreenDarkeningThreshold
                 && newScreenAutoBrightness < mScreenBrighteningThreshold) {
             if (mLoggingEnabled) {
@@ -879,7 +880,7 @@ class AutomaticBrightnessController {
         mPendingForegroundAppPackageName = null;
         mForegroundAppCategory = mPendingForegroundAppCategory;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
-        updateAutoBrightness(true /* sendUpdate */);
+        updateAutoBrightness(true /* sendUpdate */, false /* isManuallySet */);
     }
 
     private final class AutomaticBrightnessHandler extends Handler {
