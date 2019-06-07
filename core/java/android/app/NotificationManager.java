@@ -466,7 +466,7 @@ public class NotificationManager {
      * @param notification A {@link Notification} object describing what to
      *        show the user. Must not be null.
      */
-    public void notifyAsPackage(@NonNull String targetPackage, @NonNull String tag, int id,
+    public void notifyAsPackage(@NonNull String targetPackage, @Nullable String tag, int id,
             @NonNull Notification notification) {
         INotificationManager service = getService();
         String sender = mContext.getPackageName();
@@ -532,9 +532,13 @@ public class NotificationManager {
     }
 
     /**
-     * Cancel a previously shown notification.  If it's transient, the view
-     * will be hidden.  If it's persistent, it will be removed from the status
-     * bar.
+     * Cancels a previously posted notification.
+     *
+     *  <p>If the notification does not currently represent a
+     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
+     *  removed from the UI and live
+     *  {@link android.service.notification.NotificationListenerService notification listeners}
+     *  will be informed so they can remove the notification from their UIs.</p>
      */
     public void cancel(int id)
     {
@@ -542,13 +546,46 @@ public class NotificationManager {
     }
 
     /**
-     * Cancel a previously shown notification.  If it's transient, the view
-     * will be hidden.  If it's persistent, it will be removed from the status
-     * bar.
+     * Cancels a previously posted notification.
+     *
+     *  <p>If the notification does not currently represent a
+     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
+     *  removed from the UI and live
+     *  {@link android.service.notification.NotificationListenerService notification listeners}
+     *  will be informed so they can remove the notification from their UIs.</p>
      */
-    public void cancel(String tag, int id)
+    public void cancel(@Nullable String tag, int id)
     {
         cancelAsUser(tag, id, mContext.getUser());
+    }
+
+    /**
+     * Cancels a previously posted notification.
+     *
+     * <p>If the notification does not currently represent a
+     * {@link Service#startForeground(int, Notification) foreground service}, it will be
+     * removed from the UI and live
+     * {@link android.service.notification.NotificationListenerService notification listeners}
+     * will be informed so they can remove the notification from their UIs.</p>
+     *
+     * <p>This method may be used by {@link #getNotificationDelegate() a notification delegate} to
+     * cancel notifications that they have posted via {@link #notifyAsPackage(String, String, int,
+     * Notification)}.</p>
+     *
+     * @param targetPackage The package to cancel the notification as. If this package is not your
+     *                      package, you can only cancel notifications you posted with
+     *                      {@link #notifyAsPackage(String, String, int, Notification).
+     * @param tag A string identifier for this notification.  May be {@code null}.
+     * @param id An identifier for this notification.
+     */
+    public void cancelAsPackage(@NonNull String targetPackage, @Nullable String tag, int id) {
+        INotificationManager service = getService();
+        try {
+            service.cancelNotificationWithTag(targetPackage, mContext.getOpPackageName(),
+                    tag, id, mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -561,7 +598,8 @@ public class NotificationManager {
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
         try {
-            service.cancelNotificationWithTag(pkg, tag, id, user.getIdentifier());
+            service.cancelNotificationWithTag(
+                    pkg, mContext.getOpPackageName(), tag, id, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -5310,7 +5310,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             INotificationManager service = mInjector.getNotificationManager();
-            service.cancelNotificationWithTag(packageName, id.mTag, id.mId, user.getIdentifier());
+            service.cancelNotificationWithTag(
+                    packageName, "android", id.mTag, id.mId, user.getIdentifier());
         } catch (RemoteException e) {
             /* ignore - local call */
         } finally {

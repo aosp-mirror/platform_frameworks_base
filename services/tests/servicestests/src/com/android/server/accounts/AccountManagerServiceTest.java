@@ -1065,7 +1065,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         waitForLatch(latch);
         // Verify notification is cancelled
-        verify(mMockNotificationManager).cancelNotificationWithTag(
+        verify(mMockNotificationManager).cancelNotificationWithTag(anyString(),
                 anyString(), nullable(String.class), anyInt(), anyInt());
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
@@ -1943,7 +1943,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
         waitForLatch(latch);
         // Verify notification is cancelled
-        verify(mMockNotificationManager).cancelNotificationWithTag(
+        verify(mMockNotificationManager).cancelNotificationWithTag(anyString(),
                 anyString(), nullable(String.class), anyInt(), anyInt());
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());

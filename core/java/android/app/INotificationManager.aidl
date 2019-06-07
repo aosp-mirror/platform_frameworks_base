@@ -53,7 +53,7 @@ interface INotificationManager
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, int userId);
     @UnsupportedAppUsage
-    void cancelNotificationWithTag(String pkg, String tag, int id, int userId);
+    void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
