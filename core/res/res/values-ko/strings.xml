@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi 통화"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi 통화"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 통화"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 통화"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1611,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", 보안"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>의 백그라운드 활동 시작은 향후 Q 빌드에서 차단됩니다. g.co/dev/bgblock을 참조하세요."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>의 백그라운드 활동 시작이 차단되었습니다. g.co/dev/bgblock을 참조하세요."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"잘못된 비밀번호"</string>
@@ -1666,8 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용하려면 두 볼륨 키를 3초 동안 길게 누르세요"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"기능을 변경하려면 접근성 버튼을 길게 터치하세요."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"접근성 버튼을 탭했을 때 실행할 서비스를 선택하세요."</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"접근성 동작(두 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 서비스를 선택하세요."</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"접근성 동작(세 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 서비스를 선택하세요."</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"서비스 간에 전환하려면 접근성 버튼을 길게 터치합니다."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"서비스 간에 전환하려면 두 손가락을 사용하여 위로 스와이프한 다음 잠시 기다립니다."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"서비스 간에 전환하려면 세 손가락을 사용하여 위로 스와이프한 다음 잠시 기다립니다."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"확대"</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
