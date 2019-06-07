@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ Calling"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN ਕਾਲ"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ਕਾਲ"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ"</string>
@@ -1612,8 +1613,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ਓਵਰਲੇ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ਸੁਰੱਖਿਅਤ"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"ਇਹ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ <xliff:g id="PACKAGENAME">%1$s</xliff:g> ਤੋਂ ਸ਼ੁਰੂ ਹੋ ਕੇ ਭਵਿੱਖ ਦੇ Q ਬਿਲਡ ਵਿੱਚ ਬਲਾਕ ਕੀਤੀ ਜਾਵੇਗੀ। g.co/dev/bgblock ਦੇਖੋ।"</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> ਬਲਾਕ ਕਰਕੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ ਸ਼ੁਰੂ ਕੀਤੀ ਗਈ। g.co/dev/bgblock ਦੇਖੋ।"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ਪੈਟਰਨ ਭੁੱਲ ਗਏ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ਗ਼ਲਤ ਪੈਟਰਨ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ਗਲਤ ਪਾਸਵਰਡ"</string>
@@ -1667,8 +1666,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬਦਲਣ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਟੈਪ ਕਰਕੇ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="3768006783166984410">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>

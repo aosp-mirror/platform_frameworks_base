@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi कलिङ"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi कलिङ"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN कल"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN कल"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1617,8 +1618,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"आवरण #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"यो पृष्ठभूमिमा चल्ने क्रियाकलापलाई <xliff:g id="PACKAGENAME">%1$s</xliff:g> बाट भविष्यका Q build हरूमा रोक लगाइने छ। g.co/dev/bgblock हेर्नुहोस्।"</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> माथि रोक लगाएपछि पृष्ठभूमिको क्रियाकलाप सुरु हुन्छ। g.co/dev/bgblock हेर्नुहोस्।"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ढाँचा बिर्सनु भयो"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत ढाँचा"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
@@ -1672,8 +1671,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय पार्‍यो"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई निष्क्रिय पार्‍यो"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"तपाईंले पहुँच सम्बन्धी बटनलाई ट्याप गर्दा प्रयोग गर्नुपर्ने सुविधा रोज्नुहोस्:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"सुविधाहरूलाई बदल्न, पहुँच सम्बन्धी बटनलाई छोएर थिची राख्नुहोस्।"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"तपाईंले पहुँचसम्बन्धी बटन ट्याप गर्दा प्रयोग गर्नु पर्ने सुविधा रोज्नुहोस्:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"पहुँचसम्बन्धी इसारासँगै प्रयोग गर्नु पर्ने कुनै सेवा छनौट गर्नुहोस् (दुईवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"पहुँचसम्बन्धी इसारासँगै प्रयोग गर्नु पर्ने कुनै सेवा छनौट गर्नुहोस् (तीनवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"एउटा सेवाबाट अर्को सेवामा जान पहुँचसम्बन्धी बटनमा छोइराख्नुहोस्।"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"एउटा सेवाबाट अर्को सेवामा जान दुईवटा औँलाले माथितिर स्वाइप गरी थिचिराख्नुहोस्।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"एउटा सेवाबाट अर्को सेवामा जान तीनवटा औँलाले माथितिर स्वाइप गरी थिचिराख्नुहोस्।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"म्याग्निफिकेसन"</string>
     <string name="user_switched" msgid="3768006783166984410">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> मा स्विच गर्दै..."</string>

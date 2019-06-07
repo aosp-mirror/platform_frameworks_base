@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> WLAN 通话"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> WLAN 通话"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 通话"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 通话"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WLAN"</string>
@@ -1611,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"叠加视图 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"，安全"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> 的这类后台活动启动程序会在日后的 Android Q 版本中遭到屏蔽。请参阅 g.co/dev/bgblock。"</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"已屏蔽 <xliff:g id="PACKAGENAME">%1$s</xliff:g> 的后台活动启动程序。请参阅 g.co/dev/bgblock。"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密码错误"</string>
@@ -1666,8 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"无障碍快捷方式已开启<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"无障碍快捷方式已关闭<xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"同时按住两个音量键 3 秒钟即可使用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"选择按下“无障碍”按钮时要使用的功能："</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"要更改指定的功能，请触摸并按住“无障碍”按钮。"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"选择按“无障碍”按钮后要使用的服务："</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"选择要搭配无障碍手势（用两指从屏幕底部向上滑动）使用的服务："</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"选择要搭配无障碍手势（用三指从屏幕底部向上滑动）使用的服务："</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"要在多项服务之间切换，请轻触并按住“无障碍”按钮。"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"要在多项服务之间切换，请用两指向上滑动并按住。"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"要在多项服务之间切换，请用三指向上滑动并按住。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"放大功能"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
