@@ -33,11 +33,6 @@ cc_defaults {
     include_dirs: [
         "external/skia/include/private",
         "external/skia/src/core",
-        "external/skia/src/effects",
-        "external/skia/src/image",
-        "external/skia/src/utils",
-        "external/skia/src/gpu",
-        "external/skia/src/shaders",
     ],
 
     product_variables: {
@@ -47,34 +42,67 @@ cc_defaults {
             },
         },
     },
+
+    target: {
+        android: {
+            include_dirs: [
+                "external/skia/src/effects",
+                "external/skia/src/image",
+                "external/skia/src/utils",
+                "external/skia/src/gpu",
+                "external/skia/src/shaders",
+            ],
+        },
+        host: {
+            include_dirs: [
+                "external/vulkan-headers/include",
+            ],
+            cflags: [
+                "-Wno-unused-variable",
+            ],
+        }
+    }
 }
 
 cc_defaults {
     name: "hwui_static_deps",
     shared_libs: [
-        "liblog",
-        "libcutils",
         "libbase",
-        "libstatslog",
-        "libutils",
-        "libEGL",
-        "libGLESv1_CM",
-        "libGLESv2",
-        "libGLESv3",
-        "libvulkan",
-        "libui",
-        "libgui",
-        "libprotobuf-cpp-lite",
         "libharfbuzz_ng",
-        "libft2",
         "libminikin",
-        "libandroidfw",
-        "libcrypto",
-        "libsync",
     ],
-    static_libs: [
-        "libEGL_blobCache",
-    ],
+
+    target: {
+        android: {
+            shared_libs: [
+                "liblog",
+                "libcutils",
+                "libstatslog",
+                "libutils",
+                "libEGL",
+                "libGLESv1_CM",
+                "libGLESv2",
+                "libGLESv3",
+                "libvulkan",
+                "libui",
+                "libgui",
+                "libprotobuf-cpp-lite",
+                "libft2",
+                "libandroidfw",
+                "libcrypto",
+                "libsync",
+            ],
+            static_libs: [
+                "libEGL_blobCache",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libandroidfw",
+                "libutils",
+            ],
+        }
+    }
 }
 
 cc_defaults {
@@ -139,91 +167,105 @@ cc_defaults {
         "hwui/MinikinUtils.cpp",
         "hwui/PaintImpl.cpp",
         "hwui/Typeface.cpp",
-        "pipeline/skia/GLFunctorDrawable.cpp",
-        "pipeline/skia/LayerDrawable.cpp",
-        "pipeline/skia/RenderNodeDrawable.cpp",
-        "pipeline/skia/ReorderBarrierDrawables.cpp",
-        "pipeline/skia/ShaderCache.cpp",
-        "pipeline/skia/SkiaDisplayList.cpp",
-        "pipeline/skia/SkiaMemoryTracer.cpp",
-        "pipeline/skia/SkiaOpenGLPipeline.cpp",
-        "pipeline/skia/SkiaPipeline.cpp",
-        "pipeline/skia/SkiaProfileRenderer.cpp",
-        "pipeline/skia/SkiaRecordingCanvas.cpp",
-        "pipeline/skia/SkiaVulkanPipeline.cpp",
-        "pipeline/skia/VectorDrawableAtlas.cpp",
-        "pipeline/skia/VkFunctorDrawable.cpp",
-        "pipeline/skia/VkInteropFunctorDrawable.cpp",
-        "renderstate/RenderState.cpp",
-        "renderthread/CacheManager.cpp",
-        "renderthread/CanvasContext.cpp",
-        "renderthread/DrawFrameTask.cpp",
-        "renderthread/EglManager.cpp",
-        "renderthread/ReliableSurface.cpp",
-        "renderthread/VulkanManager.cpp",
-        "renderthread/VulkanSurface.cpp",
-        "renderthread/RenderProxy.cpp",
-        "renderthread/RenderTask.cpp",
-        "renderthread/RenderThread.cpp",
-        "renderthread/TimeLord.cpp",
-        "renderthread/Frame.cpp",
-        "service/GraphicsStatsService.cpp",
-        "surfacetexture/EGLConsumer.cpp",
-        "surfacetexture/ImageConsumer.cpp",
-        "surfacetexture/SurfaceTexture.cpp",
-        "thread/CommonPool.cpp",
         "utils/Blur.cpp",
-        "utils/Color.cpp",
-        "utils/GLUtils.cpp",
         "utils/LinearAllocator.cpp",
-        "utils/StringUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
-        "AnimationContext.cpp",
         "Animator.cpp",
-        "AnimatorManager.cpp",
-        "CanvasTransform.cpp",
-        "DamageAccumulator.cpp",
-        "DeferredLayerUpdater.cpp",
-        "DeviceInfo.cpp",
-        "FrameInfo.cpp",
-        "FrameInfoVisualizer.cpp",
-        "GpuMemoryTracker.cpp",
-        "HardwareBitmapUploader.cpp",
-        "HWUIProperties.sysprop",
         "Interpolator.cpp",
-        "JankTracker.cpp",
-        "Layer.cpp",
-        "LayerUpdateQueue.cpp",
         "Matrix.cpp",
         "PathParser.cpp",
-        "ProfileData.cpp",
-        "ProfileDataContainer.cpp",
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",
         "PropertyValuesHolder.cpp",
-        "Readback.cpp",
-        "RecordingCanvas.cpp",
-        "RenderNode.cpp",
-        "RenderProperties.cpp",
         "SkiaCanvas.cpp",
-        "TreeInfo.cpp",
-        "WebViewFunctorManager.cpp",
         "VectorDrawable.cpp",
-        "protos/graphicsstats.proto",
     ],
-
-    // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
-    cflags: ["-Wno-implicit-fallthrough"],
 
     proto: {
         export_proto_headers: true,
     },
 
     export_include_dirs: ["."],
+
+    target: {
+        android: {
+
+            srcs: [
+                "pipeline/skia/GLFunctorDrawable.cpp",
+                "pipeline/skia/LayerDrawable.cpp",
+                "pipeline/skia/RenderNodeDrawable.cpp",
+                "pipeline/skia/ReorderBarrierDrawables.cpp",
+                "pipeline/skia/ShaderCache.cpp",
+                "pipeline/skia/SkiaDisplayList.cpp",
+                "pipeline/skia/SkiaMemoryTracer.cpp",
+                "pipeline/skia/SkiaOpenGLPipeline.cpp",
+                "pipeline/skia/SkiaPipeline.cpp",
+                "pipeline/skia/SkiaProfileRenderer.cpp",
+                "pipeline/skia/SkiaRecordingCanvas.cpp",
+                "pipeline/skia/SkiaVulkanPipeline.cpp",
+                "pipeline/skia/VectorDrawableAtlas.cpp",
+                "pipeline/skia/VkFunctorDrawable.cpp",
+                "pipeline/skia/VkInteropFunctorDrawable.cpp",
+                "renderstate/RenderState.cpp",
+                "renderthread/CacheManager.cpp",
+                "renderthread/CanvasContext.cpp",
+                "renderthread/DrawFrameTask.cpp",
+                "renderthread/EglManager.cpp",
+                "renderthread/ReliableSurface.cpp",
+                "renderthread/VulkanManager.cpp",
+                "renderthread/VulkanSurface.cpp",
+                "renderthread/RenderProxy.cpp",
+                "renderthread/RenderTask.cpp",
+                "renderthread/RenderThread.cpp",
+                "renderthread/TimeLord.cpp",
+                "renderthread/Frame.cpp",
+                "service/GraphicsStatsService.cpp",
+                "surfacetexture/EGLConsumer.cpp",
+                "surfacetexture/ImageConsumer.cpp",
+                "surfacetexture/SurfaceTexture.cpp",
+                "thread/CommonPool.cpp",
+                "utils/Color.cpp",
+                "utils/GLUtils.cpp",
+                "utils/StringUtils.cpp",
+                "AnimationContext.cpp",
+                "AnimatorManager.cpp",
+                "CanvasTransform.cpp",
+                "DamageAccumulator.cpp",
+                "DeferredLayerUpdater.cpp",
+                "DeviceInfo.cpp",
+                "FrameInfo.cpp",
+                "FrameInfoVisualizer.cpp",
+                "GpuMemoryTracker.cpp",
+                "HardwareBitmapUploader.cpp",
+                "HWUIProperties.sysprop",
+                "JankTracker.cpp",
+                "Layer.cpp",
+                "LayerUpdateQueue.cpp",
+                "ProfileData.cpp",
+                "ProfileDataContainer.cpp",
+                "Readback.cpp",
+                "RecordingCanvas.cpp",
+                "RenderNode.cpp",
+                "RenderProperties.cpp",
+                "TreeInfo.cpp",
+                "WebViewFunctorManager.cpp",
+                "protos/graphicsstats.proto",
+            ],
+
+            // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
+            cflags: ["-Wno-implicit-fallthrough"],
+        },
+        host: {
+            export_static_lib_headers: [
+                "libarect",
+            ],
+        }
+    }
 }
 
 cc_library {
     name: "libhwui",
+    host_supported: true,
     defaults: [
         "libhwui_defaults",
     ],
@@ -351,60 +393,4 @@ phony {
         "hwuimicro",
         "hwuimacro",
     ]
-}
-
-cc_library_host_shared {
-    name: "libhwui-host",
-
-    defaults: [
-        "skia_deps",
-    ],
-    whole_static_libs: ["libskia"],
-
-    srcs: [
-        "hwui/AnimatedImageDrawable.cpp",
-        "hwui/AnimatedImageThread.cpp",
-        "hwui/Bitmap.cpp",
-        "hwui/Canvas.cpp",
-        "hwui/Typeface.cpp",
-        "hwui/MinikinSkia.cpp",
-        "hwui/MinikinUtils.cpp",
-        "hwui/PaintImpl.cpp",
-        "utils/Blur.cpp",
-        "utils/LinearAllocator.cpp",
-        "utils/VectorDrawableUtils.cpp",
-        "Animator.cpp",
-        "Interpolator.cpp",
-        "Matrix.cpp",
-        "PathParser.cpp",
-        "Properties.cpp",
-        "PropertyValuesAnimatorSet.cpp",
-        "PropertyValuesHolder.cpp",
-        "SkiaCanvas.cpp",
-        "VectorDrawable.cpp",
-    ],
-    include_dirs: [
-        "external/skia/include/private",
-        "external/skia/src/core",
-        "external/vulkan-headers/include",
-        "system/core/base/include",
-    ],
-    cpp_std: "experimental",
-    cflags: [
-        "-Wno-unused-parameter",
-        "-Wno-unused-variable",
-    ],
-    shared_libs: [
-        "libbase",
-        "libharfbuzz_ng",
-        "libminikin",
-    ],
-    static_libs: [
-        "libandroidfw",
-        "libutils",
-    ],
-    export_include_dirs: ["."],
-    export_static_lib_headers: [
-        "libarect",
-    ],
 }
