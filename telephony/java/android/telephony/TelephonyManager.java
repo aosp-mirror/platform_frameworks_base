@@ -2513,7 +2513,7 @@ public class TelephonyManager {
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
     public @NetworkType int getNetworkType() {
-        return getNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -2596,7 +2596,7 @@ public class TelephonyManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getDataNetworkType() {
-        return getDataNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getDataNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7343,7 +7343,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -8126,7 +8126,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.isDataConnectivityPossible(getSubId(SubscriptionManager
-                        .getDefaultDataSubscriptionId()));
+                        .getActiveDataSubscriptionId()));
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isDataAllowed", e);
         }

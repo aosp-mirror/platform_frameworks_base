@@ -3175,4 +3175,24 @@ public class SubscriptionManager {
 
         return result;
     }
+
+    /**
+     * Get active data subscription id.
+     * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
+     *
+     * @return Active data subscription id
+     *
+     * //TODO: Refactor this API in b/134702460
+     * @hide
+     */
+    public static int getActiveDataSubscriptionId() {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.getActiveDataSubscriptionId();
+            }
+        } catch (RemoteException ex) {
+        }
+        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    }
 }
