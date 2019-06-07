@@ -156,9 +156,8 @@ static struct thread_dispatch_offsets_t
 static constexpr int32_t PROXY_WARN_INTERVAL = 5000;
 static constexpr uint32_t GC_INTERVAL = 1000;
 
-// Protected by gProxyLock. We warn if this gets too large.
-static int32_t gNumProxies = 0;
-static int32_t gProxiesWarned = 0;
+static std::atomic<uint32_t> gNumProxies(0);
+static std::atomic<uint32_t> gProxiesWarned(0);
 
 // Number of GlobalRefs held by JavaBBinders.
 static std::atomic<uint32_t> gNumLocalRefsCreated(0);
@@ -660,12 +659,6 @@ BinderProxyNativeData* getBPNativeData(JNIEnv* env, jobject obj) {
     return (BinderProxyNativeData *) env->GetLongField(obj, gBinderProxyOffsets.mNativeData);
 }
 
-static Mutex gProxyLock;
-
-// We may cache a single BinderProxyNativeData node to avoid repeat allocation.
-// All fields are null. Protected by gProxyLock.
-static BinderProxyNativeData *gNativeDataCache;
-
 // If the argument is a JavaBBinder, return the Java object that was used to create it.
 // Otherwise return a BinderProxy for the IBinder. If a previous call was passed the
 // same IBinder, and the original BinderProxy is still alive, return the same BinderProxy.
@@ -680,36 +673,31 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         return object;
     }
 
-    // For the rest of the function we will hold this lock, to serialize
-    // looking/creation/destruction of Java proxies for native Binder proxies.
-    AutoMutex _l(gProxyLock);
+    BinderProxyNativeData* nativeData = new BinderProxyNativeData();
+    nativeData->mOrgue = new DeathRecipientList;
+    nativeData->mObject = val;
 
-    BinderProxyNativeData* nativeData = gNativeDataCache;
-    if (nativeData == nullptr) {
-        nativeData = new BinderProxyNativeData();
-    }
-    // gNativeDataCache is now logically empty.
     jobject object = env->CallStaticObjectMethod(gBinderProxyOffsets.mClass,
             gBinderProxyOffsets.mGetInstance, (jlong) nativeData, (jlong) val.get());
     if (env->ExceptionCheck()) {
         // In the exception case, getInstance still took ownership of nativeData.
-        gNativeDataCache = nullptr;
         return NULL;
     }
     BinderProxyNativeData* actualNativeData = getBPNativeData(env, object);
     if (actualNativeData == nativeData) {
-        // New BinderProxy; we still have exclusive access.
-        nativeData->mOrgue = new DeathRecipientList;
-        nativeData->mObject = val;
-        gNativeDataCache = nullptr;
-        ++gNumProxies;
-        if (gNumProxies >= gProxiesWarned + PROXY_WARN_INTERVAL) {
-            ALOGW("Unexpectedly many live BinderProxies: %d\n", gNumProxies);
-            gProxiesWarned = gNumProxies;
+        // Created a new Proxy
+        uint32_t numProxies = gNumProxies.fetch_add(1, std::memory_order_relaxed);
+        uint32_t numLastWarned = gProxiesWarned.load(std::memory_order_relaxed);
+        if (numProxies >= numLastWarned + PROXY_WARN_INTERVAL) {
+            // Multiple threads can get here, make sure only one of them gets to
+            // update the warn counter.
+            if (gProxiesWarned.compare_exchange_strong(numLastWarned,
+                        numLastWarned + PROXY_WARN_INTERVAL, std::memory_order_relaxed)) {
+                ALOGW("Unexpectedly many live BinderProxies: %d\n", numProxies);
+            }
         }
     } else {
-        // nativeData wasn't used. Reuse it the next time.
-        gNativeDataCache = nativeData;
+        delete nativeData;
     }
 
     return object;
@@ -989,8 +977,7 @@ jint android_os_Debug_getLocalObjectCount(JNIEnv* env, jobject clazz)
 
 jint android_os_Debug_getProxyObjectCount(JNIEnv* env, jobject clazz)
 {
-    AutoMutex _l(gProxyLock);
-    return gNumProxies;
+    return gNumProxies.load();
 }
 
 jint android_os_Debug_getDeathObjectCount(JNIEnv* env, jobject clazz)
@@ -1385,9 +1372,6 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 
 static void BinderProxy_destroy(void* rawNativeData)
 {
-    // Don't race with construction/initialization
-    AutoMutex _l(gProxyLock);
-
     BinderProxyNativeData * nativeData = (BinderProxyNativeData *) rawNativeData;
     LOGDEATH("Destroying BinderProxy: binder=%p drl=%p\n",
             nativeData->mObject.get(), nativeData->mOrgue.get());
