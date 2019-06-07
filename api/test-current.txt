@@ -694,6 +694,7 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
+    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable public String getIncidentReportApproverPackageName();
@@ -707,6 +708,7 @@ package android.content.pm {
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
@@ -727,6 +729,10 @@ package android.content.pm {
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
     field public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
     field public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
+  }
+
+  public static interface PackageManager.OnPermissionsChangedListener {
+    method public void onPermissionsChanged(int);
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

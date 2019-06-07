@@ -16,6 +16,7 @@
 
 package com.android.server.pm.permission;
 
+import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -44,23 +45,28 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * callback methods.
      */
     public static class PermissionCallback {
-        public void onGidsChanged(int appId, int userId) {
+        public void onGidsChanged(@AppIdInt int appId, @UserIdInt int userId) {
         }
         public void onPermissionChanged() {
         }
-        public void onPermissionGranted(int uid, int userId) {
+        public void onPermissionGranted(int uid, @UserIdInt int userId) {
         }
         public void onInstallPermissionGranted() {
         }
-        public void onPermissionRevoked(int uid, int userId) {
+        public void onPermissionRevoked(int uid, @UserIdInt int userId) {
         }
         public void onInstallPermissionRevoked() {
         }
-        public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
+        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {
+        }
+        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
+                int uid) {
         }
         public void onPermissionRemoved() {
         }
         public void onInstallPermissionUpdated() {
+        }
+        public void onInstallPermissionUpdatedNotifyListener(int uid) {
         }
     }
 

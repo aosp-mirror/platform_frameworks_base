@@ -1765,11 +1765,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private PermissionCallback mPermissionCallback = new PermissionCallback() {
         @Override
-        public void onGidsChanged(int appId, int userId) {
+        public void onGidsChanged(int appId, @UserIdInt int userId) {
             mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED));
         }
+
         @Override
-        public void onPermissionGranted(int uid, int userId) {
+        public void onPermissionGranted(int uid, @UserIdInt int userId) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Not critical; if this is lost, the application has to request again.
@@ -1777,14 +1778,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.writeRuntimePermissionsForUserLPr(userId, false);
             }
         }
+
         @Override
         public void onInstallPermissionGranted() {
             synchronized (mPackages) {
                 scheduleWriteSettingsLocked();
             }
         }
+
         @Override
-        public void onPermissionRevoked(int uid, int userId) {
+        public void onPermissionRevoked(int uid, @UserIdInt int userId) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             synchronized (mPackages) {
@@ -1795,26 +1798,43 @@ public class PackageManagerService extends IPackageManager.Stub
             final int appId = UserHandle.getAppId(uid);
             killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
         }
+
         @Override
         public void onInstallPermissionRevoked() {
             synchronized (mPackages) {
                 scheduleWriteSettingsLocked();
             }
         }
+
         @Override
-        public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
+        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {
             synchronized (mPackages) {
                 for (int userId : updatedUserIds) {
                     mSettings.writeRuntimePermissionsForUserLPr(userId, sync);
                 }
             }
         }
+
+        @Override
+        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
+                int uid) {
+            onPermissionUpdated(updatedUserIds, sync);
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+        }
+
         @Override
         public void onInstallPermissionUpdated() {
             synchronized (mPackages) {
                 scheduleWriteSettingsLocked();
             }
         }
+
+        @Override
+        public void onInstallPermissionUpdatedNotifyListener(int uid) {
+            onInstallPermissionUpdated();
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+        }
+
         @Override
         public void onPermissionRemoved() {
             synchronized (mPackages) {
