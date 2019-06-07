@@ -67,6 +67,8 @@ bool section_requires_specific_mention(int sectionId) {
     switch (sectionId) {
         case 3025: // restricted_images
             return true;
+        case 3026: // system_trace
+            return true;
         default:
             return false;
     }
