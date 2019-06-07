@@ -62,6 +62,8 @@ public class AppOpsControllerImpl implements AppOpsController,
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
+    private final PermissionFlagsCache mFlagsCache;
+    private boolean mListening;
 
     @GuardedBy("mActiveItems")
     private final List<AppOpItem> mActiveItems = new ArrayList<>();
@@ -78,8 +80,14 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     @Inject
     public AppOpsControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
+        this(context, bgLooper, new PermissionFlagsCache(context));
+    }
+
+    @VisibleForTesting
+    protected AppOpsControllerImpl(Context context, Looper bgLooper, PermissionFlagsCache cache) {
         mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mFlagsCache = cache;
         mBGHandler = new H(bgLooper);
         final int numOps = OPS.length;
         for (int i = 0; i < numOps; i++) {
@@ -94,6 +102,7 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     @VisibleForTesting
     protected void setListening(boolean listening) {
+        mListening = listening;
         if (listening) {
             mAppOps.startWatchingActive(OPS, this);
             mAppOps.startWatchingNoted(OPS, this);
@@ -225,7 +234,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         if (permission == null) {
             return false;
         }
-        int permFlags = mContext.getPackageManager().getPermissionFlags(permission,
+        int permFlags = mFlagsCache.getPermissionFlags(permission,
                 packageName, UserHandle.getUserHandleForUid(uid));
         return (permFlags & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0;
     }
@@ -308,7 +317,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     @Override
     public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
         if (updateActives(code, uid, packageName, active)) {
-            notifySuscribers(code, uid, packageName, active);
+            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, active));
         }
     }
 
@@ -319,7 +328,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         }
         if (result != AppOpsManager.MODE_ALLOWED) return;
         addNoted(code, uid, packageName);
-        notifySuscribers(code, uid, packageName, true);
+        mBGHandler.post(() -> notifySuscribers(code, uid, packageName, true));
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {
@@ -334,6 +343,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("AppOpsController state:");
+        pw.println("  Listening: " + mListening);
         pw.println("  Active Items:");
         for (int i = 0; i < mActiveItems.size(); i++) {
             final AppOpItem item = mActiveItems.get(i);
