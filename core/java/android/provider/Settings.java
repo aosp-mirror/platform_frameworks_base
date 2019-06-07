@@ -11649,16 +11649,6 @@ public final class Settings {
                 = "activity_starts_logging_enabled";
 
         /**
-         * Feature flag to enable or disable the background activity starts.
-         * When disabled, apps aren't allowed to start activities unless they're in the foreground.
-         * Type: int (0 for false, 1 for true)
-         * Default: 1
-         * @hide
-         */
-        public static final String BACKGROUND_ACTIVITY_STARTS_ENABLED =
-                "background_activity_starts_enabled";
-
-        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */

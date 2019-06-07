@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi Calling"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi calling"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN call"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN Call"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1666,8 +1667,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Press and hold both volume keys for three seconds to use <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choose a feature to use when you tap the Accessibility button:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"To change features, touch &amp; hold the Accessibility button."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Choose a service to use when you tap the accessibility button:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"To switch between services, touch &amp; hold the accessibility button."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"To switch between services, swipe up with two fingers and hold."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"To switch between services, swipe up with three fingers and hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Magnification"</string>
     <string name="user_switched" msgid="3768006783166984410">"Current user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Switching to <xliff:g id="NAME">%1$s</xliff:g>…"</string>

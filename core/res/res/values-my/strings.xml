@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g>Wi-Fi ခေါ်ဆိုမှု"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN ခေါ်ဆိုမှု"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ခေါ်ဆိုမှု"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1667,8 +1668,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ဝန်ဆောင်မှုများကို ပြောင်းလဲရန် အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့၍ ထိထားပါ။"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (မျက်နှာပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (မျက်နှာပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် အများသုံးစွဲနိုင်မှုခလုတ်ကို ဖိထားပါ။"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချေင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="3768006783166984410">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>

@@ -442,7 +442,7 @@ void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutput
 
         if (erase_data) {
             remove(fullPathName.c_str());
-        } else if (output.mIsHistory && !isAdb) {
+        } else if (!output.mIsHistory && !isAdb) {
             // This means a real data owner has called to get this data. But the config says it
             // wants to keep a local history. So now this file must be renamed as a history file.
             // So that next time, when owner calls getData() again, this data won't be uploaded
