@@ -170,6 +170,12 @@ public:
     // Vendor pulled atom start id.
     static const int32_t kVendorPulledAtomStartTag = 150000;
 
+    // Beginning of range for timestamp truncation.
+    static const int32_t kTimestampTruncationStartTag = 300000;
+
+    // End of range for timestamp truncation.
+    static const int32_t kTimestampTruncationEndTag = 304999;
+
     // Max accepted atom id.
     static const int32_t kMaxAtomTag = 200000;
 

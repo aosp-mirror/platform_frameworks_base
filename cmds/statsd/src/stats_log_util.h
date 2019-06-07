@@ -89,8 +89,9 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
-// Returns the truncated timestamp.
-int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs);
+// Checks the blacklist of atoms as well as the blacklisted range of 300,000 - 304,999.
+// Returns the truncated timestamp to the nearest 5 minutes if needed.
+int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs);
 
 inline bool isVendorPulledAtom(int atomId) {
     return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
