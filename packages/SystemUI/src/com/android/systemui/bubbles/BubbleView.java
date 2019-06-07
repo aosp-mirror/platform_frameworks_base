@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * A floating object on the screen that can post message updates.
  */
 public class BubbleView extends FrameLayout {
-    private static final String TAG = "BubbleView";
 
     private static final int DARK_ICON_ALPHA = 180;
     private static final double ICON_MIN_CONTRAST = 4.1;

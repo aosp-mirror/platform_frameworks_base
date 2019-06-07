@@ -16,6 +16,9 @@
 package com.android.systemui.bubbles;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import static java.util.stream.Collectors.toList;
 
@@ -51,8 +54,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleData {
 
-    private static final String TAG = "BubbleData";
-    private static final boolean DEBUG = false;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
     private static final int MAX_BUBBLES = 5;
 
@@ -148,7 +150,7 @@ public class BubbleData {
     }
 
     public void setExpanded(boolean expanded) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setExpanded: " + expanded);
         }
         setExpandedInternal(expanded);
@@ -156,7 +158,7 @@ public class BubbleData {
     }
 
     public void setSelectedBubble(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubble: " + bubble);
         }
         setSelectedBubbleInternal(bubble);
@@ -164,7 +166,7 @@ public class BubbleData {
     }
 
     public void notificationEntryUpdated(NotificationEntry entry) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
         Bubble bubble = getBubbleWithKey(entry.key);
@@ -190,7 +192,7 @@ public class BubbleData {
     }
 
     public void notificationEntryRemoved(NotificationEntry entry, @DismissReason int reason) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryRemoved: entry=" + entry + " reason=" + reason);
         }
         doRemove(entry.key, reason);
@@ -223,7 +225,7 @@ public class BubbleData {
     }
 
     private void doAdd(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doAdd: " + bubble);
         }
         int minInsertPoint = 0;
@@ -256,7 +258,7 @@ public class BubbleData {
     }
 
     private void doUpdate(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doUpdate: " + bubble);
         }
         mStateChange.updatedBubble = bubble;
@@ -306,7 +308,7 @@ public class BubbleData {
     }
 
     public void dismissAll(@DismissReason int reason) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "dismissAll: reason=" + reason);
         }
         if (mBubbles.isEmpty()) {
@@ -336,7 +338,7 @@ public class BubbleData {
      * @param bubble the new selected bubble
      */
     private void setSelectedBubbleInternal(@Nullable Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubbleInternal: " + bubble);
         }
         if (Objects.equals(bubble, mSelectedBubble)) {
@@ -361,7 +363,7 @@ public class BubbleData {
      * @param shouldExpand the new requested state
      */
     private void setExpandedInternal(boolean shouldExpand) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setExpandedInternal: shouldExpand=" + shouldExpand);
         }
         if (mExpanded == shouldExpand) {
@@ -466,7 +468,7 @@ public class BubbleData {
      * @return true if the position of any bubbles has changed as a result
      */
     private boolean packGroup(int position) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "packGroup: position=" + position);
         }
         Bubble groupStart = mBubbles.get(position);
@@ -495,7 +497,7 @@ public class BubbleData {
      * @return true if the position of any bubbles changed as a result
      */
     private boolean repackAll() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "repackAll()");
         }
         if (mBubbles.isEmpty()) {

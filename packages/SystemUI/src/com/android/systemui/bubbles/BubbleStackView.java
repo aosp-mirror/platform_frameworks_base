@@ -19,6 +19,10 @@ package com.android.systemui.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -79,8 +83,7 @@ import java.util.List;
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
  */
 public class BubbleStackView extends FrameLayout {
-    private static final String TAG = "BubbleStackView";
-    private static final boolean DEBUG = false;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */
     static final float FLYOUT_DRAG_PERCENT_DISMISS = 0.25f;
@@ -684,7 +687,7 @@ public class BubbleStackView extends FrameLayout {
 
     // via BubbleData.Listener
     void addBubble(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "addBubble: " + bubble);
         }
         bubble.inflate(mInflater, this);
@@ -702,7 +705,7 @@ public class BubbleStackView extends FrameLayout {
 
     // via BubbleData.Listener
     void removeBubble(Bubble bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "removeBubble: " + bubble);
         }
         // Remove it from the views
@@ -737,7 +740,7 @@ public class BubbleStackView extends FrameLayout {
      */
     // via BubbleData.Listener
     public void setSelectedBubble(@Nullable Bubble bubbleToSelect) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "setSelectedBubble: " + bubbleToSelect);
         }
         if (mExpandedBubble != null && mExpandedBubble.equals(bubbleToSelect)) {
@@ -774,7 +777,7 @@ public class BubbleStackView extends FrameLayout {
      */
     // via BubbleData.Listener
     public void setExpanded(boolean shouldExpand) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "setExpanded: " + shouldExpand);
         }
         if (shouldExpand == mIsExpanded) {
@@ -798,7 +801,7 @@ public class BubbleStackView extends FrameLayout {
      */
     @Deprecated
     void stackDismissed(int reason) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "stackDismissed: reason=" + reason);
         }
         mBubbleData.dismissAll(reason);
@@ -848,7 +851,7 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void collapseStack() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "collapseStack()");
         }
         mBubbleData.setExpanded(false);
@@ -860,7 +863,7 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void collapseStack(Runnable endRunnable) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "collapseStack(endRunnable)");
         }
         collapseStack();
@@ -878,7 +881,7 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void expandStack() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "expandStack()");
         }
         mBubbleData.setExpanded(true);
@@ -974,7 +977,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Called when a drag operation on an individual bubble has started. */
     public void onBubbleDragStart(View bubble) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
         mExpandedAnimationController.prepareForBubbleDrag(bubble);
@@ -993,7 +996,7 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a drag operation on an individual bubble has finished. */
     public void onBubbleDragFinish(
             View bubble, float x, float y, float velX, float velY) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onBubbleDragFinish: bubble=" + bubble);
         }
 
@@ -1006,7 +1009,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragStart() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onDragStart()");
         }
         if (mIsExpanded || mIsExpansionAnimating) {
@@ -1030,7 +1033,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragFinish(float x, float y, float velX, float velY) {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onDragFinish");
         }
 
@@ -1476,7 +1479,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updateExpandedBubble() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
         }
         mExpandedViewContainer.removeAllViews();
@@ -1489,7 +1492,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updateExpandedView() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedView: mIsExpanded=" + mIsExpanded);
         }
 
@@ -1542,7 +1545,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updatePointerPosition() {
-        if (DEBUG) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updatePointerPosition()");
         }
 

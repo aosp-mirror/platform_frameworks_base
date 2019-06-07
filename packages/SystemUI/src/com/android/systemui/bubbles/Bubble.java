@@ -36,10 +36,6 @@ import java.util.Objects;
  * Encapsulates the data and UI elements of a bubble.
  */
 class Bubble {
-
-    private static final boolean DEBUG = false;
-    private static final String TAG = "Bubble";
-
     private final String mKey;
     private final String mGroupId;
     private String mAppName;

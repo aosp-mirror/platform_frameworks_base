@@ -19,6 +19,8 @@ package com.android.systemui.bubbles;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.systemui.bubbles.BubbleController.DEBUG_ENABLE_AUTO_BUBBLE;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -62,7 +64,7 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
  */
 public class BubbleExpandedView extends LinearLayout implements View.OnClickListener {
-    private static final String TAG = "BubbleExpandedView";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleExpandedView" : TAG_BUBBLES;
 
     // The triangle pointing to the expanded view
     private View mPointerView;
