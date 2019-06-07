@@ -109,7 +109,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testPrepareDialogForApp_retrievesUpto4Channels() {
+    fun testPrepareDialogForApp_retrievesUpTo4Channels() {
         val channel3 = NotificationChannel("test_channel_3", "Test channel 3", IMPORTANCE_DEFAULT)
         val channel4 = NotificationChannel("test_channel_4", "Test channel 4", IMPORTANCE_DEFAULT)
 
@@ -167,6 +167,16 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
 
         verify(mockNoMan, times(1)).setNotificationsEnabledForPackage(
                 eq(TEST_PACKAGE_NAME), eq(TEST_UID), eq(true))
+    }
+
+    @Test
+    fun testSettingsClickListenerNull_noCrash() {
+        group.channels = listOf(channel1, channel2)
+        controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
+                setOf(channel1, channel2), appIcon, null)
+
+        // Pass in any old view, it should never actually be used
+        controller.launchSettings(View(context))
     }
 
     private val clickListener = object : NotificationInfo.OnSettingsClickListener {

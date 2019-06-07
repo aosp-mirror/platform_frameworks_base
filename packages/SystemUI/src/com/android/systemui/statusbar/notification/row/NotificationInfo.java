@@ -118,6 +118,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private int mStartingChannelImportance;
     private boolean mWasShownHighPriority;
     private boolean mPressedApply;
+    private boolean mPresentingChannelEditorDialog = false;
 
     /**
      * The last importance level chosen by the user.  Null if the user has not chosen an importance
@@ -447,11 +448,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private OnClickListener getTurnOffNotificationsClickListener() {
         return ((View view) -> {
-            if (mChannelEditorDialogController != null) {
+            if (!mPresentingChannelEditorDialog && mChannelEditorDialogController != null) {
+                mPresentingChannelEditorDialog = true;
+
                 mChannelEditorDialogController.prepareDialogForApp(mAppName, mPackageName, mAppUid,
                         mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
-                mChannelEditorDialogController.setOnFinishListener(
-                        () -> closeControls(this, false));
+                mChannelEditorDialogController.setOnFinishListener(() -> {
+                    mPresentingChannelEditorDialog = false;
+                    closeControls(this, false);
+                });
                 mChannelEditorDialogController.show();
             }
         });
@@ -772,6 +777,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
+        if (mPresentingChannelEditorDialog && mChannelEditorDialogController != null) {
+            mPresentingChannelEditorDialog = false;
+            // No need for the finish listener because we're closing
+            mChannelEditorDialogController.setOnFinishListener(null);
+            mChannelEditorDialogController.close();
+        }
+
         // Save regardless of the importance so we can lock the importance field if the user wants
         // to keep getting notifications
         if (save) {
