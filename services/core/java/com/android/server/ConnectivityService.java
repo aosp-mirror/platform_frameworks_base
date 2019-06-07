@@ -4394,7 +4394,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
             NetworkAgentInfo defaultNai = getDefaultNetwork();
-            if (defaultNai != null) {
+            if (defaultNai != null && defaultNai.linkProperties != null) {
                 underlyingNetworks = new Network[] { defaultNai.network };
             }
         }
@@ -4402,7 +4402,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             List<String> interfaces = new ArrayList<>();
             for (Network network : underlyingNetworks) {
                 LinkProperties lp = getLinkProperties(network);
-                if (lp != null && !TextUtils.isEmpty(lp.getInterfaceName())) {
+                if (lp != null) {
                     interfaces.add(lp.getInterfaceName());
                 }
             }
