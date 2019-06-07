@@ -54,6 +54,7 @@
         <permission name="android.permission.TETHER_PRIVILEGED"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.WATCH_APPOPS"/>
         <permission name="android.permission.WRITE_DREAM_STATE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
