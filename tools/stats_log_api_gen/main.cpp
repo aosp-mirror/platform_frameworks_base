@@ -131,14 +131,10 @@ static void write_atoms_info_cpp(FILE *out, const Atoms &atoms) {
                                                  "mobile_bytes_transfer"};
     fprintf(out,
             "const std::set<int> "
-            "AtomsInfo::kNotTruncatingTimestampAtomWhiteList = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (kTruncatingAtomNames.find(atom->name) ==
-            kTruncatingAtomNames.end()) {
-            string constant = make_constant_name(atom->name);
-            fprintf(out, " %s,\n", constant.c_str());
-        }
+            "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
+    for (set<string>::const_iterator blacklistedAtom = kTruncatingAtomNames.begin();
+         blacklistedAtom != kTruncatingAtomNames.end(); blacklistedAtom++) {
+            fprintf(out, " %s,\n", make_constant_name(*blacklistedAtom).c_str());
     }
     fprintf(out, "};\n");
     fprintf(out, "\n");
@@ -840,7 +836,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
         fprintf(out, "struct AtomsInfo {\n");
         fprintf(out,
                 "  const static std::set<int> "
-                "kNotTruncatingTimestampAtomWhiteList;\n");
+                "kTruncatingTimestampAtomBlackList;\n");
         fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
         fprintf(out,
                 "  const static std::set<int> kAtomsWithAttributionChain;\n");
