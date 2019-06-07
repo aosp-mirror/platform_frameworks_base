@@ -1379,8 +1379,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Obavite resetovanje na fabrička podešavanja da biste onemogućili režim probnog korišćenja."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Tečnost ili nečistoća u USB portu"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB port je automatski isključen. Dodirnite da biste saznali više."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Korišćenje USB porta je dozvoljeno"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon više ne otkriva tečnost ili nečistoću."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izveštaj o grešci se generiše…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li da podelite izveštaj o grešci?"</string>

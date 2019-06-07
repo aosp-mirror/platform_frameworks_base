@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Realize uma redefinição para configuração original para desativar o modo Arcabouço de testes."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Líquido ou detrito na porta USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"A porta USB é desativada automaticamente. Toque para saber mais."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"É seguro usar a porta USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Não há mais líquidos ou detritos detectados no smartphone."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório do bug..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
@@ -1494,7 +1493,7 @@
     <string name="find_next" msgid="5742124618942193978">"Localizar próximo"</string>
     <string name="find_previous" msgid="2196723669388360506">"Localizar anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitação de local de <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitação de local"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Pedido de localização"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitado por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
@@ -1589,7 +1588,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes da dock"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes na base"</string>
     <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fones de ouvido"</string>
     <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>

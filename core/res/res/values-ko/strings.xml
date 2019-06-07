@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"테스트 하네스 모드를 사용 중지하려면 초기화하세요."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 포트에서 액체 또는 이물질 감지됨"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 포트가 자동으로 사용 중지되었습니다. 자세한 내용을 보려면 탭하세요."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB 포트를 사용해도 좋음"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"휴대전화에서 액체나 이물질이 더 이상 감지되지 않습니다."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"버그 보고서 가져오는 중..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>

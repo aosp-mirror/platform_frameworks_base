@@ -511,8 +511,13 @@ public final class JobStatus {
         final long elapsedNow = sElapsedRealtimeClock.millis();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
         if (job.isPeriodic()) {
-            latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
-            earliestRunTimeElapsedMillis = latestRunTimeElapsedMillis - job.getFlexMillis();
+            // Make sure period is in the interval [min_possible_period, max_possible_period].
+            final long period = Math.max(JobInfo.getMinPeriodMillis(),
+                    Math.min(JobSchedulerService.MAX_ALLOWED_PERIOD_MS, job.getIntervalMillis()));
+            latestRunTimeElapsedMillis = elapsedNow + period;
+            earliestRunTimeElapsedMillis = latestRunTimeElapsedMillis
+                    // Make sure flex is in the interval [min_possible_flex, period].
+                    - Math.max(JobInfo.getMinFlexMillis(), Math.min(period, job.getFlexMillis()));
         } else {
             earliestRunTimeElapsedMillis = job.hasEarlyConstraint() ?
                     elapsedNow + job.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;
@@ -1631,6 +1636,9 @@ public final class JobStatus {
         formatRunTime(pw, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, elapsedRealtimeMillis);
         pw.print(", latest=");
         formatRunTime(pw, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, elapsedRealtimeMillis);
+        pw.print(", original latest=");
+        formatRunTime(pw, mOriginalLatestRunTimeElapsedMillis,
+                NO_LATEST_RUNTIME, elapsedRealtimeMillis);
         pw.println();
         if (numFailures != 0) {
             pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);

@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"برای غیرفعال کردن «حالت مجموعه داده‌های تست»، بازنشانی کارخانه‌ای کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"‏می‌توان از درگاه USB استفاده کرد"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"تلفن دیگر وجود مایعات یا خاکروبه را تشخیص نمی‌دهد."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"درحال گرفتن گزارش اشکال…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"گزارش اشکال به اشتراک گذاشته شود؟"</string>
@@ -1493,8 +1492,8 @@
     <string name="websearch" msgid="4337157977400211589">"جستجوی وب"</string>
     <string name="find_next" msgid="5742124618942193978">"یافتن بعدی"</string>
     <string name="find_previous" msgid="2196723669388360506">"یافتن قبلی"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"درخواست موقعیت مکانی از <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست موقعیت مکانی"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"درخواست مکان از <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست مکان"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"درخواست شده توسط <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"بله"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"نه"</string>

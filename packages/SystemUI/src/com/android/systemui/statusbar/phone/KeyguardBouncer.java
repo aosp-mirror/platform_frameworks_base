@@ -285,8 +285,6 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
-        // TODO(b/113914868): investigation log for disappearing home button
-        Log.i(TAG, "KeyguardBouncer.hide (b/113914868): destroyView=" + destroyView);
         if (isShowing()) {
             StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                 StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);

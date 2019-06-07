@@ -3043,15 +3043,16 @@ public class SettingsProvider extends ContentProvider {
             // Increment the generation first, so observers always see the new value
             mGenerationRegistry.incrementGeneration(key);
 
-            if (isGlobalSettingsKey(key)) {
+            if (isGlobalSettingsKey(key) || isConfigSettingsKey(key)) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
+                    if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)
+                            && isGlobalSettingsKey(key)) {
                         // When the global kill switch is updated, send the
                         // change notification for the location setting.
                         notifyLocationChangeForRunningUsers();
                     }
-                    notifyGlobalSettingChangeForRunningUsers(key, name);
+                    notifySettingChangeForRunningUsers(key, name);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -3091,7 +3092,7 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        private void notifyGlobalSettingChangeForRunningUsers(int key, String name) {
+        private void notifySettingChangeForRunningUsers(int key, String name) {
             // Important: No need to update generation for each user as there
             // is a singleton generation entry for the global settings which
             // is already incremented be the caller.

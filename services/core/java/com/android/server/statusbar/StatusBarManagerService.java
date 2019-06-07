@@ -719,21 +719,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         // Ensure state for the current user is applied, even if passed a non-current user.
         final int net1 = gatherDisableActionsLocked(mCurrentUserId, 1);
         final int net2 = gatherDisableActionsLocked(mCurrentUserId, 2);
-
-        // TODO(b/113914868): investigation log for disappearing home button
-        if (whichFlag == 1 && pkg != null && pkg.contains("systemui")) {
-            String disabledData = "{ ";
-            for (int i = 0; i < mDisableRecords.size(); i++) {
-                DisableRecord tok = mDisableRecords.get(i);
-                disabledData += "    ([" + i + "] " + tok + "), ";
-            }
-            disabledData += " }";
-            final UiState state = getUiState(displayId);
-
-            Log.d(TAG, "disabledlocked (b/113914868): displayId=" + displayId + ", net1=" + net1
-                    + ", mDisabled1=" + state.mDisabled1 + ", token=" + token
-                    + ", mDisableRecords=" + mDisableRecords.size() + " => " + disabledData);
-        }
         final UiState state = getUiState(displayId);
         if (!state.disableEquals(net1, net2)) {
             state.setDisabled(net1, net2);

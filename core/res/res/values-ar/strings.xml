@@ -700,7 +700,7 @@
     <item msgid="1103601433382158155">"فاكس العمل"</item>
     <item msgid="1735177144948329370">"فاكس المنزل"</item>
     <item msgid="603878674477207394">"جهاز نداء"</item>
-    <item msgid="1650824275177931637">"آخر"</item>
+    <item msgid="1650824275177931637">"غير ذلك"</item>
     <item msgid="9192514806975898961">"مخصص"</item>
   </string-array>
   <string-array name="emailAddressTypes">
@@ -1201,7 +1201,7 @@
     <string name="no" msgid="5141531044935541497">"إلغاء"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"تنبيه"</string>
     <string name="loading" msgid="7933681260296021180">"جارٍ التحميل…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"تشغيل"</string>
+    <string name="capital_on" msgid="1544682755514494298">"مفعّلة"</string>
     <string name="capital_off" msgid="6815870386972805832">"إيقاف"</string>
     <string name="whichApplication" msgid="4533185947064773386">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"‏إكمال الإجراء باستخدام %1$s"</string>
@@ -1445,8 +1445,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"يمكنك إجراء إعادة ضبط على إعدادات المصنع لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏السوائل والشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"‏مسموح باستخدام منفذ USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"لم يَعُد الهاتف يكتشف سوائل أو شوائب."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"جارٍ الحصول على تقرير الخطأ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"هل تريد مشاركة تقرير الخطأ؟"</string>
@@ -1586,7 +1585,7 @@
     <string name="find_next" msgid="5742124618942193978">"بحث عن التطابق التالي"</string>
     <string name="find_previous" msgid="2196723669388360506">"بحث عن التطابق السابق"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"طلب الموقع من <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"طلب الموقع"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"طلب الموقع الجغرافي"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"مطلوب من <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"نعم"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"لا"</string>

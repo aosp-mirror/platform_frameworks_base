@@ -407,7 +407,7 @@ public class ZygoteProcess {
          */
         String msgStr = args.size() + "\n" + String.join("\n", args) + "\n";
 
-        if (useUsapPool && mUsapPoolEnabled && isValidUsapCommand(args)) {
+        if (useUsapPool && mUsapPoolEnabled && canAttemptUsap(args)) {
             try {
                 return attemptUsapSendArgsAndGetResult(zygoteState, msgStr);
             } catch (IOException ex) {
@@ -498,10 +498,18 @@ public class ZygoteProcess {
      * @param args  Zygote/USAP command arguments
      * @return  True if the command can be passed to a USAP; false otherwise
      */
-    private static boolean isValidUsapCommand(ArrayList<String> args) {
+    private static boolean canAttemptUsap(ArrayList<String> args) {
         for (String flag : args) {
             for (String badFlag : INVALID_USAP_FLAGS) {
                 if (flag.startsWith(badFlag)) {
+                    return false;
+                }
+            }
+            if (flag.startsWith("--nice-name=")) {
+                // Check if the wrap property is set, usap would ignore it.
+                String niceName = flag.substring(12);
+                String property_value = SystemProperties.get("wrap." + niceName);
+                if (property_value != null && property_value.length() != 0) {
                     return false;
                 }
             }

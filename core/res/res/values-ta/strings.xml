@@ -1358,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"’தன்னியக்க சோதனைப்\' பயன்முறையை முடக்க ஆரம்பநிலைக்கு மீட்டமைக்கவும்."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB போர்ட்டில் சேதம் உள்ளது"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB போர்ட் தானாகவே முடக்கப்பட்டது மேலும் அறிய, தட்டவும்."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB போர்ட்டைப் பயன்படுத்தலாம்"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"மொபைலில் எந்தச் சேதாரமும் கண்டறியப்படவில்லை."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"பிழை அறிக்கையை எடுக்கிறது…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"பிழை அறிக்கையைப் பகிரவா?"</string>

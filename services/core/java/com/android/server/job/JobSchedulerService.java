@@ -1635,6 +1635,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private static final long PERIODIC_JOB_WINDOW_BUFFER = 30 * MINUTE_IN_MILLIS;
 
+    /** The maximum period a periodic job can have. Anything higher will be clamped down to this. */
+    public static final long MAX_ALLOWED_PERIOD_MS = 365 * 24 * 60 * 60 * 1000L;
+
     /**
      * Called after a periodic has executed so we can reschedule it. We take the last execution
      * time of the job to be the time of completion (i.e. the time at which this function is
@@ -1652,10 +1655,20 @@ public class JobSchedulerService extends com.android.server.SystemService
     JobStatus getRescheduleJobForPeriodic(JobStatus periodicToReschedule) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
         final long newLatestRuntimeElapsed;
-        final long period = periodicToReschedule.getJob().getIntervalMillis();
-        final long latestRunTimeElapsed = periodicToReschedule.getOriginalLatestRunTimeElapsed();
-        final long flex = periodicToReschedule.getJob().getFlexMillis();
+        // Make sure period is in the interval [min_possible_period, max_possible_period].
+        final long period = Math.max(JobInfo.getMinPeriodMillis(),
+                Math.min(MAX_ALLOWED_PERIOD_MS, periodicToReschedule.getJob().getIntervalMillis()));
+        // Make sure flex is in the interval [min_possible_flex, period].
+        final long flex = Math.max(JobInfo.getMinFlexMillis(),
+                Math.min(period, periodicToReschedule.getJob().getFlexMillis()));
         long rescheduleBuffer = 0;
+
+        long olrte = periodicToReschedule.getOriginalLatestRunTimeElapsed();
+        if (olrte < 0 || olrte == JobStatus.NO_LATEST_RUNTIME) {
+            Slog.wtf(TAG, "Invalid periodic job original latest run time: " + olrte);
+            olrte = elapsedNow;
+        }
+        final long latestRunTimeElapsed = olrte;
 
         final long diffMs = Math.abs(elapsedNow - latestRunTimeElapsed);
         if (elapsedNow > latestRunTimeElapsed) {
@@ -1664,7 +1677,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.i(TAG, "Periodic job ran after its intended window.");
             }
-            int numSkippedWindows = (int) (diffMs / period) + 1; // +1 to include original window
+            long numSkippedWindows = (diffMs / period) + 1; // +1 to include original window
             if (period != flex && diffMs > Math.min(PERIODIC_JOB_WINDOW_BUFFER,
                     (period - flex) / 2)) {
                 if (DEBUG) {
@@ -1682,6 +1695,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // too soon after this completed one.
                 rescheduleBuffer = Math.min(PERIODIC_JOB_WINDOW_BUFFER, period / 6 - diffMs);
             }
+        }
+
+        if (newLatestRuntimeElapsed < elapsedNow) {
+            Slog.wtf(TAG, "Rescheduling calculated latest runtime in the past: "
+                    + newLatestRuntimeElapsed);
+            return new JobStatus(periodicToReschedule, getCurrentHeartbeat(),
+                    elapsedNow + period - flex, elapsedNow + period,
+                    0 /* backoffAttempt */,
+                    sSystemClock.millis() /* lastSuccessfulRunTime */,
+                    periodicToReschedule.getLastFailedRunTime());
         }
 
         final long newEarliestRunTimeElapsed = newLatestRuntimeElapsed
@@ -2280,8 +2303,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (bucket >= mConstants.STANDBY_BEATS.length
                             || (mHeartbeat > appLastRan
                             && mHeartbeat < appLastRan + mConstants.STANDBY_BEATS[bucket])) {
-                        // TODO: log/trace that we're deferring the job due to bucketing if we
-                        // hit this
                         if (job.getWhenStandbyDeferred() == 0) {
                             if (DEBUG_STANDBY) {
                                 Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "

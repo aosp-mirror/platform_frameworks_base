@@ -273,6 +273,13 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
+
+    FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
+    FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
 };
 
 }  // namespace statsd
