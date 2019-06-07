@@ -213,7 +213,6 @@ public class StackScrollAlgorithm {
     private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
             StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
-        boolean hidden = ambientState.isFullyHidden();
         boolean hideSensitive = ambientState.isHideSensitive();
         View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
@@ -221,7 +220,6 @@ public class StackScrollAlgorithm {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
             childViewState.dimmed = dimmed;
-            childViewState.dozing = hidden;
             childViewState.hideSensitive = hideSensitive;
             boolean isActivatedChild = activatedChild == child;
             if (dimmed && isActivatedChild) {
@@ -501,7 +499,7 @@ public class StackScrollAlgorithm {
                 continue;
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (!row.showingAmbientPulsing() || (i == 0 && ambientState.isPulseExpanding())) {
+            if (!row.showingPulsing() || (i == 0 && ambientState.isPulseExpanding())) {
                 continue;
             }
             ExpandableViewState viewState = row.getViewState();
@@ -530,7 +528,8 @@ public class StackScrollAlgorithm {
             boolean isTopEntry = topHeadsUpEntry == row;
             float unmodifiedEndLocation = childState.yTranslation + childState.height;
             if (mIsExpanded) {
-                if (row.mustStayOnScreen() && !childState.headsUpIsVisible) {
+                if (row.mustStayOnScreen() && !childState.headsUpIsVisible
+                        && !row.showingPulsing()) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(ambientState, row, childState);
                     if (i == 0 && row.isAboveShelf()) {
@@ -667,7 +666,7 @@ public class StackScrollAlgorithm {
             }
             childViewState.zTranslation = baseZ
                     + childrenOnTop * zDistanceBetweenElements;
-        } else if (i == 0 && child.isAboveShelf()) {
+        } else if (i == 0 && (child.isAboveShelf() || child.showingPulsing())) {
             // In case this is a new view that has never been measured before, we don't want to
             // elevate if we are currently expanded more then the notification
             int shelfHeight = ambientState.getShelf() == null ? 0 :

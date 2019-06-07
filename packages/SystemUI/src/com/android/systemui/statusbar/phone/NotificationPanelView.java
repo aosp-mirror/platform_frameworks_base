@@ -3126,7 +3126,6 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setIconAreaController(notificationIconAreaController);
         mNotificationStackScroller.setStatusBar(statusBar);
         mNotificationStackScroller.setGroupManager(groupManager);
-        mNotificationStackScroller.setHeadsUpManager(headsUpManager);
         mNotificationStackScroller.setShelf(notificationShelf);
         mNotificationStackScroller.setScrimController(scrimController);
         updateShowEmptyShadeView();

@@ -172,7 +172,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -246,8 +245,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener, ShadeController,
-        ActivityLaunchAnimator.Callback, AmbientPulseManager.OnAmbientChangedListener,
-        AppOpsController.Callback {
+        ActivityLaunchAnimator.Callback, AppOpsController.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -385,6 +383,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     NotificationWakeUpCoordinator mWakeUpCoordinator;
     @Inject
     KeyguardBypassController mKeyguardBypassController;
+    @Inject
+    protected HeadsUpManagerPhone mHeadsUpManager;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -868,17 +868,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .commit();
         mIconController = Dependency.get(StatusBarIconController.class);
 
-        mHeadsUpManager = new HeadsUpManagerPhone(context, mStatusBarWindow, mGroupManager, this,
-                mVisualStabilityManager);
+        mHeadsUpManager.setUp(mStatusBarWindow, mGroupManager, this, mVisualStabilityManager);
         Dependency.get(ConfigurationController.class).addCallback(mHeadsUpManager);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
         mHeadsUpManager.addListener(mVisualStabilityManager);
-        mAmbientPulseManager.addListener(this);
-        mAmbientPulseManager.addListener(mGroupManager);
-        mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
@@ -1060,7 +1056,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         final NotificationRowBinderImpl rowBinder =
                 new NotificationRowBinderImpl(
                         mContext,
-                        SystemUIFactory.getInstance().provideAllowNotificationLongPress());
+                        SystemUIFactory.getInstance().provideAllowNotificationLongPress(),
+                        mKeyguardBypassController,
+                        mStatusBarStateController);
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
@@ -1579,14 +1577,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         mEntryManager.updateNotifications();
-    }
-
-    @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        mEntryManager.updateNotifications();
-        if (isAmbient) {
-            mDozeServiceHost.fireNotificationPulse();
-        } else if (!mAmbientPulseManager.hasNotifications()) {
+        if (isDozing()) {
+            if (isHeadsUp) {
+                mDozeServiceHost.fireNotificationPulse();
+            }
+        }
+        if (!isHeadsUp && !mHeadsUpManager.hasNotifications()) {
             // There are no longer any notifications to show.  We should end the pulse now.
             mDozeScrimController.pulseOutNow();
         }
@@ -3643,7 +3639,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onStartedWakingUp() {
             mDeviceInteractive = true;
             mWakeUpCoordinator.setWakingUp(true);
-            mAmbientPulseManager.releaseAllImmediately();
+            if (!mKeyguardBypassController.getBypassEnabled()) {
+                mHeadsUpManager.releaseAllImmediately();
+            }
             mVisualStabilityManager.setScreenOn(true);
             updateVisibleToUser();
             updateIsKeyguard();
@@ -4049,8 +4047,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
                 mScrimController.setWakeLockScreenSensorActive(true);
             }
-            if (mDozeScrimController.isPulsing() && mAmbientPulseManager.hasNotifications()) {
-                mAmbientPulseManager.extendPulse();
+            if (mDozeScrimController.isPulsing() && mHeadsUpManager.hasNotifications()) {
+                mHeadsUpManager.extendHeadsUp();
             } else {
                 mDozeScrimController.extendPulse();
             }
@@ -4138,12 +4136,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationGroupManager mGroupManager;
 
     protected NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
-
-
-    // for heads up notifications
-    protected HeadsUpManagerPhone mHeadsUpManager;
-
-    protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
     // handling reordering
     protected VisualStabilityManager mVisualStabilityManager;

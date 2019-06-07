@@ -171,8 +171,7 @@ public class StackStateAnimator {
                         || viewState.zTranslation != child.getTranslationZ()
                         || viewState.alpha != child.getAlpha()
                         || viewState.height != child.getActualHeight()
-                        || viewState.clipTopAmount != child.getClipTopAmount()
-                        || viewState.dozing != child.isDozing())) {
+                        || viewState.clipTopAmount != child.getClipTopAmount())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
                     + calculateChildAnimationDelay(viewState);
         }
