@@ -198,7 +198,7 @@ class UsapTableEntry {
    * PIDs don't match nothing will happen.
    *
    * @param pid The ID of the process who's entry we want to clear.
-   * @return True if the entry was cleared; false otherwise
+   * @return True if the entry was cleared by this call; false otherwise
    */
   bool ClearForPID(int32_t pid) {
     EntryStorage storage = mStorage.load();
@@ -212,14 +212,16 @@ class UsapTableEntry {
        *   3) It fails and the new value isn't INVALID_ENTRY_VALUE, in which
        *      case the entry has already been cleared and re-used.
        *
-       * In all three cases the goal of the caller has been met and we can
-       * return true.
+       * In all three cases the goal of the caller has been met, but only in
+       * the first case do we need to decrement the pool count.
        */
       if (mStorage.compare_exchange_strong(storage, INVALID_ENTRY_VALUE)) {
         close(storage.read_pipe_fd);
+        return true;
+      } else {
+        return false;
       }
 
-      return true;
     } else {
       return false;
     }
@@ -331,11 +333,24 @@ static void SigChldHandler(int /*signal_number*/) {
     if (WIFEXITED(status)) {
       async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
                             "Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
+
+      // Check to see if the PID is in the USAP pool and remove it if it is.
+      if (RemoveUsapTableEntry(pid)) {
+        ++usaps_removed;
+      }
     } else if (WIFSIGNALED(status)) {
       async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
                             "Process %d exited due to signal %d (%s)%s", pid,
                             WTERMSIG(status), strsignal(WTERMSIG(status)),
                             WCOREDUMP(status) ? "; core dumped" : "");
+
+      // If the process exited due to a signal other than SIGTERM, check to see
+      // if the PID is in the USAP pool and remove it if it is.  If the process
+      // was closed by the Zygote using SIGTERM then the USAP pool entry will
+      // have already been removed (see nativeEmptyUsapPool()).
+      if (WTERMSIG(status) != SIGTERM && RemoveUsapTableEntry(pid)) {
+        ++usaps_removed;
+      }
     }
 
     // If the just-crashed process is the system_server, bring down zygote
@@ -345,11 +360,6 @@ static void SigChldHandler(int /*signal_number*/) {
       async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
                             "Exit zygote because system server (pid %d) has terminated", pid);
       kill(getpid(), SIGKILL);
-    }
-
-    // Check to see if the PID is in the USAP pool and remove it if it is.
-    if (RemoveUsapTableEntry(pid)) {
-      ++usaps_removed;
     }
   }
 
@@ -1648,7 +1658,13 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
     auto entry_storage = entry.GetValues();
 
     if (entry_storage.has_value()) {
-      kill(entry_storage.value().pid, SIGKILL);
+      kill(entry_storage.value().pid, SIGTERM);
+
+      // Clean up the USAP table entry here.  This avoids a potential race
+      // where a newly created USAP might not be able to find a valid table
+      // entry if signal handler (which would normally do the cleanup) doesn't
+      // run between now and when the new process is created.
+
       close(entry_storage.value().read_pipe_fd);
 
       // Avoid a second atomic load by invalidating instead of clearing.
@@ -1676,6 +1692,16 @@ static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *da
  */
 static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
   return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+}
+
+static void com_android_internal_os_Zygote_nativeBlockSigTerm(JNIEnv* env, jclass) {
+  auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
+  BlockSignal(SIGTERM, fail_fn);
+}
+
+static void com_android_internal_os_Zygote_nativeUnblockSigTerm(JNIEnv* env, jclass) {
+  auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
+  UnblockSignal(SIGTERM, fail_fn);
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -1708,7 +1734,11 @@ static const JNINativeMethod gMethods[] = {
     { "nativeEmptyUsapPool", "()V",
       (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool },
     { "nativeDisableExecuteOnly", "()Z",
-      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly },
+    { "nativeBlockSigTerm", "()V",
+      (void* ) com_android_internal_os_Zygote_nativeBlockSigTerm },
+    { "nativeUnblockSigTerm", "()V",
+      (void* ) com_android_internal_os_Zygote_nativeUnblockSigTerm }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
