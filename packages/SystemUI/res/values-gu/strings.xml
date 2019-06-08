@@ -197,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"કૅરીઅર નેટવર્કમાં ફેરફાર થઈ રહ્યો છે"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"બૅટરીની વિગતો ખોલો"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"બૅટરી <xliff:g id="NUMBER">%d</xliff:g> ટકા."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"તમારા વપરાશના આધારે બૅટરી <xliff:g id="PERCENTAGE">%1$s</xliff:g> ટકા, જે લગભગ <xliff:g id="TIME">%2$s</xliff:g> સુધી ચાલે તેટલી બચી છે"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"બૅટરી ચાર્જ થઈ રહી છે, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"સિસ્ટમ સેટિંગ્સ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"નોટિફિકેશનો."</string>
@@ -398,7 +399,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ખોલવા માટે ફરીથી ટૅપ કરો"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"અનલૉક કરવા માટે ઉપર સ્વાઇપ કરો"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ખોલવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"આ ઉપકરણ તમારી સંસ્થા દ્વારા સંચાલિત છે"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"આ ઉપકરણ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા સંચાલિત થાય છે"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ફોન માટે આયકનમાંથી સ્વાઇપ કરો"</string>
@@ -932,8 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"નીચે જમણે ખસેડો"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"છોડી દો"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
 </resources>

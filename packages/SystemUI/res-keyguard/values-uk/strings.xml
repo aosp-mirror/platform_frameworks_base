@@ -167,4 +167,7 @@
       <item quantity="many">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
       <item quantity="other">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"За умовчанням"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Бульбашковий"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Аналоговий"</string>
 </resources>
