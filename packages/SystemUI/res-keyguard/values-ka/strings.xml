@@ -151,4 +151,7 @@
       <item quantity="other">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_1">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
       <item quantity="one">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_0">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ნაგულისხმევი"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ბუშტი"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ანალოგური"</string>
 </resources>
