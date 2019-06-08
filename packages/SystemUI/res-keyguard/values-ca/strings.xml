@@ -151,4 +151,7 @@
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Predeterminada"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bombolla"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analògica"</string>
 </resources>

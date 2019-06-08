@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"Prehľad"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"Zrušiť aplikáciu <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"Zavrieť aplikáciu <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"Aplikácia <xliff:g id="APP">%s</xliff:g> bola zrušená."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"Všetky nedávne aplikácie boli zrušené."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"Otvoriť informácie o aplikácii <xliff:g id="APP">%s</xliff:g>."</string>
