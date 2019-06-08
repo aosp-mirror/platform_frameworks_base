@@ -151,4 +151,7 @@
       <item quantity="one">O chip agora está desativado. Informe o código PUK para continuar. Você tem <xliff:g id="_NUMBER_1">%d</xliff:g> tentativa restante antes de o chip se tornar permanentemente inutilizável. Entre em contato com a operadora para saber mais detalhes.</item>
       <item quantity="other">O chip agora está desativado. Informe o código PUK para continuar. Você tem <xliff:g id="_NUMBER_1">%d</xliff:g> tentativas restantes antes de o chip se tornar permanentemente inutilizável. Entre em contato com a operadora para saber mais detalhes.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Padrão"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bolha"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analógico"</string>
 </resources>
