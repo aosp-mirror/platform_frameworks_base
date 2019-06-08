@@ -929,7 +929,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public void setAnimationsEnabled(boolean enabled) {
         mAnimationsEnabled = enabled;
-        mCollapsedIcons.setAnimationsEnabled(enabled);
         if (!enabled) {
             // we need to wait with enabling the animations until the first frame has passed
             mShelfIcons.setAnimationsEnabled(false);

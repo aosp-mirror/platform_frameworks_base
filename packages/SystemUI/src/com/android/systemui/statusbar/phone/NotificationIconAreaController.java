@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -78,6 +79,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private Context mContext;
     private boolean mFullyDark;
     private boolean mShowLowPriority = true;
+    private boolean mAnimationsEnabled;
 
     /**
      * Ratio representing being awake or in ambient mode, where 1 is dark and 0 awake.
@@ -281,6 +283,25 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* hideRepliedMessages */,
                 mFullyDark /* hideCurrentMedia */,
                 false /* hide centered icon */);
+    }
+
+    /**
+     * If icons of the status bar should animate when they are added or removed.
+     */
+    public void setAnimationsEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
+        updateAnimations();
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        updateAnimations();
+    }
+
+    private void updateAnimations() {
+        boolean inShade = mStatusBarStateController.getState() == StatusBarState.SHADE;
+        mCenteredIcon.setAnimationsEnabled(mAnimationsEnabled && inShade);
+        mNotificationIcons.setAnimationsEnabled(mAnimationsEnabled && inShade);
     }
 
     @VisibleForTesting
