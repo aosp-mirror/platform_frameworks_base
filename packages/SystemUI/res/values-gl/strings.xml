@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Non se permite a depuración por USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración por USB. Para utilizar esta función, cambia ao usuario principal."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"O porto USB está desactivado"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Para protexer o dispositivo de líquidos ou residuos, desactivouse o porto USB e non detectará ningún accesorio.\n\nRecibirás unha notificación cando o poidas utilizar de novo."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Activouse o porto USB para detectar cargadores e accesorios"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Activar USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Máis información"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar ata ocupar todo"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. pantalla"</string>
@@ -199,6 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Cambio de rede do operador"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir os detalles da batería"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Carga da batería: <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %, durará <xliff:g id="TIME">%2$s</xliff:g> co uso que adoitas darlle"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"A batería está cargando. Nivel: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración do sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacións"</string>
@@ -214,7 +213,7 @@
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación rexeitada"</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Sombra de notificación"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Panel despregable"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueo."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Configuración"</string>
@@ -391,7 +390,7 @@
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"É posible que se\nsupervise a rede"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Buscar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Pasa o dedo cara arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Pasa o dedo cara a esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Pasa o dedo cara á esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos e os emisores de chamada especificados. Seguirás escoitando todo aquilo que decidas reproducir, mesmo a música, os vídeos e os xogos."</string>
     <string name="zen_alarms_introduction" msgid="4934328096749380201">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas. Seguirás escoitando todo aquilo que decidas reproducir, mesmo a música, os vídeos e os xogos."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizar"</string>
@@ -400,7 +399,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacións menos urxentes abaixo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toca de novo para abrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Pasa o dedo cara arriba para desbloquear"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Pasa o dedo cara arriba para abrir"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Este dispositivo está xestionado pola túa organización"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Este dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
@@ -458,10 +457,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Xestionar"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Notificacións silenciadas"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Borra todas as notificacións silenciadas"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"O modo Non molestar puxo en pausa as notificacións"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Non hai notificacións"</string>
@@ -645,21 +642,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Bloquear"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continuar mostrando notificacións"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Silencio"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Notificacións silenciosas"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Alertando"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continuar recibindo notificacións"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Desactivar notificacións"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Queres seguir mostrando as notificacións desta aplicación?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Discretas"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Prioritarias"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Permíteche centrarte con notificacións só no panel despregable. Sempre en silencio."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Chama a túa atención cun son e cunha icona na barra de estado. Móstrase na pantalla de bloqueo."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Silenciosas"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Con alertas"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Axúdache a centrarte sen son nin vibración."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Chama a túa atención con son ou vibración."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Estas notificacións non se poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquí non se pode configurar este grupo de notificacións"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificación mediante proxy"</string>
@@ -908,8 +900,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permitir"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denegar"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tocar para programar a función Aforro de batería"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Activa a función se prevés que a batería pode esgotarse"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Non, grazas"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Activouse o programa da función Aforro de batería"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Activarase automaticamente a función Aforro de batería en canto o nivel de carga sexa inferior ao <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -942,4 +933,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mover á parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mover á parte inferior dereita"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ignorar"</string>
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Actualizouse a navegación do sistema. Para facer cambios, vai a Configuración."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Para actualizar a navegación do sistema, vai a Configuración"</string>
 </resources>
