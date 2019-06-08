@@ -320,7 +320,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private boolean hideSilentNotificationsOnLockscreen() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0) == 0;
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1) == 0;
     }
 
     private void setShowLockscreenNotifications(boolean show) {

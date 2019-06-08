@@ -60,8 +60,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         UnlockMethodCache.OnUnlockMethodChangedListener {
 
-    private static final int FP_DRAW_OFF_TIMEOUT = 800;
-
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
     private static final int STATE_SCANNING_FACE = 2;
@@ -77,8 +75,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     private int mLastState = 0;
     private boolean mTransientBiometricsError;
-    private boolean mScreenOn;
-    private boolean mLastScreenOn;
     private boolean mIsFaceUnlockState;
     private boolean mSimLocked;
     private int mDensity;
@@ -105,7 +101,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                     update(false /* force */);
                 }
             };
-    private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
                 @Override
@@ -121,18 +116,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
-                @Override
-                public void onScreenTurnedOn() {
-                    mScreenOn = true;
-                    update();
-                }
-
-                @Override
-                public void onScreenTurnedOff() {
-                    mScreenOn = false;
-                    update();
-                }
-
                 @Override
                 public void onSimStateChanged(int subId, int slotId,
                         IccCardConstants.State simState) {
@@ -246,7 +229,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         int state = getState();
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         if (state != mLastState || mLastDozing != mDozing || mLastPulsing != mPulsing
-                || mLastScreenOn != mScreenOn || mLastBouncerVisible != mBouncerVisible || force) {
+                || mLastBouncerVisible != mBouncerVisible || force) {
             int iconAnimRes = getAnimationResForTransition(mLastState, state, mLastPulsing,
                     mPulsing, mLastDozing, mDozing, mBouncerVisible);
             boolean isAnim = iconAnimRes != -1;
@@ -285,15 +268,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             }
             updateDarkTint();
 
-            if (isAnim && !mLastScreenOn) {
-                removeCallbacks(mDrawOffTimeout);
-                postDelayed(mDrawOffTimeout, FP_DRAW_OFF_TIMEOUT);
-            } else {
-                removeCallbacks(mDrawOffTimeout);
-            }
-
             mLastState = state;
-            mLastScreenOn = mScreenOn;
             mLastDozing = mDozing;
             mLastPulsing = mPulsing;
             mLastBouncerVisible = mBouncerVisible;

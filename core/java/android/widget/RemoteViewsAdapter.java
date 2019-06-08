@@ -28,7 +28,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -555,6 +557,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     }
 
     /**
+     * Config diff flags for which the cache should be reset
+     */
+    private static final int CACHE_RESET_CONFIG_FLAGS = ActivityInfo.CONFIG_FONT_SCALE
+            | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_DENSITY
+            | ActivityInfo.CONFIG_ASSETS_PATHS;
+    /**
      *
      */
     private static class FixedSizeRemoteViewsCache {
@@ -587,7 +595,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // farthest items from when we hit the memory limit
         private int mLastRequestedIndex;
 
-
         // The lower and upper bounds of the preloaded range
         private int mPreloadLowerBound;
         private int mPreloadUpperBound;
@@ -602,12 +609,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         private static final float sMaxCountSlackPercent = 0.75f;
         private static final int sMaxMemoryLimitInBytes = 2 * 1024 * 1024;
 
-        public FixedSizeRemoteViewsCache(int maxCacheSize) {
+        // Configuration for which the cache was created
+        private final Configuration mConfiguration;
+
+        FixedSizeRemoteViewsCache(int maxCacheSize, Configuration configuration) {
             mMaxCount = maxCacheSize;
             mMaxCountSlack = Math.round(sMaxCountSlackPercent * (mMaxCount / 2));
             mPreloadLowerBound = 0;
             mPreloadUpperBound = -1;
             mLastRequestedIndex = -1;
+
+            mConfiguration = new Configuration(configuration);
         }
 
         public void insert(int position, RemoteViews v, long itemId, int[] visibleWindow) {
@@ -852,7 +864,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 mAppWidgetId);
 
         synchronized(sCachedRemoteViewsCaches) {
-            if (sCachedRemoteViewsCaches.containsKey(key)) {
+            FixedSizeRemoteViewsCache cache = sCachedRemoteViewsCaches.get(key);
+            Configuration config = context.getResources().getConfiguration();
+            if (cache == null
+                    || (cache.mConfiguration.diff(config) & CACHE_RESET_CONFIG_FLAGS) != 0) {
+                mCache = new FixedSizeRemoteViewsCache(DEFAULT_CACHE_SIZE, config);
+            } else {
                 mCache = sCachedRemoteViewsCaches.get(key);
                 synchronized (mCache.mMetaData) {
                     if (mCache.mMetaData.count > 0) {
@@ -861,8 +878,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                         mDataReady = true;
                     }
                 }
-            } else {
-                mCache = new FixedSizeRemoteViewsCache(DEFAULT_CACHE_SIZE);
             }
             if (!mDataReady) {
                 requestBindService();

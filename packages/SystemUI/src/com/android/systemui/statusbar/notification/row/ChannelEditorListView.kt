@@ -24,6 +24,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.transition.AutoTransition
+import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -62,6 +63,23 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
         val transition = AutoTransition()
         transition.duration = 200
+        transition.addListener(object : Transition.TransitionListener {
+            override fun onTransitionEnd(p0: Transition?) {
+                notifySubtreeAccessibilityStateChangedIfNeeded()
+            }
+
+            override fun onTransitionResume(p0: Transition?) {
+            }
+
+            override fun onTransitionPause(p0: Transition?) {
+            }
+
+            override fun onTransitionCancel(p0: Transition?) {
+            }
+
+            override fun onTransitionStart(p0: Transition?) {
+            }
+        })
         TransitionManager.beginDelayedTransition(this, transition)
 
         // Remove any rows

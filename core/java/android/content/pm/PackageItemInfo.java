@@ -159,7 +159,7 @@ public class PackageItemInfo {
     public Bundle metaData;
 
     /**
-     * If different of UserHandle.USER_NULL, The icon of this item will be the one of that user.
+     * If different of UserHandle.USER_NULL, The icon of this item will represent that user.
      * @hide
      */
     public int showUserIcon;

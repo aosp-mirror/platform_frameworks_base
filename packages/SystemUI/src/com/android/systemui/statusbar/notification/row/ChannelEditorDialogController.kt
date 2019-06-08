@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
@@ -86,13 +87,17 @@ class ChannelEditorDialogController @Inject constructor(
     internal val groupNameLookup = hashMapOf<String, CharSequence>()
     private val channelGroupList = mutableListOf<NotificationChannelGroup>()
 
+    /**
+     * Give the controller all of the information it needs to present the dialog
+     * for a given app. Does a bunch of querying of NoMan, but won't present anything yet
+     */
     fun prepareDialogForApp(
         appName: String,
         packageName: String,
         uid: Int,
         channels: Set<NotificationChannel>,
         appIcon: Drawable,
-        onSettingsClickListener: NotificationInfo.OnSettingsClickListener
+        onSettingsClickListener: NotificationInfo.OnSettingsClickListener?
     ) {
         this.appName = appName
         this.packageName = packageName
@@ -154,6 +159,13 @@ class ChannelEditorDialogController @Inject constructor(
     fun show() {
         initDialog()
         dialog.show()
+    }
+
+    /**
+     * Close the dialog without saving. For external callers
+     */
+    fun close() {
+        done()
     }
 
     private fun done() {
@@ -235,6 +247,11 @@ class ChannelEditorDialogController @Inject constructor(
         }
     }
 
+    @VisibleForTesting
+    fun launchSettings(sender: View) {
+        onSettingsClickListener?.onClick(sender, null, appUid!!)
+    }
+
     private fun initDialog() {
         dialog = Dialog(context)
 
@@ -257,7 +274,7 @@ class ChannelEditorDialogController @Inject constructor(
             }
 
             findViewById<TextView>(R.id.see_more_button)?.setOnClickListener {
-                onSettingsClickListener?.onClick(it, null, appUid!!)
+                launchSettings(it)
                 done()
             }
 

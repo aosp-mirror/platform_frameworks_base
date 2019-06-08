@@ -124,7 +124,8 @@ void MetricProducer::addActivation(int activationTrackerIndex, const ActivationT
             std::make_shared<Activation>(activationType, ttl_seconds * NS_PER_SEC);
     mEventActivationMap.emplace(activationTrackerIndex, activation);
     if (-1 != deactivationTrackerIndex) {
-        mEventDeactivationMap.emplace(deactivationTrackerIndex, activation);
+        auto& deactivationList = mEventDeactivationMap[deactivationTrackerIndex];
+        deactivationList.push_back(activation);
     }
 }
 
@@ -155,7 +156,9 @@ void MetricProducer::cancelEventActivationLocked(int deactivationTrackerIndex) {
     if (it == mEventDeactivationMap.end()) {
         return;
     }
-    it->second->state = ActivationState::kNotActive;
+    for (auto activationToCancelIt : it->second)  {
+        activationToCancelIt->state = ActivationState::kNotActive;
+    }
 }
 
 void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
@@ -171,7 +174,9 @@ void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
             continue;
         }
         auto& activation = it->second;
-        if (activeEventActivation.state() == ActiveEventActivation::ACTIVE) {
+        // If the event activation does not have a state, assume it is active.
+        if (!activeEventActivation.has_state() ||
+                activeEventActivation.state() == ActiveEventActivation::ACTIVE) {
             // We don't want to change the ttl for future activations, so we set the start_ns
             // such that start_ns + ttl_ns == currentTimeNs + remaining_ttl_nanos
             activation->start_ns =

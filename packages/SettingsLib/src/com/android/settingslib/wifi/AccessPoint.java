@@ -999,8 +999,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 summary.append(mContext.getString(R.string.tap_to_sign_up));
             }
         } else if (isActive()) {
-            if (mConfig != null && getDetailedState() == DetailedState.CONNECTED
-                    && mIsCarrierAp) {
+            if (getDetailedState() == DetailedState.CONNECTED && mIsCarrierAp) {
                 // This is the active connection on a carrier AP
                 summary.append(String.format(mContext.getString(R.string.connected_via_carrier),
                         mCarrierName));

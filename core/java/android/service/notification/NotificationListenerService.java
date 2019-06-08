@@ -42,7 +42,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -53,7 +52,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -64,8 +62,8 @@ import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A service that receives calls from the system when new notifications are
@@ -1442,7 +1440,7 @@ public abstract class NotificationListenerService extends Service {
      */
     @GuardedBy("mLock")
     public final void applyUpdateLocked(NotificationRankingUpdate update) {
-        mRankingMap = new RankingMap(update);
+        mRankingMap = update.getRankingMap();
     }
 
     /** @hide */
@@ -1480,14 +1478,14 @@ public abstract class NotificationListenerService extends Service {
          */
         public static final int USER_SENTIMENT_POSITIVE = 1;
 
-        /** @hide */
+       /** @hide */
         @IntDef(prefix = { "USER_SENTIMENT_" }, value = {
                 USER_SENTIMENT_NEGATIVE, USER_SENTIMENT_NEUTRAL, USER_SENTIMENT_POSITIVE
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface UserSentiment {}
 
-        private String mKey;
+        private @NonNull String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
         private boolean mMatchesInterruptionFilter;
@@ -1512,7 +1510,70 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<CharSequence> mSmartReplies;
         private boolean mCanBubble;
 
-        public Ranking() {}
+        private static final int PARCEL_VERSION = 2;
+
+        public Ranking() { }
+
+        // You can parcel it, but it's not Parcelable
+        /** @hide */
+        @VisibleForTesting
+        public void writeToParcel(Parcel out, int flags) {
+            final long start = out.dataPosition();
+            out.writeInt(PARCEL_VERSION);
+            out.writeString(mKey);
+            out.writeInt(mRank);
+            out.writeBoolean(mIsAmbient);
+            out.writeBoolean(mMatchesInterruptionFilter);
+            out.writeInt(mVisibilityOverride);
+            out.writeInt(mSuppressedVisualEffects);
+            out.writeInt(mImportance);
+            out.writeCharSequence(mImportanceExplanation);
+            out.writeString(mOverrideGroupKey);
+            out.writeParcelable(mChannel, flags);
+            out.writeStringList(mOverridePeople);
+            out.writeTypedList(mSnoozeCriteria, flags);
+            out.writeBoolean(mShowBadge);
+            out.writeInt(mUserSentiment);
+            out.writeBoolean(mHidden);
+            out.writeLong(mLastAudiblyAlertedMs);
+            out.writeBoolean(mNoisy);
+            out.writeTypedList(mSmartActions, flags);
+            out.writeCharSequenceList(mSmartReplies);
+            out.writeBoolean(mCanBubble);
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public Ranking(Parcel in) {
+            final ClassLoader cl = getClass().getClassLoader();
+
+            final int version = in.readInt();
+            if (version != PARCEL_VERSION) {
+                throw new IllegalArgumentException("malformed Ranking parcel: " + in + " version "
+                        + version + ", expected " + PARCEL_VERSION);
+            }
+            mKey = in.readString();
+            mRank = in.readInt();
+            mIsAmbient = in.readBoolean();
+            mMatchesInterruptionFilter = in.readBoolean();
+            mVisibilityOverride = in.readInt();
+            mSuppressedVisualEffects = in.readInt();
+            mImportance = in.readInt();
+            mImportanceExplanation = in.readCharSequence(); // may be null
+            mOverrideGroupKey = in.readString(); // may be null
+            mChannel = (NotificationChannel) in.readParcelable(cl); // may be null
+            mOverridePeople = in.createStringArrayList();
+            mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
+            mShowBadge = in.readBoolean();
+            mUserSentiment = in.readInt();
+            mHidden = in.readBoolean();
+            mLastAudiblyAlertedMs = in.readLong();
+            mNoisy = in.readBoolean();
+            mSmartActions = in.createTypedArrayList(Notification.Action.CREATOR);
+            mSmartReplies = in.readCharSequenceList();
+            mCanBubble = in.readBoolean();
+        }
+
 
         /**
          * Returns the key of the notification this Ranking applies to.
@@ -1737,6 +1798,31 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * @hide
+         */
+        public void populate(Ranking other) {
+            populate(other.mKey,
+                    other.mRank,
+                    other.mMatchesInterruptionFilter,
+                    other.mVisibilityOverride,
+                    other.mSuppressedVisualEffects,
+                    other.mImportance,
+                    other.mImportanceExplanation,
+                    other.mOverrideGroupKey,
+                    other.mChannel,
+                    other.mOverridePeople,
+                    other.mSnoozeCriteria,
+                    other.mShowBadge,
+                    other.mUserSentiment,
+                    other.mHidden,
+                    other.mLastAudiblyAlertedMs,
+                    other.mNoisy,
+                    other.mSmartActions,
+                    other.mSmartReplies,
+                    other.mCanBubble);
+        }
+
+        /**
          * {@hide}
          */
         public static String importanceToString(int importance) {
@@ -1758,6 +1844,35 @@ public abstract class NotificationListenerService extends Service {
                     return "UNKNOWN(" + String.valueOf(importance) + ")";
             }
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Ranking other = (Ranking) o;
+            return Objects.equals(mKey, other.mKey)
+                    && Objects.equals(mRank, other.mRank)
+                    && Objects.equals(mMatchesInterruptionFilter, other.mMatchesInterruptionFilter)
+                    && Objects.equals(mVisibilityOverride, other.mVisibilityOverride)
+                    && Objects.equals(mSuppressedVisualEffects, other.mSuppressedVisualEffects)
+                    && Objects.equals(mImportance, other.mImportance)
+                    && Objects.equals(mImportanceExplanation, other.mImportanceExplanation)
+                    && Objects.equals(mOverrideGroupKey, other.mOverrideGroupKey)
+                    && Objects.equals(mChannel, other.mChannel)
+                    && Objects.equals(mOverridePeople, other.mOverridePeople)
+                    && Objects.equals(mSnoozeCriteria, other.mSnoozeCriteria)
+                    && Objects.equals(mShowBadge, other.mShowBadge)
+                    && Objects.equals(mUserSentiment, other.mUserSentiment)
+                    && Objects.equals(mHidden, other.mHidden)
+                    && Objects.equals(mLastAudiblyAlertedMs, other.mLastAudiblyAlertedMs)
+                    && Objects.equals(mNoisy, other.mNoisy)
+                    // Action.equals() doesn't exist so let's just compare list lengths
+                    && ((mSmartActions == null ? 0 : mSmartActions.size())
+                        == (other.mSmartActions == null ? 0 : other.mSmartActions.size()))
+                    && Objects.equals(mSmartReplies, other.mSmartReplies)
+                    && Objects.equals(mCanBubble, other.mCanBubble);
+        }
     }
 
     /**
@@ -1769,29 +1884,73 @@ public abstract class NotificationListenerService extends Service {
      * notifications active at the time of retrieval.
      */
     public static class RankingMap implements Parcelable {
-        private final NotificationRankingUpdate mRankingUpdate;
-        private ArrayMap<String,Integer> mRanks;
-        private ArraySet<Object> mIntercepted;
-        private ArrayMap<String, Integer> mVisibilityOverrides;
-        private ArrayMap<String, Integer> mSuppressedVisualEffects;
-        private ArrayMap<String, Integer> mImportance;
-        private ArrayMap<String, String> mImportanceExplanation;
-        private ArrayMap<String, String> mOverrideGroupKeys;
-        private ArrayMap<String, NotificationChannel> mChannels;
-        private ArrayMap<String, ArrayList<String>> mOverridePeople;
-        private ArrayMap<String, ArrayList<SnoozeCriterion>> mSnoozeCriteria;
-        private ArrayMap<String, Boolean> mShowBadge;
-        private ArrayMap<String, Integer> mUserSentiment;
-        private ArrayMap<String, Boolean> mHidden;
-        private ArrayMap<String, Long> mLastAudiblyAlerted;
-        private ArrayMap<String, Boolean> mNoisy;
-        private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
-        private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
-        private boolean[] mCanBubble;
+        private ArrayList<String> mOrderedKeys = new ArrayList<>();
+        // Note: all String keys should be intern'd as pointers into mOrderedKeys
+        private ArrayMap<String, Ranking> mRankings = new ArrayMap<>();
 
-        private RankingMap(NotificationRankingUpdate rankingUpdate) {
-            mRankingUpdate = rankingUpdate;
+        /**
+         * @hide
+         */
+        public RankingMap(Ranking[] rankings) {
+            for (int i = 0; i < rankings.length; i++) {
+                final String key = rankings[i].getKey();
+                mOrderedKeys.add(key);
+                mRankings.put(key, rankings[i]);
+            }
         }
+
+        // -- parcelable interface --
+
+        private RankingMap(Parcel in) {
+            final ClassLoader cl = getClass().getClassLoader();
+            final int count = in.readInt();
+            mOrderedKeys.ensureCapacity(count);
+            mRankings.ensureCapacity(count);
+            for (int i = 0; i < count; i++) {
+                final Ranking r = new Ranking(in);
+                final String key = r.getKey();
+                mOrderedKeys.add(key);
+                mRankings.put(key, r);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RankingMap other = (RankingMap) o;
+
+            return mOrderedKeys.equals(other.mOrderedKeys)
+                    && mRankings.equals(other.mRankings);
+
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            final int count = mOrderedKeys.size();
+            out.writeInt(count);
+            for (int i = 0; i < count; i++) {
+                mRankings.get(mOrderedKeys.get(i)).writeToParcel(out, flags);
+            }
+        }
+
+        public static final @android.annotation.NonNull Creator<RankingMap> CREATOR = new Creator<RankingMap>() {
+            @Override
+            public RankingMap createFromParcel(Parcel source) {
+                return new RankingMap(source);
+            }
+
+            @Override
+            public RankingMap[] newArray(int size) {
+                return new RankingMap[size];
+            }
+        };
 
         /**
          * Request the list of notification keys in their current ranking
@@ -1800,7 +1959,7 @@ public abstract class NotificationListenerService extends Service {
          * @return An array of active notification keys, in their ranking order.
          */
         public String[] getOrderedKeys() {
-            return mRankingUpdate.getOrderedKeys();
+            return mOrderedKeys.toArray(new String[0]);
         }
 
         /**
@@ -1808,381 +1967,26 @@ public abstract class NotificationListenerService extends Service {
          * with the given key.
          *
          * @return true if a valid key has been passed and outRanking has
-         *     been populated; false otherwise
+         * been populated; false otherwise
          */
         public boolean getRanking(String key, Ranking outRanking) {
-            int rank = getRank(key);
-            outRanking.populate(key, rank, !isIntercepted(key),
-                    getVisibilityOverride(key), getSuppressedVisualEffects(key),
-                    getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
-                    getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key), getUserSentiment(key), getHidden(key),
-                    getLastAudiblyAlerted(key), getNoisy(key), getSmartActions(key),
-                    getSmartReplies(key), canBubble(key));
-            return rank >= 0;
-        }
-
-        private int getRank(String key) {
-            synchronized (this) {
-                if (mRanks == null) {
-                    buildRanksLocked();
-                }
+            if (mRankings.containsKey(key)) {
+                outRanking.populate(mRankings.get(key));
+                return true;
             }
-            Integer rank = mRanks.get(key);
-            return rank != null ? rank : -1;
+            return false;
         }
 
-        private boolean isIntercepted(String key) {
-            synchronized (this) {
-                if (mIntercepted == null) {
-                    buildInterceptedSetLocked();
-                }
-            }
-            return mIntercepted.contains(key);
+        /**
+         * Get a reference to the actual Ranking object corresponding to the key.
+         * Used only by unit tests.
+         *
+         * @hide
+         */
+        @VisibleForTesting
+        public Ranking getRawRankingObject(String key) {
+            return mRankings.get(key);
         }
-
-        private int getVisibilityOverride(String key) {
-            synchronized (this) {
-                if (mVisibilityOverrides == null) {
-                    buildVisibilityOverridesLocked();
-                }
-            }
-            Integer override = mVisibilityOverrides.get(key);
-            if (override == null) {
-                return Ranking.VISIBILITY_NO_OVERRIDE;
-            }
-            return override.intValue();
-        }
-
-        private int getSuppressedVisualEffects(String key) {
-            synchronized (this) {
-                if (mSuppressedVisualEffects == null) {
-                    buildSuppressedVisualEffectsLocked();
-                }
-            }
-            Integer suppressed = mSuppressedVisualEffects.get(key);
-            if (suppressed == null) {
-                return 0;
-            }
-            return suppressed.intValue();
-        }
-
-        private int getImportance(String key) {
-            synchronized (this) {
-                if (mImportance == null) {
-                    buildImportanceLocked();
-                }
-            }
-            Integer importance = mImportance.get(key);
-            if (importance == null) {
-                return NotificationManager.IMPORTANCE_DEFAULT;
-            }
-            return importance.intValue();
-        }
-
-        private String getImportanceExplanation(String key) {
-            synchronized (this) {
-                if (mImportanceExplanation == null) {
-                    buildImportanceExplanationLocked();
-                }
-            }
-            return mImportanceExplanation.get(key);
-        }
-
-        private String getOverrideGroupKey(String key) {
-            synchronized (this) {
-                if (mOverrideGroupKeys == null) {
-                    buildOverrideGroupKeys();
-                }
-            }
-            return mOverrideGroupKeys.get(key);
-        }
-
-        private NotificationChannel getChannel(String key) {
-            synchronized (this) {
-                if (mChannels == null) {
-                    buildChannelsLocked();
-                }
-            }
-            return mChannels.get(key);
-        }
-
-        private ArrayList<String> getOverridePeople(String key) {
-            synchronized (this) {
-                if (mOverridePeople == null) {
-                    buildOverridePeopleLocked();
-                }
-            }
-            return mOverridePeople.get(key);
-        }
-
-        private ArrayList<SnoozeCriterion> getSnoozeCriteria(String key) {
-            synchronized (this) {
-                if (mSnoozeCriteria == null) {
-                    buildSnoozeCriteriaLocked();
-                }
-            }
-            return mSnoozeCriteria.get(key);
-        }
-
-        private boolean getShowBadge(String key) {
-            synchronized (this) {
-                if (mShowBadge == null) {
-                    buildShowBadgeLocked();
-                }
-            }
-            Boolean showBadge = mShowBadge.get(key);
-            return showBadge == null ? false : showBadge.booleanValue();
-        }
-
-        private int getUserSentiment(String key) {
-            synchronized (this) {
-                if (mUserSentiment == null) {
-                    buildUserSentimentLocked();
-                }
-            }
-            Integer userSentiment = mUserSentiment.get(key);
-            return userSentiment == null
-                    ? Ranking.USER_SENTIMENT_NEUTRAL : userSentiment.intValue();
-        }
-
-        private boolean getHidden(String key) {
-            synchronized (this) {
-                if (mHidden == null) {
-                    buildHiddenLocked();
-                }
-            }
-            Boolean hidden = mHidden.get(key);
-            return hidden == null ? false : hidden.booleanValue();
-        }
-
-        private long getLastAudiblyAlerted(String key) {
-            synchronized (this) {
-                if (mLastAudiblyAlerted == null) {
-                    buildLastAudiblyAlertedLocked();
-                }
-            }
-            Long lastAudibleAlerted = mLastAudiblyAlerted.get(key);
-            return lastAudibleAlerted == null ? -1 : lastAudibleAlerted.longValue();
-        }
-
-        private boolean getNoisy(String key) {
-            synchronized (this) {
-                if (mNoisy == null) {
-                    buildNoisyLocked();
-                }
-            }
-            Boolean noisy = mNoisy.get(key);
-            return noisy == null ? false : noisy.booleanValue();
-        }
-
-        private ArrayList<Notification.Action> getSmartActions(String key) {
-            synchronized (this) {
-                if (mSmartActions == null) {
-                    buildSmartActions();
-                }
-            }
-            return mSmartActions.get(key);
-        }
-
-        private ArrayList<CharSequence> getSmartReplies(String key) {
-            synchronized (this) {
-                if (mSmartReplies == null) {
-                    buildSmartReplies();
-                }
-            }
-            return mSmartReplies.get(key);
-        }
-
-        private boolean canBubble(String key) {
-            synchronized (this) {
-                if (mRanks == null) {
-                    buildRanksLocked();
-                }
-                if (mCanBubble == null) {
-                    mCanBubble = mRankingUpdate.getCanBubble();
-                }
-            }
-            int keyIndex = mRanks.getOrDefault(key, -1);
-            return keyIndex >= 0 ? mCanBubble[keyIndex] : false;
-        }
-
-        // Locked by 'this'
-        private void buildRanksLocked() {
-            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            mRanks = new ArrayMap<>(orderedKeys.length);
-            for (int i = 0; i < orderedKeys.length; i++) {
-                String key = orderedKeys[i];
-                mRanks.put(key, i);
-            }
-        }
-
-        // Locked by 'this'
-        private void buildInterceptedSetLocked() {
-            String[] dndInterceptedKeys = mRankingUpdate.getInterceptedKeys();
-            mIntercepted = new ArraySet<>(dndInterceptedKeys.length);
-            Collections.addAll(mIntercepted, dndInterceptedKeys);
-        }
-
-        private ArrayMap<String, Integer> buildIntMapFromBundle(Bundle bundle) {
-            ArrayMap<String, Integer> newMap = new ArrayMap<>(bundle.size());
-            for (String key : bundle.keySet()) {
-                newMap.put(key, bundle.getInt(key));
-            }
-            return newMap;
-        }
-
-        private ArrayMap<String, String> buildStringMapFromBundle(Bundle bundle) {
-            ArrayMap<String, String> newMap = new ArrayMap<>(bundle.size());
-            for (String key : bundle.keySet()) {
-                newMap.put(key, bundle.getString(key));
-            }
-            return newMap;
-        }
-
-        private ArrayMap<String, Boolean> buildBooleanMapFromBundle(Bundle bundle) {
-            ArrayMap<String, Boolean> newMap = new ArrayMap<>(bundle.size());
-            for (String key : bundle.keySet()) {
-                newMap.put(key, bundle.getBoolean(key));
-            }
-            return newMap;
-        }
-
-        private ArrayMap<String, Long> buildLongMapFromBundle(Bundle bundle) {
-            ArrayMap<String, Long> newMap = new ArrayMap<>(bundle.size());
-            for (String key : bundle.keySet()) {
-                newMap.put(key, bundle.getLong(key));
-            }
-            return newMap;
-        }
-
-        // Locked by 'this'
-        private void buildVisibilityOverridesLocked() {
-            mVisibilityOverrides = buildIntMapFromBundle(mRankingUpdate.getVisibilityOverrides());
-        }
-
-        // Locked by 'this'
-        private void buildSuppressedVisualEffectsLocked() {
-            mSuppressedVisualEffects =
-                buildIntMapFromBundle(mRankingUpdate.getSuppressedVisualEffects());
-        }
-
-        // Locked by 'this'
-        private void buildImportanceLocked() {
-            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
-            int[] importance = mRankingUpdate.getImportance();
-            mImportance = new ArrayMap<>(orderedKeys.length);
-            for (int i = 0; i < orderedKeys.length; i++) {
-                String key = orderedKeys[i];
-                mImportance.put(key, importance[i]);
-            }
-        }
-
-        // Locked by 'this'
-        private void buildImportanceExplanationLocked() {
-            mImportanceExplanation =
-                buildStringMapFromBundle(mRankingUpdate.getImportanceExplanation());
-        }
-
-        // Locked by 'this'
-        private void buildOverrideGroupKeys() {
-            mOverrideGroupKeys = buildStringMapFromBundle(mRankingUpdate.getOverrideGroupKeys());
-        }
-
-        // Locked by 'this'
-        private void buildChannelsLocked() {
-            Bundle channels = mRankingUpdate.getChannels();
-            mChannels = new ArrayMap<>(channels.size());
-            for (String key : channels.keySet()) {
-                mChannels.put(key, channels.getParcelable(key));
-            }
-        }
-
-        // Locked by 'this'
-        private void buildOverridePeopleLocked() {
-            Bundle overridePeople = mRankingUpdate.getOverridePeople();
-            mOverridePeople = new ArrayMap<>(overridePeople.size());
-            for (String key : overridePeople.keySet()) {
-                mOverridePeople.put(key, overridePeople.getStringArrayList(key));
-            }
-        }
-
-        // Locked by 'this'
-        private void buildSnoozeCriteriaLocked() {
-            Bundle snoozeCriteria = mRankingUpdate.getSnoozeCriteria();
-            mSnoozeCriteria = new ArrayMap<>(snoozeCriteria.size());
-            for (String key : snoozeCriteria.keySet()) {
-                mSnoozeCriteria.put(key, snoozeCriteria.getParcelableArrayList(key));
-            }
-        }
-
-        // Locked by 'this'
-        private void buildShowBadgeLocked() {
-            mShowBadge = buildBooleanMapFromBundle(mRankingUpdate.getShowBadge());
-        }
-
-        // Locked by 'this'
-        private void buildUserSentimentLocked() {
-            mUserSentiment = buildIntMapFromBundle(mRankingUpdate.getUserSentiment());
-        }
-
-        // Locked by 'this'
-        private void buildHiddenLocked() {
-            mHidden = buildBooleanMapFromBundle(mRankingUpdate.getHidden());
-        }
-
-        // Locked by 'this'
-        private void buildLastAudiblyAlertedLocked() {
-            mLastAudiblyAlerted = buildLongMapFromBundle(mRankingUpdate.getLastAudiblyAlerted());
-        }
-
-        // Locked by 'this'
-        private void buildNoisyLocked() {
-            mNoisy = buildBooleanMapFromBundle(mRankingUpdate.getNoisy());
-        }
-
-        // Locked by 'this'
-        private void buildSmartActions() {
-            Bundle smartActions = mRankingUpdate.getSmartActions();
-            mSmartActions = new ArrayMap<>(smartActions.size());
-            for (String key : smartActions.keySet()) {
-                mSmartActions.put(key, smartActions.getParcelableArrayList(key));
-            }
-        }
-
-        // Locked by 'this'
-        private void buildSmartReplies() {
-            Bundle smartReplies = mRankingUpdate.getSmartReplies();
-            mSmartReplies = new ArrayMap<>(smartReplies.size());
-            for (String key : smartReplies.keySet()) {
-                mSmartReplies.put(key, smartReplies.getCharSequenceArrayList(key));
-            }
-        }
-
-        // ----------- Parcelable
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeParcelable(mRankingUpdate, flags);
-        }
-
-        public static final @android.annotation.NonNull Creator<RankingMap> CREATOR = new Creator<RankingMap>() {
-            @Override
-            public RankingMap createFromParcel(Parcel source) {
-                NotificationRankingUpdate rankingUpdate = source.readParcelable(null);
-                return new RankingMap(rankingUpdate);
-            }
-
-            @Override
-            public RankingMap[] newArray(int size) {
-                return new RankingMap[size];
-            }
-        };
     }
 
     private final class MyHandler extends Handler {
