@@ -151,4 +151,10 @@
       <item quantity="one">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
       <item quantity="other">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
     </plurals>
+    <!-- no translation found for clock_title_default (6645600990069154049) -->
+    <skip />
+    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
+    <skip />
+    <!-- no translation found for clock_title_analog (4047401488577315053) -->
+    <skip />
 </resources>

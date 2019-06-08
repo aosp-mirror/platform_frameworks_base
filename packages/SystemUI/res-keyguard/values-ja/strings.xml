@@ -151,4 +151,10 @@
       <item quantity="other">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_1">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
       <item quantity="one">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_0">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
     </plurals>
+    <!-- no translation found for clock_title_default (6645600990069154049) -->
+    <skip />
+    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
+    <skip />
+    <!-- no translation found for clock_title_analog (4047401488577315053) -->
+    <skip />
 </resources>
