@@ -1565,6 +1565,93 @@ class Linker {
     return true;
   }
 
+  void AliasAdaptiveIcon(xml::XmlResource* manifest, ResourceTable* table) {
+    xml::Element* application = manifest->root->FindChild("", "application");
+    if (!application) {
+      return;
+    }
+
+    xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
+    xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
+    if (!icon || !round_icon) {
+      return;
+    }
+
+    // Find the icon resource defined within the application.
+    auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
+    if (!icon_reference || !icon_reference->name) {
+      return;
+    }
+    auto package = table->FindPackageById(icon_reference->id.value().package_id());
+    if (!package) {
+      return;
+    }
+    auto type = package->FindType(icon_reference->name.value().type);
+    if (!type) {
+      return;
+    }
+    auto icon_entry = type->FindEntry(icon_reference->name.value().entry);
+    if (!icon_entry) {
+      return;
+    }
+
+    int icon_max_sdk = 0;
+    for (auto& config_value : icon_entry->values) {
+      icon_max_sdk = (icon_max_sdk < config_value->config.sdkVersion)
+          ? config_value->config.sdkVersion : icon_max_sdk;
+    }
+    if (icon_max_sdk < SDK_O) {
+      // Adaptive icons must be versioned with v26 qualifiers, so this is not an adaptive icon.
+      return;
+    }
+
+    // Find the roundIcon resource defined within the application.
+    auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
+    if (!round_icon_reference || !round_icon_reference->name) {
+      return;
+    }
+    package = table->FindPackageById(round_icon_reference->id.value().package_id());
+    if (!package) {
+      return;
+    }
+    type = package->FindType(round_icon_reference->name.value().type);
+    if (!type) {
+      return;
+    }
+    auto round_icon_entry = type->FindEntry(round_icon_reference->name.value().entry);
+    if (!round_icon_entry) {
+      return;
+    }
+
+    int round_icon_max_sdk = 0;
+    for (auto& config_value : round_icon_entry->values) {
+      round_icon_max_sdk = (round_icon_max_sdk < config_value->config.sdkVersion)
+                     ? config_value->config.sdkVersion : round_icon_max_sdk;
+    }
+    if (round_icon_max_sdk >= SDK_O) {
+      // The developer explicitly used a v26 compatible drawable as the roundIcon, meaning we should
+      // not generate an alias to the icon drawable.
+      return;
+    }
+
+    // Add an equivalent v26 entry to the roundIcon for each v26 variant of the regular icon.
+    for (auto& config_value : icon_entry->values) {
+      if (config_value->config.sdkVersion < SDK_O) {
+        continue;
+      }
+
+      context_->GetDiagnostics()->Note(DiagMessage() << "generating "
+                                                     << round_icon_reference->name.value()
+                                                     << " with config \"" << config_value->config
+                                                     << "\" for round icon compatibility");
+
+      auto value = icon_reference->Clone(&table->string_pool);
+      auto round_config_value = round_icon_entry->FindOrCreateValue(
+          config_value->config, config_value->product);
+      round_config_value->value.reset(value);
+    }
+  }
+
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
   // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
@@ -1577,6 +1664,14 @@ class Linker {
     if (!result) {
       return false;
     }
+
+    // When a developer specifies an adaptive application icon, and a non-adaptive round application
+    // icon, create an alias from the round icon to the regular icon for v26 APIs and up. We do this
+    // because certain devices prefer android:roundIcon over android:icon regardless of the API
+    // levels of the drawables set for either. This auto-aliasing behaviour allows an app to prefer
+    // the android:roundIcon on API 25 devices, and prefer the adaptive icon on API 26 devices.
+    // See (b/34829129)
+    AliasAdaptiveIcon(manifest, table);
 
     ResourceFileFlattenerOptions file_flattener_options;
     file_flattener_options.keep_raw_values = keep_raw_values;
@@ -1592,7 +1687,6 @@ class Linker {
     file_flattener_options.output_format = options_.output_format;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
-
     if (!file_flattener.Flatten(table, writer)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking file resources");
       return false;
