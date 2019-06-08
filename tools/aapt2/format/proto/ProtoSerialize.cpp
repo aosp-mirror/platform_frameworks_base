@@ -552,6 +552,7 @@ class ValueSerializer : public ConstValueVisitor {
       SerializeItemMetaDataToPb(symbol.symbol, pb_symbol, src_pool_);
       SerializeReferenceToPb(symbol.symbol, pb_symbol->mutable_name());
       pb_symbol->set_value(symbol.value);
+      pb_symbol->set_type(symbol.type);
     }
   }
 

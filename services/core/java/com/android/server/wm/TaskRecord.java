@@ -851,11 +851,12 @@ class TaskRecord extends ConfigurationContainer {
     /**
      * DO NOT HOLD THE ACTIVITY MANAGER LOCK WHEN CALLING THIS METHOD!
      */
-    TaskSnapshot getSnapshot(boolean reducedResolution) {
+    TaskSnapshot getSnapshot(boolean reducedResolution, boolean restoreFromDisk) {
 
         // TODO: Move this to {@link TaskWindowContainerController} once recent tasks are more
         // synchronized between AM and WM.
-        return mService.mWindowManager.getTaskSnapshot(taskId, userId, reducedResolution);
+        return mService.mWindowManager.getTaskSnapshot(taskId, userId, reducedResolution,
+                restoreFromDisk);
     }
 
     void touchActiveTime() {
@@ -1442,7 +1443,7 @@ class TaskRecord extends ConfigurationContainer {
                 mActivities.remove(activityNdx);
                 --activityNdx;
                 --numActivities;
-            } else if (mStack.finishActivityLocked(r, Activity.RESULT_CANCELED, null, null,
+            } else if (mStack.finishActivityLocked(r, Activity.RESULT_CANCELED, null,
                     reason, false, pauseImmediately)) {
                 --activityNdx;
                 --numActivities;
@@ -1497,8 +1498,8 @@ class TaskRecord extends ConfigurationContainer {
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
-                    if (mStack != null && mStack.finishActivityLocked(r, Activity.RESULT_CANCELED,
-                            null, null, "clear-task-stack", false)) {
+                    if (mStack != null && mStack.finishActivityLocked(
+                            r, Activity.RESULT_CANCELED, null, "clear-task-stack", false)) {
                         --activityNdx;
                         --numActivities;
                     }
@@ -1512,8 +1513,8 @@ class TaskRecord extends ConfigurationContainer {
                         && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
                     if (!ret.finishing) {
                         if (mStack != null) {
-                            mStack.finishActivityLocked(ret, Activity.RESULT_CANCELED,
-                                    null, null, "clear-task-top", false);
+                            mStack.finishActivityLocked(
+                                    ret, Activity.RESULT_CANCELED, null, "clear-task-top", false);
                         }
                         return null;
                     }

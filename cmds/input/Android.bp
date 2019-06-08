@@ -1,0 +1,8 @@
+// Copyright 2008 The Android Open Source Project
+//
+
+java_binary {
+    name: "input",
+    wrapper: "input",
+    srcs: ["**/*.java"],
+}

@@ -291,7 +291,10 @@ class ManifestExtractor {
             }
           }
         }
-        return &attr->value;
+
+        if (!attr->value.empty()) {
+          return &attr->value;
+        }
       }
       return nullptr;
     }
@@ -425,6 +428,8 @@ class Manifest : public ManifestExtractor::Element {
   const std::string* split = nullptr;
   const std::string* platformVersionName = nullptr;
   const std::string* platformVersionCode = nullptr;
+  const int32_t* platformVersionNameInt = nullptr;
+  const int32_t* platformVersionCodeInt = nullptr;
   const int32_t* compilesdkVersion = nullptr;
   const std::string* compilesdkVersionCodename = nullptr;
   const int32_t* installLocation = nullptr;
@@ -440,6 +445,10 @@ class Manifest : public ManifestExtractor::Element {
                                                            "platformBuildVersionName"));
     platformVersionCode = GetAttributeString(FindAttribute(manifest, {},
                                                            "platformBuildVersionCode"));
+    platformVersionNameInt = GetAttributeInteger(FindAttribute(manifest, {},
+                                                               "platformBuildVersionName"));
+    platformVersionCodeInt = GetAttributeInteger(FindAttribute(manifest, {},
+                                                               "platformBuildVersionCode"));
 
     // Extract the compile sdk info
     compilesdkVersion = GetAttributeInteger(FindAttribute(manifest, COMPILE_SDK_VERSION_ATTR));
@@ -460,8 +469,14 @@ class Manifest : public ManifestExtractor::Element {
     if (platformVersionName) {
       printer->Print(StringPrintf(" platformBuildVersionName='%s'", platformVersionName->data()));
     }
+    if (platformVersionNameInt) {
+      printer->Print(StringPrintf(" platformBuildVersionName='%d'", *platformVersionNameInt));
+    }
     if (platformVersionCode) {
       printer->Print(StringPrintf(" platformBuildVersionCode='%s'", platformVersionCode->data()));
+    }
+    if (platformVersionCodeInt) {
+      printer->Print(StringPrintf(" platformBuildVersionCode='%d'", *platformVersionCodeInt));
     }
     if (compilesdkVersion) {
       printer->Print(StringPrintf(" compileSdkVersion='%d'", *compilesdkVersion));

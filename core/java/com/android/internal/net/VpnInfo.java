@@ -19,8 +19,6 @@ package com.android.internal.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
-
 /**
  * A lightweight container used to carry information of the ongoing VPN.
  * Internal use only..
@@ -30,14 +28,14 @@ import java.util.Arrays;
 public class VpnInfo implements Parcelable {
     public int ownerUid;
     public String vpnIface;
-    public String[] underlyingIfaces;
+    public String primaryUnderlyingIface;
 
     @Override
     public String toString() {
         return "VpnInfo{"
                 + "ownerUid=" + ownerUid
                 + ", vpnIface='" + vpnIface + '\''
-                + ", underlyingIfaces='" + Arrays.toString(underlyingIfaces) + '\''
+                + ", primaryUnderlyingIface='" + primaryUnderlyingIface + '\''
                 + '}';
     }
 
@@ -50,7 +48,7 @@ public class VpnInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(ownerUid);
         dest.writeString(vpnIface);
-        dest.writeStringArray(underlyingIfaces);
+        dest.writeString(primaryUnderlyingIface);
     }
 
     public static final Parcelable.Creator<VpnInfo> CREATOR = new Parcelable.Creator<VpnInfo>() {
@@ -59,7 +57,7 @@ public class VpnInfo implements Parcelable {
             VpnInfo info = new VpnInfo();
             info.ownerUid = source.readInt();
             info.vpnIface = source.readString();
-            info.underlyingIfaces = source.readStringArray();
+            info.primaryUnderlyingIface = source.readString();
             return info;
         }
 

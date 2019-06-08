@@ -17,7 +17,6 @@
 package com.android.server.testables;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -31,14 +30,10 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.Pair;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.mockito.Mockito;
-import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
@@ -48,20 +43,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 /**
- * TestableDeviceConfig uses ExtendedMockito to replace the real implementation of DeviceConfig
- * with essentially a local HashMap in the callers process. This allows for unit testing that do not
- * modify the real DeviceConfig on the device at all.
- *
- * <p>TestableDeviceConfig should be defined as a rule on your test so it can clean up after itself.
- * Like the following:</p>
- * <pre class="prettyprint">
- * &#064;Rule
- * public final TestableDeviceConfig mTestableDeviceConfig = new TestableDeviceConfig();
- * </pre>
+ * TestableDeviceConfig is a {@link StaticMockFixture} that uses ExtendedMockito to replace the real
+ * implementation of DeviceConfig with essentially a local HashMap in the callers process. This
+ * allows for unit testing that do not modify the real DeviceConfig on the device at all.
  */
-public final class TestableDeviceConfig implements TestRule {
+public final class TestableDeviceConfig implements StaticMockFixture {
 
-    private StaticMockitoSession mMockitoSession;
     private Map<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>>
             mOnPropertiesChangedListenerMap = new HashMap<>();
     private Map<String, String> mKeyValueMap = new ConcurrentHashMap<>();
@@ -73,14 +60,21 @@ public final class TestableDeviceConfig implements TestRule {
         mKeyValueMap.clear();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Statement apply(Statement base, Description description) {
-        mMockitoSession = mockitoSession()
-                .initMocks(this)
-                .strictness(Strictness.LENIENT)
-                .spyStatic(DeviceConfig.class)
-                .startMocking();
+    public StaticMockitoSessionBuilder setUpMockedClasses(
+            StaticMockitoSessionBuilder sessionBuilder) {
+        sessionBuilder.spyStatic(DeviceConfig.class);
+        return sessionBuilder;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setUpMockBehaviors() {
         doAnswer((Answer<Void>) invocationOnMock -> {
             String namespace = invocationOnMock.getArgument(0);
             Executor executor = invocationOnMock.getArgument(1);
@@ -115,20 +109,15 @@ public final class TestableDeviceConfig implements TestRule {
             String name = invocationOnMock.getArgument(1);
             return mKeyValueMap.get(getKey(namespace, name));
         }).when(() -> DeviceConfig.getProperty(anyString(), anyString()));
+    }
 
-        return new TestWatcher() {
-            @Override
-            protected void succeeded(Description description) {
-                mMockitoSession.finishMocking();
-                mOnPropertiesChangedListenerMap.clear();
-            }
-
-            @Override
-            protected void failed(Throwable e, Description description) {
-                mMockitoSession.finishMocking(e);
-                mOnPropertiesChangedListenerMap.clear();
-            }
-        }.apply(base, description);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void tearDown() {
+        clearDeviceConfig();
+        mOnPropertiesChangedListenerMap.clear();
     }
 
     private static String getKey(String namespace, String name) {
@@ -210,4 +199,22 @@ public final class TestableDeviceConfig implements TestRule {
         return properties;
     }
 
+    /**
+     * <p>TestableDeviceConfigRule is a {@link TestRule} that wraps a {@link TestableDeviceConfig}
+     * to set it up and tear it down automatically. This works well when you have no other static
+     * mocks.</p>
+     *
+     * <p>TestableDeviceConfigRule should be defined as a rule on your test so it can clean up after
+     * itself. Like the following:</p>
+     * <pre class="prettyprint">
+     * &#064;Rule
+     * public final TestableDeviceConfigRule mTestableDeviceConfigRule =
+     *     new TestableDeviceConfigRule();
+     * </pre>
+     */
+    public static class TestableDeviceConfigRule extends StaticMockFixtureRule {
+        public TestableDeviceConfigRule() {
+            super(TestableDeviceConfig::new);
+        }
+    }
 }

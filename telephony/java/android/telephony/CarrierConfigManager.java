@@ -672,6 +672,22 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING
             = "carrier_data_service_wlan_package_override_string";
 
+    /**
+     * Override the device's configuration for the cellular data service class to use
+     * for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WWAN_CLASS_OVERRIDE_STRING =
+            "carrier_data_service_wwan_class_override_string";
+
+    /**
+     * Override the device's configuration for the IWLAN data service class to use
+     * for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WLAN_CLASS_OVERRIDE_STRING =
+            "carrier_data_service_wlan_class_override_string";
+
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
@@ -1019,6 +1035,15 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL =
             "support_manage_ims_conference_call_bool";
+
+    /**
+     * Determines whether the IMS conference merge process supports and returns its participants
+     * data. When {@code true}, on merge complete, conference call would have a list of its
+     * participants returned in XML format, {@code false otherwise}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL =
+            "support_ims_conference_event_package_bool";
 
     /**
      * Determines whether High Definition audio property is displayed in the dialer UI.
@@ -2383,6 +2408,14 @@ public class CarrierConfigManager {
             "carrier_network_service_wlan_package_override_string";
 
     /**
+     * Decides when clients try to bind to iwlan network service, which class name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WLAN_CLASS_OVERRIDE_STRING =
+            "carrier_network_service_wlan_class_override_string";
+
+    /**
      * Decides when clients try to bind to wwan (cellular) network service, which package name will
      * the binding intent go to.
      * @hide
@@ -2391,12 +2424,28 @@ public class CarrierConfigManager {
             "carrier_network_service_wwan_package_override_string";
 
     /**
+     * Decides when clients try to bind to wwan (cellular) network service, which class name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_CLASS_OVERRIDE_STRING =
+            "carrier_network_service_wwan_class_override_string";
+
+    /**
      * The package name of qualified networks service that telephony binds to.
      *
      * @hide
      */
     public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING =
             "carrier_qualified_networks_service_package_override_string";
+
+    /**
+     * The class name of qualified networks service that telephony binds to.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_CLASS_OVERRIDE_STRING =
+            "carrier_qualified_networks_service_class_override_string";
     /**
      * A list of 4 LTE RSCP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
@@ -2685,6 +2734,30 @@ public class CarrierConfigManager {
         public static final String KEY_PREFIX = "gps.";
 
         /**
+         * Location information during (and after) an emergency call is only provided over control
+         * plane signaling from the network.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_CP_ONLY = 0;
+
+        /**
+         * Location information during (and after) an emergency call is provided over the data
+         * plane and serviced by the framework GNSS service, but if it fails, the carrier also
+         * supports control plane backup signaling.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK = 1;
+
+        /**
+         * Location information during (and after) an emergency call is provided over the data plane
+         * and serviced by the framework GNSS service only. There is no backup signalling over the
+         * control plane if it fails.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_DP_ONLY = 2;
+
+
+        /**
          * Determine whether current lpp_mode used for E-911 needs to be kept persistently.
          * {@code false} - not keeping the lpp_mode means using default configuration of gps.conf
          *                 when sim is not presented.
@@ -2774,6 +2847,23 @@ public class CarrierConfigManager {
          */
         public static final String KEY_NFW_PROXY_APPS_STRING = KEY_PREFIX + "nfw_proxy_apps";
 
+        /**
+         * Determines whether or not SUPL ES mode supports a control-plane mechanism to get a user's
+         * location in the event that data plane SUPL fails or is otherwise unavailable.
+         * <p>
+         * An integer value determines the support type of this carrier. If this carrier only
+         * supports data plane SUPL ES, then the value will be
+         * {@link #SUPL_EMERGENCY_MODE_TYPE_DP_ONLY}. If the carrier supports control plane fallback
+         * for emergency SUPL, the value will be {@link #SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK}.
+         * If the carrier does not support data plane SUPL using the framework, the value will be
+         * {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
+         * <p>
+         * The default value for this configuration is {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
+         * @hide
+         */
+        public static final String KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT = KEY_PREFIX
+                + "es_supl_control_plane_support_int";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
@@ -2788,6 +2878,8 @@ public class CarrierConfigManager {
             defaults.putString(KEY_GPS_LOCK_STRING, "3");
             defaults.putString(KEY_ES_EXTENSION_SEC_STRING, "0");
             defaults.putString(KEY_NFW_PROXY_APPS_STRING, "");
+            defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
+                    SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
             return defaults;
         }
     }
@@ -3104,6 +3196,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL, false);
         sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);

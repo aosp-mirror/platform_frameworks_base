@@ -1,0 +1,8 @@
+// Copyright 2015 The Android Open Source Project
+//
+
+java_binary {
+    name: "sm",
+    wrapper: "sm",
+    srcs: ["**/*.java"],
+}

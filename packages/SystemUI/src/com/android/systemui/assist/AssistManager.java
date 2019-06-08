@@ -258,12 +258,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
         }
         int phoneState = mPhoneStateMonitor.getPhoneState();
         args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
-        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
-        // Logs assistant start with invocation type.
-        MetricsLogger.action(
-                new LogMaker(MetricsEvent.ASSISTANT)
-                        .setType(MetricsEvent.TYPE_OPEN)
-                        .setSubtype(toLoggingSubType(invocationType, phoneState)));
+        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
+        logStartAssist(invocationType, phoneState);
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -449,7 +445,14 @@ public class AssistManager implements ConfigurationChangedReceiver {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
     }
 
-    private int toLoggingSubType(int invocationType, int phoneState) {
+    protected void logStartAssist(int invocationType, int phoneState) {
+        MetricsLogger.action(
+                new LogMaker(MetricsEvent.ASSISTANT)
+                        .setType(MetricsEvent.TYPE_OPEN)
+                        .setSubtype(toLoggingSubType(invocationType, phoneState)));
+    }
+
+    protected final int toLoggingSubType(int invocationType, int phoneState) {
         // Note that this logic will break if the number of Assistant invocation types exceeds 7.
         // There are currently 5 invocation types, but we will be migrating to the new logging
         // framework in the next update.

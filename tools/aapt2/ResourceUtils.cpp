@@ -378,7 +378,7 @@ std::unique_ptr<BinaryPrimitive> TryParseEnumSymbol(const Attribute* enum_attr,
     const ResourceName& enum_symbol_resource_name = symbol.symbol.name.value();
     if (trimmed_str == enum_symbol_resource_name.entry) {
       android::Res_value value = {};
-      value.dataType = android::Res_value::TYPE_INT_DEC;
+      value.dataType = symbol.type;
       value.data = symbol.value;
       return util::make_unique<BinaryPrimitive>(value);
     }

@@ -15018,7 +15018,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 params.handleStartCopy();
                 if (params.mRet != INSTALL_SUCCEEDED) {
                     mRet = params.mRet;
-                    break;
                 }
             }
         }
@@ -15029,7 +15028,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 params.handleReturnCode();
                 if (params.mRet != INSTALL_SUCCEEDED) {
                     mRet = params.mRet;
-                    break;
                 }
             }
         }
@@ -18056,9 +18054,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling verity to " + filePath);
                 final FileDescriptor fd = result.getUnownedFileDescriptor();
                 try {
-                    mInstaller.installApkVerity(filePath, fd, result.getContentSize());
                     final byte[] rootHash = VerityUtils.generateApkVerityRootHash(filePath);
-                    mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                    try {
+                        // A file may already have fs-verity, e.g. when reused during a split
+                        // install. If the measurement succeeds, no need to attempt to set up.
+                        mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                    } catch (InstallerException e) {
+                        mInstaller.installApkVerity(filePath, fd, result.getContentSize());
+                        mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                    }
                 } finally {
                     IoUtils.closeQuietly(fd);
                 }

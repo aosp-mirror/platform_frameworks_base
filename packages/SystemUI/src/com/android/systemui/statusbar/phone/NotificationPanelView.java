@@ -304,6 +304,8 @@ public class NotificationPanelView extends PanelView implements
     private int mCurrentPanelAlpha;
     private final Paint mAlphaPaint = new Paint();
     private Runnable mPanelAlphaEndAction;
+    private float mBottomAreaShadeAlpha;
+    private final ValueAnimator mBottomAreaShadeAlphaAnimator;
     private AnimatorListenerAdapter mAnimatorListenerAdapter = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -345,6 +347,9 @@ public class NotificationPanelView extends PanelView implements
     private int mThemeResId;
     private KeyguardIndicationController mKeyguardIndicationController;
     private Consumer<Boolean> mAffordanceLaunchListener;
+    private int mShelfHeight;
+    private Runnable mOnReinflationListener;
+    private int mDarkIconSize;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -369,6 +374,14 @@ public class NotificationPanelView extends PanelView implements
         mThemeResId = context.getThemeResId();
         mKeyguardBypassController = bypassController;
         dynamicPrivacyController.addListener(this);
+
+        mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
+        mBottomAreaShadeAlphaAnimator.addUpdateListener(animation -> {
+            mBottomAreaShadeAlpha = (float) animation.getAnimatedValue();
+            updateKeyguardBottomAreaAlpha();
+        });
+        mBottomAreaShadeAlphaAnimator.setDuration(160);
+        mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
     }
 
     /**
@@ -452,6 +465,9 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.keyguard_indication_bottom_padding);
         mQsNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.qs_notification_padding);
+        mShelfHeight = getResources().getDimensionPixelSize(R.dimen.notification_shelf_height);
+        mDarkIconSize = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_icon_drawing_size_dark);
     }
 
     /**
@@ -544,6 +560,9 @@ public class NotificationPanelView extends PanelView implements
 
         setKeyguardStatusViewVisibility(mBarState, false, false);
         setKeyguardBottomAreaVisibility(mBarState, false);
+        if (mOnReinflationListener != null) {
+            mOnReinflationListener.run();
+        }
     }
 
     private void initBottomArea() {
@@ -674,7 +693,8 @@ public class NotificationPanelView extends PanelView implements
                     mNotificationStackScroller.getIntrinsicContentHeight(),
                     getExpandedFraction(),
                     totalHeight,
-                    mKeyguardStatusView.getHeight(),
+                    (int) (mKeyguardStatusView.getHeight()
+                            - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
                     clockPreferredY,
                     hasCustomClock(),
                     mNotificationStackScroller.getVisibleNotificationCount() != 0,
@@ -686,6 +706,7 @@ public class NotificationPanelView extends PanelView implements
                     mClockPositionResult.clockX, CLOCK_ANIMATION_PROPERTIES, animateClock);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.Y,
                     mClockPositionResult.clockY, CLOCK_ANIMATION_PROPERTIES, animateClock);
+            updateNotificationTranslucency();
             updateClock();
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
@@ -1371,8 +1392,18 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(false /* animate */);
         }
 
+        maybeAnimateBottomAreaAlpha();
         resetHorizontalPanelPosition();
         updateQsState();
+    }
+
+    private void maybeAnimateBottomAreaAlpha() {
+        mBottomAreaShadeAlphaAnimator.cancel();
+        if (mBarState == StatusBarState.SHADE_LOCKED) {
+            mBottomAreaShadeAlphaAnimator.start();
+        } else {
+            mBottomAreaShadeAlpha = 1f;
+        }
     }
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable() {
@@ -1465,6 +1496,7 @@ public class NotificationPanelView extends PanelView implements
         } else if (statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setAlpha(1f);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
         }
@@ -1981,6 +2013,7 @@ public class NotificationPanelView extends PanelView implements
                         ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f,
                 0f, 1f, getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
+        alpha *= mBottomAreaShadeAlpha;
         mKeyguardBottomArea.setAffordanceAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -2891,6 +2924,10 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setDozing(mDozing, animate, wakeUpTouchLocation);
         mKeyguardBottomArea.setDozing(mDozing, animate);
 
+        if (dozing) {
+            mBottomAreaShadeAlphaAnimator.cancel();
+        }
+
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {
             updateDozingVisibilities(animate);
@@ -3062,10 +3099,6 @@ public class NotificationPanelView extends PanelView implements
         return mNotificationStackScroller.hasPulsingNotifications();
     }
 
-    public boolean isFullyDark() {
-        return mNotificationStackScroller.isFullyDark();
-    }
-
     public ActivatableNotificationView getActivatedChild() {
         return mNotificationStackScroller.getActivatedChild();
     }
@@ -3111,6 +3144,10 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         mAnimateNextPositionUpdate = true;
+    }
+
+    public void setOnReinflationListener(Runnable onReinflationListener) {
+        mOnReinflationListener = onReinflationListener;
     }
 
     /**

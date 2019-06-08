@@ -918,7 +918,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     return;
                 }
                 try {
-                    inm.cancelNotificationWithTag(localPackageName, null,
+                    inm.cancelNotificationWithTag(localPackageName, "android", null,
                             localForegroundId, userId);
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);

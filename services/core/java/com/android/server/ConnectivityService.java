@@ -2575,11 +2575,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
-                    if (nai.everConnected && !nai.networkMisc.explicitlySelected) {
-                        loge("ERROR: already-connected network explicitly selected.");
+                    if (nai.everConnected) {
+                        loge("ERROR: cannot call explicitlySelected on already-connected network");
                     }
-                    nai.networkMisc.explicitlySelected = true;
-                    nai.networkMisc.acceptUnvalidated = msg.arg1 == 1;
+                    nai.networkMisc.explicitlySelected = (msg.arg1 == 1);
+                    nai.networkMisc.acceptUnvalidated = (msg.arg1 == 1) && (msg.arg2 == 1);
                     // Mark the network as temporarily accepting partial connectivity so that it
                     // will be validated (and possibly become default) even if it only provides
                     // partial internet access. Note that if user connects to partial connectivity
@@ -2587,7 +2587,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // out of wifi coverage) and if the same wifi is available again, the device
                     // will auto connect to this wifi even though the wifi has "no internet".
                     // TODO: Evaluate using a separate setting in IpMemoryStore.
-                    nai.networkMisc.acceptPartialConnectivity = msg.arg1 == 1;
+                    nai.networkMisc.acceptPartialConnectivity = (msg.arg2 == 1);
                     break;
                 }
                 case NetworkAgent.EVENT_SOCKET_KEEPALIVE: {
@@ -3597,21 +3597,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void showNetworkNotification(NetworkAgentInfo nai, NotificationType type) {
         final String action;
+        final boolean highPriority;
         switch (type) {
             case LOGGED_IN:
                 action = Settings.ACTION_WIFI_SETTINGS;
                 mHandler.removeMessages(EVENT_TIMEOUT_NOTIFICATION);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_TIMEOUT_NOTIFICATION,
                         nai.network.netId, 0), TIMEOUT_NOTIFICATION_DELAY_MS);
+                // High priority because it is a direct result of the user logging in to a portal.
+                highPriority = true;
                 break;
             case NO_INTERNET:
                 action = ConnectivityManager.ACTION_PROMPT_UNVALIDATED;
+                // High priority because it is only displayed for explicitly selected networks.
+                highPriority = true;
                 break;
             case LOST_INTERNET:
                 action = ConnectivityManager.ACTION_PROMPT_LOST_VALIDATION;
+                // High priority because it could help the user avoid unexpected data usage.
+                highPriority = true;
                 break;
             case PARTIAL_CONNECTIVITY:
                 action = ConnectivityManager.ACTION_PROMPT_PARTIAL_CONNECTIVITY;
+                // Don't bother the user with a high-priority notification if the network was not
+                // explicitly selected by the user.
+                highPriority = nai.networkMisc.explicitlySelected;
                 break;
             default:
                 Slog.wtf(TAG, "Unknown notification type " + type);
@@ -3628,23 +3638,41 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
-        mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, true);
+
+        mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, highPriority);
+    }
+
+    private boolean shouldPromptUnvalidated(NetworkAgentInfo nai) {
+        // Don't prompt if the network is validated, and don't prompt on captive portals
+        // because we're already prompting the user to sign in.
+        if (nai.everValidated || nai.everCaptivePortalDetected) {
+            return false;
+        }
+
+        // If a network has partial connectivity, always prompt unless the user has already accepted
+        // partial connectivity and selected don't ask again. This ensures that if the device
+        // automatically connects to a network that has partial Internet access, the user will
+        // always be able to use it, either because they've already chosen "don't ask again" or
+        // because we have prompt them.
+        if (nai.partialConnectivity && !nai.networkMisc.acceptPartialConnectivity) {
+            return true;
+        }
+
+        // If a network has no Internet access, only prompt if the network was explicitly selected
+        // and if the user has not already told us to use the network regardless of whether it
+        // validated or not.
+        if (nai.networkMisc.explicitlySelected && !nai.networkMisc.acceptUnvalidated) {
+            return true;
+        }
+
+        return false;
     }
 
     private void handlePromptUnvalidated(Network network) {
         if (VDBG || DDBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
 
-        // Only prompt if the network is unvalidated or network has partial internet connectivity
-        // and was explicitly selected by the user, and if we haven't already been told to switch
-        // to it regardless of whether it validated or not. Also don't prompt on captive portals
-        // because we're already prompting the user to sign in.
-        if (nai == null || nai.everValidated || nai.everCaptivePortalDetected
-                || !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated
-                // TODO: Once the value of acceptPartialConnectivity is moved to IpMemoryStore,
-                // we should reevaluate how to handle acceptPartialConnectivity when network just
-                // connected.
-                || nai.networkMisc.acceptPartialConnectivity) {
+        if (nai == null || !shouldPromptUnvalidated(nai)) {
             return;
         }
 
@@ -4353,7 +4381,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * @return VPN information for accounting, or null if we can't retrieve all required
-     *         information, e.g underlying ifaces.
+     *         information, e.g primary underlying iface.
      */
     @Nullable
     private VpnInfo createVpnInfo(Vpn vpn) {
@@ -4365,24 +4393,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // see VpnService.setUnderlyingNetworks()'s javadoc about how to interpret
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
-            NetworkAgentInfo defaultNai = getDefaultNetwork();
-            if (defaultNai != null) {
-                underlyingNetworks = new Network[] { defaultNai.network };
+            NetworkAgentInfo defaultNetwork = getDefaultNetwork();
+            if (defaultNetwork != null && defaultNetwork.linkProperties != null) {
+                info.primaryUnderlyingIface = getDefaultNetwork().linkProperties.getInterfaceName();
+            }
+        } else if (underlyingNetworks.length > 0) {
+            LinkProperties linkProperties = getLinkProperties(underlyingNetworks[0]);
+            if (linkProperties != null) {
+                info.primaryUnderlyingIface = linkProperties.getInterfaceName();
             }
         }
-        if (underlyingNetworks != null && underlyingNetworks.length > 0) {
-            List<String> interfaces = new ArrayList<>();
-            for (Network network : underlyingNetworks) {
-                LinkProperties lp = getLinkProperties(network);
-                if (lp != null && !TextUtils.isEmpty(lp.getInterfaceName())) {
-                    interfaces.add(lp.getInterfaceName());
-                }
-            }
-            if (!interfaces.isEmpty()) {
-                info.underlyingIfaces = interfaces.toArray(new String[interfaces.size()]);
-            }
-        }
-        return info.underlyingIfaces == null ? null : info;
+        return info.primaryUnderlyingIface == null ? null : info;
     }
 
     /**

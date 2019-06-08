@@ -748,6 +748,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void handleFaceAuthenticated(int authUserId) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFaceAuthenticated");
         try {
+            if (mGoingToSleep) {
+                Log.d(TAG, "Aborted successful auth because device is going to sleep.");
+                return;
+            }
             final int userId;
             try {
                 userId = ActivityManager.getService().getCurrentUser().id;
@@ -931,6 +935,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public boolean isUserInLockdown(int userId) {
         return mStrongAuthTracker.getStrongAuthForUser(userId)
                 == LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+    }
+
+    public boolean userNeedsStrongAuth() {
+        return mStrongAuthTracker.getStrongAuthForUser(getCurrentUser())
+                != LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
     }
 
     public boolean needsSlowUnlockTransition() {

@@ -33,9 +33,12 @@ import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -90,6 +93,8 @@ class ImageGLWallpaper {
     private int mUniReveal;
     private int mUniTexture;
     private int mTextureId;
+
+    private float[] mCurrentTexCoordinate;
 
     ImageGLWallpaper(ImageGLProgram program) {
         mProgram = program;
@@ -195,4 +200,106 @@ class ImageGLWallpaper {
         glUniform1i(mUniTexture, 0);
     }
 
+    /**
+     * This method adjust s(x-axis), t(y-axis) texture coordinates to get current display area
+     * of texture and will be used during transition.
+     * The adjustment happens if either the width or height of the surface is larger than
+     * corresponding size of the display area.
+     * If both width and height are larger than corresponding size of the display area,
+     * the adjustment will happen at both s, t side.
+     *
+     * @param surface The size of the surface.
+     * @param scissor The display area.
+     * @param xOffset The offset amount along s axis.
+     * @param yOffset The offset amount along t axis.
+     */
+    void adjustTextureCoordinates(Rect surface, Rect scissor, float xOffset, float yOffset) {
+        mCurrentTexCoordinate = TEXTURES.clone();
+
+        if (surface == null || scissor == null) {
+            mTextureBuffer.put(mCurrentTexCoordinate);
+            mTextureBuffer.position(0);
+            return;
+        }
+
+        int surfaceWidth = surface.width();
+        int surfaceHeight = surface.height();
+        int scissorWidth = scissor.width();
+        int scissorHeight = scissor.height();
+
+        if (surfaceWidth > scissorWidth) {
+            // Calculate the new s pos in pixels.
+            float pixelS = (float) Math.round((surfaceWidth - scissorWidth) * xOffset);
+            // Calculate the s pos in texture coordinate.
+            float coordinateS = pixelS / surfaceWidth;
+            // Calculate the percentage occupied by the scissor width in surface width.
+            float surfacePercentageW = (float) scissorWidth / surfaceWidth;
+            // Need also consider the case if surface height is smaller than scissor height.
+            if (surfaceHeight < scissorHeight) {
+                // We will narrow the surface percentage to keep aspect ratio.
+                surfacePercentageW *= (float) surfaceHeight / scissorHeight;
+            }
+            // Determine the final s pos, also limit the legal s pos to prevent from out of range.
+            float s = coordinateS + surfacePercentageW > 1f ? 1f - surfacePercentageW : coordinateS;
+            // Traverse the s pos in texture coordinates array and adjust the s pos accordingly.
+            for (int i = 0; i < mCurrentTexCoordinate.length; i += 2) {
+                // indices 2, 4 and 6 are the end of s coordinates.
+                if (i == 2 || i == 4 || i == 6) {
+                    mCurrentTexCoordinate[i] = Math.min(1f, s + surfacePercentageW);
+                } else {
+                    mCurrentTexCoordinate[i] = s;
+                }
+            }
+        }
+
+        if (surfaceHeight > scissorHeight) {
+            // Calculate the new t pos in pixels.
+            float pixelT = (float) Math.round((surfaceHeight - scissorHeight) * yOffset);
+            // Calculate the t pos in texture coordinate.
+            float coordinateT = pixelT / surfaceHeight;
+            // Calculate the percentage occupied by the scissor height in surface height.
+            float surfacePercentageH = (float) scissorHeight / surfaceHeight;
+            // Need also consider the case if surface width is smaller than scissor width.
+            if (surfaceWidth < scissorWidth) {
+                // We will narrow the surface percentage to keep aspect ratio.
+                surfacePercentageH *= (float) surfaceWidth / scissorWidth;
+            }
+            // Determine the final t pos, also limit the legal t pos to prevent from out of range.
+            float t = coordinateT + surfacePercentageH > 1f ? 1f - surfacePercentageH : coordinateT;
+            // Traverse the t pos in texture coordinates array and adjust the t pos accordingly.
+            for (int i = 1; i < mCurrentTexCoordinate.length; i += 2) {
+                // indices 1, 3 and 11 are the end of t coordinates.
+                if (i == 1 || i == 3 || i == 11) {
+                    mCurrentTexCoordinate[i] = Math.min(1f, t + surfacePercentageH);
+                } else {
+                    mCurrentTexCoordinate[i] = t;
+                }
+            }
+        }
+
+        mTextureBuffer.put(mCurrentTexCoordinate);
+        mTextureBuffer.position(0);
+    }
+
+    /**
+     * Called to dump current state.
+     * @param prefix prefix.
+     * @param fd fd.
+     * @param out out.
+     * @param args args.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        if (mCurrentTexCoordinate != null) {
+            for (int i = 0; i < mCurrentTexCoordinate.length; i++) {
+                sb.append(mCurrentTexCoordinate[i]).append(',');
+                if (i == mCurrentTexCoordinate.length - 1) {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+            }
+        }
+        sb.append('}');
+        out.print(prefix); out.print("mTexCoordinates="); out.println(sb.toString());
+    }
 }

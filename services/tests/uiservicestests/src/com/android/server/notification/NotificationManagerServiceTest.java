@@ -733,7 +733,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
         assertEquals(IMPORTANCE_LOW, mBinderService.getNotificationChannel(
                 PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
-        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
         waitForIdle();
 
         update = new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
@@ -908,7 +908,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCancelNotificationImmediatelyAfterEnqueue() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
-        mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
@@ -923,7 +923,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
-        mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
@@ -1207,7 +1207,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         sbn.getNotification().flags = Notification.FLAG_ONGOING_EVENT;
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
-        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertEquals(0, mService.getNotificationRecordCount());
@@ -1508,14 +1508,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testUpdateAppNotifyCreatorBlock() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
 
-        mBinderService.setNotificationsEnabledForPackage(PKG, 0, false);
+        mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
 
         assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
-        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
+    }
+
+    @Test
+    public void testUpdateAppNotifyCreatorBlock_notIfMatchesExistingSetting() throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        mBinderService.setNotificationsEnabledForPackage(PKG, 0, false);
+        verify(mContext, never()).sendBroadcastAsUser(any(), any(), eq(null));
     }
 
     @Test
@@ -4395,7 +4403,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr1.sbn.getKey()).getNotification().isBubbleNotification());
 
         // Remove the bubble
-        mBinderService.cancelNotificationWithTag(PKG, "tag", nr1.sbn.getId(),
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", nr1.sbn.getId(),
                 nr1.sbn.getUserId());
         waitForIdle();
 
@@ -4794,7 +4802,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
 
-        mBinderService.cancelNotificationWithTag(PKG, null, nrBubble.sbn.getId(),
+        mBinderService.cancelNotificationWithTag(PKG, PKG, null, nrBubble.sbn.getId(),
                 nrBubble.sbn.getUserId());
         waitForIdle();
 

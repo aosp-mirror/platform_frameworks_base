@@ -62,7 +62,8 @@ public final class AppCompactorTest {
     private CountDownLatch mCountDown;
 
     @Rule
-    public TestableDeviceConfig mDeviceConfig = new TestableDeviceConfig();
+    public TestableDeviceConfig.TestableDeviceConfigRule
+            mDeviceConfigRule = new TestableDeviceConfig.TestableDeviceConfigRule();
 
     @Before
     public void setUp() {

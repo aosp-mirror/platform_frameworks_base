@@ -238,7 +238,19 @@ public class NavigationBarView extends FrameLayout implements
             info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
             return;
         }
+
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        ButtonDispatcher imeSwitchButton = getImeSwitchButton();
+        if (imeSwitchButton.getVisibility() == VISIBLE) {
+            // If the IME is not up, but the ime switch button is visible, then make sure that
+            // button is touchable
+            int[] loc = new int[2];
+            View buttonView = imeSwitchButton.getCurrentView();
+            buttonView.getLocationInWindow(loc);
+            info.touchableRegion.set(loc[0], loc[1], loc[0] + buttonView.getWidth(),
+                    loc[1] + buttonView.getHeight());
+            return;
+        }
         info.touchableRegion.setEmpty();
     };
 
@@ -1095,8 +1107,13 @@ public class NavigationBarView extends FrameLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        int leftInset = insets.getSystemWindowInsetLeft();
+        int rightInset = insets.getSystemWindowInsetRight();
+        setPadding(leftInset, insets.getSystemWindowInsetTop(), rightInset,
+                insets.getSystemWindowInsetBottom());
+        // we're passing the insets onto the gesture handler since the back arrow is only
+        // conditionally added and doesn't always get all the insets.
+        mEdgeBackGestureHandler.setInsets(leftInset, rightInset);
         return super.onApplyWindowInsets(insets);
     }
 

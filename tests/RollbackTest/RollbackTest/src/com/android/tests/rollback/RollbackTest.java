@@ -35,7 +35,6 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -972,7 +971,7 @@ public class RollbackTest {
             //setting the timeout to a very short amount that will definitely be triggered
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                     PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
-                    Long.toString(1), false /* makeDefault*/);
+                    Long.toString(0), false /* makeDefault*/);
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
             RollbackTestUtils.uninstall(TEST_APP_A);

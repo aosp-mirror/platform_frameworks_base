@@ -107,7 +107,7 @@ class MapFlattenVisitor : public ValueVisitor {
     }
 
     for (Attribute::Symbol& s : attr->symbols) {
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC, s.value);
+      BinaryPrimitive val(s.type, s.value);
       FlattenEntry(&s.symbol, &val);
     }
   }

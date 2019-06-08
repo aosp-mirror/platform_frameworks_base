@@ -322,6 +322,7 @@ class ZygoteConnection {
             Runnable stateChangeCode) {
         try {
             if (zygoteServer.isUsapPoolEnabled()) {
+                Log.i(TAG, "Emptying USAP Pool due to state change.");
                 Zygote.emptyUsapPool();
             }
 
@@ -330,11 +331,13 @@ class ZygoteConnection {
             if (zygoteServer.isUsapPoolEnabled()) {
                 Runnable fpResult =
                         zygoteServer.fillUsapPool(
-                                new int[]{mSocket.getFileDescriptor().getInt$()});
+                                new int[]{mSocket.getFileDescriptor().getInt$()}, false);
 
                 if (fpResult != null) {
                     zygoteServer.setForkChild();
                     return fpResult;
+                } else {
+                    Log.i(TAG, "Finished refilling USAP Pool after state change.");
                 }
             }
 
@@ -468,6 +471,9 @@ class ZygoteConnection {
         closeSocket();
 
         Zygote.setAppProcessName(parsedArgs, TAG);
+
+        // Set the Java Language thread priority to the default value for new apps.
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

@@ -708,6 +708,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
             return {};
           }
           symbol.value = pb_symbol.value();
+          symbol.type = pb_symbol.type() != 0U ? pb_symbol.type()
+                                               : android::Res_value::TYPE_INT_DEC;
           attr->symbols.push_back(std::move(symbol));
         }
         value = std::move(attr);

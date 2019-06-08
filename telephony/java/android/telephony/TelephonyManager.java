@@ -1498,6 +1498,48 @@ public class TelephonyManager {
      */
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate if the SIM combination in DSDS has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios.
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
+            "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
+
+    /** @hide */
+    @IntDef({
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE,
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SimCombinationWarningType{}
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no SIM combination warning.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate two active SIMs are both CDMA hence there might be functional limitation.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
+
+    /**
+     * String intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate what's the name of SIM combination it has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios, and the
+     * name will be "operator1 & operator2".
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_NAMES =
+            "android.telephony.extra.SIM_COMBINATION_NAMES";
     //
     //
     // Device Info
@@ -2521,7 +2563,7 @@ public class TelephonyManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getNetworkType() {
-        return getNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -2604,7 +2646,7 @@ public class TelephonyManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getDataNetworkType() {
-        return getDataNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getDataNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7390,7 +7432,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -8173,7 +8215,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.isDataConnectivityPossible(getSubId(SubscriptionManager
-                        .getDefaultDataSubscriptionId()));
+                        .getActiveDataSubscriptionId()));
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isDataAllowed", e);
         }

@@ -1,0 +1,7 @@
+// Copyright 2012 The Android Open Source Project
+
+java_binary {
+    name: "content",
+    wrapper: "content",
+    srcs: ["**/*.java"],
+}

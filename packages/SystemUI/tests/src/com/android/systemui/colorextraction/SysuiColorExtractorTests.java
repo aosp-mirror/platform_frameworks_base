@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -57,6 +58,8 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
 
+    @Mock
+    private WallpaperManager mWallpaperManager;
     private ColorExtractor.GradientColors mColors;
     private SysuiColorExtractor mColorExtractor;
 
@@ -72,7 +75,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsNormal.set(mColors);
                     outGradientColorsDark.set(mColors);
                     outGradientColorsExtraDark.set(mColors);
-                }, mock(ConfigurationController.class), false);
+                }, mock(ConfigurationController.class), false, mWallpaperManager);
     }
 
     @Test
@@ -127,7 +130,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         Tonal tonal = mock(Tonal.class);
         ConfigurationController configurationController = mock(ConfigurationController.class);
         SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
-                tonal, configurationController, false /* registerVisibility */);
+                tonal, configurationController, false /* registerVisibility */, mWallpaperManager);
         verify(configurationController).addCallback(eq(sysuiColorExtractor));
 
         reset(tonal);

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.hardware.face.FaceManager
 import android.provider.Settings
-import com.android.internal.annotations.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.tuner.TunerService
 
@@ -29,9 +28,18 @@ import javax.inject.Singleton
 @Singleton
 class KeyguardBypassController {
 
+    /**
+     * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
+     */
+    var bypassEnabled: Boolean = false
+        get() = field && unlockMethodCache.isUnlockingWithFacePossible
+        private set
+
+    private val unlockMethodCache: UnlockMethodCache
+
     @Inject
-    constructor(context: Context,
-                tunerService: TunerService) {
+    constructor(context: Context, tunerService: TunerService) {
+        unlockMethodCache = UnlockMethodCache.getInstance(context)
         val faceManager = context.getSystemService(FaceManager::class.java)
         if (faceManager?.isHardwareDetected != true) {
             return
@@ -50,15 +58,4 @@ class KeyguardBypassController {
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
     }
-
-    @VisibleForTesting
-    constructor(bypassEnabled: Boolean) {
-       this.bypassEnabled = bypassEnabled;
-    }
-
-    /**
-     * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
-     */
-    var bypassEnabled: Boolean = false
-    private set
 }

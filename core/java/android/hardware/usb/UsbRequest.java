@@ -362,6 +362,30 @@ public class UsbRequest {
      * @return true if cancelling succeeded
      */
     public boolean cancel() {
+        if (mConnection == null) {
+            return false;
+        }
+
+        return mConnection.cancelRequest(this);
+    }
+
+    /**
+     * Cancels a pending queue operation (for use when the UsbDeviceConnection associated
+     * with this request is synchronized). This ensures we don't have a race where the
+     * device is closed and then the request is canceled which would lead to a
+     * use-after-free because the cancel operation uses the device connection
+     * information freed in the when UsbDeviceConnection is closed.<br/>
+     *
+     * This method assumes the connected is not closed while this method is executed.
+     *
+     * @return true if cancelling succeeded.
+     */
+    /* package */ boolean cancelIfOpen() {
+        if (mNativeContext == 0 || (mConnection != null && !mConnection.isOpen())) {
+            Log.w(TAG,
+                    "Detected attempt to cancel a request on a connection which isn't open");
+            return false;
+        }
         return native_cancel();
     }
 

@@ -16,24 +16,34 @@
 
 package com.android.systemui.assist.ui;
 
+import android.animation.ArgbEvaluator;
 import android.annotation.ColorInt;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 
+import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.phone.NavigationBarFragment;
+import com.android.systemui.statusbar.phone.NavigationBarTransitions;
 
 import java.util.ArrayList;
 
 /**
  * Shows lights at the bottom of the phone, marking the invocation progress.
  */
-public class InvocationLightsView extends View {
+public class InvocationLightsView extends View
+        implements NavigationBarTransitions.DarkIntensityListener {
 
     private static final String TAG = "InvocationLightsView";
 
@@ -49,9 +59,16 @@ public class InvocationLightsView extends View {
     // allocation on each frame.
     private final Path mPath = new Path();
     private final int mViewHeight;
+    private final int mStrokeWidth;
+    @ColorInt
+    private final int mLightColor;
+    @ColorInt
+    private final int mDarkColor;
 
     // Allocate variable for screen location lookup to avoid memory alloc onDraw()
     private int[] mScreenLocation = new int[2];
+    private boolean mRegistered = false;
+    private boolean mUseNavBarColor = true;
 
     public InvocationLightsView(Context context) {
         this(context, null);
@@ -69,8 +86,8 @@ public class InvocationLightsView extends View {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        int strokeWidth = DisplayUtils.convertDpToPx(LIGHT_HEIGHT_DP, context);
-        mPaint.setStrokeWidth(strokeWidth);
+        mStrokeWidth = DisplayUtils.convertDpToPx(LIGHT_HEIGHT_DP, context);
+        mPaint.setStrokeWidth(mStrokeWidth);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.MITER);
         mPaint.setAntiAlias(true);
@@ -82,13 +99,19 @@ public class InvocationLightsView extends View {
         CircularCornerPathRenderer cornerPathRenderer = new CircularCornerPathRenderer(
                 cornerRadiusBottom, cornerRadiusTop, displayWidth, displayHeight);
         mGuide = new PerimeterPathGuide(context, cornerPathRenderer,
-                strokeWidth / 2, displayWidth, displayHeight);
+                mStrokeWidth / 2, displayWidth, displayHeight);
 
         mViewHeight = Math.max(cornerRadiusBottom, cornerRadiusTop);
 
-        @ColorInt int lightColor = getResources().getColor(R.color.default_invocation_lights_color);
+        final int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(mContext, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(mContext, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(mContext, dualToneDarkTheme);
+        mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
+
         for (int i = 0; i < 4; i++) {
-            mAssistInvocationLights.add(new EdgeLight(lightColor, 0, 0));
+            mAssistInvocationLights.add(new EdgeLight(Color.TRANSPARENT, 0, 0));
         }
     }
 
@@ -100,6 +123,8 @@ public class InvocationLightsView extends View {
         if (progress == 0) {
             setVisibility(View.GONE);
         } else {
+            attemptRegisterNavBarListener();
+
             float cornerLengthNormalized =
                     mGuide.getRegionWidth(PerimeterPathGuide.Region.BOTTOM_LEFT);
             float arcLengthNormalized = cornerLengthNormalized * MINIMUM_CORNER_RATIO;
@@ -131,6 +156,21 @@ public class InvocationLightsView extends View {
         for (EdgeLight light : mAssistInvocationLights) {
             light.setLength(0);
         }
+        attemptUnregisterNavBarListener();
+    }
+
+    /**
+     * Sets all invocation lights to a single color. If color is null, uses the navigation bar
+     * color (updated when the nav bar color changes).
+     */
+    public void setColors(@Nullable @ColorInt Integer color) {
+        if (color == null) {
+            mUseNavBarColor = true;
+            mPaint.setStrokeCap(Paint.Cap.BUTT);
+            attemptRegisterNavBarListener();
+        } else {
+            setColors(color, color, color, color);
+        }
     }
 
     /**
@@ -138,11 +178,24 @@ public class InvocationLightsView extends View {
      */
     public void setColors(@ColorInt int color1, @ColorInt int color2,
             @ColorInt int color3, @ColorInt int color4) {
+        mUseNavBarColor = false;
+        attemptUnregisterNavBarListener();
         mAssistInvocationLights.get(0).setColor(color1);
         mAssistInvocationLights.get(1).setColor(color2);
         mAssistInvocationLights.get(2).setColor(color3);
         mAssistInvocationLights.get(3).setColor(color4);
     }
+
+    /**
+     * Reacts to changes in the navigation bar color
+     *
+     * @param darkIntensity 0 is the lightest color, 1 is the darkest.
+     */
+    @Override // NavigationBarTransitions.DarkIntensityListener
+    public void onDarkIntensity(float darkIntensity) {
+        updateDarkness(darkIntensity);
+    }
+
 
     @Override
     protected void onFinishInflate() {
@@ -166,15 +219,19 @@ public class InvocationLightsView extends View {
         getLocationOnScreen(mScreenLocation);
         canvas.translate(-mScreenLocation[0], -mScreenLocation[1]);
 
-        // if the lights are different colors, the inner ones need to be drawn last and with a
-        // square cap so that the join between lights is straight
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        renderLight(mAssistInvocationLights.get(0), canvas);
-        renderLight(mAssistInvocationLights.get(3), canvas);
+        if (mUseNavBarColor) {
+            for (EdgeLight light : mAssistInvocationLights) {
+                renderLight(light, canvas);
+            }
+        } else {
+            mPaint.setStrokeCap(Paint.Cap.ROUND);
+            renderLight(mAssistInvocationLights.get(0), canvas);
+            renderLight(mAssistInvocationLights.get(3), canvas);
 
-        mPaint.setStrokeCap(Paint.Cap.SQUARE);
-        renderLight(mAssistInvocationLights.get(1), canvas);
-        renderLight(mAssistInvocationLights.get(2), canvas);
+            mPaint.setStrokeCap(Paint.Cap.BUTT);
+            renderLight(mAssistInvocationLights.get(1), canvas);
+            renderLight(mAssistInvocationLights.get(2), canvas);
+        }
     }
 
     protected void setLight(int index, float offset, float length) {
@@ -185,10 +242,58 @@ public class InvocationLightsView extends View {
         mAssistInvocationLights.get(index).setLength(length);
     }
 
+    /**
+     * Receives an intensity from 0 (lightest) to 1 (darkest) and sets the handle color
+     * appropriately. Intention is to match the home handle color.
+     */
+    protected void updateDarkness(float darkIntensity) {
+        if (mUseNavBarColor) {
+            @ColorInt int invocationColor = (int) ArgbEvaluator.getInstance().evaluate(
+                    darkIntensity, mLightColor, mDarkColor);
+            for (EdgeLight light : mAssistInvocationLights) {
+                light.setColor(invocationColor);
+            }
+            invalidate();
+        }
+    }
+
     private void renderLight(EdgeLight light, Canvas canvas) {
         mGuide.strokeSegment(mPath, light.getOffset(), light.getOffset() + light.getLength());
         mPaint.setColor(light.getColor());
         canvas.drawPath(mPath, mPaint);
     }
 
+    private void attemptRegisterNavBarListener() {
+        if (!mRegistered) {
+            NavigationBarController controller = Dependency.get(NavigationBarController.class);
+            if (controller == null) {
+                return;
+            }
+
+            NavigationBarFragment navBar = controller.getDefaultNavigationBarFragment();
+            if (navBar == null) {
+                return;
+            }
+
+            updateDarkness(navBar.getBarTransitions().addDarkIntensityListener(this));
+            mRegistered = true;
+        }
+    }
+
+    private void attemptUnregisterNavBarListener() {
+        if (mRegistered) {
+            NavigationBarController controller = Dependency.get(NavigationBarController.class);
+            if (controller == null) {
+                return;
+            }
+
+            NavigationBarFragment navBar = controller.getDefaultNavigationBarFragment();
+            if (navBar == null) {
+                return;
+            }
+
+            navBar.getBarTransitions().removeDarkIntensityListener(this);
+            mRegistered = false;
+        }
+    }
 }

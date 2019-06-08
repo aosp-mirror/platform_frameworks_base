@@ -49,7 +49,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected int mClipBottomAmount;
     protected int mMinimumHeightForClipping = 0;
     protected float mExtraWidthForClipping = 0;
-    private boolean mDark;
+    private boolean mDozing;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
@@ -213,18 +213,18 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     /**
-     * Sets the notification as dark. The default implementation does nothing.
+     * Sets the notification as dozing. The default implementation does nothing.
      *
-     * @param dark Whether the notification should be dark.
+     * @param dozing Whether the notification should be dozing.
      * @param fade Whether an animation should be played to change the state.
      * @param delay If fading, the delay of the animation.
      */
-    public void setDark(boolean dark, boolean fade, long delay) {
-        mDark = dark;
+    public void setDozing(boolean dozing, boolean fade, long delay) {
+        mDozing = dozing;
     }
 
-    public boolean isDark() {
-        return mDark;
+    public boolean isDozing() {
+        return mDozing;
     }
 
     public boolean isRemoved() {

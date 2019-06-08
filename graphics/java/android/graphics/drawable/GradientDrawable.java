@@ -1757,7 +1757,7 @@ public class GradientDrawable extends Drawable {
         }
 
         int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
-        st.mAngle = angle % 360;
+        st.mAngle = ((angle % 360) + 360) % 360; // offset negative angle measures
 
         final TypedValue tv = a.peekValue(R.styleable.GradientDrawableGradient_gradientRadius);
         if (tv != null) {

@@ -72,6 +72,8 @@ static TextParserBase* selectParser(int section) {
             return new PsParser();
         case 2006:
             return new BatteryTypeParser();
+        case 3026: // system_trace is already a serialized protobuf
+            return new NoopParser();
         default:
             // Return no op parser when no specific ones are implemented.
             return new NoopParser();
