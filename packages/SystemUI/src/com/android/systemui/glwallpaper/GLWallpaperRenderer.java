@@ -52,6 +52,13 @@ public interface GLWallpaperRenderer {
     void updateAmbientMode(boolean inAmbientMode, long duration);
 
     /**
+     * Notify the wallpaper offsets changed.
+     * @param xOffset offset along x axis.
+     * @param yOffset offset along y axis.
+     */
+    void updateOffsets(float xOffset, float yOffset);
+
+    /**
      * Ask renderer to report the surface size it needs.
      */
     Size reportSurfaceSize();

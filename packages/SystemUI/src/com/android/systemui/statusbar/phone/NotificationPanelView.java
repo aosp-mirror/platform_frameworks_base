@@ -303,6 +303,8 @@ public class NotificationPanelView extends PanelView implements
     private int mCurrentPanelAlpha;
     private final Paint mAlphaPaint = new Paint();
     private Runnable mPanelAlphaEndAction;
+    private float mBottomAreaShadeAlpha;
+    private final ValueAnimator mBottomAreaShadeAlphaAnimator;
     private AnimatorListenerAdapter mAnimatorListenerAdapter = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -366,6 +368,14 @@ public class NotificationPanelView extends PanelView implements
         mPulseExpansionHandler = pulseExpansionHandler;
         mThemeResId = context.getThemeResId();
         dynamicPrivacyController.addListener(this);
+
+        mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
+        mBottomAreaShadeAlphaAnimator.addUpdateListener(animation -> {
+            mBottomAreaShadeAlpha = (float) animation.getAnimatedValue();
+            updateKeyguardBottomAreaAlpha();
+        });
+        mBottomAreaShadeAlphaAnimator.setDuration(160);
+        mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
     }
 
     /**
@@ -1368,8 +1378,18 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(false /* animate */);
         }
 
+        maybeAnimateBottomAreaAlpha();
         resetHorizontalPanelPosition();
         updateQsState();
+    }
+
+    private void maybeAnimateBottomAreaAlpha() {
+        mBottomAreaShadeAlphaAnimator.cancel();
+        if (mBarState == StatusBarState.SHADE_LOCKED) {
+            mBottomAreaShadeAlphaAnimator.start();
+        } else {
+            mBottomAreaShadeAlpha = 1f;
+        }
     }
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable() {
@@ -1462,6 +1482,7 @@ public class NotificationPanelView extends PanelView implements
         } else if (statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setAlpha(1f);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
         }
@@ -1980,6 +2001,7 @@ public class NotificationPanelView extends PanelView implements
                         ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f,
                 0f, 1f, getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
+        alpha *= mBottomAreaShadeAlpha;
         mKeyguardBottomArea.setAffordanceAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -2889,6 +2911,10 @@ public class NotificationPanelView extends PanelView implements
         mDozing = dozing;
         mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
         mKeyguardBottomArea.setDozing(mDozing, animate);
+
+        if (dozing) {
+            mBottomAreaShadeAlphaAnimator.cancel();
+        }
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {

@@ -133,8 +133,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> volanie cez Wi-Fi"</string>
-    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
-    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Volanie cez Wi‑Fi"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Volanie cez WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> volanie cez WLAN"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -303,7 +302,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; používať fotky, médiá a súbory v zariadení?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nahrávanie zvuku"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; zaznamenávať zvuk?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Chcete povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; nahrávať zvuk?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"prístup k vašej fyzickej aktivite"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k vašej fyzickej aktivite?"</string>
@@ -432,7 +431,7 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"meniť nastavenia zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikácii upraviť globálne nastavenia zvuku, ako je hlasitosť, alebo určiť, z ktorého reproduktora bude zvuk vychádzať."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávať zvuk"</string>
-    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Táto aplikácia môže kedykoľvek zaznamenávať zvuk pomocou mikrofónu."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Táto aplikácia môže kedykoľvek nahrávať zvuk pomocou mikrofónu."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"posielanie príkazov do SIM karty"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Umožňuje aplikácii odosielať príkazy na SIM kartu. Toto je veľmi nebezpečné povolenie."</string>
     <string name="permlab_activityRecognition" msgid="3634590230567608356">"rozpoznávanie fyzickej aktivity"</string>
@@ -1659,8 +1658,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Prekrytie č. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", zabezpečené"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Toto spustenie aktivity na pozadí v režime <xliff:g id="PACKAGENAME">%1$s</xliff:g> bude blokované v budúcich zostavách Q. Pozrite si informácie na g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Spustenie aktivity na pozadí v režime <xliff:g id="PACKAGENAME">%1$s</xliff:g> je blokované. Pozrite si informácie na g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nepamätám si vzor"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Nesprávny vzor"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nesprávne heslo"</string>
@@ -1716,18 +1713,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skratka dostupnosti zapla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skratka dostupnosti vypla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Ak chcete používať službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, pridržte tri sekundy oba klávesy hlasitosti"</string>
-    <!-- no translation found for accessibility_button_prompt_text (1176658502969738564) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8259145549733019401) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1041435574275047665) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (7003212763213614833) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (5261788874937410950) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (4969448938984394550) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Vyberte službu, ktorú chcete používať po klepnutí na tlačidlo dostupnosti:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Vyberte službu, ktorú chcete používať s daným gestom dostupnosti (potiahnutím dvoma prstami z dolnej časti obrazovky smerom nahor):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Vyberte službu, ktorú chcete používať s daným gestom dostupnosti (potiahnutím troma prstami z dolnej časti obrazovky smerom nahor):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Služby prepnete pridržaním tlačidla dostupnosti."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Služby prepnete potiahnutím dvoma prstami smerom nahor a pridržaním."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Služby prepnete potiahnutím troma prstami smerom nahor a pridržaním."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Priblíženie"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>

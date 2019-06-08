@@ -545,8 +545,15 @@ int64_t getWallClockMillis() {
     return time(nullptr) * MS_PER_SEC;
 }
 
-int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs) {
-    return timestampNs / NS_PER_SEC / (5 * 60) * NS_PER_SEC * (5 * 60);
+int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs) {
+    if (AtomsInfo::kTruncatingTimestampAtomBlackList.find(atomId) !=
+            AtomsInfo::kTruncatingTimestampAtomBlackList.end() ||
+        (atomId >= StatsdStats::kTimestampTruncationStartTag &&
+         atomId <= StatsdStats::kTimestampTruncationEndTag)) {
+        return timestampNs / NS_PER_SEC / (5 * 60) * NS_PER_SEC * (5 * 60);
+    } else {
+        return timestampNs;
+    }
 }
 
 int64_t NanoToMillis(const int64_t nano) {

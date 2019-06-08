@@ -146,16 +146,9 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
 
     uint64_t wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
-    const bool truncateTimestamp =
-            android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.find(event.GetTagId()) ==
-            android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.end();
-    if (truncateTimestamp) {
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
-            (long long)truncateTimestampNsToFiveMinutes(event.GetElapsedTimestampNs()));
-    } else {
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
-            (long long)event.GetElapsedTimestampNs());
-    }
+    const int64_t elapsedTimeNs = truncateTimestampIfNecessary(
+            event.GetTagId(), event.GetElapsedTimestampNs());
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS, (long long) elapsedTimeNs);
 
     uint64_t eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
     event.ToProto(*mProto);

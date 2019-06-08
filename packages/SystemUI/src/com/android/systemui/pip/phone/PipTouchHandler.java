@@ -125,6 +125,7 @@ public class PipTouchHandler {
     private int mImeOffset;
     private boolean mIsShelfShowing;
     private int mShelfHeight;
+    private int mMovementBoundsExtraOffsets;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
@@ -262,7 +263,7 @@ public class PipTouchHandler {
         mShelfHeight = shelfHeight;
     }
 
-    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
+    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
 
@@ -283,6 +284,12 @@ public class PipTouchHandler {
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
                 bottomOffset);
 
+        // The extra offset does not really affect the movement bounds, but are applied based on the
+        // current state (ime showing, or shelf offset) when we need to actually shift
+        int extraOffset = Math.max(
+                mIsImeShowing ? mImeOffset : 0,
+                !mIsImeShowing && mIsShelfShowing ? mShelfHeight : 0);
+
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
         if (fromImeAdjustment || fromShelfAdjustment) {
@@ -290,41 +297,19 @@ public class PipTouchHandler {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final int adjustedOffset = Math.max(mIsImeShowing ? mImeHeight + mImeOffset : 0,
-                        mIsShelfShowing ? mShelfHeight : 0);
-                Rect normalAdjustedBounds = new Rect();
-                mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalAdjustedBounds,
-                        adjustedOffset);
-                Rect expandedAdjustedBounds = new Rect();
-                mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds,
-                        expandedAdjustedBounds, adjustedOffset);
-                final Rect toAdjustedBounds = mMenuState == MENU_STATE_FULL
-                        ? expandedAdjustedBounds
-                        : normalAdjustedBounds;
-                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
-                        ? expandedMovementBounds
-                        : normalMovementBounds;
-
-                // If the PIP window needs to shift to right above shelf/IME and it's already above
-                // that, don't move the PIP window.
-                if (toAdjustedBounds.bottom < mMovementBounds.bottom
-                        && animatingBounds.top < toAdjustedBounds.bottom) {
-                    return;
-                }
-
-                // If the PIP window needs to shift down due to dismissal of shelf/IME but it's way
-                // above the position as if shelf/IME shows, don't move the PIP window.
-                int movementBoundsAdjustment = toMovementBounds.bottom - mMovementBounds.bottom;
-                int offsetAdjustment = fromImeAdjustment ? mImeOffset : mShelfHeight;
-                final float bottomOffsetBufferInPx = BOTTOM_OFFSET_BUFFER_DP
+                final float offsetBufferPx = BOTTOM_OFFSET_BUFFER_DP
                         * mContext.getResources().getDisplayMetrics().density;
-                if (toAdjustedBounds.bottom >= mMovementBounds.bottom
-                        && animatingBounds.top + Math.round(bottomOffsetBufferInPx)
-                        < toAdjustedBounds.bottom - movementBoundsAdjustment - offsetAdjustment) {
-                    return;
+                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
+                        ? new Rect(expandedMovementBounds)
+                        : new Rect(normalMovementBounds);
+                final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
+                final int toBottom = toMovementBounds.bottom < toMovementBounds.top
+                        ? toMovementBounds.bottom
+                        : toMovementBounds.bottom - extraOffset;
+                if ((Math.min(prevBottom, toBottom) - offsetBufferPx) <= curBounds.top
+                        && curBounds.top <= (Math.max(prevBottom, toBottom) + offsetBufferPx)) {
+                    mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
                 }
-
-                animateToOffset(animatingBounds, toAdjustedBounds);
             }
         }
 
@@ -335,6 +320,7 @@ public class PipTouchHandler {
         mDisplayRotation = displayRotation;
         mInsetBounds.set(insetBounds);
         updateMovementBounds(mMenuState);
+        mMovementBoundsExtraOffsets = extraOffset;
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
@@ -344,14 +330,6 @@ public class PipTouchHandler {
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
         }
-    }
-
-    private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
-        int offset = toAdjustedBounds.bottom - animatingBounds.top;
-        // In landscape mode, PIP window can go offset while launching IME. We want to align the
-        // the top of the PIP window with the top of the movement bounds in that case.
-        offset += Math.max(0, mMovementBounds.top - animatingBounds.top);
-        mMotionHelper.animateToOffset(animatingBounds, offset);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {

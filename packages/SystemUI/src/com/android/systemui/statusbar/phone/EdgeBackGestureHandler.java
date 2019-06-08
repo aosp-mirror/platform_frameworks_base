@@ -152,6 +152,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private WindowManager.LayoutParams mEdgePanelLp;
     private final Rect mSamplingRect = new Rect();
     private RegionSamplingHelper mRegionSamplingHelper;
+    private int mLeftInset;
+    private int mRightInset;
 
     public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService) {
         final Resources res = context.getResources();
@@ -299,7 +301,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             return false;
         }
 
-        if (x > mEdgeWidth && x < (mDisplaySize.x - mEdgeWidth)) {
+        if (x > mEdgeWidth + mLeftInset && x < (mDisplaySize.x - mEdgeWidth - mRightInset)) {
             return false;
         }
         boolean isInExcludedRegion = mExcludeRegion.contains(x, y);
@@ -325,7 +327,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
-            mIsOnLeftEdge = ev.getX() <= mEdgeWidth;
+            mIsOnLeftEdge = ev.getX() <= mEdgeWidth + mLeftInset;
             mAllowGesture = !QuickStepContract.isBackGestureDisabled(stateFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
@@ -400,7 +402,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     private void updateSamplingRect() {
         int top = mEdgePanelLp.y;
-        int left = mIsOnLeftEdge ? 0 : mDisplaySize.x - mEdgePanelLp.width;
+        int left = mIsOnLeftEdge ? mLeftInset : mDisplaySize.x - mRightInset - mEdgePanelLp.width;
         int right = left + mEdgePanelLp.width;
         int bottom = top + mEdgePanelLp.height;
         mSamplingRect.set(left, top, right, bottom);
@@ -440,6 +442,11 @@ public class EdgeBackGestureHandler implements DisplayListener {
             ev.setDisplayId(bubbleDisplayId);
         }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    public void setInsets(int leftInset, int rightInset) {
+        mLeftInset = leftInset;
+        mRightInset = rightInset;
     }
 
     class SysUiInputEventReceiver extends InputEventReceiver {

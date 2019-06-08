@@ -1637,8 +1637,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Nadsloj #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", osigurano"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Pokretanje aktivnosti u pozadini na web lokaciji <xliff:g id="PACKAGENAME">%1$s</xliff:g> blokirat će se u budućim Q verzijama. Pogledajte g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Blokirano je pokretanje aktivnosti u pozadini na web lokaciji <xliff:g id="PACKAGENAME">%1$s</xliff:g>. Pogledajte g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Zaboravili ste uzorak?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pogrešan uzorak"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Pogrešna lozinka"</string>

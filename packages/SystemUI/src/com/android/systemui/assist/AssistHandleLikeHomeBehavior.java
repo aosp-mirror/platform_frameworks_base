@@ -26,6 +26,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 
+import java.io.PrintWriter;
+
 /**
  * Assistant Handle behavior that makes Assistant handles show/hide when the home handle is
  * shown/hidden, respectively.
@@ -107,5 +109,13 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
         } else {
             mAssistHandleCallbacks.showAndStay();
         }
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println("Current AssistHandleLikeHomeBehavior State:");
+
+        pw.println(prefix + "   mIsDozing=" + mIsDozing);
+        pw.println(prefix + "   mIsHomeHandleHiding=" + mIsHomeHandleHiding);
     }
 }

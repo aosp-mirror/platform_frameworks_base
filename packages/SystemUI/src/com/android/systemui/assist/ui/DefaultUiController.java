@@ -21,7 +21,6 @@ import static com.android.systemui.assist.AssistManager.DISMISS_REASON_INVOCATIO
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.metrics.LogMaker;
@@ -52,6 +51,7 @@ public class DefaultUiController implements AssistManager.UiController {
     private static final long ANIM_DURATION_MS = 200;
 
     protected final FrameLayout mRoot;
+    protected InvocationLightsView mInvocationLightsView;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mLayoutParams;
@@ -62,7 +62,6 @@ public class DefaultUiController implements AssistManager.UiController {
     private float mLastInvocationProgress = 0;
 
     private ValueAnimator mInvocationAnimator = new ValueAnimator();
-    private InvocationLightsView mInvocationLightsView;
 
     public DefaultUiController(Context context) {
         mRoot = new FrameLayout(context);
@@ -127,14 +126,6 @@ public class DefaultUiController implements AssistManager.UiController {
         mInvocationLightsView.hide();
         mInvocationInProgress = false;
         updateAssistHandleVisibility();
-    }
-
-    /**
-     * Sets the colors of the four invocation lights, from left to right.
-     */
-    public void setInvocationColors(@ColorInt int color1, @ColorInt int color2,
-            @ColorInt int color3, @ColorInt int color4) {
-        mInvocationLightsView.setColors(color1, color2, color3, color4);
     }
 
     protected static void logInvocationProgressMetrics(

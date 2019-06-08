@@ -131,8 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-hívás"</string>
-    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
-    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi‑Fi-hívás"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-hívás"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN-hívás"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -1613,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. fedvény"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> képpont"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", biztonságos"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Ez a háttértevékenység-indítás le lesz tiltva a(z) <xliff:g id="PACKAGENAME">%1$s</xliff:g> számára a jövőbeni Q-buildeknél. Lásd: g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"A(z) <xliff:g id="PACKAGENAME">%1$s</xliff:g> számára le van tiltva a háttértevékenységek indítása. Lásd: g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Helytelen minta"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Helytelen jelszó"</string>
