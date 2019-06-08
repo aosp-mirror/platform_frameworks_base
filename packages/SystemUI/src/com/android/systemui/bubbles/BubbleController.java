@@ -736,6 +736,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         boolean suppressNotification = entry.getBubbleMetadata() != null
                 && entry.getBubbleMetadata().isNotificationSuppressed()
                 && isForegroundApp(mContext, entry.notification.getPackageName());
+        Bubble b = mBubbleData.getBubbleWithKey(entry.key);
+        if (b != null && mBubbleData.getSelectedBubble() == b && mBubbleData.isExpanded()) {
+            // If we're expanded & selected don't show in shade
+            suppressNotification = true;
+        }
         entry.setShowInShadeWhenBubble(!suppressNotification);
     }
 
