@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ওয়াই-ফাই কলিং"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi‑Fi কলিং"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN কল"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN কল"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ওয়াই-ফাই"</string>
@@ -1612,8 +1613,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"আচ্ছাদন #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", নিরাপদ"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>-এর ব্যাকগ্রাউন্ড অ্যাক্টিভিটি ভবিষ্যতে Q বিল্ড ভার্সনে ব্লক করা হবে। g.co/dev/bgblock লিঙ্ক দেখুন।"</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>-এর ব্যাকগ্রাউন্ড অ্যাক্টিভিটি ব্লক করা হয়েছে। g.co/dev/bgblock লিঙ্ক দেখুন।"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"প্যাটার্ন ভুলে গেছেন"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ভুল প্যাটার্ন"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ভুল পাসওয়ার্ড"</string>
@@ -1667,8 +1666,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে চালু করেছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে বন্ধ করেছে"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যবহার করতে ভলিউম কী বোতাম ৩ সেকেন্ডের জন্য চেপে ধরে রাখুন"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"অ্যাক্সেসযোগ্যতা বোতামের সাহায্যে যে বৈশিষ্ট্যটি নিয়ন্ত্রণ করতে চান, সেটি বেছে নিন:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"বৈশিষ্ট্যগুলি পরিবর্তন করতে অ্যাক্সেসযোগ্যতা বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"অ্যাক্সেসিবিলিটি বোতামে ট্যাপ করে ব্যবহার করার জন্য এই পরিষেবাটি বেছে নিন:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"অ্যাক্সেসিবিলিটি জেসচারের সাহায্যে ব্যবহার করার জন্য এই পরিষেবা বেছে নিন (দুটি আঙুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"অ্যাক্সেসিবিলিটি জেসচারের সাহায্যে ব্যবহার করার জন্য এই পরিষেবা বেছে নিন (তিনটি আঙুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে অ্যাক্সেসিবিলিটি বোতামটি টাচ করে &amp; ধরে রাখুন।"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে, দুটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে রাখুন।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে রাখুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="3768006783166984410">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> নামের ব্যবহারকারীতে যাচ্ছে…"</string>

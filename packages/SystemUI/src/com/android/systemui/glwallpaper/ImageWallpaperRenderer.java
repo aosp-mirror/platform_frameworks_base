@@ -29,6 +29,8 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
+import android.view.DisplayInfo;
+import android.view.WindowManager;
 
 import com.android.systemui.R;
 
@@ -41,8 +43,8 @@ import java.io.PrintWriter;
 public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         ImageRevealHelper.RevealStateListener {
     private static final String TAG = ImageWallpaperRenderer.class.getSimpleName();
-    private static final float SCALE_VIEWPORT_MIN = 0.98f;
-    private static final float SCALE_VIEWPORT_MAX = 1f;
+    private static final float SCALE_VIEWPORT_MIN = 1f;
+    private static final float SCALE_VIEWPORT_MAX = 1.1f;
 
     private final WallpaperManager mWallpaperManager;
     private final ImageGLProgram mProgram;
@@ -51,14 +53,24 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     private final ImageRevealHelper mImageRevealHelper;
 
     private SurfaceProxy mProxy;
-    private Rect mSurfaceSize;
+    private final Rect mScissor;
+    private final Rect mSurfaceSize = new Rect();
+    private final Rect mViewport = new Rect();
     private Bitmap mBitmap;
+    private boolean mScissorMode;
+    private float mXOffset;
+    private float mYOffset;
 
     public ImageWallpaperRenderer(Context context, SurfaceProxy proxy) {
         mWallpaperManager = context.getSystemService(WallpaperManager.class);
         if (mWallpaperManager == null) {
             Log.w(TAG, "WallpaperManager not available");
         }
+
+        DisplayInfo displayInfo = new DisplayInfo();
+        WindowManager wm = context.getSystemService(WindowManager.class);
+        wm.getDefaultDisplay().getDisplayInfo(displayInfo);
+        mScissor = new Rect(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
         mProxy = proxy;
         mProgram = new ImageGLProgram(context);
@@ -91,7 +103,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
             mBitmap = mWallpaperManager.getBitmap();
             mWallpaperManager.forgetLoadedWallpaper();
             if (mBitmap != null) {
-                mSurfaceSize = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+                mSurfaceSize.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
             }
         }
         return mBitmap != null;
@@ -107,13 +119,17 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         float threshold = mImageProcessHelper.getThreshold();
         float reveal = mImageRevealHelper.getReveal();
 
-        glClear(GL_COLOR_BUFFER_BIT);
-
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_AOD2OPACITY), 1);
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), threshold);
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_REVEAL), reveal);
 
-        scaleViewport(reveal);
+        glClear(GL_COLOR_BUFFER_BIT);
+        // We only need to scale viewport while doing transition.
+        if (mScissorMode) {
+            scaleViewport(reveal);
+        } else {
+            glViewport(0, 0, mSurfaceSize.width(), mSurfaceSize.height());
+        }
         mWallpaper.useTexture();
         mWallpaper.draw();
     }
@@ -121,6 +137,15 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     @Override
     public void updateAmbientMode(boolean inAmbientMode, long duration) {
         mImageRevealHelper.updateAwake(!inAmbientMode, duration);
+    }
+
+    @Override
+    public void updateOffsets(float xOffset, float yOffset) {
+        mXOffset = xOffset;
+        mYOffset = yOffset;
+        int left = (int) ((mSurfaceSize.width() - mScissor.width()) * xOffset);
+        int right = left + mScissor.width();
+        mScissor.set(left, mScissor.top, right, mScissor.bottom);
     }
 
     @Override
@@ -134,15 +159,18 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     }
 
     private void scaleViewport(float reveal) {
-        int width = mSurfaceSize.width();
-        int height = mSurfaceSize.height();
+        int left = mScissor.left;
+        int top = mScissor.top;
+        int width = mScissor.width();
+        int height = mScissor.height();
         // Interpolation between SCALE_VIEWPORT_MAX and SCALE_VIEWPORT_MIN by reveal.
-        float vpScaled = MathUtils.lerp(SCALE_VIEWPORT_MAX, SCALE_VIEWPORT_MIN, reveal);
+        float vpScaled = MathUtils.lerp(SCALE_VIEWPORT_MIN, SCALE_VIEWPORT_MAX, reveal);
         // Calculate the offset amount from the lower left corner.
-        float offset = (SCALE_VIEWPORT_MAX - vpScaled) / 2;
+        float offset = (SCALE_VIEWPORT_MIN - vpScaled) / 2;
         // Change the viewport.
-        glViewport((int) (width * offset), (int) (height * offset),
+        mViewport.set((int) (left + width * offset), (int) (top + height * offset),
                 (int) (width * vpScaled), (int) (height * vpScaled));
+        glViewport(mViewport.left, mViewport.top, mViewport.right, mViewport.bottom);
     }
 
     @Override
@@ -152,11 +180,19 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
 
     @Override
     public void onRevealStart() {
+        mScissorMode = true;
+        // Use current display area of texture.
+        mWallpaper.adjustTextureCoordinates(mSurfaceSize, mScissor, mXOffset, mYOffset);
         mProxy.preRender();
     }
 
     @Override
     public void onRevealEnd() {
+        mScissorMode = false;
+        // reset texture coordinates to use full texture.
+        mWallpaper.adjustTextureCoordinates(null, null, 0, 0);
+        // We need draw full texture back before finishing render.
+        mProxy.requestRender();
         mProxy.postRender();
     }
 
@@ -164,6 +200,12 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     public void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
         out.print(prefix); out.print("mProxy="); out.print(mProxy);
         out.print(prefix); out.print("mSurfaceSize="); out.print(mSurfaceSize);
+        out.print(prefix); out.print("mScissor="); out.print(mScissor);
+        out.print(prefix); out.print("mViewport="); out.print(mViewport);
+        out.print(prefix); out.print("mScissorMode="); out.print(mScissorMode);
+        out.print(prefix); out.print("mXOffset="); out.print(mXOffset);
+        out.print(prefix); out.print("mYOffset="); out.print(mYOffset);
         out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
+        mWallpaper.dump(prefix, fd, out, args);
     }
 }

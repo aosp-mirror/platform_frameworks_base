@@ -131,6 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Kupiga Simu Kupitia Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Kupiga Simu Kupitia WiFi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Simu ya WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Simu ya WLAN ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -1611,8 +1612,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Uwekeleaji #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", salama"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Itazuia shughuli hii ya chinichini inayoanzia <xliff:g id="PACKAGENAME">%1$s</xliff:g> katika miundo ya baadaye ya Q. Angalia g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Imezuia shughuli za chinichini zinazoanzia <xliff:g id="PACKAGENAME">%1$s</xliff:g>. Angalia g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Umesahau Ruwaza"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Mchoro huo si sahihi"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nenosiri Lisilo sahihi"</string>
@@ -1666,8 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Bonyeza na ushikilie vitufe vyote viwili vya sauti kwa sekunde tatu ili utumie <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Chagua kipengele utakachotumia, ukigusa kitufe cha Ufikivu:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ili kubadilisha vipengele, gusa na ushikilie kitufe cha Ufikivu."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Chagua huduma ya kutumia unapogusa kitufe cha ufikivu:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chagua huduma ya kutumia pamoja na ishara ya ufikivu (telezesha vidole viwili juu kutoka sehemu ya chini ya skrini):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Chagua huduma ya kutumia pamoja na ishara ya ufikivu (telezesha vidole vitatu juu kutoka sehemu ya chini ya skrini):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Ili ubadilishe kati ya huduma, gusa na ushikilie kitufe cha ufikivu."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Ili ubadilishe kati ya huduma, telezesha vidole viwili juu na ushikilie."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Ili ubadilishe kati ya huduma, telezesha vidole vitatu juu na ushikilie."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ukuzaji"</string>
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Inabadili kwenda <xliff:g id="NAME">%1$s</xliff:g>…"</string>

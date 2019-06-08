@@ -83,8 +83,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
     @UiThreadTest
     public void animationStartType_getsClearedAfterUpdatingVisibilitiesWithoutAnimation() {
         mView.setHeadsUp(true);
-        mView.setDark(true, false, 0);
-        mView.setDark(false, true, 0);
+        mView.setDozing(true, false, 0);
+        mView.setDozing(false, true, 0);
         mView.setHeadsUpAnimatingAway(true);
         assertFalse(mView.isAnimatingVisibleType());
     }

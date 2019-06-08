@@ -227,7 +227,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -811,8 +810,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController = SystemUIFactory.getInstance()
                 .createNotificationIconAreaController(context, this,
                         mStatusBarStateController, mNotificationListener);
+        mWakeUpCoordinator.setIconAreaController(mNotificationIconAreaController);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
+        mNotificationPanel.setOnReinflationListener(mNotificationIconAreaController::initAodIcons);
 
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
@@ -1189,6 +1190,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
             ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
         }
+        mNotificationIconAreaController.onThemeChanged();
     }
 
     @Override
@@ -2131,6 +2133,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 checkBarModes();
                 mAutoHideController.touchAutoHide();
             }
+            mStatusBarStateController.setSystemUiVisibility(mSystemUiVisibility);
         }
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
                 mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode,
@@ -3666,8 +3669,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateNotificationPanelTouchState() {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
                 && !DozeParameters.getInstance(mContext).shouldControlScreenOff();
-        mNotificationPanel.setTouchAndAnimationDisabled((!mDeviceInteractive && !mPulsing)
-                || goingToSleepWithoutAnimation);
+        boolean disabled = (!mDeviceInteractive && !mPulsing) || goingToSleepWithoutAnimation;
+        mNotificationPanel.setTouchAndAnimationDisabled(disabled);
+        mNotificationIconAreaController.setAnimationsEnabled(!disabled);
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
@@ -3967,6 +3971,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
 
                 private void setPulsing(boolean pulsing) {
+                    mStatusBarStateController.setPulsing(pulsing);
                     mStatusBarKeyguardViewManager.setPulsing(pulsing);
                     mKeyguardViewMediator.setPulsing(pulsing);
                     mNotificationPanel.setPulsing(pulsing);

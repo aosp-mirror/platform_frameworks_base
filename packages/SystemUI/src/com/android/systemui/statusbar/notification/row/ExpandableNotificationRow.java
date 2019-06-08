@@ -2051,18 +2051,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark == dark) {
+    public void setDozing(boolean dozing, boolean fade, long delay) {
+        if (mDozing == dozing) {
             return;
         }
-        super.setDark(dark, fade, delay);
+        super.setDozing(dozing, fade, delay);
         if (!mIsAmbientPulsing) {
             // Only fade the showing view of the pulsing notification.
             fade = false;
         }
         final NotificationContentView showing = getShowingLayout();
         if (showing != null) {
-            showing.setDark(dark, fade, delay);
+            showing.setDozing(dozing, fade, delay);
         }
         updateShelfIconColor();
     }
@@ -2180,7 +2180,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     @Override
     public boolean isSoundEffectsEnabled() {
-        final boolean mute = mDark && mSecureStateProvider != null &&
+        final boolean mute = mDozing && mSecureStateProvider != null &&
                 !mSecureStateProvider.getAsBoolean();
         return !mute && super.isSoundEffectsEnabled();
     }
@@ -2563,7 +2563,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         showingLayout.updateBackgroundColor(animated);
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateShelfIconColor();
-        showingLayout.setDark(isDark(), false /* animate */, 0 /* delay */);
+        showingLayout.setDozing(isDozing(), false /* animate */, 0 /* delay */);
         mShowingPublicInitialized = true;
     }
 

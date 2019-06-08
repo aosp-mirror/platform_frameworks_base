@@ -567,7 +567,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                     ? parentState.zTranslation
                     : 0;
             childState.dimmed = parentState.dimmed;
-            childState.dark = parentState.dark;
+            childState.dozing = parentState.dozing;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;

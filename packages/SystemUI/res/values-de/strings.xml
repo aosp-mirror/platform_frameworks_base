@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Benachrichtigungen"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"Der Akku ist fast leer"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> ausstehend; noch ca. <xliff:g id="TIME">%2$s</xliff:g>, basierend auf deiner Nutzung"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Noch <xliff:g id="PERCENTAGE">%1$s</xliff:g> übrig; bei deinem Nutzungsmuster hast du noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> ausstehend; noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Noch <xliff:g id="PERCENTAGE">%s</xliff:g>. Der Energiesparmodus ist aktiviert."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"Aufladen über USB nicht möglich. Verwende das mit dem Gerät gelieferte Ladegerät."</string>
@@ -199,6 +199,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Akku bei <xliff:g id="PERCENTAGE">%1$s</xliff:g> %, bei deinem Nutzungsmuster hast du noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />
@@ -402,7 +403,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Erneut tippen, um Benachrichtigung zu öffnen"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Zum Entsperren nach oben wischen"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Zum Öffnen nach oben wischen"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Dieses Gerät wird von deiner Organisation verwaltet"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Dieses Gerät wird von <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> verwaltet"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Zum Öffnen des Telefons vom Symbol wegwischen"</string>
@@ -936,8 +937,6 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Nach unten rechts verschieben"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Schließen"</string>
-    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
-    <skip />
-    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
-    <skip />
+    <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Systemsteuerungseinstellungen wurden angepasst. Änderungen kannst du in den Einstellungen vornehmen."</string>
+    <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Gehe zu den Einstellungen, um die Systemsteuerung anzupassen"</string>
 </resources>

@@ -25,6 +25,9 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.Dimension;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -49,6 +52,7 @@ import android.os.SystemProperties;
 import android.provider.Settings.Secure;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -60,12 +64,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -176,29 +176,59 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         }
     }
 
+    /**
+     * Returns an animator that animates the given view from start to end over durationMs. Start and
+     * end represent total animation progress: 0 is the start, 1 is the end, 1.1 would be an
+     * overshoot.
+     */
+    Animator getHandleAnimator(View view, float start, float end, boolean isLeft, long durationMs,
+            Interpolator interpolator) {
+        // Note that lerp does allow overshoot, in cases where start and end are outside of [0,1].
+        float scaleStart = MathUtils.lerp(2f, 1f, start);
+        float scaleEnd = MathUtils.lerp(2f, 1f, end);
+        Animator scaleX = ObjectAnimator.ofFloat(view, View.SCALE_X, scaleStart, scaleEnd);
+        Animator scaleY = ObjectAnimator.ofFloat(view, View.SCALE_Y, scaleStart, scaleEnd);
+        float translationStart = MathUtils.lerp(0.2f, 0f, start);
+        float translationEnd = MathUtils.lerp(0.2f, 0f, end);
+        int xDirection = isLeft ? -1 : 1;
+        Animator translateX = ObjectAnimator.ofFloat(view, View.TRANSLATION_X,
+                xDirection * translationStart * view.getWidth(),
+                xDirection * translationEnd * view.getWidth());
+        Animator translateY = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y,
+                translationStart * view.getHeight(), translationEnd * view.getHeight());
+
+        AnimatorSet set = new AnimatorSet();
+        set.play(scaleX).with(scaleY);
+        set.play(scaleX).with(translateX);
+        set.play(scaleX).with(translateY);
+        set.setDuration(durationMs);
+        set.setInterpolator(interpolator);
+        return set;
+    }
+
     private void fade(View view, boolean fadeIn, boolean isLeft) {
         if (fadeIn) {
             view.animate().cancel();
             view.setAlpha(1f);
             view.setVisibility(View.VISIBLE);
 
-            AnimationSet anim = new AnimationSet(true);
-            anim.setDuration(900);
-
-            Animation scaleAnimation = new ScaleAnimation(2f, 1f, 2f, 1f,
-                    ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
-            anim.addAnimation(scaleAnimation);
-            anim.setInterpolator(new PathInterpolator(0.02f, 0.44f, 0.67f, 1.00f));
-
-            Animation translateAnimation = new TranslateAnimation(
-                    TranslateAnimation.RELATIVE_TO_SELF, isLeft ? -0.2f : 0.2f,
-                    TranslateAnimation.RELATIVE_TO_SELF,
-                    0f,
-                    TranslateAnimation.RELATIVE_TO_SELF, 0.2f, TranslateAnimation.RELATIVE_TO_SELF,
-                    0f);
-            anim.addAnimation(translateAnimation);
-            anim.setInterpolator(new OvershootInterpolator());
-            view.startAnimation(anim);
+            // A piecewise spring-like interpolation.
+            // End value in one animator call must match the start value in the next, otherwise
+            // there will be a discontinuity.
+            AnimatorSet anim = new AnimatorSet();
+            Animator first = getHandleAnimator(view, 0, 1.1f, isLeft, 750,
+                    new PathInterpolator(0, 0.45f, .67f, 1f));
+            Interpolator secondInterpolator = new PathInterpolator(0.33f, 0, 0.67f, 1f);
+            Animator second = getHandleAnimator(view, 1.1f, 0.97f, isLeft, 400,
+                    secondInterpolator);
+            Animator third = getHandleAnimator(view, 0.97f, 1.02f, isLeft, 400,
+                    secondInterpolator);
+            Animator fourth = getHandleAnimator(view, 1.02f, 1f, isLeft, 400,
+                    secondInterpolator);
+            anim.play(first).before(second);
+            anim.play(second).before(third);
+            anim.play(third).before(fourth);
+            anim.start();
         } else {
             view.animate().cancel();
             view.animate().setDuration(400).alpha(0f);
