@@ -57,11 +57,13 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -171,7 +173,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
         TestableNotificationInterruptionStateProvider interruptionStateProvider =
-                new TestableNotificationInterruptionStateProvider(mContext);
+                new TestableNotificationInterruptionStateProvider(mContext,
+                        mock(NotificationFilter.class),
+                        mock(StatusBarStateController.class));
         interruptionStateProvider.setUpWithPresenter(
                 mock(NotificationPresenter.class),
                 mock(HeadsUpManager.class),
@@ -647,8 +651,9 @@ public class BubbleControllerTest extends SysuiTestCase {
     public static class TestableNotificationInterruptionStateProvider extends
             NotificationInterruptionStateProvider {
 
-        public TestableNotificationInterruptionStateProvider(Context context) {
-            super(context);
+        public TestableNotificationInterruptionStateProvider(Context context,
+                NotificationFilter filter, StatusBarStateController controller) {
+            super(context, filter, controller);
             mUseHeadsUp = true;
         }
     }
