@@ -3886,8 +3886,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
-        private boolean mWakeLockScreenPerformsAuth = SystemProperties.getBoolean(
-                "persist.sysui.wake_performs_auth", false);
+        @VisibleForTesting
+        boolean mWakeLockScreenPerformsAuth = SystemProperties.getBoolean(
+                "persist.sysui.wake_performs_auth", true);
 
         @Override
         public String toString() {
