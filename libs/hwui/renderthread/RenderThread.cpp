@@ -156,7 +156,9 @@ void RenderThread::initializeDisplayEventReceiver() {
     LOG_ALWAYS_FATAL_IF(mVsyncSource, "Initializing a second DisplayEventReceiver?");
 
     if (!Properties::isolatedProcess) {
-        auto receiver = std::make_unique<DisplayEventReceiver>();
+        auto receiver = std::make_unique<DisplayEventReceiver>(
+            ISurfaceComposer::eVsyncSourceApp,
+            ISurfaceComposer::eConfigChangedDispatch);
         status_t status = receiver->initCheck();
         LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
                             "Initialization of DisplayEventReceiver "
