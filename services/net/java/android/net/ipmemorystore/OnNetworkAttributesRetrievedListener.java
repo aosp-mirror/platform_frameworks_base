@@ -40,8 +40,8 @@ public interface OnNetworkAttributesRetrievedListener {
                 // NonNull, but still don't crash the system server if null
                 if (null != listener) {
                     listener.onNetworkAttributesRetrieved(
-                            new Status(statusParcelable), l2Key,
-                            new NetworkAttributes(networkAttributesParcelable));
+                            new Status(statusParcelable), l2Key, null == networkAttributesParcelable
+                                ? null : new NetworkAttributes(networkAttributesParcelable));
                 }
             }
 
