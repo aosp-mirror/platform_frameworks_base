@@ -174,7 +174,9 @@ void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
             continue;
         }
         auto& activation = it->second;
-        if (activeEventActivation.state() == ActiveEventActivation::ACTIVE) {
+        // If the event activation does not have a state, assume it is active.
+        if (!activeEventActivation.has_state() ||
+                activeEventActivation.state() == ActiveEventActivation::ACTIVE) {
             // We don't want to change the ttl for future activations, so we set the start_ns
             // such that start_ns + ttl_ns == currentTimeNs + remaining_ttl_nanos
             activation->start_ns =
