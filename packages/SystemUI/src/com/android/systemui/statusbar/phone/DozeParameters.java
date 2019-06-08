@@ -35,7 +35,11 @@ import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
-public class DozeParameters implements TunerService.Tunable {
+/**
+ * Retrieve doze information
+ */
+public class DozeParameters implements TunerService.Tunable,
+        com.android.systemui.plugins.statusbar.DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
     public static final boolean FORCE_NO_BLANKING =
