@@ -12665,6 +12665,14 @@ public final class Settings {
         public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
 
         /**
+         * List of Apps selected to use prerelease Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_PRERELEASE_OPT_IN_APPS =
+                "game_driver_prerelease_opt_in_apps";
+
+        /**
          * List of Apps selected not to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide

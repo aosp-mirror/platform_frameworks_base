@@ -76,6 +76,8 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYER_APP, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_ALL_APPS, int.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_OPT_IN_APPS, String.class);
+        sGlobalSettingToTypeMap.put(
+                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_OPT_OUT_APPS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_BLACKLIST, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_WHITELIST, String.class);

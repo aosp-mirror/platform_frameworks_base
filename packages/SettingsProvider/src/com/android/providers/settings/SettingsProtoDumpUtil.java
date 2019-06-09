@@ -716,6 +716,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GAME_DRIVER_OPT_IN_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
         dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_PRERELEASE_OPT_IN_APPS);
+        dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
         dumpSetting(s, p,
