@@ -24,6 +24,7 @@ import android.util.Pools;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptConsumer;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HeptPredicate;
@@ -47,6 +48,7 @@ import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.TriPredicate;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -432,13 +434,15 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         if (isConstSupplier()) {
             sb.append(getFuncTypeAsString()).append("(").append(doInvoke()).append(")");
         } else {
-            if (mFunc instanceof PooledLambdaImpl) {
-                sb.append(mFunc);
+            Object func = mFunc;
+            if (func instanceof PooledLambdaImpl) {
+                sb.append(func);
             } else {
-                sb.append(getFuncTypeAsString()).append("@").append(hashCodeHex(mFunc));
+                sb.append(getFuncTypeAsString()).append("@").append(hashCodeHex(func));
             }
             sb.append("(");
-            sb.append(commaSeparateFirstN(mArgs, LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE))));
+            sb.append(commaSeparateFirstN(mArgs,
+                    LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE))));
             sb.append(")");
         }
         return sb.toString();
@@ -450,7 +454,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     private static String hashCodeHex(Object o) {
-        return Integer.toHexString(o.hashCode());
+        return Integer.toHexString(Objects.hashCode(o));
     }
 
     private String getFuncTypeAsString() {
@@ -490,7 +494,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", i = " + i
                             + ")");
         }
-        r.mFunc = func;
+        r.mFunc = Preconditions.checkNotNull(func);
         r.setFlags(MASK_FUNC_TYPE, LambdaType.encode(fNumArgs, fReturnType));
         r.setFlags(MASK_EXPOSED_AS, LambdaType.encode(numPlaceholders, fReturnType));
         if (ArrayUtils.size(r.mArgs) < fNumArgs) r.mArgs = new Object[fNumArgs];
