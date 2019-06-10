@@ -322,6 +322,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal.Permiss
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.CloseGuard;
@@ -2384,10 +2385,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    public PackageManagerService(Context context, Installer installer,
-            boolean factoryTest, boolean onlyCore) {
+    public PackageManagerService(Context context, Installer installer, boolean factoryTest,
+            boolean onlyCore) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
+                Trace.TRACE_TAG_PACKAGE_MANAGER);
+        t.traceBegin("create package manager");
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "create package manager");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
 
@@ -2403,6 +2406,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstaller = installer;
 
         // Create sub-components that provide services / data. Order here is important.
+        t.traceBegin("createSubComponents");
+        // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         synchronized (mPackages) {
             // Expose private service for system components to use.
@@ -2420,6 +2425,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPermissionManager.getPermissionSettings(), mPackages);
         }
         }
+        // CHECKSTYLE:ON IndentationCheck
+        t.traceEnd();
+
+        t.traceBegin("addSharedUsers");
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID,
@@ -2436,6 +2445,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.networkstack", NETWORKSTACK_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        t.traceEnd();
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -2467,14 +2477,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
         getDefaultDisplayMetrics(context, mMetrics);
 
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "get system config");
+        t.traceBegin("get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = new ApexManager(context);
+        // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
@@ -2513,13 +2524,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
             SELinuxMMAC.readInstallPolicy();
 
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
+            t.traceBegin("loadFallbacks");
             FallbackCategoryProvider.loadFallbacks();
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            t.traceEnd();
 
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "read user settings");
+            t.traceBegin("read user settings");
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            t.traceEnd();
 
             // Clean up orphaned packages for which the code path doesn't exist
             // and they are an update to a system app - caused by bug/32321269
@@ -3269,9 +3280,9 @@ public class PackageManagerService extends IPackageManager.Stub
             ver.databaseVersion = Settings.CURRENT_DATABASE_VERSION;
 
             // can downgrade to reader
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "write settings");
+            t.traceBegin("write settings");
             mSettings.writeLPr();
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            t.traceEnd();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
@@ -3357,15 +3368,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
+        // CHECKSTYLE:ON IndentationCheck
 
         mModuleInfoProvider = new ModuleInfoProvider(mContext, this);
 
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "GC");
+        t.traceBegin("GC");
         Runtime.getRuntime().gc();
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        t.traceEnd();
 
         // The initial scanning above does many calls into installd while
         // holding the mPackages lock, but we're mostly interested in yelling
@@ -3376,7 +3388,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
 
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        t.traceEnd(); // "create package manager"
     }
 
     /**

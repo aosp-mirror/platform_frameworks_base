@@ -22,7 +22,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_ASYNC_TAG;
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
 
 import android.annotation.NonNull;
@@ -57,7 +56,6 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
 import android.provider.DeviceConfig;
@@ -619,6 +617,8 @@ public final class SystemServer {
      * initialized in one of the other functions.
      */
     private void startBootstrapServices(@NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("startBootstrapServices");
+
         // Start the watchdog as early as possible so we can crash the system server
         // if we deadlock during early boot
         t.traceBegin("StartWatchdog");
@@ -710,7 +710,7 @@ public final class SystemServer {
 
         // We need the default display before we can initialize the package manager.
         t.traceBegin("WaitForDisplay");
-        mSystemServiceManager.startBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
         t.traceEnd();
 
         // Only run "core" apps if we're encrypting the device.
@@ -802,18 +802,21 @@ public final class SystemServer {
         // Start sensor service in a separate thread. Completion should be checked
         // before using it.
         mSensorServiceStart = SystemServerInitThreadPool.get().submit(() -> {
-            TimingsTraceAndSlog traceLog = new TimingsTraceAndSlog(
-                    SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+            TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
             traceLog.traceBegin(START_SENSOR_SERVICE);
             startSensorService();
             traceLog.traceEnd();
         }, START_SENSOR_SERVICE);
+
+        t.traceEnd(); // startBootstrapServices
     }
 
     /**
      * Starts some essential services that are not tangled up in the bootstrap process.
      */
     private void startCoreServices(@NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("startCoreServices");
+
         t.traceBegin("StartBatteryService");
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);
@@ -862,12 +865,16 @@ public final class SystemServer {
         t.traceBegin("GpuService");
         mSystemServiceManager.startService(GpuService.class);
         t.traceEnd();
+
+        t.traceEnd(); // startCoreServices
     }
 
     /**
      * Starts a miscellaneous grab bag of stuff that has yet to be refactored and organized.
      */
     private void startOtherServices(@NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("startOtherServices");
+
         final Context context = mSystemContext;
         VibratorService vibrator = null;
         DynamicSystemService dynamicSystem = null;
@@ -922,8 +929,7 @@ public final class SystemServer {
             mZygotePreload = SystemServerInitThreadPool.get().submit(() -> {
                 try {
                     Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
-                    TimingsTraceAndSlog traceLog = new TimingsTraceAndSlog(
-                            SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                    TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
                     if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
                         Slog.e(TAG, "Unable to preload default resources");
@@ -1033,8 +1039,7 @@ public final class SystemServer {
             // because it need to connect to SensorManager. This have to start
             // after START_SENSOR_SERVICE is done.
             SystemServerInitThreadPool.get().submit(() -> {
-                TimingsTraceAndSlog traceLog = new TimingsTraceAndSlog(
-                        SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                 traceLog.traceBegin(START_HIDL_SERVICES);
                 startHidlServices();
                 traceLog.traceEnd();
@@ -1923,11 +1928,11 @@ public final class SystemServer {
 
         // Needed by DevicePolicyManager for initialization
         t.traceBegin("StartBootPhaseLockSettingsReady");
-        mSystemServiceManager.startBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
+        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_LOCK_SETTINGS_READY);
         t.traceEnd();
 
         t.traceBegin("StartBootPhaseSystemServicesReady");
-        mSystemServiceManager.startBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);
         t.traceEnd();
 
         t.traceBegin("MakeWindowManagerServiceReady");
@@ -1997,7 +2002,7 @@ public final class SystemServer {
         t.traceEnd();
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
-        mSystemServiceManager.startBootPhase(SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
+        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
         t.traceEnd();
 
         // Permission policy service
@@ -2028,8 +2033,7 @@ public final class SystemServer {
         mActivityManagerService.systemReady(() -> {
             Slog.i(TAG, "Making services ready");
             t.traceBegin("StartActivityManagerReadyPhase");
-            mSystemServiceManager.startBootPhase(
-                    SystemService.PHASE_ACTIVITY_MANAGER_READY);
+            mSystemServiceManager.startBootPhase(t, SystemService.PHASE_ACTIVITY_MANAGER_READY);
             t.traceEnd();
             t.traceBegin("StartObservingNativeCrashes");
             try {
@@ -2046,8 +2050,7 @@ public final class SystemServer {
             if (!mOnlyCore && mWebViewUpdateService != null) {
                 webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
                     Slog.i(TAG, WEBVIEW_PREPARATION);
-                    TimingsTraceAndSlog traceLog = new TimingsTraceAndSlog(
-                            SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                    TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                     traceLog.traceBegin(WEBVIEW_PREPARATION);
                     ConcurrentUtils.waitForFutureNoInterrupt(mZygotePreload, "Zygote preload");
                     mZygotePreload = null;
@@ -2144,8 +2147,7 @@ public final class SystemServer {
             if (webviewPrep != null) {
                 ConcurrentUtils.waitForFutureNoInterrupt(webviewPrep, WEBVIEW_PREPARATION);
             }
-            mSystemServiceManager.startBootPhase(
-                    SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+            mSystemServiceManager.startBootPhase(t, SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
             t.traceEnd();
 
             t.traceBegin("StartNetworkStack");
@@ -2240,6 +2242,8 @@ public final class SystemServer {
             }
             t.traceEnd();
         }, t);
+
+        t.traceEnd(); // startOtherServices
     }
 
     private void startSystemCaptionsManagerService(@NonNull Context context,
