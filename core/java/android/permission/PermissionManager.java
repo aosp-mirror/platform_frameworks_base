@@ -39,6 +39,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@TestApi
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
@@ -140,12 +141,13 @@ public final class PermissionManager {
             if (o == null || getClass() != o.getClass()) return false;
             SplitPermissionInfo that = (SplitPermissionInfo) o;
             return mTargetSdk == that.mTargetSdk
-                    && Objects.equals(mSplitPerm, that.mSplitPerm);
+                    && mSplitPerm.equals(that.mSplitPerm)
+                    && mNewPerms.equals(that.mNewPerms);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mSplitPerm, mTargetSdk);
+            return Objects.hash(mSplitPerm, mNewPerms, mTargetSdk);
         }
 
         /**
