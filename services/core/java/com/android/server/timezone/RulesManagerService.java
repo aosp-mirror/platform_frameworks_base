@@ -108,7 +108,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
     private static RulesManagerService create(Context context) {
         RulesManagerServiceHelperImpl helper = new RulesManagerServiceHelperImpl(context);
-        File baseVersionFile = new File(TimeZoneDataFiles.getRuntimeModuleTzVersionFile());
+        File baseVersionFile = new File(TimeZoneDataFiles.getTimeZoneModuleTzVersionFile());
         File tzDataDir = new File(TimeZoneDataFiles.getDataTimeZoneRootDir());
         return new RulesManagerService(
                 helper /* permissionHelper */,
