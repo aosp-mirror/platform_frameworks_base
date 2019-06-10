@@ -20,7 +20,9 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -33,10 +35,11 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -54,8 +57,6 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationListenerServiceTest extends UiServiceTestCase {
-
-    private String[] mKeys = new String[] { "key", "key1", "key2", "key3", "key4"};
 
     @Test
     public void testGetActiveNotifications_notNull() throws Exception {
@@ -97,52 +98,144 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         }
     }
 
-    private NotificationRankingUpdate generateUpdate() {
-        List<String> interceptedKeys = new ArrayList<>();
-        Bundle visibilityOverrides = new Bundle();
-        Bundle overrideGroupKeys = new Bundle();
-        Bundle suppressedVisualEffects = new Bundle();
-        Bundle explanation = new Bundle();
-        Bundle channels = new Bundle();
-        Bundle overridePeople = new Bundle();
-        Bundle snoozeCriteria = new Bundle();
-        Bundle showBadge = new Bundle();
-        int[] importance = new int[mKeys.length];
-        Bundle userSentiment = new Bundle();
-        Bundle mHidden = new Bundle();
-        Bundle smartActions = new Bundle();
-        Bundle smartReplies = new Bundle();
-        Bundle lastAudiblyAlerted = new Bundle();
-        Bundle noisy = new Bundle();
-        boolean[] canBubble = new boolean[mKeys.length];
+    // Tests parceling of NotificationRankingUpdate, and by extension, RankingMap and Ranking.
+    @Test
+    public void testRankingUpdate_parcel() {
+        NotificationRankingUpdate nru = generateUpdate();
+        Parcel parcel = Parcel.obtain();
+        nru.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        NotificationRankingUpdate nru1 = NotificationRankingUpdate.CREATOR.createFromParcel(parcel);
+        assertEquals(nru, nru1);
+    }
 
-        for (int i = 0; i < mKeys.length; i++) {
-            String key = mKeys[i];
-            visibilityOverrides.putInt(key, getVisibilityOverride(i));
-            overrideGroupKeys.putString(key, getOverrideGroupKey(key));
-            if (isIntercepted(i)) {
-                interceptedKeys.add(key);
-            }
-            suppressedVisualEffects.putInt(key, getSuppressedVisualEffects(i));
-            importance[i] = getImportance(i);
-            explanation.putString(key, getExplanation(key));
-            channels.putParcelable(key, getChannel(key, i));
-            overridePeople.putStringArrayList(key, getPeople(key, i));
-            snoozeCriteria.putParcelableArrayList(key, getSnoozeCriteria(key, i));
-            showBadge.putBoolean(key, getShowBadge(i));
-            userSentiment.putInt(key, getUserSentiment(i));
-            mHidden.putBoolean(key, getHidden(i));
-            smartActions.putParcelableArrayList(key, getSmartActions(key, i));
-            smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
-            lastAudiblyAlerted.putLong(key, lastAudiblyAlerted(i));
-            noisy.putBoolean(key, getNoisy(i));
-            canBubble[i] = canBubble(i);
+    private void detailedAssertEquals(RankingMap a, RankingMap b) {
+        Ranking arank = new Ranking();
+        Ranking brank = new Ranking();
+        assertArrayEquals(a.getOrderedKeys(), b.getOrderedKeys());
+        for (String key : a.getOrderedKeys()) {
+            a.getRanking(key, arank);
+            b.getRanking(key, brank);
+            detailedAssertEquals("ranking for key <" + key + ">", arank, brank);
         }
-        NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
-                interceptedKeys.toArray(new String[0]), visibilityOverrides,
-                suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions, smartReplies, lastAudiblyAlerted, noisy, canBubble);
+    }
+
+    // Tests parceling of RankingMap and RankingMap.equals
+    @Test
+    public void testRankingMap_parcel() {
+        RankingMap rmap = generateUpdate().getRankingMap();
+        Parcel parcel = Parcel.obtain();
+        rmap.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        RankingMap rmap1 = RankingMap.CREATOR.createFromParcel(parcel);
+
+        detailedAssertEquals(rmap, rmap1);
+        assertEquals(rmap, rmap1);
+    }
+
+    private void detailedAssertEquals(String comment, Ranking a, Ranking b) {
+        assertEquals(comment, a.getKey(), b.getKey());
+        assertEquals(comment, a.getRank(), b.getRank());
+        assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
+        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
+        assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
+        assertEquals(comment, a.getImportance(), b.getImportance());
+        assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
+        assertEquals(comment, a.getOverrideGroupKey(), b.getOverrideGroupKey());
+        assertEquals(comment, a.getChannel(), b.getChannel());
+        assertEquals(comment, a.getAdditionalPeople(), b.getAdditionalPeople());
+        assertEquals(comment, a.getSnoozeCriteria(), b.getSnoozeCriteria());
+        assertEquals(comment, a.canShowBadge(), b.canShowBadge());
+        assertEquals(comment, a.getUserSentiment(), b.getUserSentiment());
+        assertEquals(comment, a.isSuspended(), b.isSuspended());
+        assertEquals(comment, a.getLastAudiblyAlertedMillis(), b.getLastAudiblyAlertedMillis());
+        assertEquals(comment, a.isNoisy(), b.isNoisy());
+        assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
+        assertEquals(comment, a.canBubble(), b.canBubble());
+        assertActionsEqual(a.getSmartActions(), b.getSmartActions());
+    }
+
+    // Tests parceling of Ranking and Ranking.equals
+    @Test
+    public void testRanking_parcel() {
+        Ranking ranking = generateUpdate().getRankingMap().getRawRankingObject(mKeys[0]);
+        Parcel parcel = Parcel.obtain();
+        ranking.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Ranking ranking1 = new Ranking(parcel);
+        detailedAssertEquals("rankings differ: ", ranking, ranking1);
+        assertEquals(ranking, ranking1);
+    }
+
+    private void detailedAssertEquals(NotificationRankingUpdate a, NotificationRankingUpdate b) {
+        assertEquals(a.getRankingMap(), b.getRankingMap());
+    }
+
+    // Tests NotificationRankingUpdate.equals(), and by extension, RankingMap and Ranking.
+    @Test
+    public void testRankingUpdate_equals() {
+        NotificationRankingUpdate nru = generateUpdate();
+        NotificationRankingUpdate nru2 = generateUpdate();
+        detailedAssertEquals(nru, nru2);
+        assertEquals(nru, nru2);
+        Ranking tweak = nru2.getRankingMap().getRawRankingObject(mKeys[0]);
+        tweak.populate(
+                tweak.getKey(),
+                tweak.getRank(),
+                !tweak.matchesInterruptionFilter(), // note the inversion here!
+                tweak.getVisibilityOverride(),
+                tweak.getSuppressedVisualEffects(),
+                tweak.getImportance(),
+                tweak.getImportanceExplanation(),
+                tweak.getOverrideGroupKey(),
+                tweak.getChannel(),
+                (ArrayList) tweak.getAdditionalPeople(),
+                (ArrayList) tweak.getSnoozeCriteria(),
+                tweak.canShowBadge(),
+                tweak.getUserSentiment(),
+                tweak.isSuspended(),
+                tweak.getLastAudiblyAlertedMillis(),
+                tweak.isNoisy(),
+                (ArrayList) tweak.getSmartActions(),
+                (ArrayList) tweak.getSmartReplies(),
+                tweak.canBubble()
+        );
+        assertNotEquals(nru, nru2);
+    }
+
+    // Test data
+
+    private String[] mKeys = new String[] { "key", "key1", "key2", "key3", "key4"};
+
+    private NotificationRankingUpdate generateUpdate() {
+        Ranking[] rankings = new Ranking[mKeys.length];
+        for (int i = 0; i < mKeys.length; i++) {
+            final String key = mKeys[i];
+            Ranking ranking = new Ranking();
+            ranking.populate(
+                    key,
+                    i,
+                    !isIntercepted(i),
+                    getVisibilityOverride(i),
+                    getSuppressedVisualEffects(i),
+                    getImportance(i),
+                    getExplanation(key),
+                    getOverrideGroupKey(key),
+                    getChannel(key, i),
+                    getPeople(key, i),
+                    getSnoozeCriteria(key, i),
+                    getShowBadge(i),
+                    getUserSentiment(i),
+                    getHidden(i),
+                    lastAudiblyAlerted(i),
+                    getNoisy(i),
+                    getSmartActions(key, i),
+                    getSmartReplies(key, i),
+                    canBubble(i)
+            );
+            rankings[i] = ranking;
+        }
+        NotificationRankingUpdate update = new NotificationRankingUpdate(rankings);
         return update;
     }
 

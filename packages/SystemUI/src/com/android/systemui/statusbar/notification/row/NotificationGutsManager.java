@@ -41,12 +41,14 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -97,6 +99,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
+    private StatusBar mStatusBar;
+
     @Inject
     public NotificationGutsManager(
             Context context,
@@ -114,6 +118,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mListContainer = listContainer;
         mCheckSaveListener = checkSave;
         mOnSettingsClickListener = onSettingsClick;
+        mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
     }
 
     public void setNotificationActivityStarter(
@@ -376,6 +381,34 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             int x,
             int y,
             NotificationMenuRowPlugin.MenuItem menuItem) {
+        if (menuItem.getGutsView() instanceof NotificationInfo) {
+            if (mStatusBarStateController instanceof StatusBarStateControllerImpl) {
+                ((StatusBarStateControllerImpl) mStatusBarStateController)
+                        .setLeaveOpenOnKeyguardHide(true);
+            }
+
+            Runnable r = () -> Dependency.get(Dependency.MAIN_HANDLER).post(
+                    () -> openGutsInternal(view, x, y, menuItem));
+
+            mStatusBar.executeRunnableDismissingKeyguard(
+                    r,
+                    null /* cancelAction */,
+                    false /* dismissShade */,
+                    true /* afterKeyguardGone */,
+                    true /* deferred */);
+
+            return true;
+        }
+        return openGutsInternal(view, x, y, menuItem);
+    }
+
+    @VisibleForTesting
+    boolean openGutsInternal(
+            View view,
+            int x,
+            int y,
+            NotificationMenuRowPlugin.MenuItem menuItem) {
+
         if (!(view instanceof ExpandableNotificationRow)) {
             return false;
         }

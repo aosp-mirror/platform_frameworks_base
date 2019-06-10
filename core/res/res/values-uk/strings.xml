@@ -133,6 +133,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Виклики <xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"Дзвінок від абонента <xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Виклик через WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Виклик <xliff:g id="SPN">%s</xliff:g> через WLAN"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
@@ -1657,8 +1658,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безпечний"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Фонову активність пакета <xliff:g id="PACKAGENAME">%1$s</xliff:g> буде заблоковано в майбутніх складаннях Q. Докладніше: g.co/dev/bgblock."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Фонову активність додатка <xliff:g id="PACKAGENAME">%1$s</xliff:g> заблоковано. Докладніше: g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильний пароль"</string>
@@ -1714,8 +1713,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Ярлик спеціальних можливостей увімкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Ярлик спеціальних можливостей вимкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Виберіть функцію для кнопки спеціальних можливостей:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Щоб змінити функцію, натисніть і втримуйте кнопку спеціальних можливостей."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Виберіть сервіс для кнопки спеціальних можливостей:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Виберіть сервіс для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Виберіть сервіс для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Щоб переключитися між сервісами, натисніть і утримуйте кнопку спеціальних можливостей."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Щоб переключитися між сервісами, проведіть двома пальцями вгору й утримуйте екран."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Щоб переключитися між сервісами, проведіть трьома пальцями вгору й утримуйте екран."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Збільшення"</string>
     <string name="user_switched" msgid="3768006783166984410">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Перехід в обліковий запис \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>

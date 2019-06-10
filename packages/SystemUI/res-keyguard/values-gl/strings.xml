@@ -151,4 +151,10 @@
       <item quantity="other">A SIM está desactivada. Introduce o código PUK para continuar. Quédanche <xliff:g id="_NUMBER_1">%d</xliff:g> intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
       <item quantity="one">A SIM está desactivada. Introduce o código PUK para continuar. Quédache <xliff:g id="_NUMBER_0">%d</xliff:g> intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
     </plurals>
+    <!-- no translation found for clock_title_default (6645600990069154049) -->
+    <skip />
+    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
+    <skip />
+    <!-- no translation found for clock_title_analog (4047401488577315053) -->
+    <skip />
 </resources>

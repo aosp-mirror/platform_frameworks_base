@@ -151,4 +151,10 @@
       <item quantity="other">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_1">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
       <item quantity="one">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_0">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
     </plurals>
+    <!-- no translation found for clock_title_default (6645600990069154049) -->
+    <skip />
+    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
+    <skip />
+    <!-- no translation found for clock_title_analog (4047401488577315053) -->
+    <skip />
 </resources>

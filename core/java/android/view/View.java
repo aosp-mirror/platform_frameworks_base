@@ -9510,6 +9510,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
     }
 
+    /** @hide */
+    protected boolean getNotifiedContentCaptureAppeared() {
+        return (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0;
+    }
+
+
     /**
      * Sets the (optional) {@link ContentCaptureSession} associated with this view.
      *

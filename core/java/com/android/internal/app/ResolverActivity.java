@@ -146,19 +146,7 @@ public class ResolverActivity extends Activity {
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
 
-    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
-        @Override public void onSomePackagesChanged() {
-            mAdapter.handlePackagesChanged();
-            bindProfileView();
-        }
-
-        @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
-            // We care about all package changes, not just the whole package itself which is
-            // default behavior.
-            return true;
-        }
-    };
+    private final PackageMonitor mPackageMonitor = createPackageMonitor();
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -232,6 +220,23 @@ public class ResolverActivity extends Activity {
             }
             return DEFAULT;
         }
+    }
+
+    protected PackageMonitor createPackageMonitor() {
+        return new PackageMonitor() {
+            @Override
+            public void onSomePackagesChanged() {
+                mAdapter.handlePackagesChanged();
+                bindProfileView();
+            }
+
+            @Override
+            public boolean onPackageChanged(String packageName, int uid, String[] components) {
+                // We care about all package changes, not just the whole package itself which is
+                // default behavior.
+                return true;
+            }
+        };
     }
 
     private Intent makeMyIntent() {

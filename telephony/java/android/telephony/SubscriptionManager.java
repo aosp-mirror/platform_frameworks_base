@@ -791,6 +791,14 @@ public class SubscriptionManager {
     public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
 
     /**
+     * IMSI (International Mobile Subscriber Identity).
+     * <P>Type: TEXT </P>
+     * @hide
+     */
+    //TODO: add @SystemApi
+    public static final String IMSI = "imsi";
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
@@ -3174,5 +3182,25 @@ public class SubscriptionManager {
         }
 
         return result;
+    }
+
+    /**
+     * Get active data subscription id.
+     * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
+     *
+     * @return Active data subscription id
+     *
+     * //TODO: Refactor this API in b/134702460
+     * @hide
+     */
+    public static int getActiveDataSubscriptionId() {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.getActiveDataSubscriptionId();
+            }
+        } catch (RemoteException ex) {
+        }
+        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 }

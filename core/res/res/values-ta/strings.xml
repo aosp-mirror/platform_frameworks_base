@@ -131,6 +131,8 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> வைஃபை அழைப்பு"</string>
+    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
+    <skip />
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN அழைப்பு"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN அழைப்பு"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> வைஃபை"</string>
@@ -1612,8 +1614,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"மேலோட்ட #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", பாதுகாப்பானது"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>மின் \'பின்னணிச் செயல்பாடுத் தொடக்கம்\' இனிவரும் Q பதிப்புகளில் தடுக்கப்படும். g.co/dev/bgblock என்ற இணைப்பைப் பார்க்கவும்."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>மில் \'பின்னணிச் செயல்பாட்டுத் தொடக்கம்\' தடுக்கப்பட்டுள்ளது. g.co/dev/bgblock என்ற இணைப்பைப் பார்க்கவும்."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"வடிவத்தை மறந்துவிட்டீர்களா"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"தவறான வடிவம்"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
@@ -1667,8 +1667,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"அணுகல்தன்மை பட்டனைத் தட்டி, பயன்படுத்துவதற்கான அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"அம்சங்களை மாற்ற, அணுகல்தன்மை பட்டனைத் தொட்டுப் பிடித்திருக்கவும்."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"அணுகல்தன்மை பட்டனுக்கான சேவையைத் தேர்வுசெய்யவும்:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (இரண்டு விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (மூன்று விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"சேவைகளுக்கு இடையே மாற அணுகல்தன்மை பட்டனைத் தொட்டுப் பிடிக்கவும்."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"சேவைகளுக்கு இடையே மாற இரண்டு விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"சேவைகளுக்கு இடையே மாற மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"பெரிதாக்கல்"</string>
     <string name="user_switched" msgid="3768006783166984410">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>

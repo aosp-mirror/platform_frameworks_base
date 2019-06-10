@@ -1016,6 +1016,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         TypedArray a = theme.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.TextViewAppearance, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.TextViewAppearance,
+                attrs, a, defStyleAttr, defStyleRes);
         TypedArray appearance = null;
         int ap = a.getResourceId(
                 com.android.internal.R.styleable.TextViewAppearance_textAppearance, -1);
@@ -1023,6 +1025,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (ap != -1) {
             appearance = theme.obtainStyledAttributes(
                     ap, com.android.internal.R.styleable.TextAppearance);
+            saveAttributeDataForStyleable(context, com.android.internal.R.styleable.TextAppearance,
+                    null, appearance, 0, ap);
         }
         if (appearance != null) {
             readTextAppearance(context, appearance, attributes, false /* styleArray */);
@@ -4964,6 +4968,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets the autolink mask of the text.  See {@link
      * android.text.util.Linkify#ALL Linkify.ALL} and peers for
      * possible values.
+     *
+     * <p class="note"><b>Note:</b>
+     * {@link android.text.util.Linkify#MAP_ADDRESSES Linkify.MAP_ADDRESSES}
+     * is deprecated and should be avoided; see its documentation.
      *
      * @attr ref android.R.styleable#TextView_autoLink
      */
@@ -10578,7 +10586,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // notifyAppeared was not sent.
 
         // ContentCapture
-        if (isLaidOut() && isImportantForContentCapture()) {
+        if (isLaidOut() && isImportantForContentCapture() && getNotifiedContentCaptureAppeared()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
                 final ContentCaptureSession session = getContentCaptureSession();

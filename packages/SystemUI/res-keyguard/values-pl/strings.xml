@@ -167,4 +167,10 @@
       <item quantity="other">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
       <item quantity="one">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_0">%d</xliff:g> próbę, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
     </plurals>
+    <!-- no translation found for clock_title_default (6645600990069154049) -->
+    <skip />
+    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
+    <skip />
+    <!-- no translation found for clock_title_analog (4047401488577315053) -->
+    <skip />
 </resources>
