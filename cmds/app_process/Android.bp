@@ -6,11 +6,11 @@ cc_binary {
     multilib: {
         lib32: {
             version_script: ":art_sigchain_version_script32.txt",
-            stem: "app_process32",
+            suffix: "32",
         },
         lib64: {
             version_script: ":art_sigchain_version_script64.txt",
-            stem: "app_process64",
+            suffix: "64",
         },
     },
 
