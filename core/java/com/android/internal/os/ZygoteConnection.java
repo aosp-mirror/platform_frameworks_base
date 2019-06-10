@@ -338,6 +338,7 @@ class ZygoteConnection {
             Runnable stateChangeCode) {
         try {
             if (zygoteServer.isUsapPoolEnabled()) {
+                Log.i(TAG, "Emptying USAP Pool due to state change.");
                 Zygote.emptyUsapPool();
             }
 
@@ -351,6 +352,8 @@ class ZygoteConnection {
                 if (fpResult != null) {
                     zygoteServer.setForkChild();
                     return fpResult;
+                } else {
+                    Log.i(TAG, "Finished refilling USAP Pool after state change.");
                 }
             }
 
