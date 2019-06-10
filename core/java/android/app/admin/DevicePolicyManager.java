@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
@@ -88,6 +90,7 @@ import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -8809,6 +8812,11 @@ public class DevicePolicyManager {
 
             mService.setPermissionGrantState(admin, mContext.getPackageName(), packageName,
                     permission, grantState, new RemoteCallback((b) -> result.complete(b != null)));
+
+            // Timeout
+            BackgroundThread.getHandler().sendMessageDelayed(
+                    obtainMessage(CompletableFuture::complete, result, false),
+                    20_000);
 
             return result.get();
         } catch (RemoteException re) {
