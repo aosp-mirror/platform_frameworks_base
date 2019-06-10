@@ -37,6 +37,15 @@
      {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
     <bool name="config_navBarNeedsScrim">false</bool>
 
+    <!-- Controls the opacity of the navigation bar depending on the visibility of the
+     various workspace stacks.
+     0 - Nav bar is always opaque when either the freeform stack or docked stack is visible.
+     1 - Nav bar is always translucent when the freeform stack is visible, otherwise always
+         opaque.
+     2 - Nav bar is never forced opaque.
+     -->
+    <integer name="config_navBarOpacityMode">2</integer>
+
     <!-- Controls whether seamless rotation should be allowed even though the navbar can move
          (which normally prevents seamless rotation). -->
     <bool name="config_allowSeamlessRotationDespiteNavBarMoving">true</bool>
