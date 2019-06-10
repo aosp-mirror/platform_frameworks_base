@@ -5375,34 +5375,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
-        if (!(sender instanceof PendingIntentRecord)) {
-            return;
-        }
-        boolean isCancelled;
-        synchronized(this) {
-            PendingIntentRecord pendingIntent = (PendingIntentRecord) sender;
-            isCancelled = pendingIntent.canceled;
-            if (!isCancelled) {
-                pendingIntent.registerCancelListenerLocked(receiver);
-            }
-        }
-        if (isCancelled) {
-            try {
-                receiver.send(Activity.RESULT_CANCELED, null);
-            } catch (RemoteException e) {
-            }
-        }
+        mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
     public void unregisterIntentSenderCancelListener(IIntentSender sender,
             IResultReceiver receiver) {
-        if (!(sender instanceof PendingIntentRecord)) {
-            return;
-        }
-        synchronized(this) {
-            ((PendingIntentRecord)sender).unregisterCancelListenerLocked(receiver);
-        }
+        mPendingIntentController.unregisterIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
@@ -17679,13 +17658,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
                 long duration) {
-            if (!(target instanceof PendingIntentRecord)) {
-                Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
-                return;
-            }
-            synchronized (ActivityManagerService.this) {
-                ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
-            }
+            mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
+                    duration);
         }
 
         @Override

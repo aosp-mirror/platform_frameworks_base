@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -39,6 +40,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -239,6 +241,47 @@ public class PendingIntentController {
                         rec.key.activity, rec.ref);
                 mH.sendMessage(m);
             }
+        }
+    }
+
+    void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        boolean isCancelled;
+        synchronized (mLock) {
+            PendingIntentRecord pendingIntent = (PendingIntentRecord) sender;
+            isCancelled = pendingIntent.canceled;
+            if (!isCancelled) {
+                pendingIntent.registerCancelListenerLocked(receiver);
+            }
+        }
+        if (isCancelled) {
+            try {
+                receiver.send(Activity.RESULT_CANCELED, null);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    void unregisterIntentSenderCancelListener(IIntentSender sender,
+            IResultReceiver receiver) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        synchronized (mLock) {
+            ((PendingIntentRecord) sender).unregisterCancelListenerLocked(receiver);
+        }
+    }
+
+    void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
+            long duration) {
+        if (!(target instanceof PendingIntentRecord)) {
+            Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
+            return;
+        }
+        synchronized (mLock) {
+            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
         }
     }
 
