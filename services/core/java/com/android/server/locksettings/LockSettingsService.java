@@ -2493,7 +2493,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     private VerifyCredentialResponse spBasedDoVerifyCredential(byte[] userCredential,
             @CredentialType int credentialType, boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-        if (DEBUG) Slog.d(TAG, "spBasedDoVerifyCredential: user=" + userId);
+
+        final boolean hasEnrolledBiometrics = mInjector.hasEnrolledBiometrics();
+
+        Slog.d(TAG, "spBasedDoVerifyCredential: user=" + userId + " hasChallenge=" + hasChallenge
+                + " hasEnrolledBiometrics=" + hasEnrolledBiometrics);
         if (credentialType == CREDENTIAL_TYPE_NONE) {
             userCredential = null;
         }
@@ -2503,7 +2507,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // we need to generate challenge for each one, have it signed by GK and reset lockout
         // for each modality.
         if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)
-                && mInjector.hasEnrolledBiometrics()) {
+                && hasEnrolledBiometrics) {
             challenge = mContext.getSystemService(FaceManager.class).generateChallenge();
         }
 
@@ -2546,9 +2550,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             notifyActivePasswordMetricsAvailable(credentialType, userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
             // Reset lockout only if user has enrolled templates
-            if (mInjector.hasEnrolledBiometrics()) {
+            if (hasEnrolledBiometrics) {
                 BiometricManager bm = mContext.getSystemService(BiometricManager.class);
-                Slog.i(TAG, "Resetting lockout, length: " + response.getPayload().length);
                 bm.resetLockout(response.getPayload());
 
                 if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {

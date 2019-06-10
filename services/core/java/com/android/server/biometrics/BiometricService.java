@@ -965,6 +965,11 @@ public class BiometricService extends SystemService {
             }
         }
 
+        Slog.d(TAG, "checkAndGetBiometricModality: user=" + userId
+                + " isHardwareDetected=" + isHardwareDetected
+                + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
+                + " enabledForApps=" + enabledForApps);
+
         // Check error conditions
         if (!isHardwareDetected) {
             return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
