@@ -134,6 +134,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -5097,6 +5098,12 @@ public class Editor {
         void onHandleMoved() {}
 
         public void onDetached() {}
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+            setSystemGestureExclusionRects(Collections.singletonList(new Rect(0, 0, w, h)));
+        }
     }
 
     private class InsertionHandleView extends HandleView {

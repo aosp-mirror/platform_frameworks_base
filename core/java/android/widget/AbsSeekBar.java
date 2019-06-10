@@ -38,6 +38,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -90,6 +95,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     private float mTouchDownX;
     @UnsupportedAppUsage
     private boolean mIsDragging;
+
+    private List<Rect> mUserGestureExclusionRects = Collections.emptyList();
+    private final List<Rect> mGestureExclusionRects = new ArrayList<>();
+    private final Rect mThumbRect = new Rect();
 
     public AbsSeekBar(Context context) {
         super(context);
@@ -735,6 +744,27 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         // Canvas will be translated, so 0,0 is where we start drawing
         thumb.setBounds(left, top, right, bottom);
+        updateGestureExclusionRects();
+    }
+
+    @Override
+    public void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+        Preconditions.checkNotNull(rects, "rects must not be null");
+        mUserGestureExclusionRects = rects;
+        updateGestureExclusionRects();
+    }
+
+    private void updateGestureExclusionRects() {
+        final Drawable thumb = mThumb;
+        if (thumb == null) {
+            super.setSystemGestureExclusionRects(mUserGestureExclusionRects);
+            return;
+        }
+        mGestureExclusionRects.clear();
+        thumb.copyBounds(mThumbRect);
+        mGestureExclusionRects.add(mThumbRect);
+        mGestureExclusionRects.addAll(mUserGestureExclusionRects);
+        super.setSystemGestureExclusionRects(mGestureExclusionRects);
     }
 
     /**
