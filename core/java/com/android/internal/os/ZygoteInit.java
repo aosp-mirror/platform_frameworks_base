@@ -507,9 +507,6 @@ public class ZygoteInit {
             }
         }
 
-        // Set the Java Language thread priority to the default value for the system server.
-        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-
         if (parsedArgs.mInvokeWith != null) {
             String[] args = parsedArgs.mRemainingArgs;
             // If we have a non-null system server class path, we'll have to duplicate the
