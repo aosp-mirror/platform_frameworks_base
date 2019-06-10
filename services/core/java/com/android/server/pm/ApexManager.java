@@ -36,7 +36,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.sysprop.ApexProperties;
-import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -70,17 +69,6 @@ class ApexManager {
       */
     @GuardedBy("mLock")
     private List<PackageInfo> mAllPackagesCache;
-    /**
-     * A map from {@code apexName} to the {@Link PackageInfo} generated from the {@code
-     * AndroidManifest.xml}.
-     *
-     * <p>Note that key of this map is {@code apexName} field which corresponds to the {@code name}
-     * field of {@code apex_manifest.json}.
-     */
-    // TODO(b/132324953): remove.
-    @GuardedBy("mLock")
-    private ArrayMap<String, PackageInfo> mApexNameToPackageInfoCache;
-
 
     ApexManager(Context context) {
         mContext = context;
@@ -121,7 +109,6 @@ class ApexManager {
             if (mAllPackagesCache != null) {
                 return;
             }
-            mApexNameToPackageInfoCache = new ArrayMap<>();
             try {
                 mAllPackagesCache = new ArrayList<>();
                 HashSet<String> activePackagesSet = new HashSet<>();
@@ -145,8 +132,6 @@ class ApexManager {
                                                 + pkg.packageName);
                             }
                             activePackagesSet.add(ai.packageName);
-                            // TODO(b/132324953): remove.
-                            mApexNameToPackageInfoCache.put(ai.packageName, pkg);
                         }
                         if (ai.isFactory) {
                             if (factoryPackagesSet.contains(pkg.packageName)) {
@@ -194,19 +179,6 @@ class ApexManager {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns a {@link PackageInfo} for an active APEX package keyed by it's {@code apexName}.
-     *
-     * @deprecated this API will soon be deleted, please don't depend on it.
-     */
-    // TODO(b/132324953): delete.
-    @Deprecated
-    @Nullable PackageInfo getPackageInfoForApexName(String apexName) {
-        if (!isApexSupported()) return null;
-        populateAllPackagesCacheIfNeeded();
-        return mApexNameToPackageInfoCache.get(apexName);
     }
 
     /**
