@@ -80,7 +80,7 @@ void TestDirectoryFixture::TearDown() {
   ClearDirectory(temp_dir_);
 }
 
-bool TestDirectoryFixture::WriteFile(const std::string& path, const std::string& contents) {
+void TestDirectoryFixture::WriteFile(const std::string& path, const std::string& contents) {
   CHECK(util::StartsWith(path, temp_dir_))
       << "Attempting to create a file outside of test temporary directory.";
 
@@ -91,14 +91,29 @@ bool TestDirectoryFixture::WriteFile(const std::string& path, const std::string&
     file::mkdirs(dirs);
   }
 
-  return android::base::WriteStringToFile(contents, path);
+  CHECK(android::base::WriteStringToFile(contents, path));
 }
 
 bool CommandTestFixture::CompileFile(const std::string& path, const std::string& contents,
                                      const android::StringPiece& out_dir, IDiagnostics* diag) {
-  CHECK(WriteFile(path, contents));
+  WriteFile(path, contents);
   CHECK(file::mkdirs(out_dir.data()));
   return CompileCommand(diag).Execute({path, "-o", out_dir, "-v"}, &std::cerr) == 0;
+}
+
+bool CommandTestFixture::Link(const std::vector<std::string>& args, IDiagnostics* diag) {
+  std::vector<android::StringPiece> link_args;
+  for(const std::string& arg : args) {
+    link_args.emplace_back(arg);
+  }
+
+  // Link against the android SDK
+  std::string android_sdk = file::BuildPath({android::base::GetExecutableDirectory(),
+                                             "integration-tests", "CommandTests",
+                                             "android-28.jar"});
+  link_args.insert(link_args.end(), {"-I", android_sdk});
+
+  return LinkCommand(diag).Execute(link_args, &std::cerr) == 0;
 }
 
 bool CommandTestFixture::Link(const std::vector<std::string>& args,
@@ -128,10 +143,10 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args,
 
 std::string CommandTestFixture::GetDefaultManifest(const char* package_name) {
   const std::string manifest_file = GetTestPath("AndroidManifest.xml");
-  CHECK(WriteFile(manifest_file, android::base::StringPrintf(R"(
+  WriteFile(manifest_file, android::base::StringPrintf(R"(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="%s">
-      </manifest>)", package_name)));
+      </manifest>)", package_name));
   return manifest_file;
 }
 

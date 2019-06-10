@@ -297,6 +297,25 @@ struct R {
   };
 };
 
+template <typename T>
+uint32_t GetCompressionFlags(const StringPiece& str, T options) {
+  if (options.do_not_compress_anything) {
+    return 0;
+  }
+
+  if (options.regex_to_not_compress
+      && std::regex_search(str.to_string(), options.regex_to_not_compress.value())) {
+    return 0;
+  }
+
+  for (const std::string& extension : options.extensions_to_not_compress) {
+    if (util::EndsWith(str, extension)) {
+      return 0;
+    }
+  }
+  return ArchiveEntry::kCompress;
+}
+
 class ResourceFileFlattener {
  public:
   ResourceFileFlattener(const ResourceFileFlattenerOptions& options, IAaptContext* context,
@@ -320,8 +339,6 @@ class ResourceFileFlattener {
     // The destination to write this file to.
     std::string dst_path;
   };
-
-  uint32_t GetCompressionFlags(const StringPiece& str);
 
   std::vector<std::unique_ptr<xml::XmlResource>> LinkAndVersionXmlFile(ResourceTable* table,
                                                                        FileOperation* file_op);
@@ -379,26 +396,6 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
     rules_[R::attr::layout_marginVertical] =
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
-}
-
-// TODO(rtmitchell): turn this function into a variable that points to a method that retrieves the
-// compression flag
-uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
-  if (options_.do_not_compress_anything) {
-    return 0;
-  }
-
-  if (options_.regex_to_not_compress
-      && std::regex_search(str.to_string(), options_.regex_to_not_compress.value())) {
-    return 0;
-  }
-
-  for (const std::string& extension : options_.extensions_to_not_compress) {
-    if (util::EndsWith(str, extension)) {
-      return 0;
-    }
-  }
-  return ArchiveEntry::kCompress;
 }
 
 static bool IsTransitionElement(const std::string& name) {
@@ -640,7 +637,8 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           }
         } else {
           error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
-                                          GetCompressionFlags(file_op.dst_path), archive_writer);
+                                          GetCompressionFlags(file_op.dst_path, options_),
+                                          archive_writer);
         }
       }
     }
@@ -1547,16 +1545,7 @@ class Linker {
     }
 
     for (auto& entry : merged_assets) {
-      uint32_t compression_flags = ArchiveEntry::kCompress;
-      std::string extension = file::GetExtension(entry.first).to_string();
-
-      if (options_.do_not_compress_anything
-          || options_.extensions_to_not_compress.count(extension) > 0
-          || (options_.regex_to_not_compress
-              && std::regex_search(extension, options_.regex_to_not_compress.value()))) {
-        compression_flags = 0u;
-      }
-
+      uint32_t compression_flags = GetCompressionFlags(entry.first, options_);
       if (!io::CopyFileToArchive(context_, entry.second.get(), entry.first, compression_flags,
                                  writer)) {
         return false;
