@@ -2330,7 +2330,7 @@ public class Activity extends ContextThemeWrapper
      * calling {@link VoiceInteractor#notifyDirectActionsChanged()}.
      *
      * <p>To get the voice interactor you need to call {@link #getVoiceInteractor()}
-     * which would return non <code>null<c/ode> only if there is an ongoing voice
+     * which would return non <code>null</code> only if there is an ongoing voice
      * interaction session. You an also detect when the voice interactor is no
      * longer valid because the voice interaction session that is backing is finished
      * by calling {@link VoiceInteractor#registerOnDestroyedCallback(Executor, Runnable)}.
@@ -2339,7 +2339,7 @@ public class Activity extends ContextThemeWrapper
      * before {@link #onStop()} is being called.
      *
      * <p>You should pass to the callback the currently supported direct actions which
-     * cannot be <code>null</code> or contain <code>null</null> elements.
+     * cannot be <code>null</code> or contain <code>null</code> elements.
      *
      * <p>You should return the action list as soon as possible to ensure the consumer,
      * for example the assistant, is as responsive as possible which would improve user
