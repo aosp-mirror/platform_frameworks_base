@@ -322,6 +322,7 @@ collector_main() {
   iorapd_compiler_purge_trace_file "$package" "$activity" || return $?
 
   iorapd_perfetto_enable || return $?
+  iorapd_readahead_disable || return $?
   iorapd_start || return $?
 
   # Wait for perfetto trace to finished writing itself out.
