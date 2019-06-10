@@ -1640,6 +1640,7 @@ public class TaskStack extends WindowContainer<Task> implements
             if (mAnimationType == BoundsAnimationController.FADE_IN) {
                 setPinnedStackAlpha(1f);
                 mActivityStack.mService.notifyPinnedStackAnimationEnded();
+                return;
             }
 
             if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
@@ -1935,14 +1936,11 @@ public class TaskStack extends WindowContainer<Task> implements
     public boolean setPinnedStackAlpha(float alpha) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mWmService.mGlobalLock) {
-            if (mCancelCurrentBoundsAnimation) {
-                return false;
-            }
-            getPendingTransaction().setAlpha(getSurfaceControl(), alpha);
+            getPendingTransaction().setAlpha(getSurfaceControl(),
+                    mCancelCurrentBoundsAnimation ? 1 : alpha);
             scheduleAnimation();
+            return !mCancelCurrentBoundsAnimation;
         }
-
-        return true;
     }
 
     public DisplayInfo getDisplayInfo() {
