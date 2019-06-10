@@ -452,7 +452,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testSeamlesslyRotateWindow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction t = spy(StubTransaction.class);
 
         app.mHasSurface = true;
         app.mSurfaceControl = mock(SurfaceControl.class);
@@ -536,7 +536,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         final float[] values = new float[9];
         final Matrix matrix = new Matrix();
-        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction t = spy(StubTransaction.class);
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
         win1.mHasSurface = true;
         win1.mSurfaceControl = mock(SurfaceControl.class);

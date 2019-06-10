@@ -418,12 +418,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     Log.d(TAG, System.identityHashCode(this)
                             + " updateSurfaceAlpha: set alpha=" + alpha);
                 }
-                SurfaceControl.openTransaction();
-                try {
-                    mSurfaceControl.setAlpha(alpha);
-                } finally {
-                    SurfaceControl.closeTransaction();
-                }
+                mTmpTransaction.setAlpha(mSurfaceControl, alpha).apply();
             }
             mSurfaceAlpha = alpha;
         }
@@ -701,16 +696,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void updateBackgroundVisibilityInTransaction() {
+    private void updateBackgroundVisibility(Transaction t) {
         if (mBackgroundControl == null) {
             return;
         }
         if ((mSubLayer < 0) && ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)) {
-            mBackgroundControl.show();
+            t.show(mBackgroundControl);
         } else {
-            mBackgroundControl.hide();
+            t.hide(mBackgroundControl);
         }
     }
+
 
     private void releaseSurfaces() {
         mSurfaceAlpha = 1f;
@@ -853,60 +849,60 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                             + "Cur surface: " + mSurface);
 
-                    SurfaceControl.openTransaction();
-                    try {
-                        // If we are creating the surface control or the parent surface has not
-                        // changed, then set relative z. Otherwise allow the parent
-                        // SurfaceChangedCallback to update the relative z. This is needed so that
-                        // we do not change the relative z before the server is ready to swap the
-                        // parent surface.
-                        if (creating || (mParentSurfaceGenerationId
-                                == viewRoot.mSurface.getGenerationId())) {
-                            SurfaceControl.mergeToGlobalTransaction(updateRelativeZ());
-                        }
-                        mParentSurfaceGenerationId = viewRoot.mSurface.getGenerationId();
-
-                        if (mViewVisibility) {
-                            mSurfaceControl.show();
-                        } else {
-                            mSurfaceControl.hide();
-                        }
-                        updateBackgroundVisibilityInTransaction();
-                        if (mUseAlpha) {
-                            mSurfaceControl.setAlpha(alpha);
-                            mSurfaceAlpha = alpha;
-                        }
-
-                        // While creating the surface, we will set it's initial
-                        // geometry. Outside of that though, we should generally
-                        // leave it to the RenderThread.
-                        //
-                        // There is one more case when the buffer size changes we aren't yet
-                        // prepared to sync (as even following the transaction applying
-                        // we still need to latch a buffer).
-                        // b/28866173
-                        if (sizeChanged || creating || !mRtHandlingPositionUpdates) {
-                            mSurfaceControl.setPosition(mScreenRect.left, mScreenRect.top);
-                            mSurfaceControl.setMatrix(mScreenRect.width() / (float) mSurfaceWidth,
-                                    0.0f, 0.0f,
-                                    mScreenRect.height() / (float) mSurfaceHeight);
-                            // Set a window crop when creating the surface or changing its size to
-                            // crop the buffer to the surface size since the buffer producer may
-                            // use SCALING_MODE_SCALE and submit a larger size than the surface
-                            // size.
-                            if (mClipSurfaceToBounds && mClipBounds != null) {
-                                mSurfaceControl.setWindowCrop(mClipBounds);
-                            } else {
-                                mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
-                            }
-                        }
-                        mSurfaceControl.setCornerRadius(mCornerRadius);
-                        if (sizeChanged && !creating) {
-                            mSurfaceControl.setBufferSize(mSurfaceWidth, mSurfaceHeight);
-                        }
-                    } finally {
-                        SurfaceControl.closeTransaction();
+                    // If we are creating the surface control or the parent surface has not
+                    // changed, then set relative z. Otherwise allow the parent
+                    // SurfaceChangedCallback to update the relative z. This is needed so that
+                    // we do not change the relative z before the server is ready to swap the
+                    // parent surface.
+                    if (creating || (mParentSurfaceGenerationId
+                            == viewRoot.mSurface.getGenerationId())) {
+                        updateRelativeZ(mTmpTransaction);
                     }
+                    mParentSurfaceGenerationId = viewRoot.mSurface.getGenerationId();
+
+                    if (mViewVisibility) {
+                        mTmpTransaction.show(mSurfaceControl);
+                    } else {
+                        mTmpTransaction.hide(mSurfaceControl);
+                    }
+                    updateBackgroundVisibility(mTmpTransaction);
+                    if (mUseAlpha) {
+                        mTmpTransaction.setAlpha(mSurfaceControl, alpha);
+                        mSurfaceAlpha = alpha;
+                    }
+
+                    // While creating the surface, we will set it's initial
+                    // geometry. Outside of that though, we should generally
+                    // leave it to the RenderThread.
+                    //
+                    // There is one more case when the buffer size changes we aren't yet
+                    // prepared to sync (as even following the transaction applying
+                    // we still need to latch a buffer).
+                    // b/28866173
+                    if (sizeChanged || creating || !mRtHandlingPositionUpdates) {
+                        mTmpTransaction.setPosition(mSurfaceControl, mScreenRect.left,
+                                mScreenRect.top);
+                        mTmpTransaction.setMatrix(mSurfaceControl,
+                                mScreenRect.width() / (float) mSurfaceWidth, 0.0f, 0.0f,
+                                mScreenRect.height() / (float) mSurfaceHeight);
+                        // Set a window crop when creating the surface or changing its size to
+                        // crop the buffer to the surface size since the buffer producer may
+                        // use SCALING_MODE_SCALE and submit a larger size than the surface
+                        // size.
+                        if (mClipSurfaceToBounds && mClipBounds != null) {
+                            mTmpTransaction.setWindowCrop(mSurfaceControl, mClipBounds);
+                        } else {
+                            mTmpTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
+                                    mSurfaceHeight);
+                        }
+                    }
+                    mTmpTransaction.setCornerRadius(mSurfaceControl, mCornerRadius);
+                    if (sizeChanged && !creating) {
+                        mTmpTransaction.setBufferSize(mSurfaceControl, mSurfaceWidth,
+                                mSurfaceHeight);
+                    }
+
+                    mTmpTransaction.apply();
 
                     if (sizeChanged || creating) {
                         redrawNeeded = true;
@@ -1260,12 +1256,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final float[] colorComponents = new float[] { Color.red(bgColor) / 255.f,
                 Color.green(bgColor) / 255.f, Color.blue(bgColor) / 255.f };
 
-        SurfaceControl.openTransaction();
-        try {
-            mBackgroundControl.setColor(colorComponents);
-        } finally {
-            SurfaceControl.closeTransaction();
-        }
+        mTmpTransaction.setColor(mBackgroundControl, colorComponents).apply();
     }
 
     @UnsupportedAppUsage
@@ -1480,15 +1471,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @Override
     public void surfaceReplaced(Transaction t) {
         if (mSurfaceControl != null && mBackgroundControl != null) {
-            t.merge(updateRelativeZ());
+            updateRelativeZ(t);
         }
     }
 
-    private Transaction updateRelativeZ() {
-        Transaction t = new Transaction();
+    private void updateRelativeZ(Transaction t) {
         SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
         t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
         t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
-        return t;
     }
 }

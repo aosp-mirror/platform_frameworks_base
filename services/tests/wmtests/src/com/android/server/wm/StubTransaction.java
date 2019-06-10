@@ -239,4 +239,15 @@ public class StubTransaction extends SurfaceControl.Transaction {
     public SurfaceControl.Transaction remove(SurfaceControl sc) {
         return this;
     }
+
+    @Override
+    public SurfaceControl.Transaction syncInputWindows() {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setColorSpaceAgnostic(SurfaceControl sc, boolean agnostic) {
+        return this;
+    }
+
 }

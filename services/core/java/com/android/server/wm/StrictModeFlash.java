@@ -39,7 +39,8 @@ class StrictModeFlash {
     private boolean mDrawNeeded;
     private final int mThickness = 20;
 
-    StrictModeFlash(Supplier<Surface> surfaceFactory, DisplayContent dc) {
+    StrictModeFlash(Supplier<Surface> surfaceFactory, DisplayContent dc,
+            SurfaceControl.Transaction t) {
         mSurface = surfaceFactory.get();
         SurfaceControl ctrl = null;
         try {
@@ -48,9 +49,11 @@ class StrictModeFlash {
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
-            ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
-            ctrl.setPosition(0, 0);
-            ctrl.show();
+
+            // one more than Watermark? arbitrary.
+            t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);
+            t.setPosition(ctrl, 0, 0);
+            t.show(ctrl);
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }
@@ -103,25 +106,25 @@ class StrictModeFlash {
 
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
-    public void setVisibility(boolean on) {
+    public void setVisibility(boolean on, SurfaceControl.Transaction t) {
         if (mSurfaceControl == null) {
             return;
         }
         drawIfNeeded();
         if (on) {
-            mSurfaceControl.show();
+            t.show(mSurfaceControl);
         } else {
-            mSurfaceControl.hide();
+            t.hide(mSurfaceControl);
         }
     }
 
-    void positionSurface(int dw, int dh) {
+    void positionSurface(int dw, int dh, SurfaceControl.Transaction t) {
         if (mLastDW == dw && mLastDH == dh) {
             return;
         }
         mLastDW = dw;
         mLastDH = dh;
-        mSurfaceControl.setBufferSize(dw, dh);
+        t.setBufferSize(mSurfaceControl, dw, dh);
         mDrawNeeded = true;
     }
 

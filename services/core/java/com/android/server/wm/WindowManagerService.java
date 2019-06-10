@@ -1271,14 +1271,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
-
-        openSurfaceTransaction();
-        try {
-            createWatermarkInTransaction();
-        } finally {
-            closeSurfaceTransaction("createWatermarkInTransaction");
-        }
-
+        createWatermark();
         showEmulatorDisplayOverlayIfNeeded();
     }
 
@@ -3437,60 +3430,45 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void showCircularMask(boolean visible) {
         synchronized (mGlobalLock) {
+            if (visible) {
+                // TODO(multi-display): support multiple displays
+                if (mCircularDisplayMask == null) {
+                    int screenOffset = mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_windowOutsetBottom);
+                    int maskThickness = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.circular_display_mask_thickness);
 
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                    ">>> OPEN TRANSACTION showCircularMask(visible=" + visible + ")");
-            openSurfaceTransaction();
-            try {
-                if (visible) {
-                    // TODO(multi-display): support multiple displays
-                    if (mCircularDisplayMask == null) {
-                        int screenOffset = mContext.getResources().getInteger(
-                                com.android.internal.R.integer.config_windowOutsetBottom);
-                        int maskThickness = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.circular_display_mask_thickness);
 
-                        mCircularDisplayMask = new CircularDisplayMask(mSurfaceFactory,
-                                getDefaultDisplayContentLocked(),
-                                mPolicy.getWindowLayerFromTypeLw(
-                                        WindowManager.LayoutParams.TYPE_POINTER)
-                                        * TYPE_LAYER_MULTIPLIER + 10, screenOffset, maskThickness);
+                    if (SHOW_LIGHT_TRANSACTIONS) {
+                        Slog.i(TAG_WM,
+                                ">>> showCircularMask(visible=" + visible + ")");
                     }
-                    mCircularDisplayMask.setVisibility(true);
-                } else if (mCircularDisplayMask != null) {
-                    mCircularDisplayMask.setVisibility(false);
-                    mCircularDisplayMask = null;
+                    mCircularDisplayMask = new CircularDisplayMask(mSurfaceFactory,
+                            getDefaultDisplayContentLocked(), mPolicy.getWindowLayerFromTypeLw(
+                            WindowManager.LayoutParams.TYPE_POINTER) * TYPE_LAYER_MULTIPLIER
+                            + 10, screenOffset, maskThickness, mTransaction);
                 }
-            } finally {
-                closeSurfaceTransaction("showCircularMask");
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                        "<<< CLOSE TRANSACTION showCircularMask(visible=" + visible + ")");
+                mCircularDisplayMask.setVisibility(true, mTransaction);
+            } else if (mCircularDisplayMask != null) {
+                mCircularDisplayMask.setVisibility(false, mTransaction);
+                mCircularDisplayMask = null;
             }
+            mTransaction.apply();
         }
     }
 
     public void showEmulatorDisplayOverlay() {
         synchronized (mGlobalLock) {
 
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                    ">>> OPEN TRANSACTION showEmulatorDisplayOverlay");
-            openSurfaceTransaction();
-            try {
-                if (mEmulatorDisplayOverlay == null) {
-                    mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(
-                            mSurfaceFactory,
-                            mContext,
-                            getDefaultDisplayContentLocked(),
-                            mPolicy.getWindowLayerFromTypeLw(
-                                    WindowManager.LayoutParams.TYPE_POINTER)
-                                    * TYPE_LAYER_MULTIPLIER + 10);
-                }
-                mEmulatorDisplayOverlay.setVisibility(true);
-            } finally {
-                closeSurfaceTransaction("showEmulatorDisplayOverlay");
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                        "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> showEmulatorDisplayOverlay");
+            if (mEmulatorDisplayOverlay == null) {
+                mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(mSurfaceFactory, mContext,
+                        getDefaultDisplayContentLocked(),
+                        mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_POINTER)
+                                * TYPE_LAYER_MULTIPLIER + 10, mTransaction);
             }
+            mEmulatorDisplayOverlay.setVisibility(true, mTransaction);
+            mTransaction.apply();
         }
     }
 
@@ -3519,23 +3497,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG_WM,
-                    ">>> OPEN TRANSACTION showStrictModeViolation");
+            if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG_WM, ">>> showStrictModeViolation");
             // TODO: Modify this to use the surface trace once it is not going crazy.
             // b/31532461
-            SurfaceControl.openTransaction();
-            try {
-                // TODO(multi-display): support multiple displays
-                if (mStrictModeFlash == null) {
-                    mStrictModeFlash = new StrictModeFlash(mSurfaceFactory,
-                            getDefaultDisplayContentLocked());
-                }
-                mStrictModeFlash.setVisibility(on);
-            } finally {
-                SurfaceControl.closeTransaction();
-                if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG_WM,
-                        "<<< CLOSE TRANSACTION showStrictModeViolation");
+            // TODO(multi-display): support multiple displays
+            if (mStrictModeFlash == null) {
+                mStrictModeFlash = new StrictModeFlash(mSurfaceFactory,
+                        getDefaultDisplayContentLocked(), mTransaction);
             }
+            mStrictModeFlash.setVisibility(on, mTransaction);
+            mTransaction.apply();
         }
     }
 
@@ -5520,7 +5491,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return val;
     }
 
-    void createWatermarkInTransaction() {
+    void createWatermark() {
         if (mWatermark != null) {
             return;
         }
@@ -5538,8 +5509,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // TODO(multi-display): Show watermarks on secondary displays.
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
                     mWatermark = new Watermark(mSurfaceFactory, displayContent,
-                            displayContent.mRealDisplayMetrics,
-                            toks);
+                            displayContent.mRealDisplayMetrics, toks, mTransaction);
+                    mTransaction.apply();
                 }
             }
         } catch (FileNotFoundException e) {

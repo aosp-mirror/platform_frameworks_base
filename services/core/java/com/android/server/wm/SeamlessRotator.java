@@ -20,9 +20,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
+import android.os.IBinder;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.Surface.Rotation;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.utils.CoordinateTransforms;
@@ -35,7 +36,7 @@ import java.io.StringWriter;
  *
  * Works by transforming the {@link WindowState} back into the old display rotation.
  *
- * Uses {@link android.view.SurfaceControl#deferTransactionUntil(Surface, long)} instead of
+ * Uses {@link Transaction#deferTransactionUntil(SurfaceControl, IBinder, long)} instead of
  * latching on the buffer size to allow for seamless 180 degree rotations.
  */
 public class SeamlessRotator {

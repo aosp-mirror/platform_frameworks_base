@@ -2797,7 +2797,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             layer += Z_BOOST_BASE;
         }
         if (!mNeedsAnimationBoundsLayer) {
-            leash.setLayer(layer);
+            t.setLayer(leash, layer);
         }
 
         final DisplayContent dc = getDisplayContent();

@@ -813,18 +813,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int defaultDw = defaultInfo.logicalWidth;
         final int defaultDh = defaultInfo.logicalHeight;
         if (mWmService.mWatermark != null) {
-            mWmService.mWatermark.positionSurface(defaultDw, defaultDh);
+            mWmService.mWatermark.positionSurface(defaultDw, defaultDh, mDisplayTransaction);
         }
         if (mWmService.mStrictModeFlash != null) {
-            mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh);
+            mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh, mDisplayTransaction);
         }
         if (mWmService.mCircularDisplayMask != null) {
             mWmService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh,
-                    mWmService.getDefaultDisplayRotation());
+                    mWmService.getDefaultDisplayRotation(), mDisplayTransaction);
         }
         if (mWmService.mEmulatorDisplayOverlay != null) {
             mWmService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
-                    mWmService.getDefaultDisplayRotation());
+                    mWmService.getDefaultDisplayRotation(), mDisplayTransaction);
         }
 
         final int count = mChildren.size();
