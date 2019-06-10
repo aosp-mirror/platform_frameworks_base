@@ -56,6 +56,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
@@ -215,7 +216,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 new MetricsLogger(),
                 mock(AssistManager.class),
                 mOverviewProxyService,
-                mock(NavigationModeController.class));
+                mock(NavigationModeController.class),
+                mock(StatusBarStateController.class));
     }
 
     private class HostCallbacksForExternalDisplay extends
