@@ -23,6 +23,7 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeastOnce;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
 
 import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 import android.util.Xml;
 import android.view.Display;
@@ -604,6 +606,35 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         } finally {
             mWm.setForceDesktopModeOnExternalDisplays(false);
         }
+    }
+
+    @Test
+    public void testDisplayWindowSettingsAppliedOnDisplayReady() {
+        // Set forced densities for two displays in DisplayWindowSettings
+        final DisplayContent dc = createMockSimulatedDisplay();
+        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
+        settings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
+        settings.setForcedDensity(dc, 456, 0 /* userId */);
+
+        // Apply settings to displays - the settings will be stored, but config will not be
+        // recalculated immediately.
+        settings.applySettingsToDisplayLocked(mPrimaryDisplay);
+        settings.applySettingsToDisplayLocked(dc);
+        assertFalse(mPrimaryDisplay.mWaitingForConfig);
+        assertFalse(dc.mWaitingForConfig);
+
+        // Notify WM that the displays are ready and check that they are reconfigured.
+        spyOn(mWm);
+        mWm.displayReady();
+        waitUntilHandlersIdle();
+        verify(mWm, atLeastOnce()).reconfigureDisplayLocked(eq(mPrimaryDisplay));
+        verify(mWm, atLeastOnce()).reconfigureDisplayLocked(eq(dc));
+
+        final Configuration config = new Configuration();
+        mPrimaryDisplay.computeScreenConfiguration(config);
+        assertEquals(123, config.densityDpi);
+        dc.computeScreenConfiguration(config);
+        assertEquals(456, config.densityDpi);
     }
 
     /**
