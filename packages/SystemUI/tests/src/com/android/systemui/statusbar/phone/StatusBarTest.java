@@ -824,6 +824,7 @@ public class StatusBarTest extends SysuiTestCase {
             mAutoHideController = autoHideController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mStatusBarWindow = statusBarWindow;
+            mDozeServiceHost.mWakeLockScreenPerformsAuth = false;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
