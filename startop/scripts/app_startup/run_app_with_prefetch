@@ -317,6 +317,74 @@ configure_compiler_filter() {
 # No-op if this option was not passed in.
 configure_compiler_filter "$compiler_filter" "$package" "$activity" || exit 1
 
+# convert 'a=b\nc=d\ne=f\n...' into 'b,d,f,...'
+parse_metrics_output_string() {
+  # single string with newlines in it.
+  local input="$1"
+
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  # (n1=v1 n2=v2 n3=v3 ...)
+  readarray -t all_metrics <<< "$input"
+
+  local kv_pair=()
+  local i
+
+  for i in "${all_metrics[@]}"
+  do
+    verbose_print "parse_metrics_output: element '$i'"
+    # name=value
+
+    IFS='=' read -r metric_name metric_value rest <<< "$i"
+
+    verbose_print "parse_metrics_output: metric_value '$metric_value'"
+
+    # (value1 value2 value3 ...)
+    all_metrics+=(${metric_value})
+  done
+
+  # "value1,value2,value3,..."
+  join_by ',' "${all_metrics[@]}"
+}
+
+# convert 'a=b\nc=d\ne=f\n... into b,d,f,...'
+parse_metrics_output() {
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  while IFS='=' read -r metric_name metric_value rest; do
+    verbose_print "metric: $metric_name, value: $metric_value; rest: $rest"
+    all_metrics+=($metric_value)
+  done
+
+  join_by ',' "${all_metrics[@]}"
+}
+
+# convert 'a=b\nc=d\ne=f\n... into b,d,f,...'
+parse_metrics_header() {
+  local metric_name
+  local metric_value
+  local rest
+
+  local all_metrics=()
+
+  while IFS='=' read -r metric_name metric_value rest; do
+    verbose_print "metric: $metric_name, value: $metric_value; rest: $rest"
+    all_metrics+=($metric_name)
+  done
+
+  join_by ',' "${all_metrics[@]}"
+}
+
+metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate | parse_metrics_header)"
+
 # TODO: This loop logic could probably be moved into app_startup_runner.py
 for ((i=0;i<count;++i)) do
   verbose_print "=========================================="
@@ -335,7 +403,7 @@ for ((i=0;i<count;++i)) do
   pre_launch_timestamp="$(logcat_save_timestamp)"
 
   # TODO: multiple metrics output.
-  total_time="$(timeout $timeout $DIR/launch_application "$package" "$activity")"
+  total_time="$(timeout $timeout "$DIR/launch_application" "$package" "$activity" | "$DIR/parse_metrics" --package "$package" --activity "$activity" --timestamp "$pre_launch_timestamp" | parse_metrics_output)"
 
   if [[ $? -ne 0 ]]; then
     echo "WARNING: Skip bad result, try iteration again." >&2
@@ -353,22 +421,21 @@ for ((i=0;i<count;++i)) do
 
   echo "Iteration $i. Total time was: $total_time"
 
-  timings_array+=($total_time)
+  timings_array+=("$total_time")
 done
 
 # drop the first result which is usually garbage.
 timings_array=("${timings_array[@]:1}")
 
+# Print the CSV header first.
+echo_to_output_file "$metrics_header"
 
 # Print out interactive/debugging timings and averages.
 # Other scripts should use the --output flag and parse the CSV.
 for tim in "${timings_array[@]}"; do
-  echo_to_output_file -ne "$tim,"
+  echo_to_output_file "$tim"
 done
-echo_to_output_file ""
 
-average_string=$(echo "${timings_array[@]}" | awk '{s+=$0}END{print "Average:",s/NR}' RS=" ")
-echo -ne ${average_string}.
 if [[ x$output != x ]]; then
   echo " Saved results to '$output'"
 fi

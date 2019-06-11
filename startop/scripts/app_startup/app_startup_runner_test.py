@@ -192,19 +192,140 @@ def test_make_script_command_with_temp_output():
   with tmp_file:
     assert cmd_str == ["fake_script", "a", "b", "--count", "2", "--output", tmp_file.name]
 
-def test_parse_run_script_csv_file():
+def test_parse_run_script_csv_file_flat():
   # empty file -> empty list
   f = io.StringIO("")
-  assert asr.parse_run_script_csv_file(f) == []
+  assert asr.parse_run_script_csv_file_flat(f) == []
 
   # common case
   f = io.StringIO("1,2,3")
-  assert asr.parse_run_script_csv_file(f) == [1,2,3]
+  assert asr.parse_run_script_csv_file_flat(f) == [1,2,3]
 
   # ignore trailing comma
   f = io.StringIO("1,2,3,4,5,")
-  assert asr.parse_run_script_csv_file(f) == [1,2,3,4,5]
+  assert asr.parse_run_script_csv_file_flat(f) == [1,2,3,4,5]
 
+def test_data_frame():
+  # trivial empty data frame
+  df = asr.DataFrame()
+  assert df.headers == []
+  assert df.data_table == []
+  assert df.data_table_transposed == []
+
+  # common case, same number of values in each place.
+  df = asr.DataFrame({'TotalTime_ms':[1,2,3], 'Displayed_ms':[4,5,6]})
+  assert df.headers == ['TotalTime_ms', 'Displayed_ms']
+  assert df.data_table == [[1, 4], [2, 5], [3, 6]]
+  assert df.data_table_transposed == [(1, 2, 3), (4, 5, 6)]
+
+  # varying num values.
+  df = asr.DataFrame({'many':[1,2], 'none': []})
+  assert df.headers == ['many', 'none']
+  assert df.data_table == [[1, None], [2, None]]
+  assert df.data_table_transposed == [(1, 2), (None, None)]
+
+  df = asr.DataFrame({'many':[], 'none': [1,2]})
+  assert df.headers == ['many', 'none']
+  assert df.data_table == [[None, 1], [None, 2]]
+  assert df.data_table_transposed == [(None, None), (1, 2)]
+
+  # merge multiple data frames
+  df = asr.DataFrame()
+  df.concat_rows(asr.DataFrame())
+  assert df.headers == []
+  assert df.data_table == []
+  assert df.data_table_transposed == []
+
+  df = asr.DataFrame()
+  df2 = asr.DataFrame({'TotalTime_ms':[1,2,3], 'Displayed_ms':[4,5,6]})
+
+  df.concat_rows(df2)
+  assert df.headers == ['TotalTime_ms', 'Displayed_ms']
+  assert df.data_table == [[1, 4], [2, 5], [3, 6]]
+  assert df.data_table_transposed == [(1, 2, 3), (4, 5, 6)]
+
+  df = asr.DataFrame({'TotalTime_ms':[1,2]})
+  df2 = asr.DataFrame({'Displayed_ms':[4,5]})
+
+  df.concat_rows(df2)
+  assert df.headers == ['TotalTime_ms', 'Displayed_ms']
+  assert df.data_table == [[1, None], [2, None], [None, 4], [None, 5]]
+
+  df = asr.DataFrame({'TotalTime_ms':[1,2]})
+  df2 = asr.DataFrame({'TotalTime_ms': [3, 4], 'Displayed_ms':[5, 6]})
+
+  df.concat_rows(df2)
+  assert df.headers == ['TotalTime_ms', 'Displayed_ms']
+  assert df.data_table == [[1, None], [2, None], [3, 5], [4, 6]]
+
+  # data_row_at
+  df = asr.DataFrame({'TotalTime_ms':[1,2,3], 'Displayed_ms':[4,5,6]})
+  assert df.data_row_at(-1) == [3,6]
+  assert df.data_row_at(2) == [3,6]
+  assert df.data_row_at(1) == [2,5]
+
+  # repeat
+  df = asr.DataFrame({'TotalTime_ms':[1], 'Displayed_ms':[4]})
+  df2 = asr.DataFrame({'TotalTime_ms':[1,1,1], 'Displayed_ms':[4,4,4]})
+  assert df.repeat(3) == df2
+
+  # repeat
+  df = asr.DataFrame({'TotalTime_ms':[1,1,1], 'Displayed_ms':[4,4,4]})
+  assert df.data_row_len == 3
+  df = asr.DataFrame({'TotalTime_ms':[1,1]})
+  assert df.data_row_len == 2
+
+  # repeat
+  df = asr.DataFrame({'TotalTime_ms':[1,1,1], 'Displayed_ms':[4,4,4]})
+  assert df.data_row_len == 3
+  df = asr.DataFrame({'TotalTime_ms':[1,1]})
+  assert df.data_row_len == 2
+
+  # data_row_reduce
+  df = asr.DataFrame({'TotalTime_ms':[1,1,1], 'Displayed_ms':[4,4,4]})
+  df_sum = asr.DataFrame({'TotalTime_ms':[3], 'Displayed_ms':[12]})
+  assert df.data_row_reduce(sum) == df_sum
+
+  # merge_data_columns
+  df = asr.DataFrame({'TotalTime_ms':[1,2,3]})
+  df2 = asr.DataFrame({'Displayed_ms':[3,4,5,6]})
+
+  df.merge_data_columns(df2)
+  assert df == asr.DataFrame({'TotalTime_ms':[1,2,3], 'Displayed_ms':[3,4,5,6]})
+
+  df = asr.DataFrame({'TotalTime_ms':[1,2,3]})
+  df2 = asr.DataFrame({'Displayed_ms':[3,4]})
+
+  df.merge_data_columns(df2)
+  assert df == asr.DataFrame({'TotalTime_ms':[1,2,3], 'Displayed_ms':[3,4]})
+
+  df = asr.DataFrame({'TotalTime_ms':[1,2,3]})
+  df2 = asr.DataFrame({'TotalTime_ms':[10,11]})
+
+  df.merge_data_columns(df2)
+  assert df == asr.DataFrame({'TotalTime_ms':[10,11,3]})
+
+  df = asr.DataFrame({'TotalTime_ms':[]})
+  df2 = asr.DataFrame({'TotalTime_ms':[10,11]})
+
+  df.merge_data_columns(df2)
+  assert df == asr.DataFrame({'TotalTime_ms':[10,11]})
+
+
+
+
+
+def test_parse_run_script_csv_file():
+  # empty file -> empty list
+  f = io.StringIO("")
+  assert asr.parse_run_script_csv_file(f) == None
+
+  # common case
+  f = io.StringIO("TotalTime_ms,Displayed_ms\n1,2")
+  df = asr.DataFrame({'TotalTime_ms': [1], 'Displayed_ms': [2]})
+
+  pf = asr.parse_run_script_csv_file(f)
+  assert pf == df
 
 if __name__ == '__main__':
   pytest.main()

@@ -88,6 +88,26 @@ iorapd_perfetto_purge_app_trace() {
   adb shell "[[ -f '$remote_path' ]] && rm -f '$remote_path' || exit 0"
 }
 
+# Pull the remote perfetto trace file into a local file.
+iorapd_perfetto_pull_trace_file() {
+  local package="$1"
+  local activity="$2"
+  local output_file="$3" # local path
+
+  local compiled_path="$(_iorapd_path_to_data_file "$package" "$activity" "perfetto_trace.pb")"
+
+  if ! adb shell "[[ -f '$compiled_path' ]]"; then
+    echo "Error: Remote path '$compiled_path' invalid" >&2
+    return 1
+  fi
+  if ! mkdir -p "$(dirname "$output_file")"; then
+    echo "Error: Fail to make output directory for '$output_file'" >&2
+    return 1
+  fi
+  verbose_print adb pull "$compiled_path" "$output_file"
+  adb pull "$compiled_path" "$output_file"
+}
+
 # Compile a perfetto trace for a given application.
 # This requires the app has run at least once with perfetto tracing enabled.
 iorapd_compiler_for_app_trace() {
@@ -114,6 +134,7 @@ iorapd_compiler_for_app_trace() {
   # inodes file needs to be on the device for iorap.cmd.compiler to access it
   local remote_inodes=/data/local/tmp/prefetch/inodes.txt
   adb shell "mkdir -p \"$(dirname "$remote_inodes")\"" || return 1
+  verbose_print adb push "$inodes" "$remote_inodes"
   adb push "$inodes" "$remote_inodes"
 
   verbose_print 'iorapd-compiler: compile app trace in ' "$input_path"
@@ -130,7 +151,7 @@ iorapd_compiler_for_app_trace() {
   fi
 
   # Clean up inodes file we just pushed.
-  adb shell "[[ -f '$remote_inodes' ]] && rm -f '$remote_inodes'"
+#  adb shell "[[ -f '$remote_inodes' ]] && rm -f '$remote_inodes'"
 
   return $retcode
 }
