@@ -713,7 +713,7 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
                                      O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_APPEND,
                                      0666));
     if (fd < 0) {
-        fprintf(stderr, "Can't open %s: %s\n", fileNameChars.c_str(), strerror(errno));
+        PLOG(ERROR) << "Can't open " << fileNameChars.c_str();
         return false;
     }
 
@@ -722,7 +722,7 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
 
 static jboolean android_os_Debug_dumpJavaBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
         jint pid, jstring fileName, jint timeoutSecs) {
-    const bool ret =  dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
+    const bool ret = dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
     return ret ? JNI_TRUE : JNI_FALSE;
 }
 
