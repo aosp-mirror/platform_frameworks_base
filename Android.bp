@@ -814,6 +814,7 @@ filegroup {
         "core/java/android/os/IStatsManager.aidl",
         "core/java/android/os/IStatsPullerCallback.aidl",
     ],
+    path: "core/java",
 }
 
 filegroup {
