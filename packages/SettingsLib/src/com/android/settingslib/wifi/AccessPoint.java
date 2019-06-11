@@ -55,6 +55,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -108,6 +109,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
+    /**
+     * Synchronization lock for managing concurrency between main and worker threads.
+     *
+     * <p>This lock should be held for all modifications to {@link #mScanResults} and
+     * {@link #mExtraScanResults}.
+     */
+    private final Object mLock = new Object();
+
     @IntDef({Speed.NONE, Speed.SLOW, Speed.MODERATE, Speed.FAST, Speed.VERY_FAST})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Speed {
@@ -134,12 +143,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /** The underlying set of scan results comprising this AccessPoint. */
+    @GuardedBy("mLock")
     private final ArraySet<ScanResult> mScanResults = new ArraySet<>();
 
     /**
      * Extra set of unused scan results corresponding to this AccessPoint for verbose logging
      * purposes, such as a set of Passpoint roaming scan results when home scans are available.
      */
+    @GuardedBy("mLock")
     private final ArraySet<ScanResult> mExtraScanResults = new ArraySet<>();
 
     /**
@@ -489,8 +500,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         if (isVerboseLoggingEnabled()) {
             builder.append(",rssi=").append(mRssi);
-            builder.append(",scan cache size=").append(mScanResults.size()
-                    + mExtraScanResults.size());
+            synchronized (mLock) {
+                builder.append(",scan cache size=").append(mScanResults.size()
+                        + mExtraScanResults.size());
+            }
         }
 
         return builder.append(')').toString();
@@ -532,18 +545,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private boolean updateScores(WifiNetworkScoreCache scoreCache, long maxScoreCacheAgeMillis) {
         long nowMillis = SystemClock.elapsedRealtime();
-        for (ScanResult result : mScanResults) {
-            ScoredNetwork score = scoreCache.getScoredNetwork(result);
-            if (score == null) {
-                continue;
-            }
-            TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
-            if (timedScore == null) {
-                mScoredNetworkCache.put(
-                        result.BSSID, new TimestampedScoredNetwork(score, nowMillis));
-            } else {
-                // Update data since the has been seen in the score cache
-                timedScore.update(score, nowMillis);
+        synchronized (mLock) {
+            for (ScanResult result : mScanResults) {
+                ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                if (score == null) {
+                    continue;
+                }
+                TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
+                if (timedScore == null) {
+                    mScoredNetworkCache.put(
+                            result.BSSID, new TimestampedScoredNetwork(score, nowMillis));
+                } else {
+                    // Update data since the has been seen in the score cache
+                    timedScore.update(score, nowMillis);
+                }
             }
         }
 
@@ -619,12 +634,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mIsScoredNetworkMetered |= score.meteredHint;
             }
         } else {
-            for (ScanResult result : mScanResults) {
-                ScoredNetwork score = scoreCache.getScoredNetwork(result);
-                if (score == null) {
-                    continue;
+            synchronized (mLock) {
+                for (ScanResult result : mScanResults) {
+                    ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                    if (score == null) {
+                        continue;
+                    }
+                    mIsScoredNetworkMetered |= score.meteredHint;
                 }
-                mIsScoredNetworkMetered |= score.meteredHint;
             }
         }
         return oldMetering == mIsScoredNetworkMetered;
@@ -741,8 +758,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public Set<ScanResult> getScanResults() {
         Set<ScanResult> allScans = new ArraySet<>();
-        allScans.addAll(mScanResults);
-        allScans.addAll(mExtraScanResults);
+        synchronized (mLock) {
+            allScans.addAll(mScanResults);
+            allScans.addAll(mExtraScanResults);
+        }
         return allScans;
     }
 
@@ -766,10 +785,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         ScanResult bestResult = null;
         int bestRssi = UNREACHABLE_RSSI;
-        for (ScanResult result : mScanResults) {
-            if (result.level > bestRssi) {
-                bestRssi = result.level;
-                bestResult = result;
+        synchronized (mLock) {
+            for (ScanResult result : mScanResults) {
+                if (result.level > bestRssi) {
+                    bestRssi = result.level;
+                    bestResult = result;
+                }
             }
         }
 
@@ -1210,9 +1231,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
         savedState.putInt(KEY_EAPTYPE, mEapType);
         if (mConfig != null) savedState.putParcelable(KEY_CONFIG, mConfig);
         savedState.putParcelable(KEY_WIFIINFO, mInfo);
-        savedState.putParcelableArray(KEY_SCANRESULTS,
-                mScanResults.toArray(new Parcelable[mScanResults.size()
-                        + mExtraScanResults.size()]));
+        synchronized (mLock) {
+            savedState.putParcelableArray(KEY_SCANRESULTS,
+                    mScanResults.toArray(new Parcelable[mScanResults.size()
+                            + mExtraScanResults.size()]));
+        }
         savedState.putParcelableArrayList(KEY_SCOREDNETWORKCACHE,
                 new ArrayList<>(mScoredNetworkCache.values()));
         if (mNetworkInfo != null) {
@@ -1291,8 +1314,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
 
         int oldLevel = getLevel();
-        mScanResults.clear();
-        mScanResults.addAll(scanResults);
+        synchronized (mLock) {
+            mScanResults.clear();
+            mScanResults.addAll(scanResults);
+        }
         updateBestRssiInfo();
         int newLevel = getLevel();
 
@@ -1323,16 +1348,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
     void setScanResultsPasspoint(
             @Nullable Collection<ScanResult> homeScans,
             @Nullable Collection<ScanResult> roamingScans) {
-        mExtraScanResults.clear();
-        if (!CollectionUtils.isEmpty(homeScans)) {
-            if (!CollectionUtils.isEmpty(roamingScans)) {
-                mExtraScanResults.addAll(roamingScans);
+        synchronized (mLock) {
+            mExtraScanResults.clear();
+            if (!CollectionUtils.isEmpty(homeScans)) {
+                mIsRoaming = false;
+                if (!CollectionUtils.isEmpty(roamingScans)) {
+                    mExtraScanResults.addAll(roamingScans);
+                }
+                setScanResults(homeScans);
+            } else if (!CollectionUtils.isEmpty(roamingScans)) {
+                mIsRoaming = true;
+                setScanResults(roamingScans);
             }
-            mIsRoaming = false;
-            setScanResults(homeScans);
-        } else if (!CollectionUtils.isEmpty(roamingScans)) {
-            mIsRoaming = true;
-            setScanResults(roamingScans);
         }
     }
 

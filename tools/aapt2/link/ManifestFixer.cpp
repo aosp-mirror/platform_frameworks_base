@@ -214,6 +214,33 @@ static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
   return true;
 }
 
+// Ensure that 'ns_decls' contains a declaration for 'uri', using 'prefix' as
+// the xmlns prefix if possible.
+static void EnsureNamespaceIsDeclared(const std::string& prefix, const std::string& uri,
+                                      std::vector<xml::NamespaceDecl>* ns_decls) {
+  if (std::find_if(ns_decls->begin(), ns_decls->end(), [&](const xml::NamespaceDecl& ns_decl) {
+        return ns_decl.uri == uri;
+      }) != ns_decls->end()) {
+    return;
+  }
+
+  std::set<std::string> used_prefixes;
+  for (const auto& ns_decl : *ns_decls) {
+    used_prefixes.insert(ns_decl.prefix);
+  }
+
+  // Make multiple attempts in the unlikely event that 'prefix' is already taken.
+  std::string disambiguator;
+  for (int i = 0; i < used_prefixes.size() + 1; i++) {
+    std::string attempted_prefix = prefix + disambiguator;
+    if (used_prefixes.find(attempted_prefix) == used_prefixes.end()) {
+      ns_decls->push_back(xml::NamespaceDecl{attempted_prefix, uri});
+      return;
+    }
+    disambiguator = std::to_string(i);
+  }
+}
+
 bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
                                IDiagnostics* diag) {
   // First verify some options.
@@ -262,6 +289,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action.Action(VerifyManifest);
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {
+    EnsureNamespaceIsDeclared("android", xml::kSchemaAndroid, &el->namespace_decls);
+
     if (options_.version_name_default) {
       if (options_.replace_version) {
         el->RemoveAttribute(xml::kSchemaAndroid, "versionName");

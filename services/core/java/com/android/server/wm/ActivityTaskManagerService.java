@@ -3915,7 +3915,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
             int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Report configuration: " + token + " "
-                + horizontalSizeConfiguration + " " + verticalSizeConfigurations);
+                + Arrays.toString(horizontalSizeConfiguration) + " "
+                + Arrays.toString(verticalSizeConfigurations));
         synchronized (mGlobalLock) {
             ActivityRecord record = ActivityRecord.isInStackLocked(token);
             if (record == null) {

@@ -2384,7 +2384,7 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
 
             // ensure opPkg is delegate if does not match pkg
-            resolveNotificationUid(opPkg, pkg, Binder.getCallingUid(), userId);
+            int uid = resolveNotificationUid(opPkg, pkg, Binder.getCallingUid(), userId);
 
             // if opPkg is not the same as pkg, make sure the notification given was posted
             // by opPkg
@@ -2405,7 +2405,7 @@ public class NotificationManagerService extends SystemService {
             // summaries.
             final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
                     (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
-            cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
+            cancelNotification(uid, Binder.getCallingPid(), pkg, tag, id, 0,
                     mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
         }
 

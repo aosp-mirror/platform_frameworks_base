@@ -263,8 +263,18 @@ launch_application_and_wait_for_trace() {
   # Ensure application isn't running already.
   remote_pkill "$package"
 
+  # 5 second trace of Home screen causes
+  # a trace of the home screen.
+  # There is no way to abort the trace
+  # so just wait for it to complete instead.
+  sleep 30
+
   local time_now="$(logcat_save_timestamp)"
   local retcode=0
+
+  verbose_print "Drop caches for non-warm start."
+  # Drop all caches to get cold starts.
+  adb shell "echo 3 > /proc/sys/vm/drop_caches"
 
   verbose_print "now launching application"
   # Launch an application
@@ -316,6 +326,9 @@ collector_main() {
 
   # Wait for perfetto trace to finished writing itself out.
   launch_application_and_wait_for_trace "$package" "$activity" || return $?
+
+  # Pull the perfetto trace for manual inspection.
+  iorapd_perfetto_pull_trace_file "$package" "$activity" "perfetto_trace.pb"
 
   # Compile the trace so that the next app run can use prefetching.
   iorapd_compiler_for_app_trace "$package" "$activity" "$inodes" || return $?
