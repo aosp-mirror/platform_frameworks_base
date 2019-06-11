@@ -2361,7 +2361,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     mRealRequest,
                     mReceiver.isListener(),
                     mReceiver.isPendingIntent(),
-                    /* radius= */ 0,
+                    /* geofence= */ null,
                     mActivityManager.getPackageImportance(packageName));
 
             // remove from mRecordsByProvider
@@ -2541,7 +2541,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         LocationStatsEnums.USAGE_STARTED,
                         LocationStatsEnums.API_REQUEST_LOCATION_UPDATES,
                         packageName, request, listener != null, intent != null,
-                        /* radius= */ 0,
+                        /* geofence= */ null,
                         mActivityManager.getPackageImportance(packageName));
 
                 Receiver receiver;
@@ -2844,7 +2844,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         request,
                         /* hasListener= */ false,
                         intent != null,
-                        geofence.getRadius(),
+                        geofence,
                         mActivityManager.getPackageImportance(packageName));
             }
 
@@ -2876,7 +2876,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         /* LocationRequest= */ null,
                         /* hasListener= */ false,
                         intent != null,
-                        geofence.getRadius(),
+                        geofence,
                         mActivityManager.getPackageImportance(packageName));
             }
             mGeofenceManager.removeFence(geofence, intent);
@@ -2973,7 +2973,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             /* LocationRequest= */ null,
                             /* hasListener= */ true,
                             /* hasIntent= */ false,
-                            /* radius */ 0,
+                            /* geofence= */ null,
                             mActivityManager.getPackageImportance(packageName));
                 }
                 if (isThrottlingExemptLocked(callerIdentity)
@@ -3014,7 +3014,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             /* LocationRequest= */ null,
                             /* hasListener= */ true,
                             /* hasIntent= */ false,
-                            /* radius= */ 0,
+                            /* geofence= */ null,
                             mActivityManager.getPackageImportance(
                                     linkedListener.mCallerIdentity.mPackageName));
                 }
