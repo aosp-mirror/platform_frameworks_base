@@ -136,6 +136,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     protected final AssistManager mAssistManager;
     private final MetricsLogger mMetricsLogger;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final StatusBarStateController mStatusBarStateController;
 
     protected NavigationBarView mNavigationBarView = null;
 
@@ -244,9 +245,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public NavigationBarFragment(AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController, MetricsLogger metricsLogger,
             AssistManager assistManager, OverviewProxyService overviewProxyService,
-            NavigationModeController navigationModeController) {
+            NavigationModeController navigationModeController,
+            StatusBarStateController statusBarStateController) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
+        mStatusBarStateController = statusBarStateController;
         mMetricsLogger = metricsLogger;
         mAssistManager = assistManager;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
@@ -951,7 +954,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public void touchAutoDim() {
         getBarTransitions().setAutoDim(false);
         mHandler.removeCallbacks(mAutoDim);
-        int state = Dependency.get(StatusBarStateController.class).getState();
+        int state = mStatusBarStateController.getState();
         if (state != StatusBarState.KEYGUARD && state != StatusBarState.SHADE_LOCKED) {
             mHandler.postDelayed(mAutoDim, AUTODIM_TIMEOUT_MS);
         }

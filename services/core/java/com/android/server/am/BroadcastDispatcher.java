@@ -725,6 +725,14 @@ public class BroadcastDispatcher {
         final Dumper dumper = new Dumper(pw, queueName, dumpPackage, sdf);
         boolean printed = false;
 
+        dumper.setHeading("Currently in flight");
+        dumper.setLabel("In-Flight Ordered Broadcast");
+        if (mCurrentBroadcast != null) {
+            dumper.dump(mCurrentBroadcast);
+        } else {
+            pw.println("  (null)");
+        }
+
         dumper.setHeading("Active ordered broadcasts");
         dumper.setLabel("Active Ordered Broadcast");
         for (Deferrals d : mAlarmBroadcasts) {

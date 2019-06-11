@@ -559,7 +559,7 @@ class UserController implements Handler.Callback {
         // Spin up app widgets prior to boot-complete, so they can be ready promptly
         mInjector.startUserWidgets(userId);
 
-        Slog.i(TAG, "Sending BOOT_COMPLETE user #" + userId);
+        Slog.i(TAG, "Posting BOOT_COMPLETED user #" + userId);
         // Do not report secondary users, runtime restarts or first boot/upgrade
         if (userId == UserHandle.USER_SYSTEM
                 && !mInjector.isRuntimeRestarted() && !mInjector.isFirstBootOrUpgrade()) {
@@ -572,18 +572,26 @@ class UserController implements Handler.Callback {
         bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
                 | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                 | Intent.FLAG_RECEIVER_OFFLOAD);
-        mInjector.broadcastIntent(bootIntent, null, new IIntentReceiver.Stub() {
-                    @Override
-                    public void performReceive(Intent intent, int resultCode, String data,
-                            Bundle extras, boolean ordered, boolean sticky, int sendingUser)
-                            throws RemoteException {
-                        Slog.i(UserController.TAG, "Finished processing BOOT_COMPLETED for u" + userId);
-                        mBootCompleted = true;
-                    }
-                }, 0, null, null,
-                new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
-                Binder.getCallingUid(), Binder.getCallingPid(), userId);
+        // Widget broadcasts are outbound via FgThread, so to guarantee sequencing
+        // we also send the boot_completed broadcast from that thread.
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        FgThread.getHandler().post(() -> {
+            mInjector.broadcastIntent(bootIntent, null,
+                    new IIntentReceiver.Stub() {
+                        @Override
+                        public void performReceive(Intent intent, int resultCode, String data,
+                                Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                        throws RemoteException {
+                            Slog.i(UserController.TAG, "Finished processing BOOT_COMPLETED for u"
+                                    + userId);
+                            mBootCompleted = true;
+                        }
+                    }, 0, null, null,
+                    new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                    callingUid, callingPid, userId);
+        });
     }
 
     int restartUser(final int userId, final boolean foreground) {
