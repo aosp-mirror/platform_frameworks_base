@@ -222,4 +222,5 @@ filegroup {
     srcs: [
         "idmap2d/aidl/android/os/IIdmap2.aidl",
     ],
+    path: "idmap2d/aidl",
 }
