@@ -654,15 +654,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onThemeChanged() {
-        int which;
-        if (mStatusBarState == StatusBarState.KEYGUARD
-                || mStatusBarState == StatusBarState.SHADE_LOCKED) {
-            which = WallpaperManager.FLAG_LOCK;
-        } else {
-            which = WallpaperManager.FLAG_SYSTEM;
-        }
-        final boolean useDarkText = mColorExtractor.getColors(which,
-                true /* ignoreVisibility */).supportsDarkText();
+        final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         updateDecorViews(useDarkText);
 
         updateFooter();

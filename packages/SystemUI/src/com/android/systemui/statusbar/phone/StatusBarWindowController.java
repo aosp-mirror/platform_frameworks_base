@@ -25,7 +25,6 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -556,17 +555,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             return;
         }
 
-        StatusBarStateController state = Dependency.get(StatusBarStateController.class);
-        int which;
-        if (state.getState() == StatusBarState.KEYGUARD
-                || state.getState() == StatusBarState.SHADE_LOCKED) {
-            which = WallpaperManager.FLAG_LOCK;
-        } else {
-            which = WallpaperManager.FLAG_SYSTEM;
-        }
-        final boolean useDarkText = mColorExtractor.getColors(which,
-                true /* ignoreVisibility */).supportsDarkText();
-
+        final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         // Make sure we have the correct navbar/statusbar colors.
         setKeyguardDark(useDarkText);
     }

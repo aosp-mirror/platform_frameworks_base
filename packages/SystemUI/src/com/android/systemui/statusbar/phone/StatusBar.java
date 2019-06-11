@@ -3222,8 +3222,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
-        final boolean lockDarkText = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true
-                /* ignoreVisibility */).supportsDarkText();
+        final boolean lockDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         final int themeResId = lockDarkText ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI;
         if (mContext.getThemeResId() != themeResId) {
             mContext.setTheme(themeResId);
