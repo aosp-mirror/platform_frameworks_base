@@ -505,9 +505,7 @@ public class ZygoteProcess {
             }
             if (flag.startsWith("--nice-name=")) {
                 // Check if the wrap property is set, usap would ignore it.
-                String niceName = flag.substring(12);
-                String property_value = SystemProperties.get("wrap." + niceName);
-                if (property_value != null && property_value.length() != 0) {
+                if (Zygote.getWrapProperty(flag.substring(12)) != null) {
                     return false;
                 }
             }
