@@ -238,7 +238,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
   }
 
   if (!whitelist->IsAllowed(file_path)) {
-    fail_fn(std::string("Not whitelisted : ").append(file_path));
+    fail_fn(android::base::StringPrintf("Not whitelisted (%d): %s", fd, file_path.c_str()));
   }
 
   // File descriptor flags : currently on FD_CLOEXEC. We can set these
