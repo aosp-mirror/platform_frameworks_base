@@ -55,9 +55,9 @@ public class BadgeRenderer {
 
     /** Space between the center of the dot and the top or left of the bubble stack. */
     static float getDotCenterOffset(Context context) {
-        final int iconSizePx =
-                context.getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
-        return SIZE_PERCENTAGE * iconSizePx;
+        final int iconBitmapSize =
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        return SIZE_PERCENTAGE * iconBitmapSize;
     }
 
     static float getDotRadius(float dotCenterOffset) {

@@ -140,7 +140,7 @@ public class StackAnimationController extends
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
     /** Diameter of the bubbles themselves. */
-    private int mIndividualBubbleSize;
+    private int mBubbleIconBitmapSize;
     /**
      * The amount of space to add between the bubbles and certain UI elements, such as the top of
      * the screen or the IME. This does not apply to the left/right sides of the screen since the
@@ -185,7 +185,7 @@ public class StackAnimationController extends
             return false;
         }
 
-        float stackCenter = mStackPosition.x + mIndividualBubbleSize / 2;
+        float stackCenter = mStackPosition.x + mBubbleIconBitmapSize / 2;
         float screenCenter = mLayout.getWidth() / 2;
         return stackCenter < screenCenter;
     }
@@ -218,7 +218,7 @@ public class StackAnimationController extends
      * @return The X value that the stack will end up at after the fling/spring.
      */
     public float flingStackThenSpringToEdge(float x, float velX, float velY) {
-        final boolean stackOnLeftSide = x - mIndividualBubbleSize / 2 < mLayout.getWidth() / 2;
+        final boolean stackOnLeftSide = x - mBubbleIconBitmapSize / 2 < mLayout.getWidth() / 2;
 
         final boolean stackShouldFlingLeft = stackOnLeftSide
                 ? velX < ESCAPE_VELOCITY
@@ -427,7 +427,7 @@ public class StackAnimationController extends
                                     : 0);
             allowableRegion.right =
                     mLayout.getWidth()
-                            - mIndividualBubbleSize
+                            - mBubbleIconBitmapSize
                             + mBubbleOffscreen
                             - Math.max(
                             insets.getSystemWindowInsetRight(),
@@ -444,7 +444,7 @@ public class StackAnimationController extends
                                     : 0);
             allowableRegion.bottom =
                     mLayout.getHeight()
-                            - mIndividualBubbleSize
+                            - mBubbleIconBitmapSize
                             - mBubblePaddingTop
                             - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePaddingTop : 0f)
                             - Math.max(
@@ -517,7 +517,7 @@ public class StackAnimationController extends
         mFirstBubbleSpringingToTouch = false;
 
         animationForChildAtIndex(0)
-                .translationX(mLayout.getWidth() / 2f - mIndividualBubbleSize / 2f)
+                .translationX(mLayout.getWidth() / 2f - mBubbleIconBitmapSize / 2f)
                 .translationY(destY, after)
                 .withPositionStartVelocities(velX, velY)
                 .withStiffness(SpringForce.STIFFNESS_MEDIUM)
@@ -657,7 +657,7 @@ public class StackAnimationController extends
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mIndividualBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackStartingVerticalOffset =

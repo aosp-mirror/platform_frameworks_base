@@ -32,7 +32,8 @@ import com.android.systemui.R;
 public class BadgedImageView extends ImageView {
 
     private BadgeRenderer mDotRenderer;
-    private int mIconSize;
+    private int mIconBitmapSize;
+
     private Rect mTempBounds = new Rect();
     private Point mTempPoint = new Point();
 
@@ -56,7 +57,7 @@ public class BadgedImageView extends ImageView {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mIconSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
         mDotRenderer = new BadgeRenderer(getContext());
 
         TypedArray ta = context.obtainStyledAttributes(
@@ -69,7 +70,7 @@ public class BadgedImageView extends ImageView {
         super.onDraw(canvas);
         if (mShowUpdateDot) {
             getDrawingRect(mTempBounds);
-            mTempPoint.set((getWidth() - mIconSize) / 2, getPaddingTop());
+            mTempPoint.set((getWidth() - mIconBitmapSize) / 2, getPaddingTop());
             mDotRenderer.draw(canvas, mUpdateDotColor, mTempBounds, mDotScale, mTempPoint,
                     mOnLeft);
         }

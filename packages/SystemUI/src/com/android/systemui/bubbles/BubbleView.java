@@ -29,6 +29,7 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.launcher3.icons.BitmapInfo;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -41,7 +42,7 @@ public class BubbleView extends FrameLayout {
 
     private static final int DARK_ICON_ALPHA = 180;
     private static final double ICON_MIN_CONTRAST = 4.1;
-    private static final int DEFAULT_BACKGROUND_COLOR =  Color.LTGRAY;
+    private static final int DEFAULT_BACKGROUND_COLOR = Color.LTGRAY;
     // Same value as Launcher3 badge code
     private static final float WHITE_SCRIM_ALPHA = 0.54f;
     private Context mContext;
@@ -49,6 +50,9 @@ public class BubbleView extends FrameLayout {
     private BadgedImageView mBadgedImageView;
     private int mBadgeColor;
     private int mIconInset;
+
+    // mBubbleIconFactory cannot be static because it depends on Context.
+    private BubbleIconFactory mBubbleIconFactory;
 
     private boolean mSuppressDot = false;
 
@@ -93,7 +97,6 @@ public class BubbleView extends FrameLayout {
      */
     public void setNotif(NotificationEntry entry) {
         mEntry = entry;
-        updateViews();
     }
 
     /**
@@ -118,6 +121,13 @@ public class BubbleView extends FrameLayout {
     public void update(NotificationEntry entry) {
         mEntry = entry;
         updateViews();
+    }
+
+    /**
+     * @param factory Factory for creating normalized bubble icons.
+     */
+    public void setBubbleIconFactory(BubbleIconFactory factory) {
+        mBubbleIconFactory = factory;
     }
 
     /**
@@ -203,7 +213,7 @@ public class BubbleView extends FrameLayout {
     }
 
     void updateViews() {
-        if (mEntry == null) {
+        if (mEntry == null || mBubbleIconFactory == null) {
             return;
         }
         Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
@@ -219,10 +229,13 @@ public class BubbleView extends FrameLayout {
         }
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
-            mBadgedImageView.setImageDrawable(buildIconWithTint(iconDrawable, n.color));
-        } else {
-            mBadgedImageView.setImageDrawable(iconDrawable);
+            iconDrawable = buildIconWithTint(iconDrawable, n.color);
         }
+        BitmapInfo bitmapInfo = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
+                null /* user */,
+                true /* shrinkNonAdaptiveIcons */);
+        mBadgedImageView.setImageBitmap(bitmapInfo.icon);
+
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgeColor = badgeColor;
         mBadgedImageView.setDotColor(badgeColor);
