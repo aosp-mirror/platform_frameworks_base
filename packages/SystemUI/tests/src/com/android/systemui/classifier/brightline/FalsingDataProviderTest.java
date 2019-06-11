@@ -168,7 +168,7 @@ public class FalsingDataProviderTest extends SysuiTestCase {
         MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -1, -1);
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(motionEventB);
-        assertThat((double) mDataProvider.getAngle(), closeTo(-3 * Math.PI / 4, .001));
+        assertThat((double) mDataProvider.getAngle(), closeTo(5 * Math.PI / 4, .001));
         motionEventB.recycle();
         mDataProvider.onSessionEnd();
 

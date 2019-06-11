@@ -33,6 +33,8 @@ import java.util.List;
 class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
+    private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
+
     final int mWidthPixels;
     final int mHeightPixels;
     final float mXdpi;
@@ -113,6 +115,11 @@ class FalsingDataProvider {
         return mLastMotionEvent;
     }
 
+    /**
+     * Returns the angle between the first and last point of the recent points.
+     *
+     * The angle will be in radians, always be between 0 and 2*PI, inclusive.
+     */
     float getAngle() {
         recalculateData();
         return mAngle;
@@ -159,6 +166,12 @@ class FalsingDataProvider {
             float lastY = mLastMotionEvent.getY() - mFirstRecentMotionEvent.getY();
 
             mAngle = (float) Math.atan2(lastY, lastX);
+            while (mAngle < 0) {
+                mAngle += THREE_HUNDRED_SIXTY_DEG;
+            }
+            while (mAngle > THREE_HUNDRED_SIXTY_DEG) {
+                mAngle -= THREE_HUNDRED_SIXTY_DEG;
+            }
         }
     }
 
