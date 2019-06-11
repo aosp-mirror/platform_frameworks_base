@@ -16,12 +16,11 @@
 
 package android.view.accessibility;
 
-import android.util.SparseArray;
 import android.view.View;
 
 /** @hide */
 public final class AccessibilityNodeIdManager {
-    private SparseArray<View> mIdsToViews = new SparseArray<>();
+    private WeakSparseArray<View> mIdsToViews = new WeakSparseArray<View>();
     private static AccessibilityNodeIdManager sIdManager;
 
     /**
