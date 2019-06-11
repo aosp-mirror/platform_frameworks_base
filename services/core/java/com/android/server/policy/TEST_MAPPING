@@ -35,6 +35,14 @@
           "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
         }
       ]
+    },
+    {
+      "name": "CtsPermissionTestCases",
+      "options": [
+        {
+          "include-filter": "android.permission.cts.SplitPermissionTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
