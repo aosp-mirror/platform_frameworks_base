@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.location.Geofence;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.SystemClock;
@@ -180,13 +181,14 @@ class LocationUsageLogger {
     public void logLocationApiUsage(int usageType, int apiInUse,
             String packageName, LocationRequest locationRequest,
             boolean hasListener, boolean hasIntent,
-            float radius, int activityImportance) {
+            Geofence geofence, int activityImportance) {
         try {
             if (!checkApiUsageLogCap()) {
                 return;
             }
 
             boolean isLocationRequestNull = locationRequest == null;
+            boolean isGeofenceNull = geofence == null;
             if (D) {
                 Log.d(TAG, "log API Usage to statsd. usageType: " + usageType + ", apiInUse: "
                         + apiInUse + ", packageName: " + (packageName == null ? "" : packageName)
@@ -194,7 +196,8 @@ class LocationUsageLogger {
                         + (isLocationRequestNull ? "" : locationRequest.toString())
                         + ", hasListener: " + hasListener
                         + ", hasIntent: " + hasIntent
-                        + ", radius: " + radius
+                        + ", geofence: "
+                        + (isGeofenceNull ? "" : geofence.toString())
                         + ", importance: " + activityImportance);
             }
 
@@ -219,7 +222,9 @@ class LocationUsageLogger {
                         ? LocationStatsEnums.EXPIRATION_UNKNOWN
                         : getBucketizedExpireIn(locationRequest.getExpireAt()),
                     getCallbackType(apiInUse, hasListener, hasIntent),
-                    bucketizeRadiusToStatsdEnum(radius),
+                    isGeofenceNull
+                        ? LocationStatsEnums.RADIUS_UNKNOWN
+                        : bucketizeRadiusToStatsdEnum(geofence.getRadius()),
                     categorizeActivityImportance(activityImportance));
         } catch (Exception e) {
             // Swallow exceptions to avoid crashing LMS.
