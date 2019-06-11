@@ -64,7 +64,8 @@ public class BrightLineFalsingManager implements FalsingManager {
         mDataProvider = falsingDataProvider;
         mSensorManager = sensorManager;
         mClassifiers = new ArrayList<>();
-        // TODO: add classifiers here.
+
+        mClassifiers.add(new PointerCountClassifier(mDataProvider));
     }
 
     private void registerSensors() {
