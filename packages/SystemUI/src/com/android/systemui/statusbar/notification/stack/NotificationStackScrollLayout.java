@@ -20,7 +20,7 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
+import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -187,7 +187,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
     private final boolean mShouldDrawNotificationBackground;
-    private boolean mLowPriorityBeforeSpeedBump;
+    private boolean mHighPriorityBeforeSpeedBump;
     private final boolean mAllowLongPress;
     private boolean mDismissRtl;
 
@@ -584,12 +584,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         TunerService tunerService = Dependency.get(TunerService.class);
         tunerService.addTunable((key, newValue) -> {
-            if (key.equals(LOW_PRIORITY)) {
-                mLowPriorityBeforeSpeedBump = "1".equals(newValue);
+            if (key.equals(HIGH_PRIORITY)) {
+                mHighPriorityBeforeSpeedBump = "1".equals(newValue);
             } else if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
                 updateDismissRtlSetting("1".equals(newValue));
             }
-        }, LOW_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
+        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -5764,10 +5764,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             currentIndex++;
             boolean beforeSpeedBump;
-            if (mLowPriorityBeforeSpeedBump) {
-                beforeSpeedBump = !row.getEntry().ambient;
-            } else {
+            if (mHighPriorityBeforeSpeedBump) {
                 beforeSpeedBump = row.getEntry().isHighPriority();
+            } else {
+                beforeSpeedBump = !row.getEntry().ambient;
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;
