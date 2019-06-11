@@ -2380,33 +2380,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id,
                 int userId) {
-            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
-
-            // ensure opPkg is delegate if does not match pkg
-            int uid = resolveNotificationUid(opPkg, pkg, Binder.getCallingUid(), userId);
-
-            // if opPkg is not the same as pkg, make sure the notification given was posted
-            // by opPkg
-            if (!Objects.equals(pkg, opPkg)) {
-                synchronized (mNotificationLock) {
-                    // Look for the notification, searching both the posted and enqueued lists.
-                    NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
-                    if (r != null) {
-                        if (!Objects.equals(opPkg, r.sbn.getOpPkg())) {
-                            throw new SecurityException(opPkg + " does not have permission to "
-                                    + "cancel a notification they did not post " + tag + " " + id);
-                        }
-                    }
-                }
-            }
-
-            // Don't allow client applications to cancel foreground service notis or autobundled
-            // summaries.
-            final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
-                    (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
-            cancelNotification(uid, Binder.getCallingPid(), pkg, tag, id, 0,
-                    mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
+            cancelNotificationInternal(pkg, opPkg, Binder.getCallingUid(), Binder.getCallingPid(),
+                    tag, id, userId);
         }
 
         @Override
@@ -4638,6 +4613,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void cancelNotification(String pkg, String opPkg, int callingUid, int callingPid,
+                String tag, int id, int userId) {
+            cancelNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, userId);
+        }
+
+        @Override
         public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
                 int userId) {
             checkCallerIsSystem();
@@ -4677,6 +4658,37 @@ public class NotificationManagerService extends SystemService {
                     (r.mOriginalFlags & ~FLAG_FOREGROUND_SERVICE);
         }
     };
+
+    void cancelNotificationInternal(String pkg, String opPkg, int callingUid, int callingPid,
+            String tag, int id, int userId) {
+        userId = ActivityManager.handleIncomingUser(callingPid,
+                callingUid, userId, true, false, "cancelNotificationWithTag", pkg);
+
+        // ensure opPkg is delegate if does not match pkg
+        int uid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+
+        // if opPkg is not the same as pkg, make sure the notification given was posted
+        // by opPkg
+        if (!Objects.equals(pkg, opPkg)) {
+            synchronized (mNotificationLock) {
+                // Look for the notification, searching both the posted and enqueued lists.
+                NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
+                if (r != null) {
+                    if (!Objects.equals(opPkg, r.sbn.getOpPkg())) {
+                        throw new SecurityException(opPkg + " does not have permission to "
+                                + "cancel a notification they did not post " + tag + " " + id);
+                    }
+                }
+            }
+        }
+
+        // Don't allow client applications to cancel foreground service notis or autobundled
+        // summaries.
+        final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
+                (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
+        cancelNotification(uid, callingPid, pkg, tag, id, 0,
+                mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
+    }
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
