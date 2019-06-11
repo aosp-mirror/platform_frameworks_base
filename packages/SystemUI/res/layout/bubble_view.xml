@@ -24,7 +24,6 @@
         android:id="@+id/bubble_image"
         android:layout_width="@dimen/individual_bubble_size"
         android:layout_height="@dimen/individual_bubble_size"
-        android:padding="@dimen/bubble_view_padding"
         android:clipToPadding="false"/>
 
 </com.android.systemui.bubbles.BubbleView>
