@@ -717,7 +717,11 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
         return false;
     }
 
-    return (dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd) == 0);
+    int res = dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd);
+    if (fdatasync(fd.get()) != 0) {
+        PLOG(ERROR) << "Failed flushing trace.";
+    }
+    return res == 0;
 }
 
 static jboolean android_os_Debug_dumpJavaBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
