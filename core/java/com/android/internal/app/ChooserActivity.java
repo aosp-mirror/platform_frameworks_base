@@ -110,6 +110,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ImageUtils;
@@ -125,8 +126,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The Chooser Activity handles intent resolution specifically for sharing intents -
@@ -185,7 +188,6 @@ public class ChooserActivity extends ResolverActivity {
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 5000;
 
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -211,6 +213,8 @@ public class ChooserActivity extends ResolverActivity {
     private ChooserRowAdapter mChooserRowAdapter;
     private int mChooserRowServiceSpacing;
 
+    private int mCurrAvailableWidth = 0;
+
     /** {@link ChooserActivity#getBaseScore} */
     private static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link ChooserActivity#getBaseScore} */
@@ -220,12 +224,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final int MAX_RANKED_TARGETS = 4;
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
-
-    private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
-    private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
-    private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
-    private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
-    private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
+    private final Set<ComponentName> mServicesRequested = new HashSet<>();
 
     private static final int MAX_LOG_RANK_POSITION = 12;
 
@@ -255,10 +254,12 @@ public class ChooserActivity extends ResolverActivity {
     private ContentPreviewCoordinator mPreviewCoord;
 
     private class ContentPreviewCoordinator {
-        private static final int IMAGE_LOAD_TIMEOUT_MILLIS = 300;
         private static final int IMAGE_FADE_IN_MILLIS = 150;
         private static final int IMAGE_LOAD_TIMEOUT = 1;
         private static final int IMAGE_LOAD_INTO_VIEW = 2;
+
+        private final int mImageLoadTimeoutMillis =
+                getResources().getInteger(R.integer.config_shortAnimTime);
 
         private final View mParentView;
         private boolean mHideParentOnFail;
@@ -328,7 +329,7 @@ public class ChooserActivity extends ResolverActivity {
 
         private void loadUriIntoView(final int imageResourceId, final Uri uri,
                 final int extraImages) {
-            mHandler.sendEmptyMessageDelayed(IMAGE_LOAD_TIMEOUT, IMAGE_LOAD_TIMEOUT_MILLIS);
+            mHandler.sendEmptyMessageDelayed(IMAGE_LOAD_TIMEOUT, mImageLoadTimeoutMillis);
 
             AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
                 final Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
@@ -347,7 +348,7 @@ public class ChooserActivity extends ResolverActivity {
         private void maybeHideContentPreview() {
             if (!mAtLeastOneLoaded && mHideParentOnFail) {
                 Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
-                        + " within " + IMAGE_LOAD_TIMEOUT_MILLIS + "ms.");
+                        + " within " + mImageLoadTimeoutMillis + "ms.");
                 collapseParentView();
                 if (mChooserRowAdapter != null) {
                     mChooserRowAdapter.hideContentPreview();
@@ -369,7 +370,59 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
-    private final Handler mChooserHandler = new Handler() {
+    private final ChooserHandler mChooserHandler = new ChooserHandler();
+
+    private class ChooserHandler extends Handler {
+        private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
+        private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT = 2;
+        private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT = 3;
+        private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 4;
+        private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
+        private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
+
+        private static final int WATCHDOG_TIMEOUT_MAX_MILLIS = 10000;
+        private static final int WATCHDOG_TIMEOUT_MIN_MILLIS = 3000;
+
+        private boolean mMinTimeoutPassed = false;
+
+        private void removeAllMessages() {
+            removeMessages(LIST_VIEW_UPDATE_MESSAGE);
+            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT);
+            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT);
+            removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
+            removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
+            removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
+        }
+
+        private void restartServiceRequestTimer() {
+            mMinTimeoutPassed = false;
+            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT);
+            removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT);
+
+            if (DEBUG) {
+                Log.d(TAG, "queryTargets setting watchdog timer for "
+                        + WATCHDOG_TIMEOUT_MIN_MILLIS + "-"
+                        + WATCHDOG_TIMEOUT_MAX_MILLIS + "ms");
+            }
+
+            sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT,
+                    WATCHDOG_TIMEOUT_MIN_MILLIS);
+            sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT,
+                    WATCHDOG_TIMEOUT_MAX_MILLIS);
+        }
+
+        private void maybeStopServiceRequestTimer() {
+            // Set a minimum timeout threshold, to ensure both apis, sharing shortcuts
+            // and older-style direct share services, have had time to load, otherwise
+            // just checking mServiceConnections could force us to end prematurely
+            if (mMinTimeoutPassed && mServiceConnections.isEmpty()) {
+                logDirectShareTargetReceived(
+                        MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
+                sendVoiceChoicesIfNeeded();
+                mChooserListAdapter.completeServiceTargetLoading();
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (mChooserListAdapter == null || isDestroyed()) {
@@ -393,23 +446,17 @@ public class ChooserActivity extends ResolverActivity {
                     unbindService(sri.connection);
                     sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
-                    if (mServiceConnections.isEmpty()) {
-                        logDirectShareTargetReceived(
-                                MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
-                        sendVoiceChoicesIfNeeded();
-                    }
+                    maybeStopServiceRequestTimer();
                     break;
 
-                case CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT:
-                    if (DEBUG) {
-                        Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
-                    }
+                case CHOOSER_TARGET_SERVICE_WATCHDOG_MIN_TIMEOUT:
+                    mMinTimeoutPassed = true;
+                    maybeStopServiceRequestTimer();
+                    break;
 
+                case CHOOSER_TARGET_SERVICE_WATCHDOG_MAX_TIMEOUT:
                     unbindRemainingServices();
-                    logDirectShareTargetReceived(
-                            MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
-                    sendVoiceChoicesIfNeeded();
-                    mChooserListAdapter.completeServiceTargetLoading();
+                    maybeStopServiceRequestTimer();
                     break;
 
                 case LIST_VIEW_UPDATE_MESSAGE:
@@ -667,6 +714,17 @@ public class ChooserActivity extends ResolverActivity {
     protected boolean isWorkProfile() {
         return ((UserManager) getSystemService(Context.USER_SERVICE))
                 .getUserInfo(UserHandle.myUserId()).isManagedProfile();
+    }
+
+    @Override
+    protected PackageMonitor createPackageMonitor() {
+        return new PackageMonitor() {
+            @Override
+            public void onSomePackagesChanged() {
+                mAdapter.handlePackagesChanged();
+                bindProfileView();
+            }
+        };
     }
 
     private void onCopyButtonClicked(View v) {
@@ -1065,11 +1123,7 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver = null;
         }
         unbindRemainingServices();
-        mChooserHandler.removeMessages(LIST_VIEW_UPDATE_MESSAGE);
-        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
-        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
-        mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
-        mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
+        mChooserHandler.removeAllMessages();
 
         if (mPreviewCoord != null) mPreviewCoord.cancelLoads();
 
@@ -1307,6 +1361,7 @@ public class ChooserActivity extends ResolverActivity {
         final PackageManager pm = getPackageManager();
         ShortcutManager sm = (ShortcutManager) getSystemService(ShortcutManager.class);
         int targetsToQuery = 0;
+
         for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
             final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
             if (adapter.getScore(dri) == 0) {
@@ -1326,6 +1381,12 @@ public class ChooserActivity extends ResolverActivity {
             if (serviceName != null) {
                 final ComponentName serviceComponent = new ComponentName(
                         ai.packageName, serviceName);
+
+                if (mServicesRequested.contains(serviceComponent)) {
+                    continue;
+                }
+                mServicesRequested.add(serviceComponent);
+
                 final Intent serviceIntent = new Intent(ChooserTargetService.SERVICE_INTERFACE)
                         .setComponent(serviceComponent);
 
@@ -1376,16 +1437,7 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "queryTargets setting watchdog timer for "
-                    + WATCHDOG_TIMEOUT_MILLIS + "ms");
-        }
-        mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
-                WATCHDOG_TIMEOUT_MILLIS);
-
-        if (mServiceConnections.isEmpty()) {
-            sendVoiceChoicesIfNeeded();
-        }
+        mChooserHandler.restartServiceRequestTimer();
     }
 
     private IntentFilter getTargetIntentFilter() {
@@ -1493,7 +1545,7 @@ public class ChooserActivity extends ResolverActivity {
                 continue;
             }
             final Message msg = Message.obtain();
-            msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
+            msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
             msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null);
             mChooserHandler.sendMessage(msg);
             resultMessageSent = true;
@@ -1506,7 +1558,7 @@ public class ChooserActivity extends ResolverActivity {
 
     private void sendShortcutManagerShareTargetResultCompleted() {
         final Message msg = Message.obtain();
-        msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
+        msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
         mChooserHandler.sendMessage(msg);
     }
 
@@ -1574,6 +1626,7 @@ public class ChooserActivity extends ResolverActivity {
             unbindService(conn);
             conn.destroy();
         }
+        mServicesRequested.clear();
         mServiceConnections.clear();
     }
 
@@ -2198,10 +2251,12 @@ public class ChooserActivity extends ResolverActivity {
             return;
         }
 
-        int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
+        final int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
         if (mChooserRowAdapter.consumeLayoutRequest()
                 || mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
-                || mAdapterView.getAdapter() == null) {
+                || mAdapterView.getAdapter() == null
+                || availableWidth != mCurrAvailableWidth) {
+            mCurrAvailableWidth = availableWidth;
             mAdapterView.setAdapter(mChooserRowAdapter);
 
             getMainThreadHandler().post(() -> {
@@ -2282,7 +2337,6 @@ public class ChooserActivity extends ResolverActivity {
         private ChooserTargetInfo mPlaceHolderTargetInfo = new PlaceHolderTargetInfo();
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
-        private boolean mTargetsNeedPruning = false;
 
         private final BaseChooserTargetComparator mBaseTargetComparator
                 = new BaseChooserTargetComparator();
@@ -2351,9 +2405,21 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
+        public void handlePackagesChanged() {
+            if (DEBUG) {
+                Log.d(TAG, "clearing queryTargets on package change");
+            }
+            createPlaceHolders();
+            mServicesRequested.clear();
+            notifyDataSetChanged();
+
+            super.handlePackagesChanged();
+        }
+
+        @Override
         public void notifyDataSetChanged() {
             if (!mListViewDataChanged) {
-                mChooserHandler.sendEmptyMessageDelayed(LIST_VIEW_UPDATE_MESSAGE,
+                mChooserHandler.sendEmptyMessageDelayed(ChooserHandler.LIST_VIEW_UPDATE_MESSAGE,
                         LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
                 mListViewDataChanged = true;
             }
@@ -2368,6 +2434,7 @@ public class ChooserActivity extends ResolverActivity {
 
 
         private void createPlaceHolders() {
+            mNumShortcutResults = 0;
             mServiceTargets.clear();
             for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
                 mServiceTargets.add(mPlaceHolderTargetInfo);
@@ -2408,16 +2475,6 @@ public class ChooserActivity extends ResolverActivity {
             // don't support direct share on low ram devices
             if (ActivityManager.isLowRamDeviceStatic()) {
                 return;
-            }
-
-            if (mServiceTargets != null) {
-                if (getDisplayResolveInfoCount() == 0) {
-                    // b/109676071: When packages change, onListRebuilt() is called before
-                    // ResolverActivity.mDisplayList is re-populated; pruning now would cause the
-                    // list to disappear briefly, so instead we detect this case (the
-                    // set of targets suddenly dropping to zero) and remember to prune later.
-                    mTargetsNeedPruning = true;
-                }
             }
 
             if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
@@ -2476,7 +2533,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public int getServiceTargetCount() {
-            if (isSendAction(getTargetIntent())) {
+            if (isSendAction(getTargetIntent()) && !ActivityManager.isLowRamDeviceStatic()) {
                 return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
             }
 
@@ -2586,19 +2643,6 @@ public class ChooserActivity extends ResolverActivity {
 
             if (targets.size() == 0) {
                 return;
-            }
-
-            if (mTargetsNeedPruning) {
-                // First proper update since we got an onListRebuilt() with (transient) 0 items.
-                // Clear out the target list and rebuild.
-                createPlaceHolders();
-                mTargetsNeedPruning = false;
-
-                // Add back any app-supplied direct share targets that may have been
-                // wiped by this clear
-                if (mCallerChooserTargets != null) {
-                    addServiceResults(null, Lists.newArrayList(mCallerChooserTargets), false);
-                }
             }
 
             final float baseScore = getBaseScore(origTarget, isShortcutResult);
@@ -3445,7 +3489,7 @@ public class ChooserActivity extends ResolverActivity {
                     mChooserActivity.filterServiceTargets(
                             mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
                     final Message msg = Message.obtain();
-                    msg.what = CHOOSER_TARGET_SERVICE_RESULT;
+                    msg.what = ChooserHandler.CHOOSER_TARGET_SERVICE_RESULT;
                     msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
                             ChooserTargetServiceConnection.this);
                     mChooserActivity.mChooserHandler.sendMessage(msg);
