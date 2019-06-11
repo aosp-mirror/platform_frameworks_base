@@ -48,6 +48,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Device level configuration parameters which can be tuned by a separate configuration service.
+ * Namespaces that end in "_native" such as {@link #NAMESPACE_NETD_NATIVE} are intended to be used
+ * by native code and should be pushed to system properties to make them accessible.
  *
  * @hide
  */
