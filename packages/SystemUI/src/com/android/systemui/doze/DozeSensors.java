@@ -70,11 +70,12 @@ public class DozeSensors {
     private final Consumer<Boolean> mProxCallback;
     private final Callback mCallback;
     @VisibleForTesting
-    protected final TriggerSensor[] mSensors;
+    protected TriggerSensor[] mSensors;
 
     private final Handler mHandler = new Handler();
     private final ProxSensor mProxSensor;
     private long mDebounceFrom;
+    private boolean mSettingRegistered;
 
     public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
@@ -172,13 +173,8 @@ public class DozeSensors {
     public void setListening(boolean listen) {
         for (TriggerSensor s : mSensors) {
             s.setListening(listen);
-            if (listen) {
-                s.registerSettingsObserver(mSettingsObserver);
-            }
         }
-        if (!listen) {
-            mResolver.unregisterContentObserver(mSettingsObserver);
-        }
+        registerSettingsObserverIfNeeded(listen);
     }
 
     /** Set the listening state of only the sensors that require the touchscreen. */
@@ -238,6 +234,17 @@ public class DozeSensors {
      */
     public Boolean isProximityCurrentlyFar() {
         return mProxSensor.mCurrentlyFar;
+    }
+
+    private void registerSettingsObserverIfNeeded(boolean register) {
+        if (!register) {
+            mResolver.unregisterContentObserver(mSettingsObserver);
+        } else if (!mSettingRegistered) {
+            for (TriggerSensor s : mSensors) {
+                s.registerSettingsObserver(mSettingsObserver);
+            }
+        }
+        mSettingRegistered = register;
     }
 
     private class ProxSensor implements SensorEventListener {
