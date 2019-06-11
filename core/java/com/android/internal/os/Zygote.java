@@ -519,6 +519,9 @@ public final class Zygote {
             try {
                 sessionSocket = usapPoolSocket.accept();
 
+                // Block SIGTERM so we won't be killed if the Zygote flushes the USAP pool.
+                blockSigTerm();
+
                 BufferedReader usapReader =
                         new BufferedReader(new InputStreamReader(sessionSocket.getInputStream()));
                 usapOutputStream =
@@ -537,86 +540,115 @@ public final class Zygote {
                 } else {
                     Log.e("USAP", "Truncated command received.");
                     IoUtils.closeQuietly(sessionSocket);
+
+                    // Re-enable SIGTERM so the USAP can be flushed from the pool if necessary.
+                    unblockSigTerm();
                 }
             } catch (Exception ex) {
                 Log.e("USAP", ex.getMessage());
                 IoUtils.closeQuietly(sessionSocket);
+
+                // Re-enable SIGTERM so the USAP can be flushed from the pool if necessary.
+                unblockSigTerm();
             }
         }
 
-        applyUidSecurityPolicy(args, peerCredentials);
-        applyDebuggerSystemProperty(args);
-
-        int[][] rlimits = null;
-
-        if (args.mRLimits != null) {
-            rlimits = args.mRLimits.toArray(INT_ARRAY_2D);
-        }
-
-        // This must happen before the SELinux policy for this process is
-        // changed when specializing.
         try {
-            // Used by ZygoteProcess.zygoteSendArgsAndGetResult to fill in a
-            // Process.ProcessStartResult object.
-            usapOutputStream.writeInt(pid);
-        } catch (IOException ioEx) {
-            Log.e("USAP", "Failed to write response to session socket: " + ioEx.getMessage());
-            System.exit(-1);
-        } finally {
-            IoUtils.closeQuietly(sessionSocket);
+            // SIGTERM is blocked on loop exit.  This prevents a USAP that is specializing from
+            // being killed during a pool flush.
+
+            applyUidSecurityPolicy(args, peerCredentials);
+            applyDebuggerSystemProperty(args);
+
+            int[][] rlimits = null;
+
+            if (args.mRLimits != null) {
+                rlimits = args.mRLimits.toArray(INT_ARRAY_2D);
+            }
+
+            // This must happen before the SELinux policy for this process is
+            // changed when specializing.
+            try {
+                // Used by ZygoteProcess.zygoteSendArgsAndGetResult to fill in a
+                // Process.ProcessStartResult object.
+                usapOutputStream.writeInt(pid);
+            } catch (IOException ioEx) {
+                Log.e("USAP", "Failed to write response to session socket: "
+                        + ioEx.getMessage());
+                throw new RuntimeException(ioEx);
+            } finally {
+                IoUtils.closeQuietly(sessionSocket);
+
+                try {
+                    // This socket is closed using Os.close due to an issue with the implementation
+                    // of LocalSocketImp.close().  Because the raw FD is created by init and then
+                    // loaded from an environment variable (as opposed to being created by the
+                    // LocalSocketImpl itself) the current implementation will not actually close
+                    // the underlying FD.
+                    //
+                    // See b/130309968 for discussion of this issue.
+                    Os.close(usapPoolSocket.getFileDescriptor());
+                } catch (ErrnoException ex) {
+                    Log.e("USAP", "Failed to close USAP pool socket");
+                    throw new RuntimeException(ex);
+                }
+            }
 
             try {
-                // This socket is closed using Os.close due to an issue with the implementation of
-                // LocalSocketImp.close.  Because the raw FD is created by init and then loaded from
-                // an environment variable (as opposed to being created by the LocalSocketImpl
-                // itself) the current implementation will not actually close the underlying FD.
-                //
-                // See b/130309968 for discussion of this issue.
-                Os.close(usapPoolSocket.getFileDescriptor());
-            } catch (ErrnoException ex) {
-                Log.e("USAP", "Failed to close USAP pool socket: " + ex.getMessage());
+                ByteArrayOutputStream buffer =
+                        new ByteArrayOutputStream(Zygote.USAP_MANAGEMENT_MESSAGE_BYTES);
+                DataOutputStream outputStream = new DataOutputStream(buffer);
+
+                // This is written as a long so that the USAP reporting pipe and USAP pool event FD
+                // handlers in ZygoteServer.runSelectLoop can be unified.  These two cases should
+                // both send/receive 8 bytes.
+                outputStream.writeLong(pid);
+                outputStream.flush();
+
+                Os.write(writePipe, buffer.toByteArray(), 0, buffer.size());
+            } catch (Exception ex) {
+                Log.e("USAP",
+                        String.format("Failed to write PID (%d) to pipe (%d): %s",
+                                pid, writePipe.getInt$(), ex.getMessage()));
+                throw new RuntimeException(ex);
+            } finally {
+                IoUtils.closeQuietly(writePipe);
             }
-        }
 
-        try {
-            ByteArrayOutputStream buffer =
-                    new ByteArrayOutputStream(Zygote.USAP_MANAGEMENT_MESSAGE_BYTES);
-            DataOutputStream outputStream = new DataOutputStream(buffer);
+            specializeAppProcess(args.mUid, args.mGid, args.mGids,
+                                 args.mRuntimeFlags, rlimits, args.mMountExternal,
+                                 args.mSeInfo, args.mNiceName, args.mStartChildZygote,
+                                 args.mInstructionSet, args.mAppDataDir);
 
-            // This is written as a long so that the USAP reporting pipe and USAP pool event FD
-            // handlers in ZygoteServer.runSelectLoop can be unified.  These two cases should both
-            // send/receive 8 bytes.
-            outputStream.writeLong(pid);
-            outputStream.flush();
+            disableExecuteOnly(args.mTargetSdkVersion);
 
-            Os.write(writePipe, buffer.toByteArray(), 0, buffer.size());
-        } catch (Exception ex) {
-            Log.e("USAP",
-                    String.format("Failed to write PID (%d) to pipe (%d): %s",
-                            pid, writePipe.getInt$(), ex.getMessage()));
-            System.exit(-1);
+            if (args.mNiceName != null) {
+                Process.setArgV0(args.mNiceName);
+            }
+
+            // End of the postFork event.
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+            return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
+                                         args.mRemainingArgs,
+                                         null /* classLoader */);
         } finally {
-            IoUtils.closeQuietly(writePipe);
+            // Unblock SIGTERM to restore the process to default behavior.
+            unblockSigTerm();
         }
-
-        specializeAppProcess(args.mUid, args.mGid, args.mGids,
-                           args.mRuntimeFlags, rlimits, args.mMountExternal,
-                           args.mSeInfo, args.mNiceName, args.mStartChildZygote,
-                           args.mInstructionSet, args.mAppDataDir);
-
-        disableExecuteOnly(args.mTargetSdkVersion);
-
-        if (args.mNiceName != null) {
-            Process.setArgV0(args.mNiceName);
-        }
-
-        // End of the postFork event.
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-        return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
-                                     args.mRemainingArgs,
-                                     null /* classLoader */);
     }
+
+    private static void blockSigTerm() {
+        nativeBlockSigTerm();
+    }
+
+    private static native void nativeBlockSigTerm();
+
+    private static void unblockSigTerm() {
+        nativeUnblockSigTerm();
+    }
+
+    private static native void nativeUnblockSigTerm();
 
     private static final String USAP_ERROR_PREFIX = "Invalid command to USAP: ";
 
