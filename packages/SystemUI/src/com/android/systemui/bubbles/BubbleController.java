@@ -31,6 +31,9 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
@@ -101,8 +104,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleController implements ConfigurationController.ConfigurationListener {
 
-    private static final String TAG = "BubbleController";
-    private static final boolean DEBUG = false;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
@@ -585,7 +587,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             mNotificationEntryManager.updateNotifications();
             updateStack();
 
-            if (DEBUG) {
+            if (DEBUG_BUBBLE_CONTROLLER) {
                 Log.d(TAG, "[BubbleData]");
                 Log.d(TAG, formatBubblesString(mBubbleData.getBubbles(),
                         mBubbleData.getSelectedBubble()));

@@ -18,6 +18,9 @@ package com.android.systemui.bubbles;
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -33,7 +36,7 @@ import com.android.systemui.R;
  */
 public class BadgeRenderer {
 
-    private static final String TAG = "BadgeRenderer";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BadgeRenderer" : TAG_BUBBLES;
 
     /** The badge sizes are defined as percentages of the app icon size. */
     private static final float SIZE_PERCENTAGE = 0.38f;

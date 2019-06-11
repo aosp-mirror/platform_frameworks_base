@@ -45,7 +45,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
      */
     private static final float INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY = 6000f;
 
-    private static final String TAG = "BubbleTouchHandler";
     /**
      * When the stack is flung towards the bottom of the screen, it'll be dismissed if it's flung
      * towards the center of the screen (where the dismiss target is). This value is the width of
