@@ -620,7 +620,6 @@ public class VibratorService extends IVibratorService.Stub
                 linkVibration(vib);
                 long ident = Binder.clearCallingIdentity();
                 try {
-
                     doCancelVibrateLocked();
                     startVibrationLocked(vib);
                     addToPreviousVibrationsLocked(vib);
@@ -1437,6 +1436,8 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     final class ExternalVibratorService extends IExternalVibratorService.Stub {
+        ExternalVibrationDeathRecipient mCurrentExternalDeathRecipient;
+
         @Override
         public int onExternalVibrationStart(ExternalVibration vib) {
             if (!mSupportsExternalControl) {
@@ -1470,6 +1471,8 @@ public class VibratorService extends IVibratorService.Stub
                     // Note that this doesn't support multiple concurrent external controls, as we
                     // would need to mute the old one still if it came from a different controller.
                     mCurrentExternalVibration = vib;
+                    mCurrentExternalDeathRecipient = new ExternalVibrationDeathRecipient();
+                    mCurrentExternalVibration.linkToDeath(mCurrentExternalDeathRecipient);
                     if (mPreviousExternalVibrations.size() > mPreviousVibrationsLimit) {
                         mPreviousExternalVibrations.removeFirst();
                     }
@@ -1514,11 +1517,21 @@ public class VibratorService extends IVibratorService.Stub
         public void onExternalVibrationStop(ExternalVibration vib) {
             synchronized (mLock) {
                 if (vib.equals(mCurrentExternalVibration)) {
+                    mCurrentExternalVibration.unlinkToDeath(mCurrentExternalDeathRecipient);
+                    mCurrentExternalDeathRecipient = null;
                     mCurrentExternalVibration = null;
                     setVibratorUnderExternalControl(false);
                     if (DEBUG) {
                         Slog.e(TAG, "Stopping external vibration" + vib);
                     }
+                }
+            }
+        }
+
+        private class ExternalVibrationDeathRecipient implements IBinder.DeathRecipient {
+            public void binderDied() {
+                synchronized (mLock) {
+                    onExternalVibrationStop(mCurrentExternalVibration);
                 }
             }
         }
