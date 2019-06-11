@@ -766,10 +766,16 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public int canAuthenticate(String opPackageName) {
-            checkPermission();
+        public int canAuthenticate(String opPackageName, int userId) {
+            Slog.d(TAG, "canAuthenticate: User=" + userId
+                    + ", Caller=" + UserHandle.getCallingUserId());
 
-            final int userId = UserHandle.getCallingUserId();
+            if (userId != UserHandle.getCallingUserId()) {
+                checkInternalPermission();
+            } else {
+                checkPermission();
+            }
+
             final long ident = Binder.clearCallingIdentity();
             int error;
             try {

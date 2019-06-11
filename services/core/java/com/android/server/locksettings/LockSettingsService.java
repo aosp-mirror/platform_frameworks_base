@@ -420,9 +420,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                     new PasswordSlotManager());
         }
 
-        public boolean hasEnrolledBiometrics() {
+        public boolean hasEnrolledBiometrics(int userId) {
             BiometricManager bm = mContext.getSystemService(BiometricManager.class);
-            return bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
+            return bm.canAuthenticate(userId) == BiometricManager.BIOMETRIC_SUCCESS;
         }
 
         public int binderGetCallingUid() {
@@ -2494,7 +2494,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             @CredentialType int credentialType, boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
 
-        final boolean hasEnrolledBiometrics = mInjector.hasEnrolledBiometrics();
+        final boolean hasEnrolledBiometrics = mInjector.hasEnrolledBiometrics(userId);
 
         Slog.d(TAG, "spBasedDoVerifyCredential: user=" + userId + " hasChallenge=" + hasChallenge
                 + " hasEnrolledBiometrics=" + hasEnrolledBiometrics);
