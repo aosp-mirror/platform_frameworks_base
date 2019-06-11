@@ -112,7 +112,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
         KeyguardBypassController bypassController = new KeyguardBypassController(mContext,
-                mock(TunerService.class));
+                mock(TunerService.class), mStatusBarStateController);
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(mContext,
                         mock(HeadsUpManagerPhone.class),
