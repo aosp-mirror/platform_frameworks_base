@@ -66,6 +66,7 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
+extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
@@ -78,7 +79,7 @@ struct RegJNIRec {
 };
 
 // Map of all possible class names to register to their corresponding JNI registration function pointer
-// The actual list of registered classes will be determined at runtime via the com.android.tools.layoutlib.create.NativeConfig class
+// The actual list of registered classes will be determined at runtime via the 'native_classes' System property
 static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
     {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
@@ -111,6 +112,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.fonts.FontFamily", REG_JNI(register_android_graphics_fonts_FontFamily)},
     {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
     {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
+    {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
     {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
     {"com.android.internal.util.VirtualRefBasePtr", REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
     {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper", REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
