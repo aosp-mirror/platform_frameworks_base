@@ -25,6 +25,5 @@ java_library_static {
         type: "nano",
     },
     srcs: ["src/metrics_constants.proto"],
-    no_framework_libs: true,
     sdk_version: "system_current",
 }
