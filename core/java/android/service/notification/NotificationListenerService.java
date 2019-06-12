@@ -1199,20 +1199,25 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
-    /** Convert new-style Icons to legacy representations for pre-M clients. */
-    private void createLegacyIconExtras(Notification n) {
-        Icon smallIcon = n.getSmallIcon();
-        Icon largeIcon = n.getLargeIcon();
-        if (smallIcon != null && smallIcon.getType() == Icon.TYPE_RESOURCE) {
-            n.extras.putInt(Notification.EXTRA_SMALL_ICON, smallIcon.getResId());
-            n.icon = smallIcon.getResId();
-        }
-        if (largeIcon != null) {
-            Drawable d = largeIcon.loadDrawable(getContext());
-            if (d != null && d instanceof BitmapDrawable) {
-                final Bitmap largeIconBits = ((BitmapDrawable) d).getBitmap();
-                n.extras.putParcelable(Notification.EXTRA_LARGE_ICON, largeIconBits);
-                n.largeIcon = largeIconBits;
+    /**
+     * Convert new-style Icons to legacy representations for pre-M clients.
+     * @hide
+     */
+    public final void createLegacyIconExtras(Notification n) {
+        if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
+            Icon smallIcon = n.getSmallIcon();
+            Icon largeIcon = n.getLargeIcon();
+            if (smallIcon != null && smallIcon.getType() == Icon.TYPE_RESOURCE) {
+                n.extras.putInt(Notification.EXTRA_SMALL_ICON, smallIcon.getResId());
+                n.icon = smallIcon.getResId();
+            }
+            if (largeIcon != null) {
+                Drawable d = largeIcon.loadDrawable(getContext());
+                if (d != null && d instanceof BitmapDrawable) {
+                    final Bitmap largeIconBits = ((BitmapDrawable) d).getBitmap();
+                    n.extras.putParcelable(Notification.EXTRA_LARGE_ICON, largeIconBits);
+                    n.largeIcon = largeIconBits;
+                }
             }
         }
     }
