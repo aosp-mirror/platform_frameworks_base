@@ -707,6 +707,18 @@ public class FaceService extends BiometricServiceBase {
                 final Face face = new Face(getBiometricUtils()
                         .getUniqueName(getContext(), userId), faceId, deviceId);
                 FaceService.super.handleEnrollResult(face, remaining);
+
+                // Enrollment changes the authenticatorId, so update it here.
+                IBiometricsFace daemon = getFaceDaemon();
+                if (remaining == 0 && daemon != null) {
+                    try {
+                        mAuthenticatorIds.put(userId,
+                                hasEnrolledBiometrics(userId) ? daemon.getAuthenticatorId().value
+                                        : 0L);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to get authenticatorId", e);
+                    }
+                }
             });
         }
 
@@ -968,9 +980,9 @@ public class FaceService extends BiometricServiceBase {
 
                     daemon.setActiveUser(userId, faceDir.getAbsolutePath());
                     mCurrentUserId = userId;
+                    mAuthenticatorIds.put(userId,
+                            hasEnrolledBiometrics(userId) ? daemon.getAuthenticatorId().value : 0L);
                 }
-                mAuthenticatorIds.put(userId,
-                        hasEnrolledBiometrics(userId) ? daemon.getAuthenticatorId().value : 0L);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveUser():", e);
             }
