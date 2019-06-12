@@ -5198,6 +5198,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             awakenDreams();
         }
 
+        if (!isUserSetupComplete()) {
+            Slog.i(TAG, "Not going home because user setup is in progress.");
+            return;
+        }
+
         // Start dock.
         Intent dock = createHomeDockIntent();
         if (dock != null) {
