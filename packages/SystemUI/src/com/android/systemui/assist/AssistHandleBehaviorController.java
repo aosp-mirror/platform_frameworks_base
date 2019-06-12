@@ -243,12 +243,12 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             return;
         }
 
-        mHandlesShowing = false;
-        mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
         ScreenDecorations screenDecorations = mScreenDecorationsSupplier.get();
         if (screenDecorations == null) {
             Log.w(TAG, "Couldn't hide handles, ScreenDecorations unavailable");
         } else {
+            mHandlesShowing = false;
+            mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
             screenDecorations.setAssistHintVisible(false);
         }
     }
