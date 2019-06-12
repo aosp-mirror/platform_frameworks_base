@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -57,6 +58,8 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
 
+    @Mock
+    private WallpaperManager mWallpaperManager;
     private ColorExtractor.GradientColors mColors;
     private SysuiColorExtractor mColorExtractor;
 
@@ -72,32 +75,15 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsNormal.set(mColors);
                     outGradientColorsDark.set(mColors);
                     outGradientColorsExtraDark.set(mColors);
-                }, mock(ConfigurationController.class), false);
+                }, mock(ConfigurationController.class), mWallpaperManager, true /* immediately */);
     }
 
     @Test
-    public void getColors_usesGreyIfWallpaperNotVisible() {
-        simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(false);
-
-        ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
-
-        for (int type : sTypes) {
-            assertEquals("Not using fallback!",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
-            assertNotEquals("Wallpaper visibility event should not affect lock wallpaper.",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
-        }
-    }
-
-    @Test
-    public void getColors_doesntUseFallbackIfVisible() {
+    public void getColors() {
         mColors.setMainColor(Color.RED);
         mColors.setSecondaryColor(Color.RED);
 
         simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(true);
-
         for (int which : sWhich) {
             for (int type : sTypes) {
                 assertEquals("Not using extracted colors!",
@@ -109,8 +95,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
     @Test
     public void getColors_fallbackWhenMediaIsVisible() {
         simulateEvent(mColorExtractor);
-        mColorExtractor.setWallpaperVisible(true);
-        mColorExtractor.setHasBackdrop(true);
+        mColorExtractor.setHasMediaArtwork(true);
 
         ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
 
@@ -127,7 +112,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         Tonal tonal = mock(Tonal.class);
         ConfigurationController configurationController = mock(ConfigurationController.class);
         SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
-                tonal, configurationController, false /* registerVisibility */);
+                tonal, configurationController, mWallpaperManager, true /* immediately */);
         verify(configurationController).addCallback(eq(sysuiColorExtractor));
 
         reset(tonal);
