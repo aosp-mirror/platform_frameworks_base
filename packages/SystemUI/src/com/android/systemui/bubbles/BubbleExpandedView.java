@@ -23,9 +23,11 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.ActivityView;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -37,6 +39,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -70,6 +73,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private ActivityView mActivityView;
 
     private boolean mActivityViewReady = false;
+    private int mTaskId = -1;
+
     private PendingIntent mBubbleIntent;
 
     private boolean mKeyboardVisible;
@@ -106,6 +111,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         @Override
         public void onActivityViewDestroyed(ActivityView view) {
             mActivityViewReady = false;
+        }
+
+        @Override
+        public void onTaskCreated(int taskId, ComponentName componentName) {
+            // Since Bubble ActivityView applies singleTaskDisplay this is
+            // guaranteed to only be called once per ActivityView. The taskId is
+            // saved to use for removeTask, preventing appearance in recent tasks.
+            mTaskId = taskId;
         }
 
         /**
@@ -423,7 +436,16 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (mActivityViewReady) {
             mActivityView.release();
         }
+        if (mTaskId != -1) {
+            try {
+                ActivityTaskManager.getService().removeTask(mTaskId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to remove taskId " + mTaskId);
+            }
+            mTaskId = -1;
+        }
         removeView(mActivityView);
+
         mActivityView = null;
         mActivityViewReady = false;
     }
