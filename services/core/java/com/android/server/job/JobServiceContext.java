@@ -247,10 +247,20 @@ public final class JobServiceContext implements ServiceConnection {
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
-            boolean binding = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                    | Context.BIND_NOT_VISIBLE | Context.BIND_ADJUST_BELOW_PERCEPTIBLE,
-                    new UserHandle(job.getUserId()));
+            boolean binding = false;
+            try {
+                binding = mContext.bindServiceAsUser(intent, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                        | Context.BIND_NOT_VISIBLE | Context.BIND_ADJUST_BELOW_PERCEPTIBLE,
+                        new UserHandle(job.getUserId()));
+            } catch (SecurityException e) {
+                // Some permission policy, for example INTERACT_ACROSS_USERS and
+                // android:singleUser, can result in a SecurityException being thrown from
+                // bindServiceAsUser().  If this happens, catch it and fail gracefully.
+                Slog.w(TAG, "Job service " + job.getServiceComponent().getShortClassName()
+                        + " cannot be executed: " + e.getMessage());
+                binding = false;
+            }
             if (!binding) {
                 if (DEBUG) {
                     Slog.d(TAG, job.getServiceComponent().getShortClassName() + " unavailable.");
