@@ -374,7 +374,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private void updateColors() {
         ColorExtractor.GradientColors colors = mSysuiColorExtractor.getColors(
-                WallpaperManager.FLAG_LOCK, true);
+                WallpaperManager.FLAG_LOCK);
         mSupportsDarkText = colors.supportsDarkText();
         mColorPalette = colors.getColorPalette();
         if (mClockPlugin != null) {
