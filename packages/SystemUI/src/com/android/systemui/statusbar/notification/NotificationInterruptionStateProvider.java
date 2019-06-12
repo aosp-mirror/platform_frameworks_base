@@ -39,6 +39,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -186,14 +187,15 @@ public class NotificationInterruptionStateProvider {
      * @return true if the entry should heads up, false otherwise
      */
     public boolean shouldHeadsUp(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
-
-        if (getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: device is dozing: " + sbn.getKey());
-            }
-            return false;
+        if (mStatusBarStateController.isDozing()) {
+            return shouldHeadsUpWhenDozing(entry);
+        } else {
+            return shouldHeadsUpWhenAwake(entry);
         }
+    }
+
+    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
+        StatusBarNotification sbn = entry.notification;
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
@@ -251,19 +253,12 @@ public class NotificationInterruptionStateProvider {
      * @param entry the entry to check
      * @return true if the entry should ambient pulse, false otherwise
      */
-    public boolean shouldPulse(NotificationEntry entry) {
+    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
             if (DEBUG) {
                 Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (!getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: not dozing: " + sbn.getKey());
             }
             return false;
         }
@@ -288,24 +283,14 @@ public class NotificationInterruptionStateProvider {
             }
             return false;
         }
-
-        Bundle extras = sbn.getNotification().extras;
-        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
-        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(text)) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: title and text are empty: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        return true;
+         return true;
     }
 
     /**
-     * Common checks between heads up alerting and ambient pulse alerting.  See
+     * Common checks between regular heads up and when pulsing.  See
      * {@link #shouldHeadsUp(NotificationEntry)} and
-     * {@link #shouldPulse(NotificationEntry)}.  Notifications that fail any of these checks
+     * {@link #shouldHeadsUpWhenDozing(NotificationEntry)}.  Notifications that fail any of these
+     * checks
      * should not alert at all.
      *
      * @param entry the entry to check
@@ -387,6 +372,19 @@ public class NotificationInterruptionStateProvider {
 
     protected NotificationPresenter getPresenter() {
         return mPresenter;
+    }
+
+    /**
+     * When an entry was added, should we launch its fullscreen intent? Examples are Alarms or
+     * incoming calls.
+     *
+     * @param entry the entry that was added
+     * @return {@code true} if we should launch the full screen intent
+     */
+    public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
+        return entry.notification.getNotification().fullScreenIntent != null
+            && (!shouldHeadsUp(entry)
+                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
     }
 
     /** A component which can suppress heads-up notifications due to the overall state of the UI. */

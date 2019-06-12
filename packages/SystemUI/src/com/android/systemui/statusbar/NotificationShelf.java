@@ -477,8 +477,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float viewEnd = row.getTranslationY() + row.getActualHeight();
         boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
                 && !mAmbientState.isDozingAndNotPulsing(row);
-        boolean shouldClipOwnTop = row.showingAmbientPulsing()
-                || (mAmbientState.isPulseExpanding() && childIndex == 0);
+        boolean shouldClipOwnTop;
+        if (mAmbientState.isPulseExpanding()) {
+            shouldClipOwnTop = childIndex == 0;
+        } else {
+            shouldClipOwnTop = row.showingPulsing();
+        }
         if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
             int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
@@ -647,7 +651,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? fullTransitionAmount
                 : transitionAmount;
         iconState.clampedAppearAmount = clampedAmount;
-        float contentTransformationAmount = !row.isAboveShelf()
+        float contentTransformationAmount = !row.isAboveShelf() && !row.showingPulsing()
                     && (isLastChild || iconState.translateContent)
                 ? iconTransitionAmount
                 : 0.0f;
@@ -682,7 +686,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         notificationIconPosition += iconTopPadding;
         float shelfIconPosition = getTranslationY() + icon.getTop();
-        float iconSize = mDozing ? mHiddenShelfIconSize : mIconSize;
+        float iconSize = mAmbientState.isFullyHidden() ? mHiddenShelfIconSize : mIconSize;
         shelfIconPosition += (icon.getHeight() - icon.getIconScale() * iconSize) / 2.0f;
         float iconYTranslation = NotificationUtils.interpolate(
                 notificationIconPosition - shelfIconPosition,
@@ -717,7 +721,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
-            if (row.isAboveShelf() || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
+            if (row.isAboveShelf()
+                    || row.showingPulsing()
+                    || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
                     || row.getTranslationZ() > mAmbientState.getBaseZHeight()))) {
                 iconState.hidden = true;
             }

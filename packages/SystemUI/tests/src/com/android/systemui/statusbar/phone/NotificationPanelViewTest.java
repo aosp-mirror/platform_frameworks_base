@@ -37,7 +37,6 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -116,7 +115,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mock(TunerService.class));
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(mContext,
-                        new AmbientPulseManager(mContext),
+                        mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(),
                         bypassController);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator);
