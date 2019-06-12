@@ -4224,6 +4224,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             checkTime(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
+            app.startSeq = 0;
         }
 
         if (DEBUG_PROCESSES && mProcessesOnHold.contains(app)) Slog.v(TAG_PROCESSES,
@@ -4414,6 +4415,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.killedByAm = false;
         app.removed = false;
         app.killed = false;
+        if (app.startSeq != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero startSeq:" + app.startSeq);
+        }
+        if (app.pid != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero pid:" + app.pid);
+        }
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingType, hostingNameStr, seInfo, startTime);
         if (mConstants.FLAG_PROCESS_START_ASYNC) {
@@ -4599,8 +4608,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If there is already an app occupying that pid that hasn't been cleaned up
         if (oldApp != null && !app.isolated) {
             // Clean up anything relating to this pid first
-            Slog.w(TAG, "Reusing pid " + pid
-                    + " while app is still mapped to it");
+          Slog.wtf(TAG, "handleProcessStartedLocked process:" + app.processName
+                  + " startSeq:" + app.startSeq
+                  + " pid:" + pid
+                  + " belongs to another existing app:" + oldApp.processName
+                  + " startSeq:" + oldApp.startSeq);
             cleanUpApplicationRecordLocked(oldApp, false, false, -1,
                     true /*replacingPid*/);
         }
@@ -7591,6 +7603,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
             }
+            if (app != null && (app.startUid != callingUid || app.startSeq != startSeq)) {
+                String processName = null;
+                final ProcessRecord pending = mPendingStarts.get(startSeq);
+                if (pending != null) {
+                    processName = pending.processName;
+                }
+                final String msg = "attachApplicationLocked process:" + processName
+                      + " startSeq:" + startSeq
+                      + " pid:" + pid
+                      + " belongs to another existing app:" + app.processName
+                      + " startSeq:" + app.startSeq;
+                Slog.wtf(TAG, msg);
+                // SafetyNet logging for b/131105245.
+                EventLog.writeEvent(0x534e4554, "131105245", app.startUid, msg);
+                // If there is already an app occupying that pid that hasn't been cleaned up
+                cleanUpApplicationRecordLocked(app, false, false, -1,
+                    true /*replacingPid*/);
+                mPidsSelfLocked.remove(pid);
+                app = null;
+            }
         } else {
             app = null;
         }
@@ -7599,7 +7631,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // update the internal state.
         if (app == null && startSeq > 0) {
             final ProcessRecord pending = mPendingStarts.get(startSeq);
-            if (pending != null && pending.startUid == callingUid
+            if (pending != null && pending.startUid == callingUid && pending.startSeq == startSeq
                     && handleProcessStartedLocked(pending, pid, pending.usingWrapper,
                             startSeq, true)) {
                 app = pending;
