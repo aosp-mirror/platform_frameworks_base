@@ -2242,6 +2242,12 @@ android_media_AudioSystem_setAllowedCapturePolicy(JNIEnv *env, jobject thiz, jin
     return AudioSystem::setAllowedCapturePolicy(uid, flags);
 }
 
+static jint
+android_media_AudioSystem_setRttEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    return (jint) check_AudioSystem_Command(AudioSystem::setRttEnabled(enabled));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2319,6 +2325,7 @@ static const JNINativeMethod gMethods[] = {
     {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
                     (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
     {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
+    {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {
