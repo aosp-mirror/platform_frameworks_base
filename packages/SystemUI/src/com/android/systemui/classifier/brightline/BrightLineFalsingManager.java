@@ -64,10 +64,14 @@ public class BrightLineFalsingManager implements FalsingManager {
         mDataProvider = falsingDataProvider;
         mSensorManager = sensorManager;
         mClassifiers = new ArrayList<>();
+        DistanceClassifier distanceClassifier = new DistanceClassifier(mDataProvider);
+        ProximityClassifier proximityClassifier = new ProximityClassifier(distanceClassifier,
+                mDataProvider);
         mClassifiers.add(new PointerCountClassifier(mDataProvider));
         mClassifiers.add(new TypeClassifier(mDataProvider));
         mClassifiers.add(new DiagonalClassifier(mDataProvider));
-        mClassifiers.add(new DistanceClassifier(mDataProvider));
+        mClassifiers.add(distanceClassifier);
+        mClassifiers.add(proximityClassifier);
     }
 
     private void registerSensors() {
