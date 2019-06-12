@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
-import android.os.Build;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -981,6 +980,8 @@ public class AudioSystem
     public static native boolean getMasterMono();
     /** @hide enables or disables the master mono mode. */
     public static native int setMasterMono(boolean mono);
+    /** @hide enables or disables the RTT mode. */
+    public static native int setRttEnabled(boolean enabled);
 
     /** @hide returns master balance value in range -1.f -> 1.f, where 0.f is dead center. */
     @TestApi
