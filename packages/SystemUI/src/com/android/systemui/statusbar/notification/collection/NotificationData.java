@@ -114,8 +114,6 @@ public class NotificationData {
             } else if (isHeadsUp) {
                 // Provide consistent ranking with headsUpManager
                 return mHeadsUpManager.compare(a, b);
-            } else if (a.getRow().showingAmbientPulsing() != b.getRow().showingAmbientPulsing()) {
-                return a.getRow().showingAmbientPulsing() ? -1 : 1;
             } else if (aMedia != bMedia) {
                 // Upsort current media notification.
                 return aMedia ? -1 : 1;

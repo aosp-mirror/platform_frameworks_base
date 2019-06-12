@@ -24,7 +24,6 @@ import android.view.View;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -32,6 +31,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 
@@ -54,7 +54,6 @@ public class AmbientState {
     private int mSpeedBumpIndex = -1;
     private boolean mDozing;
     private boolean mHideSensitive;
-    private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private float mStackTranslation;
     private int mLayoutHeight;
     private int mTopPadding;
@@ -83,11 +82,14 @@ public class AmbientState {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
+    private HeadsUpManager mHeadUpManager;
 
     public AmbientState(
             Context context,
-            @NonNull SectionProvider sectionProvider) {
+            @NonNull SectionProvider sectionProvider,
+            HeadsUpManager headsUpManager) {
         mSectionProvider = sectionProvider;
+        mHeadUpManager = headsUpManager;
         reload(context);
     }
 
@@ -389,8 +391,7 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing && mAmbientPulseManager != null
-                && mAmbientPulseManager.hasNotifications();
+        return mPulsing && mHeadUpManager != null && mHeadUpManager.hasNotifications();
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -405,10 +406,10 @@ public class AmbientState {
     }
 
     public boolean isPulsing(NotificationEntry entry) {
-        if (!mPulsing || mAmbientPulseManager == null) {
+        if (!mPulsing || mHeadUpManager == null) {
             return false;
         }
-        return mAmbientPulseManager.isAlerting(entry.key);
+        return mHeadUpManager.isAlerting(entry.key);
     }
 
     public boolean isPanelTracking() {

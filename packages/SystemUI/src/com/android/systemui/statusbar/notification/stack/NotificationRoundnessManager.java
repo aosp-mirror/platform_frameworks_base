@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -34,8 +33,7 @@ import javax.inject.Singleton;
  * A class that manages the roundness for notification views
  */
 @Singleton
-class NotificationRoundnessManager implements OnHeadsUpChangedListener,
-        AmbientPulseManager.OnAmbientChangedListener {
+class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private final ActivatableNotificationView[] mFirstInSectionViews;
     private final ActivatableNotificationView[] mLastInSectionViews;
@@ -45,16 +43,14 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
-    private ActivatableNotificationView mTrackedAmbient;
     private float mAppearFraction;
 
     @Inject
-    NotificationRoundnessManager(AmbientPulseManager ambientPulseManager) {
+    NotificationRoundnessManager() {
         mFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
-        ambientPulseManager.addListener(this);
     }
 
     @Override
@@ -73,14 +69,8 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isPulsing) {
-        ActivatableNotificationView row = entry.getRow();
-        if (isPulsing) {
-            mTrackedAmbient = row;
-        } else if (mTrackedAmbient == row) {
-            mTrackedAmbient = null;
-        }
-        updateView(row, false /* animate */);
+    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+        updateView(entry.getRow(), false /* animate */);
     }
 
     private void updateView(ActivatableNotificationView view, boolean animate) {
@@ -134,6 +124,9 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
         if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
             return 1.0f;
         }
+        if (view.showingPulsing()) {
+            return 1.0f;
+        }
         if (isFirstInSection(view, true /* include first section */) && top) {
             return 1.0f;
         }
@@ -143,9 +136,6 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener,
         if (view == mTrackedHeadsUp && mAppearFraction <= 0.0f) {
             // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
             // rounded.
-            return 1.0f;
-        }
-        if (view == mTrackedAmbient) {
             return 1.0f;
         }
         return 0.0f;

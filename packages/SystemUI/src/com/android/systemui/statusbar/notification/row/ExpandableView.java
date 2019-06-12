@@ -49,7 +49,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected int mClipBottomAmount;
     protected int mMinimumHeightForClipping = 0;
     protected float mExtraWidthForClipping = 0;
-    private boolean mDozing;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
@@ -210,21 +209,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * @param fade Whether an animation should be played to change the state.
      */
     public void setDimmed(boolean dimmed, boolean fade) {
-    }
-
-    /**
-     * Sets the notification as dozing. The default implementation does nothing.
-     *
-     * @param dozing Whether the notification should be dozing.
-     * @param fade Whether an animation should be played to change the state.
-     * @param delay If fading, the delay of the animation.
-     */
-    public void setDozing(boolean dozing, boolean fade, long delay) {
-        mDozing = dozing;
-    }
-
-    public boolean isDozing() {
-        return mDozing;
     }
 
     public boolean isRemoved() {
@@ -527,7 +511,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     public void setHeadsUpIsVisible() {
     }
 
-    public boolean showingAmbientPulsing() {
+    public boolean showingPulsing() {
         return false;
     }
 
