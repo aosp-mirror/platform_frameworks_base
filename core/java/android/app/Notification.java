@@ -3386,11 +3386,7 @@ public class Notification implements Parcelable
          */
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        /**
-         * Caches a ambient version of {@link #mCachedAmbientColorIsFor}.
-         */
-        private int mCachedAmbientColor = COLOR_INVALID;
-        private int mCachedAmbientColorIsFor = COLOR_INVALID;
+
         /**
          * A neutral color color that can be used for icons.
          */
@@ -5445,22 +5441,9 @@ public class Notification implements Parcelable
          */
         @UnsupportedAppUsage
         public RemoteViews makePublicContentView() {
-            return makePublicView(false /* ambient */);
-        }
-
-        /**
-         * Construct a RemoteViews for the display in public contexts like on the lockscreen.
-         *
-         * @hide
-         */
-        public RemoteViews makePublicAmbientNotification() {
-            return makePublicView(true /* ambient */);
-        }
-
-        private RemoteViews makePublicView(boolean ambient) {
             if (mN.publicVersion != null) {
                 final Builder builder = recoverBuilder(mContext, mN.publicVersion);
-                return ambient ? builder.makeAmbientNotification() : builder.createContentView();
+                return builder.createContentView();
             }
             Bundle savedBundle = mN.extras;
             Style style = mStyle;

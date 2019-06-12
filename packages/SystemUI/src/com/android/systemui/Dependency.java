@@ -54,7 +54,6 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -268,7 +267,6 @@ public class Dependency extends SystemUI {
     @Inject Lazy<VisualStabilityManager> mVisualStabilityManager;
     @Inject Lazy<NotificationGutsManager> mNotificationGutsManager;
     @Inject Lazy<NotificationMediaManager> mNotificationMediaManager;
-    @Inject Lazy<AmbientPulseManager> mAmbientPulseManager;
     @Inject Lazy<NotificationBlockingHelperManager> mNotificationBlockingHelperManager;
     @Inject Lazy<NotificationRemoteInputManager> mNotificationRemoteInputManager;
     @Inject Lazy<SmartReplyConstants> mSmartReplyConstants;
@@ -449,7 +447,6 @@ public class Dependency extends SystemUI {
                 mNotificationGroupAlertTransferHelper::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
         mProviders.put(NotificationGutsManager.class, mNotificationGutsManager::get);
-        mProviders.put(AmbientPulseManager.class, mAmbientPulseManager::get);
         mProviders.put(NotificationBlockingHelperManager.class,
                 mNotificationBlockingHelperManager::get);
         mProviders.put(NotificationRemoteInputManager.class,

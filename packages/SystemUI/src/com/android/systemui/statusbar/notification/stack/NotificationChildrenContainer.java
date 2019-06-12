@@ -567,7 +567,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                     ? parentState.zTranslation
                     : 0;
             childState.dimmed = parentState.dimmed;
-            childState.dozing = parentState.dozing;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
@@ -662,8 +661,10 @@ public class NotificationChildrenContainer extends ViewGroup {
                 && !showingAsLowPriority()) {
             return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
         }
-        if (mIsLowPriority || !mContainingNotification.isOnKeyguard()
-                && (mContainingNotification.isExpanded() || mContainingNotification.isHeadsUp())) {
+        if (mIsLowPriority
+                || (!mContainingNotification.isOnKeyguard() && mContainingNotification.isExpanded())
+                || (mContainingNotification.isHeadsUpState()
+                        && mContainingNotification.canShowHeadsUp())) {
             return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
         }
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
