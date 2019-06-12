@@ -1419,6 +1419,13 @@ class ActivityStarter {
                     stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
                             null /* intentResultData */, "startActivity", true /* oomAdj */);
                 }
+
+                // Stack should also be detached from display and be removed if it's empty.
+                if (startedActivityStack != null && startedActivityStack.isAttached()
+                        && startedActivityStack.numActivities() == 0
+                        && !startedActivityStack.isActivityTypeHome()) {
+                    startedActivityStack.remove();
+                }
             }
             mService.mWindowManager.continueSurfaceLayout();
         }
@@ -2289,15 +2296,17 @@ class ActivityStarter {
     }
 
     private int setTaskFromReuseOrCreateNewTask(TaskRecord taskToAffiliate) {
+        if (mRestrictedBgActivity && (mReuseTask == null || !mReuseTask.containsAppUid(mCallingUid))
+                && handleBackgroundActivityAbort(mStartActivity)) {
+            return START_ABORTED;
+        }
+
         mTargetStack = computeStackFocus(mStartActivity, true, mLaunchFlags, mOptions);
 
         // Do no move the target stack to front yet, as we might bail if
         // isLockTaskModeViolation fails below.
 
         if (mReuseTask == null) {
-            if (mRestrictedBgActivity && handleBackgroundActivityAbort(mStartActivity)) {
-                return START_ABORTED;
-            }
             final TaskRecord task = mTargetStack.createTaskRecord(
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.mUserId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
@@ -2310,11 +2319,6 @@ class ActivityStarter {
             if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                     + " in new task " + mStartActivity.getTaskRecord());
         } else {
-            if (mRestrictedBgActivity && !mReuseTask.containsAppUid(mCallingUid)) {
-                if (handleBackgroundActivityAbort(mStartActivity)) {
-                    return START_ABORTED;
-                }
-            }
             addOrReparentStartingActivity(mReuseTask, "setTaskFromReuseOrCreateNewTask");
         }
 
