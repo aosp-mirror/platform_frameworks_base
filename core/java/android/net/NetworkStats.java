@@ -23,7 +23,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,6 +36,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Collection of active network statistics. Can contain summary details across
@@ -994,23 +994,33 @@ public class NetworkStats implements Parcelable {
         if (limitUid == UID_ALL && limitTag == TAG_ALL && limitIfaces == INTERFACES_ALL) {
             return;
         }
+        filter(e -> (limitUid == UID_ALL || limitUid == e.uid)
+                && (limitTag == TAG_ALL || limitTag == e.tag)
+                && (limitIfaces == INTERFACES_ALL
+                    || ArrayUtils.contains(limitIfaces, e.iface)));
+    }
 
+    /**
+     * Only keep entries with {@link #set} value less than {@link #SET_DEBUG_START}.
+     *
+     * <p>This mutates the original structure in place.
+     */
+    public void filterDebugEntries() {
+        filter(e -> e.set < SET_DEBUG_START);
+    }
+
+    private void filter(Predicate<Entry> predicate) {
         Entry entry = new Entry();
         int nextOutputEntry = 0;
         for (int i = 0; i < size; i++) {
             entry = getValues(i, entry);
-            final boolean matches =
-                    (limitUid == UID_ALL || limitUid == entry.uid)
-                    && (limitTag == TAG_ALL || limitTag == entry.tag)
-                    && (limitIfaces == INTERFACES_ALL
-                            || ArrayUtils.contains(limitIfaces, entry.iface));
-
-            if (matches) {
-                setValues(nextOutputEntry, entry);
+            if (predicate.test(entry)) {
+                if (nextOutputEntry != i) {
+                    setValues(nextOutputEntry, entry);
+                }
                 nextOutputEntry++;
             }
         }
-
         size = nextOutputEntry;
     }
 
@@ -1289,7 +1299,8 @@ public class NetworkStats implements Parcelable {
         }
 
         final Entry tmpEntry = new Entry();
-        for (int i = 0; i < size; i++) {
+        final int origSize = size;
+        for (int i = 0; i < origSize; i++) {
             if (!Objects.equals(iface[i], tunIface)) {
                 // Consider only entries that go onto the VPN interface.
                 continue;
@@ -1305,8 +1316,9 @@ public class NetworkStats implements Parcelable {
             tmpEntry.roaming = roaming[i];
             tmpEntry.defaultNetwork = defaultNetwork[i];
 
-            // In a first pass, compute each UID's total share of data across all underlyingIfaces.
-            // This is computed on the basis of the share of each UID's usage over tunIface.
+            // In a first pass, compute this entry's total share of data across all
+            // underlyingIfaces. This is computed on the basis of the share of this entry's usage
+            // over tunIface.
             // TODO: Consider refactoring first pass into a separate helper method.
             long totalRxBytes = 0;
             if (tunIfaceTotal.rxBytes > 0) {
@@ -1383,9 +1395,11 @@ public class NetworkStats implements Parcelable {
                                     * perInterfaceTotal[j].operations
                                     / underlyingIfacesTotal.operations;
                 }
-
+                // tmpEntry now contains the migrated data of the i-th entry for the j-th underlying
+                // interface. Add that data usage to this object.
                 combineValues(tmpEntry);
                 if (tag[i] == TAG_NONE) {
+                    // Add the migrated data to moved so it is deducted from the VPN app later.
                     moved[j].add(tmpEntry);
                     // Add debug info
                     tmpEntry.set = SET_DBG_VPN_IN;
@@ -1401,8 +1415,8 @@ public class NetworkStats implements Parcelable {
             @NonNull String[] underlyingIfaces,
             @NonNull Entry[] moved) {
         for (int i = 0; i < underlyingIfaces.length; i++) {
-            // Add debug info
             moved[i].uid = tunUid;
+            // Add debug info
             moved[i].set = SET_DBG_VPN_OUT;
             moved[i].tag = TAG_NONE;
             moved[i].iface = underlyingIfaces[i];
