@@ -163,6 +163,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mHandler = handler;
         mWakeUpDelay = wakeUpDelay;
         mKeyguardBypassController = keyguardBypassController;
+        mKeyguardBypassController.setUnlockController(this);
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -234,6 +235,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         }
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
                 .setType(MetricsEvent.TYPE_SUCCESS).setSubtype(toSubtype(biometricSourceType)));
+        boolean unlockAllowed = mKeyguardBypassController.onBiometricAuthenticated(
+                biometricSourceType);
+        if (unlockAllowed) {
+            startWakeAndUnlock(biometricSourceType);
+        }
+    }
+
+    private void startWakeAndUnlock(BiometricSourceType biometricSourceType) {
         startWakeAndUnlock(calculateMode(biometricSourceType));
     }
 
