@@ -585,7 +585,10 @@ class ActivityTestsBase {
         }
 
         void tearDown() {
-            mHandlerThread.quitSafely();
+            // Make sure there are no running messages and then quit the thread so the next test
+            // won't be affected.
+            mHandlerThread.getThreadHandler().runWithScissors(mHandlerThread::quit,
+                    0 /* timeout */);
         }
     }
 
@@ -630,7 +633,8 @@ class ActivityTestsBase {
             mWindowManager = prepareMockWindowManager();
             mKeyguardController = mock(KeyguardController.class);
 
-            // Do not schedule idle timeouts
+            // Do not schedule idle that may touch methods outside the scope of the test.
+            doNothing().when(this).scheduleIdleLocked();
             doNothing().when(this).scheduleIdleTimeoutLocked(any());
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
