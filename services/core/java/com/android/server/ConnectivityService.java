@@ -192,6 +192,7 @@ import com.android.server.net.BaseNetdEventCallback;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkStatsFactory;
 import com.android.server.utils.PriorityDump;
 
 import com.google.android.collect.Lists;
@@ -4387,7 +4388,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
             NetworkAgentInfo defaultNai = getDefaultNetwork();
-            if (defaultNai != null && defaultNai.linkProperties != null) {
+            if (defaultNai != null) {
                 underlyingNetworks = new Network[] { defaultNai.network };
             }
         }
@@ -4396,7 +4397,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (Network network : underlyingNetworks) {
                 LinkProperties lp = getLinkProperties(network);
                 if (lp != null) {
-                    interfaces.add(lp.getInterfaceName());
+                    for (String iface : lp.getAllInterfaceNames()) {
+                        if (!TextUtils.isEmpty(iface)) {
+                            interfaces.add(iface);
+                        }
+                    }
                 }
             }
             if (!interfaces.isEmpty()) {
@@ -6783,8 +6788,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Notify NetworkStatsService that the set of active ifaces has changed, or that one of the
-     * properties tracked by NetworkStatsService on an active iface has changed.
+     * Notify NetworkStatsService and NetworkStatsFactory that the set of active ifaces has changed,
+     * or that one of the active iface's trackedproperties has changed.
      */
     private void notifyIfacesChangedForNetworkStats() {
         ensureRunningOnConnectivityServiceThread();
@@ -6793,11 +6798,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (activeLinkProperties != null) {
             activeIface = activeLinkProperties.getInterfaceName();
         }
+
+        // CAUTION: Ordering matters between updateVpnInfos() and forceUpdateIfaces(), which
+        // triggers a new poll. Trigger the poll first to ensure a snapshot is taken before
+        // switching to the new state. This ensures that traffic does not get mis-attributed to
+        // incorrect apps (including VPN app).
         try {
             mStatsService.forceUpdateIfaces(
-                    getDefaultNetworks(), getAllVpnInfo(), getAllNetworkState(), activeIface);
+                    getDefaultNetworks(), getAllNetworkState(), activeIface);
         } catch (Exception ignored) {
         }
+        NetworkStatsFactory.updateVpnInfos(getAllVpnInfo());
     }
 
     @Override
