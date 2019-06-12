@@ -101,7 +101,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         mNotificationInflater.setUsesIncreasedHeadsUpHeight(true);
         Notification.Builder builder = spy(mBuilder);
         mNotificationInflater.inflateNotificationViews(
-                false /* inflateSynchronously */,
+                true /* inflateSynchronously */,
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
                 mContext);
@@ -113,7 +113,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         mNotificationInflater.setUsesIncreasedHeight(true);
         Notification.Builder builder = spy(mBuilder);
         mNotificationInflater.inflateNotificationViews(
-                false /* inflateSynchronously */,
+                true /* inflateSynchronously */,
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
                 mContext);
@@ -161,6 +161,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Test
     public void testRemovedNotInflated() throws Exception {
         mRow.setRemoved();
+        mNotificationInflater.setInflateSynchronously(true);
         mNotificationInflater.inflateNotificationViews();
         Assert.assertNull(mRow.getEntry().getRunningTask());
     }

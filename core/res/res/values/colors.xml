@@ -79,6 +79,7 @@
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <color name="decor_view_status_guard">#ff000000</color>
+    <color name="decor_view_status_guard_light">#ffffffff</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>

@@ -114,6 +114,24 @@ public class ExternalVibration implements Parcelable {
         return true;
     }
 
+    /**
+     * Links a recipient to death against this external vibration token
+     */
+    public void linkToDeath(IBinder.DeathRecipient recipient) {
+        try {
+            mToken.linkToDeath(recipient, 0);
+        } catch (RemoteException e) {
+            return;
+        }
+    }
+
+    /**
+     * Unlinks a recipient to death against this external vibration token
+     */
+    public void unlinkToDeath(IBinder.DeathRecipient recipient) {
+        mToken.unlinkToDeath(recipient, 0);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof ExternalVibration)) {
