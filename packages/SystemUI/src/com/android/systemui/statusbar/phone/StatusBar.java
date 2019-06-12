@@ -3770,6 +3770,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     "com.android.systemui:CAMERA_GESTURE");
         }
         vibrateForCameraGesture();
+
+        if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP) {
+            Log.v(TAG, "Camera launch");
+            mKeyguardUpdateMonitor.onCameraLaunched();
+        }
+
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             startActivityDismissingKeyguard(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
                     false /* onlyProvisioned */, true /* dismissShade */,
