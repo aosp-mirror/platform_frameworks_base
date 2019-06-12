@@ -1809,7 +1809,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
 
-        boolean isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        boolean isPrivileged;
+
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "checkOperation", e);
+            return AppOpsManager.opToDefaultMode(code);
+        }
 
         synchronized (this) {
             if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
@@ -1999,8 +2006,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
         } catch (SecurityException e) {
-            Slog.e(TAG, "Cannot startOperation", e);
-            return AppOpsManager.MODE_IGNORED;
+            Slog.e(TAG, "noteOperation", e);
+            return AppOpsManager.MODE_ERRORED;
         }
 
         synchronized (this) {
@@ -2177,8 +2184,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
         } catch (SecurityException e) {
-            Slog.e(TAG, "Cannot startOperation", e);
-            return AppOpsManager.MODE_IGNORED;
+            Slog.e(TAG, "startOperation", e);
+            return AppOpsManager.MODE_ERRORED;
         }
 
         synchronized (this) {
