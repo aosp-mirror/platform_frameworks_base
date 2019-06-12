@@ -24,6 +24,9 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVE
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,13 +41,16 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.NotificationChannels;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -63,6 +69,9 @@ public class NavigationModeController implements Dumpable {
     private static final String TAG = NavigationModeController.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    static final String SHARED_PREFERENCES_NAME = "navigation_mode_controller_preferences";
+    static final String PREFS_SWITCHED_FROM_GESTURE_NAV_KEY = "switched_from_gesture_nav";
+
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
     }
@@ -78,6 +87,8 @@ public class NavigationModeController implements Dumpable {
     private int mMode = NAV_BAR_MODE_3BUTTON;
     private ArrayList<ModeChangedListener> mListeners = new ArrayList<>();
 
+    private String mLastDefaultLauncher;
+
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -92,7 +103,13 @@ public class NavigationModeController implements Dumpable {
                     if (DEBUG) {
                         Log.d(TAG, "ACTION_PREFERRED_ACTIVITY_CHANGED");
                     }
-                    switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
+                    final String launcher = getDefaultLauncherPackageName(mCurrentUserContext);
+                    // Check if it is a default launcher change
+                    if (!TextUtils.equals(mLastDefaultLauncher, launcher)) {
+                        switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
+                        showNotificationIfDefaultLauncherSupportsGestureNav();
+                        mLastDefaultLauncher = launcher;
+                    }
                     break;
             }
         }
@@ -157,6 +174,8 @@ public class NavigationModeController implements Dumpable {
         IntentFilter preferredActivityFilter = new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, preferredActivityFilter, null,
                 null);
+        // We are only interested in launcher changes, so keeping track of the current default.
+        mLastDefaultLauncher = getDefaultLauncherPackageName(mContext);
 
         updateCurrentInteractionMode(false /* notify */);
         switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
@@ -287,6 +306,84 @@ public class NavigationModeController implements Dumpable {
         });
     }
 
+    private void switchFromGestureNavModeIfNotSupportedByDefaultLauncher() {
+        if (getCurrentInteractionMode(mCurrentUserContext) != NAV_BAR_MODE_GESTURAL) {
+            return;
+        }
+        final Boolean supported = isGestureNavSupportedByDefaultLauncher(mCurrentUserContext);
+        if (supported == null || supported) {
+            return;
+        }
+
+        setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
+        showNotification(mCurrentUserContext, R.string.notification_content_system_nav_changed);
+        mCurrentUserContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .edit().putBoolean(PREFS_SWITCHED_FROM_GESTURE_NAV_KEY, true).apply();
+    }
+
+    private void showNotificationIfDefaultLauncherSupportsGestureNav() {
+        boolean previouslySwitchedFromGestureNav = mCurrentUserContext
+                .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .getBoolean(PREFS_SWITCHED_FROM_GESTURE_NAV_KEY, false);
+        if (!previouslySwitchedFromGestureNav) {
+            return;
+        }
+        if (getCurrentInteractionMode(mCurrentUserContext) == NAV_BAR_MODE_GESTURAL) {
+            return;
+        }
+        final Boolean supported = isGestureNavSupportedByDefaultLauncher(mCurrentUserContext);
+        if (supported == null || !supported) {
+            return;
+        }
+
+        showNotification(mCurrentUserContext, R.string.notification_content_gesture_nav_available);
+        mCurrentUserContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .edit().putBoolean(PREFS_SWITCHED_FROM_GESTURE_NAV_KEY, false).apply();
+    }
+
+    /**
+     * Returns null if there is no default launcher set for the current user. Returns true if the
+     * current default launcher supports Gesture Navigation. Returns false otherwise.
+     */
+    private Boolean isGestureNavSupportedByDefaultLauncher(Context context) {
+        final String defaultLauncherPackageName = getDefaultLauncherPackageName(context);
+        if (DEBUG) {
+            Log.d(TAG, "isGestureNavSupportedByDefaultLauncher:"
+                    + " defaultLauncher=" + defaultLauncherPackageName
+                    + " contextUser=" + context.getUserId());
+        }
+        if (defaultLauncherPackageName == null) {
+            return null;
+        }
+        ComponentName recentsComponentName = ComponentName.unflattenFromString(
+                context.getString(com.android.internal.R.string.config_recentsComponentName));
+        return recentsComponentName.getPackageName().equals(defaultLauncherPackageName);
+    }
+
+    private String getDefaultLauncherPackageName(Context context) {
+        final ComponentName cn = context.getPackageManager().getHomeActivities(new ArrayList<>());
+        if (cn == null) {
+            return null;
+        }
+        return cn.getPackageName();
+    }
+
+    private void showNotification(Context context, int resId) {
+        final CharSequence message = context.getResources().getString(resId);
+        if (DEBUG) {
+            Log.d(TAG, "showNotification: message=" + message);
+        }
+
+        final Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setContentText(message)
+                        .setStyle(new Notification.BigTextStyle())
+                        .setSmallIcon(R.drawable.ic_info)
+                        .setAutoCancel(true)
+                        .setContentIntent(PendingIntent.getActivity(context, 0, new Intent(), 0));
+        context.getSystemService(NotificationManager.class).notify(TAG, 0, builder.build());
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NavigationModeController:");
@@ -299,6 +396,12 @@ public class NavigationModeController implements Dumpable {
         }
         pw.println("  defaultOverlays=" + defaultOverlays);
         dumpAssetPaths(mCurrentUserContext);
+
+        pw.println("  defaultLauncher=" + mLastDefaultLauncher);
+        boolean previouslySwitchedFromGestureNav = mCurrentUserContext
+                .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .getBoolean(PREFS_SWITCHED_FROM_GESTURE_NAV_KEY, false);
+        pw.println("  previouslySwitchedFromGestureNav=" + previouslySwitchedFromGestureNav);
     }
 
     private void dumpAssetPaths(Context context) {
@@ -307,28 +410,5 @@ public class NavigationModeController implements Dumpable {
         for (ApkAssets a : assets) {
             Log.d(TAG, "    " + a.getAssetPath());
         }
-    }
-
-    private void switchFromGestureNavModeIfNotSupportedByDefaultLauncher() {
-        if (getCurrentInteractionMode(mCurrentUserContext) == NAV_BAR_MODE_GESTURAL
-                && !isGestureNavSupportedByDefaultLauncher(mCurrentUserContext)) {
-            setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
-        }
-    }
-
-    private boolean isGestureNavSupportedByDefaultLauncher(Context context) {
-        final ComponentName cn = context.getPackageManager().getHomeActivities(new ArrayList<>());
-        if (cn == null) {
-            // There is no default home app set for the current user, don't make any changes yet.
-            return true;
-        }
-        if (DEBUG) {
-            Log.d(TAG, "isGestureNavSupportedByDefaultLauncher: launcher=" + cn.getPackageName()
-                    + " contextUser=" + context.getUserId());
-        }
-
-        ComponentName recentsComponentName = ComponentName.unflattenFromString(context.getString(
-                com.android.internal.R.string.config_recentsComponentName));
-        return recentsComponentName.getPackageName().equals(cn.getPackageName());
     }
 }
