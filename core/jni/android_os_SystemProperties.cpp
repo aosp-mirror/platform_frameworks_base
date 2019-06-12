@@ -19,7 +19,6 @@
 
 #include "android-base/logging.h"
 #include "android-base/properties.h"
-#include "cutils/properties.h"
 #include "utils/misc.h"
 #include <utils/Log.h>
 #include "jni.h"

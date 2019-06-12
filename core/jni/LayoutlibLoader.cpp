@@ -67,6 +67,7 @@ extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
+extern int register_android_os_SystemProperties(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
@@ -113,11 +114,11 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
     {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
     {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
+    {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
     {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
     {"com.android.internal.util.VirtualRefBasePtr", REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
     {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper", REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
 };
-
 // Vector to store the names of classes that need delegates of their native methods
 static vector<string> classesToDelegate;
 
