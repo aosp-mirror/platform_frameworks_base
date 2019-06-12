@@ -48,7 +48,6 @@ public class BubbleView extends FrameLayout {
 
     private BadgedImageView mBadgedImageView;
     private int mBadgeColor;
-    private int mPadding;
     private int mIconInset;
 
     private boolean mSuppressDot = false;
@@ -70,8 +69,6 @@ public class BubbleView extends FrameLayout {
     public BubbleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mContext = context;
-        // XXX: can this padding just be on the view and we look it up?
-        mPadding = getResources().getDimensionPixelSize(R.dimen.bubble_view_padding);
         mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
     }
 

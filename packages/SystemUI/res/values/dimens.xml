@@ -1107,8 +1107,6 @@
     <dimen name="bubble_flyout_pointer_size">6dp</dimen>
     <!-- How much space to leave between the flyout (tip of the arrow) and the bubble stack. -->
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
-    <!-- Padding around a collapsed bubble -->
-    <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->
