@@ -488,6 +488,7 @@ public class NotificationMediaManager implements Dumpable {
         if (bmp != null) {
             artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), bmp);
         }
+        boolean hasMediaArtwork = artworkDrawable != null;
         boolean allowWhenShade = false;
         if (ENABLE_LOCKSCREEN_WALLPAPER && artworkDrawable == null) {
             Bitmap lockWallpaper =
@@ -506,7 +507,7 @@ public class NotificationMediaManager implements Dumpable {
         boolean hideBecauseOccluded = shadeController != null && shadeController.isOccluded();
 
         final boolean hasArtwork = artworkDrawable != null;
-        mColorExtractor.setHasBackdrop(hasArtwork);
+        mColorExtractor.setHasMediaArtwork(hasMediaArtwork);
         if (mScrimController != null) {
             mScrimController.setHasBackdrop(hasArtwork);
         }
