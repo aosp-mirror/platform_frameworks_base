@@ -49,7 +49,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -106,7 +105,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             Dependency.get(VisualStabilityManager.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
-    protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
     private final NotificationPanelView mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -213,7 +211,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
-            mEntryManager.addNotificationLifetimeExtender(mAmbientPulseManager);
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
@@ -297,7 +294,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private void maybeEndAmbientPulse() {
         if (mNotificationPanel.hasPulsingNotifications() &&
-                !mAmbientPulseManager.hasNotifications()) {
+                !mHeadsUpManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -343,10 +340,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {
-        if (mShadeController.isDozing()) {
-            return false;
-        }
-
         if (mShadeController.isOccluded()) {
             boolean devicePublic = mLockscreenUserManager.
                     isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
@@ -354,6 +347,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                     || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
             boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
             if (userPublic && needsRedaction) {
+                // TODO(b/135046837): we can probably relax this with dynamic privacy
                 return false;
             }
         }
