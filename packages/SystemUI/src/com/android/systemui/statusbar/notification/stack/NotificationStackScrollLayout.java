@@ -864,8 +864,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int backgroundRectTop = top;
         int lastSectionBottom =
                 mSections[0].getCurrentBounds().bottom + animationYOffset;
-        int previousLeft = left;
-        int previousRight = right;
+        int currentLeft = left;
+        int currentRight = right;
         boolean first = true;
         for (NotificationSection section : mSections) {
             if (section.getFirstVisibleChild() == null) {
@@ -878,23 +878,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             // as separate roundrects, as the rounded corners right next to each other look
             // bad.
             if (sectionTop - lastSectionBottom > DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX
-                    || (previousLeft != ownLeft && !first)) {
-                canvas.drawRoundRect(ownLeft,
+                    || ((currentLeft != ownLeft || currentRight != ownRight) && !first)) {
+                canvas.drawRoundRect(currentLeft,
                         backgroundRectTop,
-                        ownRight,
+                        currentRight,
                         lastSectionBottom,
                         mCornerRadius, mCornerRadius, mBackgroundPaint);
                 backgroundRectTop = sectionTop;
             }
-            previousLeft = ownLeft;
-            previousRight = ownRight;
+            currentLeft = ownLeft;
+            currentRight = ownRight;
             lastSectionBottom =
                     section.getCurrentBounds().bottom + animationYOffset;
             first = false;
         }
-        canvas.drawRoundRect(previousLeft,
+        canvas.drawRoundRect(currentLeft,
                 backgroundRectTop,
-                previousRight,
+                currentRight,
                 lastSectionBottom,
                 mCornerRadius, mCornerRadius, mBackgroundPaint);
     }
