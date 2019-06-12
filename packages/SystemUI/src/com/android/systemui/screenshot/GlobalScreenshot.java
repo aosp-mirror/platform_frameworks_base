@@ -92,6 +92,11 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+
 
 /**
  * POD used in the AsyncTask which saves an image in the background.
@@ -445,6 +450,8 @@ class GlobalScreenshot {
     static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
     static final String EXTRA_CANCEL_NOTIFICATION = "android:screenshot_cancel_notification";
     static final String EXTRA_DISALLOW_ENTER_PIP = "android:screenshot_disallow_enter_pip";
+
+    private static final String TAG = "GlobalScreenshot";
 
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
@@ -902,11 +909,19 @@ class GlobalScreenshot {
      * appropriate signals to the system (ie. to dismiss the keyguard if necessary).
      */
     public static class ActionProxyReceiver extends BroadcastReceiver {
+        static final int CLOSE_WINDOWS_TIMEOUT_MILLIS = 3000;
+
         @Override
         public void onReceive(Context context, final Intent intent) {
             Runnable startActivityRunnable = () -> {
-                ActivityManagerWrapper.getInstance().closeSystemWindows(
-                        SYSTEM_DIALOG_REASON_SCREENSHOT);
+                try {
+                    ActivityManagerWrapper.getInstance().closeSystemWindows(
+                            SYSTEM_DIALOG_REASON_SCREENSHOT).get(
+                            CLOSE_WINDOWS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+                } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                    Slog.e(TAG, "Unable to share screenshot", e);
+                    return;
+                }
 
                 Intent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
                 if (intent.getBooleanExtra(EXTRA_CANCEL_NOTIFICATION, false)) {
