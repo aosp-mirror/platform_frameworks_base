@@ -307,7 +307,6 @@ public class ZygoteProcess {
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
-     * @param useSystemGraphicsDriver whether the process uses system graphics driver.
      *
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
@@ -324,7 +323,6 @@ public class ZygoteProcess {
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
                                                   boolean useUsapPool,
-                                                  boolean useSystemGraphicsDriver,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
@@ -335,7 +333,7 @@ public class ZygoteProcess {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
-                    packageName, useUsapPool, useSystemGraphicsDriver, zygoteArgs);
+                    packageName, useUsapPool, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -554,7 +552,6 @@ public class ZygoteProcess {
                                                       boolean startChildZygote,
                                                       @Nullable String packageName,
                                                       boolean useUsapPool,
-                                                      boolean useSystemGraphicsDriver,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -636,7 +633,7 @@ public class ZygoteProcess {
             // The USAP pool can not be used if the application will not use the systems graphics
             // driver.  If that driver is requested use the Zygote application start path.
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi),
-                                              useUsapPool && useSystemGraphicsDriver,
+                                              useUsapPool,
                                               argsForZygote);
         }
     }
@@ -1147,8 +1144,7 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    false /* useUsapPool */, false /*useSystemGraphicsDriver*/,
-                    extraArgs);
+                    false /* useUsapPool */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }
