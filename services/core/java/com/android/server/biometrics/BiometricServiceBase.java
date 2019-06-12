@@ -713,8 +713,6 @@ public abstract class BiometricServiceBase extends SystemService
             // already generated a new authenticator id when the new biometric is enrolled.
             if (identifier instanceof Fingerprint) {
                 updateActiveGroup(((Fingerprint)identifier).getGroupId(), null);
-            } else {
-                updateActiveGroup(mCurrentUserId, null);
             }
         }
     }
