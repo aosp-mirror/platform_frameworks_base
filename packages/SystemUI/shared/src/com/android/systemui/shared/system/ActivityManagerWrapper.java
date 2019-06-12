@@ -64,6 +64,7 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class ActivityManagerWrapper {
@@ -380,8 +381,8 @@ public class ActivityManagerWrapper {
     /**
      * Requests that the system close any open system windows (including other SystemUI).
      */
-    public void closeSystemWindows(final String reason) {
-        mBackgroundExecutor.submit(new Runnable() {
+    public Future<?> closeSystemWindows(final String reason) {
+        return mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 try {

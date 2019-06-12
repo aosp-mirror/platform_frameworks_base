@@ -1962,6 +1962,7 @@
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
   <java-symbol type="color" name="config_defaultNotificationColor" />
   <java-symbol type="color" name="decor_view_status_guard" />
+  <java-symbol type="color" name="decor_view_status_guard_light" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="ic_settings" />
@@ -3743,7 +3744,8 @@
   <java-symbol type="array" name="config_displayWhiteBalanceBaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceIncreaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
-  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBrightnesses" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBiases" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
@@ -3800,7 +3802,9 @@
   <java-symbol type="string" name="chooser_all_apps_button_label" />
   <java-symbol type="anim" name="resolver_launch_anim" />
   <java-symbol type="style" name="Animation.DeviceDefault.Activity.Resolver" />
-  
+
+  <java-symbol type="color" name="decor_view_status_guard_light" />
+
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
 </resources>

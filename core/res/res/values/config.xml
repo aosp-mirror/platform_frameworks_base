@@ -4018,9 +4018,28 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
-         The ambient brightness threshold (in lux) beneath which we fall back to a fixed ambient
-         color temperature. -->
-    <item name="config_displayWhiteBalanceLowLightAmbientBrightnessThreshold" format="float" type="dimen">10.0</item>
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceLowLightAmbientBiases, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceLowLightAmbientColorTemperature.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceLowLightAmbientBiases. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBrightnesses">
+        <item>10.0</item>
+        <item>10.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceLowLightAmbientBrightnesses for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBiases">
+        <item>0.0</item>
+        <item>1.0</item>
+    </array>
 
     <!-- See DisplayWhiteBalanceController.
          The ambient color temperature (in cct) to which we fall back when the ambient brightness

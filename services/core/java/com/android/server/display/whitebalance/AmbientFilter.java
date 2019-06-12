@@ -18,6 +18,7 @@ package com.android.server.display.whitebalance;
 
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.RollingBuffer;
 
 import java.io.PrintWriter;
@@ -155,7 +156,8 @@ abstract class AmbientFilter {
     /**
      * A weighted average prioritising recent changes.
      */
-    static class WeightedMovingAverageAmbientFilter extends AmbientFilter {
+    @VisibleForTesting
+    public static class WeightedMovingAverageAmbientFilter extends AmbientFilter {
 
         // How long the latest ambient value change is predicted to last.
         private static final int PREDICTION_TIME = 100; // Milliseconds
