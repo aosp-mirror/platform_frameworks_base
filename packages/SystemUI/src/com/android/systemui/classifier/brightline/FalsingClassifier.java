@@ -66,19 +66,19 @@ abstract class FalsingClassifier {
     }
 
     int getWidthPixels() {
-        return mDataProvider.mWidthPixels;
+        return mDataProvider.getWidthPixels();
     }
 
     int getHeightPixels() {
-        return mDataProvider.mHeightPixels;
+        return mDataProvider.getHeightPixels();
     }
 
     float getXdpi() {
-        return mDataProvider.mXdpi;
+        return mDataProvider.getXdpi();
     }
 
     float getYdpi() {
-        return mDataProvider.mYdpi;
+        return mDataProvider.getYdpi();
     }
 
     final @Classifier.InteractionType int getInteractionType() {

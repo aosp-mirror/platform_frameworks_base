@@ -35,10 +35,10 @@ class FalsingDataProvider {
     private static final long MOTION_EVENT_AGE_MS = 1000;
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
 
-    final int mWidthPixels;
-    final int mHeightPixels;
-    final float mXdpi;
-    final float mYdpi;
+    private final int mWidthPixels;
+    private final int mHeightPixels;
+    private final float mXdpi;
+    private final float mYdpi;
 
     private @Classifier.InteractionType int mInteractionType;
     private final TimeLimitedMotionEventBuffer mRecentMotionEvents =
@@ -58,8 +58,8 @@ class FalsingDataProvider {
         mWidthPixels = displayMetrics.widthPixels;
         mHeightPixels = displayMetrics.heightPixels;
 
-        FalsingClassifier.logInfo("xdpi, ydpi: " + mXdpi + ", " + mYdpi);
-        FalsingClassifier.logInfo("width, height: " + mWidthPixels + ", " + mHeightPixels);
+        FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
+        FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
     }
 
     void onMotionEvent(MotionEvent motionEvent) {
@@ -84,6 +84,24 @@ class FalsingDataProvider {
         FalsingClassifier.logDebug("Size: " + mRecentMotionEvents.size());
 
         mDirty = true;
+    }
+
+    /** Returns screen width in pixels. */
+    int getWidthPixels() {
+        return mWidthPixels;
+    }
+
+    /** Returns screen height in pixels. */
+    int getHeightPixels() {
+        return mHeightPixels;
+    }
+
+    float getXdpi() {
+        return mXdpi;
+    }
+
+    float getYdpi() {
+        return mYdpi;
     }
 
     List<MotionEvent> getRecentMotionEvents() {
