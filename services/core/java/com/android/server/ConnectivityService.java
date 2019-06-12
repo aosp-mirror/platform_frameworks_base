@@ -966,6 +966,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+
         mTethering = makeTethering();
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
@@ -1012,8 +1014,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext);
         dataConnectionStats.startMonitoring();
-
-        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         mKeepaliveTracker = new KeepaliveTracker(mContext, mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
