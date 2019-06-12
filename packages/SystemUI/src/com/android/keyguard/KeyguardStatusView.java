@@ -414,10 +414,12 @@ public class KeyguardStatusView extends GridLayout implements
             int expanded = mOwnerInfo.getBottom() + mOwnerInfo.getPaddingBottom();
             int toRemove = (int) ((expanded - collapsed) * ratio);
             setBottom(getMeasuredHeight() - toRemove);
-            // We're using scrolling in order not to overload the translation which is used
-            // when appearing the icons
-            mNotificationIcons.setScrollY(toRemove);
-        } else {
+            if (mNotificationIcons != null) {
+                // We're using scrolling in order not to overload the translation which is used
+                // when appearing the icons
+                mNotificationIcons.setScrollY(toRemove);
+            }
+        } else if (mNotificationIcons != null){
             mNotificationIcons.setScrollY(0);
         }
     }
