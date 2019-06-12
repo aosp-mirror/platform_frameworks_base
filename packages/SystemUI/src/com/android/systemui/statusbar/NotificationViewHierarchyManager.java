@@ -364,7 +364,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                         && !row.isLowPriority()));
             }
 
-            entry.getRow().setOnAmbient(mShadeController.get().isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.isRowRemoved();
