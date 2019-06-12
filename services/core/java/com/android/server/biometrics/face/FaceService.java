@@ -193,6 +193,7 @@ public class FaceService extends BiometricServiceBase {
                         .setAutoCancel(true)
                         .setCategory(Notification.CATEGORY_SYSTEM)
                         .setContentIntent(pendingIntent)
+                        .setVisibility(Notification.VISIBILITY_SECRET)
                         .build();
 
                 nm.createNotificationChannel(channel);
