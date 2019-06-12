@@ -171,4 +171,86 @@ TEST_F(LinkTest, NoCompressResources) {
   EXPECT_FALSE(file->WasCompressed());
 }
 
+TEST_F(LinkTest, OverlayStyles) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+  const std::string override_files_dir = GetTestPath("compiled-override");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <style name="MyStyle">
+                                 <item name="android:textColor">#123</item>
+                               </style>
+                             </resources>)",
+                          compiled_files_dir, &diag));
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values-override.xml"),
+                          R"(<resources>
+                               <style name="MyStyle">
+                                 <item name="android:background">#456</item>
+                               </style>
+                             </resources>)",
+                          override_files_dir, &diag));
+
+
+  const std::string out_apk = GetTestPath("out.apk");
+  std::vector<std::string> link_args = {
+      "--manifest", GetDefaultManifest(kDefaultPackageName),
+      "-o", out_apk,
+  };
+  const auto override_files = file::FindFiles(override_files_dir, &diag);
+  for (const auto &override_file : override_files.value()) {
+      link_args.push_back("-R");
+      link_args.push_back(file::BuildPath({override_files_dir, override_file}));
+  }
+  ASSERT_TRUE(Link(link_args, compiled_files_dir, &diag));
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  const Style* actual_style = test::GetValue<Style>(
+      apk->GetResourceTable(), std::string(kDefaultPackageName) + ":style/MyStyle");
+  ASSERT_NE(actual_style, nullptr);
+  ASSERT_EQ(actual_style->entries.size(), 2);
+  EXPECT_EQ(actual_style->entries[0].key.id, 0x01010098);  // android:textColor
+  EXPECT_EQ(actual_style->entries[1].key.id, 0x010100d4);  // android:background
+}
+
+TEST_F(LinkTest, OverrideStylesInsteadOfOverlaying) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+  const std::string override_files_dir = GetTestPath("compiled-override");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <style name="MyStyle">
+                                 <item name="android:textColor">#123</item>
+                               </style>
+                             </resources>)",
+                          compiled_files_dir, &diag));
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values-override.xml"),
+                          R"(<resources>
+                               <style name="MyStyle">
+                                 <item name="android:background">#456</item>
+                               </style>
+                             </resources>)",
+                          override_files_dir, &diag));
+
+
+  const std::string out_apk = GetTestPath("out.apk");
+  std::vector<std::string> link_args = {
+      "--manifest", GetDefaultManifest(kDefaultPackageName),
+      "--override-styles-instead-of-overlaying",
+      "-o", out_apk,
+  };
+  const auto override_files = file::FindFiles(override_files_dir, &diag);
+  for (const auto &override_file : override_files.value()) {
+      link_args.push_back("-R");
+      link_args.push_back(file::BuildPath({override_files_dir, override_file}));
+  }
+  ASSERT_TRUE(Link(link_args, compiled_files_dir, &diag));
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  const Style* actual_style = test::GetValue<Style>(
+      apk->GetResourceTable(), std::string(kDefaultPackageName) + ":style/MyStyle");
+  ASSERT_NE(actual_style, nullptr);
+  ASSERT_EQ(actual_style->entries.size(), 1);
+  EXPECT_EQ(actual_style->entries[0].key.id, 0x010100d4);  // android:background
+}
+
 }  // namespace aapt

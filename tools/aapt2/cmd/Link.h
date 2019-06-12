@@ -42,6 +42,7 @@ struct LinkOptions {
   std::vector<std::string> assets_dirs;
   bool output_to_directory = false;
   bool auto_add_overlay = false;
+  bool override_styles_instead_of_overlaying = false;
   OutputFormat output_format = OutputFormat::kApk;
 
   // Java/Proguard options.
@@ -242,6 +243,10 @@ class LinkCommand : public Command {
         "Allows the addition of new resources in overlays without\n"
             "<add-resource> tags.",
         &options_.auto_add_overlay);
+    AddOptionalSwitch("--override-styles-instead-of-overlaying",
+                      "Causes styles defined in -R resources to replace previous definitions\n"
+                      "instead of merging into them\n",
+                      &options_.override_styles_instead_of_overlaying);
     AddOptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml.",
         &options_.manifest_fixer_options.rename_manifest_package);
     AddOptionalFlag("--rename-instrumentation-target-package",
