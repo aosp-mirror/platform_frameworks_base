@@ -130,18 +130,15 @@ public class InstallInstalling extends AlertActivity {
             } else {
                 PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-                params.installFlags = PackageManager.INSTALL_FULL_APP;
-                params.referrerUri = getIntent().getParcelableExtra(Intent.EXTRA_REFERRER);
-                params.originatingUri = getIntent()
-                        .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
-                params.originatingUid = getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                        UID_UNKNOWN);
-                params.installerPackageName =
-                        getIntent().getStringExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME);
-                params.installReason = PackageManager.INSTALL_REASON_USER;
-
-                // Whitelist all restricted permissions.
-                params.setWhitelistedRestrictedPermissions(null /*permissions*/);
+                params.setInstallAsInstantApp(false);
+                params.setReferrerUri(getIntent().getParcelableExtra(Intent.EXTRA_REFERRER));
+                params.setOriginatingUri(getIntent()
+                        .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI));
+                params.setOriginatingUid(getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
+                        UID_UNKNOWN));
+                params.setInstallerPackageName(getIntent().getStringExtra(
+                        Intent.EXTRA_INSTALLER_PACKAGE_NAME));
+                params.setInstallReason(PackageManager.INSTALL_REASON_USER);
 
                 File file = new File(mPackageURI.getPath());
                 try {
