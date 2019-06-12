@@ -43,7 +43,7 @@ import java.util.function.Function;
 public class NotificationIconAreaController implements DarkReceiver,
         StatusBarStateController.StateListener {
 
-    public static final String LOW_PRIORITY = "low_priority";
+    public static final String HIGH_PRIORITY = "high_priority";
     private static final long AOD_ICONS_APPEAR_DURATION = 200;
 
     private final ContrastColorUtil mContrastColorUtil;
