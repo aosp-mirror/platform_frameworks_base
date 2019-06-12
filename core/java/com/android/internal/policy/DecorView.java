@@ -262,8 +262,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final int mResizeShadowSize;
     private final Paint mVerticalResizeShadowPaint = new Paint();
     private final Paint mHorizontalResizeShadowPaint = new Paint();
+    private final Paint mLegacyNavigationBarBackgroundPaint = new Paint();
     private Insets mBackgroundInsets = Insets.NONE;
     private Insets mLastBackgroundInsets = Insets.NONE;
+    private boolean mDrawLegacyNavigationBarBackground;
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -292,6 +294,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         mResizeShadowSize = context.getResources().getDimensionPixelSize(
                 R.dimen.resize_shadow_size);
         initResizingPaints();
+
+        mLegacyNavigationBarBackgroundPaint.setColor(Color.BLACK);
     }
 
     void setBackgroundFallback(@Nullable Drawable fallbackDrawable) {
@@ -1143,6 +1147,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     navBarToRightEdge || navBarToLeftEdge, navBarToLeftEdge,
                     0 /* sideInset */, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds);
+            mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
+                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
 
             boolean statusBarNeedsRightInset = navBarToRightEdge
                     && mNavigationColorViewState.present;
@@ -2310,6 +2316,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onPostDraw(RecordingCanvas canvas) {
         drawResizingShadowIfNeeded(canvas);
+        drawLegacyNavigationBarBackground(canvas);
     }
 
     private void initResizingPaints() {
@@ -2340,6 +2347,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         canvas.translate(getWidth() - mFrameOffsets.right, 0);
         canvas.drawRect(0, 0, mResizeShadowSize, getHeight(), mVerticalResizeShadowPaint);
         canvas.restore();
+    }
+
+    private void drawLegacyNavigationBarBackground(RecordingCanvas canvas) {
+        if (!mDrawLegacyNavigationBarBackground) {
+            return;
+        }
+        View v = mNavigationColorViewState.view;
+        if (v == null) {
+            return;
+        }
+        canvas.drawRect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom(),
+                mLegacyNavigationBarBackgroundPaint);
     }
 
     /** Release the renderer thread which is usually done when the user stops resizing. */
