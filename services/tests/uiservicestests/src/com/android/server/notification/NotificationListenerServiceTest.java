@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Notification.EXTRA_SMALL_ICON;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
@@ -24,6 +25,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -33,8 +35,13 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.service.notification.NotificationListenerService;
@@ -44,19 +51,33 @@ import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.server.UiServiceTestCase;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.test.runner.AndroidJUnit4;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationListenerServiceTest extends UiServiceTestCase {
+
+    int targetSdk = 0;
+
+    @Before
+    public void setUp() {
+        targetSdk = mContext.getApplicationInfo().targetSdkVersion;
+    }
+
+    @After
+    public void tearDown() {
+        mContext.getApplicationInfo().targetSdkVersion = targetSdk;
+    }
 
     @Test
     public void testGetActiveNotifications_notNull() throws Exception {
@@ -109,17 +130,6 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(nru, nru1);
     }
 
-    private void detailedAssertEquals(RankingMap a, RankingMap b) {
-        Ranking arank = new Ranking();
-        Ranking brank = new Ranking();
-        assertArrayEquals(a.getOrderedKeys(), b.getOrderedKeys());
-        for (String key : a.getOrderedKeys()) {
-            a.getRanking(key, arank);
-            b.getRanking(key, brank);
-            detailedAssertEquals("ranking for key <" + key + ">", arank, brank);
-        }
-    }
-
     // Tests parceling of RankingMap and RankingMap.equals
     @Test
     public void testRankingMap_parcel() {
@@ -133,28 +143,6 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(rmap, rmap1);
     }
 
-    private void detailedAssertEquals(String comment, Ranking a, Ranking b) {
-        assertEquals(comment, a.getKey(), b.getKey());
-        assertEquals(comment, a.getRank(), b.getRank());
-        assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
-        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
-        assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
-        assertEquals(comment, a.getImportance(), b.getImportance());
-        assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
-        assertEquals(comment, a.getOverrideGroupKey(), b.getOverrideGroupKey());
-        assertEquals(comment, a.getChannel(), b.getChannel());
-        assertEquals(comment, a.getAdditionalPeople(), b.getAdditionalPeople());
-        assertEquals(comment, a.getSnoozeCriteria(), b.getSnoozeCriteria());
-        assertEquals(comment, a.canShowBadge(), b.canShowBadge());
-        assertEquals(comment, a.getUserSentiment(), b.getUserSentiment());
-        assertEquals(comment, a.isSuspended(), b.isSuspended());
-        assertEquals(comment, a.getLastAudiblyAlertedMillis(), b.getLastAudiblyAlertedMillis());
-        assertEquals(comment, a.isNoisy(), b.isNoisy());
-        assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
-        assertEquals(comment, a.canBubble(), b.canBubble());
-        assertActionsEqual(a.getSmartActions(), b.getSmartActions());
-    }
-
     // Tests parceling of Ranking and Ranking.equals
     @Test
     public void testRanking_parcel() {
@@ -165,10 +153,6 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Ranking ranking1 = new Ranking(parcel);
         detailedAssertEquals("rankings differ: ", ranking, ranking1);
         assertEquals(ranking, ranking1);
-    }
-
-    private void detailedAssertEquals(NotificationRankingUpdate a, NotificationRankingUpdate b) {
-        assertEquals(a.getRankingMap(), b.getRankingMap());
     }
 
     // Tests NotificationRankingUpdate.equals(), and by extension, RankingMap and Ranking.
@@ -202,6 +186,49 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         );
         assertNotEquals(nru, nru2);
     }
+
+    @Test
+    public void testLegacyIcons_preM() {
+        TestListenerService service = new TestListenerService();
+        service.attachBaseContext(mContext);
+        service.targetSdk = Build.VERSION_CODES.LOLLIPOP_MR1;
+
+        Bitmap largeIcon = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
+
+        Notification n = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(android.R.drawable.star_on)
+                .setLargeIcon(Icon.createWithBitmap(largeIcon))
+                .setContentTitle("test")
+                .build();
+
+        service.createLegacyIconExtras(n);
+
+        assertEquals(android.R.drawable.star_on, n.extras.getInt(EXTRA_SMALL_ICON));
+        assertEquals(android.R.drawable.star_on, n.icon);
+        assertNotNull(n.largeIcon);
+        assertNotNull(n.extras.getParcelable(Notification.EXTRA_LARGE_ICON));
+    }
+
+    @Test
+    public void testLegacyIcons_mPlus() {
+        TestListenerService service = new TestListenerService();
+        service.attachBaseContext(mContext);
+        service.targetSdk = Build.VERSION_CODES.M;
+
+        Bitmap largeIcon = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
+
+        Notification n = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(android.R.drawable.star_on)
+                .setLargeIcon(Icon.createWithBitmap(largeIcon))
+                .setContentTitle("test")
+                .build();
+
+        service.createLegacyIconExtras(n);
+
+        assertEquals(0, n.extras.getInt(EXTRA_SMALL_ICON));
+        assertNull(n.largeIcon);
+    }
+
 
     // Test data
 
@@ -346,8 +373,46 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         }
     }
 
+    private void detailedAssertEquals(NotificationRankingUpdate a, NotificationRankingUpdate b) {
+        assertEquals(a.getRankingMap(), b.getRankingMap());
+    }
+
+    private void detailedAssertEquals(String comment, Ranking a, Ranking b) {
+        assertEquals(comment, a.getKey(), b.getKey());
+        assertEquals(comment, a.getRank(), b.getRank());
+        assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
+        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
+        assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
+        assertEquals(comment, a.getImportance(), b.getImportance());
+        assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
+        assertEquals(comment, a.getOverrideGroupKey(), b.getOverrideGroupKey());
+        assertEquals(comment, a.getChannel(), b.getChannel());
+        assertEquals(comment, a.getAdditionalPeople(), b.getAdditionalPeople());
+        assertEquals(comment, a.getSnoozeCriteria(), b.getSnoozeCriteria());
+        assertEquals(comment, a.canShowBadge(), b.canShowBadge());
+        assertEquals(comment, a.getUserSentiment(), b.getUserSentiment());
+        assertEquals(comment, a.isSuspended(), b.isSuspended());
+        assertEquals(comment, a.getLastAudiblyAlertedMillis(), b.getLastAudiblyAlertedMillis());
+        assertEquals(comment, a.isNoisy(), b.isNoisy());
+        assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
+        assertEquals(comment, a.canBubble(), b.canBubble());
+        assertActionsEqual(a.getSmartActions(), b.getSmartActions());
+    }
+
+    private void detailedAssertEquals(RankingMap a, RankingMap b) {
+        Ranking arank = new Ranking();
+        Ranking brank = new Ranking();
+        assertArrayEquals(a.getOrderedKeys(), b.getOrderedKeys());
+        for (String key : a.getOrderedKeys()) {
+            a.getRanking(key, arank);
+            b.getRanking(key, brank);
+            detailedAssertEquals("ranking for key <" + key + ">", arank, brank);
+        }
+    }
+
     public static class TestListenerService extends NotificationListenerService {
         private final IBinder binder = new LocalBinder();
+        public int targetSdk = 0;
 
         public TestListenerService() {
             mWrapper = mock(NotificationListenerWrapper.class);
@@ -368,6 +433,20 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             TestListenerService getService() {
                 return TestListenerService.this;
             }
+        }
+
+        @Override
+        protected void attachBaseContext(Context base) {
+            super.attachBaseContext(base);
+        }
+
+        @Override
+        public ApplicationInfo getApplicationInfo() {
+            ApplicationInfo info = super.getApplicationInfo();
+            if (targetSdk != 0) {
+                info.targetSdkVersion = targetSdk;
+            }
+            return info;
         }
     }
 }
