@@ -532,9 +532,6 @@ public final class Zygote {
         Credentials peerCredentials = null;
         ZygoteArguments args = null;
 
-        // Load resources
-        ZygoteInit.nativePreloadGraphicsDriver();
-
         // Change the priority to max before calling accept so we can respond to new specialization
         // requests as quickly as possible.  This will be reverted to the default priority in the
         // native specialization code.
@@ -648,6 +645,8 @@ public final class Zygote {
                                  args.mInstructionSet, args.mAppDataDir);
 
             disableExecuteOnly(args.mTargetSdkVersion);
+
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
                                          args.mRemainingArgs,
@@ -835,17 +834,32 @@ public final class Zygote {
     }
 
     /**
+     * Gets the wrap property if set.
+     *
+     * @param appName the application name to check
+     * @return value of wrap property or null if property not set or
+     * null if app_name is null or null if app_name is empty
+     */
+    public static String getWrapProperty(String appName) {
+        if (appName == null || appName.isEmpty()) {
+            return null;
+        }
+
+        String propertyValue = SystemProperties.get("wrap." + appName);
+        if (propertyValue != null && !propertyValue.isEmpty()) {
+            return propertyValue;
+        }
+        return null;
+    }
+
+    /**
      * Applies invoke-with system properties to the zygote arguments.
      *
      * @param args non-null; zygote args
      */
     static void applyInvokeWithSystemProperty(ZygoteArguments args) {
-        if (args.mInvokeWith == null && args.mNiceName != null) {
-            String property = "wrap." + args.mNiceName;
-            args.mInvokeWith = SystemProperties.get(property);
-            if (args.mInvokeWith != null && args.mInvokeWith.length() == 0) {
-                args.mInvokeWith = null;
-            }
+        if (args.mInvokeWith == null) {
+            args.mInvokeWith = getWrapProperty(args.mNiceName);
         }
     }
 

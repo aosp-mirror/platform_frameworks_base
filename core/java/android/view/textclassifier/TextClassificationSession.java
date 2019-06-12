@@ -163,6 +163,11 @@ final class TextClassificationSession implements TextClassifier {
                 case SelectionEvent.EVENT_AUTO_SELECTION:
                     mSmartEvent = event;
                     break;
+                case SelectionEvent.ACTION_ABANDON:
+                    if (mPrevEvent != null) {
+                        event.setEntityType(mPrevEvent.getEntityType());
+                    }
+                    break;
                 case SelectionEvent.EVENT_SELECTION_MODIFIED:
                     if (mPrevEvent != null
                             && mPrevEvent.getAbsoluteStart() == event.getAbsoluteStart()

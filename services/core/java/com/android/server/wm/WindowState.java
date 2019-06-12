@@ -1558,7 +1558,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isInteresting() {
         return mAppToken != null && !mAppDied
-                && (!mAppToken.isFreezingScreen() || !mAppFreezing);
+                && (!mAppToken.isFreezingScreen() || !mAppFreezing)
+                && mViewVisibility == View.VISIBLE;
     }
 
     /**

@@ -547,6 +547,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int MAX_BUGREPORT_TITLE_SIZE = 50;
 
     private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
+    private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
 
     OomAdjuster mOomAdjuster;
     final LowMemDetector mLowMemDetector;
@@ -3790,9 +3791,28 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private static long dumpJavaTracesTombstoned(int pid, String fileName, long timeoutMs) {
         final long timeStart = SystemClock.elapsedRealtime();
-        if (!Debug.dumpJavaBacktraceToFileTimeout(pid, fileName, (int) (timeoutMs / 1000))) {
-            Debug.dumpNativeBacktraceToFileTimeout(pid, fileName,
-                    (NATIVE_DUMP_TIMEOUT_MS / 1000));
+        boolean javaSuccess = Debug.dumpJavaBacktraceToFileTimeout(pid, fileName,
+                (int) (timeoutMs / 1000));
+        if (javaSuccess) {
+            // Check that something is in the file, actually. Try-catch should not be necessary,
+            // but better safe than sorry.
+            try {
+                long size = new File(fileName).length();
+                if (size < JAVA_DUMP_MINIMUM_SIZE) {
+                    Slog.w(TAG, "Successfully created Java ANR file is empty!");
+                    javaSuccess = false;
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Unable to get ANR file size", e);
+                javaSuccess = false;
+            }
+        }
+        if (!javaSuccess) {
+            Slog.w(TAG, "Dumping Java threads failed, initiating native stack dump.");
+            if (!Debug.dumpNativeBacktraceToFileTimeout(pid, fileName,
+                    (NATIVE_DUMP_TIMEOUT_MS / 1000))) {
+                Slog.w(TAG, "Native stack dump failed!");
+            }
         }
 
         return SystemClock.elapsedRealtime() - timeStart;
@@ -5361,34 +5381,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
-        if (!(sender instanceof PendingIntentRecord)) {
-            return;
-        }
-        boolean isCancelled;
-        synchronized(this) {
-            PendingIntentRecord pendingIntent = (PendingIntentRecord) sender;
-            isCancelled = pendingIntent.canceled;
-            if (!isCancelled) {
-                pendingIntent.registerCancelListenerLocked(receiver);
-            }
-        }
-        if (isCancelled) {
-            try {
-                receiver.send(Activity.RESULT_CANCELED, null);
-            } catch (RemoteException e) {
-            }
-        }
+        mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
     public void unregisterIntentSenderCancelListener(IIntentSender sender,
             IResultReceiver receiver) {
-        if (!(sender instanceof PendingIntentRecord)) {
-            return;
-        }
-        synchronized(this) {
-            ((PendingIntentRecord)sender).unregisterCancelListenerLocked(receiver);
-        }
+        mPendingIntentController.unregisterIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
@@ -17668,13 +17667,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
                 long duration) {
-            if (!(target instanceof PendingIntentRecord)) {
-                Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
-                return;
-            }
-            synchronized (ActivityManagerService.this) {
-                ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
-            }
+            mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
+                    duration);
         }
 
         @Override
