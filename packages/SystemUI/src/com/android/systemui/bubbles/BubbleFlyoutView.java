@@ -58,6 +58,8 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mPointerSize;
     private final int mBubbleSize;
     private final int mBubbleIconBitmapSize;
+    private final float mBubbleIconTopPadding;
+
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
     private final int mFloatingBackgroundColor;
@@ -72,7 +74,7 @@ public class BubbleFlyoutView extends FrameLayout {
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
     private final float mNewDotRadius;
     private final float mNewDotSize;
-    private final float mNewDotOffsetFromBubbleBounds;
+    private final float mOriginalDotSize;
 
     /**
      * The paint used to draw the background, whose color changes as the flyout transitions to the
@@ -130,6 +132,14 @@ public class BubbleFlyoutView extends FrameLayout {
     /** The flyout's X translation when at rest (not animating or dragging). */
     private float mRestingTranslationX = 0f;
 
+    /** The badge sizes are defined as percentages of the app icon size. Same value as Launcher3. */
+    private static final float SIZE_PERCENTAGE = 0.228f;
+
+    /** Extra scale down of the dot provides room for error in estimating actual dot location.
+     * At the end of the flyout-to-dot animation, wherever the small dot ends up, its disappearance
+     * and the appearance of the larger real dot forms a cohesive animation. */
+    private static final float DOT_SCALE = 0.6f;
+
     /** Callback to run when the flyout is hidden. */
     private Runnable mOnHide;
 
@@ -147,10 +157,13 @@ public class BubbleFlyoutView extends FrameLayout {
 
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleIconTopPadding  = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
+
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
-        mNewDotOffsetFromBubbleBounds = BadgeRenderer.getDotCenterOffset(context);
-        mNewDotRadius = BadgeRenderer.getDotRadius(mNewDotOffsetFromBubbleBounds);
+
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleIconBitmapSize;
+        mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
         mNewDotSize = mNewDotRadius * 2f;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
@@ -219,8 +232,7 @@ public class BubbleFlyoutView extends FrameLayout {
         post(() -> {
             // Multi line flyouts get top-aligned to the bubble.
             if (mFlyoutText.getLineCount() > 1) {
-                float bubbleIconTopPadding = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
-                setTranslationY(stackPos.y + bubbleIconTopPadding);
+                setTranslationY(stackPos.y + mBubbleIconTopPadding);
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
                 setTranslationY(
@@ -248,7 +260,7 @@ public class BubbleFlyoutView extends FrameLayout {
 
             // Calculate the translation values needed to be in the correct 'new dot' position.
             final float distanceFromFlyoutLeftToDotCenterX =
-                    mFlyoutSpaceFromBubble + mNewDotOffsetFromBubbleBounds / 2;
+                    mFlyoutSpaceFromBubble + mBubbleIconTopPadding + mOriginalDotSize / 2;
             if (mArrowPointingLeft) {
                 mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX - mNewDotRadius;
             } else {
@@ -260,7 +272,7 @@ public class BubbleFlyoutView extends FrameLayout {
                     getHeight() / 2f
                             - mNewDotRadius
                             - mBubbleSize / 2f
-                            + mNewDotOffsetFromBubbleBounds / 2;
+                            + mOriginalDotSize / 2;
         });
     }
 
