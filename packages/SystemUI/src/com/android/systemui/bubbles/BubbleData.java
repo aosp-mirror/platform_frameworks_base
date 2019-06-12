@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -172,7 +171,7 @@ public class BubbleData {
         Bubble bubble = getBubbleWithKey(entry.key);
         if (bubble == null) {
             // Create a new bubble
-            bubble = new Bubble(mContext, entry, this::onBubbleBlocked);
+            bubble = new Bubble(mContext, entry);
             doAdd(bubble);
             trim();
         } else {
@@ -550,28 +549,6 @@ public class BubbleData {
                 }
             }
         }
-    }
-
-    private void onBubbleBlocked(NotificationEntry entry) {
-        final String blockedGroupId = Bubble.groupId(entry);
-        int selectedIndex = mBubbles.indexOf(mSelectedBubble);
-        for (Iterator<Bubble> i = mBubbles.iterator(); i.hasNext(); ) {
-            Bubble bubble = i.next();
-            if (bubble.getGroupId().equals(blockedGroupId)) {
-                mStateChange.bubbleRemoved(bubble, BubbleController.DISMISS_BLOCKED);
-                i.remove();
-            }
-        }
-        if (mBubbles.isEmpty()) {
-            setExpandedInternal(false);
-            setSelectedBubbleInternal(null);
-        } else if (!mBubbles.contains(mSelectedBubble)) {
-            // choose a new one
-            int newIndex = Math.min(selectedIndex, mBubbles.size() - 1);
-            Bubble newSelected = mBubbles.get(newIndex);
-            setSelectedBubbleInternal(newSelected);
-        }
-        dispatchPendingChanges();
     }
 
     private int indexForKey(String key) {

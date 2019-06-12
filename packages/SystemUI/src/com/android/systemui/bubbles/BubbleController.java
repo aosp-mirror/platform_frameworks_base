@@ -44,7 +44,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -56,7 +55,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
-import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
 import android.util.Pair;
@@ -122,21 +120,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
-    // Enables some subset of notifs to automatically become bubbles
-    public static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
-
     /** Flag to enable or disable the entire feature */
     private static final String ENABLE_BUBBLES = "experiment_enable_bubbles";
-    /** Auto bubble flags set whether different notif types should be presented as a bubble */
-    private static final String ENABLE_AUTO_BUBBLE_MESSAGES = "experiment_autobubble_messaging";
-    private static final String ENABLE_AUTO_BUBBLE_ONGOING = "experiment_autobubble_ongoing";
-    private static final String ENABLE_AUTO_BUBBLE_ALL = "experiment_autobubble_all";
-
-    /** Use an activityView for an auto-bubbled notifs if it has an appropriate content intent */
-    private static final String ENABLE_BUBBLE_CONTENT_INTENT = "experiment_bubble_content_intent";
-
-    private static final String BUBBLE_STIFFNESS = "experiment_bubble_stiffness";
-    private static final String BUBBLE_BOUNCINESS = "experiment_bubble_bounciness";
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -698,42 +683,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return mStackView;
     }
 
-    /**
-     * Whether the notification should automatically bubble or not. Gated by secure settings flags.
-     */
-    @VisibleForTesting
-    protected boolean shouldAutoBubbleForFlags(Context context, NotificationEntry entry) {
-        if (entry.isBubbleDismissed()) {
-            return false;
-        }
-        StatusBarNotification n = entry.notification;
-
-        boolean autoBubbleMessages = shouldAutoBubbleMessages(context) || DEBUG_ENABLE_AUTO_BUBBLE;
-        boolean autoBubbleOngoing = shouldAutoBubbleOngoing(context) || DEBUG_ENABLE_AUTO_BUBBLE;
-        boolean autoBubbleAll = shouldAutoBubbleAll(context) || DEBUG_ENABLE_AUTO_BUBBLE;
-
-        boolean hasRemoteInput = false;
-        if (n.getNotification().actions != null) {
-            for (Notification.Action action : n.getNotification().actions) {
-                if (action.getRemoteInputs() != null) {
-                    hasRemoteInput = true;
-                    break;
-                }
-            }
-        }
-        boolean isCall = Notification.CATEGORY_CALL.equals(n.getNotification().category)
-                && n.isOngoing();
-        boolean isMusic = n.getNotification().hasMediaSession();
-        boolean isImportantOngoing = isMusic || isCall;
-
-        Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
-        boolean isMessageType = Notification.CATEGORY_MESSAGE.equals(n.getNotification().category);
-        boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
-        return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
-                || (isImportantOngoing && autoBubbleOngoing)
-                || autoBubbleAll;
-    }
-
     private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
         boolean suppressNotification = entry.getBubbleMetadata() != null
                 && entry.getBubbleMetadata().isNotificationSuppressed()
@@ -816,43 +765,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    private static boolean shouldAutoBubbleMessages(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_AUTO_BUBBLE_MESSAGES, 0) != 0;
-    }
-
-    private static boolean shouldAutoBubbleOngoing(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_AUTO_BUBBLE_ONGOING, 0) != 0;
-    }
-
-    private static boolean shouldAutoBubbleAll(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_AUTO_BUBBLE_ALL, 0) != 0;
-    }
-
-    static boolean shouldUseContentIntent(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_BUBBLE_CONTENT_INTENT, 0) != 0;
-    }
-
     private static boolean areBubblesEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ENABLE_BUBBLES, 1) != 0;
-    }
-
-    /** Default stiffness to use for bubble physics animations. */
-    public static int getBubbleStiffness(Context context, int defaultStiffness) {
-        return Settings.Secure.getInt(
-                context.getContentResolver(), BUBBLE_STIFFNESS, defaultStiffness);
-    }
-
-    /** Default bounciness/damping ratio to use for bubble physics animations. */
-    public static float getBubbleBounciness(Context context, float defaultBounciness) {
-        return Settings.Secure.getInt(
-                context.getContentResolver(),
-                BUBBLE_BOUNCINESS,
-                (int) (defaultBounciness * 100)) / 100f;
     }
 
     /**

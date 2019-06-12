@@ -18,14 +18,12 @@ package com.android.systemui.bubbles;
 
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.systemui.bubbles.BubbleController.DEBUG_ENABLE_AUTO_BUBBLE;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityView;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -39,7 +37,6 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -47,7 +44,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.LinearLayout;
 
@@ -57,8 +53,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
 /**
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
@@ -73,7 +67,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private AlphaOptimizedButton mSettingsIcon;
 
     // Views for expanded state
-    private ExpandableNotificationRow mNotifRow;
     private ActivityView mActivityView;
 
     private boolean mActivityViewReady = false;
@@ -84,7 +77,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private int mMinHeight;
     private int mSettingsIconHeight;
-    private int mBubbleHeight;
     private int mPointerWidth;
     private int mPointerHeight;
     private ShapeDrawable mPointerDrawable;
@@ -94,12 +86,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private String mAppName;
     private Drawable mAppIcon;
 
-    private INotificationManager mNotificationManagerService;
     private BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
     private BubbleStackView mStackView;
-
-    private BubbleExpandedView.OnBubbleBlockedListener mOnBubbleBlockedListener;
 
     private ActivityView.StateCallback mStateCallback = new ActivityView.StateCallback() {
         @Override
@@ -154,12 +143,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mMinHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_default_height);
         mPointerMargin = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_margin);
-        try {
-            mNotificationManagerService = INotificationManager.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
-        } catch (ServiceManager.ServiceNotFoundException e) {
-            Log.w(TAG, e);
-        }
     }
 
     @Override
@@ -274,13 +257,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     /**
-     * Sets the listener to notify when a bubble has been blocked.
-     */
-    public void setOnBlockedListener(OnBubbleBlockedListener listener) {
-        mOnBubbleBlockedListener = listener;
-    }
-
-    /**
      * Sets the notification entry used to populate this view.
      */
     public void setEntry(NotificationEntry entry, BubbleStackView stackView, String appName) {
@@ -288,17 +264,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mEntry = entry;
         mAppName = appName;
 
-        ApplicationInfo info;
         try {
-            info = mPm.getApplicationInfo(
+            ApplicationInfo info = mPm.getApplicationInfo(
                     entry.notification.getPackageName(),
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-            if (info != null) {
-                mAppIcon = mPm.getApplicationIcon(info);
-            }
+            mAppIcon = mPm.getApplicationIcon(info);
         } catch (PackageManager.NameNotFoundException e) {
             // Do nothing.
         }
@@ -317,17 +290,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (usingActivityView()) {
             mActivityView.setCallback(mStateCallback);
         } else {
-            // We're using notification template
-            ViewGroup parent = (ViewGroup) mNotifRow.getParent();
-            if (parent == this) {
-                // Already added
-                return;
-            } else if (parent != null) {
-                // Still in the shade... remove it
-                parent.removeView(mNotifRow);
-            }
-            addView(mNotifRow, 1 /* index */);
-            mPointerView.setAlpha(1f);
+            Log.e(TAG, "Cannot populate expanded view.");
         }
     }
 
@@ -349,17 +312,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private void updateExpandedView() {
         mBubbleIntent = getBubbleIntent(mEntry);
         if (mBubbleIntent != null) {
-            if (mNotifRow != null) {
-                // Clear out the row if we had it previously
-                removeView(mNotifRow);
-                mNotifRow = null;
-            }
             setContentVisibility(false);
             mActivityView.setVisibility(VISIBLE);
-        } else if (DEBUG_ENABLE_AUTO_BUBBLE) {
-            // Hide activity view if we had it previously
-            mActivityView.setVisibility(GONE);
-            mNotifRow = mEntry.getRow();
         }
         updateView();
     }
@@ -403,12 +357,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 // If the keyboard is visible... don't adjust the height because that will cause
                 // a configuration change and the keyboard will be lost.
                 lp.height = (int) height;
-                mBubbleHeight = (int) height;
                 mActivityView.setLayoutParams(lp);
                 mNeedsNewHeight = false;
             }
-        } else {
-            mBubbleHeight = mNotifRow != null ? mNotifRow.getIntrinsicHeight() : mMinHeight;
         }
     }
 
@@ -448,9 +399,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 && mActivityView.getVisibility() == VISIBLE
                 && mActivityView.isAttachedToWindow()) {
             mActivityView.onLocationChanged();
-        } else if (mNotifRow != null) {
-            applyRowState(mNotifRow);
-            mPointerView.setAlpha(1f);
         }
         updateHeight();
     }
@@ -469,8 +417,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Removes and releases an ActivityView if one was previously created for this bubble.
      */
     public void cleanUpExpandedState() {
-        removeView(mNotifRow);
-
         if (mActivityView == null) {
             return;
         }
@@ -496,38 +442,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         return INVALID_DISPLAY;
     }
 
-    private void applyRowState(ExpandableNotificationRow view) {
-        view.reset();
-        view.setHeadsUp(false);
-        view.resetTranslation();
-        view.setOnKeyguard(false);
-        view.setClipBottomAmount(0);
-        view.setClipTopAmount(0);
-        view.setContentTransformationAmount(0, false);
-        view.setIconsVisible(true);
-
-        // TODO - Need to reset this (and others) when view goes back in shade, leave for now
-        // view.setTopRoundness(1, false);
-        // view.setBottomRoundness(1, false);
-
-        ExpandableViewState viewState = view.getViewState();
-        viewState = viewState == null ? new ExpandableViewState() : viewState;
-        viewState.height = view.getIntrinsicHeight();
-        viewState.gone = false;
-        viewState.hidden = false;
-        viewState.dimmed = false;
-        viewState.alpha = 1f;
-        viewState.notGoneIndex = -1;
-        viewState.xTranslation = 0;
-        viewState.yTranslation = 0;
-        viewState.zTranslation = 0;
-        viewState.scaleX = 1;
-        viewState.scaleY = 1;
-        viewState.inShelf = true;
-        viewState.headsUpIsVisible = false;
-        viewState.applyToView(view);
-    }
-
     private Intent getSettingsIntent(String packageName, final int appUid) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
@@ -546,16 +460,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             return data.getIntent();
         }
         return null;
-    }
-
-    /**
-     * Listener that is notified when a bubble is blocked.
-     */
-    public interface OnBubbleBlockedListener {
-        /**
-         * Called when a bubble is blocked for the provided entry.
-         */
-        void onBubbleBlocked(NotificationEntry entry);
     }
 
     /**

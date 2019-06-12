@@ -196,7 +196,6 @@ public class BubbleStackView extends FrameLayout {
 
     private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;
-    private BubbleExpandedView.OnBubbleBlockedListener mBlockedListener;
 
     private boolean mViewUpdatedRequested = false;
     private boolean mIsExpansionAnimating = false;
