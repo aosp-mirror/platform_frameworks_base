@@ -193,6 +193,7 @@ public class FaceService extends BiometricServiceBase {
                         .setAutoCancel(true)
                         .setCategory(Notification.CATEGORY_SYSTEM)
                         .setContentIntent(pendingIntent)
+                        .setVisibility(Notification.VISIBILITY_SECRET)
                         .build();
 
                 nm.createNotificationChannel(channel);
@@ -479,6 +480,8 @@ public class FaceService extends BiometricServiceBase {
                 Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
                 return;
             }
+
+            Slog.d(TAG, "Resetting lockout for user: " + mCurrentUserId);
 
             try {
                 mDaemonWrapper.resetLockout(token);
