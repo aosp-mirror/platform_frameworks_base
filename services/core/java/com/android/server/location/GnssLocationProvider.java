@@ -937,7 +937,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
             mGnssBatchingProvider.enable();
             if (mGnssVisibilityControl != null) {
-                mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */true);
+                mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ true);
             }
         } else {
             setGpsEnabled(false);
