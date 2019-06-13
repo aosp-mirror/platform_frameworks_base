@@ -402,18 +402,18 @@ public class DisplayModeDirector {
     }
 
     private static final class Vote {
-        public static final int PRIORITY_USER_SETTING = 0;
         // We split the app request into two priorities in case we can satisfy one desire without
         // the other.
-        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE = 1;
-        public static final int PRIORITY_APP_REQUEST_SIZE = 2;
+        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE = 0;
+        public static final int PRIORITY_APP_REQUEST_SIZE = 1;
+        public static final int PRIORITY_USER_SETTING_REFRESH_RATE = 2;
         public static final int PRIORITY_LOW_BRIGHTNESS = 3;
         public static final int PRIORITY_LOW_POWER_MODE = 4;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY and/or MAX_PRIORITY as
         // appropriate, as well as priorityToString.
 
-        public static final int MIN_PRIORITY = PRIORITY_USER_SETTING;
+        public static final int MIN_PRIORITY = PRIORITY_APP_REQUEST_REFRESH_RATE;
         public static final int MAX_PRIORITY = PRIORITY_LOW_POWER_MODE;
 
         /**
@@ -457,12 +457,12 @@ public class DisplayModeDirector {
 
         public static String priorityToString(int priority) {
             switch (priority) {
-                case PRIORITY_USER_SETTING:
-                    return "PRIORITY_USER_SETTING";
                 case PRIORITY_APP_REQUEST_REFRESH_RATE:
                     return "PRIORITY_APP_REQUEST_REFRESH_RATE";
                 case PRIORITY_APP_REQUEST_SIZE:
                     return "PRIORITY_APP_REQUEST_SIZE";
+                case PRIORITY_USER_SETTING_REFRESH_RATE:
+                    return "PRIORITY_USER_SETTING_REFRESH_RATE";
                 case PRIORITY_LOW_POWER_MODE:
                     return "PRIORITY_LOW_POWER_MODE";
                 default:
@@ -548,7 +548,7 @@ public class DisplayModeDirector {
             float peakRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate);
             Vote vote = Vote.forRefreshRates(0f, peakRefreshRate);
-            updateVoteLocked(Vote.PRIORITY_USER_SETTING, vote);
+            updateVoteLocked(Vote.PRIORITY_USER_SETTING_REFRESH_RATE, vote);
         }
 
         private void updateBrightnessSettingLocked() {
