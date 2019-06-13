@@ -994,4 +994,9 @@ public abstract class PackageManagerInternal {
      */
     public abstract void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
             @UserIdInt int userId);
+
+    /**
+     * Migrates legacy obb data to its new location.
+     */
+    public abstract void migrateLegacyObbData();
 }
