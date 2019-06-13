@@ -164,11 +164,6 @@ public final class NotificationEntry {
     private boolean mShowInShadeWhenBubble = true;
 
     /**
-     * Whether the user has dismissed this notification when it was in bubble form.
-     */
-    private boolean mUserDismissedBubble;
-
-    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -223,14 +218,6 @@ public final class NotificationEntry {
 
     public boolean isBubble() {
         return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
-    }
-
-    public void setBubbleDismissed(boolean userDismissed) {
-        mUserDismissedBubble = userDismissed;
-    }
-
-    public boolean isBubbleDismissed() {
-        return mUserDismissedBubble;
     }
 
     /**

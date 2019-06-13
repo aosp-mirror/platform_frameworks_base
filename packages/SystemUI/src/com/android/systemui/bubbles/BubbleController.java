@@ -408,7 +408,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // TEMP: refactor to change this to pass entry
         Bubble bubble = mBubbleData.getBubbleWithKey(key);
         if (bubble != null) {
-            mBubbleData.notificationEntryRemoved(bubble.entry, reason);
+            mBubbleData.notificationEntryRemoved(bubble.getEntry(), reason);
         }
     }
 
@@ -420,7 +420,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 if (!mBubbleData.hasBubbleWithKey(key)) {
                     return false;
                 }
-                NotificationEntry entry = mBubbleData.getBubbleWithKey(key).entry;
+                Bubble bubble = mBubbleData.getBubbleWithKey(key);
+                NotificationEntry entry = bubble.getEntry();
 
                 final boolean isClearAll = reason == REASON_CANCEL_ALL;
                 final boolean isUserDimiss = reason == REASON_CANCEL;
@@ -434,7 +435,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
                 // The bubble notification sticks around in the data as long as the bubble is
                 // not dismissed and the app hasn't cancelled the notification.
-                boolean bubbleExtended = entry.isBubble() && !entry.isBubbleDismissed()
+                boolean bubbleExtended = entry.isBubble() && !bubble.isRemoved()
                         && userRemovedNotif;
                 if (bubbleExtended) {
                     entry.setShowInShadeWhenBubble(false);
@@ -443,7 +444,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                     mNotificationEntryManager.updateNotifications();
                     return true;
-                } else if (!userRemovedNotif && !entry.isBubbleDismissed()) {
+                } else if (!userRemovedNotif && !bubble.isRemoved()) {
                     // This wasn't a user removal so we should remove the bubble as well
                     mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
                     return false;
@@ -488,7 +489,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 removeBubble(entry.key, DISMISS_NO_LONGER_BUBBLE);
             } else if (shouldBubble) {
                 updateShowInShadeForSuppressNotification(entry);
-                entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
+                Bubble b = mBubbleData.getBubbleWithKey(entry.key);
+                b.setRemoved(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry);
             }
         }
@@ -531,13 +533,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.removeBubble(bubble);
 
                 if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
-                        && !bubble.entry.showInShadeWhenBubble()) {
+                        && !bubble.getEntry().showInShadeWhenBubble()) {
                     // The bubble is gone & the notification is gone, time to actually remove it
-                    mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
-                            UNDEFINED_DISMISS_REASON);
+                    mNotificationEntryManager.performRemoveNotification(
+                            bubble.getEntry().notification, UNDEFINED_DISMISS_REASON);
                 } else {
                     // Update the flag for SysUI
-                    bubble.entry.notification.getNotification().flags &= ~FLAG_BUBBLE;
+                    bubble.getEntry().notification.getNotification().flags &= ~FLAG_BUBBLE;
 
                     // Make sure NoMan knows it's not a bubble anymore so anyone querying it will
                     // get right result back
@@ -758,8 +760,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (expandedBubble.getDisplayId() == displayId) {
                 mBubbleData.setExpanded(false);
             }
-            if (expandedBubble.expandedView != null) {
-                expandedBubble.expandedView.notifyDisplayEmpty();
+            if (expandedBubble.getExpandedView() != null) {
+                expandedBubble.getExpandedView().notifyDisplayEmpty();
             }
         }
     }

@@ -28,6 +28,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -219,13 +221,14 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testRemoveBubble() {
         mBubbleController.updateBubble(mRow.getEntry());
+        assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         assertTrue(mBubbleController.hasBubbles());
         verify(mNotificationEntryManager).updateNotifications();
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
-        assertTrue(mRow.getEntry().isBubbleDismissed());
+        assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         verify(mNotificationEntryManager, times(2)).updateNotifications();
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
     }
@@ -255,15 +258,17 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testDismissStack() {
         mBubbleController.updateBubble(mRow.getEntry());
         verify(mNotificationEntryManager, times(1)).updateNotifications();
+        assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         mBubbleController.updateBubble(mRow2.getEntry());
         verify(mNotificationEntryManager, times(2)).updateNotifications();
+        assertNotNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().key));
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
         verify(mNotificationEntryManager, times(3)).updateNotifications();
-        assertTrue(mRow.getEntry().isBubbleDismissed());
-        assertTrue(mRow2.getEntry().isBubbleDismissed());
+        assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
+        assertNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().key));
     }
 
     @Test

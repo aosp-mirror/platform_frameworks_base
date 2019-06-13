@@ -39,14 +39,14 @@ class Bubble {
     private final String mKey;
     private final String mGroupId;
     private String mAppName;
+    private NotificationEntry mEntry;
 
     private boolean mInflated;
-    public NotificationEntry entry;
-    BubbleView iconView;
-    BubbleExpandedView expandedView;
+    private BubbleView mIconView;
+    private BubbleExpandedView mExpandedView;
     private long mLastUpdated;
     private long mLastAccessed;
-    private PackageManager mPm;
+    private boolean mIsRemoved;
 
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
@@ -56,25 +56,25 @@ class Bubble {
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(Context context, NotificationEntry e) {
-        entry = e;
+        mEntry = e;
         mKey = e.key;
         mLastUpdated = e.notification.getPostTime();
         mGroupId = groupId(e);
 
-        mPm = context.getPackageManager();
+        PackageManager pm = context.getPackageManager();
         ApplicationInfo info;
         try {
-            info = mPm.getApplicationInfo(
-                entry.notification.getPackageName(),
+            info = pm.getApplicationInfo(
+                mEntry.notification.getPackageName(),
                 PackageManager.MATCH_UNINSTALLED_PACKAGES
                     | PackageManager.MATCH_DISABLED_COMPONENTS
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                mAppName = String.valueOf(mPm.getApplicationLabel(info));
+                mAppName = String.valueOf(pm.getApplicationLabel(info));
             }
         } catch (PackageManager.NameNotFoundException unused) {
-            mAppName = entry.notification.getPackageName();
+            mAppName = mEntry.notification.getPackageName();
         }
     }
 
@@ -82,12 +82,16 @@ class Bubble {
         return mKey;
     }
 
+    public NotificationEntry getEntry() {
+        return mEntry;
+    }
+
     public String getGroupId() {
         return mGroupId;
     }
 
     public String getPackageName() {
-        return entry.notification.getPackageName();
+        return mEntry.notification.getPackageName();
     }
 
     public String getAppName() {
@@ -99,22 +103,30 @@ class Bubble {
     }
 
     public void updateDotVisibility() {
-        if (iconView != null) {
-            iconView.updateDotVisibility(true /* animate */);
+        if (mIconView != null) {
+            mIconView.updateDotVisibility(true /* animate */);
         }
+    }
+
+    public BubbleView getIconView() {
+        return mIconView;
+    }
+
+    public BubbleExpandedView getExpandedView() {
+        return mExpandedView;
     }
 
     void inflate(LayoutInflater inflater, BubbleStackView stackView) {
         if (mInflated) {
             return;
         }
-        iconView = (BubbleView) inflater.inflate(
+        mIconView = (BubbleView) inflater.inflate(
                 R.layout.bubble_view, stackView, false /* attachToRoot */);
-        iconView.setNotif(entry);
+        mIconView.setNotif(mEntry);
 
-        expandedView = (BubbleExpandedView) inflater.inflate(
+        mExpandedView = (BubbleExpandedView) inflater.inflate(
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-        expandedView.setEntry(entry, stackView, mAppName);
+        mExpandedView.setEntry(mEntry, stackView, mAppName);
 
         mInflated = true;
     }
@@ -128,25 +140,33 @@ class Bubble {
      * and setting {@code false} actually means rendering the expanded view in transparent.
      */
     void setContentVisibility(boolean visibility) {
-        if (expandedView != null) {
-            expandedView.setContentVisibility(visibility);
+        if (mExpandedView != null) {
+            mExpandedView.setContentVisibility(visibility);
         }
     }
 
-    void setDismissed() {
-        entry.setBubbleDismissed(true);
+    void setRemoved() {
+        mIsRemoved = true;
         // TODO: move this somewhere where it can be guaranteed not to run until safe from flicker
-        if (expandedView != null) {
-            expandedView.cleanUpExpandedState();
+        if (mExpandedView != null) {
+            mExpandedView.cleanUpExpandedState();
         }
+    }
+
+    void setRemoved(boolean removed) {
+        mIsRemoved = removed;
+    }
+
+    public boolean isRemoved() {
+        return mIsRemoved;
     }
 
     void setEntry(NotificationEntry entry) {
-        this.entry = entry;
+        this.mEntry = entry;
         mLastUpdated = entry.notification.getPostTime();
         if (mInflated) {
-            iconView.update(entry);
-            expandedView.update(entry);
+            mIconView.update(entry);
+            mExpandedView.update(entry);
         }
     }
 
@@ -175,7 +195,7 @@ class Bubble {
      * @return the display id of the virtual display on which bubble contents is drawn.
      */
     int getDisplayId() {
-        return expandedView != null ? expandedView.getVirtualDisplayId() : INVALID_DISPLAY;
+        return mExpandedView != null ? mExpandedView.getVirtualDisplayId() : INVALID_DISPLAY;
     }
 
     /**
@@ -183,14 +203,14 @@ class Bubble {
      */
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
-        entry.setShowInShadeWhenBubble(false);
+        mEntry.setShowInShadeWhenBubble(false);
     }
 
     /**
      * @return whether bubble is from a notification associated with a foreground service.
      */
     public boolean isOngoing() {
-        return entry.isForegroundService();
+        return mEntry.isForegroundService();
     }
 
     @Override

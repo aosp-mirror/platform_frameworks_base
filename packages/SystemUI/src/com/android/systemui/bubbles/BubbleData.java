@@ -302,8 +302,8 @@ public class BubbleData {
             Bubble newSelected = mBubbles.get(newIndex);
             setSelectedBubbleInternal(newSelected);
         }
-        bubbleToRemove.setDismissed();
-        maybeSendDeleteIntent(reason, bubbleToRemove.entry);
+        bubbleToRemove.setRemoved();
+        maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
     }
 
     public void dismissAll(@DismissReason int reason) {
@@ -317,8 +317,8 @@ public class BubbleData {
         setSelectedBubbleInternal(null);
         while (!mBubbles.isEmpty()) {
             Bubble bubble = mBubbles.remove(0);
-            bubble.setDismissed();
-            maybeSendDeleteIntent(reason, bubble.entry);
+            bubble.setRemoved();
+            maybeSendDeleteIntent(reason, bubble.getEntry());
             mStateChange.bubbleRemoved(bubble, reason);
         }
         dispatchPendingChanges();
