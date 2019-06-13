@@ -323,7 +323,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
         mUsingDarkText = mColorExtractor.getColors(ColorExtractor.TYPE_DARK,
-                WallpaperManager.FLAG_SYSTEM, true).supportsDarkText();
+                WallpaperManager.FLAG_SYSTEM).supportsDarkText();
         setTheme(mUsingDarkText ? R.style.RecentsTheme_Wallpaper_Light
                 : R.style.RecentsTheme_Wallpaper);
 
@@ -394,8 +394,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void onColorsChanged(ColorExtractor colorExtractor, int which) {
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            // Recents doesn't care about the wallpaper being visible or not, it always
-            // wants to scrim with wallpaper colors
             ColorExtractor.GradientColors colors = mColorExtractor.getNeutralColors();
             boolean darkText = colors.supportsDarkText();
             if (darkText != mUsingDarkText) {
