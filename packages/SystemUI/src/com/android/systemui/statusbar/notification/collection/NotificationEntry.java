@@ -161,7 +161,7 @@ public final class NotificationEntry {
      * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
      * expanded</p>
      */
-    private boolean mShowInShadeWhenBubble;
+    private boolean mShowInShadeWhenBubble = true;
 
     /**
      * Whether the user has dismissed this notification when it was in bubble form.
