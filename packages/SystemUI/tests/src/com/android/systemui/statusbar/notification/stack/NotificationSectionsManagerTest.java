@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -41,6 +42,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -60,6 +62,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayout mNssl;
     @Mock private ActivityStarterDelegate mActivityStarterDelegate;
     @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private ConfigurationController mConfigurationController;
 
     private NotificationSectionsManager mSectionsManager;
 
@@ -70,13 +73,19 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mNssl,
                         mActivityStarterDelegate,
                         mStatusBarStateController,
+                        mConfigurationController,
                         true);
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mSectionsManager.inflateViews(mContext);
+        mSectionsManager.initialize(LayoutInflater.from(mContext));
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+    }
+
+    @Test(expected =  IllegalStateException.class)
+    public void testDuplicateInitializeThrows() {
+        mSectionsManager.initialize(LayoutInflater.from(mContext));
     }
 
     @Test
