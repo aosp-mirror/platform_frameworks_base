@@ -3683,6 +3683,11 @@ public class UserManagerService extends IUserManager.Stub {
 
         long now = System.currentTimeMillis();
         final long nowRealtime = SystemClock.elapsedRealtime();
+
+        final int currentUser = LocalServices.getService(ActivityManagerInternal.class)
+                .getCurrentUserId();
+        pw.print("Current user: "); pw.println(currentUser);
+
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
@@ -3696,6 +3701,7 @@ public class UserManagerService extends IUserManager.Stub {
                     final int userId = userInfo.id;
                     pw.print("  "); pw.print(userInfo);
                     pw.print(" serialNo="); pw.print(userInfo.serialNumber);
+                    pw.print(" isPrimary="); pw.print(userInfo.isPrimary());
                     if (mRemovingUserIds.get(userId)) {
                         pw.print(" <removing> ");
                     }
@@ -3778,13 +3784,15 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUserStates) {
                 pw.println("  Started users state: " + mUserStates);
             }
-            // Dump some capabilities
-            pw.println();
-            pw.println("  Max users: " + UserManager.getMaxSupportedUsers());
-            pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
-            pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
-                    com.android.internal.R.bool.config_guestUserEphemeral));
-        }
+        } // synchronized (mPackagesLock)
+
+        // Dump some capabilities
+        pw.println();
+        pw.println("  Max users: " + UserManager.getMaxSupportedUsers());
+        pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
+        pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_guestUserEphemeral));
+        pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {

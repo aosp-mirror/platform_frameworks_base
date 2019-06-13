@@ -985,11 +985,13 @@ class UserController implements Handler.Callback {
      * <ul>
      *     <li>{@link Intent#ACTION_USER_STARTED} - sent to registered receivers of the new user
      *     <li>{@link Intent#ACTION_USER_BACKGROUND} - sent to registered receivers of the outgoing
-     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is
+     *     {@code false}
      *     <li>{@link Intent#ACTION_USER_FOREGROUND} - sent to registered receivers of the new
-     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is
+     *     {@code true}
      *     <li>{@link Intent#ACTION_USER_SWITCHED} - sent to registered receivers of the new user.
-     *     Sent only if {@code foreground} parameter is true
+     *     Sent only if {@code foreground} parameter is {@code true}
      *     <li>{@link Intent#ACTION_USER_STARTING} - ordered broadcast sent to registered receivers
      *     of the new fg user
      *     <li>{@link Intent#ACTION_LOCKED_BOOT_COMPLETED} - ordered broadcast sent to receivers of
