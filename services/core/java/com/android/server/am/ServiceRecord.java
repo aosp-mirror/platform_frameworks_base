@@ -911,18 +911,20 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         // avoid deadlocks.
         final String localPackageName = packageName;
         final int localForegroundId = foregroundId;
+        final int appUid = appInfo.uid;
+        final int appPid = app.pid;
         ams.mHandler.post(new Runnable() {
             public void run() {
-                INotificationManager inm = NotificationManager.getService();
-                if (inm == null) {
+                NotificationManagerInternal nm = LocalServices.getService(
+                        NotificationManagerInternal.class);
+                if (nm == null) {
                     return;
                 }
                 try {
-                    inm.cancelNotificationWithTag(localPackageName, "android", null,
-                            localForegroundId, userId);
+                    nm.cancelNotification(localPackageName, localPackageName, appUid, appPid,
+                            null, localForegroundId, userId);
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);
-                } catch (RemoteException e) {
                 }
             }
         });
