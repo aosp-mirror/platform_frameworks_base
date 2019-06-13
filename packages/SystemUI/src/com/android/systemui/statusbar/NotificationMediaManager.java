@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
@@ -89,6 +90,7 @@ public class NotificationMediaManager implements Dumpable {
             = Dependency.get(StatusBarStateController.class);
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardBypassController mKeyguardBypassController;
 
     // Late binding
     private NotificationEntryManager mEntryManager;
@@ -173,9 +175,11 @@ public class NotificationMediaManager implements Dumpable {
             Lazy<ShadeController> shadeController,
             Lazy<StatusBarWindowController> statusBarWindowController,
             NotificationEntryManager notificationEntryManager,
-            MediaArtworkProcessor mediaArtworkProcessor) {
+            MediaArtworkProcessor mediaArtworkProcessor,
+            KeyguardBypassController keyguardBypassController) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
+        mKeyguardBypassController = keyguardBypassController;
         mMediaListeners = new ArrayList<>();
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -457,7 +461,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         Bitmap artworkBitmap = null;
-        if (mediaMetadata != null) {
+        if (mediaMetadata != null && !mKeyguardBypassController.getBypassEnabled()) {
             artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
                 artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
