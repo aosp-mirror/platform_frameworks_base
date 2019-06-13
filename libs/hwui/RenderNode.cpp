@@ -264,6 +264,12 @@ void RenderNode::syncProperties() {
 }
 
 void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
+    if (mPositionListenerDirty) {
+        mPositionListener = std::move(mStagingPositionListener);
+        mStagingPositionListener = nullptr;
+        mPositionListenerDirty = false;
+    }
+
     // Push the animators first so that setupStartValueIfNecessary() is called
     // before properties() is trampled by stagingProperties(), as they are
     // required by some animators.
