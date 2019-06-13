@@ -4863,6 +4863,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         startedWakingUp(ON_BECAUSE_OF_UNKNOWN);
+        finishedWakingUp(ON_BECAUSE_OF_UNKNOWN);
         screenTurningOn(null);
         screenTurnedOn();
     }
