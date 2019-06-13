@@ -899,7 +899,10 @@ public class FaceService extends BiometricServiceBase {
     public void onStart() {
         super.onStart();
         publishBinderService(Context.FACE_SERVICE, new FaceServiceWrapper());
-        SystemServerInitThreadPool.get().submit(this::getFaceDaemon, TAG + ".onStart");
+        // Get the face daemon on FaceService's on thread so SystemServerInitThreadPool isn't
+        // blocked
+        SystemServerInitThreadPool.get().submit(() -> mHandler.post(this::getFaceDaemon),
+                TAG + ".onStart");
     }
 
     @Override
