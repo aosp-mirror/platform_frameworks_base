@@ -457,6 +457,9 @@ message GlobalSettingsProto {
         optional SettingProto game_driver_sphal_libraries = 16;
         // ANGLE - External package containing ANGLE libraries
         optional SettingProto angle_debug_package = 17;
+        // Game Driver - List of Apps selected to use prerelease Game Driver
+        // i.e. <pkg1>,<pkg2>,...,<pkgN>
+        optional SettingProto game_driver_prerelease_opt_in_apps = 18;
     }
     optional Gpu gpu = 59;
 
