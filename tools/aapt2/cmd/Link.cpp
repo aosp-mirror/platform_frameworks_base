@@ -1691,6 +1691,8 @@ class Linker {
 
     TableMergerOptions table_merger_options;
     table_merger_options.auto_add_overlay = options_.auto_add_overlay;
+    table_merger_options.override_styles_instead_of_overlaying =
+        options_.override_styles_instead_of_overlaying;
     table_merger_options.strict_visibility = options_.strict_visibility;
     table_merger_ = util::make_unique<TableMerger>(context_, &final_table_, table_merger_options);
 

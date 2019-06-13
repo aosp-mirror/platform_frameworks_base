@@ -436,6 +436,53 @@ TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
               Eq(make_value(Reference(test::ParseNameOrDie("com.app.a:style/OverlayParent")))));
 }
 
+TEST_F(TableMergerTest, OverrideStyleInsteadOfOverlaying) {
+  std::unique_ptr<ResourceTable> table_a =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.a", 0x7f)
+          .AddValue(
+              "com.app.a:styleable/MyWidget",
+              test::StyleableBuilder().AddItem("com.app.a:attr/foo", ResourceId(0x1234)).Build())
+          .AddValue("com.app.a:style/Theme",
+                    test::StyleBuilder()
+                        .AddItem("com.app.a:attr/foo", ResourceUtils::MakeBool(false))
+                        .Build())
+          .Build();
+  std::unique_ptr<ResourceTable> table_b =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.a", 0x7f)
+          .AddValue(
+              "com.app.a:styleable/MyWidget",
+              test::StyleableBuilder().AddItem("com.app.a:attr/bar", ResourceId(0x5678)).Build())
+          .AddValue(
+              "com.app.a:style/Theme",
+              test::StyleBuilder().AddItem("com.app.a:attr/bat", util::make_unique<Id>()).Build())
+          .Build();
+
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = true;
+  options.override_styles_instead_of_overlaying = true;
+  TableMerger merger(context_.get(), &final_table, options);
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), true /*overlay*/));
+
+  // Styleables are always overlaid
+  std::unique_ptr<Styleable> expected_styleable = test::StyleableBuilder()
+      // The merged Styleable has its entries ordered by name.
+      .AddItem("com.app.a:attr/bar", ResourceId(0x5678))
+      .AddItem("com.app.a:attr/foo", ResourceId(0x1234))
+      .Build();
+  const Styleable* actual_styleable =
+      test::GetValue<Styleable>(&final_table, "com.app.a:styleable/MyWidget");
+  ASSERT_NE(actual_styleable, nullptr);
+  EXPECT_TRUE(actual_styleable->Equals(expected_styleable.get()));
+  // Style should be overridden
+  const Style* actual_style = test::GetValue<Style>(&final_table, "com.app.a:style/Theme");
+  ASSERT_NE(actual_style, nullptr);
+  EXPECT_TRUE(actual_style->Equals(test::GetValue<Style>(table_b.get(), "com.app.a:style/Theme")));
+}
+
 TEST_F(TableMergerTest, SetOverlayable) {
   auto overlayable = std::make_shared<Overlayable>("CustomizableResources",
                                                   "overlay://customization");
