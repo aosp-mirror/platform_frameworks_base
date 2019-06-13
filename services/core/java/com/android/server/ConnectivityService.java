@@ -149,7 +149,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
 
@@ -167,7 +166,6 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
-import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
@@ -304,7 +302,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Flag indicating if background data is restricted. */
     private boolean mRestrictBackground;
 
-    final private Context mContext;
+    private final Context mContext;
+    private final Dependencies mDeps;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
@@ -585,11 +584,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private NetworkNotificationManager mNotifier;
     private LingerMonitor mLingerMonitor;
 
-    // sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
-    private static final int MIN_NET_ID = 100; // some reserved marks
-    private static final int MAX_NET_ID = 65535 - 0x0400; // Top 1024 bits reserved by IpSecService
-    private int mNextNetId = MIN_NET_ID;
-
     // sequence number of NetworkRequests
     private int mNextNetworkRequestId = 1;
 
@@ -833,19 +827,113 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     };
 
+    /**
+     * Dependencies of ConnectivityService, for injection in tests.
+     */
+    @VisibleForTesting
+    public static class Dependencies {
+        /**
+         * Get system properties to use in ConnectivityService.
+         */
+        public MockableSystemProperties getSystemProperties() {
+            return new MockableSystemProperties();
+        }
+
+        /**
+         * Create a HandlerThread to use in ConnectivityService.
+         */
+        public HandlerThread makeHandlerThread() {
+            return new HandlerThread("ConnectivityServiceThread");
+        }
+
+        /**
+         * Get a reference to the NetworkStackClient.
+         */
+        public NetworkStackClient getNetworkStack() {
+            return NetworkStackClient.getInstance();
+        }
+
+        /**
+         * @see Tethering
+         */
+        public Tethering makeTethering(@NonNull Context context,
+                @NonNull INetworkManagementService nms,
+                @NonNull INetworkStatsService statsService,
+                @NonNull INetworkPolicyManager policyManager,
+                @NonNull TetheringDependencies tetheringDeps) {
+            return new Tethering(context, nms, statsService, policyManager,
+                    IoThread.get().getLooper(), getSystemProperties(), tetheringDeps);
+        }
+
+        /**
+         * @see ProxyTracker
+         */
+        public ProxyTracker makeProxyTracker(@NonNull Context context,
+                @NonNull Handler connServiceHandler) {
+            return new ProxyTracker(context, connServiceHandler, EVENT_PROXY_HAS_CHANGED);
+        }
+
+        /**
+         * @see NetIdManager
+         */
+        public NetIdManager makeNetIdManager() {
+            return new NetIdManager();
+        }
+
+        /**
+         * @see NetworkUtils#queryUserAccess(int, int)
+         */
+        public boolean queryUserAccess(int uid, int netId) {
+            return NetworkUtils.queryUserAccess(uid, netId);
+        }
+
+        /**
+         * @see MultinetworkPolicyTracker
+         */
+        public MultinetworkPolicyTracker makeMultinetworkPolicyTracker(
+                @NonNull Context c, @NonNull Handler h, @NonNull Runnable r) {
+            return new MultinetworkPolicyTracker(c, h, r);
+        }
+
+        /**
+         * @see ServiceManager#checkService(String)
+         */
+        public boolean hasService(@NonNull String name) {
+            return ServiceManager.checkService(name) != null;
+        }
+
+        /**
+         * @see IpConnectivityMetrics.Logger
+         */
+        public IpConnectivityMetrics.Logger getMetricsLogger() {
+            return checkNotNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
+                    "no IpConnectivityMetrics service");
+        }
+
+        /**
+         * @see IpConnectivityMetrics
+         */
+        public IIpConnectivityMetrics getIpConnectivityMetrics() {
+            return IIpConnectivityMetrics.Stub.asInterface(
+                    ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
+        }
+    }
+
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        this(context, netManager, statsService, policyManager,
-            getDnsResolver(), new IpConnectivityLog(), NetdService.getInstance());
+        this(context, netManager, statsService, policyManager, getDnsResolver(),
+                new IpConnectivityLog(), NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
     protected ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd) {
+            IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
-        mSystemProperties = getSystemProperties();
+        mDeps = checkNotNull(deps, "missing Dependencies");
+        mSystemProperties = mDeps.getSystemProperties();
+        mNetIdManager = mDeps.makeNetIdManager();
 
         mMetricsLog = logger;
         mDefaultRequest = createDefaultInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
@@ -862,7 +950,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultWifiRequest = createDefaultInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_WIFI, NetworkRequest.Type.BACKGROUND_REQUEST);
 
-        mHandlerThread = new HandlerThread("ConnectivityServiceThread");
+        mHandlerThread = mDeps.makeHandlerThread();
         mHandlerThread.start();
         mHandler = new InternalHandler(mHandlerThread.getLooper());
         mTrackerHandler = new NetworkStateTrackerHandler(mHandlerThread.getLooper());
@@ -880,7 +968,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
         mDnsResolver = checkNotNull(dnsresolver, "missing IDnsResolver");
-        mProxyTracker = makeProxyTracker();
+        mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
         mNetd = netd;
         mKeyStore = KeyStore.getInstance();
@@ -948,7 +1036,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Do the same for Ethernet, since it's often not specified in the configs, although many
         // devices can use it via USB host adapters.
-        if (mNetConfigs[TYPE_ETHERNET] == null && hasService(Context.ETHERNET_SERVICE)) {
+        if (mNetConfigs[TYPE_ETHERNET] == null && mDeps.hasService(Context.ETHERNET_SERVICE)) {
             mLegacyTypeTracker.addSupportedType(TYPE_ETHERNET);
             mNetworksDefined++;
         }
@@ -968,7 +1056,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
-        mTethering = makeTethering();
+        mTethering = deps.makeTethering(mContext, mNMS, mStatsService, mPolicyManager,
+                makeTetheringDependencies());
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 
@@ -1027,7 +1116,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
-        mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
+        mMultinetworkPolicyTracker = mDeps.makeMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
 
@@ -1037,10 +1126,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         registerPrivateDnsSettingsCallbacks();
     }
 
-    @VisibleForTesting
-    protected Tethering makeTethering() {
-        // TODO: Move other elements into @Overridden getters.
-        final TetheringDependencies deps = new TetheringDependencies() {
+    private TetheringDependencies makeTetheringDependencies() {
+        return new TetheringDependencies() {
             @Override
             public boolean isTetheringSupported() {
                 return ConnectivityService.this.isTetheringSupported();
@@ -1050,14 +1137,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return mDefaultRequest;
             }
         };
-        return new Tethering(mContext, mNMS, mStatsService, mPolicyManager,
-                IoThread.get().getLooper(), new MockableSystemProperties(),
-                deps);
-    }
-
-    @VisibleForTesting
-    protected ProxyTracker makeProxyTracker() {
-        return new ProxyTracker(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
     }
 
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
@@ -1147,22 +1226,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private synchronized int nextNetworkRequestId() {
         return mNextNetworkRequestId++;
-    }
-
-    @VisibleForTesting
-    protected int reserveNetId() {
-        synchronized (mNetworkForNetId) {
-            for (int i = MIN_NET_ID; i <= MAX_NET_ID; i++) {
-                int netId = mNextNetId;
-                if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
-                // Make sure NetID unused.  http://b/16815182
-                if (!mNetIdInUse.get(netId)) {
-                    mNetIdInUse.put(netId, true);
-                    return netId;
-                }
-            }
-        }
-        throw new IllegalStateException("No free netIds");
     }
 
     private NetworkState getFilteredNetworkState(int networkType, int uid) {
@@ -1796,11 +1859,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     };
 
-    @VisibleForTesting
-    protected void registerNetdEventCallback() {
-        final IIpConnectivityMetrics ipConnectivityMetrics =
-                IIpConnectivityMetrics.Stub.asInterface(
-                        ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
+    private void registerNetdEventCallback() {
+        final IIpConnectivityMetrics ipConnectivityMetrics = mDeps.getIpConnectivityMetrics();
         if (ipConnectivityMetrics == null) {
             Slog.wtf(TAG, "Missing IIpConnectivityMetrics");
             return;
@@ -2236,12 +2296,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected static final String DEFAULT_TCP_BUFFER_SIZES = "4096,87380,110208,4096,16384,110208";
     private static final String DEFAULT_TCP_RWND_KEY = "net.tcp.default_init_rwnd";
 
-    // Overridden for testing purposes to avoid writing to SystemProperties.
-    @VisibleForTesting
-    protected MockableSystemProperties getSystemProperties() {
-        return new MockableSystemProperties();
-    }
-
     private void updateTcpBufferSizes(String tcpBufferSizes) {
         String[] values = null;
         if (tcpBufferSizes != null) {
@@ -2631,8 +2685,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     if (valid != nai.lastValidated) {
                         if (wasDefault) {
-                            metricsLogger().defaultNetworkMetrics().logDefaultNetworkValidity(
-                                    SystemClock.elapsedRealtime(), valid);
+                            mDeps.getMetricsLogger()
+                                    .defaultNetworkMetrics().logDefaultNetworkValidity(
+                                            SystemClock.elapsedRealtime(), valid);
                         }
                         final int oldScore = nai.getCurrentScore();
                         nai.lastValidated = valid;
@@ -2967,8 +3022,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     final boolean wasDefault = isDefaultNetwork(nai);
                     synchronized (mNetworkForNetId) {
                         mNetworkForNetId.remove(nai.network.netId);
-                        mNetIdInUse.delete(nai.network.netId);
                     }
+                    mNetIdManager.releaseNetId(nai.network.netId);
                     // Just in case.
                     mLegacyTypeTracker.remove(nai, wasDefault);
                 }
@@ -3015,7 +3070,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
             // whose timestamps tell how long it takes to recover a default network.
             long now = SystemClock.elapsedRealtime();
-            metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(now, null, nai);
+            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(now, null, nai);
         }
         notifyIfacesChangedForNetworkStats();
         // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -3069,9 +3124,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             destroyNativeNetwork(nai);
             mDnsManager.removeNetwork(nai.network);
         }
-        synchronized (mNetworkForNetId) {
-            mNetIdInUse.delete(nai.network.netId);
-        }
+        mNetIdManager.releaseNetId(nai.network.netId);
     }
 
     private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
@@ -4155,7 +4208,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return null;
             }
             return getLinkPropertiesProxyInfo(activeNetwork);
-        } else if (queryUserAccess(Binder.getCallingUid(), network.netId)) {
+        } else if (mDeps.queryUserAccess(Binder.getCallingUid(), network.netId)) {
             // Don't call getLinkProperties() as it requires ACCESS_NETWORK_STATE permission, which
             // caller may not have.
             return getLinkPropertiesProxyInfo(network);
@@ -4164,10 +4217,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return null;
     }
 
-    @VisibleForTesting
-    protected boolean queryUserAccess(int uid, int netId) {
-        return NetworkUtils.queryUserAccess(uid, netId);
-    }
 
     private ProxyInfo getLinkPropertiesProxyInfo(Network network) {
         final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
@@ -4760,7 +4809,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             // Concatenate the range of types onto the range of NetIDs.
-            int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
+            int id = NetIdManager.MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
             mNotifier.setProvNotificationVisible(visible, id, action);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -5371,10 +5420,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @GuardedBy("mNetworkForNetId")
     private final SparseArray<NetworkAgentInfo> mNetworkForNetId = new SparseArray<>();
     // NOTE: Accessed on multiple threads, synchronized with mNetworkForNetId.
-    // An entry is first added to mNetIdInUse, prior to mNetworkForNetId, so
+    // An entry is first reserved with NetIdManager, prior to being added to mNetworkForNetId, so
     // there may not be a strict 1:1 correlation between the two.
-    @GuardedBy("mNetworkForNetId")
-    private final SparseBooleanArray mNetIdInUse = new SparseBooleanArray();
+    private final NetIdManager mNetIdManager;
 
     // NetworkAgentInfo keyed off its connecting messenger
     // TODO - eval if we can reduce the number of lists/hashmaps/sparsearrays
@@ -5476,9 +5524,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // satisfies mDefaultRequest.
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
-                new Network(reserveNetId()), new NetworkInfo(networkInfo), lp, nc, currentScore,
-                mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd, mDnsResolver,
-                mNMS, factorySerialNumber);
+                new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
+                currentScore, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
+                mDnsResolver, mNMS, factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
         nai.setNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
@@ -5487,7 +5535,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("registerNetworkAgent " + nai);
         final long token = Binder.clearCallingIdentity();
         try {
-            getNetworkStack().makeNetworkMonitor(
+            mDeps.getNetworkStack().makeNetworkMonitor(
                     nai.network, name, new NetworkMonitorCallbacks(nai));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -5497,11 +5545,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // NetworkAgent until nai.asyncChannel.connect(), which will be called when finalizing the
         // registration.
         return nai.network.netId;
-    }
-
-    @VisibleForTesting
-    protected NetworkStackClient getNetworkStack() {
-        return NetworkStackClient.getInstance();
     }
 
     private void handleRegisterNetworkAgent(NetworkAgentInfo nai, INetworkMonitor networkMonitor) {
@@ -6313,7 +6356,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Notify system services that this network is up.
             makeDefault(newNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-            metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
+            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
                     now, newNetwork, oldDefaultNetwork);
             // Have a new default network, release the transition wakelock in
             scheduleReleaseNetworkTransitionWakelock();
@@ -6983,27 +7026,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // Redirect it to network watchlist service to access watchlist file and calculate hash.
         return nwm.getWatchlistConfigHash();
-    }
-
-    @VisibleForTesting
-    MultinetworkPolicyTracker createMultinetworkPolicyTracker(Context c, Handler h, Runnable r) {
-        return new MultinetworkPolicyTracker(c, h, r);
-    }
-
-    @VisibleForTesting
-    public WakeupMessage makeWakeupMessage(Context c, Handler h, String s, int cmd, Object obj) {
-        return new WakeupMessage(c, h, s, cmd, 0, 0, obj);
-    }
-
-    @VisibleForTesting
-    public boolean hasService(String name) {
-        return ServiceManager.checkService(name) != null;
-    }
-
-    @VisibleForTesting
-    protected IpConnectivityMetrics.Logger metricsLogger() {
-        return checkNotNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
-                "no IpConnectivityMetrics service");
     }
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {

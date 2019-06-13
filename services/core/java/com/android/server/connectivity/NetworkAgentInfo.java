@@ -579,10 +579,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         if (newExpiry > 0) {
-            mLingerMessage = mConnService.makeWakeupMessage(
+            mLingerMessage = new WakeupMessage(
                     mContext, mHandler,
-                    "NETWORK_LINGER_COMPLETE." + network.netId,
-                    EVENT_NETWORK_LINGER_COMPLETE, this);
+                    "NETWORK_LINGER_COMPLETE." + network.netId /* cmdName */,
+                    EVENT_NETWORK_LINGER_COMPLETE /* cmd */,
+                    0 /* arg1 (unused) */, 0 /* arg2 (unused) */,
+                    this /* obj (NetworkAgentInfo) */);
             mLingerMessage.schedule(newExpiry);
         }
 
