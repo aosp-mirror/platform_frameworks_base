@@ -210,7 +210,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private KeyEventDispatcher mKeyEventDispatcher;
 
-    private MotionEventInjector mMotionEventInjector;
+    private SparseArray<MotionEventInjector> mMotionEventInjectors;
 
     private FingerprintGestureDispatcher mFingerprintGestureDispatcher;
 
@@ -859,30 +859,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Called by AccessibilityInputFilter when it creates or destroys the motionEventInjector.
      * Not using a getter because the AccessibilityInputFilter isn't thread-safe
      *
-     * @param motionEventInjector The new value of the motionEventInjector. May be null.
+     * @param motionEventInjectors The array of motionEventInjectors. May be null.
+     *
      */
-    void setMotionEventInjector(MotionEventInjector motionEventInjector) {
+    void setMotionEventInjectors(SparseArray<MotionEventInjector> motionEventInjectors) {
         synchronized (mLock) {
-            mMotionEventInjector = motionEventInjector;
+            mMotionEventInjectors = motionEventInjectors;
             // We may be waiting on this object being set
             mLock.notifyAll();
         }
     }
 
     @Override
-    public MotionEventInjector getMotionEventInjectorLocked() {
+    public @Nullable MotionEventInjector getMotionEventInjectorForDisplayLocked(int displayId) {
         final long endMillis = SystemClock.uptimeMillis() + WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS;
-        while ((mMotionEventInjector == null) && (SystemClock.uptimeMillis() < endMillis)) {
+        MotionEventInjector motionEventInjector = null;
+        while ((mMotionEventInjectors == null) && (SystemClock.uptimeMillis() < endMillis)) {
             try {
                 mLock.wait(endMillis - SystemClock.uptimeMillis());
             } catch (InterruptedException ie) {
                 /* ignore */
             }
         }
-        if (mMotionEventInjector == null) {
+        if (mMotionEventInjectors == null) {
             Slog.e(LOG_TAG, "MotionEventInjector installation timed out");
+        } else {
+            motionEventInjector = mMotionEventInjectors.get(displayId);
         }
-        return mMotionEventInjector;
+        return motionEventInjector;
     }
 
     /**

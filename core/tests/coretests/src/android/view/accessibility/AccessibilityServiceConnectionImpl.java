@@ -131,6 +131,8 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void sendGesture(int sequence, ParceledListSlice gestureSteps) {}
 
+    public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {}
+
     public boolean isFingerprintGestureDetectionAvailable() {
         return false;
     }

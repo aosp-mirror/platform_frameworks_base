@@ -114,7 +114,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private final SparseArray<MagnificationGestureHandler> mMagnificationGestureHandler =
             new SparseArray<>(0);
 
-    private final SparseArray<MotionEventInjector> mMotionEventInjector = new SparseArray<>(0);
+    private final SparseArray<MotionEventInjector> mMotionEventInjectors = new SparseArray<>(0);
 
     private AutoclickController mAutoclickController;
 
@@ -411,10 +411,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 MotionEventInjector injector = new MotionEventInjector(
                         mContext.getMainLooper());
                 addFirstEventHandler(displayId, injector);
-                // TODO: Need to set MotionEventInjector per display.
-                mAms.setMotionEventInjector(injector);
-                mMotionEventInjector.put(displayId, injector);
+                mMotionEventInjectors.put(displayId, injector);
             }
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
+            mAms.setMotionEventInjectors(mMotionEventInjectors);
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
@@ -461,15 +463,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void disableFeatures() {
-        for (int i = mMotionEventInjector.size() - 1; i >= 0; i--) {
-            final MotionEventInjector injector = mMotionEventInjector.valueAt(i);
-            // TODO: Need to set MotionEventInjector per display.
-            mAms.setMotionEventInjector(null);
+        for (int i = mMotionEventInjectors.size() - 1; i >= 0; i--) {
+            final MotionEventInjector injector = mMotionEventInjectors.valueAt(i);
             if (injector != null) {
                 injector.onDestroy();
             }
         }
-        mMotionEventInjector.clear();
+        mAms.setMotionEventInjectors(null);
+        mMotionEventInjectors.clear();
         if (mAutoclickController != null) {
             mAutoclickController.onDestroy();
             mAutoclickController = null;

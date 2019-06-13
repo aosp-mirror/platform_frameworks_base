@@ -751,8 +751,8 @@ public abstract class AccessibilityService extends Service {
                             callback, handler);
                     mGestureStatusCallbackInfos.put(mGestureStatusCallbackSequence, callbackInfo);
                 }
-                connection.sendGesture(mGestureStatusCallbackSequence,
-                        new ParceledListSlice<>(steps));
+                connection.dispatchGesture(mGestureStatusCallbackSequence,
+                        new ParceledListSlice<>(steps), gesture.getDisplayId());
             }
         } catch (RemoteException re) {
             throw new RuntimeException(re);

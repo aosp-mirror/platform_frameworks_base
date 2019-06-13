@@ -88,7 +88,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     protected final Context mContext;
     protected final SystemSupport mSystemSupport;
-    private final WindowManagerInternal mWindowManagerService;
+    protected final WindowManagerInternal mWindowManagerService;
     private final GlobalActionPerformer mGlobalActionPerformer;
     private final AccessibilityWindowManager mA11yWindowManager;
     private final PowerManager mPowerManager;
@@ -165,9 +165,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         @Nullable MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId);
 
         /**
-         * @return The current injector of motion events, if one exists
+         * @param displayId The display id.
+         * @return The current injector of motion events used on the display, if one exists.
          */
-        @Nullable MotionEventInjector getMotionEventInjectorLocked();
+        @Nullable MotionEventInjector getMotionEventInjectorForDisplayLocked(int displayId);
 
         /**
          * @return The current dispatcher for fingerprint gestures, if one exists
@@ -709,6 +710,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public void sendGesture(int sequence, ParceledListSlice gestureSteps) {
+    }
+
+    @Override
+    public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
     }
 
     @Override

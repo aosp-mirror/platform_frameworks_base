@@ -237,7 +237,6 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         return (userState != null) ? userState.getSoftKeyboardShowMode() : 0;
     }
 
-
     @Override
     public boolean isAccessibilityButtonAvailable() {
         synchronized (mLock) {
@@ -353,12 +352,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     @Override
-    public void sendGesture(int sequence, ParceledListSlice gestureSteps) {
+    public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
+        final boolean isTouchableDisplay = mWindowManagerService.isTouchableDisplay(displayId);
         synchronized (mLock) {
             if (mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
-                        mSystemSupport.getMotionEventInjectorLocked();
-                if (motionEventInjector != null) {
+                        mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
+                if (motionEventInjector != null && isTouchableDisplay) {
                     motionEventInjector.injectEvents(
                             gestureSteps.getList(), mServiceInterface, sequence);
                 } else {
