@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
+import android.os.Trace;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewRootImpl;
@@ -95,6 +96,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
                             .sendToTarget();
                     return;
                 }
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Sync transaction frameNumber=" + frame);
                 TransactionCompat t = new TransactionCompat();
                 for (int i = params.length - 1; i >= 0; i--) {
                     SyncRtSurfaceTransactionApplierCompat.SurfaceParams surfaceParams =
@@ -105,6 +107,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
                 }
                 t.setEarlyWakeup();
                 t.apply();
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
                         .sendToTarget();
             }
