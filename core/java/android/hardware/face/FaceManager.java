@@ -637,7 +637,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             }
         }
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
-        return null;
+        return "";
     }
 
     /**
