@@ -106,7 +106,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
     }
 
-    private void extractWallpaperColors() {
+    protected void extractWallpaperColors() {
         GradientColors[] systemColors = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
         GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
         extractInto(mSystemColors,

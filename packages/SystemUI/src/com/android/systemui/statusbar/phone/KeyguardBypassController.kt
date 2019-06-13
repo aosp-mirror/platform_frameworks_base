@@ -17,16 +17,21 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import android.hardware.biometrics.BiometricSourceType
 import android.hardware.face.FaceManager
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.tuner.TunerService
-
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class KeyguardBypassController {
+
+    private val unlockMethodCache: UnlockMethodCache
+    private val statusBarStateController: StatusBarStateController
 
     /**
      * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
@@ -35,11 +40,13 @@ class KeyguardBypassController {
         get() = field && unlockMethodCache.isUnlockingWithFacePossible
         private set
 
-    private val unlockMethodCache: UnlockMethodCache
+    lateinit var unlockController: BiometricUnlockController
 
     @Inject
-    constructor(context: Context, tunerService: TunerService) {
+    constructor(context: Context, tunerService: TunerService,
+                statusBarStateController: StatusBarStateController) {
         unlockMethodCache = UnlockMethodCache.getInstance(context)
+        this.statusBarStateController = statusBarStateController
         val faceManager = context.getSystemService(FaceManager::class.java)
         if (faceManager?.isHardwareDetected != true) {
             return
@@ -57,5 +64,19 @@ class KeyguardBypassController {
                                         KeyguardUpdateMonitor.getCurrentUser()) != 0
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+    }
+
+    /**
+     * Notify that the biometric unlock has happened.
+     *
+     * @return false if we can not wake and unlock right now
+     */
+    fun onBiometricAuthenticated(biometricSourceType: BiometricSourceType): Boolean {
+        if (bypassEnabled && statusBarStateController.state != StatusBarState.KEYGUARD) {
+            // We're bypassing but not actually on the lockscreen, the user should decide when
+            // to unlock
+            return false
+        }
+        return true
     }
 }

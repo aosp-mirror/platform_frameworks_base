@@ -713,16 +713,20 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
                                      O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_APPEND,
                                      0666));
     if (fd < 0) {
-        fprintf(stderr, "Can't open %s: %s\n", fileNameChars.c_str(), strerror(errno));
+        PLOG(ERROR) << "Can't open " << fileNameChars.c_str();
         return false;
     }
 
-    return (dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd) == 0);
+    int res = dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd);
+    if (fdatasync(fd.get()) != 0) {
+        PLOG(ERROR) << "Failed flushing trace.";
+    }
+    return res == 0;
 }
 
 static jboolean android_os_Debug_dumpJavaBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
         jint pid, jstring fileName, jint timeoutSecs) {
-    const bool ret =  dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
+    const bool ret = dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
     return ret ? JNI_TRUE : JNI_FALSE;
 }
 
