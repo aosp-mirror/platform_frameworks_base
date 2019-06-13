@@ -19,6 +19,7 @@ package android.content;
 import static org.junit.Assert.assertEquals;
 
 import android.app.ActivityThread;
+import android.os.UserHandle;
 import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
@@ -57,5 +58,33 @@ public class ContextTest {
 
         assertEquals(defaultDisplayContext.getDisplay().getDisplayId(),
                 defaultDisplayContext.getDisplayId());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testStartActivityAsUserNullIntentNullUser() {
+        final Context testContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
+        testContext.startActivityAsUser(null, null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testStartActivityAsUserNullIntentNonNullUser() {
+        final Context testContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
+        testContext.startActivityAsUser(null, new UserHandle(UserHandle.USER_ALL));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testStartActivityAsUserNonNullIntentNullUser() {
+        final Context testContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
+        testContext.startActivityAsUser(new Intent(), null);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testStartActivityAsUserNonNullIntentNonNullUser() {
+        final Context testContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
+        testContext.startActivityAsUser(new Intent(), new UserHandle(UserHandle.USER_ALL));
     }
 }

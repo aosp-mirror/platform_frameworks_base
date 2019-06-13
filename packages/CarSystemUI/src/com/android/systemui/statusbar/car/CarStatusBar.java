@@ -63,6 +63,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -127,6 +128,7 @@ public class CarStatusBar extends StatusBar implements
     private SwitchToGuestTimer mSwitchToGuestTimer;
     private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
+    private ScreenLifecycle mScreenLifecycle;
 
     // The container for the notifications.
     private CarNotificationView mNotificationView;
@@ -230,6 +232,9 @@ public class CarStatusBar extends StatusBar implements
         mPowerManagerHelper.connectToCarService();
 
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
+
+        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
+        mScreenLifecycle.addObserver(mScreenObserver);
     }
 
     /**
@@ -315,7 +320,6 @@ public class CarStatusBar extends StatusBar implements
     public void showKeyguard() {
         super.showKeyguard();
         updateNavBarForKeyguardContent();
-        dismissKeyguardWhenUserSwitcherNotDisplayed();
     }
 
     /**
@@ -978,6 +982,13 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
+    final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
+        @Override
+        public void onScreenTurnedOn() {
+            dismissKeyguardWhenUserSwitcherNotDisplayed();
+        }
+    };
+
     // We automatically dismiss keyguard unless user switcher is being shown on the keyguard.
     private void dismissKeyguardWhenUserSwitcherNotDisplayed() {
         if (mFullscreenUserSwitcher == null) {
@@ -1000,6 +1011,10 @@ public class CarStatusBar extends StatusBar implements
      * Dismisses the keyguard and shows bouncer if authentication is necessary.
      */
     public void dismissKeyguard() {
+        // Don't dismiss keyguard when the screen is off.
+        if (mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF) {
+            return;
+        }
         executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
                 true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
     }

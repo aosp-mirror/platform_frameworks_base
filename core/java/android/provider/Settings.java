@@ -12665,6 +12665,14 @@ public final class Settings {
         public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
 
         /**
+         * List of Apps selected to use prerelease Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_PRERELEASE_OPT_IN_APPS =
+                "game_driver_prerelease_opt_in_apps";
+
+        /**
          * List of Apps selected not to use Game Driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
@@ -13567,39 +13575,6 @@ public final class Settings {
         @TestApi
         public static final String LOCATION_GLOBAL_KILL_SWITCH =
                 "location_global_kill_switch";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for 3P apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_3P_CHECK_RELAXED =
-                "privileged_device_identifier_3p_check_relaxed";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for preloaded non-privileged apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED =
-                "privileged_device_identifier_non_priv_check_relaxed";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for preloaded privileged apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_PRIV_CHECK_RELAXED =
-                "privileged_device_identifier_priv_check_relaxed";
 
         /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored

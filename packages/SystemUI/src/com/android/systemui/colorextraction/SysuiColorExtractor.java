@@ -16,18 +16,11 @@
 
 package com.android.systemui.colorextraction;
 
-import android.annotation.ColorInt;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.os.Handler;
-import android.os.RemoteException;
+import android.graphics.Color;
 import android.os.UserHandle;
-import android.util.Log;
-import android.view.Display;
-import android.view.IWallpaperVisibilityListener;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -52,46 +45,28 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         ConfigurationController.ConfigurationListener {
     private static final String TAG = "SysuiColorExtractor";
     private final Tonal mTonal;
-    private boolean mWallpaperVisible;
-    private boolean mHasBackdrop;
-    // Colors to return when the wallpaper isn't visible
-    private final GradientColors mWpHiddenColors;
+    private boolean mHasMediaArtwork;
+    private final GradientColors mNeutralColorsLock;
+    private final GradientColors mBackdropColors;
 
     @Inject
     public SysuiColorExtractor(Context context, ConfigurationController configurationController) {
-        this(context, new Tonal(context), configurationController, true);
+        this(context, new Tonal(context), configurationController,
+                context.getSystemService(WallpaperManager.class), false /* immediately */);
     }
 
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type,
-            ConfigurationController configurationController, boolean registerVisibility) {
-        super(context, type, false /* immediately */);
+            ConfigurationController configurationController,
+            WallpaperManager wallpaperManager, boolean immediately) {
+        super(context, type, immediately, wallpaperManager);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
-        mWpHiddenColors = new GradientColors();
+        mNeutralColorsLock = new GradientColors();
         configurationController.addCallback(this);
 
-        WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
-        updateDefaultGradients(systemColors);
+        mBackdropColors = new GradientColors();
+        mBackdropColors.setMainColor(Color.BLACK);
 
-        if (registerVisibility) {
-            try {
-                IWindowManager windowManagerService = WindowManagerGlobal.getWindowManagerService();
-                Handler handler = Handler.getMain();
-                boolean visible = windowManagerService.registerWallpaperVisibilityListener(
-                        new IWallpaperVisibilityListener.Stub() {
-                            @Override
-                            public void onWallpaperVisibilityChanged(boolean newVisibility,
-                                    int displayId) throws RemoteException {
-                                handler.post(() -> setWallpaperVisible(newVisibility));
-                            }
-                        }, Display.DEFAULT_DISPLAY);
-                setWallpaperVisible(visible);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Can't listen to wallpaper visibility changes", e);
-            }
-        }
-
-        WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
         if (wallpaperManager != null) {
             // Listen to all users instead of only the current one.
             wallpaperManager.removeOnColorsChangedListener(this);
@@ -100,8 +75,14 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         }
     }
 
-    private void updateDefaultGradients(WallpaperColors colors) {
-        mTonal.applyFallback(colors, mWpHiddenColors);
+    @Override
+    protected void extractWallpaperColors() {
+        super.extractWallpaperColors();
+        // mTonal is final but this method will be invoked by the base class during its ctor.
+        if (mTonal == null) {
+            return;
+        }
+        mTonal.applyFallback(mLockColors == null ? mSystemColors : mLockColors, mNeutralColorsLock);
     }
 
     @Override
@@ -110,27 +91,28 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
             // Colors do not belong to current user, ignoring.
             return;
         }
-
-        super.onColorsChanged(colors, which);
-
-        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            @ColorInt int oldColor = mWpHiddenColors.getMainColor();
-            updateDefaultGradients(colors);
-            if (oldColor != mWpHiddenColors.getMainColor()) {
-                triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
-            }
+        if ((which & WallpaperManager.FLAG_LOCK) != 0) {
+            mTonal.applyFallback(colors, mNeutralColorsLock);
         }
+        super.onColorsChanged(colors, which);
     }
 
     @Override
     public void onUiModeChanged() {
-        WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
-        updateDefaultGradients(systemColors);
-        triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
+        extractWallpaperColors();
+        triggerColorsChanged(WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+    }
+
+    @Override
+    public GradientColors getColors(int which, int type) {
+        if (mHasMediaArtwork && (which & WallpaperManager.FLAG_LOCK) != 0) {
+            return mBackdropColors;
+        }
+        return super.getColors(which, type);
     }
 
     /**
-     * Colors the should be using for scrims.
+     * Colors that should be using for scrims.
      *
      * They will be:
      * - A light gray if the wallpaper is light
@@ -138,81 +120,12 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
      * - Black otherwise
      */
     public GradientColors getNeutralColors() {
-        return mWpHiddenColors;
+        return mHasMediaArtwork ? mBackdropColors : mNeutralColorsLock;
     }
 
-    /**
-     * Get TYPE_NORMAL colors when wallpaper is visible, or fallback otherwise.
-     *
-     * @param which FLAG_LOCK or FLAG_SYSTEM
-     * @return colors
-     */
-    @Override
-    public GradientColors getColors(int which) {
-        return getColors(which, TYPE_DARK);
-    }
-
-    /**
-     * Wallpaper colors when the wallpaper is visible, fallback otherwise.
-     *
-     * @param which FLAG_LOCK or FLAG_SYSTEM
-     * @param type TYPE_NORMAL, TYPE_DARK or TYPE_EXTRA_DARK
-     * @return colors
-     */
-    @Override
-    public GradientColors getColors(int which, int type) {
-        return getColors(which, type, false /* ignoreVisibility */);
-    }
-
-    /**
-     * Get TYPE_NORMAL colors, possibly ignoring wallpaper visibility.
-     *
-     * @param which FLAG_LOCK or FLAG_SYSTEM
-     * @param ignoreWallpaperVisibility whether you want fallback colors or not if the wallpaper
-     *                                  isn't visible
-     * @return
-     */
-    public GradientColors getColors(int which, boolean ignoreWallpaperVisibility) {
-        return getColors(which, TYPE_NORMAL, ignoreWallpaperVisibility);
-    }
-
-    /**
-     *
-     * @param which FLAG_LOCK or FLAG_SYSTEM
-     * @param type TYPE_NORMAL, TYPE_DARK or TYPE_EXTRA_DARK
-     * @param ignoreWallpaperVisibility true if true wallpaper colors should be returning
-     *                                  if it's visible or not
-     * @return colors
-     */
-    public GradientColors getColors(int which, int type, boolean ignoreWallpaperVisibility) {
-        // mWallpaperVisible only handles the "system wallpaper" and will be always set to false
-        // if we have different lock and system wallpapers.
-        if (which == WallpaperManager.FLAG_SYSTEM) {
-            if (mWallpaperVisible || ignoreWallpaperVisibility) {
-                return super.getColors(which, type);
-            } else {
-                return mWpHiddenColors;
-            }
-        } else {
-            if (mHasBackdrop) {
-                return mWpHiddenColors;
-            } else {
-                return super.getColors(which, type);
-            }
-        }
-    }
-
-    @VisibleForTesting
-    void setWallpaperVisible(boolean visible) {
-        if (mWallpaperVisible != visible) {
-            mWallpaperVisible = visible;
-            triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
-        }
-    }
-
-    public void setHasBackdrop(boolean hasBackdrop) {
-        if (mHasBackdrop != hasBackdrop) {
-            mHasBackdrop = hasBackdrop;
+    public void setHasMediaArtwork(boolean hasBackdrop) {
+        if (mHasMediaArtwork != hasBackdrop) {
+            mHasMediaArtwork = hasBackdrop;
             triggerColorsChanged(WallpaperManager.FLAG_LOCK);
         }
     }
@@ -230,7 +143,8 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         pw.println("  Gradients:");
         pw.println("    system: " + Arrays.toString(system));
         pw.println("    lock: " + Arrays.toString(lock));
-        pw.println("  Default scrim: " + mWpHiddenColors);
+        pw.println("  Neutral colors: " + mNeutralColorsLock);
+        pw.println("  Has media backdrop: " + mHasMediaArtwork);
 
     }
 }

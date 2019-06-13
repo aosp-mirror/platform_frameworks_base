@@ -2553,31 +2553,39 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final boolean isItemEnabled;
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemEnabled = ((AbsListView.LayoutParams) lp).isEnabled;
+            isItemEnabled = ((AbsListView.LayoutParams) lp).isEnabled && isEnabled();
         } else {
             isItemEnabled = false;
         }
 
-        if (!isEnabled() || !isItemEnabled) {
-            info.setEnabled(false);
-            return;
-        }
+        info.setEnabled(isItemEnabled);
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            info.addAction(AccessibilityAction.ACTION_CLEAR_SELECTION);
-        } else {
-            info.addAction(AccessibilityAction.ACTION_SELECT);
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
+                    AccessibilityAction.ACTION_CLEAR_SELECTION);
+        } else  {
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
+                    AccessibilityAction.ACTION_SELECT);
         }
 
         if (isItemClickable(view)) {
-            info.addAction(AccessibilityAction.ACTION_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
             info.setClickable(true);
         }
 
         if (isLongClickable()) {
-            info.addAction(AccessibilityAction.ACTION_LONG_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemEnabled,
+                    AccessibilityAction.ACTION_LONG_CLICK);
             info.setLongClickable(true);
+        }
+    }
+
+
+    private void addAccessibilityActionIfEnabled(AccessibilityNodeInfo info, boolean enabled,
+            AccessibilityAction action) {
+        if (enabled) {
+            info.addAction(action);
         }
     }
 
