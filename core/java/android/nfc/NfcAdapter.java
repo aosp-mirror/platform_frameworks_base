@@ -1714,11 +1714,12 @@ public final class NfcAdapter {
     /**
      * Sets Secure NFC feature.
      * <p>This API is for the Settings application.
+     * @return True if successful
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public boolean setNfcSecure(boolean enable) {
+    public boolean enableSecureNfc(boolean enable) {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
@@ -1736,7 +1737,7 @@ public final class NfcAdapter {
      * @return True if device supports Secure NFC, false otherwise
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      */
-    public boolean deviceSupportsNfcSecure() {
+    public boolean isSecureNfcSupported() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
@@ -1751,12 +1752,12 @@ public final class NfcAdapter {
     /**
      * Checks Secure NFC feature is enabled.
      *
-     * @return True if device supports Secure NFC is enabled, false otherwise
+     * @return True if Secure NFC is enabled, false otherwise
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      * @throws UnsupportedOperationException if device doesn't support
-     *         Secure NFC functionality. {@link #deviceSupportsNfcSecure}
+     *         Secure NFC functionality. {@link #isSecureNfcSupported}
      */
-    public boolean isNfcSecureEnabled() {
+    public boolean isSecureNfcEnabled() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
