@@ -178,15 +178,31 @@ public class NetworkNotificationManager {
         CharSequence title;
         CharSequence details;
         int icon = getIcon(transportType, notifyType);
-        if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
-            title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
-            details = r.getString(R.string.wifi_no_internet_detailed);
-        } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY
-                && transportType == TRANSPORT_WIFI) {
-            title = r.getString(R.string.network_partial_connectivity,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
-            details = r.getString(R.string.network_partial_connectivity_detailed);
+        if (notifyType == NotificationType.NO_INTERNET) {
+            switch (transportType) {
+                case TRANSPORT_WIFI:
+                    title = r.getString(R.string.wifi_no_internet,
+                        WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    details = r.getString(R.string.wifi_no_internet_detailed);
+                    break;
+                default:
+                    // TODO: Display notifications for those networks that provide internet.
+                    // except VPN.
+                    return;
+            }
+
+        } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY) {
+            switch (transportType) {
+                case TRANSPORT_WIFI:
+                    title = r.getString(R.string.network_partial_connectivity,
+                        WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    details = r.getString(R.string.network_partial_connectivity_detailed);
+                    break;
+                default:
+                    // TODO: Display notifications for those networks that provide internet.
+                    // except VPN.
+                    return;
+            }
         } else if (notifyType == NotificationType.LOST_INTERNET &&
                 transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
