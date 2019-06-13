@@ -24921,6 +24921,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
             }
         }
+
+        @Override
+        public void migrateLegacyObbData() {
+            try {
+                mInstaller.migrateLegacyObbData();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+        }
     }
 
     @GuardedBy("mPackages")
