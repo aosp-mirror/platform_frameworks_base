@@ -640,10 +640,10 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(
-                Collections.singletonList(DozeLog.PULSE_REASON_NOTIFICATION));
+                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
         HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
                 Arrays.asList(DozeLog.PULSE_REASON_INTENT,
-                        DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
+                        DozeLog.PULSE_REASON_NOTIFICATION,
                         DozeLog.PULSE_REASON_SENSOR_SIGMOTION,
                         DozeLog.REASON_SENSOR_PICKUP,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
@@ -662,6 +662,7 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mDozeScrimController).pulse(any(), anyInt());
 
+        mStatusBar.mDozeServiceHost.mWakeLockScreenPerformsAuth = true;
         for (int i = 0; i < DozeLog.REASONS; i++) {
             reset(mKeyguardUpdateMonitor);
             mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class), i);

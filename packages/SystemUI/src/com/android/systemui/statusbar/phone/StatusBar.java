@@ -3950,9 +3950,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarWindow.suppressWakeUpGesture(true);
             }
 
-            boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION || (
-                    reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
-                            && mWakeLockScreenPerformsAuth);
+            boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
+                            && mWakeLockScreenPerformsAuth;
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
             // execute the transition. The pulse callback will then be invoked when the scrims
             // are black, indicating that StatusBar is ready to present the rest of the UI.
