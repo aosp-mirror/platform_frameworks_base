@@ -303,6 +303,8 @@ message Atom {
         ContentCaptureSessionEvents content_capture_session_events = 208;
         ContentCaptureFlushed content_capture_flushed = 209;
         LocationManagerApiUsageReported location_manager_api_usage_reported = 210;
+        ReviewPermissionsFragmentResultReported review_permissions_fragment_result_reported
+            = 211 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6549,4 +6551,25 @@ message LocationManagerApiUsageReported {
     // Activity Importance of API caller.
     // Categorized to 3 types that are interesting from location's perspective.
     optional android.stats.location.ActivityImportance activiy_importance = 12;
+}
+
+/**
+ * Information about a permission grant or denial made by user inside ReviewPermissionsFragment
+ */
+message ReviewPermissionsFragmentResultReported {
+    // unique value identifying a permission group change. A permission group change might result
+    // in multiple of these atoms
+    optional int64 change_id = 1;
+
+    // UID of package the permission belongs to
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package the permission belongs to
+    optional string package_name = 3;
+
+    // The permission to be granted
+    optional string permission_name = 4;
+
+    // The result of the permission grant
+    optional bool permission_granted = 5;
 }
