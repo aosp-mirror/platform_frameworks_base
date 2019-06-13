@@ -78,10 +78,12 @@ public class GraphicsEnvironment {
     // GAME_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
     // 1: All apps use Game Driver
-    // 2: All apps use system graphics driver
+    // 2: All apps use Prerelease Driver
+    // 3: All apps use system graphics driver
     private static final int GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_ALL = 1;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_NONE = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER = 1;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -714,15 +716,19 @@ public class GraphicsEnvironment {
         // 4. GAME_DRIVER_OPT_IN_APPS
         // 5. GAME_DRIVER_BLACKLIST
         // 6. GAME_DRIVER_WHITELIST
-        final int globalOptIn = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_NONE) {
-            if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
-            return null;
-        }
-
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_ALL) {
-            if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
-            return hasGameDriver ? gameDriver : null;
+        switch (coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0)) {
+            case GAME_DRIVER_GLOBAL_OPT_IN_OFF:
+                if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
+                return null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
+                return hasGameDriver ? gameDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use prerelease driver.");
+                return hasPrereleaseDriver ? prereleaseDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT:
+            default:
+                break;
         }
 
         final String appPackageName = ai.packageName;
