@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
@@ -135,7 +134,6 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mNotificationInflater);
 
         assertNotNull(mRow.getPrivateLayout().getHeadsUpChild());
-        assertNull(mRow.getShowingLayout().getAmbientChild());
         verify(mRow).onNotificationUpdated();
     }
 
@@ -178,7 +176,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
                 0,
-                new ArrayMap() /* cachedContentViews */, mRow, false /* redactAmbient */,
+                new ArrayMap() /* cachedContentViews */, mRow,
                 true /* isNewView */, (v, p, r) -> true,
                 new InflationCallback() {
                     @Override
@@ -210,14 +208,12 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
     @Test
     public void testUpdateNeedsRedactionReinflatesChangedContentViews() {
-        mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true);
         mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_PUBLIC, true);
         mNotificationInflater.updateNeedsRedaction(true);
 
         NotificationContentInflater.AsyncInflationTask asyncInflationTask =
                 (NotificationContentInflater.AsyncInflationTask) mRow.getEntry().getRunningTask();
-        assertEquals(FLAG_CONTENT_VIEW_AMBIENT | FLAG_CONTENT_VIEW_PUBLIC,
-                asyncInflationTask.getReInflateFlags());
+        assertEquals(FLAG_CONTENT_VIEW_PUBLIC, asyncInflationTask.getReInflateFlags());
         asyncInflationTask.abort();
     }
 

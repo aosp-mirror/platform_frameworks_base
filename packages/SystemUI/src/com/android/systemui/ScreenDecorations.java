@@ -64,6 +64,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -231,7 +232,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             anim.start();
         } else {
             view.animate().cancel();
-            view.animate().setDuration(400).alpha(0f);
+            view.animate()
+                    .setInterpolator(new AccelerateInterpolator(1.5f))
+                    .setDuration(250)
+                    .alpha(0f);
         }
 
     }

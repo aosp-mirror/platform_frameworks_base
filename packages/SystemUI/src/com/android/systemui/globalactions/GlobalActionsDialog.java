@@ -1021,7 +1021,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public boolean onLongClickItem(int position) {
             final Action action = mAdapter.getItem(position);
             if (action instanceof LongPressAction) {
-                mDialog.dismiss();
+                if (mDialog != null) {
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action long-clicked while mDialog is null.");
+                }
                 return ((LongPressAction) action).onLongPress();
             }
             return false;
@@ -1031,9 +1035,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onClickItem(int position) {
             Action item = mAdapter.getItem(position);
             if (!(item instanceof SilentModeTriStateAction)) {
-                mDialog.dismiss();
+                if (mDialog != null) {
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action clicked while mDialog is null.");
+                }
+                item.onPress();
             }
-            item.onPress();
         }
 
         @Override

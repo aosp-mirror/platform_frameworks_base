@@ -58,9 +58,16 @@ class IdmapManager {
 
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
-        // STOPSHIP(b/119390857): Check api version once Q sdk version is finalized
-        final String value = SystemProperties.get("ro.vndk.version", "Q");
-        VENDOR_IS_Q_OR_LATER = value.equals("Q") || value.equals("q");
+        final String value = SystemProperties.get("ro.vndk.version", "29");
+        boolean isQOrLater;
+        try {
+            isQOrLater = Integer.parseInt(value) >= 29;
+        } catch (NumberFormatException e) {
+            // The version is not a number, therefore it is a development codename.
+            isQOrLater = true;
+        }
+
+        VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
     IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {

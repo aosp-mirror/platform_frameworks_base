@@ -99,7 +99,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final DoubleTapHelper mDoubleTapHelper;
 
     private boolean mDimmed;
-    protected boolean mDozing;
 
     protected int mBgTint = NO_COLOR;
     private float mBgAlpha = 1f;
@@ -434,16 +433,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return true;
     }
 
-    public void setDozing(boolean dozing, boolean fade, long delay) {
-        super.setDozing(dozing, fade, delay);
-        if (mDozing == dozing) {
-            return;
-        }
-        mDozing = dozing;
-        updateBackground();
-        updateBackgroundTint(false);
-    }
-
     private void updateOutlineAlpha() {
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
@@ -536,10 +525,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      *                       used and the background color not at all.
      */
     public void setOverrideTintColor(int color, float overrideAmount) {
-        if (mDozing) {
-            color = NO_COLOR;
-            overrideAmount = 0;
-        }
         mOverrideTint = color;
         mOverrideAmount = overrideAmount;
         int newColor = calculateBgColor();
@@ -1048,6 +1033,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public boolean isHeadsUpAnimatingAway() {
+        return false;
+    }
+
+    public boolean isHeadsUp() {
         return false;
     }
 

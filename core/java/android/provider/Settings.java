@@ -7756,6 +7756,20 @@ public final class Settings {
                 NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
+         * Direction to advance media for skip gesture
+         * @hide
+         */
+        public static final String SKIP_DIRECTION = "skip_gesture_direction";
+
+        /**
+         * Only used if FeatureFlag "settings_skip_direction_mutable" is enabled.
+         * If feature flag is disabled, should assume SKIP_DIRECTION = 0.
+         *      0 / false = right to left to advance to next
+         *      1 / true = left to right to advance to next
+         */
+        private static final Validator SKIP_DIRECTION_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Gesture that silences sound (alarms, notification, calls).
          * @hide
          */
@@ -8987,6 +9001,7 @@ public final class Settings {
             UI_NIGHT_MODE,
             LOCK_SCREEN_WHEN_TRUST_LOST,
             SKIP_GESTURE,
+            SKIP_DIRECTION,
             SILENCE_GESTURE,
             THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
             NAVIGATION_MODE,
@@ -9173,6 +9188,8 @@ public final class Settings {
             VALIDATORS.put(LOCK_SCREEN_CUSTOM_CLOCK_FACE, LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
             VALIDATORS.put(SKIP_GESTURE, SKIP_GESTURE_VALIDATOR);
+            VALIDATORS.put(SKIP_DIRECTION, SKIP_DIRECTION_VALIDATOR);
+            VALIDATORS.put(SKIP_DIRECTION, SKIP_DIRECTION_VALIDATOR);
             VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
             VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                     THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
@@ -13572,39 +13589,6 @@ public final class Settings {
         @TestApi
         public static final String LOCATION_GLOBAL_KILL_SWITCH =
                 "location_global_kill_switch";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for 3P apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_3P_CHECK_RELAXED =
-                "privileged_device_identifier_3p_check_relaxed";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for preloaded non-privileged apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_NON_PRIV_CHECK_RELAXED =
-                "privileged_device_identifier_non_priv_check_relaxed";
-
-        /**
-         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
-         * permission check for preloaded privileged apps.
-         *
-         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
-         *
-         * @hide
-         */
-        public static final String PRIVILEGED_DEVICE_IDENTIFIER_PRIV_CHECK_RELAXED =
-                "privileged_device_identifier_priv_check_relaxed";
 
         /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored

@@ -490,16 +490,23 @@ class ZygoteServer {
             if (mUsapPoolRefillTriggerTimestamp == INVALID_TIMESTAMP) {
                 pollTimeoutMs = -1;
             } else {
-                int elapsedTimeMs =
-                        (int) (System.currentTimeMillis() - mUsapPoolRefillTriggerTimestamp);
+                long elapsedTimeMs = System.currentTimeMillis() - mUsapPoolRefillTriggerTimestamp;
 
                 if (elapsedTimeMs >= mUsapPoolRefillDelayMs) {
                     // Normalize the poll timeout value when the time between one poll event and the
                     // next pushes us over the delay value.  This prevents poll receiving a 0
                     // timeout value, which would result in it returning immediately.
                     pollTimeoutMs = -1;
+
+                } else if (elapsedTimeMs <= 0) {
+                    // This can occur if the clock used by currentTimeMillis is reset, which is
+                    // possible because it is not guaranteed to be monotonic.  Because we can't tell
+                    // how far back the clock was set the best way to recover is to simply re-start
+                    // the respawn delay countdown.
+                    pollTimeoutMs = mUsapPoolRefillDelayMs;
+
                 } else {
-                    pollTimeoutMs = mUsapPoolRefillDelayMs - elapsedTimeMs;
+                    pollTimeoutMs = (int) (mUsapPoolRefillDelayMs - elapsedTimeMs);
                 }
             }
 

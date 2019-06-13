@@ -3319,7 +3319,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
             // On TV, use legacy handling until assistants are implemented in the proper way.
             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .launchLegacyAssist(hint, UserHandle.myUserId(), args);
+                    .launchLegacyAssist(hint, mCurrentUserId, args);
         } else {
             if (hint != null) {
                 if (args == null) {

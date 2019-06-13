@@ -27,10 +27,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,6 +41,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
@@ -73,6 +76,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private Consumer<Boolean> mProxCallback;
     @Mock
     private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
+    @Mock
+    private TriggerSensor mMockTriggerSensor;
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -105,6 +110,25 @@ public class DozeSensorsTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(mCallback, never()).onSensorPulse(eq(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
                 anyBoolean(), anyFloat(), anyFloat(), eq(null));
+    }
+
+    @Test
+    public void testSetListening_firstTrue_registerSettingsObserver() {
+        mDozeSensors.mSensors = new TriggerSensor[] {mMockTriggerSensor};
+
+        mDozeSensors.setListening(true);
+
+        verify(mMockTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
+    }
+
+    @Test
+    public void testSetListening_twiceTrue_onlyRegisterSettingsObserverOnce() {
+        mDozeSensors.mSensors = new TriggerSensor[] {mMockTriggerSensor};
+        mDozeSensors.setListening(true);
+
+        mDozeSensors.setListening(true);
+
+        verify(mMockTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
     }
 
     private class TestableDozeSensors extends DozeSensors {

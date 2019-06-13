@@ -31,6 +31,7 @@ import android.view.ViewTreeObserver;
 
 import androidx.collection.ArraySet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -50,18 +51,27 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Stack;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A implementation of HeadsUpManager for phone and car.
  */
+@Singleton
 public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         VisualStabilityManager.Callback, OnHeadsUpChangedListener,
         ConfigurationController.ConfigurationListener, StateListener {
     private static final String TAG = "HeadsUpManagerPhone";
 
-    private final View mStatusBarWindowView;
-    private final NotificationGroupManager mGroupManager;
-    private final VisualStabilityManager mVisualStabilityManager;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @VisibleForTesting
+    final int mExtensionTime;
+    private final StatusBarStateController mStatusBarStateController;
+    private View mStatusBarWindowView;
+    private NotificationGroupManager mGroupManager;
+    private VisualStabilityManager mVisualStabilityManager;
+    private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @VisibleForTesting
+    int mAutoDismissNotificationDecayDozing;
     private boolean mReleaseOnExpandFinish;
 
     private int mStatusBarHeight;
@@ -101,20 +111,30 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  Constructor:
 
+    @Inject
     public HeadsUpManagerPhone(@NonNull final Context context,
-                               @NonNull View statusBarWindowView,
-                               @NonNull NotificationGroupManager groupManager,
-                               @NonNull StatusBar bar,
-                               @NonNull VisualStabilityManager visualStabilityManager) {
+            StatusBarStateController statusBarStateController) {
         super(context);
+        Resources resources = mContext.getResources();
+        mAutoDismissNotificationDecayDozing = resources.getInteger(
+                R.integer.heads_up_notification_decay_dozing);
+        mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
+        mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController.addCallback(this);
 
+        initResources();
+    }
+
+
+    public void setUp(@NonNull View statusBarWindowView,
+            @NonNull NotificationGroupManager groupManager,
+            @NonNull StatusBar bar,
+            @NonNull VisualStabilityManager visualStabilityManager) {
         mStatusBarWindowView = statusBarWindowView;
-        mStatusBarTouchableRegionManager = new StatusBarTouchableRegionManager(context, this, bar,
+        mStatusBarTouchableRegionManager = new StatusBarTouchableRegionManager(mContext, this, bar,
                 statusBarWindowView);
         mGroupManager = groupManager;
         mVisualStabilityManager = visualStabilityManager;
-
-        initResources();
 
         addListener(new OnHeadsUpChangedListener() {
             @Override
@@ -125,7 +145,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 mStatusBarTouchableRegionManager.updateTouchableRegion();
             }
         });
-        Dependency.get(StatusBarStateController.class).addCallback(this);
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -259,6 +278,18 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         if (headsUpEntry instanceof HeadsUpEntryPhone && entry.isRowPinned()) {
             ((HeadsUpEntryPhone) headsUpEntry).setMenuShownPinned(menuShown);
         }
+    }
+
+    /**
+     * Extends the lifetime of the currently showing pulsing notification so that the pulse lasts
+     * longer.
+     */
+    public void extendHeadsUp() {
+        HeadsUpEntryPhone topEntry = getTopHeadsUpEntryPhone();
+        if (topEntry == null) {
+            return;
+        }
+        topEntry.extendPulse();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,6 +457,12 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         private boolean mMenuShownPinned;
 
+        /**
+         * If the time this entry has been on was extended
+         */
+        private boolean extended;
+
+
         @Override
         protected boolean isSticky() {
             return super.isSticky() || mMenuShownPinned;
@@ -433,7 +470,10 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         public void setEntry(@NonNull final NotificationEntry entry) {
             Runnable removeHeadsUpRunnable = () -> {
-                if (!mVisualStabilityManager.isReorderingAllowed()) {
+                if (!mVisualStabilityManager.isReorderingAllowed()
+                        // We don't want to allow reordering while pulsing, but headsup need to
+                        // time out if we're dozing.
+                        && !mStatusBarStateController.isDozing()) {
                     mEntriesToRemoveWhenReorderingAllowed.add(entry);
                     mVisualStabilityManager.addReorderingAllowedCallback(
                             HeadsUpManagerPhone.this);
@@ -490,6 +530,24 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         public void reset() {
             super.reset();
             mMenuShownPinned = false;
+            extended = false;
+        }
+
+        private void extendPulse() {
+            if (!extended) {
+                extended = true;
+                updateEntry(false);
+            }
+        }
+
+        @Override
+        protected long calculateFinishTime() {
+            return mPostTime + getDecayDuration() + (extended ? mExtensionTime : 0);
+        }
+
+        private int getDecayDuration() {
+            return mStatusBarStateController.isDozing() ? mAutoDismissNotificationDecayDozing
+                    : getRecommendedHeadsUpTimeoutMs();
         }
     }
 
