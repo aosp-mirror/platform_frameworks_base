@@ -7300,6 +7300,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (wasInLaunchingProviders) {
                         mHandler.removeMessages(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, r);
                     }
+                    // Make sure the package is associated with the process.
+                    // XXX We shouldn't need to do this, since we have added the package
+                    // when we generated the providers in generateApplicationProvidersLocked().
+                    // But for some reason in some cases we get here with the package no longer
+                    // added...  for now just patch it in to make things happy.
+                    r.addPackage(dst.info.applicationInfo.packageName,
+                            dst.info.applicationInfo.longVersionCode, mProcessStats);
                     synchronized (dst) {
                         dst.provider = src.provider;
                         dst.setProcess(r);
