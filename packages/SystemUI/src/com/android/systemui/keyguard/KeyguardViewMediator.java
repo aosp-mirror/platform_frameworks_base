@@ -1800,6 +1800,10 @@ public class KeyguardViewMediator extends SystemUI {
             if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
                 flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
             }
+            if (mStatusBarKeyguardViewManager.shouldSubtleWindowAnimationsForUnlock()) {
+                flags |= WindowManagerPolicyConstants
+                        .KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
+            }
 
             mUpdateMonitor.setKeyguardGoingAway(true /* goingAway */);
 

@@ -3471,12 +3471,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * Starts the Keyguard exit animation on all windows that don't belong to an app token.
      */
-    void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade) {
+    void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade,
+            boolean subtle) {
         final WindowManagerPolicy policy = mWmService.mPolicy;
         forAllWindows(w -> {
             if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)
                     && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
-                w.startAnimation(policy.createHiddenByKeyguardExit(onWallpaper, goingToShade));
+                w.startAnimation(policy.createHiddenByKeyguardExit(
+                        onWallpaper, goingToShade, subtle));
             }
         }, true /* traverseTopToBottom */);
     }
