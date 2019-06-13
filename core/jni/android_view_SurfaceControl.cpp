@@ -1255,6 +1255,32 @@ static jboolean nativeSetDisplayBrightness(JNIEnv* env, jclass clazz, jobject di
     return error == OK ? JNI_TRUE : JNI_FALSE;
 }
 
+static void nativeWriteTransactionToParcel(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        doThrowNPE(env);
+        return;
+    }
+    SurfaceComposerClient::Transaction* const self =
+            reinterpret_cast<SurfaceComposerClient::Transaction *>(nativeObject);
+    if (self != nullptr) {
+        self->writeToParcel(parcel);
+    }
+}
+
+static jlong nativeReadTransactionFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        doThrowNPE(env);
+        return 0;
+    }
+    std::unique_ptr<SurfaceComposerClient::Transaction> transaction =
+            SurfaceComposerClient::Transaction::createFromParcel(parcel);
+
+    return reinterpret_cast<jlong>(transaction.release());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1409,6 +1435,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayBrightnessSupport },
     {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;F)Z",
             (void*)nativeSetDisplayBrightness },
+    {"nativeReadTransactionFromParcel", "(Landroid/os/Parcel;)J",
+            (void*)nativeReadTransactionFromParcel },
+    {"nativeWriteTransactionToParcel", "(JLandroid/os/Parcel;)V",
+            (void*)nativeWriteTransactionToParcel },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
