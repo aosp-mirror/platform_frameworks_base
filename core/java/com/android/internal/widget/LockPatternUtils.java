@@ -886,13 +886,13 @@ public class LockPatternUtils {
             return;
         }
 
+        // TODO(b/120484642): This is a location where we still use a String for vold
+        String passwordString = password != null ? new String(password) : null;
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... dummy) {
                 IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
                 try {
-                    // TODO(b/120484642): This is a location where we still use a String for vold
-                    String passwordString = password != null ? new String(password) : null;
                     storageManager.changeEncryptionPassword(type, passwordString);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error changing encryption password", e);
