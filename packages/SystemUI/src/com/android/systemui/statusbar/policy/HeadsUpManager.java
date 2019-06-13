@@ -416,14 +416,14 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
         @Override
         protected long calculateFinishTime() {
-            return mPostTime + getRecommendedTimeoutMillis();
+            return mPostTime + getRecommendedHeadsUpTimeoutMs();
         }
 
         /**
          * Get user-preferred or default timeout duration. The larger one will be returned.
          * @return milliseconds before auto-dismiss
          */
-        private int getRecommendedTimeoutMillis() {
+        protected int getRecommendedHeadsUpTimeoutMs() {
             return mAccessibilityMgr.getRecommendedTimeoutMillis(
                     mAutoDismissNotificationDecay,
                     AccessibilityManager.FLAG_CONTENT_CONTROLS

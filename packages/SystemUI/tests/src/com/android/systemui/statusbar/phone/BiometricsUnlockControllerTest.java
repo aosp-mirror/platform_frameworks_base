@@ -81,6 +81,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mUnlockMethodCache.isUnlockingWithFacePossible()).thenReturn(true);
+        when(mKeyguardBypassController.onBiometricAuthenticated(any())).thenReturn(true);
         mContext.addMockSystemService(PowerManager.class, mPowerManager);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mDependency.injectTestDependency(StatusBarWindowController.class,

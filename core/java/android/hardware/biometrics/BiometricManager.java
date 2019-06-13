@@ -104,9 +104,17 @@ public class BiometricManager {
      */
     @RequiresPermission(USE_BIOMETRIC)
     public @BiometricError int canAuthenticate() {
+        return canAuthenticate(mContext.getUserId());
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public @BiometricError int canAuthenticate(int userId) {
         if (mService != null) {
             try {
-                return mService.canAuthenticate(mContext.getOpPackageName());
+                return mService.canAuthenticate(mContext.getOpPackageName(), userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

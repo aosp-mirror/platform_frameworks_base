@@ -111,7 +111,7 @@
         <item name="android:colorBackground">@*android:color/background_material_dark</item>
     </style>
 
-    <style name="TextAppearance.Keyguard" parent="Theme.SystemUI">
+    <style name="TextAppearance.Keyguard">
         <item name="android:textSize">@dimen/widget_title_font_size</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>

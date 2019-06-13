@@ -188,11 +188,9 @@ public:
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
     };
 
-    // Note this is not thread safe, this needs to be called
-    // before the RenderNode is used for drawing.
-    // RenderNode takes ownership of the pointer
     ANDROID_API void setPositionListener(PositionListener* listener) {
-        mPositionListener = listener;
+        mStagingPositionListener = listener;
+        mPositionListenerDirty = true;
     }
 
     // This is only modified in MODE_FULL, so it can be safely accessed
@@ -275,6 +273,8 @@ private:
     // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
 
+    bool mPositionListenerDirty = false;
+    sp<PositionListener> mStagingPositionListener;
     sp<PositionListener> mPositionListener;
 
     UsageHint mUsageHint = UsageHint::Unknown;

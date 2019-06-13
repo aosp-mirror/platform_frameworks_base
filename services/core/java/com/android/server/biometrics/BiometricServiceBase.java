@@ -713,8 +713,6 @@ public abstract class BiometricServiceBase extends SystemService
             // already generated a new authenticator id when the new biometric is enrolled.
             if (identifier instanceof Fingerprint) {
                 updateActiveGroup(((Fingerprint)identifier).getGroupId(), null);
-            } else {
-                updateActiveGroup(mCurrentUserId, null);
             }
         }
     }
@@ -1090,6 +1088,8 @@ public abstract class BiometricServiceBase extends SystemService
         if (DEBUG) Slog.v(getTag(), "starting client "
                 + mCurrentClient.getClass().getSuperclass().getSimpleName()
                 + "(" + mCurrentClient.getOwnerString() + ")"
+                + " targetUserId: " + mCurrentClient.getTargetUserId()
+                + " currentUserId: " + mCurrentUserId
                 + " cookie: " + cookie + "/" + mCurrentClient.getCookie());
         if (cookie != mCurrentClient.getCookie()) {
             Slog.e(getTag(), "Mismatched cookie");

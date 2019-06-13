@@ -21,14 +21,15 @@ import android.content.Context
 import android.util.FloatProperty
 import com.android.systemui.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.AmbientPulseManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,10 +37,10 @@ import javax.inject.Singleton
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
         private val mContext: Context,
-        private val mAmbientPulseManager: AmbientPulseManager,
+        private val mHeadsUpManagerPhone: HeadsUpManagerPhone,
         private val mStatusBarStateController: StatusBarStateController,
         private val mBypassController: KeyguardBypassController)
-    : AmbientPulseManager.OnAmbientChangedListener, StatusBarStateController.StateListener {
+    : OnHeadsUpChangedListener, StatusBarStateController.StateListener {
 
     private val mNotificationVisibility
             = object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
@@ -89,7 +90,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
 
     init {
-        mAmbientPulseManager.addListener(this)
+        mHeadsUpManagerPhone.addListener(this)
         mStatusBarStateController.addCallback(this)
         mDozeParameters = DozeParameters.getInstance(mContext)
     }
@@ -111,13 +112,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // If we stopped expanding and we're still visible because we had a pulse that hasn't
             // times out, let's release them all to make sure were not stuck in a state where
             // notifications are visible
-            mAmbientPulseManager.releaseAllImmediately()
+            mHeadsUpManagerPhone.releaseAllImmediately()
         }
     }
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
-        var visible = (mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications())
-                && pulsing;
+        // TODO: handle Lockscreen wakeup for bypass when we're not pulsing anymore
+        var visible = (mNotificationsVisibleForExpansion || mHeadsUpManagerPhone.hasNotifications())
+                && pulsing
         if (!visible && mNotificationsVisible && (mWakingUp || willWakeUp) && mDozeAmount != 0.0f) {
             // let's not make notifications invisible while waking up, otherwise the animation
             // is strange
@@ -212,7 +214,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun handleAnimationFinished() {
         if (mLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
-            mEntrySetToClearWhenFinished.forEach { it.setAmbientGoingAway(false) }
+            mEntrySetToClearWhenFinished.forEach { it.setHeadsUpAnimatingAway(false) }
             mEntrySetToClearWhenFinished.clear()
         }
     }
@@ -251,22 +253,23 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
-    override fun onAmbientStateChanged(entry: NotificationEntry, isPulsing: Boolean) {
+    override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
         var animate = shouldAnimateVisibility()
-        if (!isPulsing) {
+        if (!isHeadsUp) {
             if (mLinearDozeAmount != 0.0f && mLinearVisibilityAmount != 0.0f) {
                 if (entry.isRowDismissed) {
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
                     animate = false
                 } else if (!mWakingUp && !willWakeUp){
-                    entry.setAmbientGoingAway(true)
+                    // TODO: look that this is done properly and not by anyone else
+                    entry.setHeadsUpAnimatingAway(true)
                     mEntrySetToClearWhenFinished.add(entry)
                 }
             }
         } else if (mEntrySetToClearWhenFinished.contains(entry)) {
             mEntrySetToClearWhenFinished.remove(entry)
-            entry.setAmbientGoingAway(false)
+            entry.setHeadsUpAnimatingAway(false)
         }
         updateNotificationVisibility(animate, increaseSpeed = false)
     }

@@ -78,7 +78,6 @@ class GnssVisibilityControl {
     private final Handler mHandler;
     private final Context mContext;
     private final GpsNetInitiatedHandler mNiHandler;
-    private final Notification mEmergencyLocationUserNotification;
 
     private boolean mIsGpsEnabled;
 
@@ -107,7 +106,6 @@ class GnssVisibilityControl {
         mNiHandler = niHandler;
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mPackageManager = mContext.getPackageManager();
-        mEmergencyLocationUserNotification = createEmergencyLocationUserNotification(mContext);
 
         // Complete initialization as the first event to run in mHandler thread. After that,
         // all object state read/update events run in the mHandler thread.
@@ -153,7 +151,6 @@ class GnssVisibilityControl {
     }
 
     private void handleInitialize() {
-        disableNfwLocationAccess(); // Disable until config properties are loaded.
         listenForProxyAppsPackageUpdates();
     }
 
@@ -263,25 +260,21 @@ class GnssVisibilityControl {
         return false;
     }
 
-    private void handleGpsEnabledChanged(boolean isEnabled) {
-        if (DEBUG) Log.d(TAG, "handleGpsEnabledChanged, isEnabled: " + isEnabled);
-
-        if (mIsGpsEnabled == isEnabled) {
-            return;
+    private void handleGpsEnabledChanged(boolean isGpsEnabled) {
+        if (DEBUG) {
+            Log.d(TAG, "handleGpsEnabledChanged, mIsGpsEnabled: " + mIsGpsEnabled
+                    + ", isGpsEnabled: " + isGpsEnabled);
         }
 
-        mIsGpsEnabled = isEnabled;
+        // The proxy app list in the GNSS HAL needs to be configured if it restarts after
+        // a crash. So, update HAL irrespective of the previous GPS enabled state.
+        mIsGpsEnabled = isGpsEnabled;
         if (!mIsGpsEnabled) {
             disableNfwLocationAccess();
             return;
         }
 
-        // When GNSS was disabled, we already set the proxy app list to empty in GNSS HAL.
-        // Update only if the proxy app list is not empty.
-        String[] locationPermissionEnabledProxyApps = getLocationPermissionEnabledProxyApps();
-        if (locationPermissionEnabledProxyApps.length != 0) {
-            setNfwLocationAccessProxyAppsInGnssHal(locationPermissionEnabledProxyApps);
-        }
+        setNfwLocationAccessProxyAppsInGnssHal(getLocationPermissionEnabledProxyApps());
     }
 
     private void disableNfwLocationAccess() {
@@ -632,13 +625,15 @@ class GnssVisibilityControl {
         }
 
         notificationManager.notifyAsUser(/* tag= */ null, /* notificationId= */ 0,
-                mEmergencyLocationUserNotification, UserHandle.ALL);
+                createEmergencyLocationUserNotification(mContext), UserHandle.ALL);
     }
 
     private static Notification createEmergencyLocationUserNotification(Context context) {
-        String firstLineText = context.getString(R.string.gpsNotifTitle);
-        String secondLineText =  context.getString(R.string.global_action_emergency);
-        String accessibilityServicesText = firstLineText + " (" + secondLineText + ")";
+        // NOTE: Do not reuse the returned notification object as it will not reflect
+        //       changes to notification text when the system language is changed.
+        final String firstLineText = context.getString(R.string.gpsNotifTitle);
+        final String secondLineText =  context.getString(R.string.global_action_emergency);
+        final String accessibilityServicesText = firstLineText + " (" + secondLineText + ")";
         return new Notification.Builder(context, SystemNotificationChannels.NETWORK_ALERTS)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)
                 .setWhen(0)
