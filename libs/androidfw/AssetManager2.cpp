@@ -22,10 +22,10 @@
 #include <iterator>
 #include <map>
 #include <set>
-#include <sstream>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/Util.h"
 #include "utils/ByteOrder.h"
 #include "utils/Trace.h"
 
@@ -33,12 +33,6 @@
 #ifdef ERROR
 #undef ERROR
 #endif
-#endif
-
-#ifdef __ANDROID__
-#define ANDROID_LOG(x) LOG(x)
-#else
-#define ANDROID_LOG(x) std::stringstream()
 #endif
 
 #include "androidfw/ResourceUtils.h"
