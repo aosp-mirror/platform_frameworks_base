@@ -1289,20 +1289,6 @@ public final class PowerManager {
         }
     }
 
-    /**
-     * Returns whether the screen brightness is currently boosted to maximum, caused by a call
-     * to {@link #boostScreenBrightness(long)}.
-     * @return {@code True} if the screen brightness is currently boosted. {@code False} otherwise.
-     *
-     * @deprecated This call is rarely used and will be phased out soon.
-     * @hide
-     * @removed
-     */
-    @SystemApi @Deprecated
-    public boolean isScreenBrightnessBoosted() {
-        return false;
-    }
-
    /**
      * Returns true if the specified wake lock level is supported.
      *
@@ -2029,18 +2015,6 @@ public final class PowerManager {
     /** @hide */
     @UnsupportedAppUsage
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
-
-    /**
-     * Intent that is broadcast when the state of {@link #isScreenBrightnessBoosted()} has changed.
-     * This broadcast is only sent to registered receivers.
-     *
-     * @deprecated This intent is rarely used and will be phased out soon.
-     * @hide
-     * @removed
-     **/
-    @SystemApi @Deprecated
-    public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED
-            = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
     /**
      * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .

@@ -151,11 +151,6 @@ package android.os {
     field public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
   }
 
-  public final class PowerManager {
-    method @Deprecated public boolean isScreenBrightnessBoosted();
-    field @Deprecated public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
-  }
-
 }
 
 package android.service.notification {
