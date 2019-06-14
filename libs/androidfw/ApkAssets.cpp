@@ -211,7 +211,7 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
     return false;
   }
 
-  ::ZipString name;
+  std::string name;
   ::ZipEntry entry;
 
   // We need to hold back directories because many paths will contain them and we want to only
@@ -220,7 +220,7 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
 
   int32_t result;
   while ((result = ::Next(cookie, &entry, &name)) == 0) {
-    StringPiece full_file_path(reinterpret_cast<const char*>(name.name), name.name_length);
+    StringPiece full_file_path(name);
     StringPiece leaf_file_path = full_file_path.substr(root_path_full.size());
 
     if (!leaf_file_path.empty()) {
