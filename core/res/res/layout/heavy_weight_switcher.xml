@@ -15,7 +15,9 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="24dp"
+    android:orientation="vertical"
+    android:paddingVertical="24dp"
+    android:paddingHorizontal="16dp"
     android:gravity="center_horizontal"
     android:layout_width="wrap_content" android:layout_height="wrap_content">
 
@@ -23,6 +25,7 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="0"
         android:paddingBottom="20dp"
+        android:paddingHorizontal="8dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/heavy_weight_switcher_title"/>
 
@@ -30,6 +33,7 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="0"
         android:paddingBottom="16dp"
+        android:paddingHorizontal="8dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/heavy_weight_switcher_text"/>
 
@@ -37,8 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="72dp"
+        android:paddingHorizontal="8dp"
         android:orientation="horizontal"
-        android:background="@android:drawable/list_selector_background"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:focusable="true" >
     
@@ -68,8 +73,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="88dp"
+        android:paddingHorizontal="8dp"
         android:orientation="horizontal"
-        android:background="@android:drawable/list_selector_background"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:focusable="true" >
     
