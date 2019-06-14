@@ -112,7 +112,9 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
         final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
                 .getGuestUserDisabled(null);
-        return mUserSwitcherController.getSwitchableUserCount() > 1 || guestEnabled
+        return mUserSwitcherController.getSwitchableUserCount() > 1
+                // If we cannot add guests even if they are enabled, do not show
+                || (guestEnabled && !mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER))
                 || mContext.getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user);
     }
 
