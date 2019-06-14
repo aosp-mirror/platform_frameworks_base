@@ -577,7 +577,8 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"మీ తలను ఎడమ/కుడి వైపుగా ఇంకాస్త తిప్పండి."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"స్క్రీన్ ఎగువన ఉన్న సెన్సార్‌ను శుభ్రం చేస్తుంది."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
