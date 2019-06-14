@@ -64,7 +64,6 @@ public class GpuService extends SystemService {
 
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String GAME_DRIVER_WHITELIST_FILENAME = "whitelist.txt";
-    private static final String GAME_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
     private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private final Context mContext;
@@ -230,9 +229,6 @@ public class GpuService extends SystemService {
         // Reset the whitelist.
         Settings.Global.putString(mContentResolver,
                                   Settings.Global.GAME_DRIVER_WHITELIST, "");
-        // Reset the sphal libraries
-        Settings.Global.putString(mContentResolver,
-                                  Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, "");
         mGameDriverVersionCode = driverInfo.longVersionCode;
 
         try {
@@ -241,10 +237,6 @@ public class GpuService extends SystemService {
 
             assetToSettingsGlobal(mContext, driverContext, GAME_DRIVER_WHITELIST_FILENAME,
                     Settings.Global.GAME_DRIVER_WHITELIST, ",");
-
-            assetToSettingsGlobal(mContext, driverContext, GAME_DRIVER_SPHAL_LIBRARIES_FILENAME,
-                    Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, ":");
-
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
                 Slog.w(TAG, "driver package '" + mDriverPackageName + "' not installed");
