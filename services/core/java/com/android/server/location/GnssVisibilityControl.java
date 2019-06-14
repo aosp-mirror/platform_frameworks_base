@@ -151,7 +151,6 @@ class GnssVisibilityControl {
     }
 
     private void handleInitialize() {
-        disableNfwLocationAccess(); // Disable until config properties are loaded.
         listenForProxyAppsPackageUpdates();
     }
 
@@ -261,25 +260,21 @@ class GnssVisibilityControl {
         return false;
     }
 
-    private void handleGpsEnabledChanged(boolean isEnabled) {
-        if (DEBUG) Log.d(TAG, "handleGpsEnabledChanged, isEnabled: " + isEnabled);
-
-        if (mIsGpsEnabled == isEnabled) {
-            return;
+    private void handleGpsEnabledChanged(boolean isGpsEnabled) {
+        if (DEBUG) {
+            Log.d(TAG, "handleGpsEnabledChanged, mIsGpsEnabled: " + mIsGpsEnabled
+                    + ", isGpsEnabled: " + isGpsEnabled);
         }
 
-        mIsGpsEnabled = isEnabled;
+        // The proxy app list in the GNSS HAL needs to be configured if it restarts after
+        // a crash. So, update HAL irrespective of the previous GPS enabled state.
+        mIsGpsEnabled = isGpsEnabled;
         if (!mIsGpsEnabled) {
             disableNfwLocationAccess();
             return;
         }
 
-        // When GNSS was disabled, we already set the proxy app list to empty in GNSS HAL.
-        // Update only if the proxy app list is not empty.
-        String[] locationPermissionEnabledProxyApps = getLocationPermissionEnabledProxyApps();
-        if (locationPermissionEnabledProxyApps.length != 0) {
-            setNfwLocationAccessProxyAppsInGnssHal(locationPermissionEnabledProxyApps);
-        }
+        setNfwLocationAccessProxyAppsInGnssHal(getLocationPermissionEnabledProxyApps());
     }
 
     private void disableNfwLocationAccess() {

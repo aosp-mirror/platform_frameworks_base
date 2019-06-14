@@ -450,7 +450,7 @@
 
     <style name="TextAppearance.NotificationInfo.Secondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:alpha">0.54</item>
+        <item name="android:alpha">0.62</item>
     </style>
 
     <style name="TextAppearance.NotificationInfo.Title">

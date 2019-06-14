@@ -1820,7 +1820,7 @@ public class ZenModeConfig implements Parcelable {
             if (modified != to.modified) {
                 d.addLine(item, "modified", modified, to.modified);
             }
-            if (pkg != to.pkg) {
+            if (!Objects.equals(pkg, to.pkg)) {
                 d.addLine(item, "pkg", pkg, to.pkg);
             }
         }

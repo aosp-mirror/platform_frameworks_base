@@ -200,6 +200,8 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeGetDisplayBrightnessSupport(IBinder displayToken);
     private static native boolean nativeSetDisplayBrightness(IBinder displayToken,
             float brightness);
+    private static native long nativeReadTransactionFromParcel(Parcel in);
+    private static native void nativeWriteTransactionToParcel(long nativeObject, Parcel out);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2061,10 +2063,10 @@ public final class SurfaceControl implements Parcelable {
         return nativeSetDisplayBrightness(displayToken, brightness);
     }
 
-    /**
+     /**
      * An atomic set of changes to a set of SurfaceControl.
      */
-    public static class Transaction implements Closeable {
+    public static class Transaction implements Closeable, Parcelable {
         /**
          * @hide
          */
@@ -2087,6 +2089,10 @@ public final class SurfaceControl implements Parcelable {
             mNativeObject = nativeCreateTransaction();
             mFreeNativeResources
                 = sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
+        private Transaction(Parcel in) {
+            readFromParcel(in);
         }
 
         /**
@@ -2605,7 +2611,7 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
-        /** flag the transaction as an animation 
+        /** flag the transaction as an animation
          * @hide
          */
         public Transaction setAnimationTransaction() {
@@ -2686,5 +2692,39 @@ public final class SurfaceControl implements Parcelable {
             sc.release();
             return this;
         }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
+            if (mNativeObject == 0) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+            }
+            nativeWriteTransactionToParcel(mNativeObject, dest);
+        }
+
+        private void readFromParcel(Parcel in) {
+            mNativeObject = 0;
+            if (in.readInt() != 0) {
+                mNativeObject = nativeReadTransactionFromParcel(in);
+                mFreeNativeResources = sRegistry.registerNativeAllocation(this, mNativeObject);
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final @NonNull Creator<Transaction> CREATOR = new Creator<Transaction>() {
+                    @Override
+                    public Transaction createFromParcel(Parcel in) {
+                        return new Transaction(in);
+                    }
+                    @Override
+                    public Transaction[] newArray(int size) {
+                        return new Transaction[size];
+                    }
+                };
     }
 }
