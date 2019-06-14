@@ -29,13 +29,13 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
-import android.net.TrafficStats;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -321,32 +321,41 @@ public final class ConnectivityController extends StateController implements
     @SuppressWarnings("unused")
     private static boolean isInsane(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
-        final long estimatedBytes = jobStatus.getEstimatedNetworkBytes();
-        if (estimatedBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
-            // We don't know how large the job is; cross our fingers!
-            return false;
+        final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            final long bandwidth = capabilities.getLinkDownstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes in time.
+            if (bandwidth != LINK_BANDWIDTH_UNSPECIFIED) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((downloadBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                if (estimatedMillis > JobServiceContext.EXECUTING_TIMESLICE_MILLIS) {
+                    // If we'd never finish before the timeout, we'd be insane!
+                    Slog.w(TAG, "Estimated " + downloadBytes + " download bytes over " + bandwidth
+                            + " kbps network would take " + estimatedMillis + "ms; that's insane!");
+                    return true;
+                }
+            }
         }
 
-        // We don't ask developers to differentiate between upstream/downstream
-        // in their size estimates, so test against the slowest link direction.
-        final long slowest = NetworkCapabilities.minBandwidth(
-                capabilities.getLinkDownstreamBandwidthKbps(),
-                capabilities.getLinkUpstreamBandwidthKbps());
-        if (slowest == LINK_BANDWIDTH_UNSPECIFIED) {
-            // We don't know what the network is like; cross our fingers!
-            return false;
+        final long uploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+        if (uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            final long bandwidth = capabilities.getLinkUpstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes in time.
+            if (bandwidth != LINK_BANDWIDTH_UNSPECIFIED) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((uploadBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                if (estimatedMillis > JobServiceContext.EXECUTING_TIMESLICE_MILLIS) {
+                    // If we'd never finish before the timeout, we'd be insane!
+                    Slog.w(TAG, "Estimated " + uploadBytes + " upload bytes over " + bandwidth
+                            + " kbps network would take " + estimatedMillis + "ms; that's insane!");
+                    return true;
+                }
+            }
         }
 
-        final long estimatedMillis = ((estimatedBytes * DateUtils.SECOND_IN_MILLIS)
-                / (slowest * TrafficStats.KB_IN_BYTES / 8));
-        if (estimatedMillis > JobServiceContext.EXECUTING_TIMESLICE_MILLIS) {
-            // If we'd never finish before the timeout, we'd be insane!
-            Slog.w(TAG, "Estimated " + estimatedBytes + " bytes over " + slowest
-                    + " kbps network would take " + estimatedMillis + "ms; that's insane!");
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     @SuppressWarnings("unused")

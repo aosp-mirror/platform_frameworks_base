@@ -32,24 +32,6 @@ package android.app.admin {
 
 }
 
-package android.app.job {
-
-  public class JobInfo implements android.os.Parcelable {
-    method @Deprecated public long getEstimatedNetworkBytes();
-  }
-
-  public static final class JobInfo.Builder {
-    method @Deprecated public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
-    method @Deprecated public android.app.job.JobInfo.Builder setIsPrefetch(boolean);
-  }
-
-  public final class JobWorkItem implements android.os.Parcelable {
-    ctor @Deprecated public JobWorkItem(android.content.Intent, long);
-    method @Deprecated public long getEstimatedNetworkBytes();
-  }
-
-}
-
 package android.app.slice {
 
   public final class Slice implements android.os.Parcelable {
