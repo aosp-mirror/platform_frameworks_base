@@ -57,6 +57,7 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
     private final int mBubbleSize;
+    private final int mBubbleIconBitmapSize;
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
     private final int mFloatingBackgroundColor;
@@ -143,7 +144,9 @@ public class BubbleFlyoutView extends FrameLayout {
         mFlyoutPadding = res.getDimensionPixelSize(R.dimen.bubble_flyout_padding_x);
         mFlyoutSpaceFromBubble = res.getDimensionPixelSize(R.dimen.bubble_flyout_space_from_bubble);
         mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
+
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
         mNewDotOffsetFromBubbleBounds = BadgeRenderer.getDotCenterOffset(context);
@@ -216,7 +219,8 @@ public class BubbleFlyoutView extends FrameLayout {
         post(() -> {
             // Multi line flyouts get top-aligned to the bubble.
             if (mFlyoutText.getLineCount() > 1) {
-                setTranslationY(stackPos.y);
+                float bubbleIconTopPadding = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
+                setTranslationY(stackPos.y + bubbleIconTopPadding);
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
                 setTranslationY(

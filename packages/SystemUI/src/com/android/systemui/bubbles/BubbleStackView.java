@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -49,7 +48,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -183,7 +181,7 @@ public class BubbleStackView extends FrameLayout {
     private int mStatusBarHeight;
     private int mPipDismissHeight;
     private int mImeOffset;
-
+    private BubbleIconFactory mBubbleIconFactory;
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
     private boolean mImeVisible;
@@ -284,7 +282,8 @@ public class BubbleStackView extends FrameLayout {
                 }
             };
 
-    @NonNull private final SurfaceSynchronizer mSurfaceSynchronizer;
+    @NonNull
+    private final SurfaceSynchronizer mSurfaceSynchronizer;
 
     private BubbleDismissView mDismissContainer;
     private Runnable mAfterMagnet;
@@ -336,6 +335,9 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.setElevation(elevation);
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+        int iconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleIconFactory = new BubbleIconFactory(context, iconBitmapSize);
 
         mExpandedViewContainer = new FrameLayout(context);
         mExpandedViewContainer.setElevation(elevation);
@@ -455,7 +457,7 @@ public class BubbleStackView extends FrameLayout {
      * Handle theme changes.
      */
     public void onThemeChanged() {
-        for (Bubble b: mBubbleData.getBubbles()) {
+        for (Bubble b : mBubbleData.getBubbles()) {
             b.iconView.updateViews();
             b.expandedView.applyThemeAttrs();
         }
@@ -618,6 +620,7 @@ public class BubbleStackView extends FrameLayout {
 
     /**
      * Updates the visibility of the 'dot' indicating an update on the bubble.
+     *
      * @param key the {@link NotificationEntry#key} associated with the bubble.
      */
     public void updateDotVisibility(String key) {
@@ -690,6 +693,9 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "addBubble: " + bubble);
         }
         bubble.inflate(mInflater, this);
+        bubble.iconView.setBubbleIconFactory(mBubbleIconFactory);
+        bubble.iconView.updateViews();
+
         mBubbleContainer.addView(bubble.iconView, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.iconView, true, mClippingParameters);
@@ -796,6 +802,7 @@ public class BubbleStackView extends FrameLayout {
 
     /**
      * Dismiss the stack of bubbles.
+     *
      * @deprecated
      */
     @Deprecated
@@ -1518,24 +1525,12 @@ public class BubbleStackView extends FrameLayout {
 
     /** Sets the appropriate Z-order and dot position for each bubble in the stack. */
     private void updateBubbleShadowsAndDotPosition(boolean animate) {
-        int bubbsCount = mBubbleContainer.getChildCount();
-        for (int i = 0; i < bubbsCount; i++) {
+        int bubbleCount = mBubbleContainer.getChildCount();
+        for (int i = 0; i < bubbleCount; i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             bv.updateDotVisibility(true /* animate */);
             bv.setZ((BubbleController.MAX_BUBBLES
                     * getResources().getDimensionPixelSize(R.dimen.bubble_elevation)) - i);
-
-            // Draw the shadow around the circle inscribed within the bubble's bounds. This
-            // (intentionally) does not draw a shadow behind the update dot, which should be drawing
-            // its own shadow since it's on a different (higher) plane.
-            bv.setOutlineProvider(new ViewOutlineProvider() {
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setOval(0, 0, mBubbleSize, mBubbleSize);
-                }
-            });
-            bv.setClipToOutline(false);
-
             // If the dot is on the left, and so is the stack, we need to change the dot position.
             if (bv.getDotPositionOnLeft() == mStackOnLeftOrWillBe) {
                 bv.setDotPosition(!mStackOnLeftOrWillBe, animate);

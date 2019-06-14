@@ -1110,7 +1110,9 @@
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->
-    <dimen name="individual_bubble_size">52dp</dimen>
+    <dimen name="individual_bubble_size">60dp</dimen>
+    <!-- Size of bubble icon bitmap. -->
+    <dimen name="bubble_icon_bitmap_size">52dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
     <dimen name="bubble_dismiss_encircle_size">56dp</dimen>
     <!-- How much to inset the icon in the circle -->
@@ -1142,9 +1144,9 @@
     <!-- Offset between bubbles in their stacked position. -->
     <dimen name="bubble_stack_offset">5dp</dimen>
     <!-- How far offscreen the bubble stack rests. -->
-    <dimen name="bubble_stack_offscreen">5dp</dimen>
+    <dimen name="bubble_stack_offscreen">9dp</dimen>
     <!-- How far down the screen the stack starts. -->
-    <dimen name="bubble_stack_starting_offset_y">100dp</dimen>
+    <dimen name="bubble_stack_starting_offset_y">96dp</dimen>
     <!-- Size of image buttons in the bubble header -->
     <dimen name="bubble_header_icon_size">48dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->

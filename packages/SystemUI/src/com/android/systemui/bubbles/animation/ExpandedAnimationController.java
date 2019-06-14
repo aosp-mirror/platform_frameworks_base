@@ -86,10 +86,12 @@ public class ExpandedAnimationController
     private boolean mSpringingBubbleToTouch = false;
 
     private int mExpandedViewPadding;
+    private float mLauncherGridDiff;
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding) {
         mDisplaySize = displaySize;
         mExpandedViewPadding = expandedViewPadding;
+        mLauncherGridDiff = 30f;
     }
 
     /**
@@ -438,8 +440,7 @@ public class ExpandedAnimationController
          *      [launcherGridDiff] --- arbitrary value until launcher exports widths
          *  Launcher's app icon grid edge that we must match
          */
-        final float launcherGridDiff = mBubbleSizePx / 2f;
-        final float rowMargins = (mExpandedViewPadding + launcherGridDiff) * 2;
+        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
         final float maxRowWidth = mDisplaySize.x - rowMargins;
 
         final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;

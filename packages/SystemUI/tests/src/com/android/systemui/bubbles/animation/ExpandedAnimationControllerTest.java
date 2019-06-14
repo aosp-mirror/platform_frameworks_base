@@ -46,6 +46,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mDisplayWidth = 500;
     private int mDisplayHeight = 1000;
     private int mExpandedViewPadding = 10;
+    private float mLauncherGridDiff = 30f;
 
     @Spy
     private ExpandedAnimationController mExpandedController =
@@ -281,8 +282,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
      * @return Space between bubbles in row above expanded view.
      */
     private float getSpaceBetweenBubbles() {
-        final float launcherGridDiff = mBubbleSize / 2f;
-        final float rowMargins = (mExpandedViewPadding + launcherGridDiff) * 2;
+        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
         final float maxRowWidth = mDisplayWidth - rowMargins;
 
         final float totalBubbleWidth = mMaxBubbles * mBubbleSize;
