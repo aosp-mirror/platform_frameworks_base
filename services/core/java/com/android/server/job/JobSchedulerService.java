@@ -187,6 +187,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
+    /** Needed to get remaining quota time. */
+    private final QuotaController mQuotaController;
+
     /** Need directly for receiving thermal events */
     private IThermalService mThermalService;
     /** Thermal constraint. */
@@ -1338,7 +1341,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
-        mControllers.add(new QuotaController(this));
+        mQuotaController = new QuotaController(this);
+        mControllers.add(mQuotaController);
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
@@ -2395,6 +2399,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         // The expensive check: validate that the defined package+service is
         // still present & viable.
         return isComponentUsable(job);
+    }
+
+    /** Returns the maximum amount of time this job could run for. */
+    public long getMaxJobExecutionTimeMs(JobStatus job) {
+        synchronized (mLock) {
+            if (mConstants.USE_HEARTBEATS) {
+                return JobServiceContext.EXECUTING_TIMESLICE_MILLIS;
+            }
+            return Math.min(mQuotaController.getMaxJobExecutionTimeMsLocked(job),
+                    JobServiceContext.EXECUTING_TIMESLICE_MILLIS);
+        }
     }
 
     /**
