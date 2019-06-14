@@ -271,8 +271,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSwipeUpToRetry = mUnlockMethodCache.isUnlockingWithFacePossible()
                 && securityMode != SecurityMode.SimPin
                 && securityMode != SecurityMode.SimPuk
-                && securityMode != SecurityMode.None
-                && securityMode != SecurityMode.Pattern;
+                && securityMode != SecurityMode.None;
     }
 
     public CharSequence getTitle() {
