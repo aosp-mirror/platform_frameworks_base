@@ -130,7 +130,7 @@ public class InvocationLightsView extends View
             float arcLengthNormalized = cornerLengthNormalized * MINIMUM_CORNER_RATIO;
             float arcOffsetNormalized = (cornerLengthNormalized - arcLengthNormalized) / 2f;
 
-            float minLightLength = arcLengthNormalized / 2;
+            float minLightLength = 0;
             float maxLightLength = mGuide.getRegionWidth(PerimeterPathGuide.Region.BOTTOM) / 4f;
 
             float lightLength = MathUtils.lerp(minLightLength, maxLightLength, progress);
