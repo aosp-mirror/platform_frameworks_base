@@ -97,6 +97,9 @@ public class FaceService extends BiometricServiceBase {
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
+    private static final String NOTIFICATION_TAG = "FaceService";
+    private static final int NOTIFICATION_ID = 1;
+
     private final class FaceAuthClient extends AuthenticationClientImpl {
         private int mLastAcquire;
 
@@ -177,13 +180,11 @@ public class FaceService extends BiometricServiceBase {
                         0 /* requestCode */, intent, 0 /* flags */, null /* options */,
                         UserHandle.CURRENT);
 
-                final String id = "FaceService";
+                final String channelName = "FaceEnrollNotificationChannel";
 
-                NotificationManager nm =
-                        getContext().getSystemService(NotificationManager.class);
-                NotificationChannel channel = new NotificationChannel(id, name,
+                NotificationChannel channel = new NotificationChannel(channelName, name,
                         NotificationManager.IMPORTANCE_HIGH);
-                Notification notification = new Notification.Builder(getContext(), id)
+                Notification notification = new Notification.Builder(getContext(), channelName)
                         .setSmallIcon(R.drawable.ic_lock)
                         .setContentTitle(title)
                         .setContentText(content)
@@ -196,8 +197,9 @@ public class FaceService extends BiometricServiceBase {
                         .setVisibility(Notification.VISIBILITY_SECRET)
                         .build();
 
-                nm.createNotificationChannel(channel);
-                nm.notifyAsUser(null /* tag */, 0 /* id */, notification, UserHandle.CURRENT);
+                mNotificationManager.createNotificationChannel(channel);
+                mNotificationManager.notifyAsUser(NOTIFICATION_TAG, NOTIFICATION_ID, notification,
+                        UserHandle.CURRENT);
             }
 
             return super.onAcquired(acquireInfo, vendorCode);
@@ -230,6 +232,9 @@ public class FaceService extends BiometricServiceBase {
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
             checkPermission(MANAGE_BIOMETRIC);
+
+            mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
+                    UserHandle.CURRENT);
 
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
@@ -688,6 +693,8 @@ public class FaceService extends BiometricServiceBase {
     // One of the AuthenticationClient constants
     private int mCurrentUserLockoutMode;
 
+    private NotificationManager mNotificationManager;
+
     private int[] mBiometricPromptIgnoreList;
     private int[] mBiometricPromptIgnoreListVendor;
     private int[] mKeyguardIgnoreList;
@@ -880,6 +887,8 @@ public class FaceService extends BiometricServiceBase {
 
     public FaceService(Context context) {
         super(context);
+
+        mNotificationManager = getContext().getSystemService(NotificationManager.class);
 
         mBiometricPromptIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_biometricprompt_ignorelist);
