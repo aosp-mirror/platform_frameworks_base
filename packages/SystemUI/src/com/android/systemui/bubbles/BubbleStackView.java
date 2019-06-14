@@ -1302,17 +1302,6 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * Calculates how large the expanded view of the bubble can be. This takes into account the
-     * y position when the bubbles are expanded as well as the bounds of the dismiss target.
-     */
-    int getMaxExpandedHeight() {
-        int expandedY = (int) mExpandedAnimationController.getExpandedY();
-        // PIP dismiss view uses FLAG_LAYOUT_IN_SCREEN so we need to subtract the bottom inset
-        int pipDismissHeight = mPipDismissHeight - getBottomInset();
-        return mDisplaySize.y - expandedY - mBubbleSize - pipDismissHeight;
-    }
-
-    /**
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getExpandedViewY() {

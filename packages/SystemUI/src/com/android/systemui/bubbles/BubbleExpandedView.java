@@ -48,6 +48,7 @@ import android.util.Log;
 import android.util.StatsLog;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -91,6 +92,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private boolean mKeyboardVisible;
     private boolean mNeedsNewHeight;
 
+    private Point mDisplaySize;
     private int mMinHeight;
     private int mSettingsIconHeight;
     private int mPointerWidth;
@@ -166,6 +168,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mPm = context.getPackageManager();
+        mDisplaySize = new Point();
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getSize(mDisplaySize);
         mMinHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_default_height);
         mPointerMargin = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_margin);
@@ -184,7 +189,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, true /* pointUp */));
         mPointerView.setBackground(mPointerDrawable);
-        mPointerView.setVisibility(GONE);
+        mPointerView.setVisibility(INVISIBLE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
@@ -270,14 +275,12 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      */
     void updateInsets(WindowInsets insets) {
         if (usingActivityView()) {
-            Point displaySize = new Point();
-            mActivityView.getContext().getDisplay().getSize(displaySize);
             int[] windowLocation = mActivityView.getLocationOnScreen();
             final int windowBottom = windowLocation[1] + mActivityView.getHeight();
             final int keyboardHeight = insets.getSystemWindowInsetBottom()
                     - insets.getStableInsetBottom();
             final int insetsBottom = Math.max(0,
-                    windowBottom + keyboardHeight - displaySize.y);
+                    windowBottom + keyboardHeight - mDisplaySize.y);
             mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
         }
     }
@@ -359,7 +362,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             if (data == null) {
                 // This is a contentIntent based bubble, lets allow it to be the max height
                 // as it was forced into this mode and not prepared to be small
-                desiredHeight = mStackView.getMaxExpandedHeight();
+                desiredHeight = getMaxExpandedHeight();
             } else {
                 boolean useRes = data.getDesiredHeightResId() != 0;
                 float desiredPx;
@@ -373,9 +376,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 }
                 desiredHeight = desiredPx > 0 ? desiredPx : mMinHeight;
             }
-            int max = mStackView.getMaxExpandedHeight() - mSettingsIconHeight - mPointerHeight
-                    - mPointerMargin;
-            float height = Math.min(desiredHeight, max);
+            float height = Math.min(desiredHeight, getMaxExpandedHeight());
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
             mNeedsNewHeight =  lp.height != height;
@@ -387,6 +388,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 mNeedsNewHeight = false;
             }
         }
+    }
+
+    private int getMaxExpandedHeight() {
+        int[] windowLocation = mActivityView.getLocationOnScreen();
+        return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight;
     }
 
     @Override
