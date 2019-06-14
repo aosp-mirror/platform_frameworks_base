@@ -463,7 +463,7 @@ void CanvasContext::draw() {
         }
         SwapHistory& swap = mSwapHistory.next();
         swap.damage = windowDirty;
-        swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
+        swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         if (mNativeSurface.get()) {
             int durationUs;
@@ -549,7 +549,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     UiFrameInfoBuilder(frameInfo).addFlag(FrameInfoFlags::RTAnimation).setVsync(vsync, vsync);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
-    prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
+    prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
     } else {
