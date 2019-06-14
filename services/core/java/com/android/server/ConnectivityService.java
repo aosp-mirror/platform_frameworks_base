@@ -6901,8 +6901,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final int userId = UserHandle.getCallingUserId();
 
-        final IpMemoryStore ipMemoryStore = IpMemoryStore.getMemoryStore(mContext);
-        ipMemoryStore.factoryReset();
+        Binder.withCleanCallingIdentity(() -> {
+            final IpMemoryStore ipMemoryStore = IpMemoryStore.getMemoryStore(mContext);
+            ipMemoryStore.factoryReset();
+        });
 
         // Turn airplane mode off
         setAirplaneMode(false);
