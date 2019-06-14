@@ -786,6 +786,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         inflateStatusBarWindow(context);
         mStatusBarWindow.setService(this);
+        mStatusBarWindow.setBypassController(mKeyguardBypassController);
         mStatusBarWindow.setOnTouchListener(getStatusBarWindowTouchListener());
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
@@ -3622,6 +3623,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
+            mKeyguardBypassController.onStartedGoingToSleep();
         }
 
         @Override

@@ -89,6 +89,21 @@ class NotificationWakeUpCoordinator @Inject constructor(
             }
         }
 
+    /**
+     * True if we can show pulsing heads up notifications
+     */
+    var canShowPulsingHuns: Boolean = false
+        private set
+        get() {
+            var canShow = pulsing
+            if (bypassController.bypassEnabled) {
+                // We also allow pulsing on the lock screen!
+                canShow = canShow || (mWakingUp || willWakeUp || fullyAwake)
+                        && mStatusBarStateController.state == StatusBarState.KEYGUARD
+            }
+            return canShow
+        }
+
 
     init {
         mHeadsUpManagerPhone.addListener(this)
@@ -120,13 +135,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
         // TODO: handle Lockscreen wakeup for bypass when we're not pulsing anymore
         var visible = mNotificationsVisibleForExpansion || mHeadsUpManagerPhone.hasNotifications()
-        var canShow = pulsing
-        if (bypassController.bypassEnabled) {
-            // We also allow pulsing on the lock screen!
-            canShow = canShow || (mWakingUp || willWakeUp || fullyAwake)
-                            && mStatusBarStateController.state == StatusBarState.KEYGUARD
-        }
-        visible = visible && canShow
+        visible = visible && canShowPulsingHuns
 
         if (!visible && mNotificationsVisible && (mWakingUp || willWakeUp) && mDozeAmount != 0.0f) {
             // let's not make notifications invisible while waking up, otherwise the animation

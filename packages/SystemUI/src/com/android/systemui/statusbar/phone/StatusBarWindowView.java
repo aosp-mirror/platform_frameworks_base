@@ -149,6 +149,7 @@ public class StatusBarWindowView extends FrameLayout {
      * events manually as it's outside of the regular view bounds.
      */
     private boolean mExpandingBelowNotch;
+    private KeyguardBypassController mBypassController;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -417,6 +418,7 @@ public class StatusBarWindowView extends FrameLayout {
         if (mNotificationPanel.isFullyExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()
+                && !mBypassController.getBypassEnabled()
                 && !mService.isDozing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
         }
@@ -439,7 +441,8 @@ public class StatusBarWindowView extends FrameLayout {
         if (mService.isDozing()) {
             handled = !mService.isPulsing();
         }
-        if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled)
+        if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled
+                && !mBypassController.getBypassEnabled())
                 || mDragDownHelper.isDraggingDown()) {
             // we still want to finish our drag down gesture when locking the screen
             handled = mDragDownHelper.onTouchEvent(ev);
@@ -516,6 +519,10 @@ public class StatusBarWindowView extends FrameLayout {
         if (mLockIcon != null) {
             mLockIcon.onShowingLaunchAffordanceChanged(showing);
         }
+    }
+
+    public void setBypassController(KeyguardBypassController bypassController) {
+        mBypassController = bypassController;
     }
 
     public class LayoutParams extends FrameLayout.LayoutParams {
