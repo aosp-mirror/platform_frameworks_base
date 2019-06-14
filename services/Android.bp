@@ -35,6 +35,7 @@ java_library {
         "services.usage",
         "services.usb",
         "services.voiceinteraction",
+        "services.wifi",
         "android.hidl.base-V1.0-java",
     ],
 
