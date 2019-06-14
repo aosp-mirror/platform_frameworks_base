@@ -33,11 +33,13 @@ import android.widget.Toast;
 
 import dalvik.system.VMRuntime;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,6 +74,7 @@ public class GraphicsEnvironment {
             "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
+    private static final String GAME_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
     private static final int VULKAN_1_0 = 0x00400000;
     private static final int VULKAN_1_1 = 0x00401000;
 
@@ -822,10 +825,7 @@ public class GraphicsEnvironment {
           .append("!/lib/")
           .append(abi);
         final String paths = sb.toString();
-
-        final String sphalLibraries =
-                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
-
+        final String sphalLibraries = getSphalLibraries(context, driverPackageName);
         if (DEBUG) {
             Log.v(TAG,
                     "gfx driver package search path: " + paths
@@ -860,6 +860,29 @@ public class GraphicsEnvironment {
             return ai.secondaryCpuAbi;
         }
         return null;
+    }
+
+    private static String getSphalLibraries(Context context, String driverPackageName) {
+        try {
+            final Context driverContext =
+                    context.createPackageContext(driverPackageName, Context.CONTEXT_RESTRICTED);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    driverContext.getAssets().open(GAME_DRIVER_SPHAL_LIBRARIES_FILENAME)));
+            final ArrayList<String> assetStrings = new ArrayList<>();
+            for (String assetString; (assetString = reader.readLine()) != null;) {
+                assetStrings.add(assetString);
+            }
+            return String.join(":", assetStrings);
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Driver package '" + driverPackageName + "' not installed");
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Failed to load '" + GAME_DRIVER_SPHAL_LIBRARIES_FILENAME + "'");
+            }
+        }
+        return "";
     }
 
     private static native int getCanLoadSystemLibraries();
