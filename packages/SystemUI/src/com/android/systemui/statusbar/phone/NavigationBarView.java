@@ -772,9 +772,10 @@ public class NavigationBarView extends FrameLayout implements
 
     @Override
     public void onNavigationModeChanged(int mode) {
+        Context curUserCtx = Dependency.get(NavigationModeController.class).getCurrentUserContext();
         mNavBarMode = mode;
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
-        mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
+        mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode, curUserCtx);
         mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
         getRotateSuggestionButton().onNavigationModeChanged(mNavBarMode);
 
@@ -1103,6 +1104,7 @@ public class NavigationBarView extends FrameLayout implements
         mContextualButtonGroup.dump(pw);
         mRecentsOnboarding.dump(pw);
         mTintController.dump(pw);
+        mEdgeBackGestureHandler.dump(pw);
     }
 
     @Override
