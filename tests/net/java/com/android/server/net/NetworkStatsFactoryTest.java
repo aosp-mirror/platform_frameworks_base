@@ -154,7 +154,7 @@ public class NetworkStatsFactoryTest {
         //  - 41 sent 464xlat packets of size 100 bytes
         //  - no other traffic on base interface for root uid.
         NetworkStats stats = parseDetailedStats(R.raw.xt_qtaguid_with_clat_simple);
-        assertEquals(4, stats.size());
+        assertEquals(3, stats.size());
 
         assertStatsEntry(stats, "v4-wlan0", 10060, SET_DEFAULT, 0x0, 46860L, 4920L);
         assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, 0L, 0L);
