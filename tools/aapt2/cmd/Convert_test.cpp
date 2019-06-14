@@ -132,7 +132,7 @@ TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
   int count = 0;
 
   // Can't pass nullptrs into Next()
-  ZipString zip_name;
+  std::string zip_name;
   ZipEntry zip_data;
 
   while ((result = Next(cookie, &zip_data, &zip_name)) == 0) {
