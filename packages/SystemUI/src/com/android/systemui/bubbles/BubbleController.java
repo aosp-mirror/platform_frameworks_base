@@ -533,7 +533,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.removeBubble(bubble);
 
                 if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
-                        && !bubble.getEntry().showInShadeWhenBubble()) {
+                        && !bubble.showInShadeWhenBubble()) {
                     // The bubble is gone & the notification is gone, time to actually remove it
                     mNotificationEntryManager.performRemoveNotification(
                             bubble.getEntry().notification, UNDEFINED_DISMISS_REASON);

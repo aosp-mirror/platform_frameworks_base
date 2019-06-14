@@ -401,6 +401,7 @@ public class BubbleStackView extends FrameLayout {
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
+
             float newY = getExpandedViewY();
             if (newY < 0) {
                 // TODO: This means our expanded content is too big to fit on screen. Right now
@@ -675,21 +676,8 @@ public class BubbleStackView extends FrameLayout {
         Bubble bubbleToExpand = mBubbleData.getBubbleWithKey(key);
         if (bubbleToExpand != null) {
             setSelectedBubble(bubbleToExpand);
-            bubbleToExpand.getEntry().setShowInShadeWhenBubble(false);
+            bubbleToExpand.setShowInShadeWhenBubble(false);
             setExpanded(true);
-        }
-    }
-
-    /**
-     * Sets the entry that should be expanded and expands if needed.
-     */
-    @VisibleForTesting
-    void setExpandedBubble(NotificationEntry entry) {
-        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
-            BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
-            if (entry.equals(bv.getEntry())) {
-                setExpandedBubble(entry.key);
-            }
         }
     }
 
@@ -774,9 +762,8 @@ public class BubbleStackView extends FrameLayout {
                 requestUpdate();
                 logBubbleEvent(previouslySelected, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
                 logBubbleEvent(bubbleToSelect, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-                notifyExpansionChanged(previouslySelected.getEntry(), false /* expanded */);
-                notifyExpansionChanged(bubbleToSelect == null ? null : bubbleToSelect.getEntry(),
-                        true /* expanded */);
+                notifyExpansionChanged(previouslySelected, false /* expanded */);
+                notifyExpansionChanged(bubbleToSelect, true /* expanded */);
             });
         }
     }
@@ -803,7 +790,7 @@ public class BubbleStackView extends FrameLayout {
             logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
             logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
         }
-        notifyExpansionChanged(mExpandedBubble.getEntry(), mIsExpanded);
+        notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
 
     /**
@@ -965,9 +952,9 @@ public class BubbleStackView extends FrameLayout {
                 mExpandedAnimateYDistance);
     }
 
-    private void notifyExpansionChanged(NotificationEntry entry, boolean expanded) {
-        if (mExpandListener != null) {
-            mExpandListener.onBubbleExpandChanged(expanded, entry != null ? entry.key : null);
+    private void notifyExpansionChanged(Bubble bubble, boolean expanded) {
+        if (mExpandListener != null && bubble != null) {
+            mExpandListener.onBubbleExpandChanged(expanded, bubble.getKey());
         }
     }
 
@@ -1353,7 +1340,7 @@ public class BubbleStackView extends FrameLayout {
      */
     @VisibleForTesting
     void animateInFlyoutForBubble(Bubble bubble) {
-        final CharSequence updateMessage = bubble.getEntry().getUpdateMessage(getContext());
+        final CharSequence updateMessage = bubble.getUpdateMessage(getContext());
 
         // Show the message if one exists, and we're not expanded or animating expansion.
         if (updateMessage != null
@@ -1631,8 +1618,8 @@ public class BubbleStackView extends FrameLayout {
                     action,
                     getNormalizedXPosition(),
                     getNormalizedYPosition(),
-                    bubble.getEntry().showInShadeWhenBubble(),
-                    bubble.getEntry().isForegroundService(),
+                    bubble.showInShadeWhenBubble(),
+                    bubble.isOngoing(),
                     false /* isAppForeground (unused) */);
         }
     }
