@@ -631,7 +631,7 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
  *
  * Returns 0 on success.
  */
-int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
+int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool primary_zygote)
 {
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
@@ -761,6 +761,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     //addOption("-verbose:jni");
     addOption("-verbose:gc");
     //addOption("-verbose:class");
+
+    if (primary_zygote) {
+        addOption("-Xprimaryzygote");
+    }
 
     /*
      * The default starting and maximum size of the heap.  Larger
@@ -1123,6 +1127,8 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
             className != NULL ? className : "(unknown)", getuid());
 
     static const String8 startSystemServer("start-system-server");
+    // Whether this is the primary zygote, meaning the zygote which will fork system server.
+    bool primary_zygote = false;
 
     /*
      * 'startSystemServer == true' means runtime is obsolete and not run from
@@ -1130,6 +1136,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
      */
     for (size_t i = 0; i < options.size(); ++i) {
         if (options[i] == startSystemServer) {
+            primary_zygote = true;
            /* track our progress through the boot sequence */
            const int LOG_BOOT_PROGRESS_START = 3000;
            LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,  ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
@@ -1165,7 +1172,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     JniInvocation jni_invocation;
     jni_invocation.Init(NULL);
     JNIEnv* env;
-    if (startVm(&mJavaVM, &env, zygote) != 0) {
+    if (startVm(&mJavaVM, &env, zygote, primary_zygote) != 0) {
         return;
     }
     onVmCreated(env);
