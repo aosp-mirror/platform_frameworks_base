@@ -195,4 +195,8 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+
+    /** Get all permission that have a certain protection level */
+    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
+            @PermissionInfo.Protection int protectionLevel);
 }
