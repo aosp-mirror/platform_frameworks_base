@@ -39,7 +39,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         private val mContext: Context,
         private val mHeadsUpManagerPhone: HeadsUpManagerPhone,
         private val mStatusBarStateController: StatusBarStateController,
-        private val mBypassController: KeyguardBypassController)
+        private val bypassController: KeyguardBypassController)
     : OnHeadsUpChangedListener, StatusBarStateController.StateListener {
 
     private val mNotificationVisibility
@@ -67,6 +67,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mWakingUp = false
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
     private val mDozeParameters: DozeParameters;
+    var fullyAwake: Boolean = false
+
     var willWakeUp = false
         set(value) {
             if (!value || mDozeAmount != 0.0f) {
@@ -75,7 +77,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
 
     lateinit var iconAreaController : NotificationIconAreaController
-
     var pulsing: Boolean = false
         set(value) {
             field = value
@@ -118,8 +119,15 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
         // TODO: handle Lockscreen wakeup for bypass when we're not pulsing anymore
-        var visible = (mNotificationsVisibleForExpansion || mHeadsUpManagerPhone.hasNotifications())
-                && pulsing
+        var visible = mNotificationsVisibleForExpansion || mHeadsUpManagerPhone.hasNotifications()
+        var canShow = pulsing
+        if (bypassController.bypassEnabled) {
+            // We also allow pulsing on the lock screen!
+            canShow = canShow || (mWakingUp || willWakeUp || fullyAwake)
+                            && mStatusBarStateController.state == StatusBarState.KEYGUARD
+        }
+        visible = visible && canShow
+
         if (!visible && mNotificationsVisible && (mWakingUp || willWakeUp) && mDozeAmount != 0.0f) {
             // let's not make notifications invisible while waking up, otherwise the animation
             // is strange
@@ -173,7 +181,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun updateDozeAmountIfBypass(): Boolean {
-        if (mBypassController.bypassEnabled) {
+        if (bypassController.bypassEnabled) {
             var amount = 1.0f;
             if (mStatusBarStateController.state == StatusBarState.SHADE
                     || mStatusBarStateController.state == StatusBarState.SHADE_LOCKED) {
@@ -247,7 +255,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     fun setWakingUp(wakingUp: Boolean) {
         willWakeUp = false
         mWakingUp = wakingUp
-        if (wakingUp && mNotificationsVisible && !mNotificationsVisibleForExpansion) {
+        if (wakingUp && mNotificationsVisible && !mNotificationsVisibleForExpansion
+                && !bypassController.bypassEnabled) {
             // We're waking up while pulsing, let's make sure the animation looks nice
             mStackScroller.wakeUpFromPulse();
         }

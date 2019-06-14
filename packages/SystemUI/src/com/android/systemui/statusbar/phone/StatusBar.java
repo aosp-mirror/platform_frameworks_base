@@ -3621,6 +3621,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
+            mWakeUpCoordinator.setFullyAwake(false);
         }
 
         @Override
@@ -3643,6 +3644,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onFinishedWakingUp() {
+            mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
         }
     };
