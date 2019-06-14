@@ -24,7 +24,6 @@ import android.content.Context;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 
-import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 /** Containing logic for the rotation button in nav bar. */
@@ -61,7 +60,7 @@ public class RotationContextButton extends ContextualButton implements
         Context context = new ContextThemeWrapper(getContext().getApplicationContext(),
                 mRotationButtonController.getStyleRes());
         return KeyButtonDrawable.create(context, mIconResId, false /* shadow */,
-                QuickStepContract.isGesturalMode(mNavBarMode));
+                null /* ovalBackgroundColor */);
     }
 
     @Override
