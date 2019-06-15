@@ -3019,46 +3019,10 @@ class AlarmManagerService extends SystemService {
                 DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 
-    /**
-     * If the last time AlarmThread woke up precedes any due wakeup or non-wakeup alarm that we set
-     * by more than half a minute, log a wtf.
-     */
-    private void validateLastAlarmExpiredLocked(long nowElapsed) {
-        final StringBuilder errorMsg = new StringBuilder();
-        boolean stuck = false;
-        if (mNextNonWakeup < (nowElapsed - 10_000) && mLastWakeup < mNextNonWakeup) {
-            stuck = true;
-            errorMsg.append("[mNextNonWakeup=");
-            TimeUtils.formatDuration(mNextNonWakeup - nowElapsed, errorMsg);
-            errorMsg.append(" set at ");
-            TimeUtils.formatDuration(mNextNonWakeUpSetAt - nowElapsed, errorMsg);
-            errorMsg.append(", mLastWakeup=");
-            TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
-            errorMsg.append(", timerfd_gettime=" + mInjector.getNextAlarm(ELAPSED_REALTIME));
-            errorMsg.append("];");
-        }
-        if (mNextWakeup < (nowElapsed - 10_000) && mLastWakeup < mNextWakeup) {
-            stuck = true;
-            errorMsg.append("[mNextWakeup=");
-            TimeUtils.formatDuration(mNextWakeup - nowElapsed, errorMsg);
-            errorMsg.append(" set at ");
-            TimeUtils.formatDuration(mNextWakeUpSetAt - nowElapsed, errorMsg);
-            errorMsg.append(", mLastWakeup=");
-            TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
-            errorMsg.append(", timerfd_gettime="
-                    + mInjector.getNextAlarm(ELAPSED_REALTIME_WAKEUP));
-            errorMsg.append("];");
-        }
-        if (stuck) {
-            Slog.wtf(TAG, "Alarm delivery stuck: " + errorMsg.toString());
-        }
-    }
-
     void rescheduleKernelAlarmsLocked() {
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
         final long nowElapsed = mInjector.getElapsedRealtime();
-        validateLastAlarmExpiredLocked(nowElapsed);
         long nextNonWakeup = 0;
         if (mAlarmBatches.size() > 0) {
             final Batch firstWakeup = findFirstWakeupBatchLocked();

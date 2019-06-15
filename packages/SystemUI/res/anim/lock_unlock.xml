@@ -34,7 +34,7 @@
                             android:pathData=" M22.33 21 C22.33,21 6.33,21 6.33,21 C5.6,21 5,20.4 5,19.67 C5,19.67 5,6.33 5,6.33 C5,5.6 5.6,5 6.33,5 C6.33,5 22.33,5 22.33,5 C23.07,5 23.67,5.6 23.67,6.33 C23.67,6.33 23.67,19.67 23.67,19.67 C23.67,20.4 23.07,21 22.33,21c "
                             android:strokeWidth="2"
                             android:strokeAlpha="1"
-                            android:strokeColor="#ffffff" />
+                            android:strokeColor="#ffffff"/>
                     </group>
                 </group>
                 <group
@@ -79,7 +79,7 @@
                                 android:pathData=" M14.33 14.33 C14.33,14.33 14.33,9.67 14.33,9.67 C14.33,7.09 12.24,5 9.67,5 C7.09,5 5,7.09 5,9.67 C5,9.67 5,14.33 5,14.33 "
                                 android:strokeWidth="2"
                                 android:strokeAlpha="1"
-                                android:strokeColor="#ffffff" />
+                                android:strokeColor="#ffffff"/>
                         </group>
                     </group>
                 </group>
@@ -230,7 +230,7 @@
                     </aapt:attr>
                 </objectAnimator>
                 <objectAnimator
-                    android:duration="333"
+                    android:duration="183"
                     android:propertyName="pathData"
                     android:startOffset="67"
                     android:valueFrom="M14.33 14.33 C14.33,14.33 14.29,6.17 14.29,6.17 C14.29,3.59 12.2,1.5 9.63,1.5 C7.05,1.5 4.96,3.59 4.96,6.17 C4.96,6.17 4.96,7.33 4.96,7.33 "
@@ -286,7 +286,7 @@
         <aapt:attr name="android:animation">
             <set android:ordering="together">
                 <objectAnimator
-                    android:duration="717"
+                    android:duration="983"
                     android:propertyName="translateX"
                     android:startOffset="0"
                     android:valueFrom="0"

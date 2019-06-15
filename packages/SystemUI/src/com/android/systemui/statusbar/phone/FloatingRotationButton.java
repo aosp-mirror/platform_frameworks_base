@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -26,12 +28,15 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
 /** Containing logic for the rotation button on the physical left bottom corner of the screen. */
 public class FloatingRotationButton implements RotationButton {
+
+    private static final float BACKGROUND_ALPHA = 0.92f;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -151,8 +156,18 @@ public class FloatingRotationButton implements RotationButton {
     public KeyButtonDrawable getImageDrawable() {
         Context context = new ContextThemeWrapper(mContext.getApplicationContext(),
                 mRotationButtonController.getStyleRes());
-        return KeyButtonDrawable.create(context, R.drawable.ic_sysbar_rotate_button,
-                false /* shadow */, true /* hasOvalBg */);
+        final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(context, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(context, dualToneDarkTheme);
+        @ColorInt int darkColor = Utils.getColorAttrDefaultColor(darkContext,
+                R.attr.singleToneColor);
+        Color ovalBackgroundColor = Color.valueOf(Color.red(darkColor), Color.green(darkColor),
+                Color.blue(darkColor), BACKGROUND_ALPHA);
+
+        return KeyButtonDrawable.create(lightContext,
+                Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor), darkColor,
+                R.drawable.ic_sysbar_rotate_button, false /* shadow */, ovalBackgroundColor);
     }
 
     @Override

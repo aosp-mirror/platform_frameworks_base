@@ -3609,8 +3609,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void createFakeHistoryEvents(long numEvents) {
         for(long i = 0; i < numEvents; i++) {
-            noteWifiOnLocked();
-            noteWifiOffLocked();
+            noteLongPartialWakelockStart("name1", "historyName1", 1000);
+            noteLongPartialWakelockFinish("name1", "historyName1", 1000);
         }
     }
 
@@ -3693,9 +3693,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryBufferLastPos = -1;
             final long elapsedRealtime = mClocks.elapsedRealtime();
             final long uptime = mClocks.uptimeMillis();
+            HistoryItem newItem = new HistoryItem();
+            newItem.setTo(cur);
             startRecordingHistory(elapsedRealtime, uptime, false);
-
-            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, newItem);
             return;
         }
 
