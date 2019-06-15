@@ -308,7 +308,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الصور والوسائط والملفات على جهازك؟"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لـ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"النشاط البدني"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"الوصول إلى بيانات نشاطك البدني"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى بيانات نشاطك البدني؟"</string>
@@ -320,7 +320,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى سجلّ مكالماتك الهاتفية؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بإجراء المكالمات الهاتفية وإدارتها؟"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏هل تريد السماح لـ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بإجراء المكالمات الهاتفية وإدارتها؟"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"أجهزة استشعار الجسم"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى بيانات المستشعر حول علاماتك الحيوية؟"</string>
@@ -2122,7 +2122,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"تم العثور على تطبيق ضار"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"تعديل"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"سيهتز الهاتف عند تلقي المكالمات والإشعارات"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"سيهتز الهاتف عند تلقّي المكالمات والإشعارات"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"تغييرات النظام"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"عدم الإزعاج"</string>

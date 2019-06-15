@@ -902,7 +902,7 @@
     <string name="granularity_label_link" msgid="5815508880782488267">"링크"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"행"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"출고 테스트 불합격"</string>
-    <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST 작업은 /system/app 디렉토리에 설치된 패키지에 대해서만 지원됩니다."</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST 작업은 /system/app 디렉터리에 설치된 패키지에 대해서만 지원됩니다."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST 작업을 제공하는 패키지가 없습니다."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"다시 부팅"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' 페이지 내용:"</string>

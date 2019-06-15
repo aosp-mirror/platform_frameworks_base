@@ -308,7 +308,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie rekodi zako za nambari za simu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige na kudhibiti simu?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; kupiga na kudhibiti simu?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Vihisi vya mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie data ya vitambuzi kuhusu viashiria muhimu vya mwili wako?"</string>
