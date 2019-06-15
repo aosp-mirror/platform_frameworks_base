@@ -1,11 +1,6 @@
 // Signature format: 2.0
 package android.app {
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
-    method @Deprecated public boolean enterPictureInPictureMode(@NonNull android.app.PictureInPictureArgs);
-    method @Deprecated public void setPictureInPictureArgs(@NonNull android.app.PictureInPictureArgs);
-  }
-
   public class ActivityManager {
     method @Deprecated public static int getMaxNumPictureInPictureActions();
   }
@@ -24,24 +19,6 @@ package android.app {
   public static class Notification.Builder {
     method @Deprecated public android.app.Notification.Builder setChannel(String);
     method @Deprecated public android.app.Notification.Builder setTimeout(long);
-  }
-
-  @Deprecated public final class PictureInPictureArgs implements android.os.Parcelable {
-    method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
-    method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
-    field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
-  }
-
-  public static class PictureInPictureArgs.Builder {
-    ctor public PictureInPictureArgs.Builder();
-    method public android.app.PictureInPictureArgs build();
-    method public android.app.PictureInPictureArgs.Builder setActions(java.util.List<android.app.RemoteAction>);
-    method public android.app.PictureInPictureArgs.Builder setAspectRatio(android.util.Rational);
-    method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
 }
