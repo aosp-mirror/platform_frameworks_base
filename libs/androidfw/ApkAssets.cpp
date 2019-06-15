@@ -134,7 +134,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   }
 
   if (entry.method == kCompressDeflated) {
-    LOG(WARNING) << kResourcesArsc << " in APK '" << path << "' is compressed.";
+    ANDROID_LOG(WARNING) << kResourcesArsc << " in APK '" << path << "' is compressed.";
   }
 
   // Open the resource table via mmap unless it is compressed. This logic is taken care of by Open.

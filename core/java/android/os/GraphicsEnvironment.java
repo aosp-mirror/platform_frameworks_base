@@ -33,11 +33,13 @@ import android.widget.Toast;
 
 import dalvik.system.VMRuntime;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,16 +74,19 @@ public class GraphicsEnvironment {
             "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
+    private static final String GAME_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
     private static final int VULKAN_1_0 = 0x00400000;
     private static final int VULKAN_1_1 = 0x00401000;
 
     // GAME_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
     // 1: All apps use Game Driver
-    // 2: All apps use system graphics driver
+    // 2: All apps use Prerelease Driver
+    // 3: All apps use system graphics driver
     private static final int GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_ALL = 1;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_NONE = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER = 1;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -714,15 +719,19 @@ public class GraphicsEnvironment {
         // 4. GAME_DRIVER_OPT_IN_APPS
         // 5. GAME_DRIVER_BLACKLIST
         // 6. GAME_DRIVER_WHITELIST
-        final int globalOptIn = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_NONE) {
-            if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
-            return null;
-        }
-
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_ALL) {
-            if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
-            return hasGameDriver ? gameDriver : null;
+        switch (coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0)) {
+            case GAME_DRIVER_GLOBAL_OPT_IN_OFF:
+                if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
+                return null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
+                return hasGameDriver ? gameDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use prerelease driver.");
+                return hasPrereleaseDriver ? prereleaseDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT:
+            default:
+                break;
         }
 
         final String appPackageName = ai.packageName;
@@ -816,10 +825,7 @@ public class GraphicsEnvironment {
           .append("!/lib/")
           .append(abi);
         final String paths = sb.toString();
-
-        final String sphalLibraries =
-                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
-
+        final String sphalLibraries = getSphalLibraries(context, driverPackageName);
         if (DEBUG) {
             Log.v(TAG,
                     "gfx driver package search path: " + paths
@@ -854,6 +860,29 @@ public class GraphicsEnvironment {
             return ai.secondaryCpuAbi;
         }
         return null;
+    }
+
+    private static String getSphalLibraries(Context context, String driverPackageName) {
+        try {
+            final Context driverContext =
+                    context.createPackageContext(driverPackageName, Context.CONTEXT_RESTRICTED);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    driverContext.getAssets().open(GAME_DRIVER_SPHAL_LIBRARIES_FILENAME)));
+            final ArrayList<String> assetStrings = new ArrayList<>();
+            for (String assetString; (assetString = reader.readLine()) != null;) {
+                assetStrings.add(assetString);
+            }
+            return String.join(":", assetStrings);
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Driver package '" + driverPackageName + "' not installed");
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Failed to load '" + GAME_DRIVER_SPHAL_LIBRARIES_FILENAME + "'");
+            }
+        }
+        return "";
     }
 
     private static native int getCanLoadSystemLibraries();

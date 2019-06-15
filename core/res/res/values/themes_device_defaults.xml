@@ -1704,6 +1704,8 @@ easier.
 
     <!-- DeviceDefault theme for the default system theme.  -->
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
+    <style name="Theme.DeviceDefault.System.Dialog" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="Theme.DeviceDefault.System.Dialog.Alert" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
 
     <style name="ThemeOverlay.DeviceDefault" />
 
