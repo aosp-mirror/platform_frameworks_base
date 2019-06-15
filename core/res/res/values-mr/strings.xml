@@ -577,7 +577,8 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"स्क्रीनच्या वरील उजव्या कडेवरील सेन्सर साफ करा."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
