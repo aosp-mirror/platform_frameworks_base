@@ -27,6 +27,9 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -67,6 +70,7 @@ import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -90,7 +94,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
     public static final String TAG_OPS = "OverviewProxyService";
-    public static final boolean DEBUG_OVERVIEW_PROXY = false;
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
 
@@ -442,6 +445,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
+    private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
+
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
             = this::cleanupAfterDeath;
@@ -481,6 +486,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 PatternMatcher.PATTERN_LITERAL);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
+
+        // Listen for status bar state changes
+        statusBarWinController.registerCallback(mStatusBarWindowCallback);
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
@@ -531,7 +539,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             navBarView.updateSystemUiStateFlags();
         }
         if (mStatusBarWinController != null) {
-            mStatusBarWinController.updateSystemUiStateFlags();
+            mStatusBarWinController.notifyStateChangedCallbacks();
         }
         notifySystemUiStateFlags(mSysUiStateFlags);
     }
@@ -544,6 +552,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify sysui state change", e);
         }
+    }
+
+    private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
+            boolean bouncerShowing) {
+        int displayId = mContext.getDisplayId();
+        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+                keyguardShowing && !keyguardOccluded, displayId);
+        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
+                keyguardShowing && keyguardOccluded, displayId);
+        setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing, displayId);
     }
 
     /**
