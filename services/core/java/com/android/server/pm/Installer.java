@@ -121,24 +121,6 @@ public class Installer extends SystemService {
         }
     }
 
-    @Override
-    public void onUnlockUser(int userId) {
-        if (userId == 0) {
-            if (!checkBeforeRemote()) return;
-
-            if (mInstalld == null) {
-                Slog.wtf(TAG, "Call to onUnlockUser prior to onStart.");
-                return;
-            }
-
-            try {
-                mInstalld.migrateLegacyObbData();
-            } catch (RemoteException re) {
-                Slog.wtf(TAG, "Error migrating legacy OBB data.", re);
-            }
-        }
-    }
-
     private void connect() {
         IBinder binder = ServiceManager.getService("installd");
         if (binder != null) {
@@ -702,6 +684,24 @@ public class Installer extends SystemService {
         try {
             mInstalld.destroyAppDataSnapshot(null, pkg, userId, ceSnapshotInode, snapshotId,
                     storageFlags);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Migrates obb data from its legacy location {@code /data/media/obb} to
+     * {@code /data/media/0/Android/obb}. This call is idempotent and a fast no-op if data has
+     * already been migrated.
+     *
+     * @throws InstallerException if an error occurs.
+     */
+    public boolean migrateLegacyObbData() throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.migrateLegacyObbData();
             return true;
         } catch (Exception e) {
             throw InstallerException.from(e);
