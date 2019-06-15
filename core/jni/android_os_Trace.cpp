@@ -24,26 +24,29 @@
 
 namespace android {
 
-inline static void sanitizeString(char* str, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        char c = str[i];
-        if (c == '\0' || c == '\n' || c == '|') {
-            str[i] = ' ';
+inline static void sanitizeString(char* str) {
+    while (*str) {
+        char c = *str;
+        if (c == '\n' || c == '|') {
+            *str = ' ';
         }
+        str++;
     }
-}
-
-inline static void getString(JNIEnv* env, jstring jstring, char* outBuffer, jsize maxSize) {
-    jsize size = std::min(env->GetStringLength(jstring), maxSize);
-    env->GetStringUTFRegion(jstring, 0, size, outBuffer);
-    sanitizeString(outBuffer, size);
-    outBuffer[size] = '\0';
 }
 
 template<typename F>
 inline static void withString(JNIEnv* env, jstring jstr, F callback) {
-    std::array<char, 1024> buffer;
-    getString(env, jstr, buffer.data(), buffer.size());
+    // We need to handle the worst case of 1 character -> 4 bytes
+    // So make a buffer of size 4097 and let it hold a string with a maximum length
+    // of 1024. The extra last byte for the null terminator.
+    std::array<char, 4097> buffer;
+    // We have no idea of knowing how much data GetStringUTFRegion wrote, so null it out in
+    // advance so we can have a reliable null terminator
+    memset(buffer.data(), 0, buffer.size());
+    jsize size = std::min(env->GetStringLength(jstr), 1024);
+    env->GetStringUTFRegion(jstr, 0, size, buffer.data());
+    sanitizeString(buffer.data());
+
     callback(buffer.data());
 }
 

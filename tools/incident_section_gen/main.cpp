@@ -408,9 +408,10 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
 
-        if (field->type() != FieldDescriptor::TYPE_MESSAGE
-                && field->type() != FieldDescriptor::TYPE_STRING) {
-            continue;
+        if (field->type() != FieldDescriptor::TYPE_MESSAGE &&
+            field->type() != FieldDescriptor::TYPE_STRING &&
+            field->type() != FieldDescriptor::TYPE_BYTES) {
+          continue;
         }
 
         const SectionFlags s = getSectionFlags(field);

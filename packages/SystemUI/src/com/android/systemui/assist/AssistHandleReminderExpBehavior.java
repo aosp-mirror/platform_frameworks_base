@@ -16,14 +16,13 @@
 
 package com.android.systemui.assist;
 
-import static com.android.systemui.shared.system.PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED;
-
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -44,6 +43,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,6 +67,14 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private static final boolean DEFAULT_SUPPRESS_ON_LOCKSCREEN = false;
     private static final boolean DEFAULT_SUPPRESS_ON_LAUNCHER = false;
     private static final boolean DEFAULT_SUPPRESS_ON_APPS = false;
+
+    private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
+            PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_PACKAGE_ADDED,
+            Intent.ACTION_PACKAGE_CHANGED,
+            Intent.ACTION_PACKAGE_REMOVED
+    };
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -110,8 +118,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             mDefaultHome = getCurrentDefaultHome();
         }
     };
-    private final IntentFilter mDefaultHomeIntentFilter =
-            new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED);
+    private final IntentFilter mDefaultHomeIntentFilter;
     private final Runnable mResetConsecutiveTaskSwitches = this::resetConsecutiveTaskSwitches;
 
     private final Handler mHandler;
@@ -146,6 +153,10 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mDefaultHomeIntentFilter = new IntentFilter();
+        for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
+            mDefaultHomeIntentFilter.addAction(action);
+        }
     }
 
     @Override
@@ -205,7 +216,24 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
 
     @Nullable
     private static ComponentName getCurrentDefaultHome() {
-        return PackageManagerWrapper.getInstance().getHomeActivities(new ArrayList<>());
+        List<ResolveInfo> homeActivities = new ArrayList<>();
+        ComponentName defaultHome =
+                PackageManagerWrapper.getInstance().getHomeActivities(homeActivities);
+        if (defaultHome != null) {
+            return defaultHome;
+        }
+
+        int topPriority = Integer.MIN_VALUE;
+        ComponentName topComponent = null;
+        for (ResolveInfo resolveInfo : homeActivities) {
+            if (resolveInfo.priority > topPriority) {
+                topComponent = resolveInfo.activityInfo.getComponentName();
+                topPriority = resolveInfo.priority;
+            } else if (resolveInfo.priority == topPriority) {
+                topComponent = null;
+            }
+        }
+        return topComponent;
     }
 
     private void handleStatusBarStateChanged(int newState) {

@@ -308,7 +308,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos journaux d\'appels?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faire et gérer des appels téléphoniques"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à faire et à gérer les appels téléphoniques?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à faire et à gérer des appels téléphoniques?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs sur vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder aux données des capteurs pour vos signes vitaux?"</string>
