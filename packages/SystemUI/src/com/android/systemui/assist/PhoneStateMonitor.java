@@ -16,8 +16,6 @@
 
 package com.android.systemui.assist;
 
-import static com.android.systemui.shared.system.PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED;
-
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
@@ -25,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ResolveInfo;
 
 import androidx.annotation.Nullable;
 
@@ -38,6 +37,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /** Class to monitor and report the state of the phone. */
 final class PhoneStateMonitor {
@@ -53,6 +53,14 @@ final class PhoneStateMonitor {
     private static final int PHONE_STATE_APP_IMMERSIVE = 9;
     private static final int PHONE_STATE_APP_FULLSCREEN = 10;
 
+    private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
+            PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_PACKAGE_ADDED,
+            Intent.ACTION_PACKAGE_CHANGED,
+            Intent.ACTION_PACKAGE_REMOVED
+    };
+
     private final Context mContext;
     private final StatusBarStateController mStatusBarStateController;
 
@@ -64,14 +72,17 @@ final class PhoneStateMonitor {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
         ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
-        mDefaultHome = PackageManagerWrapper.getInstance().getHomeActivities(new ArrayList<>());
+        mDefaultHome = getCurrentDefaultHome();
+        IntentFilter intentFilter = new IntentFilter();
+        for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
+            intentFilter.addAction(action);
+        }
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mDefaultHome =
-                        PackageManagerWrapper.getInstance().getHomeActivities(new ArrayList<>());
+                mDefaultHome = getCurrentDefaultHome();
             }
-        }, new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED));
+        }, intentFilter);
         mLauncherShowing = isLauncherShowing(activityManagerWrapper.getRunningTask());
         activityManagerWrapper.registerTaskStackListener(new TaskStackChangeListener() {
             @Override
@@ -91,6 +102,28 @@ final class PhoneStateMonitor {
             phoneState = getPhoneAppState();
         }
         return phoneState;
+    }
+
+    @Nullable
+    private static ComponentName getCurrentDefaultHome() {
+        List<ResolveInfo> homeActivities = new ArrayList<>();
+        ComponentName defaultHome =
+                PackageManagerWrapper.getInstance().getHomeActivities(homeActivities);
+        if (defaultHome != null) {
+            return defaultHome;
+        }
+
+        int topPriority = Integer.MIN_VALUE;
+        ComponentName topComponent = null;
+        for (ResolveInfo resolveInfo : homeActivities) {
+            if (resolveInfo.priority > topPriority) {
+                topComponent = resolveInfo.activityInfo.getComponentName();
+                topPriority = resolveInfo.priority;
+            } else if (resolveInfo.priority == topPriority) {
+                topComponent = null;
+            }
+        }
+        return topComponent;
     }
 
     private int getPhoneLockscreenState() {

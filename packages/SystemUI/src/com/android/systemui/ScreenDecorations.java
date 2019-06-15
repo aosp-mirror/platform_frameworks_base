@@ -768,6 +768,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
 
     @Override
     public void onDarkIntensity(float darkIntensity) {
+        if (!mHandler.getLooper().isCurrentThread()) {
+            mHandler.post(() -> onDarkIntensity(darkIntensity));
+            return;
+        }
         if (mOverlay != null) {
             CornerHandleView assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
             CornerHandleView assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);

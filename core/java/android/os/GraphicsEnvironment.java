@@ -33,11 +33,13 @@ import android.widget.Toast;
 
 import dalvik.system.VMRuntime;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +64,7 @@ public class GraphicsEnvironment {
     private static final String SYSTEM_DRIVER_VERSION_NAME = "";
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String PROPERTY_GFX_DRIVER_PRERELEASE = "ro.gfx.driver.1";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
     private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
@@ -71,16 +74,19 @@ public class GraphicsEnvironment {
             "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
+    private static final String GAME_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
     private static final int VULKAN_1_0 = 0x00400000;
     private static final int VULKAN_1_1 = 0x00401000;
 
     // GAME_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
     // 1: All apps use Game Driver
-    // 2: All apps use system graphics driver
+    // 2: All apps use Prerelease Driver
+    // 3: All apps use system graphics driver
     private static final int GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_ALL = 1;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_NONE = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER = 1;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -112,65 +118,6 @@ public class GraphicsEnvironment {
      * Then the app process is allowed to send stats to GpuStats module.
      */
     public static native void hintActivityLaunch();
-
-    /**
-     * Allow to query whether an application will use Game Driver.
-     */
-    public static boolean shouldUseGameDriver(Context context, Bundle coreSettings,
-            ApplicationInfo applicationInfo) {
-        final String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
-        if (driverPackageName == null || driverPackageName.isEmpty()) {
-            return false;
-        }
-
-        // To minimize risk of driver updates crippling the device beyond user repair, never use an
-        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
-        // were tested thoroughly with the pre-installed driver.
-        if (applicationInfo.isPrivilegedApp() || (applicationInfo.isSystemApp()
-                && !applicationInfo.isUpdatedSystemApp())) {
-            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
-            return false;
-        }
-        final ContentResolver contentResolver = context.getContentResolver();
-        final String packageName = applicationInfo.packageName;
-        final int globalOptIn;
-        if (coreSettings != null) {
-            globalOptIn = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
-        } else {
-            globalOptIn = Settings.Global.getInt(contentResolver,
-                    Settings.Global.GAME_DRIVER_ALL_APPS, 0);
-        }
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_ALL) {
-            return true;
-        }
-        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_NONE) {
-            return false;
-        }
-
-        // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
-        if (getGlobalSettingsString(contentResolver, coreSettings,
-                Settings.Global.GAME_DRIVER_OPT_OUT_APPS).contains(packageName)) {
-            return false;
-        }
-        final boolean isOptIn = getGlobalSettingsString(contentResolver, coreSettings,
-                Settings.Global.GAME_DRIVER_OPT_IN_APPS).contains(packageName);
-        final List<String> whitelist = getGlobalSettingsString(contentResolver, coreSettings,
-                Settings.Global.GAME_DRIVER_WHITELIST);
-        if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
-                && !whitelist.contains(packageName)) {
-            return false;
-        }
-
-        // If the application is not opted-in, then check whether it's on the blacklist,
-        // terminate early if it's on the blacklist and fallback to system driver.
-        if (!isOptIn
-                && getGlobalSettingsString(contentResolver, coreSettings,
-                                       Settings.Global.GAME_DRIVER_BLACKLIST)
-                        .contains(packageName)) {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Query to determine if ANGLE should be used
@@ -742,12 +689,102 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Return the driver package name to use. Return null for system driver.
+     */
+    private static String chooseDriverInternal(Context context, Bundle coreSettings) {
+        final String gameDriver = SystemProperties.get(PROPERTY_GFX_DRIVER);
+        final boolean hasGameDriver = gameDriver != null && !gameDriver.isEmpty();
+
+        final String prereleaseDriver = SystemProperties.get(PROPERTY_GFX_DRIVER_PRERELEASE);
+        final boolean hasPrereleaseDriver = prereleaseDriver != null && !prereleaseDriver.isEmpty();
+
+        if (!hasGameDriver && !hasPrereleaseDriver) {
+            if (DEBUG) Log.v(TAG, "Neither Game Driver nor prerelease driver is supported.");
+            return null;
+        }
+
+        // To minimize risk of driver updates crippling the device beyond user repair, never use an
+        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
+        // were tested thoroughly with the pre-installed driver.
+        final ApplicationInfo ai = context.getApplicationInfo();
+        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
+            if (DEBUG) Log.v(TAG, "Ignoring driver package for privileged/non-updated system app.");
+            return null;
+        }
+
+        // Priority for Game Driver settings global on confliction (Higher priority comes first):
+        // 1. GAME_DRIVER_ALL_APPS
+        // 2. GAME_DRIVER_OPT_OUT_APPS
+        // 3. GAME_DRIVER_PRERELEASE_OPT_IN_APPS
+        // 4. GAME_DRIVER_OPT_IN_APPS
+        // 5. GAME_DRIVER_BLACKLIST
+        // 6. GAME_DRIVER_WHITELIST
+        switch (coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0)) {
+            case GAME_DRIVER_GLOBAL_OPT_IN_OFF:
+                if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
+                return null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
+                return hasGameDriver ? gameDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use prerelease driver.");
+                return hasPrereleaseDriver ? prereleaseDriver : null;
+            case GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT:
+            default:
+                break;
+        }
+
+        final String appPackageName = ai.packageName;
+        if (getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_OPT_OUT_APPS)
+                        .contains(appPackageName)) {
+            if (DEBUG) Log.v(TAG, "App opts out for Game Driver.");
+            return null;
+        }
+
+        if (getGlobalSettingsString(
+                    null, coreSettings, Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS)
+                        .contains(appPackageName)) {
+            if (DEBUG) Log.v(TAG, "App opts in for prerelease Game Driver.");
+            return hasPrereleaseDriver ? prereleaseDriver : null;
+        }
+
+        // Early return here since the rest logic is only for Game Driver.
+        if (!hasGameDriver) {
+            if (DEBUG) Log.v(TAG, "Game Driver is not supported on the device.");
+            return null;
+        }
+
+        final boolean isOptIn =
+                getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
+                        .contains(appPackageName);
+        final List<String> whitelist =
+                getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_WHITELIST);
+        if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
+                && !whitelist.contains(appPackageName)) {
+            if (DEBUG) Log.v(TAG, "App is not on the whitelist for Game Driver.");
+            return null;
+        }
+
+        // If the application is not opted-in, then check whether it's on the blacklist,
+        // terminate early if it's on the blacklist and fallback to system driver.
+        if (!isOptIn
+                && getGlobalSettingsString(
+                        null, coreSettings, Settings.Global.GAME_DRIVER_BLACKLIST)
+                           .contains(appPackageName)) {
+            if (DEBUG) Log.v(TAG, "App is on the blacklist for Game Driver.");
+            return null;
+        }
+
+        return gameDriver;
+    }
+
+    /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
     private static boolean chooseDriver(
             Context context, Bundle coreSettings, PackageManager pm, String packageName) {
-        final String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
-        if (driverPackageName == null || driverPackageName.isEmpty()) {
+        final String driverPackageName = chooseDriverInternal(context, coreSettings);
+        if (driverPackageName == null) {
             return false;
         }
 
@@ -770,10 +807,6 @@ public class GraphicsEnvironment {
             return false;
         }
 
-        if (!shouldUseGameDriver(context, coreSettings, context.getApplicationInfo())) {
-            return false;
-        }
-
         final String abi = chooseAbi(driverAppInfo);
         if (abi == null) {
             if (DEBUG) {
@@ -792,10 +825,7 @@ public class GraphicsEnvironment {
           .append("!/lib/")
           .append(abi);
         final String paths = sb.toString();
-
-        final String sphalLibraries =
-                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
-
+        final String sphalLibraries = getSphalLibraries(context, driverPackageName);
         if (DEBUG) {
             Log.v(TAG,
                     "gfx driver package search path: " + paths
@@ -830,6 +860,29 @@ public class GraphicsEnvironment {
             return ai.secondaryCpuAbi;
         }
         return null;
+    }
+
+    private static String getSphalLibraries(Context context, String driverPackageName) {
+        try {
+            final Context driverContext =
+                    context.createPackageContext(driverPackageName, Context.CONTEXT_RESTRICTED);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    driverContext.getAssets().open(GAME_DRIVER_SPHAL_LIBRARIES_FILENAME)));
+            final ArrayList<String> assetStrings = new ArrayList<>();
+            for (String assetString; (assetString = reader.readLine()) != null;) {
+                assetStrings.add(assetString);
+            }
+            return String.join(":", assetStrings);
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Driver package '" + driverPackageName + "' not installed");
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Failed to load '" + GAME_DRIVER_SPHAL_LIBRARIES_FILENAME + "'");
+            }
+        }
+        return "";
     }
 
     private static native int getCanLoadSystemLibraries();
