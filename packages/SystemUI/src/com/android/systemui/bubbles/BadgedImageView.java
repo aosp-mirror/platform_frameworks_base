@@ -18,12 +18,14 @@ package com.android.systemui.bubbles;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.launcher3.icons.DotRenderer;
 import com.android.systemui.R;
 
 /**
@@ -31,16 +33,18 @@ import com.android.systemui.R;
  */
 public class BadgedImageView extends ImageView {
 
-    private BadgeRenderer mDotRenderer;
-    private int mIconBitmapSize;
-
+    private DotRenderer mDotRenderer;
     private Rect mTempBounds = new Rect();
     private Point mTempPoint = new Point();
 
+    private int mIconBitmapSize;
+    private int mDotColor;
     private float mDotScale = 0f;
-    private int mUpdateDotColor;
-    private boolean mShowUpdateDot;
+    private boolean mShowDot;
     private boolean mOnLeft;
+
+    /** Same as value in Launcher3 IconShape */
+    private static final int DEFAULT_PATH_SIZE = 100;
 
     public BadgedImageView(Context context) {
         this(context, null);
@@ -58,7 +62,11 @@ public class BadgedImageView extends ImageView {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-        mDotRenderer = new BadgeRenderer(getContext());
+
+        Path iconShapePath = new Path();
+        float radius = DEFAULT_PATH_SIZE * 0.5f;
+        iconShapePath.addCircle(radius /* x */, radius /* y */, radius, Path.Direction.CW);
+        mDotRenderer = new DotRenderer(mIconBitmapSize, iconShapePath, DEFAULT_PATH_SIZE);
 
         TypedArray ta = context.obtainStyledAttributes(
                 new int[] {android.R.attr.colorBackgroundFloating});
@@ -68,11 +76,15 @@ public class BadgedImageView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mShowUpdateDot) {
+        if (mShowDot) {
             getDrawingRect(mTempBounds);
             mTempPoint.set((getWidth() - mIconBitmapSize) / 2, getPaddingTop());
-            mDotRenderer.draw(canvas, mUpdateDotColor, mTempBounds, mDotScale, mTempPoint,
-                    mOnLeft);
+            DotRenderer.DrawParams params = new DotRenderer.DrawParams();
+            params.color = mDotColor;
+            params.iconBounds = mTempBounds;
+            params.leftAlign = mOnLeft;
+            params.scale = mDotScale;
+            mDotRenderer.draw(canvas, params);
         }
     }
 
@@ -91,8 +103,8 @@ public class BadgedImageView extends ImageView {
     /**
      * Set whether the dot should show or not.
      */
-    public void setShowDot(boolean showBadge) {
-        mShowUpdateDot = showBadge;
+    public void setShowDot(boolean showDot) {
+        mShowDot = showDot;
         invalidate();
     }
 
@@ -100,14 +112,14 @@ public class BadgedImageView extends ImageView {
      * @return whether the dot is being displayed.
      */
     public boolean isShowingDot() {
-        return mShowUpdateDot;
+        return mShowDot;
     }
 
     /**
      * The colour to use for the dot.
      */
     public void setDotColor(int color) {
-        mUpdateDotColor = ColorUtils.setAlphaComponent(color, 255 /* alpha */);
+        mDotColor = ColorUtils.setAlphaComponent(color, 255 /* alpha */);
         invalidate();
     }
 
