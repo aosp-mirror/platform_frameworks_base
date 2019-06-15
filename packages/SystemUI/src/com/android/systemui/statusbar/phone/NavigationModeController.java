@@ -224,7 +224,7 @@ public class NavigationModeController implements Dumpable {
         return mode;
     }
 
-    private Context getCurrentUserContext() {
+    public Context getCurrentUserContext() {
         int userId = ActivityManagerWrapper.getInstance().getCurrentUserId();
         if (DEBUG) {
             Log.d(TAG, "getCurrentUserContext: contextUser=" + mContext.getUserId()
