@@ -6396,6 +6396,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable ComponentName getProfileOwnerAsUser(final int userId) {
         if (mService != null) {
             try {
