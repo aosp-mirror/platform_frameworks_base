@@ -19,7 +19,6 @@
 #include <EGL/egl.h>
 #include <Properties.h>
 #include <ui/GraphicBufferMapper.h>
-#include <vulkan/vulkan.h>
 
 #include "core_jni_helpers.h"
 
@@ -67,9 +66,6 @@ void android_internal_os_ZygoteInit_nativePreloadGraphicsDriver(JNIEnv* env, jcl
     ScopedSCSExit x;
     if (Properties::peekRenderPipelineType() == RenderPipelineType::SkiaGL) {
         eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    } else {
-        uint32_t count = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
     }
 }
 
