@@ -115,7 +115,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mBound;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
-    private float mBackButtonAlpha;
+    private float mNavBarButtonAlpha;
     private MotionEvent mStatusBarGestureDownEvent;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
@@ -241,19 +241,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
-        public void setBackButtonAlpha(float alpha, boolean animate) {
-            if (!verifyCaller("setBackButtonAlpha")) {
+        public void setNavBarButtonAlpha(float alpha, boolean animate) {
+            if (!verifyCaller("setNavBarButtonAlpha")) {
                 return;
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mBackButtonAlpha = alpha;
-                mHandler.post(() -> {
-                    notifyBackButtonAlphaChanged(alpha, animate);
-                });
+                mNavBarButtonAlpha = alpha;
+                mHandler.post(() -> notifyNavBarButtonAlphaChanged(alpha, animate));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void setBackButtonAlpha(float alpha, boolean animate) {
+            setNavBarButtonAlpha(alpha, animate);
         }
 
         @Override
@@ -465,7 +468,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .supportsRoundedCornersOnWindows(mContext.getResources());
 
         // Assumes device always starts with back button until launcher tells it that it does not
-        mBackButtonAlpha = 1.0f;
+        mNavBarButtonAlpha = 1.0f;
 
         // Listen for nav bar mode changes
         mNavBarMode = navModeController.addListener(this);
@@ -565,7 +568,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public float getBackButtonAlpha() {
-        return mBackButtonAlpha;
+        return mNavBarButtonAlpha;
     }
 
     public void cleanupAfterDeath() {
@@ -637,7 +640,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void addCallback(OverviewProxyListener listener) {
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
-        listener.onBackButtonAlphaChanged(mBackButtonAlpha, false);
+        listener.onNavBarButtonAlphaChanged(mNavBarButtonAlpha, false);
         listener.onSystemUiStateChanged(mSysUiStateFlags);
     }
 
@@ -668,14 +671,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         if (mOverviewProxy != null) {
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mOverviewProxy = null;
-            notifyBackButtonAlphaChanged(1f, false /* animate */);
+            notifyNavBarButtonAlphaChanged(1f, false /* animate */);
             notifyConnectionChanged();
         }
     }
 
-    private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
+    private void notifyNavBarButtonAlphaChanged(float alpha, boolean animate) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onBackButtonAlphaChanged(alpha, animate);
+            mConnectionCallbacks.get(i).onNavBarButtonAlphaChanged(alpha, animate);
         }
     }
 
@@ -766,7 +769,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onQuickStepStarted() {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
-        default void onBackButtonAlphaChanged(float alpha, boolean animate) {}
+        /** Notify changes in the nav bar button alpha */
+        default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
