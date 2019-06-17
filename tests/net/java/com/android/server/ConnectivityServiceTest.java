@@ -192,6 +192,7 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkStatsFactory;
 import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
@@ -4901,9 +4902,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         // Default network switch should update ifaces.
@@ -4914,9 +4915,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyWifi),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(WIFI_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         // Disconnect should update ifaces.
@@ -4925,9 +4926,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         // Metered change should update ifaces
@@ -4936,9 +4937,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         mCellNetworkAgent.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
@@ -4946,9 +4947,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         // Captive portal change shouldn't update ifaces
@@ -4957,9 +4958,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, never())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
 
         // Roaming change should update ifaces
@@ -4968,9 +4969,9 @@ public class ConnectivityServiceTest {
         verify(mStatsService, atLeastOnce())
                 .forceUpdateIfaces(
                         eq(onlyCell),
-                        eq(new VpnInfo[0]),
                         any(NetworkState[].class),
                         eq(MOBILE_IFNAME));
+        assertEquals(new VpnInfo[0], NetworkStatsFactory.getVpnInfos());
         reset(mStatsService);
     }
 
