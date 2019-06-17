@@ -1028,7 +1028,8 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @AdapterState
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getState()} instead to determine "
+            + "whether you can use BLE & BT classic.")
     public int getLeState() {
         int state = BluetoothAdapter.STATE_OFF;
 
@@ -1484,7 +1485,8 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
+            + "shows UI that confirms the user wants to go into discoverable mode.")
     public boolean setScanMode(@ScanMode int mode, int duration) {
         if (getState() != STATE_ON) {
             return false;
