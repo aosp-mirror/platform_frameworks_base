@@ -26,6 +26,9 @@ import libcore.icu.LocaleData;
 import libcore.util.ZoneInfo;
 
 import java.nio.CharBuffer;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -86,6 +89,59 @@ class TimeFormatter {
     }
 
     /**
+     * The implementation of {@link TimeMigrationUtils#formatMillisWithFixedFormat(long)} for
+     * 2038-safe formatting with the pattern "%Y-%m-%d %H:%M:%S" and including the historic
+     * incorrect digit localization behavior.
+     */
+    String formatMillisWithFixedFormat(long timeMillis) {
+        // This method is deliberately not a general purpose replacement for
+        // format(String, ZoneInfo.WallTime, ZoneInfo): It hard-codes the pattern used; many of the
+        // pattern characters supported by Time.format() have unusual behavior which would make
+        // using java.time.format or similar packages difficult. It would be a lot of work to share
+        // behavior and many internal Android usecases can be covered by this common pattern
+        // behavior.
+
+        // No need to worry about overflow / underflow: long millis is representable by Instant and
+        // LocalDateTime with room to spare.
+        Instant instant = Instant.ofEpochMilli(timeMillis);
+
+        // Date/times are calculated in the current system default time zone.
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+        // You'd think it would be as simple as:
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", locale);
+        // return formatter.format(localDateTime);
+        // but we retain Time's behavior around digits.
+
+        StringBuilder stringBuilder = new StringBuilder(19);
+
+        // This effectively uses the US locale because number localization is handled separately
+        // (see below).
+        stringBuilder.append(localDateTime.getYear());
+        stringBuilder.append('-');
+        append2DigitNumber(stringBuilder, localDateTime.getMonthValue());
+        stringBuilder.append('-');
+        append2DigitNumber(stringBuilder, localDateTime.getDayOfMonth());
+        stringBuilder.append(' ');
+        append2DigitNumber(stringBuilder, localDateTime.getHour());
+        stringBuilder.append(':');
+        append2DigitNumber(stringBuilder, localDateTime.getMinute());
+        stringBuilder.append(':');
+        append2DigitNumber(stringBuilder, localDateTime.getSecond());
+
+        String result = stringBuilder.toString();
+        return localizeDigits(result);
+    }
+
+    /** Zero-pads value as needed to achieve a 2-digit number. */
+    private static void append2DigitNumber(StringBuilder builder, int value) {
+        if (value < 10) {
+            builder.append('0');
+        }
+        builder.append(value);
+    }
+
+    /**
      * Format the specified {@code wallTime} using {@code pattern}. The output is returned.
      */
     public String format(String pattern, ZoneInfo.WallTime wallTime, ZoneInfo zoneInfo) {
@@ -99,12 +155,9 @@ class TimeFormatter {
 
             formatInternal(pattern, wallTime, zoneInfo);
             String result = stringBuilder.toString();
-            // This behavior is the source of a bug since some formats are defined as being
-            // in ASCII and not localized.
-            if (localeData.zeroDigit != '0') {
-                result = localizeDigits(result);
-            }
-            return result;
+            // The localizeDigits() behavior is the source of a bug since some formats are defined
+            // as being in ASCII and not localized.
+            return localizeDigits(result);
         } finally {
             outputBuilder = null;
             numberFormatter = null;
@@ -112,6 +165,10 @@ class TimeFormatter {
     }
 
     private String localizeDigits(String s) {
+        if (localeData.zeroDigit == '0') {
+            return s;
+        }
+
         int length = s.length();
         int offsetToLocalizedDigits = localeData.zeroDigit - '0';
         StringBuilder result = new StringBuilder(length);
