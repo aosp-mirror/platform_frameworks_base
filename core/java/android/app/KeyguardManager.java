@@ -32,7 +32,6 @@ import android.content.pm.ResolveInfo;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -506,13 +505,6 @@ public class KeyguardManager {
         } catch (RemoteException e) {
             return false;
         }
-    }
-
-    /** @removed */
-    @Deprecated
-    public void dismissKeyguard(@NonNull Activity activity,
-            @Nullable KeyguardDismissCallback callback, @Nullable Handler handler) {
-        requestDismissKeyguard(activity, callback);
     }
 
     /**
