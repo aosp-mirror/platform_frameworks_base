@@ -86,7 +86,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -1987,9 +1987,7 @@ public class SyncManager {
         if (time == 0) {
             return "N/A";
         }
-        Time tobj = new Time();
-        tobj.set(time);
-        return tobj.format("%Y-%m-%d %H:%M:%S");
+        return TimeMigrationUtils.formatMillisWithFixedFormat(time);
     }
 
     private final static Comparator<SyncOperation> sOpDumpComparator = (op1, op2) -> {
@@ -2555,9 +2553,7 @@ public class SyncManager {
                     accountKey = "Unknown";
                 }
                 final long elapsedTime = item.elapsedTime;
-                final Time time = new Time();
                 final long eventTime = item.eventTime;
-                time.set(eventTime);
 
                 final String key = authorityName + "/" + accountKey;
                 final Long lastEventTime = lastTimeMap.get(key);
@@ -2622,9 +2618,7 @@ public class SyncManager {
                     authorityName = "Unknown";
                     accountKey = "Unknown";
                 }
-                final Time time = new Time();
                 final long eventTime = item.eventTime;
-                time.set(eventTime);
 
                 pw.printf("  #%-3d: %s %8s ",
                         i + 1,
