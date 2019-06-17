@@ -146,7 +146,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     }
     for (int i = 0; i < warmupFrameCount; i++) {
         testContext.waitForVsync();
-        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
         proxy->syncAndDrawFrame();
     }
@@ -161,10 +161,10 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
 
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
-    nsecs_t start = systemTime(CLOCK_MONOTONIC);
+    nsecs_t start = systemTime(SYSTEM_TIME_MONOTONIC);
     for (int i = 0; i < opts.count; i++) {
         testContext.waitForVsync();
-        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         {
             ATRACE_NAME("UI-Draw Frame");
             UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
@@ -173,7 +173,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         }
         if (opts.reportFrametimeWeight) {
             proxy->fence();
-            nsecs_t done = systemTime(CLOCK_MONOTONIC);
+            nsecs_t done = systemTime(SYSTEM_TIME_MONOTONIC);
             avgMs.add((done - vsync) / 1000000.0);
             if (i % 10 == 9) {
                 printf("Average frametime %.3fms\n", avgMs.average());
@@ -181,7 +181,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         }
     }
     proxy->fence();
-    nsecs_t end = systemTime(CLOCK_MONOTONIC);
+    nsecs_t end = systemTime(SYSTEM_TIME_MONOTONIC);
 
     if (reporter) {
         outputBenchmarkReport(info, opts, reporter, proxy.get(), (end - start) / (double)s2ns(1));

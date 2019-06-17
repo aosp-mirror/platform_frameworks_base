@@ -485,7 +485,7 @@ static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfa
 
 static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+    nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
     UiFrameInfoBuilder(proxy->frameInfo())
             .setVsync(vsync, vsync)
             .addFlag(FrameInfoFlags::SurfaceCanvas);

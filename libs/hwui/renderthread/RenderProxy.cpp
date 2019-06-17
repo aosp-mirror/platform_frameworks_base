@@ -339,7 +339,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     };
     nsecs_t lastVsync = renderThread->timeLord().latestVsync();
     nsecs_t estimatedNextVsync = lastVsync + renderThread->timeLord().frameIntervalNanos();
-    nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(CLOCK_MONOTONIC);
+    nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(SYSTEM_TIME_MONOTONIC);
     // We expect the UI thread to take 4ms and for RT to be active from VSYNC+4ms to
     // VSYNC+12ms or so, so aim for the gap during which RT is expected to
     // be idle

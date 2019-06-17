@@ -143,7 +143,7 @@ void ProfileData::reset() {
     mSlowFrameCounts.fill(0);
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
-    mStatStartTime = systemTime(CLOCK_MONOTONIC);
+    mStatStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
 }
 
 void ProfileData::reportFrame(int64_t duration) {
