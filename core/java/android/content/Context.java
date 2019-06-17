@@ -234,7 +234,9 @@ public abstract class Context {
             BIND_ALLOW_OOM_MANAGEMENT,
             BIND_WAIVE_PRIORITY,
             BIND_IMPORTANT,
-            BIND_ADJUST_WITH_ACTIVITY
+            BIND_ADJUST_WITH_ACTIVITY,
+            BIND_NOT_PERCEPTIBLE,
+            BIND_INCLUDE_CAPABILITIES
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
@@ -329,24 +331,23 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * Flag for {@link #bindService}: If binding from an app that is visible or user-perceptible,
+     * lower the target service's importance to below the perceptible level. This allows
+     * the system to (temporarily) expunge the bound process from memory to make room for more
+     * important user-perceptible processes.
+     */
+    public static final int BIND_NOT_PERCEPTIBLE = 0x00000100;
+
+    /**
      * Flag for {@link #bindService}: If binding from an app that has specific capabilities
      * due to its foreground state such as an activity or foreground service, then this flag will
      * allow the bound app to get the same capabilities, as long as it has the required permissions
      * as well.
      */
-    public static final int BIND_INCLUDE_CAPABILITIES = 0x00001000;
+    public static final int BIND_INCLUDE_CAPABILITIES = 0x000001000;
 
     /***********    Public flags above this line ***********/
     /***********    Hidden flags below this line ***********/
-
-    /**
-     * Flag for {@link #bindService}: If binding from something better than perceptible,
-     * still set the adjust below perceptible. This would be used for bound services that can
-     * afford to be evicted when under extreme memory pressure, but should be restarted as soon
-     * as possible.
-     * @hide
-     */
-    public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x00040000;
 
     /**
      * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
@@ -473,7 +474,7 @@ public abstract class Context {
      */
     public static final int BIND_REDUCTION_FLAGS =
             Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_WAIVE_PRIORITY
-                    | Context.BIND_ADJUST_BELOW_PERCEPTIBLE | Context.BIND_NOT_VISIBLE;
+                    | Context.BIND_NOT_PERCEPTIBLE | Context.BIND_NOT_VISIBLE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "RECEIVER_VISIBLE_" }, value = {

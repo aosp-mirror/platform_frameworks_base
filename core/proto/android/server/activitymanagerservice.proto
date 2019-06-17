@@ -591,6 +591,8 @@ message ConnectionRecordProto {
         SHOWING_UI = 13;
         NOT_VISIBLE = 14;
         DEAD = 15;
+        NOT_PERCEPTIBLE = 16;
+        INCLUDE_CAPABILITIES = 17;
     }
     repeated Flag flags = 3;
     optional string service_name = 4;
