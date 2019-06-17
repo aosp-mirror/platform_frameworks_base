@@ -232,6 +232,11 @@ public class NetworkNotificationManager {
             title = r.getString(R.string.network_switch_metered, toTransport);
             details = r.getString(R.string.network_switch_metered_detail, toTransport,
                     fromTransport);
+        } else if (notifyType == NotificationType.NO_INTERNET
+                    || notifyType == NotificationType.PARTIAL_CONNECTIVITY) {
+            // NO_INTERNET and PARTIAL_CONNECTIVITY notification for non-WiFi networks
+            // are sent, but they are not implemented yet.
+            return;
         } else {
             Slog.wtf(TAG, "Unknown notification type " + notifyType + " on network transport "
                     + getTransportName(transportType));
