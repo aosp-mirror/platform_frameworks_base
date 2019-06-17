@@ -544,14 +544,30 @@ class ActivityMetricsLogger {
 
             // If we have an active transition that's waiting on a certain activity that will be
             // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
-            if (info != null && !hasVisibleNonFinishingActivity(t)) {
-                if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible"
-                        + " activity=" + r);
-                logAppTransitionCancel(info);
-                mWindowingModeTransitionInfo.remove(r.getWindowingMode());
-                if (mWindowingModeTransitionInfo.size() == 0) {
-                    reset(true /* abort */, info, "notifyVisibilityChanged to invisible");
-                }
+
+            // We have no active transitions.
+            if (info == null) {
+                return;
+            }
+
+            // The notified activity whose visibility changed is no longer the launched activity.
+            // We can still wait to get onWindowsDrawn.
+            if (info.launchedActivity != r) {
+                return;
+            }
+
+            // Check if there is any activity in the task that is visible and not finishing. If the
+            // launched activity finished before it is drawn and if there is another activity in
+            // the task then that activity will be draw on screen.
+            if (hasVisibleNonFinishingActivity(t)) {
+                return;
+            }
+
+            if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible activity=" + r);
+            logAppTransitionCancel(info);
+            mWindowingModeTransitionInfo.remove(r.getWindowingMode());
+            if (mWindowingModeTransitionInfo.size() == 0) {
+                reset(true /* abort */, info, "notifyVisibilityChanged to invisible");
             }
         }
     }
