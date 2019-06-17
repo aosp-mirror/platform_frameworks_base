@@ -310,18 +310,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         return nGetUsage(mNativeObject);
     }
 
-    /** @removed replaced by {@link #close()} */
-    @Deprecated
-    public void destroy() {
-        close();
-    }
-
-    /** @removed replaced by {@link #isClosed()} */
-    @Deprecated
-    public boolean isDestroyed() {
-        return isClosed();
-    }
-
     /**
      * Destroys this buffer immediately. Calling this method frees up any
      * underlying native resources. After calling this method, this buffer
