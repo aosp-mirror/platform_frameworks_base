@@ -123,13 +123,9 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
   using IterationEnder = std::unique_ptr<void, decltype(EndIteration)*>;
   IterationEnder iteration_ender(cookie, EndIteration);
 
-  ZipString zip_entry_name;
+  std::string zip_entry_path;
   ZipEntry zip_data;
-  while ((result = Next(cookie, &zip_data, &zip_entry_name)) == 0) {
-    std::string zip_entry_path =
-        std::string(reinterpret_cast<const char*>(zip_entry_name.name),
-                    zip_entry_name.name_length);
-
+  while ((result = Next(cookie, &zip_data, &zip_entry_path)) == 0) {
     // Do not add folders to the file collection
     if (util::EndsWith(zip_entry_path, "/")) {
       continue;
