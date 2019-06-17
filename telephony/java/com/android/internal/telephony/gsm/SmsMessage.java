@@ -17,7 +17,6 @@
 package com.android.internal.telephony.gsm;
 
 import android.telephony.PhoneNumberUtils;
-import android.text.format.Time;
 import android.telephony.Rlog;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -33,6 +32,8 @@ import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static com.android.internal.telephony.SmsConstants.MessageClass;
 import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
@@ -722,19 +723,21 @@ public class SmsMessage extends SmsMessageBase {
             int timezoneOffset = IccUtils.gsmBcdByteToInt((byte) (tzByte & (~0x08)));
 
             timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
-
-            Time time = new Time(Time.TIMEZONE_UTC);
+            // timezoneOffset is in quarter hours.
+            int timeZoneOffsetSeconds = timezoneOffset * 15 * 60;
 
             // It's 2006.  Should I really support years < 2000?
-            time.year = year >= 90 ? year + 1900 : year + 2000;
-            time.month = month - 1;
-            time.monthDay = day;
-            time.hour = hour;
-            time.minute = minute;
-            time.second = second;
-
-            // Timezone offset is in quarter hours.
-            return time.toMillis(true) - (timezoneOffset * 15 * 60 * 1000);
+            int fullYear = year >= 90 ? year + 1900 : year + 2000;
+            LocalDateTime localDateTime = LocalDateTime.of(
+                    fullYear,
+                    month /* 1-12 */,
+                    day,
+                    hour,
+                    minute,
+                    second);
+            long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
+            // Convert to milliseconds.
+            return epochSeconds * 1000;
         }
 
         /**

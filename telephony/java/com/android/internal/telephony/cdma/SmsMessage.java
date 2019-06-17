@@ -713,7 +713,7 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         if (mBearerData.msgCenterTimeStamp != null) {
-            mScTimeMillis = mBearerData.msgCenterTimeStamp.toMillis(true);
+            mScTimeMillis = mBearerData.msgCenterTimeStamp.toMillis();
         }
 
         if (VDBG) Rlog.d(LOG_TAG, "SMS SC timestamp: " + mScTimeMillis);
