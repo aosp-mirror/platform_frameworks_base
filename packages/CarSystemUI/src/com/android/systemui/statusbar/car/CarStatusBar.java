@@ -423,14 +423,13 @@ public class CarStatusBar extends StatusBar implements
                 }
         );
 
-        mNotificationClickHandlerFactory = new NotificationClickHandlerFactory(
-                mBarService,
-                launchResult -> {
-                    if (launchResult == ActivityManager.START_TASK_TO_FRONT
-                            || launchResult == ActivityManager.START_SUCCESS) {
-                        animateCollapsePanels();
-                    }
-                });
+        mNotificationClickHandlerFactory = new NotificationClickHandlerFactory(mBarService);
+        mNotificationClickHandlerFactory.registerClickListener((launchResult, alertEntry) -> {
+            if (launchResult == ActivityManager.START_TASK_TO_FRONT
+                    || launchResult == ActivityManager.START_SUCCESS) {
+                animateCollapsePanels();
+            }
+        });
         Car car = Car.createCar(mContext);
         CarUxRestrictionsManager carUxRestrictionsManager = (CarUxRestrictionsManager)
                 car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
