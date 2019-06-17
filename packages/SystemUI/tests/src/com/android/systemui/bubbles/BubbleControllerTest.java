@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
+import android.hardware.face.FaceManager;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -106,6 +107,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ZenModeController mZenModeController;
     @Mock
     private ZenModeConfig mZenModeConfig;
+    @Mock
+    private FaceManager mFaceManager;
 
     private FrameLayout mStatusBarView;
     @Captor
@@ -141,6 +144,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mStatusBarView = new FrameLayout(mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
+        mContext.addMockSystemService(FaceManager.class, mFaceManager);
 
         // Bubbles get added to status bar window view
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
