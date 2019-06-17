@@ -935,7 +935,7 @@ public final class ColorDisplayService extends SystemService {
 
             if (mNightDisplayTintController.isActivatedStateNotSet()
                     || (mNightDisplayTintController.isActivated() != activate)) {
-                mNightDisplayTintController.setActivated(activate);
+                mNightDisplayTintController.setActivated(activate, activate ? start : end);
             }
 
             updateNextAlarm(mNightDisplayTintController.isActivated(), now);
@@ -1131,6 +1131,14 @@ public final class ColorDisplayService extends SystemService {
 
         @Override
         public void setActivated(Boolean activated) {
+            setActivated(activated, LocalDateTime.now());
+        }
+
+        /**
+         * Use directly when it is important that the last activation time be exact (for example, an
+         * automatic change). Otherwise use {@link #setActivated(Boolean)}.
+         */
+        public void setActivated(Boolean activated, @NonNull LocalDateTime lastActivationTime) {
             if (activated == null) {
                 super.setActivated(null);
                 return;
@@ -1142,7 +1150,7 @@ public final class ColorDisplayService extends SystemService {
                 // This is a true state change, so set this as the last activation time.
                 Secure.putStringForUser(getContext().getContentResolver(),
                         Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
-                        LocalDateTime.now().toString(),
+                        lastActivationTime.toString(),
                         mCurrentUser);
             }
 
