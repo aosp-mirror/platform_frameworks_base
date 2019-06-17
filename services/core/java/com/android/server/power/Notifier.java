@@ -91,7 +91,6 @@ public class Notifier {
     private static final int MSG_USER_ACTIVITY = 1;
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
-    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
 
@@ -127,7 +126,6 @@ public class Notifier {
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
-    private final Intent mScreenBrightnessBoostIntent;
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
@@ -181,10 +179,6 @@ public class Notifier {
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mScreenBrightnessBoostIntent =
-                new Intent(PowerManager.ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED);
-        mScreenBrightnessBoostIntent.addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
@@ -560,20 +554,6 @@ public class Notifier {
     }
 
     /**
-     * Called when screen brightness boost begins or ends.
-     */
-    public void onScreenBrightnessBoostChanged() {
-        if (DEBUG) {
-            Slog.d(TAG, "onScreenBrightnessBoostChanged");
-        }
-
-        mSuspendBlocker.acquire();
-        Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED);
-        msg.setAsynchronous(true);
-        mHandler.sendMessage(msg);
-    }
-
-    /**
      * Called when there has been user activity.
      */
     public void onUserActivity(int event, int uid) {
@@ -729,22 +709,6 @@ public class Notifier {
         }
     }
 
-    private void sendBrightnessBoostChangedBroadcast() {
-        if (DEBUG) {
-            Slog.d(TAG, "Sending brightness boost changed broadcast.");
-        }
-
-        mContext.sendOrderedBroadcastAsUser(mScreenBrightnessBoostIntent, UserHandle.ALL, null,
-                mScreeBrightnessBoostChangedDone, mHandler, 0, null, null);
-    }
-
-    private final BroadcastReceiver mScreeBrightnessBoostChangedDone = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mSuspendBlocker.release();
-        }
-    };
-
     private void sendWakeUpBroadcast() {
         if (DEBUG) {
             Slog.d(TAG, "Sending wake up broadcast.");
@@ -860,9 +824,6 @@ public class Notifier {
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
                     showWirelessChargingStarted(msg.arg1, msg.arg2);
-                    break;
-                case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
-                    sendBrightnessBoostChangedBroadcast();
                     break;
                 case MSG_PROFILE_TIMED_OUT:
                     lockProfile(msg.arg1);
