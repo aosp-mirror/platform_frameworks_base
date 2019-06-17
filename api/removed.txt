@@ -149,20 +149,12 @@ package android.content.pm {
     field @Deprecated public String volumeUuid;
   }
 
-  public class ComponentInfo extends android.content.pm.PackageItemInfo {
-    field @Deprecated public boolean encryptionAware;
-  }
-
   public class PackageInfo implements android.os.Parcelable {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
   }
 
   public abstract class PackageManager {
     method public abstract boolean setInstantAppCookie(@Nullable byte[]);
-  }
-
-  public class ResolveInfo implements android.os.Parcelable {
-    field @Deprecated public boolean instantAppAvailable;
   }
 
   public final class SharedLibraryInfo implements android.os.Parcelable {

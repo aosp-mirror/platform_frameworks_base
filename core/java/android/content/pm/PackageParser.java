@@ -4288,7 +4288,7 @@ public class PackageParser {
         a.info.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
         a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         a.info.lockTaskLaunchMode = 0;
-        a.info.encryptionAware = a.info.directBootAware = false;
+        a.info.directBootAware = false;
         a.info.rotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         a.info.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         if (hardwareAccelerated) {
@@ -4492,7 +4492,7 @@ public class PackageParser {
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
 
-            a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
+            a.info.directBootAware = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_directBootAware,
                     false);
 
@@ -4524,7 +4524,7 @@ public class PackageParser {
                 a.info.flags |= ActivityInfo.FLAG_SINGLE_USER;
             }
 
-            a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
+            a.info.directBootAware = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_directBootAware,
                     false);
         }
@@ -4920,7 +4920,7 @@ public class PackageParser {
         info.minAspectRatio = target.info.minAspectRatio;
         info.requestedVrComponent = target.info.requestedVrComponent;
 
-        info.encryptionAware = info.directBootAware = target.info.directBootAware;
+        info.directBootAware = target.info.directBootAware;
 
         Activity a = new Activity(cachedArgs.mActivityAliasArgs, info);
         if (outError[0] != null) {
@@ -5131,7 +5131,7 @@ public class PackageParser {
             p.info.flags |= ProviderInfo.FLAG_SINGLE_USER;
         }
 
-        p.info.encryptionAware = p.info.directBootAware = sa.getBoolean(
+        p.info.directBootAware = sa.getBoolean(
                 R.styleable.AndroidManifestProvider_directBootAware,
                 false);
         if (p.info.directBootAware) {
@@ -5451,7 +5451,7 @@ public class PackageParser {
             s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
         }
 
-        s.info.encryptionAware = s.info.directBootAware = sa.getBoolean(
+        s.info.directBootAware = sa.getBoolean(
                 R.styleable.AndroidManifestService_directBootAware,
                 false);
         if (s.info.directBootAware) {

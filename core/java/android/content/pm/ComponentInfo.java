@@ -79,10 +79,6 @@ public class ComponentInfo extends PackageItemInfo {
      */
     public boolean directBootAware = false;
 
-    /** @removed */
-    @Deprecated
-    public boolean encryptionAware = false;
-
     public ComponentInfo() {
     }
 
@@ -94,7 +90,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = orig.descriptionRes;
         enabled = orig.enabled;
         exported = orig.exported;
-        encryptionAware = directBootAware = orig.directBootAware;
+        directBootAware = orig.directBootAware;
     }
 
     /** @hide */
@@ -226,7 +222,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);
-        encryptionAware = directBootAware = (source.readInt() != 0);
+        directBootAware = (source.readInt() != 0);
     }
 
     /**
