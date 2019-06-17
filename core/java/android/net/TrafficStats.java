@@ -775,17 +775,10 @@ public class TrafficStats {
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidTxBytes(int uid) {
-        // This isn't actually enforcing any security; it just returns the
-        // unsupported value. The real filtering is done at the kernel level.
-        final int callingUid = android.os.Process.myUid();
-        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
-            try {
-                return getStatsService().getUidStats(uid, TYPE_TX_BYTES);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            return UNSUPPORTED;
+        try {
+            return getStatsService().getUidStats(uid, TYPE_TX_BYTES);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -808,17 +801,10 @@ public class TrafficStats {
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidRxBytes(int uid) {
-        // This isn't actually enforcing any security; it just returns the
-        // unsupported value. The real filtering is done at the kernel level.
-        final int callingUid = android.os.Process.myUid();
-        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
-            try {
-                return getStatsService().getUidStats(uid, TYPE_RX_BYTES);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            return UNSUPPORTED;
+        try {
+            return getStatsService().getUidStats(uid, TYPE_RX_BYTES);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -841,17 +827,10 @@ public class TrafficStats {
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidTxPackets(int uid) {
-        // This isn't actually enforcing any security; it just returns the
-        // unsupported value. The real filtering is done at the kernel level.
-        final int callingUid = android.os.Process.myUid();
-        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
-            try {
-                return getStatsService().getUidStats(uid, TYPE_TX_PACKETS);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            return UNSUPPORTED;
+        try {
+            return getStatsService().getUidStats(uid, TYPE_TX_PACKETS);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -874,17 +853,10 @@ public class TrafficStats {
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidRxPackets(int uid) {
-        // This isn't actually enforcing any security; it just returns the
-        // unsupported value. The real filtering is done at the kernel level.
-        final int callingUid = android.os.Process.myUid();
-        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
-            try {
-                return getStatsService().getUidStats(uid, TYPE_RX_PACKETS);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            return UNSUPPORTED;
+        try {
+            return getStatsService().getUidStats(uid, TYPE_RX_PACKETS);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
