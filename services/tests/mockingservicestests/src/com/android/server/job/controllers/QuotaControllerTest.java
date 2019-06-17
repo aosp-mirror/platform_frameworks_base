@@ -170,7 +170,7 @@ public class QuotaControllerTest {
                 getAdvancedClock(Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC),
                         24 * HOUR_IN_MILLIS);
         JobSchedulerService.sUptimeMillisClock = getAdvancedClock(
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC),
+                Clock.fixed(SystemClock.uptimeClock().instant(), ZoneOffset.UTC),
                 24 * HOUR_IN_MILLIS);
         JobSchedulerService.sElapsedRealtimeClock = getAdvancedClock(
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC),

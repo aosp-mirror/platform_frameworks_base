@@ -150,7 +150,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
     @VisibleForTesting
-    public static Clock sUptimeMillisClock = SystemClock.uptimeMillisClock();
+    public static Clock sUptimeMillisClock = SystemClock.uptimeClock();
     @VisibleForTesting
     public static Clock sElapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
 
