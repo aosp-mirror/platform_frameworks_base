@@ -74,6 +74,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final DozeParameters mDozeParameters;
     private final WindowManager.LayoutParams mLpChanged;
     private final boolean mKeyguardScreenRotation;
+    private final long mLockScreenDisplayTimeout;
     private ViewGroup mStatusBarView;
     private WindowManager.LayoutParams mLp;
     private boolean mHasTopUi;
@@ -104,6 +105,8 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new WindowManager.LayoutParams();
+        mLockScreenDisplayTimeout = context.getResources()
+                .getInteger(R.integer.config_lockScreenDisplayTimeout);
         ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
@@ -280,7 +283,8 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         if (state.isKeyguardShowingAndNotOccluded()
                 && state.statusBarState == StatusBarState.KEYGUARD
                 && !state.qsExpanded) {
-            mLpChanged.userActivityTimeout = KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
+            mLpChanged.userActivityTimeout = state.bouncerShowing
+                    ? KeyguardViewMediator.AWAKE_INTERVAL_BOUNCER_MS : mLockScreenDisplayTimeout;
         } else {
             mLpChanged.userActivityTimeout = -1;
         }
