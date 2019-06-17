@@ -95,7 +95,7 @@ public final class ContentSuggestionsPerUserService extends
 
     @GuardedBy("mLock")
     void provideContextImageLocked(int taskId, @NonNull Bundle imageContextRequestExtras) {
-        RemoteContentSuggestionsService service = getRemoteServiceLocked();
+        RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
             ActivityManager.TaskSnapshot snapshot =
                     mActivityTaskManagerInternal.getTaskSnapshotNoRestore(taskId, false);
@@ -118,7 +118,7 @@ public final class ContentSuggestionsPerUserService extends
     void suggestContentSelectionsLocked(
             @NonNull SelectionsRequest selectionsRequest,
             @NonNull ISelectionsCallback selectionsCallback) {
-        RemoteContentSuggestionsService service = getRemoteServiceLocked();
+        RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
             service.suggestContentSelections(selectionsRequest, selectionsCallback);
         }
@@ -128,7 +128,7 @@ public final class ContentSuggestionsPerUserService extends
     void classifyContentSelectionsLocked(
             @NonNull ClassificationsRequest classificationsRequest,
             @NonNull IClassificationsCallback callback) {
-        RemoteContentSuggestionsService service = getRemoteServiceLocked();
+        RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
             service.classifyContentSelections(classificationsRequest, callback);
         }
@@ -136,7 +136,7 @@ public final class ContentSuggestionsPerUserService extends
 
     @GuardedBy("mLock")
     void notifyInteractionLocked(@NonNull String requestId, @NonNull Bundle bundle) {
-        RemoteContentSuggestionsService service = getRemoteServiceLocked();
+        RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
             service.notifyInteraction(requestId, bundle);
         }
@@ -153,12 +153,12 @@ public final class ContentSuggestionsPerUserService extends
 
     @GuardedBy("mLock")
     @Nullable
-    private RemoteContentSuggestionsService getRemoteServiceLocked() {
+    private RemoteContentSuggestionsService ensureRemoteServiceLocked() {
         if (mRemoteService == null) {
             final String serviceName = getComponentNameLocked();
             if (serviceName == null) {
                 if (mMaster.verbose) {
-                    Slog.v(TAG, "getRemoteServiceLocked(): not set");
+                    Slog.v(TAG, "ensureRemoteServiceLocked(): not set");
                 }
                 return null;
             }
@@ -170,8 +170,8 @@ public final class ContentSuggestionsPerUserService extends
                         @Override
                         public void onServiceDied(
                                 @NonNull RemoteContentSuggestionsService service) {
-                            // TODO(b/120865921): properly implement
                             Slog.w(TAG, "remote content suggestions service died");
+                            updateRemoteServiceLocked();
                         }
                     }, mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
         }
