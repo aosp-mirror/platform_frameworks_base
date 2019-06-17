@@ -1143,7 +1143,7 @@
     <dimen name="bubble_message_padding">4dp</dimen>
     <!-- Offset between bubbles in their stacked position. -->
     <dimen name="bubble_stack_offset">5dp</dimen>
-    <!-- How far offscreen the bubble stack rests. -->
+    <!-- How far offscreen the bubble stack rests. Cuts off padding and part of icon bitmap. -->
     <dimen name="bubble_stack_offscreen">9dp</dimen>
     <!-- How far down the screen the stack starts. -->
     <dimen name="bubble_stack_starting_offset_y">96dp</dimen>
