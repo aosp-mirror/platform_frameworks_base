@@ -912,7 +912,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final String localPackageName = packageName;
         final int localForegroundId = foregroundId;
         final int appUid = appInfo.uid;
-        final int appPid = app.pid;
+        final int appPid = app != null ? app.pid : 0;
         ams.mHandler.post(new Runnable() {
             public void run() {
                 NotificationManagerInternal nm = LocalServices.getService(
