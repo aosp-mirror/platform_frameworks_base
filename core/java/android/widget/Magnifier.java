@@ -277,7 +277,7 @@ public final class Magnifier {
                             mWindowElevation, mWindowCornerRadius,
                             mOverlay != null ? mOverlay : new ColorDrawable(Color.TRANSPARENT),
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
-                            mDestroyLock, mCallback);
+                            mCallback);
                 }
             }
             performPixelCopy(startX, startY, true /* update window position */);
@@ -306,11 +306,9 @@ public final class Magnifier {
      */
     public void dismiss() {
         if (mWindow != null) {
-            synchronized (mDestroyLock) {
-                synchronized (mLock) {
-                    mWindow.destroy();
-                    mWindow = null;
-                }
+            synchronized (mLock) {
+                mWindow.destroy();
+                mWindow = null;
             }
             mPrevShowSourceCoords.x = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
             mPrevShowSourceCoords.y = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
@@ -835,24 +833,16 @@ public final class Magnifier {
         private int mWindowPositionY;
         private boolean mPendingWindowPositionUpdate;
 
-        // The lock used to synchronize the UI and render threads when a #destroy
-        // is performed on the UI thread and a frame callback on the render thread.
-        // When both mLock and mDestroyLock need to be held at the same time,
-        // mDestroyLock should be acquired before mLock in order to avoid deadlocks.
-        private final Object mDestroyLock;
-
         // The current content of the magnifier. It is mBitmap + mOverlay, only used for testing.
         private Bitmap mCurrentContent;
 
         InternalPopupWindow(final Context context, final Display display,
                 final SurfaceControl parentSurfaceControl, final int width, final int height,
                 final float elevation, final float cornerRadius, final Drawable overlay,
-                final Handler handler, final Object lock, final Object destroyLock,
-                final Callback callback) {
+                final Handler handler, final Object lock, final Callback callback) {
             mDisplay = display;
             mOverlay = overlay;
             mLock = lock;
-            mDestroyLock = destroyLock;
             mCallback = callback;
 
             mContentWidth = width;
@@ -1039,20 +1029,17 @@ public final class Magnifier {
         }
 
         /**
-         * Destroys this instance.
+         * Destroys this instance. The method has to be called in a context holding {@link #mLock}.
          */
         public void destroy() {
-            synchronized (mDestroyLock) {
-                mSurface.destroy();
-            }
-            synchronized (mLock) {
-                mRenderer.destroy();
-                mSurfaceControl.remove();
-                mSurfaceSession.kill();
-                mHandler.removeCallbacks(mMagnifierUpdater);
-                if (mBitmap != null) {
-                    mBitmap.recycle();
-                }
+            // Destroy the renderer. This will not proceed until pending frame callbacks complete.
+            mRenderer.destroy();
+            mSurface.destroy();
+            mSurfaceControl.remove();
+            mSurfaceSession.kill();
+            mHandler.removeCallbacks(mMagnifierUpdater);
+            if (mBitmap != null) {
+                mBitmap.recycle();
             }
         }
 
@@ -1090,24 +1077,20 @@ public final class Magnifier {
                     final int pendingY = mWindowPositionY;
 
                     callback = frame -> {
-                        synchronized (mDestroyLock) {
-                            if (!mSurface.isValid()) {
-                                return;
-                            }
-                            synchronized (mLock) {
-                                // Show or move the window at the content draw frame.
-                                SurfaceControl.openTransaction();
-                                mSurfaceControl.deferTransactionUntil(mSurface, frame);
-                                if (updateWindowPosition) {
-                                    mSurfaceControl.setPosition(pendingX, pendingY);
-                                }
-                                if (firstDraw) {
-                                    mSurfaceControl.setLayer(SURFACE_Z);
-                                    mSurfaceControl.show();
-                                }
-                                SurfaceControl.closeTransaction();
-                            }
+                        if (!mSurface.isValid()) {
+                            return;
                         }
+                        // Show or move the window at the content draw frame.
+                        SurfaceControl.openTransaction();
+                        mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                        if (updateWindowPosition) {
+                            mSurfaceControl.setPosition(pendingX, pendingY);
+                        }
+                        if (firstDraw) {
+                            mSurfaceControl.setLayer(SURFACE_Z);
+                            mSurfaceControl.show();
+                        }
+                        SurfaceControl.closeTransaction();
                     };
                     mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
                 } else {
