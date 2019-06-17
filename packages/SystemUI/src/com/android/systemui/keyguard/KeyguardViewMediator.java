@@ -174,7 +174,7 @@ public class KeyguardViewMediator extends SystemUI {
     /**
      * The default amount of time we stay awake (used for all key input)
      */
-    public static final int AWAKE_INTERVAL_DEFAULT_MS = 10000;
+    public static final int AWAKE_INTERVAL_BOUNCER_MS = 10000;
 
     /**
      * How long to wait after the screen turns off due to timeout before
