@@ -1904,14 +1904,15 @@ public class PermissionManagerService {
         return Boolean.TRUE == granted;
     }
 
-    private boolean isPermissionsReviewRequired(PackageParser.Package pkg, int userId) {
+    private boolean isPermissionsReviewRequired(@NonNull PackageParser.Package pkg,
+            @UserIdInt int userId) {
         // Permission review applies only to apps not supporting the new permission model.
         if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M) {
             return false;
         }
 
         // Legacy apps have the permission and get user consent on launch.
-        if (pkg == null || pkg.mExtras == null) {
+        if (pkg.mExtras == null) {
             return false;
         }
         final PackageSetting ps = (PackageSetting) pkg.mExtras;
@@ -3111,7 +3112,7 @@ public class PermissionManagerService {
             PermissionManagerService.this.systemReady();
         }
         @Override
-        public boolean isPermissionsReviewRequired(Package pkg, int userId) {
+        public boolean isPermissionsReviewRequired(@NonNull Package pkg, @UserIdInt int userId) {
             return PermissionManagerService.this.isPermissionsReviewRequired(pkg, userId);
         }
         @Override

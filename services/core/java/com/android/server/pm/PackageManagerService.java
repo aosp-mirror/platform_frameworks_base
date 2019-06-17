@@ -24340,8 +24340,12 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean isPermissionsReviewRequired(String packageName, int userId) {
             synchronized (mPackages) {
-                return mPermissionManager.isPermissionsReviewRequired(
-                        mPackages.get(packageName), userId);
+                final PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return false;
+                }
+
+                return mPermissionManager.isPermissionsReviewRequired(pkg, userId);
             }
         }
 
