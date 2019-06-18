@@ -118,6 +118,12 @@ class DumpContext : public IAaptContext {
     return 0;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    UNIMPLEMENTED(FATAL) << "Split Name Dependencies should not be necessary";
+    static std::set<std::string> empty;
+    return empty;
+  }
+
  private:
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;

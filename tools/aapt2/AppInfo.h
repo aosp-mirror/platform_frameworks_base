@@ -17,6 +17,7 @@
 #ifndef AAPT_APP_INFO_H
 #define AAPT_APP_INFO_H
 
+#include <set>
 #include <string>
 
 #include "util/Maybe.h"
@@ -42,6 +43,9 @@ struct AppInfo {
 
   // The app's split name, if it is a split.
   Maybe<std::string> split_name;
+
+  // The split names that this split depends on.
+  std::set<std::string> split_name_dependencies;
 };
 
 }  // namespace aapt

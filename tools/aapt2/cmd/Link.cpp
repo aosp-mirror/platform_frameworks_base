@@ -140,6 +140,14 @@ class LinkContext : public IAaptContext {
     min_sdk_version_ = minSdk;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    return split_name_dependencies_;
+  }
+
+  void SetSplitNameDependencies(const std::set<std::string>& split_name_dependencies) {
+    split_name_dependencies_ = split_name_dependencies;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
@@ -151,6 +159,7 @@ class LinkContext : public IAaptContext {
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
+  std::set<std::string> split_name_dependencies_;
 };
 
 // A custom delegate that generates compatible pre-O IDs for use with feature splits.
@@ -963,6 +972,17 @@ class Linker {
         app_info.min_sdk_version = ResourceUtils::ParseSdkVersion(min_sdk->value);
       }
     }
+
+    for (const xml::Element* child_el : manifest_el->GetChildElements()) {
+      if (child_el->namespace_uri.empty() && child_el->name == "uses-split") {
+        if (const xml::Attribute* split_name =
+            child_el->FindAttribute(xml::kSchemaAndroid, "name")) {
+          if (!split_name->value.empty()) {
+            app_info.split_name_dependencies.insert(split_name->value);
+          }
+        }
+      }
+    }
     return app_info;
   }
 
@@ -1770,6 +1790,7 @@ class Linker {
     context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or_default(0));
 
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
+    context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
