@@ -24,6 +24,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYH
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
@@ -168,6 +169,11 @@ public class Tile implements Parcelable {
         ensureMetadataNotStale(context);
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+            if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE_URI)) {
+                // If has as uri to provide dynamic summary, skip loading here. UI will later load
+                // at tile binding time.
+                return null;
+            }
             if (mMetaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                 try {
                     final Resources res =
@@ -211,6 +217,8 @@ public class Tile implements Parcelable {
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData != null) {
             if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+                // If has as uri to provide dynamic summary, skip loading here. UI will later load
+                // at tile binding time.
                 return null;
             }
             if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {

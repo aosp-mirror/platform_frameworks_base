@@ -162,6 +162,16 @@ public class TileUtils {
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the content provider providing the title text that should be displayed for the
+     * preference.
+     *
+     * Title provided by the content provider overrides any static title.
+     */
+    public static final String META_DATA_PREFERENCE_TITLE_URI =
+            "com.android.settings.title_uri";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the summary text that should be displayed for the preference.
      */
     public static final String META_DATA_PREFERENCE_SUMMARY = "com.android.settings.summary";
