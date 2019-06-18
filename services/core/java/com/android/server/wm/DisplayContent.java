@@ -30,16 +30,21 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.TYPE_IME;
+import static android.view.InsetsState.TYPE_LEFT_GESTURES;
+import static android.view.InsetsState.TYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -135,6 +140,7 @@ import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.utils.RegionUtils.forEachRect;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
 
 import android.animation.AnimationHandler;
@@ -324,6 +330,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final RemoteCallbackList<ISystemGestureExclusionListener>
             mSystemGestureExclusionListeners = new RemoteCallbackList<>();
     private final Region mSystemGestureExclusion = new Region();
+    private int mSystemGestureExclusionLimit;
 
     /**
      * For default display it contains real metrics, empty for others.
@@ -894,6 +901,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWallpaperController = new WallpaperController(mWmService, this);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
+        mSystemGestureExclusionLimit = mWmService.mSystemGestureExclusionLimitDp
+                * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
         mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
@@ -1549,8 +1558,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             longSize = height;
         }
 
-        final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
-        final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
+        final int shortSizeDp = shortSize * DENSITY_DEFAULT / mBaseDisplayDensity;
+        final int longSizeDp = longSize * DENSITY_DEFAULT / mBaseDisplayDensity;
 
         mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
         mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
@@ -2198,6 +2207,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplay.getMetrics(mDisplayMetrics);
 
         onDisplayChanged(this);
+    }
+
+    @Override
+    void onDisplayChanged(DisplayContent dc) {
+        super.onDisplayChanged(dc);
+        updateSystemGestureExclusionLimit();
+    }
+
+    void updateSystemGestureExclusionLimit() {
+        mSystemGestureExclusionLimit = mWmService.mSystemGestureExclusionLimitDp
+                * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
+        updateSystemGestureExclusion();
     }
 
     void initializeDisplayBaseInfo() {
@@ -5107,24 +5128,35 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @VisibleForTesting
     Region calculateSystemGestureExclusion() {
+        final Region unhandled = Region.obtain();
+        unhandled.set(0, 0, mDisplayFrames.mDisplayWidth, mDisplayFrames.mDisplayHeight);
+
+        final Rect leftEdge = mInsetsStateController.getSourceProvider(TYPE_LEFT_GESTURES)
+                .getSource().getFrame();
+        final Rect rightEdge = mInsetsStateController.getSourceProvider(TYPE_RIGHT_GESTURES)
+                .getSource().getFrame();
+
         final Region global = Region.obtain();
         final Region touchableRegion = Region.obtain();
         final Region local = Region.obtain();
+        final int[] remainingLeftRight =
+                {mSystemGestureExclusionLimit, mSystemGestureExclusionLimit};
 
         // Traverse all windows bottom up to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
             if (w.cantReceiveTouchInput() || !w.isVisible()
-                    || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0) {
+                    || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
+                    || unhandled.isEmpty()) {
                 return;
             }
             final boolean modal =
                     (w.mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
 
-            // Only keep the exclusion zones from the windows behind where the current window
-            // isn't touchable.
+            // Get the touchable region of the window, and intersect with where the screen is still
+            // touchable, i.e. touchable regions on top are not covering it yet.
             w.getTouchableRegion(touchableRegion);
-            global.op(touchableRegion, Op.DIFFERENCE);
+            touchableRegion.op(unhandled, Op.INTERSECT);
 
             rectListToRegion(w.getSystemGestureExclusion(), local);
 
@@ -5136,11 +5168,76 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // A window can only exclude system gestures where it is actually touchable
             local.op(touchableRegion, Op.INTERSECT);
 
-            global.op(local, Op.UNION);
-        }, false /* topToBottom */);
+            // Apply restriction if necessary.
+            if (needsGestureExclusionRestrictions(w, mLastDispatchedSystemUiVisibility)) {
+
+                // Processes the region along the left edge.
+                remainingLeftRight[0] = addToGlobalAndConsumeLimit(local, global, leftEdge,
+                        remainingLeftRight[0]);
+
+                // Processes the region along the right edge.
+                remainingLeftRight[1] = addToGlobalAndConsumeLimit(local, global, rightEdge,
+                        remainingLeftRight[1]);
+
+                // Adds the middle (unrestricted area)
+                final Region middle = Region.obtain(local);
+                middle.op(leftEdge, Op.DIFFERENCE);
+                middle.op(rightEdge, Op.DIFFERENCE);
+                global.op(middle, Op.UNION);
+                middle.recycle();
+            } else {
+                global.op(local, Op.UNION);
+            }
+            unhandled.op(touchableRegion, Op.DIFFERENCE);
+        }, true /* topToBottom */);
         local.recycle();
         touchableRegion.recycle();
+        unhandled.recycle();
         return global;
+    }
+
+    /**
+     * @return Whether gesture exclusion area should be restricted from the window depending on the
+     *         current SystemUI visibility flags.
+     */
+    private static boolean needsGestureExclusionRestrictions(WindowState win, int sysUiVisibility) {
+        final int type = win.mAttrs.type;
+        final int stickyHideNavFlags =
+                SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        final boolean stickyHideNav =
+                (sysUiVisibility & stickyHideNavFlags) == stickyHideNavFlags;
+        return !stickyHideNav && type != TYPE_INPUT_METHOD && type != TYPE_STATUS_BAR
+                && win.getActivityType() != ACTIVITY_TYPE_HOME;
+    }
+
+    /**
+     * Adds a local gesture exclusion area to the global area while applying a limit per edge.
+     *
+     * @param local The gesture exclusion area to add.
+     * @param global The destination.
+     * @param edge Only processes the part in that region.
+     * @param limit How much limit in pixels we have.
+     * @return How much of the limit are remaining.
+     */
+    private static int addToGlobalAndConsumeLimit(Region local, Region global, Rect edge,
+            int limit) {
+        final Region r = Region.obtain(local);
+        r.op(edge, Op.INTERSECT);
+
+        final int[] remaining = {limit};
+        forEachRect(r, rect -> {
+            if (remaining[0] <= 0) {
+                return;
+            }
+            final int height = rect.height();
+            if (height > remaining[0]) {
+                rect.bottom = rect.top + remaining[0];
+            }
+            remaining[0] -= height;
+            global.op(rect, Op.UNION);
+        });
+        r.recycle();
+        return remaining[0];
     }
 
     void registerSystemGestureExclusionListener(ISystemGestureExclusionListener listener) {
