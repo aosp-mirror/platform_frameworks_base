@@ -33,19 +33,22 @@ class KeyguardBypassController {
     private val unlockMethodCache: UnlockMethodCache
     private val statusBarStateController: StatusBarStateController
 
-    lateinit var unlockController: BiometricUnlockController
-    var isPulseExpanding = false
-
-            /**
-             * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
-             */
-    var bypassEnabled: Boolean = false
-        get() = field && unlockMethodCache.isUnlockingWithFacePossible
-        private set
     /**
      * The pending unlock type which is set if the bypass was blocked when it happened.
      */
     private var pendingUnlockType: BiometricSourceType? = null
+
+    lateinit var unlockController: BiometricUnlockController
+    var isPulseExpanding = false
+
+    /**
+     * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
+     */
+    var bypassEnabled: Boolean = false
+        get() = field && unlockMethodCache.isUnlockingWithFacePossible
+        private set
+
+    var bouncerShowing: Boolean = false
 
     @Inject
     constructor(context: Context, tunerService: TunerService,
@@ -85,6 +88,11 @@ class KeyguardBypassController {
      */
     fun onBiometricAuthenticated(biometricSourceType: BiometricSourceType): Boolean {
         if (bypassEnabled) {
+            if (bouncerShowing) {
+                // Whenever the bouncer is showing, we want to unlock. Otherwise we can get stuck
+                // in the shade locked where the bouncer wouldn't unlock
+                return true
+            }
             if (statusBarStateController.state != StatusBarState.KEYGUARD) {
                 // We're bypassing but not actually on the lockscreen, the user should decide when
                 // to unlock
