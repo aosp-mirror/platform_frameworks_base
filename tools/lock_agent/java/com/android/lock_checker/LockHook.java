@@ -72,13 +72,19 @@ public class LockHook {
 
     private static final LockChecker[] sCheckers;
 
+    private static boolean sNativeHandling = false;
+
     static {
         sHandlerThread = new HandlerThread("LockHook:wtf", Process.THREAD_PRIORITY_BACKGROUND);
         sHandlerThread.start();
         sHandler = new WtfHandler(sHandlerThread.getLooper());
 
         sCheckers = new LockChecker[] { new OnThreadLockChecker() };
+
+        sNativeHandling = getNativeHandlingConfig();
     }
+
+    private static native boolean getNativeHandlingConfig();
 
     static <T> boolean shouldDumpStacktrace(StacktraceHasher hasher, Map<String, T> dumpedSet,
             T val, AnnotatedStackTraceElement[] st, int from, int to) {
@@ -175,7 +181,12 @@ public class LockHook {
     private static void handleViolation(Violation v) {
         String msg = v.toString();
         Log.wtf(TAG, msg);
+        if (sNativeHandling) {
+            nWtf(msg);  // Also send to native.
+        }
     }
+
+    private static native void nWtf(String msg);
 
     /**
      * Generates a hash for a given stacktrace of a {@link Throwable}.
