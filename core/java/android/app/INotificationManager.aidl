@@ -108,6 +108,8 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
     boolean isPackagePaused(String pkg);
 
+    void silenceNotificationSound();
+
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
     @UnsupportedAppUsage
