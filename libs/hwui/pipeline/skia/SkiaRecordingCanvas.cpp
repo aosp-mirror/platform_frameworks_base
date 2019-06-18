@@ -18,14 +18,18 @@
 
 #include <SkImagePriv.h>
 #include "CanvasTransform.h"
+#ifdef __ANDROID__ // Layoutlib does not support Layers
 #include "Layer.h"
 #include "LayerDrawable.h"
+#endif
 #include "NinePatchUtils.h"
 #include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
 #include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/VkFunctorDrawable.h"
 #include "pipeline/skia/VkInteropFunctorDrawable.h"
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -102,12 +106,15 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
 }
 
 void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdater) {
+#ifdef __ANDROID__ // Layoutlib does not support Layers
     if (layerUpdater != nullptr) {
         // Create a ref-counted drawable, which is kept alive by sk_sp in SkLiteDL.
         sk_sp<SkDrawable> drawable(new LayerDrawable(layerUpdater));
         drawDrawable(drawable.get());
     }
+#endif
 }
+
 
 void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     // Record the child node. Drawable dtor will be invoked when mChildNodes deque is cleared.
@@ -125,8 +132,10 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     }
 }
 
+
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
                                              uirenderer::GlFunctorLifecycleListener* listener) {
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         functorDrawable = mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(
@@ -137,9 +146,11 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
     }
     mDisplayList->mChildFunctors.push_back(functorDrawable);
     drawDrawable(functorDrawable);
+#endif
 }
 
 void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         functorDrawable = mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, asSkCanvas());
@@ -148,6 +159,7 @@ void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
     }
     mDisplayList->mChildFunctors.push_back(functorDrawable);
     drawDrawable(functorDrawable);
+#endif
 }
 
 void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
