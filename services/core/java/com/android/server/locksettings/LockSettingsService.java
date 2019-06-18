@@ -1290,6 +1290,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 final BiometricManager bm = mContext.getSystemService(BiometricManager.class);
                 final PackageManager pm = mContext.getPackageManager();
                 for (int i = 0; i < resetLockouts.size(); i++) {
+                    bm.setActiveUser(resetLockouts.get(i).mUserId);
                     bm.resetLockout(resetLockouts.get(i).mHAT);
                 }
                 if (challengeType == CHALLENGE_INTERNAL
