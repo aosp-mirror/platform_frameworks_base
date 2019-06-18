@@ -203,17 +203,16 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         @Override
-        public void onBackButtonAlphaChanged(float alpha, boolean animate) {
-            final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
-            final boolean useAltBack =
-                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-            if (QuickStepContract.isGesturalMode(mNavBarMode) && !useAltBack) {
-                // If property was changed to hide/show back button, going home will trigger
-                // launcher to to change the back button alpha to reflect property change
-                backButton.setVisibility(View.GONE);
-            } else {
-                backButton.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
-                backButton.setAlpha(alpha, animate);
+        public void onNavBarButtonAlphaChanged(float alpha, boolean animate) {
+            ButtonDispatcher buttonDispatcher = null;
+            if (QuickStepContract.isSwipeUpMode(mNavBarMode)) {
+                buttonDispatcher = mNavigationBarView.getBackButton();
+            } else if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+                buttonDispatcher = mNavigationBarView.getHomeHandle();
+            }
+            if (buttonDispatcher != null) {
+                buttonDispatcher.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
+                buttonDispatcher.setAlpha(alpha, animate);
             }
         }
     };
