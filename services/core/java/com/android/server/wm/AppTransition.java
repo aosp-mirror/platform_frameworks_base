@@ -87,6 +87,7 @@ import android.content.res.Configuration;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -258,6 +259,8 @@ public class AppTransition implements Dump {
     private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
 
+    private final int mDefaultWindowAnimationStyleResId;
+
     private RemoteAnimationController mRemoteAnimationController;
 
     final Handler mHandler;
@@ -305,6 +308,12 @@ public class AppTransition implements Dump {
                 * mContext.getResources().getDisplayMetrics().density);
         mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
         mLowRamRecentsEnabled = ActivityManager.isLowRamDeviceStatic();
+
+        final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
+                com.android.internal.R.styleable.Window);
+        mDefaultWindowAnimationStyleResId = windowStyle.getResourceId(
+                com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+        windowStyle.recycle();
     }
 
     boolean isTransitionSet() {
@@ -523,6 +532,25 @@ public class AppTransition implements Dump {
         return redoLayout;
     }
 
+    @VisibleForTesting
+    int getDefaultWindowAnimationStyleResId() {
+        return mDefaultWindowAnimationStyleResId;
+    }
+
+    /** Returns window animation style ID from {@link LayoutParams} or from system in some cases */
+    @VisibleForTesting
+    int getAnimationStyleResId(@NonNull LayoutParams lp) {
+        int resId = lp.windowAnimations;
+        if (lp.type == LayoutParams.TYPE_APPLICATION_STARTING) {
+            // Note that we don't want application to customize starting window animation.
+            // Since this window is specific for displaying while app starting,
+            // application should not change its animation directly.
+            // In this case, it will use system resource to get default animation.
+            resId = mDefaultWindowAnimationStyleResId;
+        }
+        return resId;
+    }
+
     private AttributeCache.Entry getCachedAnimations(LayoutParams lp) {
         if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
                 + (lp != null ? lp.packageName : null)
@@ -532,7 +560,7 @@ public class AppTransition implements Dump {
             // application resources.  It is nice to avoid loading application
             // resources if we can.
             String packageName = lp.packageName != null ? lp.packageName : "android";
-            int resId = lp.windowAnimations;
+            int resId = getAnimationStyleResId(lp);
             if ((resId&0xFF000000) == 0x01000000) {
                 packageName = "android";
             }
