@@ -379,8 +379,8 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription());
-        final int width = mainWindow.getFrameLw().width();
-        final int height = mainWindow.getFrameLw().height();
+        final int width = task.getBounds().width();
+        final int height = task.getBounds().height();
 
         final RenderNode node = RenderNode.create("TaskSnapshotController", null);
         node.setLeftTopRightBottom(0, 0, width, height);
@@ -398,7 +398,7 @@ class TaskSnapshotController {
         // color above
         return new TaskSnapshot(topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
                 hwBitmap.getColorSpace(), topChild.getConfiguration().orientation,
-                mainWindow.getStableInsets(), ActivityManager.isLowRamDeviceStatic() /* reduced */,
+                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* reduced */,
                 1.0f /* scale */, false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);
     }
