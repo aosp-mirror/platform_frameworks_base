@@ -923,7 +923,7 @@
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren burbuilak erabiltzeko baimena eman nahi duzu?"</string>
     <string name="manage_bubbles_text" msgid="7027739766859191408">"Kudeatu"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Ukatu"</string>
-    <string name="yes_bubbles" msgid="668809525728633841">"Onartu"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"Baimendu"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Galdetu geroago"</string>
     <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> (<xliff:g id="APP_NAME">%2$s</xliff:g>)"</string>
     <string name="bubble_content_description_stack" msgid="8666349184095622232">"<xliff:g id="APP_NAME">%2$s</xliff:g> aplikazioaren \"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>\" jakinarazpena, eta beste <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
