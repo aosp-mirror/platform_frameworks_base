@@ -68,6 +68,7 @@ namespace {
 
 JavaVM* gJavaVM = nullptr;
 bool gForkCrash = false;
+bool gJavaCrash = false;
 
 // Converts a class name to a type descriptor
 // (ex. "java.lang.String" to "Ljava/lang/String;")
@@ -394,6 +395,8 @@ jint attach(JavaVM* vm, char* options, void* reserved ATTRIBUTE_UNUSED) {
     for (const std::string& c : config) {
         if (c == "native_crash") {
             gForkCrash = true;
+        } else if (c == "java_crash") {
+            gJavaCrash = true;
         }
     }
 
@@ -403,6 +406,11 @@ jint attach(JavaVM* vm, char* options, void* reserved ATTRIBUTE_UNUSED) {
 extern "C" JNIEXPORT
 jboolean JNICALL Java_com_android_lock_1checker_LockHook_getNativeHandlingConfig(JNIEnv*, jclass) {
     return gForkCrash ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_android_lock_1checker_LockHook_getSimulateCrashConfig(JNIEnv*, jclass) {
+    return gJavaCrash ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_android_lock_1checker_LockHook_nWtf(JNIEnv* env, jclass,

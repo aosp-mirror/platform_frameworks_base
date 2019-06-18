@@ -16,6 +16,7 @@
 
 package com.android.lock_checker;
 
+import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -24,6 +25,7 @@ import android.os.Process;
 import android.util.Log;
 import android.util.LogWriter;
 
+import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.StatLogger;
 
@@ -73,6 +75,7 @@ public class LockHook {
     private static final LockChecker[] sCheckers;
 
     private static boolean sNativeHandling = false;
+    private static boolean sSimulateCrash = false;
 
     static {
         sHandlerThread = new HandlerThread("LockHook:wtf", Process.THREAD_PRIORITY_BACKGROUND);
@@ -82,9 +85,11 @@ public class LockHook {
         sCheckers = new LockChecker[] { new OnThreadLockChecker() };
 
         sNativeHandling = getNativeHandlingConfig();
+        sSimulateCrash = getSimulateCrashConfig();
     }
 
     private static native boolean getNativeHandlingConfig();
+    private static native boolean getSimulateCrashConfig();
 
     static <T> boolean shouldDumpStacktrace(StacktraceHasher hasher, Map<String, T> dumpedSet,
             T val, AnnotatedStackTraceElement[] st, int from, int to) {
@@ -183,6 +188,12 @@ public class LockHook {
         Log.wtf(TAG, msg);
         if (sNativeHandling) {
             nWtf(msg);  // Also send to native.
+        }
+        if (sSimulateCrash) {
+            RuntimeInit.logUncaught("LockAgent",
+                    ActivityThread.isSystem() ? "system_server"
+                            : ActivityThread.currentProcessName(),
+                    Process.myPid(), v.getException());
         }
     }
 
@@ -308,5 +319,6 @@ public class LockHook {
     }
 
     interface Violation {
+        Throwable getException();
     }
 }
