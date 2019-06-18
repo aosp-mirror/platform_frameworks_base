@@ -6066,30 +6066,6 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * @deprecated Do not use
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public @Nullable String getDeviceInitializerApp() {
-        return null;
-    }
-
-    /**
-     * @hide
-     * @deprecated Do not use
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public @Nullable ComponentName getDeviceInitializerComponent() {
-        return null;
-    }
-
-    /**
-     * @hide
      * @deprecated Use #ACTION_SET_PROFILE_OWNER
      * Sets the given component as an active admin and registers the package as the profile
      * owner for this user. The package must already be installed and there shouldn't be
@@ -7391,60 +7367,6 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
-    }
-
-    /**
-     * Called by a device owner to create a user with the specified name. The UserHandle returned
-     * by this method should not be persisted as user handles are recycled as users are removed and
-     * created. If you need to persist an identifier for this user, use
-     * {@link UserManager#getSerialNumberForUser}.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param name the user's name
-     * @see UserHandle
-     * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
-     *         user could not be created.
-     *
-     * @deprecated From {@link android.os.Build.VERSION_CODES#M}
-     * @removed From {@link android.os.Build.VERSION_CODES#N}
-     */
-    @Deprecated
-    public @Nullable UserHandle createUser(@NonNull ComponentName admin, String name) {
-        return null;
-    }
-
-    /**
-     * Called by a device owner to create a user with the specified name. The UserHandle returned
-     * by this method should not be persisted as user handles are recycled as users are removed and
-     * created. If you need to persist an identifier for this user, use
-     * {@link UserManager#getSerialNumberForUser}.  The new user will be started in the background
-     * immediately.
-     *
-     * <p> profileOwnerComponent is the {@link DeviceAdminReceiver} to be the profile owner as well
-     * as registered as an active admin on the new user.  The profile owner package will be
-     * installed on the new user if it already is installed on the device.
-     *
-     * <p>If the optionalInitializeData is not null, then the extras will be passed to the
-     * profileOwnerComponent when onEnable is called.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param name the user's name
-     * @param ownerName the human readable name of the organisation associated with this DPM.
-     * @param profileOwnerComponent The {@link DeviceAdminReceiver} that will be an active admin on
-     *      the user.
-     * @param adminExtras Extras that will be passed to onEnable of the admin receiver
-     *      on the new user.
-     * @see UserHandle
-     * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
-     *         user could not be created.
-     *
-     * @deprecated From {@link android.os.Build.VERSION_CODES#M}
-     * @removed From {@link android.os.Build.VERSION_CODES#N}
-     */
-    @Deprecated
-    public @Nullable UserHandle createAndInitializeUser(@NonNull ComponentName admin, String name,
-            String ownerName, @NonNull ComponentName profileOwnerComponent, Bundle adminExtras) {
-        return null;
     }
 
     /**
