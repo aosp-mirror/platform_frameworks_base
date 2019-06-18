@@ -66,7 +66,8 @@ public class LockHook {
 
     static final StatLogger sStats = new StatLogger(new String[] { "on-thread", });
 
-    private static final ConcurrentLinkedQueue<Object> sViolations = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<Violation> sViolations =
+            new ConcurrentLinkedQueue<>();
     private static final int MAX_VIOLATIONS = 50;
 
     private static final LockChecker[] sCheckers;
@@ -101,8 +102,8 @@ public class LockHook {
         }
     }
 
-    static void wtf(String message) {
-        sHandler.wtf(message);
+    static void wtf(Violation v) {
+        sHandler.wtf(v);
     }
 
     static void doCheckOnThisThread(boolean check) {
@@ -151,10 +152,10 @@ public class LockHook {
             super(looper);
         }
 
-        public void wtf(String msg) {
+        public void wtf(Violation v) {
             sDoCheck.set(false);
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = msg;
+            args.arg1 = v;
             obtainMessage(MSG_WTF, args).sendToTarget();
             sDoCheck.set(true);
         }
@@ -164,11 +165,16 @@ public class LockHook {
             switch (msg.what) {
                 case MSG_WTF:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    Log.wtf(TAG, (String) args.arg1);
+                    handleViolation((Violation) args.arg1);
                     args.recycle();
                     break;
             }
         }
+    }
+
+    private static void handleViolation(Violation v) {
+        String msg = v.toString();
+        Log.wtf(TAG, msg);
     }
 
     /**
@@ -224,8 +230,10 @@ public class LockHook {
         }
     }
 
-    static void addViolation(Object o) {
-        sViolations.offer(o);
+    static void addViolation(Violation v) {
+        wtf(v);
+
+        sViolations.offer(v);
         while (sViolations.size() > MAX_VIOLATIONS) {
             sViolations.poll();
         }
@@ -286,5 +294,8 @@ public class LockHook {
         String getCheckerName();
 
         void dump(PrintWriter pw);
+    }
+
+    interface Violation {
     }
 }
