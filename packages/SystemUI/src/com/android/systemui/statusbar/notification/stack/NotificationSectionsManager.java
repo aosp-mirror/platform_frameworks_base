@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -32,6 +31,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
 /**
  * Manages the boundaries of the two notification sections (high priority and low priority). Also
@@ -43,8 +44,10 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
     private final NotificationStackScrollLayout mParent;
     private final ActivityStarter mActivityStarter;
     private final StatusBarStateController mStatusBarStateController;
+    private final ConfigurationController mConfigurationController;
     private final boolean mUseMultipleSections;
 
+    private boolean mInitialized = false;
     private SectionHeaderView mGentleHeader;
     private boolean mGentleHeaderVisible = false;
     @Nullable private ExpandableNotificationRow mFirstGentleNotif;
@@ -54,18 +57,29 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             NotificationStackScrollLayout parent,
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
+            ConfigurationController configurationController,
             boolean useMultipleSections) {
         mParent = parent;
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
+        mConfigurationController = configurationController;
         mUseMultipleSections = useMultipleSections;
     }
 
+    /** Must be called before use. */
+    void initialize(LayoutInflater layoutInflater) {
+        if (mInitialized) {
+            throw new IllegalStateException("NotificationSectionsManager already initialized");
+        }
+        mInitialized = true;
+        reinflateViews(layoutInflater);
+        mConfigurationController.addCallback(mConfigurationListener);
+    }
+
     /**
-     * Must be called before use. Should be called again whenever inflation-related things change,
-     * such as density or theme changes.
+     * Reinflates the entire notification header, including all decoration views.
      */
-    void inflateViews(Context context) {
+    void reinflateViews(LayoutInflater layoutInflater) {
         int oldPos = -1;
         if (mGentleHeader != null) {
             if (mGentleHeader.getTransientContainer() != null) {
@@ -76,7 +90,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             }
         }
 
-        mGentleHeader = (SectionHeaderView) LayoutInflater.from(context).inflate(
+        mGentleHeader = (SectionHeaderView) layoutInflater.inflate(
                 R.layout.status_bar_notification_section_header, mParent, false);
         mGentleHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
         mGentleHeader.setOnClearAllClickListener(this::onClearGentleNotifsClick);
@@ -243,6 +257,13 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
         }
         return lastChildBeforeGap;
     }
+
+    private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onLocaleListChanged() {
+            mGentleHeader.reinflateContents();
+        }
+    };
 
     private void onGentleHeaderClick(View v) {
         Intent intent = new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
