@@ -33,8 +33,6 @@ import com.android.internal.annotations.VisibleForTesting;
  * are represented as a comma-delimited key value list.
  */
 public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
-    private static final String TAG = "BackupAgentTimeout";
-
     @VisibleForTesting
     public static final String SETTING = Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS;
 

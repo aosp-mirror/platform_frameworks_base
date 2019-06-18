@@ -21,7 +21,6 @@ import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThread;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -133,8 +132,7 @@ public class BackupManagerServiceTest {
                 () ->
                         new BackupManagerService(
                                 /* context */ null,
-                                new Trampoline(mContext),
-                                startBackupThread(null)));
+                                new Trampoline(mContext)));
     }
 
     /** Test that the constructor handles {@code null} parameters. */
@@ -144,17 +142,7 @@ public class BackupManagerServiceTest {
                 NullPointerException.class,
                 () ->
                         new BackupManagerService(
-                                mContext, /* trampoline */ null, startBackupThread(null)));
-    }
-
-    /** Test that the constructor handles {@code null} parameters. */
-    @Test
-    public void testConstructor_withNullBackupThread_throws() throws Exception {
-        expectThrows(
-                NullPointerException.class,
-                () ->
-                        new BackupManagerService(
-                                mContext, new Trampoline(mContext), /* backupThread */ null));
+                                mContext, /* trampoline */ null));
     }
 
     /** Test that the service registers users. */
@@ -1581,8 +1569,7 @@ public class BackupManagerServiceTest {
 
     private BackupManagerService createService() {
         mShadowContext.grantPermissions(BACKUP);
-        return new BackupManagerService(
-                mContext, new Trampoline(mContext), startBackupThread(null));
+        return new BackupManagerService(mContext, new Trampoline(mContext));
     }
 
     private BackupManagerService createServiceAndRegisterUser(

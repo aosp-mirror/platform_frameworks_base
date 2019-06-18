@@ -39,7 +39,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.FileUtils;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
@@ -87,7 +86,6 @@ public class BackupManagerService {
 
     private final Context mContext;
     private final Trampoline mTrampoline;
-    private final HandlerThread mBackupThread;
 
     // Keeps track of all unlocked users registered with this service. Indexed by user id.
     private final SparseArray<UserBackupManagerService> mServiceUsers = new SparseArray<>();
@@ -107,11 +105,9 @@ public class BackupManagerService {
     };
 
     /** Instantiate a new instance of {@link BackupManagerService}. */
-    public BackupManagerService(
-            Context context, Trampoline trampoline, HandlerThread backupThread) {
+    public BackupManagerService(Context context, Trampoline trampoline) {
         mContext = checkNotNull(context);
         mTrampoline = checkNotNull(trampoline);
-        mBackupThread = checkNotNull(backupThread);
 
         // Set up our transport options.
         SystemConfig systemConfig = SystemConfig.getInstance();
