@@ -18,9 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 
 import android.app.ActivityManager;
@@ -47,17 +44,19 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.RemoteInputController.Callback;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
+import com.google.android.collect.Lists;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 
+import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -83,6 +82,8 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
+    private final ArrayList<WeakReference<StatusBarWindowCallback>>
+            mCallbacks = Lists.newArrayList();
 
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
@@ -106,6 +107,19 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
+    }
+
+    /**
+     * Register to receive notifications about status bar window state changes.
+     */
+    public void registerCallback(StatusBarWindowCallback callback) {
+        // Prevent adding duplicate callbacks
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            if (mCallbacks.get(i).get() == callback) {
+                return;
+            }
+        }
+        mCallbacks.add(new WeakReference<StatusBarWindowCallback>(callback));
     }
 
     private boolean shouldEnableKeyguardScreenRotation() {
@@ -318,18 +332,18 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             }
             mHasTopUi = mHasTopUiChanged;
         }
-        updateSystemUiStateFlags();
+        notifyStateChangedCallbacks();
     }
 
-    public void updateSystemUiStateFlags() {
-        int displayId = mContext.getDisplayId();
-        OverviewProxyService overviewProxyService = Dependency.get(OverviewProxyService.class);
-        overviewProxyService.setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
-                mCurrentState.keyguardShowing && !mCurrentState.keyguardOccluded, displayId);
-        overviewProxyService.setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
-                mCurrentState.keyguardShowing && mCurrentState.keyguardOccluded, displayId);
-        overviewProxyService.setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
-                mCurrentState.bouncerShowing, displayId);
+    public void notifyStateChangedCallbacks() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            StatusBarWindowCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onStateChanged(mCurrentState.keyguardShowing,
+                        mCurrentState.keyguardOccluded,
+                        mCurrentState.bouncerShowing);
+            }
+        }
     }
 
     private void applyForceStatusBarVisibleFlag(State state) {

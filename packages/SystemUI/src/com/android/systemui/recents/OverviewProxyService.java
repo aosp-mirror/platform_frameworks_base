@@ -27,6 +27,9 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -67,6 +70,7 @@ import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -90,7 +94,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
     public static final String TAG_OPS = "OverviewProxyService";
-    public static final boolean DEBUG_OVERVIEW_PROXY = false;
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
 
@@ -115,7 +118,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mBound;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
-    private float mBackButtonAlpha;
+    private float mNavBarButtonAlpha;
     private MotionEvent mStatusBarGestureDownEvent;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
@@ -241,19 +244,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
-        public void setBackButtonAlpha(float alpha, boolean animate) {
-            if (!verifyCaller("setBackButtonAlpha")) {
+        public void setNavBarButtonAlpha(float alpha, boolean animate) {
+            if (!verifyCaller("setNavBarButtonAlpha")) {
                 return;
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mBackButtonAlpha = alpha;
-                mHandler.post(() -> {
-                    notifyBackButtonAlphaChanged(alpha, animate);
-                });
+                mNavBarButtonAlpha = alpha;
+                mHandler.post(() -> notifyNavBarButtonAlphaChanged(alpha, animate));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void setBackButtonAlpha(float alpha, boolean animate) {
+            setNavBarButtonAlpha(alpha, animate);
         }
 
         @Override
@@ -442,6 +448,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
+    private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
+
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
             = this::cleanupAfterDeath;
@@ -465,7 +473,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .supportsRoundedCornersOnWindows(mContext.getResources());
 
         // Assumes device always starts with back button until launcher tells it that it does not
-        mBackButtonAlpha = 1.0f;
+        mNavBarButtonAlpha = 1.0f;
 
         // Listen for nav bar mode changes
         mNavBarMode = navModeController.addListener(this);
@@ -481,6 +489,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 PatternMatcher.PATTERN_LITERAL);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
+
+        // Listen for status bar state changes
+        statusBarWinController.registerCallback(mStatusBarWindowCallback);
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
@@ -531,7 +542,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             navBarView.updateSystemUiStateFlags();
         }
         if (mStatusBarWinController != null) {
-            mStatusBarWinController.updateSystemUiStateFlags();
+            mStatusBarWinController.notifyStateChangedCallbacks();
         }
         notifySystemUiStateFlags(mSysUiStateFlags);
     }
@@ -544,6 +555,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify sysui state change", e);
         }
+    }
+
+    private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
+            boolean bouncerShowing) {
+        int displayId = mContext.getDisplayId();
+        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+                keyguardShowing && !keyguardOccluded, displayId);
+        setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
+                keyguardShowing && keyguardOccluded, displayId);
+        setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing, displayId);
     }
 
     /**
@@ -565,7 +586,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public float getBackButtonAlpha() {
-        return mBackButtonAlpha;
+        return mNavBarButtonAlpha;
     }
 
     public void cleanupAfterDeath() {
@@ -637,7 +658,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void addCallback(OverviewProxyListener listener) {
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
-        listener.onBackButtonAlphaChanged(mBackButtonAlpha, false);
+        listener.onNavBarButtonAlphaChanged(mNavBarButtonAlpha, false);
         listener.onSystemUiStateChanged(mSysUiStateFlags);
     }
 
@@ -668,14 +689,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         if (mOverviewProxy != null) {
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mOverviewProxy = null;
-            notifyBackButtonAlphaChanged(1f, false /* animate */);
+            notifyNavBarButtonAlphaChanged(1f, false /* animate */);
             notifyConnectionChanged();
         }
     }
 
-    private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
+    private void notifyNavBarButtonAlphaChanged(float alpha, boolean animate) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onBackButtonAlphaChanged(alpha, animate);
+            mConnectionCallbacks.get(i).onNavBarButtonAlphaChanged(alpha, animate);
         }
     }
 
@@ -766,7 +787,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onQuickStepStarted() {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
-        default void onBackButtonAlphaChanged(float alpha, boolean animate) {}
+        /** Notify changes in the nav bar button alpha */
+        default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}

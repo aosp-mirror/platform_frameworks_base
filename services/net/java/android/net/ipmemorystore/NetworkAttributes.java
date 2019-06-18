@@ -127,6 +127,7 @@ public class NetworkAttributes {
 
     @Nullable
     private static InetAddress getByAddressOrNull(@Nullable final byte[] address) {
+        if (null == address) return null;
         try {
             return InetAddress.getByAddress(address);
         } catch (UnknownHostException e) {
@@ -227,7 +228,9 @@ public class NetworkAttributes {
         }
 
         /**
-         * Set the lease expiry timestamp of assigned v4 address.
+         * Set the lease expiry timestamp of assigned v4 address. Long.MAX_VALUE is used
+         * to represent "infinite lease".
+         *
          * @param assignedV4AddressExpiry The lease expiry timestamp of assigned v4 address.
          * @return This builder.
          */
