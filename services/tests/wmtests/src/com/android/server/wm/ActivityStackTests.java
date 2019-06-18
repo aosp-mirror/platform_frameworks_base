@@ -1079,6 +1079,19 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(listener.mChanged);
     }
 
+    @Test
+    public void testResetTaskWithFinishingActivities() {
+        final ActivityRecord taskTop =
+                new ActivityBuilder(mService).setStack(mStack).setCreateTask(true).build();
+        // Make all activities in the task are finishing to simulate TaskRecord#getTopActivity
+        // returns null.
+        taskTop.finishing = true;
+
+        final ActivityRecord newR = new ActivityBuilder(mService).build();
+        final ActivityRecord result = mStack.resetTaskIfNeededLocked(taskTop, newR);
+        assertThat(result).isEqualTo(taskTop);
+    }
+
     private void verifyShouldSleepActivities(boolean focusedStack,
             boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
         final ActivityDisplay display = mock(ActivityDisplay.class);

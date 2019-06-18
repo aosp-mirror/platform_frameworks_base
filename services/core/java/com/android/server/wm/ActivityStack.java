@@ -3579,6 +3579,16 @@ class ActivityStack extends ConfigurationContainer {
         return taskInsertionPoint;
     }
 
+    /**
+     * Reset the task by reparenting the activities that have same affinity to the task or
+     * reparenting the activities that have different affinityies out of the task, while these
+     * activities allow task reparenting.
+     *
+     * @param taskTop     Top activity of the task might be reset.
+     * @param newActivity The activity that going to be started.
+     * @return The non-finishing top activity of the task after reset or the original task top
+     *         activity if all activities within the task are finishing.
+     */
     final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
             ActivityRecord newActivity) {
         final boolean forceReset =
@@ -3609,9 +3619,10 @@ class ActivityStack extends ConfigurationContainer {
 
         int taskNdx = mTaskHistory.indexOf(task);
         if (taskNdx >= 0) {
-            do {
-                taskTop = mTaskHistory.get(taskNdx--).getTopActivity();
-            } while (taskTop == null && taskNdx >= 0);
+            ActivityRecord newTop = mTaskHistory.get(taskNdx).getTopActivity();
+            if (newTop != null) {
+                taskTop = newTop;
+            }
         }
 
         if (topOptions != null) {
