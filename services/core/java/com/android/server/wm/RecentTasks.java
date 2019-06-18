@@ -308,11 +308,13 @@ class RecentTasks {
      */
     @VisibleForTesting
     void resetFreezeTaskListReorderingOnTimeout() {
-        final ActivityStack focusedStack = mService.getTopDisplayFocusedStack();
-        final TaskRecord topTask = focusedStack != null
-                ? focusedStack.topTask()
-                : null;
-        resetFreezeTaskListReordering(topTask);
+        synchronized (mService.mGlobalLock) {
+            final ActivityStack focusedStack = mService.getTopDisplayFocusedStack();
+            final TaskRecord topTask = focusedStack != null
+                    ? focusedStack.topTask()
+                    : null;
+            resetFreezeTaskListReordering(topTask);
+        }
     }
 
     @VisibleForTesting
