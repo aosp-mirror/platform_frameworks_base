@@ -418,7 +418,7 @@ class TaskSnapshotSurface implements StartingSurface {
 
     private void reportDrawn() {
         try {
-            mSession.finishDrawing(mWindow);
+            mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
         } catch (RemoteException e) {
             // Local call.
         }
