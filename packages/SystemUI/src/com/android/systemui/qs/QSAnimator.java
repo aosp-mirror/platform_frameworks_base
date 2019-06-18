@@ -73,6 +73,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private int mNumQuickTiles;
     private float mLastPosition;
     private QSTileHost mHost;
+    private boolean mShowCollapsedOnKeyguard;
 
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QSPanel panel) {
         mQs = qs;
@@ -98,10 +99,30 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     public void setOnKeyguard(boolean onKeyguard) {
         mOnKeyguard = onKeyguard;
-        mQuickQsPanel.setVisibility(mOnKeyguard ? View.INVISIBLE : View.VISIBLE);
+        updateQQSVisibility();
         if (mOnKeyguard) {
             clearAnimationState();
         }
+    }
+
+
+    /**
+     * Sets whether or not the keyguard is currently being shown with a collapsed header.
+     */
+    void setShowCollapsedOnKeyguard(boolean showCollapsedOnKeyguard) {
+        mShowCollapsedOnKeyguard = showCollapsedOnKeyguard;
+        updateQQSVisibility();
+        setCurrentPosition();
+    }
+
+
+    private void setCurrentPosition() {
+        setPosition(mLastPosition);
+    }
+
+    private void updateQQSVisibility() {
+        mQuickQsPanel.setVisibility(mOnKeyguard
+                && !mShowCollapsedOnKeyguard ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void setHost(QSTileHost qsh) {
@@ -322,7 +343,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public void setPosition(float position) {
         if (mFirstPageAnimator == null) return;
         if (mOnKeyguard) {
-            return;
+            if (mShowCollapsedOnKeyguard) {
+                position = 0;
+            } else {
+                position = 1;
+            }
         }
         mLastPosition = position;
         if (mOnFirstPage && mAllowFancy) {
@@ -356,7 +381,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationStarted() {
-        mQuickQsPanel.setVisibility(mOnKeyguard ? View.INVISIBLE : View.VISIBLE);
+        updateQQSVisibility();
         if (mOnFirstPage) {
             final int N = mQuickQsViews.size();
             for (int i = 0; i < N; i++) {
@@ -410,7 +435,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         @Override
         public void run() {
             updateAnimators();
-            setPosition(mLastPosition);
+            setCurrentPosition();
         }
     };
 }

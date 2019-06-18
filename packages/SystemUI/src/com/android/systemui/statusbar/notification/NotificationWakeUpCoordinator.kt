@@ -237,7 +237,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     fun getWakeUpHeight() : Float {
-        return mStackScroller.pulseHeight
+        return mStackScroller.wakeUpHeight
     }
 
     private fun updateHideAmount() {
@@ -257,8 +257,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
+    /**
+     * Set the height how tall notifications are pulsing. This is only set whenever we are expanding
+     * from a pulse and determines how much the notifications are expanded.
+     */
     fun setPulseHeight(height: Float): Float {
-        return mStackScroller.setPulseHeight(height)
+        val overflow = mStackScroller.setPulseHeight(height)
+        //  no overflow for the bypass experience
+        return if (bypassController.bypassEnabled) 0.0f else overflow
     }
 
     fun setWakingUp(wakingUp: Boolean) {

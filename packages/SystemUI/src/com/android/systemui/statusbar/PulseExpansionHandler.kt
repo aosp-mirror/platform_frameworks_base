@@ -62,16 +62,18 @@ constructor(context: Context,
     private val mMinDragDistance: Int
     private var mInitialTouchX: Float = 0.0f
     private var mInitialTouchY: Float = 0.0f
-    private var isExpanding: Boolean = false
+    var isExpanding: Boolean = false
         private set(value) {
             val changed = field != value
             field = value
             bypassController.isPulseExpanding = value
             if (changed && !value && !leavingLockscreen) {
                 bypassController.maybePerformPendingUnlock()
+                pulseExpandAbortListener?.run()
             }
         }
-    private var leavingLockscreen: Boolean = false
+    var leavingLockscreen: Boolean = false
+        private set
     private val mTouchSlop: Float
     private lateinit var expansionCallback: ExpansionCallback
     private lateinit var stackScroller: NotificationStackScrollLayout
@@ -89,6 +91,8 @@ constructor(context: Context,
 
     private val isFalseTouch: Boolean
         get() = mFalsingManager.isFalseTouch
+    var qsExpanded: Boolean = false
+    var pulseExpandAbortListener: Runnable? = null
 
     init {
         mMinDragDistance = context.resources.getDimensionPixelSize(
@@ -103,7 +107,7 @@ constructor(context: Context,
     }
 
     private fun maybeStartExpansion(event: MotionEvent): Boolean {
-        if (!wakeUpCoordinator.canShowPulsingHuns) {
+        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded) {
             return false
         }
         if (velocityTracker == null) {
@@ -270,6 +274,7 @@ constructor(context: Context,
     }
 
     private fun cancelExpansion() {
+        isExpanding = false
         mFalsingManager.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
@@ -280,7 +285,6 @@ constructor(context: Context,
         wakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
                 true /* animate */,
                 false /* increaseSpeed */)
-        isExpanding = false
     }
 
     private fun findView(x: Float, y: Float): ExpandableView? {
