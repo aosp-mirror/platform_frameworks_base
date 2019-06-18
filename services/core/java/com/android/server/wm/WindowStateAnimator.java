@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -1294,6 +1295,13 @@ class WindowStateAnimator {
         if (mWin.mSkipEnterAnimationForSeamlessReplacement) {
             return;
         }
+
+        // We don't apply animation for application main window here since this window type
+        // should be controlled by AppWindowToken in general.
+        if (mAttrType == TYPE_BASE_APPLICATION) {
+            return;
+        }
+
         final int transit;
         if (mEnterAnimationPending) {
             mEnterAnimationPending = false;
@@ -1365,6 +1373,7 @@ class WindowStateAnimator {
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
                     + " a=" + a
                     + " transit=" + transit
+                    + " type=" + mAttrType
                     + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
