@@ -31,6 +31,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
@@ -56,7 +57,6 @@ import android.app.servertransaction.PauseActivityItem;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
@@ -163,12 +163,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Make sure the state does not change if we are not the current top activity.
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped behind");
 
-        // Make sure that the state does not change when we have an activity becoming translucent
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
         mStack.mTranslucentActivityWaiting = topActivity;
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
-
-        assertTrue(mActivity.isState(STOPPED));
+        assertTrue(mActivity.isState(PAUSED));
     }
 
     private void ensureActivityConfiguration() {
@@ -436,6 +434,15 @@ public class ActivityRecordTests extends ActivityTestsBase {
         } finally {
             stack.getDisplay().removeChild(stack);
         }
+    }
+
+    @Test
+    public void testShouldPauseWhenMakeClientVisible() {
+        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.changeWindowTranslucency(false);
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        mActivity.makeClientVisible();
+        assertEquals(PAUSED, mActivity.getState());
     }
 
     @Test
