@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Build;
 import android.os.SystemProperties;
@@ -26,6 +27,7 @@ import android.os.SystemProperties;
  *
  * @hide
  */
+@TestApi
 public class InputMethodSystemProperty {
     /**
      * System property key for the production use. The value must be either empty or a valid
@@ -87,6 +89,7 @@ public class InputMethodSystemProperty {
      *
      * @hide
      */
+    @TestApi
     public static final boolean MULTI_CLIENT_IME_ENABLED = (sMultiClientImeComponentName != null);
 
     /**
