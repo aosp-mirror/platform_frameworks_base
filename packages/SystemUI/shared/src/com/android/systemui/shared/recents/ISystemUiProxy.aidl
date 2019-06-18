@@ -55,8 +55,15 @@ interface ISystemUiProxy {
     /**
      * Control the {@param alpha} of the back button in the navigation bar and {@param animate} if
      * needed from current value
+     * @deprecated
      */
     void setBackButtonAlpha(float alpha, boolean animate) = 8;
+
+    /**
+     * Control the {@param alpha} of the option nav bar button (back-button in 2 button mode
+     * and home bar in no-button mode) and {@param animate} if needed from current value
+     */
+    void setNavBarButtonAlpha(float alpha, boolean animate) = 19;
 
     /**
      * Proxies motion events from the homescreen UI to the status bar. Only called when
