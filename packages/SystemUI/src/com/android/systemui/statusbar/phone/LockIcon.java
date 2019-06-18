@@ -420,10 +420,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     private int getState() {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        if (mTransientBiometricsError) {
-            return STATE_BIOMETRICS_ERROR;
-        } else if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing) && !mSimLocked) {
+        if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing) && !mSimLocked) {
             return STATE_LOCK_OPEN;
+        } else if (mTransientBiometricsError) {
+            return STATE_BIOMETRICS_ERROR;
         } else if (updateMonitor.isFaceDetectionRunning()) {
             return STATE_SCANNING_FACE;
         } else {
