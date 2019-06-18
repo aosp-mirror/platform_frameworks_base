@@ -957,7 +957,7 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         // to all 0s.
         proxy.setLightAlpha(0, 0);
         proxy.setLightGeometry((Vector3){0, 0, 0}, 0);
-        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         UiFrameInfoBuilder(proxy.frameInfo())
                 .setVsync(vsync, vsync)
                 .addFlag(FrameInfoFlags::SurfaceCanvas);

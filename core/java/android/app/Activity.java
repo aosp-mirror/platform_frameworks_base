@@ -2682,12 +2682,6 @@ public class Activity extends ContextThemeWrapper
         enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
     }
 
-    /** @removed */
-    @Deprecated
-    public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
-        return enterPictureInPictureMode(PictureInPictureArgs.convert(args));
-    }
-
     /**
      * Puts the activity in picture-in-picture mode if possible in the current system state. The
      * set parameters in {@param params} will be combined with the parameters from prior calls to
@@ -2722,12 +2716,6 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             return false;
         }
-    }
-
-    /** @removed */
-    @Deprecated
-    public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
-        setPictureInPictureParams(PictureInPictureArgs.convert(args));
     }
 
     /**

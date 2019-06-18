@@ -20,6 +20,7 @@ import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
+import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
@@ -192,6 +193,7 @@ import com.android.server.net.BaseNetdEventCallback;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkStatsFactory;
 import com.android.server.utils.PriorityDump;
 
 import com.google.android.collect.Lists;
@@ -4381,7 +4383,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * @return VPN information for accounting, or null if we can't retrieve all required
-     *         information, e.g primary underlying iface.
+     *         information, e.g underlying ifaces.
      */
     @Nullable
     private VpnInfo createVpnInfo(Vpn vpn) {
@@ -4393,17 +4395,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // see VpnService.setUnderlyingNetworks()'s javadoc about how to interpret
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
-            NetworkAgentInfo defaultNetwork = getDefaultNetwork();
-            if (defaultNetwork != null && defaultNetwork.linkProperties != null) {
-                info.primaryUnderlyingIface = getDefaultNetwork().linkProperties.getInterfaceName();
-            }
-        } else if (underlyingNetworks.length > 0) {
-            LinkProperties linkProperties = getLinkProperties(underlyingNetworks[0]);
-            if (linkProperties != null) {
-                info.primaryUnderlyingIface = linkProperties.getInterfaceName();
+            NetworkAgentInfo defaultNai = getDefaultNetwork();
+            if (defaultNai != null) {
+                underlyingNetworks = new Network[] { defaultNai.network };
             }
         }
-        return info.primaryUnderlyingIface == null ? null : info;
+        if (underlyingNetworks != null && underlyingNetworks.length > 0) {
+            List<String> interfaces = new ArrayList<>();
+            for (Network network : underlyingNetworks) {
+                LinkProperties lp = getLinkProperties(network);
+                if (lp != null) {
+                    for (String iface : lp.getAllInterfaceNames()) {
+                        if (!TextUtils.isEmpty(iface)) {
+                            interfaces.add(iface);
+                        }
+                    }
+                }
+            }
+            if (!interfaces.isEmpty()) {
+                info.underlyingIfaces = interfaces.toArray(new String[interfaces.size()]);
+            }
+        }
+        return info.underlyingIfaces == null ? null : info;
     }
 
     /**
@@ -6783,8 +6796,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Notify NetworkStatsService that the set of active ifaces has changed, or that one of the
-     * properties tracked by NetworkStatsService on an active iface has changed.
+     * Notify NetworkStatsService and NetworkStatsFactory that the set of active ifaces has changed,
+     * or that one of the active iface's trackedproperties has changed.
      */
     private void notifyIfacesChangedForNetworkStats() {
         ensureRunningOnConnectivityServiceThread();
@@ -6793,11 +6806,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (activeLinkProperties != null) {
             activeIface = activeLinkProperties.getInterfaceName();
         }
+
+        // CAUTION: Ordering matters between updateVpnInfos() and forceUpdateIfaces(), which
+        // triggers a new poll. Trigger the poll first to ensure a snapshot is taken before
+        // switching to the new state. This ensures that traffic does not get mis-attributed to
+        // incorrect apps (including VPN app).
         try {
             mStatsService.forceUpdateIfaces(
-                    getDefaultNetworks(), getAllVpnInfo(), getAllNetworkState(), activeIface);
+                    getDefaultNetworks(), getAllNetworkState(), activeIface);
         } catch (Exception ignored) {
         }
+        NetworkStatsFactory.updateVpnInfos(getAllVpnInfo());
     }
 
     @Override
@@ -6950,6 +6969,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                 }
             }
+        }
+
+        // restore private DNS settings to default mode (opportunistic)
+        if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC);
         }
 
         Settings.Global.putString(mContext.getContentResolver(),

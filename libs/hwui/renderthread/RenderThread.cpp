@@ -103,7 +103,7 @@ public:
                                            [this]() { mRenderThread->drainDisplayEventQueue(); });
     }
 
-    virtual nsecs_t latestVsyncEvent() override { return systemTime(CLOCK_MONOTONIC); }
+    virtual nsecs_t latestVsyncEvent() override { return systemTime(SYSTEM_TIME_MONOTONIC); }
 
 private:
     RenderThread* mRenderThread;

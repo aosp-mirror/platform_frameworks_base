@@ -305,6 +305,8 @@ message Atom {
         LocationManagerApiUsageReported location_manager_api_usage_reported = 210;
         ReviewPermissionsFragmentResultReported review_permissions_fragment_result_reported
             = 211 [(log_from_module) = "permissioncontroller"];
+        RuntimePermissionsUpgradeResult runtime_permissions_upgrade_result =
+            212 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6572,4 +6574,19 @@ message ReviewPermissionsFragmentResultReported {
 
     // The result of the permission grant
     optional bool permission_granted = 5;
+}
+
+/**
+* Information about results of permission upgrade by RuntimePermissionsUpgradeController
+* Logged from: RuntimePermissionUpdgradeController
+*/
+message RuntimePermissionsUpgradeResult {
+    // Permission granted as result of upgrade
+    optional string permission_name = 1;
+
+    // UID of package granted permission
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package granted permission
+    optional string package_name = 3;
 }

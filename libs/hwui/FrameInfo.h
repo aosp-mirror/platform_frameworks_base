@@ -100,15 +100,15 @@ class FrameInfo {
 public:
     void importUiThreadInfo(int64_t* info);
 
-    void markSyncStart() { set(FrameInfoIndex::SyncStart) = systemTime(CLOCK_MONOTONIC); }
+    void markSyncStart() { set(FrameInfoIndex::SyncStart) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
     void markIssueDrawCommandsStart() {
-        set(FrameInfoIndex::IssueDrawCommandsStart) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::IssueDrawCommandsStart) = systemTime(SYSTEM_TIME_MONOTONIC);
     }
 
-    void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(CLOCK_MONOTONIC); }
+    void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
-    void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(CLOCK_MONOTONIC); }
+    void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
     void addFlag(int frameInfoFlag) {
         set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);

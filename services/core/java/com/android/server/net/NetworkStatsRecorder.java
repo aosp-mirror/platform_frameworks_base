@@ -23,7 +23,6 @@ import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.Nullable;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
@@ -37,13 +36,12 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.net.VpnInfo;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
-import libcore.io.IoUtils;
-
 import com.google.android.collect.Sets;
+
+import libcore.io.IoUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -202,18 +200,12 @@ public class NetworkStatsRecorder {
     }
 
     /**
-     * Record any delta that occurred since last {@link NetworkStats} snapshot,
-     * using the given {@link Map} to identify network interfaces. First
-     * snapshot is considered bootstrap, and is not counted as delta.
-     *
-     * @param vpnArray Optional info about the currently active VPN, if any. This is used to
-     *                 redistribute traffic from the VPN app to the underlying responsible apps.
-     *                 This should always be set to null if the provided snapshot is aggregated
-     *                 across all UIDs (e.g. contains UID_ALL buckets), regardless of VPN state.
+     * Record any delta that occurred since last {@link NetworkStats} snapshot, using the given
+     * {@link Map} to identify network interfaces. First snapshot is considered bootstrap, and is
+     * not counted as delta.
      */
     public void recordSnapshotLocked(NetworkStats snapshot,
-            Map<String, NetworkIdentitySet> ifaceIdent, @Nullable VpnInfo[] vpnArray,
-            long currentTimeMillis) {
+            Map<String, NetworkIdentitySet> ifaceIdent, long currentTimeMillis) {
         final HashSet<String> unknownIfaces = Sets.newHashSet();
 
         // skip recording when snapshot missing
@@ -231,12 +223,6 @@ public class NetworkStatsRecorder {
                 snapshot, mLastSnapshot, mObserver, mCookie);
         final long end = currentTimeMillis;
         final long start = end - delta.getElapsedRealtime();
-
-        if (vpnArray != null) {
-            for (VpnInfo info : vpnArray) {
-                delta.migrateTun(info.ownerUid, info.vpnIface, info.primaryUnderlyingIface);
-            }
-        }
 
         NetworkStats.Entry entry = null;
         for (int i = 0; i < delta.size(); i++) {
