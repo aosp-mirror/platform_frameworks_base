@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -87,6 +88,9 @@ public class StatusBarNotificationTest {
         assertEquals(0,
                 logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY));
         assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CATEGORY));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_STYLE));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_PEOPLE));
+
     }
 
     /** Verify that modifying the returned logMaker won't leave stale data behind for
@@ -157,6 +161,24 @@ public class StatusBarNotificationTest {
         sbn.setOverrideGroupKey(null);
         assertEquals(GROUP_ID_1,
                 sbn.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
+    }
+
+    @Test
+    public void testLogMakerWithPerson() {
+        Notification.Builder builder = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID)
+                .addPerson(new Person.Builder().build());
+        final LogMaker logMaker = getNotification(PKG, builder).getLogMaker();
+        assertEquals(1,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_PEOPLE));
+    }
+
+    @Test
+    public void testLogMakerWithStyle() {
+        Notification.Builder builder = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID)
+                .setStyle(new Notification.MessagingStyle(new Person.Builder().build()));
+        final LogMaker logMaker = getNotification(PKG, builder).getLogMaker();
+        assertEquals("android.app.Notification$MessagingStyle".hashCode(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_STYLE));
     }
 
     private StatusBarNotification getNotification(String pkg, String group, String channelId) {
