@@ -5301,7 +5301,7 @@ message NetworkDnsEventReported {
     // Only valid for event_type = EVENT_RESNSEND.
     optional int32 res_nsend_flags = 5;
 
-    optional android.stats.dnsresolver.Transport network_type = 6;
+    optional android.stats.dnsresolver.NetworkType network_type = 6;
 
     // The DNS over TLS mode on a specific netId.
     optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
