@@ -61,6 +61,14 @@ class Bubble {
     private long mLastAccessed;
     private boolean mIsRemoved;
 
+    /**
+     * Whether this notification should be shown in the shade when it is also displayed as a bubble.
+     *
+     * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
+     * expanded</p>
+     */
+    private boolean mShowInShadeWhenBubble = true;
+
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
         return user.getIdentifier() + "|" + entry.notification.getPackageName();
@@ -99,14 +107,6 @@ class Bubble {
         return mEntry;
     }
 
-    public boolean showInShadeWhenBubble() {
-        return mEntry.showInShadeWhenBubble();
-    }
-
-    public void setShowInShadeWhenBubble(boolean showInShade) {
-        mEntry.setShowInShadeWhenBubble(showInShade);
-    }
-
     public String getGroupId() {
         return mGroupId;
     }
@@ -129,11 +129,11 @@ class Bubble {
         }
     }
 
-    public BubbleView getIconView() {
+    BubbleView getIconView() {
         return mIconView;
     }
 
-    public BubbleExpandedView getExpandedView() {
+    BubbleExpandedView getExpandedView() {
         return mExpandedView;
     }
 
@@ -182,7 +182,7 @@ class Bubble {
         return mIsRemoved;
     }
 
-    void setEntry(NotificationEntry entry) {
+    void updateEntry(NotificationEntry entry) {
         mEntry = entry;
         mLastUpdated = entry.notification.getPostTime();
         if (mInflated) {
@@ -225,6 +225,23 @@ class Bubble {
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
         setShowInShadeWhenBubble(false);
+    }
+
+    /**
+     * Whether this notification should be shown in the shade when it is also displayed as a
+     * bubble.
+     */
+    boolean showInShadeWhenBubble() {
+        return !mEntry.isRowDismissed() && !shouldSuppressNotification()
+                && (!mEntry.isClearable() || mShowInShadeWhenBubble);
+    }
+
+    /**
+     * Sets whether this notification should be shown in the shade when it is also displayed as a
+     * bubble.
+     */
+    void setShowInShadeWhenBubble(boolean showInShade) {
+        mShowInShadeWhenBubble = showInShade;
     }
 
     /**
@@ -353,6 +370,11 @@ class Bubble {
             }
         }
         return 0;
+    }
+
+    private boolean shouldSuppressNotification() {
+        return mEntry.getBubbleMetadata() != null
+                && mEntry.getBubbleMetadata().isNotificationSuppressed();
     }
 
     @Override
