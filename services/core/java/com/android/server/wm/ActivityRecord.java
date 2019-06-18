@@ -2039,6 +2039,13 @@ final class ActivityRecord extends ConfigurationContainer {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
             makeActiveIfNeeded(null /* activeActivity*/);
+            if (isState(STOPPING, STOPPED) && isFocusable()) {
+                // #shouldMakeActive() only evaluates the topmost activities in task, so
+                // activities that are not the topmost in task are not being resumed or paused.
+                // For activities that are still in STOPPING or STOPPED state, updates the state
+                // to PAUSE at least when making it visible.
+                setState(PAUSED, "makeClientVisible");
+            }
         } catch (Exception e) {
             Slog.w(TAG, "Exception thrown sending visibility update: " + intent.getComponent(), e);
         }
