@@ -7629,22 +7629,30 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
-        boolean shouldWaitForAnimToComplete = false;
+        boolean isDown;
+        boolean isUp;
+
         if (ev instanceof KeyEvent) {
             KeyEvent keyEvent = (KeyEvent) ev;
-            shouldWaitForAnimToComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
-                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN;
-        } else if (ev instanceof MotionEvent) {
+            isDown = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
+            isUp = keyEvent.getAction() == KeyEvent.ACTION_UP;
+        } else {
             MotionEvent motionEvent = (MotionEvent) ev;
-            shouldWaitForAnimToComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
-                    || motionEvent.getAction() == MotionEvent.ACTION_DOWN;
+            isDown = motionEvent.getAction() == MotionEvent.ACTION_DOWN;
+            isUp = motionEvent.getAction() == MotionEvent.ACTION_UP;
         }
 
-        if (shouldWaitForAnimToComplete) {
+        // For ACTION_DOWN, syncInputTransactions before injecting input.
+        // For ACTION_UP, sync after injecting.
+        if (isDown) {
             syncInputTransactions();
         }
-
-        return LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
+        final boolean result =
+                LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
+        if (isUp) {
+            syncInputTransactions();
+        }
+        return result;
     }
 
     @Override
