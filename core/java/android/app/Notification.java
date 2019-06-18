@@ -8539,8 +8539,10 @@ public class Notification implements Parcelable
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
+        public static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
 
         /**
          * If set and the app posting the bubble is in the foreground, the bubble will
@@ -8551,8 +8553,10 @@ public class Notification implements Parcelable
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble, or if the user has seen the content in the notification and the
          * notification is no longer relevant.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
+        public static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
                 Icon icon, int height, @DimenRes int heightResId) {
@@ -8668,8 +8672,18 @@ public class Notification implements Parcelable
             out.writeInt(mDesiredHeightResId);
         }
 
-        private void setFlags(int flags) {
+        /**
+         * @hide
+         */
+        public void setFlags(int flags) {
             mFlags = flags;
+        }
+
+        /**
+         * @hide
+         */
+        public int getFlags() {
+            return mFlags;
         }
 
         /**
