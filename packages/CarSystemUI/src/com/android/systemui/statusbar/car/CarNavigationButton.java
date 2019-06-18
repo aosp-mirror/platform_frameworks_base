@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -96,7 +97,10 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
                             mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
                             return;
                         }
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                        ActivityOptions options = ActivityOptions.makeBasic();
+                        options.setLaunchDisplayId(mContext.getDisplayId());
+                        mContext.startActivityAsUser(intent, options.toBundle(),
+                                UserHandle.CURRENT);
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to launch intent", e);
                     }
@@ -111,7 +115,10 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
                 final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
                 setOnLongClickListener(v -> {
                     try {
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                        ActivityOptions options = ActivityOptions.makeBasic();
+                        options.setLaunchDisplayId(mContext.getDisplayId());
+                        mContext.startActivityAsUser(intent, options.toBundle(),
+                                UserHandle.CURRENT);
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to launch intent", e);
                     }
