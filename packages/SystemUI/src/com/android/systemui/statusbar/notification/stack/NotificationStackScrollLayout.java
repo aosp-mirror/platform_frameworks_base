@@ -32,7 +32,6 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -508,6 +507,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationRoundnessManager notificationRoundnessManager,
             DynamicPrivacyController dynamicPrivacyController,
+            ConfigurationController configurationController,
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
             HeadsUpManagerPhone headsUpManager,
@@ -532,8 +532,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         this,
                         activityStarter,
                         statusBarStateController,
+                        configurationController,
                         NotificationUtils.useNewInterruptionModel(context));
-        mSectionsManager.inflateViews(context);
+        mSectionsManager.initialize(LayoutInflater.from(context));
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
             final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
@@ -647,7 +648,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
-        mSectionsManager.inflateViews(mContext);
+        mSectionsManager.reinflateViews(LayoutInflater.from(mContext));
     }
 
     @Override
