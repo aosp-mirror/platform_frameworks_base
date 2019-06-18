@@ -246,7 +246,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
-import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -433,9 +432,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // messaging when a client uses an expired token.
     private static final long START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT =
             START_AS_CALLER_TOKEN_TIMEOUT_IMPL + 20 * MINUTE_IN_MILLIS;
-
-    // How long to whitelist the Services for when requested.
-    private static final int SERVICE_LAUNCH_IDLE_WHITELIST_DURATION_MS = 5 * 1000;
 
     // Activity tokens of system activities that are delegating their call to
     // #startActivityByCaller, keyed by the permissionToken granted to the delegate.
@@ -3079,9 +3075,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             if (TextUtils.equals(pae.intent.getAction(),
                     android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
-                pae.intent.putExtras(pae.extras);
-
-                startVoiceInteractionServiceAsUser(pae.intent, pae.userHandle, "AssistContext");
+                // Start voice interaction through VoiceInteractionManagerService.
+                mAssistUtils.showSessionForActiveService(sendBundle, SHOW_SOURCE_APPLICATION,
+                        null, null);
             } else {
                 pae.intent.replaceExtras(pae.extras);
                 pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
@@ -3097,34 +3093,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    /**
-     * Workaround for historical API which starts the Assist service with a non-foreground
-     * {@code startService()} call.
-     */
-    private void startVoiceInteractionServiceAsUser(
-            Intent intent, int userHandle, String reason) {
-        // Resolve the intent to find out which package we need to whitelist.
-        ResolveInfo resolveInfo =
-                mContext.getPackageManager().resolveServiceAsUser(intent, 0, userHandle);
-        if (resolveInfo == null || resolveInfo.serviceInfo == null) {
-            Slog.e(TAG, "VoiceInteractionService intent does not resolve. Not starting.");
-            return;
-        }
-        intent.setPackage(resolveInfo.serviceInfo.packageName);
-
-        // Whitelist background services temporarily.
-        LocalServices.getService(DeviceIdleController.LocalService.class)
-                .addPowerSaveTempWhitelistApp(Process.myUid(), intent.getPackage(),
-                        SERVICE_LAUNCH_IDLE_WHITELIST_DURATION_MS, userHandle, false, reason);
-
-        // Finally, try to start the service.
-        try {
-            mContext.startServiceAsUser(intent, UserHandle.of(userHandle));
-        } catch (RuntimeException e) {
-            Slog.e(TAG, "VoiceInteractionService failed to start.", e);
         }
     }
 
