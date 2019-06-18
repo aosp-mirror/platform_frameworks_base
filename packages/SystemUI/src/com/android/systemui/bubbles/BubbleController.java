@@ -287,8 +287,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Override
     public void onConfigChanged(Configuration newConfig) {
         if (mStackView != null && newConfig != null && newConfig.orientation != mOrientation) {
-            mStackView.onOrientationChanged();
             mOrientation = newConfig.orientation;
+            mStackView.onOrientationChanged(newConfig.orientation);
         }
     }
 

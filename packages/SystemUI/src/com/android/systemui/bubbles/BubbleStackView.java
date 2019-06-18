@@ -29,6 +29,7 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -163,7 +164,7 @@ public class BubbleStackView extends FrameLayout {
     private Runnable mHideFlyout = () -> animateFlyoutCollapsed(true, 0 /* velX */);
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
-    private OnLayoutChangeListener mMoveStackToValidPositionOnLayoutListener;
+    private OnLayoutChangeListener mOrientationChangedListener;
     /** Whether the stack was on the left side of the screen prior to rotation. */
     private boolean mWasOnLeftBeforeRotation = false;
     /**
@@ -291,6 +292,8 @@ public class BubbleStackView extends FrameLayout {
     private boolean mSuppressNewDot = false;
     private boolean mSuppressFlyout = false;
 
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer) {
         super(context);
@@ -326,8 +329,9 @@ public class BubbleStackView extends FrameLayout {
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
         mStackAnimationController = new StackAnimationController();
+
         mExpandedAnimationController = new ExpandedAnimationController(
-                mDisplaySize, mExpandedViewPadding);
+                mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation);
         mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
@@ -417,13 +421,20 @@ public class BubbleStackView extends FrameLayout {
             return view.onApplyWindowInsets(insets);
         });
 
-        mMoveStackToValidPositionOnLayoutListener =
+        mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    mExpandedAnimationController.updateOrientation(mOrientation);
+                    if (mIsExpanded) {
+                        // Re-draw bubble row and pointer for new orientation.
+                        mExpandedAnimationController.expandFromStack(() -> {
+                            updatePointerPosition();
+                        } /* after */);
+                    }
                     if (mVerticalPosPercentBeforeRotation >= 0) {
                         mStackAnimationController.moveStackToSimilarPositionAfterRotation(
                                 mWasOnLeftBeforeRotation, mVerticalPosPercentBeforeRotation);
                     }
-                    removeOnLayoutChangeListener(mMoveStackToValidPositionOnLayoutListener);
+                    removeOnLayoutChangeListener(mOrientationChangedListener);
                 };
 
         // This must be a separate OnDrawListener since it should be called for every draw.
@@ -464,14 +475,15 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
-    public void onOrientationChanged() {
+    public void onOrientationChanged(int orientation) {
+        mOrientation = orientation;
+
         final RectF allowablePos = mStackAnimationController.getAllowableStackPositionRegion();
         mWasOnLeftBeforeRotation = mStackAnimationController.isStackOnLeftSide();
         mVerticalPosPercentBeforeRotation =
                 (mStackAnimationController.getStackPosition().y - allowablePos.top)
                         / (allowablePos.bottom - allowablePos.top);
-        addOnLayoutChangeListener(mMoveStackToValidPositionOnLayoutListener);
-
+        addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
     }
 
