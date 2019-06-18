@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.Surface.ROTATION_0;
@@ -36,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -249,6 +251,23 @@ public class WindowStateTests extends WindowTestsBase {
         // Invisible window can't be IME targets even if they have the right flags.
         assertFalse(appWindow.canBeImeTarget());
         assertFalse(imeWindow.canBeImeTarget());
+
+        // Simulate the window is in split screen primary stack and the current state is
+        // minimized and home stack is resizable, so that we should ignore input for the stack.
+        final DockedStackDividerController controller =
+                mDisplayContent.getDockedDividerController();
+        final TaskStack stack = createTaskStackOnDisplay(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        spyOn(appWindow);
+        spyOn(controller);
+        spyOn(stack);
+        doReturn(true).when(controller).isMinimizedDock();
+        doReturn(true).when(controller).isHomeStackResizable();
+        doReturn(stack).when(appWindow).getStack();
+
+        // Make sure canBeImeTarget is false due to shouldIgnoreInput is true;
+        assertFalse(appWindow.canBeImeTarget());
+        assertTrue(stack.shouldIgnoreInput());
     }
 
     @Test
