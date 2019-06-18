@@ -2301,6 +2301,7 @@ package android.provider {
     field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
+    field public static final String NAMESPACE_WINDOW_MANAGER = "android:window_manager";
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {
@@ -2315,6 +2316,10 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
+  }
+
+  public static interface DeviceConfig.WindowManager {
+    field public static final String KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP = "system_gesture_exclusion_limit_dp";
   }
 
   public final class MediaStore {
