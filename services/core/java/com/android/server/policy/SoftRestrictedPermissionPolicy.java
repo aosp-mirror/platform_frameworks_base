@@ -33,6 +33,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.os.UserHandle;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
@@ -75,12 +76,14 @@ public abstract class SoftRestrictedPermissionPolicy {
      *
      * @param context A context to use
      * @param appInfo The application the permission belongs to
+     * @param user The user the app belongs to
      * @param permission The name of the permission
      *
      * @return The policy for this permission
      */
     public static @NonNull SoftRestrictedPermissionPolicy forPermission(@NonNull Context context,
-            @NonNull ApplicationInfo appInfo, @NonNull String permission) {
+            @NonNull ApplicationInfo appInfo, @NonNull UserHandle user,
+            @NonNull String permission) {
         switch (permission) {
             // Storage uses a special app op to decide the mount state and supports soft restriction
             // where the restricted state allows the permission but only for accessing the medial
@@ -88,7 +91,7 @@ public abstract class SoftRestrictedPermissionPolicy {
             case READ_EXTERNAL_STORAGE:
             case WRITE_EXTERNAL_STORAGE: {
                 int flags = context.getPackageManager().getPermissionFlags(
-                        permission, appInfo.packageName, context.getUser());
+                        permission, appInfo.packageName, user);
                 boolean applyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
                 boolean isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                 boolean hasRequestedLegacyExternalStorage =
