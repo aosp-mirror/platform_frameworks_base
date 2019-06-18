@@ -1625,7 +1625,7 @@ public class BubbleStackView extends FrameLayout {
                     getNormalizedYPosition(),
                     false /* unread bubble */,
                     false /* on-going bubble */,
-                    false /* foreground bubble */);
+                    false /* isAppForeground (unused) */);
         } else {
             StatusBarNotification notification = bubble.entry.notification;
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
@@ -1639,7 +1639,7 @@ public class BubbleStackView extends FrameLayout {
                     getNormalizedYPosition(),
                     bubble.entry.showInShadeWhenBubble(),
                     bubble.entry.isForegroundService(),
-                    BubbleController.isForegroundApp(mContext, notification.getPackageName()));
+                    false /* isAppForeground (unused) */);
         }
     }
 

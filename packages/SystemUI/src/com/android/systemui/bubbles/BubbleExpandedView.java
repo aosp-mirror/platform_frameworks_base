@@ -533,7 +533,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 mStackView.getNormalizedYPosition(),
                 entry.showInShadeWhenBubble(),
                 entry.isForegroundService(),
-                BubbleController.isForegroundApp(mContext, notification.getPackageName()));
+                false /* isAppForeground (unused) */);
     }
 
     private int getDimenForPackageUser(int resId, String pkg, int userId) {
