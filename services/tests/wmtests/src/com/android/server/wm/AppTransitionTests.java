@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
@@ -45,6 +46,7 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -222,6 +224,21 @@ public class AppTransitionTests extends WindowTestsBase {
         dc.mAppTransition.freeze();
         assertFalse(dc.isAppAnimating());
         assertTrue(runner.mCancelled);
+    }
+
+    @Test
+    public void testGetAnimationStyleResId() {
+        // Verify getAnimationStyleResId will return as LayoutParams.windowAnimations when without
+        // specifying window type.
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
+        attrs.windowAnimations = 0x12345678;
+        assertEquals(attrs.windowAnimations, mDc.mAppTransition.getAnimationStyleResId(attrs));
+
+        // Verify getAnimationStyleResId will return system resource Id when the window type is
+        // starting window.
+        attrs.type = TYPE_APPLICATION_STARTING;
+        assertEquals(mDc.mAppTransition.getDefaultWindowAnimationStyleResId(),
+                mDc.mAppTransition.getAnimationStyleResId(attrs));
     }
 
     private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
