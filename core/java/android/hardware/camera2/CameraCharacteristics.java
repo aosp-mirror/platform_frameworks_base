@@ -760,14 +760,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>For devices at the LIMITED level or above:</p>
      * <ul>
-     * <li>For YUV_420_888 burst capture use case, this list will always include (<code>min</code>, <code>max</code>)
-     * and (<code>max</code>, <code>max</code>) where <code>min</code> &lt;= 15 and <code>max</code> = the maximum output frame rate of the
+     * <li>For devices that advertise NIR color filter arrangement in
+     * {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}, this list will always include
+     * (<code>max</code>, <code>max</code>) where <code>max</code> = the maximum output frame rate of the maximum YUV_420_888
+     * output size.</li>
+     * <li>For devices advertising any color filter arrangement other than NIR, or devices not
+     * advertising color filter arrangement, this list will always include (<code>min</code>, <code>max</code>) and
+     * (<code>max</code>, <code>max</code>) where <code>min</code> &lt;= 15 and <code>max</code> = the maximum output frame rate of the
      * maximum YUV_420_888 output size.</li>
      * </ul>
      * <p><b>Units</b>: Frames per second (FPS)</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
     @PublicKey
     @NonNull
