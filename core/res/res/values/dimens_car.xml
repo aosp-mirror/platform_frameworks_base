@@ -147,5 +147,6 @@
     <dimen name="action_bar_margin_end">@*android:dimen/car_margin</dimen>
     <!-- Space between a button and another button or screen edge -->
     <dimen name="action_bar_button_margin">@*android:dimen/car_padding_4</dimen>
+    <dimen name="action_bar_button_max_width">268dp</dimen>
     <dimen name="action_bar_toggle_internal_padding">@*android:dimen/car_padding_3</dimen>
 </resources>
