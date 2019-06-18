@@ -3078,18 +3078,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns whether the subscription is enabled or not. This is different from activated
-     * or deactivated for two aspects. 1) For when user disables a physical subscription, we
-     * actually disable the modem because we can't switch off the subscription. 2) For eSIM,
-     * user may enable one subscription but the system may activate another temporarily. In this
-     * case, user enabled one is different from current active one.
-
-     * @param subscriptionId The subscription it asks about.
-     * @return whether it's enabled or not. {@code true} if user set this subscription enabled
-     * earlier, or user never set subscription enable / disable on this slot explicitly, and
-     * this subscription is currently active. Otherwise, it returns {@code false}.
-     *
+     * DO NOT USE.
+     * This API is designed for features that are not finished at this point. Do not call this API.
      * @hide
+     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3107,14 +3099,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get which subscription is enabled on this slot. See {@link #isSubscriptionEnabled(int)}
-     * for more details.
-     *
-     * @param slotIndex which slot it asks about.
-     * @return which subscription is enabled on this slot. If there's no enabled subscription
-     *         in this slot, it will return {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
-     *
+     * DO NOT USE.
+     * This API is designed for features that are not finished at this point. Do not call this API.
      * @hide
+     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
