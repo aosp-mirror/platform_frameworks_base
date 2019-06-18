@@ -139,8 +139,10 @@ public class StackAnimationController extends
 
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
-    /** Diameter of the bubbles themselves. */
+    /** Diameter of the bubble icon. */
     private int mBubbleIconBitmapSize;
+    /** Width of the bubble (icon and padding). */
+    private int mBubbleSize;
     /**
      * The amount of space to add between the bubbles and certain UI elements, such as the top of
      * the screen or the IME. This does not apply to the left/right sides of the screen since the
@@ -427,7 +429,7 @@ public class StackAnimationController extends
                                     : 0);
             allowableRegion.right =
                     mLayout.getWidth()
-                            - mBubbleIconBitmapSize
+                            - mBubbleSize
                             + mBubbleOffscreen
                             - Math.max(
                             insets.getSystemWindowInsetRight(),
@@ -657,6 +659,7 @@ public class StackAnimationController extends
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
