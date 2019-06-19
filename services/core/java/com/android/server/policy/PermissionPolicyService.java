@@ -23,6 +23,7 @@ import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
 import android.annotation.NonNull;
@@ -407,6 +408,16 @@ public final class PermissionPolicyService extends SystemService {
          */
         private final @NonNull ArrayList<OpToUnrestrict> mOpsToForeground = new ArrayList<>();
 
+        /**
+         * All ops that need to be flipped to foreground if allow.
+         *
+         * Currently, only used by the foreground/background permissions logic.
+         *
+         * @see #syncPackages
+         */
+        private final @NonNull ArrayList<OpToUnrestrict> mOpsToForegroundIfAllow =
+                new ArrayList<>();
+
         PermissionToOpSynchroniser(@NonNull Context context) {
             mContext = context;
             mPackageManager = context.getPackageManager();
@@ -429,8 +440,13 @@ public final class PermissionPolicyService extends SystemService {
                 final OpToUnrestrict op = mOpsToAllowIfDefault.get(i);
                 setUidModeAllowedIfDefault(op.code, op.uid, op.packageName);
             }
-            final int foregroundCount = mOpsToForeground.size();
+            final int foregroundCount = mOpsToForegroundIfAllow.size();
             for (int i = 0; i < foregroundCount; i++) {
+                final OpToUnrestrict op = mOpsToForegroundIfAllow.get(i);
+                setUidModeForegroundIfAllow(op.code, op.uid, op.packageName);
+            }
+            final int foregroundIfAllowCount = mOpsToForeground.size();
+            for (int i = 0; i < foregroundIfAllowCount; i++) {
                 final OpToUnrestrict op = mOpsToForeground.get(i);
                 setUidModeForeground(op.code, op.uid, op.packageName);
             }
@@ -530,6 +546,24 @@ public final class PermissionPolicyService extends SystemService {
             }
         }
 
+        private boolean isBgPermRestricted(@NonNull String pkg, @NonNull String perm, int uid) {
+            try {
+                final PermissionInfo bgPermInfo = mPackageManager.getPermissionInfo(perm, 0);
+
+                if (bgPermInfo.isSoftRestricted()) {
+                    Slog.wtf(LOG_TAG, "Support for soft restricted background permissions not "
+                            + "implemented");
+                }
+
+                return bgPermInfo.isHardRestricted() && (mPackageManager.getPermissionFlags(
+                                perm, pkg, UserHandle.getUserHandleForUid(uid))
+                                & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+            } catch (NameNotFoundException e) {
+                Slog.w(LOG_TAG, "Cannot read permission state of " + perm, e);
+                return false;
+            }
+        }
+
         /**
          * Add op that belong to a foreground permission for later processing in
          * {@link #syncPackages()}.
@@ -552,26 +586,27 @@ public final class PermissionPolicyService extends SystemService {
             final String pkgName = pkg.packageName;
             final int uid = pkg.applicationInfo.uid;
 
-            if (mPackageManager.checkPermission(permission, pkgName)
-                    == PackageManager.PERMISSION_GRANTED) {
-                boolean isBgHardRestricted = false;
-                try {
-                    final PermissionInfo bgPermInfo = mPackageManager.getPermissionInfo(
-                            bgPermissionName, 0);
+            // App does not support runtime permissions. Hence the state is encoded in the app-op.
+            // To not override unrecoverable state don't change app-op unless bg perm is reviewed.
+            if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                // If the review is required for this permission, the grant state does not
+                // really matter. To have a stable state, don't change the app-op if review is still
+                // pending.
+                int flags = mPackageManager.getPermissionFlags(bgPermissionName,
+                        pkg.packageName, UserHandle.getUserHandleForUid(uid));
 
-                    if (bgPermInfo.isSoftRestricted()) {
-                        Slog.wtf(LOG_TAG, "Support for soft restricted background permissions not "
-                                + "implemented");
-                    }
-
-                    isBgHardRestricted =
-                            bgPermInfo.isHardRestricted() && (mPackageManager.getPermissionFlags(
-                                    bgPermissionName, pkgName, UserHandle.getUserHandleForUid(uid))
-                                    & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
-                } catch (NameNotFoundException e) {
-                    Slog.w(LOG_TAG, "Cannot read permission state of " + bgPermissionName, e);
+                if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0
+                        && isBgPermRestricted(pkgName, bgPermissionName, uid)) {
+                    mOpsToForegroundIfAllow.add(new OpToUnrestrict(uid, pkgName, opCode));
                 }
 
+                return;
+            }
+
+            if (mPackageManager.checkPermission(permission, pkgName)
+                    == PackageManager.PERMISSION_GRANTED) {
+                final boolean isBgHardRestricted = isBgPermRestricted(pkgName, bgPermissionName,
+                        uid);
                 final boolean isBgPermGranted = mPackageManager.checkPermission(bgPermissionName,
                         pkgName) == PackageManager.PERMISSION_GRANTED;
 
@@ -625,11 +660,15 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private void setUidModeAllowedIfDefault(int opCode, int uid, @NonNull String packageName) {
-            setUidModeIfDefault(opCode, uid, AppOpsManager.MODE_ALLOWED, packageName);
+            setUidModeIfMode(opCode, uid, MODE_DEFAULT, MODE_ALLOWED, packageName);
         }
 
         private void setUidModeAllowed(int opCode, int uid, @NonNull String packageName) {
             setUidMode(opCode, uid, MODE_ALLOWED, packageName);
+        }
+
+        private void setUidModeForegroundIfAllow(int opCode, int uid, @NonNull String packageName) {
+            setUidModeIfMode(opCode, uid, MODE_ALLOWED, MODE_FOREGROUND, packageName);
         }
 
         private void setUidModeForeground(int opCode, int uid, @NonNull String packageName) {
@@ -637,7 +676,7 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private void setUidModeIgnoredIfDefault(int opCode, int uid, @NonNull String packageName) {
-            setUidModeIfDefault(opCode, uid, AppOpsManager.MODE_IGNORED, packageName);
+            setUidModeIfMode(opCode, uid, MODE_DEFAULT, MODE_IGNORED, packageName);
         }
 
         private void setUidModeIgnored(int opCode, int uid, @NonNull String packageName) {
@@ -654,23 +693,13 @@ public final class PermissionPolicyService extends SystemService {
             }
         }
 
-        private void setUidModeIfDefault(int opCode, int uid, int mode,
+        private void setUidModeIfMode(int opCode, int uid, int requiredModeBefore, int newMode,
                 @NonNull String packageName) {
-            final int currentMode;
-            try {
-                currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
+            final int currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
                     .opToPublicName(opCode), uid, packageName);
-            } catch (SecurityException e) {
-                // This might happen if the app was uninstalled in between the add and sync step.
-                // In this case the package name cannot be resolved inside appops service and hence
-                // the uid does not match.
-                Slog.w(LOG_TAG, "Cannot set mode of uid=" + uid + " op=" + opCode + " to " + mode,
-                        e);
-                return;
-            }
 
-            if (currentMode == MODE_DEFAULT) {
-                mAppOpsManager.setUidMode(opCode, uid, mode);
+            if (currentMode == requiredModeBefore) {
+                mAppOpsManager.setUidMode(opCode, uid, newMode);
             }
         }
 
