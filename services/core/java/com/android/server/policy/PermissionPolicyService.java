@@ -414,7 +414,7 @@ public final class PermissionPolicyService extends SystemService {
             } else if (permissionInfo.isSoftRestricted()) {
                 final SoftRestrictedPermissionPolicy policy =
                         SoftRestrictedPermissionPolicy.forPermission(mContext, pkg.applicationInfo,
-                                permission);
+                                mContext.getUser(), permission);
 
                 if (opCode != OP_NONE) {
                     if (policy.canBeGranted()) {

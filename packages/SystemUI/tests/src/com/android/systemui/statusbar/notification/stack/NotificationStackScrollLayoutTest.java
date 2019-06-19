@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarTest.TestableNotificationEntryManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -155,6 +156,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 true /* allowLongPress */, mNotificationRoundnessManager,
                 new AmbientPulseManager(mContext),
                 mock(DynamicPrivacyController.class),
+                mock(ConfigurationController.class),
                 mock(ActivityStarterDelegate.class),
                 mock(StatusBarStateController.class));
         mStackScroller = spy(mStackScrollerInternal);
