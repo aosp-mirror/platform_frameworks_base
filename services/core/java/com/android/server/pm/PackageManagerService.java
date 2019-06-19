@@ -111,9 +111,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFile
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
-import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
-import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
-import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -293,6 +290,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
@@ -19802,6 +19800,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
+        final String packageName = ps.pkg.packageName;
+
         // These are flags that can change base on user actions.
         final int userSettableMask = FLAG_PERMISSION_USER_SET
                 | FLAG_PERMISSION_USER_FIXED
@@ -19811,8 +19811,59 @@ public class PackageManagerService extends IPackageManager.Stub
         final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
                 | FLAG_PERMISSION_POLICY_FIXED;
 
-        boolean writeInstallPermissions = false;
-        boolean writeRuntimePermissions = false;
+        // Delay and combine non-async permission callbacks
+        final boolean[] permissionRemoved = new boolean[1];
+        final ArraySet<Long> revokedPermissions = new ArraySet<>();
+        final SparseBooleanArray updatedUsers = new SparseBooleanArray();
+
+        PermissionCallback delayingPermCallback = new PermissionCallback() {
+            public void onGidsChanged(int appId, int userId) {
+                mPermissionCallback.onGidsChanged(appId, userId);
+            }
+
+            public void onPermissionChanged() {
+                mPermissionCallback.onPermissionChanged();
+            }
+
+            public void onPermissionGranted(int uid, int userId) {
+                mPermissionCallback.onPermissionGranted(uid, userId);
+            }
+
+            public void onInstallPermissionGranted() {
+                mPermissionCallback.onInstallPermissionGranted();
+            }
+
+            public void onPermissionRevoked(int uid, int userId) {
+                revokedPermissions.add(IntPair.of(uid, userId));
+
+                updatedUsers.put(userId, true);
+            }
+
+            public void onInstallPermissionRevoked() {
+                mPermissionCallback.onInstallPermissionRevoked();
+            }
+
+            public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
+                for (int userId : updatedUserIds) {
+                    if (sync) {
+                        updatedUsers.put(userId, true);
+                    } else {
+                        // Don't override sync=true by sync=false
+                        if (!updatedUsers.get(userId)) {
+                            updatedUsers.put(userId, false);
+                        }
+                    }
+                }
+            }
+
+            public void onPermissionRemoved() {
+                permissionRemoved[0] = true;
+            }
+
+            public void onInstallPermissionUpdated() {
+                mPermissionCallback.onInstallPermissionUpdated();
+            }
+        };
 
         final int permissionCount = ps.pkg.requestedPermissions.size();
         for (int i = 0; i < permissionCount; i++) {
@@ -19844,26 +19895,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            final PermissionsState permissionsState = ps.getPermissionsState();
-
-            final int oldFlags = permissionsState.getPermissionFlags(permName, userId);
+            final int oldFlags = mPermissionManager.getPermissionFlags(permName, packageName,
+                    Process.SYSTEM_UID, userId);
 
             // Always clear the user settable flags.
-            final boolean hasInstallState =
-                    permissionsState.getInstallPermissionState(permName) != null;
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
             if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M && bp.isRuntime()) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
             }
-            if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {
-                if (hasInstallState) {
-                    writeInstallPermissions = true;
-                } else {
-                    writeRuntimePermissions = true;
-                }
-            }
+
+            mPermissionManager.updatePermissionFlags(permName, packageName,
+                    userSettableMask, flags, Process.SYSTEM_UID, userId, false,
+                    delayingPermCallback);
 
             // Below is only runtime permission handling.
             if (!bp.isRuntime()) {
@@ -19877,35 +19922,42 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // If this permission was granted by default, make sure it is.
             if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
-                if (permissionsState.grantRuntimePermission(bp, userId)
-                        != PERMISSION_OPERATION_FAILURE) {
-                    writeRuntimePermissions = true;
-                }
+                mPermissionManager.grantRuntimePermission(permName, packageName, false,
+                        Process.SYSTEM_UID, userId, delayingPermCallback);
             // If permission review is enabled the permissions for a legacy apps
             // are represented as constantly granted runtime ones, so don't revoke.
             } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
                 // Otherwise, reset the permission.
-                final int revokeResult = permissionsState.revokeRuntimePermission(bp, userId);
-                switch (revokeResult) {
-                    case PERMISSION_OPERATION_SUCCESS:
-                    case PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
-                        writeRuntimePermissions = true;
-                        final int appId = ps.appId;
-                        mHandler.post(
-                                () -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
-                    } break;
-                }
+                mPermissionManager.revokeRuntimePermission(permName, packageName, false, userId,
+                        delayingPermCallback);
             }
         }
 
-        // Synchronously write as we are taking permissions away.
-        if (writeRuntimePermissions) {
-            mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+        // Execute delayed callbacks
+        if (permissionRemoved[0]) {
+            mPermissionCallback.onPermissionRemoved();
         }
 
-        // Synchronously write as we are taking permissions away.
-        if (writeInstallPermissions) {
-            mSettings.writeLPr();
+        // Slight variation on the code in mPermissionCallback.onPermissionRevoked() as we cannot
+        // kill uid while holding mPackages-lock
+        if (!revokedPermissions.isEmpty()) {
+            int numRevokedPermissions = revokedPermissions.size();
+            for (int i = 0; i < numRevokedPermissions; i++) {
+                int revocationUID = IntPair.first(revokedPermissions.valueAt(i));
+                int revocationUserId = IntPair.second(revokedPermissions.valueAt(i));
+
+                mOnPermissionChangeListeners.onPermissionsChanged(revocationUID);
+
+                // Kill app later as we are holding mPackages
+                mHandler.post(() -> killUid(UserHandle.getAppId(revocationUID), revocationUserId,
+                        KILL_APP_REASON_PERMISSIONS_REVOKED));
+            }
+        }
+
+        int numUpdatedUsers = updatedUsers.size();
+        for (int i = 0; i < numUpdatedUsers; i++) {
+            mSettings.writeRuntimePermissionsForUserLPr(updatedUsers.keyAt(i),
+                    updatedUsers.valueAt(i));
         }
     }
 
