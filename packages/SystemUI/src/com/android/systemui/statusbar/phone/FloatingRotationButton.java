@@ -115,7 +115,6 @@ public class FloatingRotationButton implements RotationButton {
             return false;
         }
         mWindowManager.removeViewImmediate(mKeyButtonView);
-        mRotationButtonController.cleanUp();
         mIsShowing = false;
         return true;
     }
@@ -141,10 +140,7 @@ public class FloatingRotationButton implements RotationButton {
 
     @Override
     public void setOnClickListener(View.OnClickListener onClickListener) {
-        mKeyButtonView.setOnClickListener(view -> {
-            hide();
-            onClickListener.onClick(view);
-        });
+        mKeyButtonView.setOnClickListener(onClickListener);
     }
 
     @Override
