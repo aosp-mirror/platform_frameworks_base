@@ -241,6 +241,7 @@ cc_defaults {
                 "JankTracker.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
+                "LightingInfo.cpp",
                 "ProfileData.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",

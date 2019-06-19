@@ -60,49 +60,6 @@ public:
 
     void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque);
 
-    static float getLightRadius() {
-        if (CC_UNLIKELY(Properties::overrideLightRadius > 0)) {
-            return Properties::overrideLightRadius;
-        }
-        return mLightRadius;
-    }
-
-    static uint8_t getAmbientShadowAlpha() {
-        if (CC_UNLIKELY(Properties::overrideAmbientShadowStrength >= 0)) {
-            return Properties::overrideAmbientShadowStrength;
-        }
-        return mAmbientShadowAlpha;
-    }
-
-    static uint8_t getSpotShadowAlpha() {
-        if (CC_UNLIKELY(Properties::overrideSpotShadowStrength >= 0)) {
-            return Properties::overrideSpotShadowStrength;
-        }
-        return mSpotShadowAlpha;
-    }
-
-    static Vector3 getLightCenter() {
-        if (CC_UNLIKELY(Properties::overrideLightPosY > 0 || Properties::overrideLightPosZ > 0)) {
-            Vector3 adjustedLightCenter = mLightCenter;
-            if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
-                // negated since this shifts up
-                adjustedLightCenter.y = -Properties::overrideLightPosY;
-            }
-            if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
-                adjustedLightCenter.z = Properties::overrideLightPosZ;
-            }
-            return adjustedLightCenter;
-        }
-        return mLightCenter;
-    }
-
-    static void updateLighting(const LightGeometry& lightGeometry, const LightInfo& lightInfo) {
-        mLightRadius = lightGeometry.radius;
-        mAmbientShadowAlpha = lightInfo.ambientShadowAlpha;
-        mSpotShadowAlpha = lightInfo.spotShadowAlpha;
-        mLightCenter = lightGeometry.center;
-    }
-
     void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) override {
         mPictureCapturedCallback = callback;
@@ -163,11 +120,6 @@ private:
     std::unique_ptr<SkPictureRecorder> mRecorder;
     std::unique_ptr<SkNWayCanvas> mNwayCanvas;
     std::function<void(sk_sp<SkPicture>&&)> mPictureCapturedCallback;
-
-    static float mLightRadius;
-    static uint8_t mAmbientShadowAlpha;
-    static uint8_t mSpotShadowAlpha;
-    static Vector3 mLightCenter;
 };
 
 } /* namespace skiapipeline */

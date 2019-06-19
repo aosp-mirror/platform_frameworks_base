@@ -23,6 +23,7 @@
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include "LightingInfo.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
@@ -37,12 +38,6 @@ using namespace android::uirenderer::renderthread;
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
-
-float SkiaPipeline::mLightRadius = 0;
-uint8_t SkiaPipeline::mAmbientShadowAlpha = 0;
-uint8_t SkiaPipeline::mSpotShadowAlpha = 0;
-
-Vector3 SkiaPipeline::mLightCenter = {FLT_MIN, FLT_MIN, FLT_MIN};
 
 SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
     mVectorDrawables.reserve(30);
@@ -84,7 +79,7 @@ void SkiaPipeline::onPrepareTree() {
 void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
                                 LayerUpdateQueue* layerUpdateQueue, bool opaque,
                                 const LightInfo& lightInfo) {
-    updateLighting(lightGeometry, lightInfo);
+    LightingInfo::updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderVectorDrawableCache();
     renderLayersImpl(*layerUpdateQueue, opaque);
@@ -117,9 +112,13 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
             layerCanvas->androidFramework_setDeviceClipRestriction(layerDamage.toSkIRect());
 
-            auto savedLightCenter = mLightCenter;
+            // TODO: put localized light center calculation and storage to a drawable related code.
+            // It does not seem right to store something localized in a global state
+            const Vector3 savedLightCenter(LightingInfo::getLightCenterRaw());
+            Vector3 transformedLightCenter(savedLightCenter);
             // map current light center into RenderNode's coordinate space
-            layerNode->getSkiaLayer()->inverseTransformInWindow.mapPoint3d(mLightCenter);
+            layerNode->getSkiaLayer()->inverseTransformInWindow.mapPoint3d(transformedLightCenter);
+            LightingInfo::setLightCenterRaw(transformedLightCenter);
 
             const RenderProperties& properties = layerNode->properties();
             const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
@@ -136,7 +135,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             RenderNodeDrawable root(layerNode, layerCanvas, false);
             root.forceDraw(layerCanvas);
             layerCanvas->restoreToCount(saveCount);
-            mLightCenter = savedLightCenter;
+            LightingInfo::setLightCenterRaw(savedLightCenter);
 
             // cache the current context so that we can defer flushing it until
             // either all the layers have been rendered or the context changes
