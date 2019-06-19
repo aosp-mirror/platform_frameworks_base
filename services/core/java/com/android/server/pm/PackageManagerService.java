@@ -11605,16 +11605,16 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg.applicationInfo.isDirectBootAware()) {
                 // we're direct boot aware; set for all components
                 for (PackageParser.Service s : pkg.services) {
-                    s.info.encryptionAware = s.info.directBootAware = true;
+                    s.info.directBootAware = true;
                 }
                 for (PackageParser.Provider p : pkg.providers) {
-                    p.info.encryptionAware = p.info.directBootAware = true;
+                    p.info.directBootAware = true;
                 }
                 for (PackageParser.Activity a : pkg.activities) {
-                    a.info.encryptionAware = a.info.directBootAware = true;
+                    a.info.directBootAware = true;
                 }
                 for (PackageParser.Activity r : pkg.receivers) {
-                    r.info.encryptionAware = r.info.directBootAware = true;
+                    r.info.directBootAware = true;
                 }
             }
             if (compressedFileExists(pkg.codePath)) {
