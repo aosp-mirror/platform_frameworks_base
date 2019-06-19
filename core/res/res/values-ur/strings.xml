@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"اپنا سر تھوڑا کم کریں۔"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"اپنا سر تھوڑا کم کریں۔"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"آپ کے چہرہ کو چھپانے والی ہر چیز کو ہٹائیں۔"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"اسکرین کے بالائی کنارے پر سنسر کو صاف کریں۔"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"سیاہ بار سمیت، اپنی اسکرین کے اوپری حصے کو صاف کریں"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>

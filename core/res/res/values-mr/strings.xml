@@ -256,7 +256,7 @@
     <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षितता"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"कार मोड"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"खाते स्थिती"</string>
-    <string name="notification_channel_developer" msgid="7579606426860206060">"विकसक मेसेज"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"डेव्हलपर मेसेज"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"अपडेट"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"नेटवर्क स्थिती"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्क सूचना"</string>
@@ -267,7 +267,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"रीटेल डेमो"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB कनेक्‍शन"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"APP चालत आहे"</string>
-    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"अॅप्‍समुळे बॅटरी संपत आहे"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"बॅटरी लवकर संपवणारी अॅप्‍स"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> बॅटरी वापरत आहे"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> अॅप्‍स बॅटरी वापरत आहेत"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"स्क्रीनच्या वरील उजव्या कडेवरील सेन्सर साफ करा."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
@@ -1200,7 +1200,7 @@
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
-    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"गेमवर परत जाण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="387882830435195342">"गेम निवडा"</string>
     <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"अधिक चांगल्या कामगिरीसाठी, एकावेळी यापैकी केवळ एक गेम चालू ठेवता येईल."</string>

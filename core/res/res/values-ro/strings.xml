@@ -579,7 +579,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Întoarceți capul mai puțin."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Întoarceți capul mai puțin."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Eliminați orice vă ascunde chipul."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Curățați senzorul de la marginea de sus a ecranului."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Curățați partea de sus a ecranului, inclusiv bara neagră"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
@@ -1693,8 +1693,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu două degete din partea de jos a ecranului):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu trei degete din partea de jos a ecranului):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pentru a comuta între servicii, atingeți lung butonul de accesibilitate."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pentru a comuta între servicii, glisați în sus cu două degete și țineți lung."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pentru a comuta între servicii, glisați în sus cu trei degete și țineți lung."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pentru a schimba între servicii, glisați în sus cu două degete și țineți lung."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pentru a schimba între servicii, glisați în sus cu trei degete și țineți lung."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Mărire"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
