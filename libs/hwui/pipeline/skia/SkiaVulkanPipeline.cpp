@@ -19,6 +19,7 @@
 #include "DeferredLayerUpdater.h"
 #include "Readback.h"
 #include "ShaderCache.h"
+#include "LightingInfo.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "VkInteropFunctorDrawable.h"
@@ -69,7 +70,7 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     if (backBuffer.get() == nullptr) {
         return false;
     }
-    SkiaPipeline::updateLighting(lightGeometry, lightInfo);
+    LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
                 mVkSurface->getCurrentPreTransform());
     ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
