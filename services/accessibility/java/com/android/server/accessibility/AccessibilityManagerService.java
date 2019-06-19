@@ -27,6 +27,7 @@ import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityGestureInfo;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -814,11 +815,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
 
-    boolean onGesture(int gestureId) {
+    boolean onGesture(AccessibilityGestureInfo gestureInfo) {
         synchronized (mLock) {
-            boolean handled = notifyGestureLocked(gestureId, false);
+            boolean handled = notifyGestureLocked(gestureInfo, false);
             if (!handled) {
-                handled = notifyGestureLocked(gestureId, true);
+                handled = notifyGestureLocked(gestureInfo, true);
             }
             return handled;
         }
@@ -1009,7 +1010,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private boolean notifyGestureLocked(int gestureId, boolean isDefault) {
+    private boolean notifyGestureLocked(AccessibilityGestureInfo gestureInfo, boolean isDefault) {
         // TODO: Now we are giving the gestures to the last enabled
         //       service that can handle them which is the last one
         //       in our list since we write the last enabled as the
@@ -1023,7 +1024,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             AccessibilityServiceConnection service = state.mBoundServices.get(i);
             if (service.mRequestTouchExplorationMode && service.mIsDefault == isDefault) {
-                service.notifyGesture(gestureId);
+                service.notifyGesture(gestureInfo);
                 return true;
             }
         }

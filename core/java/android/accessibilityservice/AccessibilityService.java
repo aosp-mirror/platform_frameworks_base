@@ -381,7 +381,8 @@ public abstract class AccessibilityService extends Service {
         void onInterrupt();
         void onServiceConnected();
         void init(int connectionId, IBinder windowToken);
-        boolean onGesture(int gestureId);
+        /** The detected gesture information for different displays */
+        boolean onGesture(AccessibilityGestureInfo gestureInfo);
         boolean onKeyEvent(KeyEvent event);
         /** Magnification changed callbacks for different displays */
         void onMagnificationChanged(int displayId, @NonNull Region region,
@@ -514,17 +515,18 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Called by the system when the user performs a specific gesture on the
-     * touch screen.
+     * Called by {@link #onGesture(AccessibilityGestureInfo)} when the user performs a specific
+     * gesture on the default display.
      *
      * <strong>Note:</strong> To receive gestures an accessibility service must
      * request that the device is in touch exploration mode by setting the
-     * {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}
+     * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}
      * flag.
      *
      * @param gestureId The unique id of the performed gesture.
      *
      * @return Whether the gesture was handled.
+     * @deprecated Override {@link #onGesture(AccessibilityGestureInfo)} instead.
      *
      * @see #GESTURE_SWIPE_UP
      * @see #GESTURE_SWIPE_UP_AND_LEFT
@@ -543,7 +545,32 @@ public abstract class AccessibilityService extends Service {
      * @see #GESTURE_SWIPE_RIGHT_AND_LEFT
      * @see #GESTURE_SWIPE_RIGHT_AND_DOWN
      */
+    @Deprecated
     protected boolean onGesture(int gestureId) {
+        return false;
+    }
+
+    /**
+     * Called by the system when the user performs a specific gesture on the
+     * specific touch screen.
+     *<p>
+     * <strong>Note:</strong> To receive gestures an accessibility service must
+     * request that the device is in touch exploration mode by setting the
+     * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}
+     * flag.
+     *<p>
+     * <strong>Note:</strong> The default implementation calls {@link #onGesture(int)} when the
+     * touch screen is default display.
+     *
+     * @param gestureInfo The information of gesture.
+     *
+     * @return Whether the gesture was handled.
+     *
+     */
+    public boolean onGesture(@NonNull AccessibilityGestureInfo gestureInfo) {
+        if (gestureInfo.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            onGesture(gestureInfo.getGestureId());
+        }
         return false;
     }
 
@@ -1647,8 +1674,8 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public boolean onGesture(int gestureId) {
-                return AccessibilityService.this.onGesture(gestureId);
+            public boolean onGesture(AccessibilityGestureInfo gestureInfo) {
+                return AccessibilityService.this.onGesture(gestureInfo);
             }
 
             @Override
@@ -1747,8 +1774,9 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void onGesture(int gestureId) {
-            Message message = mCaller.obtainMessageI(DO_ON_GESTURE, gestureId);
+        @Override
+        public void onGesture(AccessibilityGestureInfo gestureInfo) {
+            Message message = mCaller.obtainMessageO(DO_ON_GESTURE, gestureInfo);
             mCaller.sendMessage(message);
         }
 
@@ -1861,8 +1889,7 @@ public abstract class AccessibilityService extends Service {
 
                 case DO_ON_GESTURE: {
                     if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final int gestureId = message.arg1;
-                        mCallback.onGesture(gestureId);
+                        mCallback.onGesture((AccessibilityGestureInfo) message.obj);
                     }
                 } return;
 
