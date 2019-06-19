@@ -2810,7 +2810,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // receive input keys, so we should move the focused app to the home app so that
                     // window manager can correctly calculate the focus window that can receive
                     // input keys.
-                    display.moveHomeStackToFront(
+                    display.moveHomeActivityToTop(
                             "startActivityFromRecents: homeVisibleInSplitScreen");
 
                     // Immediately update the minimized docked stack mode, the upcoming animation
