@@ -321,11 +321,10 @@ final class InputMonitor {
     }
 
     void updateInputWindowsImmediately() {
-        if (mUpdateInputWindowsPending) {
-            mApplyImmediately = true;
-            mUpdateInputWindows.run();
-            mApplyImmediately = false;
-        }
+        mHandler.removeCallbacks(mUpdateInputWindows);
+        mApplyImmediately = true;
+        mUpdateInputWindows.run();
+        mApplyImmediately = false;
     }
 
     /* Called when the current input focus changes.
