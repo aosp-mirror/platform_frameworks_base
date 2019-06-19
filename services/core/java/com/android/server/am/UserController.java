@@ -72,7 +72,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -85,7 +84,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -2137,6 +2135,7 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case START_USER_SWITCH_FG_MSG:
@@ -2161,7 +2160,8 @@ class UserController implements Handler.Callback {
                 mInjector.batteryStatsServiceNoteEvent(
                         BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                         Integer.toString(msg.arg1), msg.arg1);
-                mInjector.getSystemServiceManager().startUser(msg.arg1);
+                mInjector.getSystemServiceManager().startUser(TimingsTraceAndSlog.newAsyncLog(),
+                        msg.arg1);
                 break;
             case SYSTEM_USER_UNLOCK_MSG:
                 final int userId = msg.arg1;
@@ -2217,14 +2217,12 @@ class UserController implements Handler.Callback {
 
             // Report system user unlock time to perf dashboard
             if (id == UserHandle.USER_SYSTEM) {
-                new TimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER)
-                        .logDuration("SystemUserUnlock", unlockTime);
+                new TimingsTraceAndSlog().logDuration("SystemUserUnlock", unlockTime);
             } else {
-                new TimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER)
-                        .logDuration("User" + id + "Unlock", unlockTime);
+                new TimingsTraceAndSlog().logDuration("User" + id + "Unlock", unlockTime);
             }
         }
-    };
+    }
 
     @VisibleForTesting
     static class Injector {

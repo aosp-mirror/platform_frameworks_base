@@ -33,9 +33,23 @@ public final class TimingsTraceAndSlog extends TimingsTraceLog {
     /**
      * Tag for timing measurement of non-main asynchronous operations.
      */
-    public static final String SYSTEM_SERVER_TIMING_ASYNC_TAG = SYSTEM_SERVER_TIMING_TAG + "Async";
+    private static final String SYSTEM_SERVER_TIMING_ASYNC_TAG = SYSTEM_SERVER_TIMING_TAG + "Async";
+
+    /**
+     * Set this to a positive value to get a {@Slog.w} log for any trace that took longer than it.
+     */
+    private static final long BOTTLENECK_DURATION_MS = -1;
 
     private final String mTag;
+
+    /**
+     * Creates a new {@link TimingsTraceAndSlog} for async operations.
+     */
+    @NonNull
+    public static TimingsTraceAndSlog newAsyncLog() {
+        return new TimingsTraceAndSlog(SYSTEM_SERVER_TIMING_ASYNC_TAG,
+                Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
 
     /**
      * Default constructor using {@code system_server} tags.
@@ -59,5 +73,18 @@ public final class TimingsTraceAndSlog extends TimingsTraceLog {
     public void traceBegin(@NonNull String name) {
         Slog.i(mTag, name);
         super.traceBegin(name);
+    }
+
+    @Override
+    public void logDuration(String name, long timeMs) {
+        super.logDuration(name, timeMs);
+        if (BOTTLENECK_DURATION_MS > 0 && timeMs >= BOTTLENECK_DURATION_MS) {
+            Slog.w(mTag, "Slow duration for " + name + ": " + timeMs + "ms");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "TimingsTraceAndSlog[" + mTag + "]";
     }
 }

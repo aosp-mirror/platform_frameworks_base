@@ -16,7 +16,7 @@
 
 package android.util;
 
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Trace;
 
@@ -31,7 +31,8 @@ import java.util.List;
 
 /**
  * Tests for {@link TimingsTraceLog}.
- * <p>Usage: bit FrameworksCoreTests:android.util.TimingsTraceLogTest
+ *
+ * <p>Usage: {@code atest FrameworksCoreTests:android.util.TimingsTraceLogTest}
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -64,7 +65,24 @@ public class TimingsTraceLogTest {
         });
         t.start();
         t.join();
-        assertTrue(errors.toString(), errors.isEmpty());
+        assertThat(errors).isEmpty();
     }
 
+    @Test
+    public void testGetUnfinishedTracesForDebug() {
+        TimingsTraceLog log = new TimingsTraceLog("TEST", Trace.TRACE_TAG_APP);
+        assertThat(log.getUnfinishedTracesForDebug()).isEmpty();
+
+        log.traceBegin("One");
+        assertThat(log.getUnfinishedTracesForDebug()).containsExactly("One").inOrder();
+
+        log.traceBegin("Two");
+        assertThat(log.getUnfinishedTracesForDebug()).containsExactly("One", "Two").inOrder();
+
+        log.traceEnd();
+        assertThat(log.getUnfinishedTracesForDebug()).containsExactly("One").inOrder();
+
+        log.traceEnd();
+        assertThat(log.getUnfinishedTracesForDebug()).isEmpty();
+    }
 }

@@ -16,16 +16,22 @@
 
 package android.util;
 
+import android.annotation.NonNull;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Trace;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * Helper class for reporting boot and shutdown timing metrics.
- * <p>Note: This class is not thread-safe. Use a separate copy for other threads</p>
+ *
+ * <p><b>NOTE:</b> This class is not thread-safe. Use a separate copy for other threads.
+ *
  * @hide
  */
 public class TimingsTraceLog {
@@ -87,5 +93,22 @@ public class TimingsTraceLog {
      */
     public void logDuration(String name, long timeMs) {
         Slog.d(mTag, name + " took to complete: " + timeMs + "ms");
+    }
+
+    /**
+     * Gets the names of the traces that {@link #traceBegin(String) have begun} but
+     * {@link #traceEnd() have not finished} yet.
+     *
+     * <p><b>NOTE:</b> this method is expensive and it should not be used in "production" - it
+     * should only be used for debugging purposes during development (and/or guarded by
+     * static {@code DEBUG} constants that are {@code false}).
+     */
+    @NonNull
+    public final List<String> getUnfinishedTracesForDebug() {
+        if (mStartTimes == null || mStartTimes.isEmpty()) return Collections.emptyList();
+
+        final ArrayList<String> stack = new ArrayList<>(mStartTimes.size());
+        mStartTimes.descendingIterator().forEachRemaining((pair) -> stack.add(pair.first));
+        return stack;
     }
 }
