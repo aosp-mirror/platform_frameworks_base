@@ -248,7 +248,7 @@ class TaskSnapshotSurface implements StartingSurface {
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, sysUiVis, taskDescription);
+                windowPrivateFlags, sysUiVis, taskDescription, 1f);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
     }
@@ -488,12 +488,14 @@ class TaskSnapshotSurface implements StartingSurface {
         private final int mWindowFlags;
         private final int mWindowPrivateFlags;
         private final int mSysUiVis;
+        private final float mScale;
 
-        SystemBarBackgroundPainter( int windowFlags, int windowPrivateFlags, int sysUiVis,
-                TaskDescription taskDescription) {
+        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int sysUiVis,
+                TaskDescription taskDescription, float scale) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
             mSysUiVis = sysUiVis;
+            mScale = scale;
             final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
             final int semiTransparent = context.getColor(
                     R.color.system_bar_background_semi_transparent);
@@ -521,7 +523,7 @@ class TaskSnapshotSurface implements StartingSurface {
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
                     mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)) {
-                return getColorViewTopInset(mStableInsets.top, mContentInsets.top);
+                return (int) (getColorViewTopInset(mStableInsets.top, mContentInsets.top) * mScale);
             } else {
                 return 0;
             }
@@ -544,8 +546,8 @@ class TaskSnapshotSurface implements StartingSurface {
                 int statusBarHeight) {
             if (statusBarHeight > 0 && Color.alpha(mStatusBarColor) != 0
                     && (alreadyDrawnFrame == null || c.getWidth() > alreadyDrawnFrame.right)) {
-                final int rightInset = DecorView.getColorViewRightInset(mStableInsets.right,
-                        mContentInsets.right);
+                final int rightInset = (int) (DecorView.getColorViewRightInset(mStableInsets.right,
+                        mContentInsets.right) * mScale);
                 final int left = alreadyDrawnFrame != null ? alreadyDrawnFrame.right : 0;
                 c.drawRect(left, 0, c.getWidth() - rightInset, statusBarHeight, mStatusBarPaint);
             }
@@ -555,7 +557,7 @@ class TaskSnapshotSurface implements StartingSurface {
         void drawNavigationBarBackground(Canvas c) {
             final Rect navigationBarRect = new Rect();
             getNavigationBarRect(c.getWidth(), c.getHeight(), mStableInsets, mContentInsets,
-                    navigationBarRect);
+                    navigationBarRect, mScale);
             final boolean visible = isNavigationBarColorViewVisible();
             if (visible && Color.alpha(mNavigationBarColor) != 0 && !navigationBarRect.isEmpty()) {
                 c.drawRect(navigationBarRect, mNavigationBarPaint);
