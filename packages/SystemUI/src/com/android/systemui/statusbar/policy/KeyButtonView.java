@@ -249,13 +249,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 x = (int)ev.getRawX();
                 y = (int)ev.getRawY();
 
-                boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > (mIsVertical
-                        ? QuickStepContract.getQuickScrubTouchSlopPx()
-                        : QuickStepContract.getQuickStepTouchSlopPx());
-                boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > (mIsVertical
-                        ? QuickStepContract.getQuickStepTouchSlopPx()
-                        : QuickStepContract.getQuickScrubTouchSlopPx());
-                if (exceededTouchSlopX || exceededTouchSlopY) {
+                float slop = QuickStepContract.getQuickStepTouchSlopPx(getContext());
+                if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
                     setPressed(false);
