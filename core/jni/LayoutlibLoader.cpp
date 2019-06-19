@@ -49,6 +49,9 @@ extern int register_android_graphics_Typeface(JNIEnv* env);
 namespace android {
 
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
+extern int register_android_content_AssetManager(JNIEnv* env);
+extern int register_android_content_StringBlock(JNIEnv* env);
+extern int register_android_content_res_ApkAssets(JNIEnv* env);
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
@@ -86,6 +89,9 @@ struct RegJNIRec {
 // The actual list of registered classes will be determined at runtime via the 'native_classes' System property
 static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
+    {"android.content.AssetManager", REG_JNI(register_android_content_AssetManager)},
+    {"android.content.StringBlock", REG_JNI(register_android_content_StringBlock)},
+    {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
     {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
     {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
     {"android.graphics.ByteBufferStreamAdaptor", REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
@@ -241,6 +247,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     const char* path = env->GetStringUTFChars(stringPath, 0);
     u_setDataDirectory(path);
     env->ReleaseStringUTFChars(stringPath, path);
+
+
     return JNI_VERSION_1_6;
 }
 

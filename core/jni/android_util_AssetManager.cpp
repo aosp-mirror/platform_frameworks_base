@@ -18,10 +18,8 @@
 #define LOG_TAG "asset"
 
 #include <inttypes.h>
-#include <linux/capability.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/system_properties.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -399,6 +397,7 @@ static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   return array_map;
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support parcel
 static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
                                           jlongArray out_offsets) {
   off64_t start_offset, length;
@@ -430,6 +429,15 @@ static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> as
   }
   return newParcelFileDescriptor(env, file_desc);
 }
+#else
+static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
+                                          jlongArray out_offsets) {
+  jniThrowException(env, "java/lang/UnsupportedOperationException",
+                    "Implement me");
+  // never reached
+  return nullptr;
+}
+#endif
 
 static jint NativeGetGlobalAssetCount(JNIEnv* /*env*/, jobject /*clazz*/) {
   return Asset::getGlobalCount();

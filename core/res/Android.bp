@@ -38,6 +38,12 @@ android_app {
     // Create package-export.apk, which other packages can use to get
     // PRODUCT-agnostic resource data like IDs and type definitions.
     export_package_resources: true,
+
+    dist: {
+        targets: [
+            "simulated_device_launcher",
+        ],
+    },
 }
 
 // This logic can be removed once robolectric's transition to binary resources is complete
