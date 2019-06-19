@@ -113,7 +113,8 @@ public class NotificationPanelView extends PanelView implements
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
         OnHeadsUpChangedListener, QS.HeightListener, ZenModeController.Callback,
         ConfigurationController.ConfigurationListener, StateListener,
-        PulseExpansionHandler.ExpansionCallback, DynamicPrivacyController.Listener {
+        PulseExpansionHandler.ExpansionCallback, DynamicPrivacyController.Listener,
+        NotificationWakeUpCoordinator.WakeUpListener {
 
     private static final boolean DEBUG = false;
 
@@ -429,16 +430,16 @@ public class NotificationPanelView extends PanelView implements
         mWakeUpCoordinator.setStackScroller(mNotificationStackScroller);
         mQsFrame = findViewById(R.id.qs_frame);
         mPulseExpansionHandler.setUp(mNotificationStackScroller, this, mShadeController);
-
-
-        mNotificationStackScroller.setOnPulseHeightChangedListener(
-                () -> {
-                    if (mKeyguardBypassController.getBypassEnabled()) {
-                        // Position the notifications while dragging down while pulsing
-                        requestScrollerTopPaddingUpdate(false /* animate */);
-                        updateQSPulseExpansion();
-                    }
-                });
+        mWakeUpCoordinator.addListener(new NotificationWakeUpCoordinator.WakeUpListener() {
+            @Override
+            public void onPulseExpansionChanged(boolean expandingChanged) {
+                if (mKeyguardBypassController.getBypassEnabled()) {
+                    // Position the notifications while dragging down while pulsing
+                    requestScrollerTopPaddingUpdate(false /* animate */);
+                    updateQSPulseExpansion();
+                }
+            }
+        });
     }
 
     @Override

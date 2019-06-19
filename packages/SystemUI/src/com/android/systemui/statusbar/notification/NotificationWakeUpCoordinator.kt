@@ -66,7 +66,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mLinearVisibilityAmount = 0.0f
     private var mWakingUp = false
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
-    private val mDozeParameters: DozeParameters;
+    private val mDozeParameters: DozeParameters
+    private var pulseExpanding: Boolean = false
+    private val wakeUpListeners = arrayListOf<WakeUpListener>()
     var fullyAwake: Boolean = false
 
     var willWakeUp = false
@@ -89,6 +91,16 @@ class NotificationWakeUpCoordinator @Inject constructor(
             }
         }
 
+    var notificationsFullyHidden: Boolean = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                for (listener in wakeUpListeners) {
+                    listener.onFullyHiddenChanged(value)
+                }
+            }
+        }
+
     /**
      * True if we can show pulsing heads up notifications
      */
@@ -104,7 +116,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return canShow
         }
 
-
     init {
         mHeadsUpManagerPhone.addListener(this)
         mStatusBarStateController.addCallback(this)
@@ -113,7 +124,18 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
         mStackScroller = stackScroller
+        pulseExpanding = stackScroller.isPulseExpanding
+        stackScroller.setOnPulseHeightChangedListener {
+            val nowExpanding = isPulseExpanding()
+            val changed = nowExpanding != pulseExpanding
+            pulseExpanding = nowExpanding
+            for (listener in wakeUpListeners) {
+                listener.onPulseExpansionChanged(changed)
+            }
+        }
     }
+
+    fun isPulseExpanding(): Boolean = mStackScroller.isPulseExpanding
 
     /**
      * @param visible should notifications be visible
@@ -130,6 +152,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // notifications are visible
             mHeadsUpManagerPhone.releaseAllImmediately()
         }
+    }
+
+    fun addListener(listener: WakeUpListener) {
+        wakeUpListeners.add(listener);
+    }
+
+    fun removeFullyHiddenChangedListener(listener: WakeUpListener) {
+        wakeUpListeners.remove(listener);
     }
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
@@ -244,7 +274,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         val linearAmount = Math.min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
         val amount = Math.min(1.0f - mVisibilityAmount, mDozeAmount)
         mStackScroller.setHideAmount(linearAmount, amount)
-        iconAreaController.setFullyHidden(linearAmount == 1.0f);
+        notificationsFullyHidden = linearAmount == 1.0f;
     }
 
     private fun notifyAnimationStart(awake: Boolean) {
@@ -300,4 +330,17 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun shouldAnimateVisibility() =
             mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking()
+
+    interface WakeUpListener {
+        /**
+         * Called whenever the notifications are fully hidden or shown
+         */
+        @JvmDefault fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
+
+        /**
+         * Called whenever the pulseExpansion changes
+         * @param expandingChanged if the user has started or stopped expanding
+         */
+        @JvmDefault fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+    }
 }

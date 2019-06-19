@@ -3278,7 +3278,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
-        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
+        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
             if (fromMoreCard) {
@@ -3286,7 +3286,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             mNeedsAnimation = true;
         }
-        if (isHeadsUp(child) && mAnimationsEnabled && !mChangePositionInProgress) {
+        if (isHeadsUp(child) && mAnimationsEnabled && !mChangePositionInProgress
+                && !isFullyHidden()) {
             mAddedHeadsUpChildren.add(child);
             mChildrenToAddAnimated.remove(child);
         }

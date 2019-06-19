@@ -799,6 +799,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
                 .createNotificationIconAreaController(context, this,
+                        mWakeUpCoordinator, mKeyguardBypassController,
                         mStatusBarStateController, mNotificationListener);
         mWakeUpCoordinator.setIconAreaController(mNotificationIconAreaController);
         inflateShelf();
@@ -3572,6 +3573,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
+        mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
+        mStatusBarWindow.setBouncerShowing(bouncerShowing);
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);

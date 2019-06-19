@@ -525,6 +525,12 @@ public class StatusBarWindowView extends FrameLayout {
         mBypassController = bypassController;
     }
 
+    public void setBouncerShowing(boolean bouncerShowing) {
+        if (mLockIcon != null) {
+            mLockIcon.setBouncerShowing(bouncerShowing);
+        }
+    }
+
     public class LayoutParams extends FrameLayout.LayoutParams {
 
         public boolean ignoreRightInset;

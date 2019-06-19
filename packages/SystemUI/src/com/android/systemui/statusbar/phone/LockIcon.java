@@ -47,6 +47,8 @@ import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -64,7 +66,8 @@ import javax.inject.Named;
  */
 public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChangedListener,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
-        UnlockMethodCache.OnUnlockMethodChangedListener {
+        UnlockMethodCache.OnUnlockMethodChangedListener,
+        NotificationWakeUpCoordinator.WakeUpListener {
 
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
@@ -78,6 +81,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final DockManager mDockManager;
     private final Handler mMainHandler;
     private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardBypassController mBypassController;
+    private final NotificationWakeUpCoordinator mWakeUpCoordinator;
 
     private int mLastState = 0;
     private boolean mTransientBiometricsError;
@@ -92,6 +97,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private int mIconColor;
     private float mDozeAmount;
     private int mIconRes;
+    private boolean mBouncerShowing;
     private boolean mWasPulsingOnThisFrame;
     private boolean mWakeAndUnlockRunning;
     private boolean mKeyguardShowing;
@@ -150,6 +156,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             AccessibilityController accessibilityController,
+            KeyguardBypassController bypassController,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardMonitor keyguardMonitor,
             @Nullable DockManager dockManager,
             @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
@@ -160,6 +168,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
+        mBypassController = bypassController;
+        mWakeUpCoordinator = wakeUpCoordinator;
         mKeyguardMonitor = keyguardMonitor;
         mDockManager = dockManager;
         mMainHandler = mainHandler;
@@ -173,6 +183,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mKeyguardMonitor.addCallback(mKeyguardMonitorCallback);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
+        mWakeUpCoordinator.addListener(this);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
@@ -187,6 +198,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mKeyguardMonitor.removeCallback(mKeyguardMonitorCallback);
+        mWakeUpCoordinator.removeFullyHiddenChangedListener(this);
         mUnlockMethodCache.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
@@ -279,6 +291,12 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
+        if (mBypassController.getBypassEnabled()
+                && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                && !mWakeUpCoordinator.getNotificationsFullyHidden()
+                && !mBouncerShowing) {
+            invisible = true;
+        }
         setVisibility(invisible ? INVISIBLE : VISIBLE);
         updateClickability();
     }
@@ -367,6 +385,20 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return LOCK_IN;
         }
         return -1;
+    }
+
+    @Override
+    public void onFullyHiddenChanged(boolean isFullyHidden) {
+        if (mBypassController.getBypassEnabled()) {
+            update();
+        }
+    }
+
+    public void setBouncerShowing(boolean bouncerShowing) {
+        mBouncerShowing = bouncerShowing;
+        if (mBypassController.getBypassEnabled()) {
+            update();
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)

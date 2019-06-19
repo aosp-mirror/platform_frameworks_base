@@ -93,6 +93,7 @@ constructor(context: Context,
         get() = mFalsingManager.isFalseTouch
     var qsExpanded: Boolean = false
     var pulseExpandAbortListener: Runnable? = null
+    var bouncerShowing: Boolean = false
 
     init {
         mMinDragDistance = context.resources.getDimensionPixelSize(
@@ -107,7 +108,8 @@ constructor(context: Context,
     }
 
     private fun maybeStartExpansion(event: MotionEvent): Boolean {
-        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded) {
+        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded
+                || bouncerShowing) {
             return false
         }
         if (velocityTracker == null) {
