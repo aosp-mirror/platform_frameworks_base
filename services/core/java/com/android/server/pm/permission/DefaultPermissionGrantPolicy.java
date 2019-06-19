@@ -143,12 +143,6 @@ public final class DefaultPermissionGrantPolicy {
         CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
-    private static final Set<String> LOCATION_PERMISSIONS = new ArraySet<>();
-    static {
-        LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-    }
-
     private static final Set<String> ALWAYS_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -453,7 +447,8 @@ public final class DefaultPermissionGrantPolicy {
         // SetupWizard
         grantPermissionsToSystemPackage(
                 getKnownPackage(PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId), userId,
-                PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
+                PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                CAMERA_PERMISSIONS);
 
         // Camera
         grantPermissionsToSystemPackage(
@@ -585,7 +580,7 @@ public final class DefaultPermissionGrantPolicy {
         // Maps
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackageForCategory(Intent.CATEGORY_APP_MAPS, userId),
-                userId, LOCATION_PERMISSIONS);
+                userId, ALWAYS_LOCATION_PERMISSIONS);
 
         // Gallery
         grantPermissionsToSystemPackage(
@@ -609,14 +604,14 @@ public final class DefaultPermissionGrantPolicy {
             }
         }
         grantPermissionsToPackage(browserPackage, userId, false /* ignoreSystemPackage */,
-                true /*whitelistRestrictedPermissions*/, LOCATION_PERMISSIONS);
+                true /*whitelistRestrictedPermissions*/, ALWAYS_LOCATION_PERMISSIONS);
 
         // Voice interaction
         if (voiceInteractPackageNames != null) {
             for (String voiceInteractPackageName : voiceInteractPackageNames) {
                 grantPermissionsToSystemPackage(voiceInteractPackageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
-                        PHONE_PERMISSIONS, SMS_PERMISSIONS, LOCATION_PERMISSIONS);
+                        PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
             }
         }
 
@@ -625,7 +620,7 @@ public final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(
                     getDefaultSystemHandlerActivityPackage(
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
-                    userId, MICROPHONE_PERMISSIONS, LOCATION_PERMISSIONS);
+                    userId, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
         }
 
         // Voice recognition
@@ -667,7 +662,7 @@ public final class DefaultPermissionGrantPolicy {
                 .addCategory(Intent.CATEGORY_LAUNCHER_APP);
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(homeIntent, userId), userId,
-                LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS);
 
         // Watches
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
@@ -676,18 +671,18 @@ public final class DefaultPermissionGrantPolicy {
             String wearPackage = getDefaultSystemHandlerActivityPackageForCategory(
                     Intent.CATEGORY_HOME_MAIN, userId);
             grantPermissionsToSystemPackage(wearPackage, userId,
-                    CONTACTS_PERMISSIONS, MICROPHONE_PERMISSIONS, LOCATION_PERMISSIONS);
+                    CONTACTS_PERMISSIONS, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
             grantSystemFixedPermissionsToSystemPackage(wearPackage, userId, PHONE_PERMISSIONS);
 
             // Fitness tracking on watches
             grantPermissionsToSystemPackage(
                     getDefaultSystemHandlerActivityPackage(ACTION_TRACK, userId), userId,
-                    SENSORS_PERMISSIONS, LOCATION_PERMISSIONS);
+                    SENSORS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
         }
 
         // Print Spooler
         grantSystemFixedPermissionsToSystemPackage(PrintManager.PRINT_SPOOLER_PACKAGE_NAME, userId,
-                LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS);
 
         // EmergencyInfo
         grantSystemFixedPermissionsToSystemPackage(
@@ -725,7 +720,7 @@ public final class DefaultPermissionGrantPolicy {
         if (!TextUtils.isEmpty(textClassifierPackageName)) {
             grantPermissionsToSystemPackage(textClassifierPackageName, userId,
                     PHONE_PERMISSIONS, SMS_PERMISSIONS, CALENDAR_PERMISSIONS,
-                    LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
+                    ALWAYS_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
         // Atthention Service
@@ -835,7 +830,7 @@ public final class DefaultPermissionGrantPolicy {
         }
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(packageName, userId,
-                    PHONE_PERMISSIONS, MICROPHONE_PERMISSIONS, LOCATION_PERMISSIONS,
+                    PHONE_PERMISSIONS, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
                     CAMERA_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
     }
@@ -850,7 +845,7 @@ public final class DefaultPermissionGrantPolicy {
             // Grant these permissions as system-fixed, so that nobody can accidentally
             // break cellular data.
             grantSystemFixedPermissionsToSystemPackage(packageName, userId,
-                    PHONE_PERMISSIONS, LOCATION_PERMISSIONS);
+                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
         }
     }
 
@@ -864,7 +859,7 @@ public final class DefaultPermissionGrantPolicy {
             PackageInfo pkg = getSystemPackageInfo(packageName);
             if (isSystemPackage(pkg) && doesPackageSupportRuntimePermissions(pkg)) {
                 revokeRuntimePermissions(packageName, PHONE_PERMISSIONS, true, userId);
-                revokeRuntimePermissions(packageName, LOCATION_PERMISSIONS, true, userId);
+                revokeRuntimePermissions(packageName, ALWAYS_LOCATION_PERMISSIONS, true, userId);
             }
         }
     }
@@ -889,7 +884,7 @@ public final class DefaultPermissionGrantPolicy {
 
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
-        grantPermissionsToSystemPackage(packageName, userId, LOCATION_PERMISSIONS);
+        grantPermissionsToSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(String intentAction, int userId) {
