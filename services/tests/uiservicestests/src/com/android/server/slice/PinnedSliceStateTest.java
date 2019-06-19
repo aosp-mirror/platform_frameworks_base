@@ -68,7 +68,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
     private IBinder mToken = new Binder();
 
     @Before
-    public void setup() {
+    public void setUp() {
         mSliceService = mock(SliceManagerService.class);
         when(mSliceService.getContext()).thenReturn(mContext);
         when(mSliceService.getLock()).thenReturn(new Object());
