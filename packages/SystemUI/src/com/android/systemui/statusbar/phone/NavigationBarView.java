@@ -1040,6 +1040,9 @@ public class NavigationBarView extends FrameLayout implements
         reorient();
         onNavigationModeChanged(mNavBarMode);
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
+        if (mRotationButtonController != null) {
+            mRotationButtonController.registerListeners();
+        }
 
         mEdgeBackGestureHandler.onNavBarAttached();
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
@@ -1053,6 +1056,10 @@ public class NavigationBarView extends FrameLayout implements
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();
         }
+        if (mRotationButtonController != null) {
+            mRotationButtonController.unregisterListeners();
+        }
+
         mEdgeBackGestureHandler.onNavBarDetached();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
