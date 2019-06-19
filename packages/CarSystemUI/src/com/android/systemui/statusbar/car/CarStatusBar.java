@@ -681,11 +681,11 @@ public class CarStatusBar extends StatusBar implements
                     mStatusBarWindowController.setPanelVisible(false);
                     mNotificationView.setVisibility(View.INVISIBLE);
                     mNotificationView.setClipBounds(null);
-                    mNotificationViewController.setIsInForeground(false);
+                    mNotificationViewController.onVisibilityChanged(false);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
                 } else {
-                    mNotificationViewController.setIsInForeground(true);
+                    mNotificationViewController.onVisibilityChanged(true);
                     // let the status bar know that the panel is open
                     mNotificationView.setVisibleNotificationsAsSeen();
                     setPanelExpanded(true);
