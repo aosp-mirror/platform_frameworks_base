@@ -87,14 +87,16 @@ class TaskSnapshotLoader {
                         + bitmapFile.getPath());
                 return null;
             }
-            ComponentName topActivityComponent = ComponentName.unflattenFromString(
+            final ComponentName topActivityComponent = ComponentName.unflattenFromString(
                     proto.topActivityComponent);
+            // For legacy snapshots, restore the scale based on the reduced resolution state
+            final float legacyScale = reducedResolution ? mPersister.getReducedScale() : 1f;
+            final float scale = Float.compare(proto.scale, 0f) != 0 ? proto.scale : legacyScale;
             return new TaskSnapshot(topActivityComponent, buffer, bitmap.getColorSpace(),
                     proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
-                    reducedResolution, reducedResolution ? mPersister.getReducedScale() : 1f,
-                    proto.isRealSnapshot, proto.windowingMode, proto.systemUiVisibility,
-                    proto.isTranslucent);
+                    reducedResolution, scale, proto.isRealSnapshot, proto.windowingMode,
+                    proto.systemUiVisibility, proto.isTranslucent);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);
             return null;
