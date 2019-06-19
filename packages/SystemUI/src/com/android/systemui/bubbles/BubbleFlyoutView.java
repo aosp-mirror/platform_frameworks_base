@@ -137,8 +137,8 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Extra scale down of the dot provides room for error in estimating actual dot location.
      * At the end of the flyout-to-dot animation, wherever the small dot ends up, its disappearance
-     * and the appearance of the larger real dot forms a cohesive animation. */
-    private static final float DOT_SCALE = 0.6f;
+     * and the appearance of the larger real dot forms a cohesive animation.*/
+    private static final float DOT_SCALE = 0.8f;
 
     /** Callback to run when the flyout is hidden. */
     private Runnable mOnHide;
@@ -262,15 +262,13 @@ public class BubbleFlyoutView extends FrameLayout {
             final float distanceFromFlyoutLeftToDotCenterX =
                     mFlyoutSpaceFromBubble + mBubbleIconTopPadding + mOriginalDotSize / 2;
             if (mArrowPointingLeft) {
-                mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX - mNewDotRadius;
+                mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX - (mOriginalDotSize / 2);
             } else {
                 mTranslationXWhenDot =
-                        getWidth() + distanceFromFlyoutLeftToDotCenterX - mNewDotRadius;
+                        getWidth() + distanceFromFlyoutLeftToDotCenterX - (mOriginalDotSize / 2);
             }
-
             mTranslationYWhenDot =
                     getHeight() / 2f
-                            - mNewDotRadius
                             - mBubbleSize / 2f
                             + mOriginalDotSize / 2;
         });
