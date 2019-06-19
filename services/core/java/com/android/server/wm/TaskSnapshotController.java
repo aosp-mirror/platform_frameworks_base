@@ -306,7 +306,8 @@ class TaskSnapshotController {
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         return new TaskSnapshot(
                 appWindowToken.mActivityComponent, screenshotBuffer.getGraphicBuffer(),
-                screenshotBuffer.getColorSpace(), appWindowToken.getConfiguration().orientation,
+                screenshotBuffer.getColorSpace(),
+                appWindowToken.getTask().getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
                 !appWindowToken.fillsParent() || isWindowTranslucent);
@@ -379,8 +380,8 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription());
-        final int width = mainWindow.getFrameLw().width();
-        final int height = mainWindow.getFrameLw().height();
+        final int width = task.getBounds().width();
+        final int height = task.getBounds().height();
 
         final RenderNode node = RenderNode.create("TaskSnapshotController", null);
         node.setLeftTopRightBottom(0, 0, width, height);
@@ -394,11 +395,12 @@ class TaskSnapshotController {
         if (hwBitmap == null) {
             return null;
         }
+
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
         return new TaskSnapshot(topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
-                hwBitmap.getColorSpace(), topChild.getConfiguration().orientation,
-                mainWindow.getStableInsets(), ActivityManager.isLowRamDeviceStatic() /* reduced */,
+                hwBitmap.getColorSpace(), topChild.getTask().getConfiguration().orientation,
+                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* reduced */,
                 1.0f /* scale */, false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);
     }
