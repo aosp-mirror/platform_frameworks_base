@@ -39,6 +39,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -96,7 +97,7 @@ public class NotificationShellCmd extends ShellCommand {
             + "  <args> are as described in `am start`";
 
     public static final int NOTIFICATION_ID = 1138;
-    public static final String NOTIFICATION_PACKAGE = "com.android.shell";
+    public static final String NOTIFICATION_PACKAGE = "android";
     public static final String CHANNEL_ID = "shellcmd";
     public static final String CHANNEL_NAME = "Shell command";
     public static final int CHANNEL_IMP = NotificationManager.IMPORTANCE_DEFAULT;
@@ -267,7 +268,7 @@ public class NotificationShellCmd extends ShellCommand {
     }
 
     void ensureChannel() throws RemoteException {
-        final int uid = Binder.getCallingUid();
+        final int uid = Process.myUid();
         final int userid = UserHandle.getCallingUserId();
         final long token = Binder.clearCallingIdentity();
         try {
@@ -519,7 +520,7 @@ public class NotificationShellCmd extends ShellCommand {
         final long token = Binder.clearCallingIdentity();
         try {
             mBinderService.enqueueNotificationWithTag(
-                    NOTIFICATION_PACKAGE, "android",
+                    NOTIFICATION_PACKAGE, NOTIFICATION_PACKAGE,
                     tag, NOTIFICATION_ID,
                     n, userId);
         } finally {
