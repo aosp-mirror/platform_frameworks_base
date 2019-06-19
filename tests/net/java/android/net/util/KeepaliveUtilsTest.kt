@@ -78,7 +78,6 @@ class KeepaliveUtilsTest {
         assertRunWithException(arrayOf("5"))
 
         // Check resource with invalid slots value.
-        assertRunWithException(arrayOf("2,2"))
         assertRunWithException(arrayOf("3,-1"))
 
         // Check resource with invalid transport type.
