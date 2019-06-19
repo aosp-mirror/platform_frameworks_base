@@ -21,6 +21,7 @@ cc_binary {
         "libbinder",
         "libcutils",
         "libdl",
+        "libhidlbase",
         "libhwbinder",
         "liblog",
         "libnativeloader",
