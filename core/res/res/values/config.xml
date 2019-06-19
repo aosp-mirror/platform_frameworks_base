@@ -364,7 +364,7 @@
          overridden by the device to present the capability of creating socket keepalives. -->
     <!-- An Array of "[NetworkCapabilities.TRANSPORT_*],[supported keepalives] -->
     <string-array translatable="false" name="config_networkSupportedKeepaliveCount">
-        <item>0,3</item>
+        <item>0,1</item>
         <item>1,3</item>
     </string-array>
 
