@@ -741,7 +741,7 @@ java_defaults {
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     libs: [
         "ext",
         "updatable_media_stubs",
@@ -945,7 +945,7 @@ filegroup {
 java_library {
     name: "ext",
     installable: true,
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     static_libs: [
         "libphonenumber-platform",
         "nist-sip",
@@ -1169,7 +1169,7 @@ optional_subdirs = [
 // updated to use hwbinder.stubs.
 java_library {
     name: "hwbinder",
-    no_framework_libs: true,
+    sdk_version: "core_platform",
 
     srcs: [
         "core/java/android/os/HidlSupport.java",
@@ -1704,7 +1704,7 @@ droidstubs {
         "core/java/android/util/AndroidException.java",
     ],
     installable: false,
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     annotations_enabled: true,
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
