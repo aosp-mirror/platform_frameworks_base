@@ -41,7 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
-import java.lang.Math;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -263,6 +262,17 @@ public class NotificationUsageStats {
         }
     }
 
+    /**
+     * Call this when RemoteViews object has been removed from a notification because the images
+     * it contains are too big (even after rescaling).
+     */
+    public synchronized void registerImageRemoved(String packageName) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numImagesRemoved++;
+        }
+    }
+
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
         return getAggregatedStatsLocked(record.sbn.getPackageName());
@@ -405,6 +415,7 @@ public class NotificationUsageStats {
         public int numAlertViolations;
         public int numQuotaViolations;
         public long mLastAccessTime;
+        public int numImagesRemoved;
 
         public AggregatedStats(Context context, String key) {
             this.key = key;
@@ -529,6 +540,7 @@ public class NotificationUsageStats {
             maybeCount("note_over_rate", (numRateViolations - previous.numRateViolations));
             maybeCount("note_over_alert_rate", (numAlertViolations - previous.numAlertViolations));
             maybeCount("note_over_quota", (numQuotaViolations - previous.numQuotaViolations));
+            maybeCount("note_images_removed", (numImagesRemoved - previous.numImagesRemoved));
             noisyImportance.maybeCount(previous.noisyImportance);
             quietImportance.maybeCount(previous.quietImportance);
             finalImportance.maybeCount(previous.finalImportance);
@@ -562,6 +574,7 @@ public class NotificationUsageStats {
             previous.numRateViolations = numRateViolations;
             previous.numAlertViolations = numAlertViolations;
             previous.numQuotaViolations = numQuotaViolations;
+            previous.numImagesRemoved = numImagesRemoved;
             noisyImportance.update(previous.noisyImportance);
             quietImportance.update(previous.quietImportance);
             finalImportance.update(previous.finalImportance);
@@ -667,6 +680,8 @@ public class NotificationUsageStats {
             output.append("numAlertViolations=").append(numAlertViolations).append("\n");
             output.append(indentPlusTwo);
             output.append("numQuotaViolations=").append(numQuotaViolations).append("\n");
+            output.append(indentPlusTwo);
+            output.append("numImagesRemoved=").append(numImagesRemoved).append("\n");
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(finalImportance.toString()).append("\n");
@@ -709,6 +724,7 @@ public class NotificationUsageStats {
             maybePut(dump, "numQuotaLViolations", numQuotaViolations);
             maybePut(dump, "notificationEnqueueRate", getEnqueueRate());
             maybePut(dump, "numAlertViolations", numAlertViolations);
+            maybePut(dump, "numImagesRemoved", numImagesRemoved);
             noisyImportance.maybePut(dump, previous.noisyImportance);
             quietImportance.maybePut(dump, previous.quietImportance);
             finalImportance.maybePut(dump, previous.finalImportance);

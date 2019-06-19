@@ -207,6 +207,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -462,6 +463,9 @@ public class NotificationManagerService extends SystemService {
     private boolean mIsTelevision;
     private boolean mIsAutomotive;
     private boolean mNotificationEffectsEnabledForAutomotive;
+
+    private int mWarnRemoteViewsSizeBytes;
+    private int mStripRemoteViewsSizeBytes;
 
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -1723,6 +1727,11 @@ public class NotificationManagerService extends SystemService {
 
         mZenModeHelper.setPriorityOnlyDndExemptPackages(getContext().getResources().getStringArray(
                 com.android.internal.R.array.config_priorityOnlyDndExemptPackages));
+
+        mWarnRemoteViewsSizeBytes = getContext().getResources().getInteger(
+                com.android.internal.R.integer.config_notificationWarnRemoteViewSizeBytes);
+        mStripRemoteViewsSizeBytes = getContext().getResources().getInteger(
+                com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
     }
 
     @Override
@@ -4712,7 +4721,7 @@ public class NotificationManagerService extends SystemService {
 
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, userId);
+            fixNotification(notification, pkg, tag, id, userId);
 
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
@@ -4817,8 +4826,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected void fixNotification(Notification notification, String pkg, int userId)
-            throws NameNotFoundException {
+    protected void fixNotification(Notification notification, String pkg, String tag, int id,
+            int userId) throws NameNotFoundException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
@@ -4841,6 +4850,50 @@ public class NotificationManagerService extends SystemService {
                         ": Use of fullScreenIntent requires the USE_FULL_SCREEN_INTENT permission");
             }
         }
+
+        // Remote views? Are they too big?
+        checkRemoteViews(pkg, tag, id, notification);
+    }
+
+    private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
+        if (removeRemoteView(pkg, tag, id, notification.contentView)) {
+            notification.contentView = null;
+        }
+        if (removeRemoteView(pkg, tag, id, notification.bigContentView)) {
+            notification.bigContentView = null;
+        }
+        if (removeRemoteView(pkg, tag, id, notification.headsUpContentView)) {
+            notification.headsUpContentView = null;
+        }
+        if (notification.publicVersion != null) {
+            if (removeRemoteView(pkg, tag, id, notification.publicVersion.contentView)) {
+                notification.publicVersion.contentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.publicVersion.bigContentView)) {
+                notification.publicVersion.bigContentView = null;
+            }
+            if (removeRemoteView(pkg, tag, id, notification.publicVersion.headsUpContentView)) {
+                notification.publicVersion.headsUpContentView = null;
+            }
+        }
+    }
+
+    private boolean removeRemoteView(String pkg, String tag, int id, RemoteViews contentView) {
+        if (contentView == null) {
+            return false;
+        }
+        final int contentViewSize = contentView.estimateMemoryUsage();
+        if (contentViewSize > mWarnRemoteViewsSizeBytes
+                && contentViewSize < mStripRemoteViewsSizeBytes) {
+            Slog.w(TAG, "RemoteViews too large on tag: " + tag + " id: " + id
+                    + " this might be stripped in a future release");
+        }
+        if (contentViewSize >= mStripRemoteViewsSizeBytes) {
+            mUsageStats.registerImageRemoved(pkg);
+            Slog.w(TAG, "Removed too large RemoteViews on tag: " + tag + " id: " + id);
+            return true;
+        }
+        return false;
     }
 
     /**
