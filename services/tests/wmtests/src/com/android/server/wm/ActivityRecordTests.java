@@ -31,9 +31,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
@@ -166,7 +166,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
         mStack.mTranslucentActivityWaiting = topActivity;
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
-        assertTrue(mActivity.isState(PAUSED));
+        assertTrue(mActivity.isState(STARTED));
+
+        mStack.mTranslucentActivityWaiting = null;
+        topActivity.changeWindowTranslucency(false);
+        mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped behind non-opaque");
+        mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
+        assertTrue(mActivity.isState(STARTED));
     }
 
     private void ensureActivityConfiguration() {
@@ -442,7 +448,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         topActivity.changeWindowTranslucency(false);
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
         mActivity.makeClientVisible();
-        assertEquals(PAUSED, mActivity.getState());
+        assertEquals(STARTED, mActivity.getState());
     }
 
     @Test
