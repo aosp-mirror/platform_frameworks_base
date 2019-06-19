@@ -2693,6 +2693,14 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
+        /**
+         * Writes the transaction to parcel, clearing the transaction as if it had been applied so
+         * it can be used to store future transactions. It's the responsibility of the parcel
+         * reader to apply the original transaction.
+         *
+         * @param dest parcel to write the transaction to
+         * @param flags
+         */
         @Override
         public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
             if (mNativeObject == 0) {

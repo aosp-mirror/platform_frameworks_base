@@ -49,7 +49,7 @@ public class BaseIWindow extends IWindow.Stub {
             DisplayCutout.ParcelableWrapper displayCutout) {
         if (reportDraw) {
             try {
-                mSession.finishDrawing(this);
+                mSession.finishDrawing(this, null /* postDrawTransaction */);
             } catch (RemoteException e) {
             }
         }

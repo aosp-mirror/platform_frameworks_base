@@ -1266,6 +1266,7 @@ static void nativeWriteTransactionToParcel(JNIEnv* env, jclass clazz, jlong nati
             reinterpret_cast<SurfaceComposerClient::Transaction *>(nativeObject);
     if (self != nullptr) {
         self->writeToParcel(parcel);
+        self->clear();
     }
 }
 

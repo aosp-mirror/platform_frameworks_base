@@ -2356,14 +2356,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void finishDrawingWindow(Session session, IWindow client) {
+    void finishDrawingWindow(Session session, IWindow client,
+            @Nullable SurfaceControl.Transaction postDrawTransaction) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 WindowState win = windowForClientLocked(session, client, false);
                 if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "finishDrawingWindow: " + win + " mDrawState="
                         + (win != null ? win.mWinAnimator.drawStateToString() : "null"));
-                if (win != null && win.mWinAnimator.finishDrawingLocked()) {
+                if (win != null && win.mWinAnimator.finishDrawingLocked(postDrawTransaction)) {
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         win.getDisplayContent().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
