@@ -60,10 +60,16 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
 
     @Override // from AbstractRemoteService
     protected void handleOnDestroy() {
-        if (mPendingRequest != null) {
-            mPendingRequest.cancel();
+        handleCancelPendingRequest();
+    }
+
+    protected BasePendingRequest<S, I> handleCancelPendingRequest() {
+        BasePendingRequest<S, I> pendingRequest = mPendingRequest;
+        if (pendingRequest != null) {
+            pendingRequest.cancel();
             mPendingRequest = null;
         }
+        return pendingRequest;
     }
 
     @Override // from AbstractRemoteService
