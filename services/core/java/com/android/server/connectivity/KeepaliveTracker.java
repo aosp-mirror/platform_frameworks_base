@@ -562,7 +562,7 @@ public class KeepaliveTracker {
         if (KeepaliveInfo.STARTING == ki.mStartedState) {
             if (SUCCESS == reason) {
                 // Keepalive successfully started.
-                if (DBG) Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
+                Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
                 ki.mStartedState = KeepaliveInfo.STARTED;
                 try {
                     ki.mCallback.onStarted(slot);
