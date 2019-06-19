@@ -451,9 +451,9 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"កម្មវិធីសន្សំថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"បិទ​កម្មវិធី​សន្សំ​ថ្ម"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"នៅពេល​កំពុងថត ឬបញ្ជូន <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> អាច​ថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់ពី​ឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់ រូបថត និងសារ​ជាដើម។"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"នៅពេល​កំពុងថត ឬភ្ជាប់ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> អាច​ថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់ពី​ឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់ រូបថត និងសារ​ជាដើម។"</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"នៅពេល​កំពុងថត ឬបញ្ជូន សេវាកម្មដែល​ផ្ដល់មុខងារនេះ​អាចថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់​ រូបថត និងសារ​ជាដើម។"</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"បង្ហាញព័ត៌មានរសើប​ អំឡុងពេលបញ្ជូន/ថត"</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"ការបង្ហាញព័ត៌មានរសើប​ អំឡុងពេលភ្ជាប់/ថត"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"គ្រប់គ្រង"</string>
