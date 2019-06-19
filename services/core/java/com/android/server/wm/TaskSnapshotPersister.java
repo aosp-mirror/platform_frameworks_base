@@ -342,6 +342,7 @@ class TaskSnapshotPersister {
             proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
+            proto.scale = mSnapshot.getScale();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);
             final AtomicFile atomicFile = new AtomicFile(file);
@@ -369,12 +370,13 @@ class TaskSnapshotPersister {
             }
 
             final Bitmap swBitmap = bitmap.copy(Config.ARGB_8888, false /* isMutable */);
-            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap reduced = mSnapshot.isReducedResolution()
                     ? swBitmap
                     : Bitmap.createScaledBitmap(swBitmap,
                             (int) (bitmap.getWidth() * mReducedScale),
                             (int) (bitmap.getHeight() * mReducedScale), true /* filter */);
+
+            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             try {
                 FileOutputStream reducedFos = new FileOutputStream(reducedFile);
                 reduced.compress(JPEG, QUALITY, reducedFos);
@@ -383,6 +385,7 @@ class TaskSnapshotPersister {
                 Slog.e(TAG, "Unable to open " + reducedFile +" for persisting.", e);
                 return false;
             }
+            reduced.recycle();
 
             // For snapshots with reduced resolution, do not create or save full sized bitmaps
             if (mSnapshot.isReducedResolution()) {
@@ -399,7 +402,6 @@ class TaskSnapshotPersister {
                 Slog.e(TAG, "Unable to open " + file + " for persisting.", e);
                 return false;
             }
-            reduced.recycle();
             swBitmap.recycle();
             return true;
         }
