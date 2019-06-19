@@ -3288,6 +3288,27 @@ public class PermissionManagerService {
         }
 
         @Override
+        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
+                @PermissionInfo.Protection int protectionLevel) {
+            ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+
+            synchronized (PermissionManagerService.this.mLock) {
+                int numTotalPermissions = mSettings.mPermissions.size();
+
+                for (int i = 0; i < numTotalPermissions; i++) {
+                    BasePermission bp = mSettings.mPermissions.valueAt(i);
+
+                    if (bp.perm != null && bp.perm.info != null
+                            && bp.protectionLevel == protectionLevel) {
+                        matchingPermissions.add(bp.perm.info);
+                    }
+                }
+            }
+
+            return matchingPermissions;
+        }
+
+        @Override
         public @Nullable byte[] backupRuntimePermissions(@NonNull UserHandle user) {
             return PermissionManagerService.this.backupRuntimePermissions(user);
         }
