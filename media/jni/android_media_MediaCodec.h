@@ -17,6 +17,8 @@
 #ifndef _ANDROID_MEDIA_MEDIACODEC_H_
 #define _ANDROID_MEDIA_MEDIACODEC_H_
 
+#include <mutex>
+
 #include "jni.h"
 
 #include <media/MediaAnalyticsItem.h>
@@ -156,6 +158,7 @@ private:
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
     AString mNameAtCreation;
+    std::once_flag mReleaseFlag;
 
     sp<AMessage> mCallbackNotification;
     sp<AMessage> mOnFrameRenderedNotification;
