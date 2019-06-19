@@ -7388,6 +7388,20 @@ message MetricsEvent {
     // CATEGORY: NOTIFICATION
     MEDIA_NOTIFICATION_SEEKBAR = 1743;
 
+    // Custom tag for StatusBarNotification. Length of
+    // Notification.extras[EXTRA_PEOPLE_LIST], set by addPerson().
+    FIELD_NOTIFICATION_PEOPLE = 1744;
+
+    // Custom tag for StatusBarNotification. The Java hashcode of
+    // Notification.extras[EXTRA_TEMPLATE], which is a string like
+    // android.app.Notification$MessagingStyle, set by setStyle().
+    FIELD_NOTIFICATION_STYLE = 1745;
+
+    // OPEN: Settings > About phone > Legal information > Google Play system update licenses
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MODULE_LICENSES_DASHBOARD = 1746;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -16,11 +16,16 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,9 +37,10 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
  * notification sections. Currently only used for gentle notifications.
  */
 public class SectionHeaderView extends ActivatableNotificationView {
-    private View mContents;
+    private ViewGroup mContents;
     private TextView mLabelView;
     private ImageView mClearAllButton;
+    @Nullable private View.OnClickListener mOnClearClickListener = null;
 
     private final RectF mTmpRect = new RectF();
 
@@ -45,14 +51,36 @@ public class SectionHeaderView extends ActivatableNotificationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mContents = findViewById(R.id.content);
-        mLabelView = findViewById(R.id.header_label);
-        mClearAllButton = findViewById(R.id.btn_clear_all);
+        mContents = checkNotNull(findViewById(R.id.content));
+        bindContents();
+    }
+
+    private void bindContents() {
+        mLabelView = checkNotNull(findViewById(R.id.header_label));
+        mClearAllButton = checkNotNull(findViewById(R.id.btn_clear_all));
+        if (mOnClearClickListener != null) {
+            mClearAllButton.setOnClickListener(mOnClearClickListener);
+        }
     }
 
     @Override
     protected View getContentView() {
         return mContents;
+    }
+
+    /**
+     * Destroys and reinflates the visible contents of the section header. For use on configuration
+     * changes or any other time that layout values might need to be re-evaluated.
+     *
+     * Does not reinflate the base content view itself ({@link #getContentView()} or any of the
+     * decorator views, such as the background view or shadow view.
+     */
+    void reinflateContents() {
+        mContents.removeAllViews();
+        LayoutInflater.from(getContext()).inflate(
+                R.layout.status_bar_notification_section_header_contents,
+                mContents);
+        bindContents();
     }
 
     /** Must be called whenever the UI mode changes (i.e. when we enter night mode). */
@@ -88,6 +116,7 @@ public class SectionHeaderView extends ActivatableNotificationView {
 
     /** Fired when the user clicks on the "X" button on the far right of the header. */
     void setOnClearAllClickListener(View.OnClickListener listener) {
+        mOnClearClickListener = listener;
         mClearAllButton.setOnClickListener(listener);
     }
 }
