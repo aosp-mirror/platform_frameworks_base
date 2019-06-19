@@ -47,11 +47,14 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManagerInternal;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
+import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -75,6 +78,13 @@ public final class PermissionPolicyService extends SystemService {
     /** Whether the user is started but not yet stopped */
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsStarted = new SparseBooleanArray();
+
+    /**
+     * Whether an async {@link #synchronizePackagePermissionsAndAppOpsForUser} is currently
+     * scheduled for a package/user.
+     */
+    @GuardedBy("mLock")
+    private final ArraySet<Pair<String, Integer>> mIsPackageSyncsScheduled = new ArraySet<>();
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
@@ -111,11 +121,26 @@ public final class PermissionPolicyService extends SystemService {
         });
 
         permManagerInternal.addOnRuntimePermissionStateChangedListener(
-                (packageName, changedUserId) -> {
-                    if (isStarted(changedUserId)) {
-                        synchronizePackagePermissionsAndAppOpsForUser(packageName, changedUserId);
+                this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
+    }
+
+    private void synchronizePackagePermissionsAndAppOpsAsyncForUser(@NonNull String packageName,
+            @UserIdInt int changedUserId) {
+        if (isStarted(changedUserId)) {
+            synchronized (mLock) {
+                if (mIsPackageSyncsScheduled.add(new Pair<>(packageName, changedUserId))) {
+                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                            PermissionPolicyService
+                                    ::synchronizePackagePermissionsAndAppOpsForUser,
+                            this, packageName, changedUserId));
+                } else {
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "sync for " + packageName + "/" + changedUserId
+                                + " already scheduled");
                     }
-                });
+                }
+            }
+        }
     }
 
     @Override
@@ -230,10 +255,14 @@ public final class PermissionPolicyService extends SystemService {
      */
     private void synchronizePackagePermissionsAndAppOpsForUser(@NonNull String packageName,
             @UserIdInt int userId) {
+        synchronized (mLock) {
+            mIsPackageSyncsScheduled.remove(new Pair<>(packageName, userId));
+        }
+
         if (DEBUG) {
             Slog.v(LOG_TAG,
-                    "synchronizePackagePermissionsAndAppOpsForUser(" + packageName + ", " + userId
-                            + ")");
+                    "synchronizePackagePermissionsAndAppOpsForUser(" + packageName + ", "
+                            + userId + ")");
         }
 
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
@@ -578,7 +607,7 @@ public final class PermissionPolicyService extends SystemService {
             final int currentMode;
             try {
                 currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
-                        .opToPublicName(opCode), uid, packageName);
+                    .opToPublicName(opCode), uid, packageName);
             } catch (SecurityException e) {
                 // This might happen if the app was uninstalled in between the add and sync step.
                 // In this case the package name cannot be resolved inside appops service and hence
