@@ -375,6 +375,7 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
     event->initialize(deviceId, source, displayId, action, 0, flags, edgeFlags, metaState,
             buttonState, static_cast<MotionClassification>(classification),
             xOffset, yOffset, xPrecision, yPrecision,
+            AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event);
