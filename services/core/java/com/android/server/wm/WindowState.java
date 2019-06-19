@@ -5054,9 +5054,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // relative layering of multiple APPLICATION_MEDIA/OVERLAY has never
             // been defined and so we can use static layers and leave it that way.
             if (w.mAttrs.type == TYPE_APPLICATION_MEDIA) {
-                w.assignLayer(t, -2);
+                if (mWinAnimator.hasSurface()) {
+                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceController.mSurfaceControl, -2);
+                } else {
+                    w.assignLayer(t, -2);
+                }
             } else if (w.mAttrs.type == TYPE_APPLICATION_MEDIA_OVERLAY) {
-                w.assignLayer(t, -1);
+                if (mWinAnimator.hasSurface()) {
+                    w.assignRelativeLayer(t, mWinAnimator.mSurfaceController.mSurfaceControl, -1);
+                } else {
+                    w.assignLayer(t, -1);
+                }
             } else {
                 w.assignLayer(t, layer);
             }
