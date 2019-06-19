@@ -2380,6 +2380,11 @@ enum PageId {
     // Note: Only shows up on first time toggle
     DIALOG_DARK_UI_INFO = 1740;
 
+    // OPEN: Settings > About phone > Legal information > Google Play system update licenses
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MODULE_LICENSES_DASHBOARD = 1746;
+
     // OPEN: Settings > System > Gestures > Global Actions Panel
     // CATEGORY: SETTINGS
     // OS: Q
