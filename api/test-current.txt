@@ -3473,6 +3473,11 @@ package android.view.inputmethod {
     method public boolean isInputMethodPickerShown();
   }
 
+  public class InputMethodSystemProperty {
+    ctor public InputMethodSystemProperty();
+    field public static final boolean MULTI_CLIENT_IME_ENABLED;
+  }
+
 }
 
 package android.view.inspector {

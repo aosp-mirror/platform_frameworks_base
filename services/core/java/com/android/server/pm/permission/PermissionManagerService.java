@@ -2143,7 +2143,7 @@ public class PermissionManagerService {
         }
 
         if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
-                pkg.applicationInfo, permName).canBeGranted()) {
+                pkg.applicationInfo, UserHandle.of(userId), permName).canBeGranted()) {
             Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
                     + packageName);
             return;

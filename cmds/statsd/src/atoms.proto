@@ -303,14 +303,16 @@ message Atom {
         ContentCaptureSessionEvents content_capture_session_events = 208;
         ContentCaptureFlushed content_capture_flushed = 209;
         LocationManagerApiUsageReported location_manager_api_usage_reported = 210;
-        ReviewPermissionsFragmentResultReported review_permissions_fragment_result_reported
-            = 211 [(log_from_module) = "permissioncontroller"];
+        ReviewPermissionsFragmentResultReported review_permissions_fragment_result_reported =
+            211 [(log_from_module) = "permissioncontroller"];
         RuntimePermissionsUpgradeResult runtime_permissions_upgrade_result =
             212 [(log_from_module) = "permissioncontroller"];
+        GrantPermissionsActivityButtonActions grant_permissions_activity_button_actions =
+            213 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10059
+    // Next: 10062
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -373,6 +375,7 @@ message Atom {
         FaceSettings face_settings = 10058;
         CoolingDevice cooling_device = 10059;
         AppOps app_ops = 10060;
+        ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5280,7 +5283,7 @@ message NetworkDnsEventReported {
     // Only valid for event_type = EVENT_RESNSEND.
     optional int32 res_nsend_flags = 5;
 
-    optional android.stats.dnsresolver.Transport network_type = 6;
+    optional android.stats.dnsresolver.NetworkType network_type = 6;
 
     // The DNS over TLS mode on a specific netId.
     optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
@@ -6351,6 +6354,28 @@ message SystemIonHeapSize {
     optional int64 size_in_bytes = 1;
 }
 
+/*
+ * Logs the per-process size of the system ion heap.
+ *
+ * Pulled from StatsCompanionService.
+ */
+message ProcessSystemIonHeapSize {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name (from /proc/PID/cmdline).
+    optional string process_name = 2;
+
+    // Sum of sizes of all allocations.
+    optional int32 total_size_in_kilobytes = 3;
+
+    // Number of allocations.
+    optional int32 allocation_count = 4;
+
+    // Size of the largest allocation.
+    optional int32 max_size_in_kilobytes = 5;
+}
+
 /**
  * Push network stack events.
  *
@@ -6589,4 +6614,25 @@ message RuntimePermissionsUpgradeResult {
 
     // Name of package granted permission
     optional string package_name = 3;
+}
+
+/**
+* Information about a buttons presented in GrantPermissionsActivty and choice made by user
+*/
+message GrantPermissionsActivityButtonActions {
+    // Permission granted as result of upgrade
+    optional string permission_group_name = 1;
+
+    // UID of package granted permission
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package requesting permission
+    optional string package_name = 3;
+
+    // Buttons presented in the dialog - bit flags, bit numbers are in accordance with
+    // LABEL_ constants in GrantPermissionActivity.java
+    optional int32 buttons_presented = 4;
+
+    // Button clicked by user - same as bit flags in buttons_presented with only single bit set
+    optional int32 button_clicked = 5;
 }

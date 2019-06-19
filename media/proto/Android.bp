@@ -5,7 +5,6 @@ java_library_static {
         type: "lite",
     },
     srcs: ["mediaplayer2.proto"],
-    no_framework_libs: true,
     jarjar_rules: "jarjar-rules.txt",
     sdk_version: "28",
 }

@@ -2399,6 +2399,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void silenceNotificationSound() {
+            checkCallerIsSystem();
+
+            mNotificationDelegate.clearEffects();
+        }
+
+        @Override
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
 

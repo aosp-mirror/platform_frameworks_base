@@ -110,15 +110,15 @@ public class Trampoline extends IBackupManager.Stub {
     private final Object mStateLock = new Object();
 
     private volatile BackupManagerService mService;
-    private HandlerThread mHandlerThread;
-    private Handler mHandler;
+    private final Handler mHandler;
 
     public Trampoline(Context context) {
         mContext = context;
         mGlobalDisable = isBackupDisabled();
-        mHandlerThread = new HandlerThread(BACKUP_THREAD, Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        HandlerThread handlerThread =
+                new HandlerThread(BACKUP_THREAD, Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
     }
 
@@ -232,7 +232,7 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     protected BackupManagerService createBackupManagerService() {
-        return new BackupManagerService(mContext, this, mHandlerThread);
+        return new BackupManagerService(mContext, this);
     }
 
     protected void postToHandler(Runnable runnable) {

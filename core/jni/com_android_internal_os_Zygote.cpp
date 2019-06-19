@@ -292,6 +292,7 @@ static std::array<UsapTableEntry, USAP_POOL_SIZE_MAX_LIMIT> gUsapTable;
 static FileDescriptorTable* gOpenFdTable = nullptr;
 
 // Must match values in com.android.internal.os.Zygote.
+// The order of entries here must be kept in sync with ExternalStorageViews array values.
 enum MountExternalKind {
   MOUNT_EXTERNAL_NONE = 0,
   MOUNT_EXTERNAL_DEFAULT = 1,
@@ -300,6 +301,18 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_LEGACY = 4,
   MOUNT_EXTERNAL_INSTALLER = 5,
   MOUNT_EXTERNAL_FULL = 6,
+  MOUNT_EXTERNAL_COUNT = 7
+};
+
+// The order of entries here must be kept in sync with MountExternalKind enum values.
+static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorageViews = {
+  "",                     // MOUNT_EXTERNAL_NONE
+  "/mnt/runtime/default", // MOUNT_EXTERNAL_DEFAULT
+  "/mnt/runtime/read",    // MOUNT_EXTERNAL_READ
+  "/mnt/runtime/write",   // MOUNT_EXTERNAL_WRITE
+  "/mnt/runtime/write",   // MOUNT_EXTERNAL_LEGACY
+  "/mnt/runtime/write",   // MOUNT_EXTERNAL_INSTALLER
+  "/mnt/runtime/full",    // MOUNT_EXTERNAL_FULL
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -633,6 +646,23 @@ static int UnmountTree(const char* path) {
   return 0;
 }
 
+static void CreateDir(const std::string& dir, mode_t mode, uid_t uid, gid_t gid,
+                      fail_fn_t fail_fn) {
+  if (fs_prepare_dir(dir.c_str(), mode, uid, gid) != 0) {
+    fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s: %s",
+                         dir.c_str(), strerror(errno)));
+  }
+}
+
+static void BindMount(const std::string& source_dir, const std::string& target_dir,
+                      fail_fn_t fail_fn) {
+  if (TEMP_FAILURE_RETRY(mount(source_dir.c_str(), target_dir.c_str(), nullptr,
+                               MS_BIND | MS_REC, nullptr)) == -1) {
+    fail_fn(CREATE_ERROR("Failed to mount %s to %s: %s",
+                         source_dir.c_str(), target_dir.c_str(), strerror(errno)));
+  }
+}
+
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static void MountEmulatedStorage(uid_t uid, jint mount_mode,
@@ -641,18 +671,11 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   // See storage config details at http://source.android.com/tech/storage/
   ATRACE_CALL();
 
-  String8 storage_source;
-  if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
-    storage_source = "/mnt/runtime/default";
-  } else if (mount_mode == MOUNT_EXTERNAL_READ) {
-    storage_source = "/mnt/runtime/read";
-  } else if (mount_mode == MOUNT_EXTERNAL_WRITE
-      || mount_mode == MOUNT_EXTERNAL_LEGACY
-      || mount_mode == MOUNT_EXTERNAL_INSTALLER) {
-    storage_source = "/mnt/runtime/write";
-  } else if (mount_mode == MOUNT_EXTERNAL_FULL) {
-    storage_source = "/mnt/runtime/full";
-  } else if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
+  if (mount_mode < 0 || mount_mode >= MOUNT_EXTERNAL_COUNT) {
+    fail_fn(CREATE_ERROR("Unknown mount_mode: %d", mount_mode));
+  }
+
+  if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
     // Sane default of no storage visible
     return;
   }
@@ -667,26 +690,15 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     return;
   }
 
-  if (TEMP_FAILURE_RETRY(mount(storage_source.string(), "/storage", nullptr,
-                               MS_BIND | MS_REC | MS_SLAVE, nullptr)) == -1) {
-    fail_fn(CREATE_ERROR("Failed to mount %s to /storage: %s",
-                         storage_source.string(),
-                         strerror(errno)));
-  }
+  const std::string& storage_source = ExternalStorageViews[mount_mode];
+
+  BindMount(storage_source, "/storage", fail_fn);
 
   // Mount user-specific symlink helper into place
   userid_t user_id = multiuser_get_user_id(uid);
-  const String8 user_source(String8::format("/mnt/user/%d", user_id));
-  if (fs_prepare_dir(user_source.string(), 0751, 0, 0) == -1) {
-    fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s",
-                         user_source.string()));
-  }
-
-  if (TEMP_FAILURE_RETRY(mount(user_source.string(), "/storage/self",
-                               nullptr, MS_BIND, nullptr)) == -1) {
-    fail_fn(CREATE_ERROR("Failed to mount %s to /storage/self: %s",
-                         user_source.string(), strerror(errno)));
-  }
+  const std::string user_source = StringPrintf("/mnt/user/%d", user_id);
+  CreateDir(user_source, 0751, AID_ROOT, AID_ROOT, fail_fn);
+  BindMount(user_source, "/storage/self", fail_fn);
 }
 
 static bool NeedsNoRandomizeWorkaround() {
