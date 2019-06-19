@@ -174,7 +174,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     }
 
     // Get the names of classes that have to delegate their native methods
-    jclass createInfo = FindClassOrDie(env, "com/android/tools/layoutlib/create/CreateInfo");
+
+    jclass createInfo = FindClassOrDie(env, "com/android/tools/layoutlib/create/NativeConfig");
     jfieldID arrayId = GetStaticFieldIDOrDie(env, createInfo,
             "DELEGATE_CLASS_NATIVES_TO_NATIVES", "[Ljava/lang/String;");
     jobjectArray array = (jobjectArray) env->GetStaticObjectField(createInfo, arrayId);
@@ -194,11 +195,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     }
 
     // Set the location of ICU data
-    jclass bridge = FindClassOrDie(env, "com/android/layoutlib/bridge/Bridge");
-    jstring stringPath = (jstring) env->CallStaticObjectMethod(bridge,
-            GetStaticMethodIDOrDie(env, bridge, "getIcuDataPath", "()Ljava/lang/String;"));
+    jclass system = FindClassOrDie(env, "java/lang/System");
+    jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
+        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jstring stringPath = (jstring) (jstring) env->CallStaticObjectMethod(system,
+        getPropertyMethod, env->NewStringUTF("icu.dir"),
+        env->NewStringUTF(""));
     const char* path = env->GetStringUTFChars(stringPath, 0);
     u_setDataDirectory(path);
     env->ReleaseStringUTFChars(stringPath, path);
     return JNI_VERSION_1_6;
 }
+
