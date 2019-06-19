@@ -71,7 +71,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     private TestableContext mContextSpy;
 
     @Before
-    public void setup() {
+    public void setUp() {
         LocalServices.addService(UsageStatsManagerInternal.class,
                 mock(UsageStatsManagerInternal.class));
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
