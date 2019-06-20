@@ -75,6 +75,7 @@ android_library {
         "--extra-packages",
         "com.android.keyguard",
     ],
+    kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler-2.19"],
 }
@@ -128,6 +129,7 @@ android_library {
         "telephony-common",
         "android.test.base",
     ],
+    kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
         "--extra-packages",
         "com.android.keyguard:com.android.systemui",
@@ -154,6 +156,8 @@ android_app {
     libs: [
         "telephony-common",
     ],
+
+    kotlincflags: ["-Xjvm-default=enable"],
 
     dxflags: ["--multi-dex"],
     aaptflags: [
@@ -190,6 +194,8 @@ android_app {
     libs: [
         "telephony-common",
     ],
+
+    kotlincflags: ["-Xjvm-default=enable"],
 
     srcs: [
         "legacy/recents/src/**/*.java",

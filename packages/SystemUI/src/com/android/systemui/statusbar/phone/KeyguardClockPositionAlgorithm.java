@@ -112,10 +112,15 @@ public class KeyguardClockPositionAlgorithm {
     private float mEmptyDragAmount;
 
     /**
-     * If true the clock should always be positioned like it's dark. Used in the bypass, where
-     * notifications don't expand on the lock screen and should be kept stable
+     * Setting if bypass is enabled. If true the clock should always be positioned like it's dark
+     * and other minor adjustments.
      */
-    private boolean mPositionLikeDark;
+    private boolean mBypassEnabled;
+
+    /**
+     * The stackscroller padding when unlocked
+     */
+    private int mUnlockedStackScrollerPadding;
 
     /**
      * Refreshes the dimension values.
@@ -139,7 +144,7 @@ public class KeyguardClockPositionAlgorithm {
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
             boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
-            boolean positionLikeDark) {
+            boolean bypassEnabled, int unlockedStackScrollerPadding) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -151,20 +156,24 @@ public class KeyguardClockPositionAlgorithm {
         mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
         mEmptyDragAmount = emptyDragAmount;
-        mPositionLikeDark = positionLikeDark;
+        mBypassEnabled = bypassEnabled;
+        mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
     }
 
     public void run(Result result) {
         final int y = getClockY(mPanelExpansion);
         result.clockY = y;
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = y + mKeyguardStatusHeight;
-        result.stackScrollerPaddingExpanded = getClockY(1.0f) + mKeyguardStatusHeight;
+        result.stackScrollerPadding = mBypassEnabled ? mUnlockedStackScrollerPadding
+                : y + mKeyguardStatusHeight;
+        result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
+                : getClockY(1.0f) + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
     public float getMinStackScrollerPadding() {
-        return mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
+        return mBypassEnabled ? mUnlockedStackScrollerPadding
+                : mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
     }
 
     private int getMaxClockY() {
@@ -176,7 +185,7 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getExpandedPreferredClockY() {
-        return (mHasCustomClock && (!mHasVisibleNotifs || mPositionLikeDark)) ? getPreferredClockY()
+        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? getPreferredClockY()
                 : getExpandedClockPosition();
     }
 
@@ -218,7 +227,7 @@ public class KeyguardClockPositionAlgorithm {
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        float darkAmount = mPositionLikeDark && !mHasCustomClock ? 1.0f : mDarkAmount;
+        float darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : mDarkAmount;
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 

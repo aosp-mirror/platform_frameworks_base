@@ -118,7 +118,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(),
                         bypassController);
-        PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator);
+        PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator,
+                bypassController);
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
                 bypassController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
