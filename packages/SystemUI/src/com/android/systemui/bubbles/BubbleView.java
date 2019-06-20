@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -32,7 +33,6 @@ import android.util.PathParser;
 import android.widget.FrameLayout;
 
 import com.android.internal.graphics.ColorUtils;
-import com.android.launcher3.icons.BitmapInfo;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -53,6 +53,7 @@ public class BubbleView extends FrameLayout {
     private BadgedImageView mBadgedImageView;
     private int mBadgeColor;
     private int mIconInset;
+    private Drawable mUserBadgedAppIcon;
 
     // mBubbleIconFactory cannot be static because it depends on Context.
     private BubbleIconFactory mBubbleIconFactory;
@@ -133,6 +134,9 @@ public class BubbleView extends FrameLayout {
         mBubbleIconFactory = factory;
     }
 
+    public void setAppIcon(Drawable appIcon) {
+        mUserBadgedAppIcon = appIcon;
+    }
     /**
      * @return the {@link ExpandableNotificationRow} view to display notification content when the
      * bubble is expanded.
@@ -228,10 +232,11 @@ public class BubbleView extends FrameLayout {
         if (needsTint) {
             iconDrawable = buildIconWithTint(iconDrawable, n.color);
         }
-        BitmapInfo bitmapInfo = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
+        Bitmap bubbleIcon = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
                 null /* user */,
-                true /* shrinkNonAdaptiveIcons */);
-        mBadgedImageView.setImageBitmap(bitmapInfo.icon);
+                true /* shrinkNonAdaptiveIcons */).icon;
+        mBubbleIconFactory.badgeWithDrawable(bubbleIcon, mUserBadgedAppIcon);
+        mBadgedImageView.setImageBitmap(bubbleIcon);
 
         // Update badge.
         int badgeColor = determineDominateColor(iconDrawable, n.color);
