@@ -399,8 +399,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"తెరవడానికి మళ్లీ నొక్కండి"</string>
-    <!-- no translation found for keyguard_unlock (6035822649218712063) -->
-    <skip />
+    <string name="keyguard_unlock" msgid="6035822649218712063">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ఈ పరికరాన్ని మీ సంస్థ నిర్వహిస్తోంది"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> నిర్వహణలో ఉంది"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>

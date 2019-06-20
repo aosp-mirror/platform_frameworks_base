@@ -399,8 +399,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"নিচে অপেক্ষাকৃত কম জরুরী বিজ্ঞপ্তিগুলি"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খোলার জন্য আবার আলতো চাপুন"</string>
-    <!-- no translation found for keyguard_unlock (6035822649218712063) -->
-    <skip />
+    <string name="keyguard_unlock" msgid="6035822649218712063">"খোলার জন্য উপরে সোয়াইপ করুন"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপনার সংস্থা এই ডিভাইসটি পরিচালনা করছে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> এর দ্বারা পরিচালিত"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ফোনের জন্য আইকন থেকে সোয়াইপ করুন"</string>
