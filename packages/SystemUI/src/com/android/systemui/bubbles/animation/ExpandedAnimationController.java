@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -64,6 +65,8 @@ public class ExpandedAnimationController
     private Point mDisplaySize;
     /** Max number of bubbles shown in row above expanded view.*/
     private int mBubblesMaxRendered;
+    /** Width of current screen orientation. */
+    private float mScreenWidth;
 
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
@@ -88,8 +91,10 @@ public class ExpandedAnimationController
     private int mExpandedViewPadding;
     private float mLauncherGridDiff;
 
-    public ExpandedAnimationController(Point displaySize, int expandedViewPadding) {
+    public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
+            int orientation) {
         mDisplaySize = displaySize;
+        updateOrientation(orientation);
         mExpandedViewPadding = expandedViewPadding;
         mLauncherGridDiff = 30f;
     }
@@ -122,6 +127,18 @@ public class ExpandedAnimationController
         mCollapsePoint = collapsePoint;
 
         startOrUpdateCollapseAnimation();
+    }
+
+    /**
+     * Update effective screen width based on current orientation.
+     * @param orientation Landscape or portrait.
+     */
+    public void updateOrientation(int orientation) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mScreenWidth = mDisplaySize.y;
+            return;
+        }
+        mScreenWidth = mDisplaySize.x;
     }
 
     private void startOrUpdateExpandAnimation() {
@@ -421,7 +438,7 @@ public class ExpandedAnimationController
         final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
         final float rowWidth = totalGapWidth + totalBubbleWidth;
 
-        final float centerScreen = mDisplaySize.x / 2f;
+        final float centerScreen = mScreenWidth / 2f;
         final float halfRow = rowWidth / 2f;
         final float rowLeft = centerScreen - halfRow;
 
@@ -441,7 +458,7 @@ public class ExpandedAnimationController
          *  Launcher's app icon grid edge that we must match
          */
         final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
-        final float maxRowWidth = mDisplaySize.x - rowMargins;
+        final float maxRowWidth = mScreenWidth - rowMargins;
 
         final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
         final float totalGapWidth = maxRowWidth - totalBubbleWidth;

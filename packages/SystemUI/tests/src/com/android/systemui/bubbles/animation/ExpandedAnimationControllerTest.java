@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.verify;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -46,13 +47,14 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mDisplayWidth = 500;
     private int mDisplayHeight = 1000;
     private int mExpandedViewPadding = 10;
+    private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
     private float mLauncherGridDiff = 30f;
 
     @Spy
     private ExpandedAnimationController mExpandedController =
             new ExpandedAnimationController(
                     new Point(mDisplayWidth, mDisplayHeight) /* displaySize */,
-                    mExpandedViewPadding);
+                    mExpandedViewPadding, mOrientation);
 
     private int mStackOffset;
     private float mBubblePaddingTop;
