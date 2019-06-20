@@ -16,8 +16,8 @@
 
 package android.net;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import androidx.test.filters.SmallTest;
 
@@ -43,7 +43,7 @@ public class IpSecTransformTest {
         config.setSpiResourceId(1985);
         IpSecTransform postModification = new IpSecTransform(null, config);
 
-        assertFalse(IpSecTransform.equals(preModification, postModification));
+        assertNotEquals(preModification, postModification);
     }
 
     @Test
@@ -57,6 +57,6 @@ public class IpSecTransformTest {
         IpSecTransform config1 = new IpSecTransform(null, config);
         IpSecTransform config2 = new IpSecTransform(null, config);
 
-        assertTrue(IpSecTransform.equals(config1, config2));
+        assertEquals(config1, config2);
     }
 }

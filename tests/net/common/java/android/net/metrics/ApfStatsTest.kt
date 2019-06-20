@@ -16,11 +16,9 @@
 
 package android.net.metrics
 
-import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.internal.util.ParcelableTestUtil
-import com.android.internal.util.TestUtils
+import com.android.testutils.assertParcelSane
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,11 +26,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ApfStatsTest {
-    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
-        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
-        TestUtils.assertParcelingIsLossless(obj)
-    }
-
     @Test
     fun testBuilderAndParcel() {
         val apfStats = ApfStats.Builder()
@@ -59,6 +52,6 @@ class ApfStatsTest {
         assertEquals(8, apfStats.programUpdatesAllowingMulticast)
         assertEquals(9, apfStats.maxProgramSize)
 
-        testParcel(apfStats, 10)
+        assertParcelSane(apfStats, 10)
     }
 }

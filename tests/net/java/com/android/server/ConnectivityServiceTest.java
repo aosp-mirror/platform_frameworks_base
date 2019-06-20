@@ -68,7 +68,15 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
-import static org.junit.Assert.assertArrayEquals;
+import static com.android.testutils.ConcurrentUtilsKt.await;
+import static com.android.testutils.ConcurrentUtilsKt.durationOf;
+import static com.android.testutils.HandlerUtilsKt.waitForIdleSerialExecutor;
+import static com.android.testutils.MiscAssertsKt.assertContainsExactly;
+import static com.android.testutils.MiscAssertsKt.assertEmpty;
+import static com.android.testutils.MiscAssertsKt.assertLength;
+import static com.android.testutils.MiscAssertsKt.assertRunsInAtMost;
+import static com.android.testutils.MiscAssertsKt.assertThrows;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -194,6 +202,7 @@ import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkStatsFactory;
 import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.ThrowingConsumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -2567,10 +2576,10 @@ public class ConnectivityServiceTest {
                 .build();
 
         Class<IllegalArgumentException> expected = IllegalArgumentException.class;
-        assertException(() -> { mCm.requestNetwork(request1, new NetworkCallback()); }, expected);
-        assertException(() -> { mCm.requestNetwork(request1, pendingIntent); }, expected);
-        assertException(() -> { mCm.requestNetwork(request2, new NetworkCallback()); }, expected);
-        assertException(() -> { mCm.requestNetwork(request2, pendingIntent); }, expected);
+        assertThrows(expected, () -> mCm.requestNetwork(request1, new NetworkCallback()));
+        assertThrows(expected, () -> mCm.requestNetwork(request1, pendingIntent));
+        assertThrows(expected, () -> mCm.requestNetwork(request2, new NetworkCallback()));
+        assertThrows(expected, () -> mCm.requestNetwork(request2, pendingIntent));
     }
 
     @Test
@@ -3482,7 +3491,7 @@ public class ConnectivityServiceTest {
             };
         }
 
-        assertTimeLimit("Registering callbacks", REGISTER_TIME_LIMIT_MS, () -> {
+        assertRunsInAtMost("Registering callbacks", REGISTER_TIME_LIMIT_MS, () -> {
             for (NetworkCallback cb : callbacks) {
                 mCm.registerNetworkCallback(request, cb);
             }
@@ -3495,7 +3504,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
 
         long onAvailableDispatchingDuration = durationOf(() -> {
-            awaitLatch(availableLatch, 10 * CONNECT_TIME_LIMIT_MS);
+            await(availableLatch, 10 * CONNECT_TIME_LIMIT_MS);
         });
         Log.d(TAG, String.format("Dispatched %d of %d onAvailable callbacks in %dms",
                 NUM_REQUESTS - availableLatch.getCount(), NUM_REQUESTS,
@@ -3510,7 +3519,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.connect(false);
 
         long onLostDispatchingDuration = durationOf(() -> {
-            awaitLatch(losingLatch, 10 * SWITCH_TIME_LIMIT_MS);
+            await(losingLatch, 10 * SWITCH_TIME_LIMIT_MS);
         });
         Log.d(TAG, String.format("Dispatched %d of %d onLosing callbacks in %dms",
                 NUM_REQUESTS - losingLatch.getCount(), NUM_REQUESTS, onLostDispatchingDuration));
@@ -3518,31 +3527,11 @@ public class ConnectivityServiceTest {
                 NUM_REQUESTS, onLostDispatchingDuration, SWITCH_TIME_LIMIT_MS),
                 onLostDispatchingDuration <= SWITCH_TIME_LIMIT_MS);
 
-        assertTimeLimit("Unregistering callbacks", UNREGISTER_TIME_LIMIT_MS, () -> {
+        assertRunsInAtMost("Unregistering callbacks", UNREGISTER_TIME_LIMIT_MS, () -> {
             for (NetworkCallback cb : callbacks) {
                 mCm.unregisterNetworkCallback(cb);
             }
         });
-    }
-
-    private long durationOf(Runnable fn) {
-        long startTime = SystemClock.elapsedRealtime();
-        fn.run();
-        return SystemClock.elapsedRealtime() - startTime;
-    }
-
-    private void assertTimeLimit(String descr, long timeLimit, Runnable fn) {
-        long timeTaken = durationOf(fn);
-        String msg = String.format("%s: took %dms, limit was %dms", descr, timeTaken, timeLimit);
-        Log.d(TAG, msg);
-        assertTrue(msg, timeTaken <= timeLimit);
-    }
-
-    private boolean awaitLatch(CountDownLatch l, long timeoutMs) {
-        try {
-            return l.await(timeoutMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {}
-        return false;
     }
 
     @Test
@@ -4105,7 +4094,7 @@ public class ConnectivityServiceTest {
         }
 
         public void assertNoCallback() {
-            HandlerUtilsKt.waitForIdleSerialExecutor(mExecutor, TIMEOUT_MS);
+            waitForIdleSerialExecutor(mExecutor, TIMEOUT_MS);
             CallbackValue cv = mCallbacks.peek();
             assertNull("Unexpected callback: " + cv, cv);
         }
@@ -4242,11 +4231,6 @@ public class ConnectivityServiceTest {
 
         ka3.stop();
         callback3.expectStopped();
-    }
-
-    @FunctionalInterface
-    private interface ThrowingConsumer<T> {
-        void accept(T t) throws Exception;
     }
 
     // Helper method to prepare the executor and run test
@@ -4823,17 +4807,17 @@ public class ConnectivityServiceTest {
         assertNull(mCm.getLinkProperties(TYPE_NONE));
         assertFalse(mCm.isNetworkSupported(TYPE_NONE));
 
-        assertException(() -> { mCm.networkCapabilitiesForType(TYPE_NONE); },
-                IllegalArgumentException.class);
+        assertThrows(IllegalArgumentException.class,
+                () -> { mCm.networkCapabilitiesForType(TYPE_NONE); });
 
         Class<UnsupportedOperationException> unsupported = UnsupportedOperationException.class;
-        assertException(() -> { mCm.startUsingNetworkFeature(TYPE_WIFI, ""); }, unsupported);
-        assertException(() -> { mCm.stopUsingNetworkFeature(TYPE_WIFI, ""); }, unsupported);
+        assertThrows(unsupported, () -> { mCm.startUsingNetworkFeature(TYPE_WIFI, ""); });
+        assertThrows(unsupported, () -> { mCm.stopUsingNetworkFeature(TYPE_WIFI, ""); });
         // TODO: let test context have configuration application target sdk version
         // and test that pre-M requesting for TYPE_NONE sends back APN_REQUEST_FAILED
-        assertException(() -> { mCm.startUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
-        assertException(() -> { mCm.stopUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
-        assertException(() -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); }, unsupported);
+        assertThrows(unsupported, () -> { mCm.startUsingNetworkFeature(TYPE_NONE, ""); });
+        assertThrows(unsupported, () -> { mCm.stopUsingNetworkFeature(TYPE_NONE, ""); });
+        assertThrows(unsupported, () -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); });
     }
 
     @Test
@@ -5095,11 +5079,11 @@ public class ConnectivityServiceTest {
         ResolverParamsParcel resolvrParams = mResolverParamsParcelCaptor.getValue();
         assertEquals(2, resolvrParams.tlsServers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
-                new String[]{"2001:db8::1", "192.0.2.1"}));
+                new String[] { "2001:db8::1", "192.0.2.1" }));
         // Opportunistic mode.
         assertEquals(2, resolvrParams.tlsServers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
-                new String[]{"2001:db8::1", "192.0.2.1"}));
+                new String[] { "2001:db8::1", "192.0.2.1" }));
         reset(mMockDnsResolver);
         cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES,
@@ -5117,7 +5101,7 @@ public class ConnectivityServiceTest {
         resolvrParams = mResolverParamsParcelCaptor.getValue();
         assertEquals(2, resolvrParams.servers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
-                new String[]{"2001:db8::1", "192.0.2.1"}));
+                new String[] { "2001:db8::1", "192.0.2.1" }));
         reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
 
@@ -5127,10 +5111,10 @@ public class ConnectivityServiceTest {
         resolvrParams = mResolverParamsParcelCaptor.getValue();
         assertEquals(2, resolvrParams.servers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
-                new String[]{"2001:db8::1", "192.0.2.1"}));
+                new String[] { "2001:db8::1", "192.0.2.1" }));
         assertEquals(2, resolvrParams.tlsServers.length);
         assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
-                new String[]{"2001:db8::1", "192.0.2.1"}));
+                new String[] { "2001:db8::1", "192.0.2.1" }));
         reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
 
@@ -5263,29 +5247,6 @@ public class ConnectivityServiceTest {
         LinkProperties lp = (LinkProperties) callbackObj;
         assertEquals(dnsServers.size(), lp.getDnsServers().size());
         assertTrue(lp.getDnsServers().containsAll(dnsServers));
-    }
-
-    private static <T> void assertEmpty(T[] ts) {
-        int length = ts.length;
-        assertEquals("expected empty array, but length was " + length, 0, length);
-    }
-
-    private static <T> void assertLength(int expected, T[] got) {
-        int length = got.length;
-        assertEquals(String.format("expected array of length %s, but length was %s for %s",
-                expected, length, Arrays.toString(got)), expected, length);
-    }
-
-    private static <T> void assertException(Runnable block, Class<T> expected) {
-        try {
-            block.run();
-            fail("Expected exception of type " + expected);
-        } catch (Exception got) {
-            if (!got.getClass().equals(expected)) {
-                fail("Expected exception of type " + expected + " but got " + got);
-            }
-            return;
-        }
     }
 
     @Test
@@ -6482,14 +6443,6 @@ public class ConnectivityServiceTest {
         vpnNetworkAgent.connect(true);
         waitForIdle();
         return vpnNetworkAgent;
-    }
-
-    private void assertContainsExactly(int[] actual, int... expected) {
-        int[] sortedActual = Arrays.copyOf(actual, actual.length);
-        int[] sortedExpected = Arrays.copyOf(expected, expected.length);
-        Arrays.sort(sortedActual);
-        Arrays.sort(sortedExpected);
-        assertArrayEquals(sortedExpected, sortedActual);
     }
 
     private static PackageInfo buildPackageInfo(boolean hasSystemPermission, int uid) {
