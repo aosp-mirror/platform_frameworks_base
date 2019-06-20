@@ -261,12 +261,19 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             }
         }
         mCurrentUser = currentUser;
+        List<String> currentSpecs = new ArrayList(mTileSpecs);
         mTileSpecs.clear();
         mTileSpecs.addAll(tileSpecs);
         mTiles.clear();
         mTiles.putAll(newTiles);
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onTilesChanged();
+        if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
+            // If we didn't manage to create any tiles, set it to empty (default)
+            if (DEBUG) Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
+            changeTiles(currentSpecs, loadTileSpecs(mContext, ""));
+        } else {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onTilesChanged();
+            }
         }
     }
 
