@@ -82,7 +82,7 @@ public class JobStatusTest {
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sUptimeMillisClock =
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
+                Clock.fixed(SystemClock.uptimeClock().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
     }
