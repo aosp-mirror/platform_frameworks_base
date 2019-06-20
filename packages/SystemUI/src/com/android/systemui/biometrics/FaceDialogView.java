@@ -289,15 +289,9 @@ public class FaceDialogView extends BiometricDialogView {
 
     @Override
     protected void handleResetMessage() {
-        mErrorText.setText(getHintStringResourceId());
-        mErrorText.setContentDescription(mContext.getString(getHintStringResourceId()));
         mErrorText.setTextColor(mTextColor);
-        if (getState() == STATE_AUTHENTICATING) {
-            mErrorText.setVisibility(View.VISIBLE);
-        } else {
-            mErrorText.setVisibility(View.INVISIBLE);
-            announceAccessibilityEvent();
-        }
+        mErrorText.setVisibility(View.INVISIBLE);
+        announceAccessibilityEvent();
     }
 
     @Override
@@ -383,7 +377,7 @@ public class FaceDialogView extends BiometricDialogView {
 
     @Override
     protected int getHintStringResourceId() {
-        return R.string.face_dialog_looking_for_face;
+        return 0;
     }
 
     @Override
@@ -408,7 +402,6 @@ public class FaceDialogView extends BiometricDialogView {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             if (mDialogAnimatedIn) {
                 mIconController.startPulsing();
-                mErrorText.setVisibility(View.VISIBLE);
             } else {
                 mIconController.showIcon(R.drawable.face_dialog_pulse_dark_to_light);
             }
