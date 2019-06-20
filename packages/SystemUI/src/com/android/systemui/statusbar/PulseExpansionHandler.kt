@@ -36,6 +36,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -54,7 +55,8 @@ class PulseExpansionHandler @Inject
 constructor(context: Context,
             private val wakeUpCoordinator: NotificationWakeUpCoordinator,
             private val bypassController: KeyguardBypassController,
-            private val headsUpManager: HeadsUpManagerPhone) : Gefingerpoken {
+            private val headsUpManager: HeadsUpManagerPhone,
+            private val roundnessManager: NotificationRoundnessManager) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
@@ -71,11 +73,19 @@ constructor(context: Context,
             field = value
             bypassController.isPulseExpanding = value
             if (changed) {
-                headsUpManager.unpinAll(true /* userUnPinned */)
-                if (!value && !leavingLockscreen) {
-                    bypassController.maybePerformPendingUnlock()
-                    pulseExpandAbortListener?.run()
+                if (value) {
+                    val topEntry = headsUpManager.topEntry
+                    topEntry?.let {
+                        roundnessManager.setTrackingHeadsUp(it.row)
+                    }
+                } else {
+                    roundnessManager.setTrackingHeadsUp(null)
+                    if (!leavingLockscreen) {
+                        bypassController.maybePerformPendingUnlock()
+                        pulseExpandAbortListener?.run()
+                    }
                 }
+                headsUpManager.unpinAll(true /* userUnPinned */)
             }
         }
     var leavingLockscreen: Boolean = false
@@ -237,7 +247,7 @@ constructor(context: Context,
     }
 
     private fun captureStartingChild(x: Float, y: Float) {
-        if (mStartingChild == null) {
+        if (mStartingChild == null && !bypassController.bypassEnabled) {
             mStartingChild = findView(x, y)
             if (mStartingChild != null) {
                 setUserLocked(mStartingChild!!, true)

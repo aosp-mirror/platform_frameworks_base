@@ -148,6 +148,15 @@ public class NotificationPanelView extends PanelView implements
 
     private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES = new AnimationProperties()
             .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+    private static final AnimatableProperty KEYGUARD_HEADS_UP_SHOWING_AMOUNT
+            = AnimatableProperty.from("KEYGUARD_HEADS_UP_SHOWING_AMOUNT",
+            NotificationPanelView::setKeyguardHeadsUpShowingAmount,
+            NotificationPanelView::getKeyguardHeadsUpShowingAmount,
+            R.id.keyguard_hun_animator_tag,
+            R.id.keyguard_hun_animator_end_tag,
+            R.id.keyguard_hun_animator_start_tag);
+    private static final AnimationProperties KEYGUARD_HUN_PROPERTIES =
+            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
     private final InjectionInflationController mInjectionInflationController;
     private final PowerManager mPowerManager;
@@ -357,6 +366,8 @@ public class NotificationPanelView extends PanelView implements
     private int mDarkIconSize;
     private int mHeadsUpInset;
     private boolean mHeadsUpPinnedMode;
+    private float mKeyguardHeadsUpShowingAmount = 0.0f;
+    private boolean mShowingKeyguardHeadsUp;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -742,7 +753,6 @@ public class NotificationPanelView extends PanelView implements
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
         mKeyguardBottomArea.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 
         mStackScrollerMeasuringPass++;
@@ -1416,6 +1426,7 @@ public class NotificationPanelView extends PanelView implements
         } else if (oldState == StatusBarState.SHADE_LOCKED
                 && statusBarState == StatusBarState.KEYGUARD) {
             animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            mNotificationStackScroller.resetScrollPosition();
             // Only animate header if the header is visible. If not, it will partially animate out
             // the top of QS
             if (!mQsExpanded) {
@@ -1430,6 +1441,7 @@ public class NotificationPanelView extends PanelView implements
                 }
             }
         }
+        updateKeyguardStatusBarForHeadsUp();
         if (keyguardShowing) {
             updateDozingVisibilities(false /* animate */);
         }
@@ -1722,20 +1734,10 @@ public class NotificationPanelView extends PanelView implements
         } else {
             int expandedPosition = mClockPositionResult.stackScrollerPadding;
             return (int) MathUtils.lerp(collapsedPosition, expandedPosition,
-                    calculateHeaderAppearAmountBypass());
+                    mNotificationStackScroller.calculateAppearFractionBypass());
         }
     }
 
-
-    private float calculateHeaderAppearAmountBypass() {
-        float pulseHeight = mNotificationStackScroller.getPulseHeight();
-        float wakeUpHeight = mNotificationStackScroller.getWakeUpHeight();
-        float dragDownAmount = pulseHeight - wakeUpHeight;
-
-        // The total distance required to fully reveal the header
-        float totalDistance = mClockPositionResult.stackScrollerPadding;
-        return MathUtils.smoothStep(0, totalDistance, dragDownAmount);
-    }
 
     protected void requestScrollerTopPaddingUpdate(boolean animate) {
         mNotificationStackScroller.updateTopPadding(calculateQsTopPadding(), animate);
@@ -2069,7 +2071,7 @@ public class NotificationPanelView extends PanelView implements
         if (mBarState == StatusBarState.KEYGUARD && !mKeyguardBypassController.getBypassEnabled()) {
             return -mQs.getQsMinExpansionHeight();
         }
-        float appearAmount = mNotificationStackScroller.getAppearFraction(mExpandedHeight);
+        float appearAmount = mNotificationStackScroller.calculateAppearFraction(mExpandedHeight);
         float startHeight = -mQsExpansionHeight;
         if (mKeyguardBypassController.getBypassEnabled() && isOnKeyguard()
                 && mNotificationStackScroller.isPulseExpanding()) {
@@ -2079,7 +2081,7 @@ public class NotificationPanelView extends PanelView implements
                 // again after the header has animated away
                 appearAmount = 0;
             } else {
-                appearAmount = calculateHeaderAppearAmountBypass();
+                appearAmount = mNotificationStackScroller.calculateAppearFractionBypass();
             }
             startHeight = -mQs.getQsMinExpansionHeight();
         }
@@ -2120,6 +2122,7 @@ public class NotificationPanelView extends PanelView implements
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
         float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha;
+        newAlpha *= 1.0f - mKeyguardHeadsUpShowingAmount;
         mKeyguardStatusBar.setAlpha(newAlpha);
         mKeyguardStatusBar.setVisibility(newAlpha != 0f && !mDozing ? VISIBLE : INVISIBLE);
     }
@@ -2754,6 +2757,31 @@ public class NotificationPanelView extends PanelView implements
         updateGestureExclusionRect();
         mHeadsUpPinnedMode = inPinnedMode;
         updateHeadsUpVisibility();
+        updateKeyguardStatusBarForHeadsUp();
+    }
+
+    private void updateKeyguardStatusBarForHeadsUp() {
+        boolean showingKeyguardHeadsUp = mKeyguardShowing
+                && mHeadsUpAppearanceController.shouldBeVisible();
+        if (mShowingKeyguardHeadsUp != showingKeyguardHeadsUp) {
+            mShowingKeyguardHeadsUp = showingKeyguardHeadsUp;
+            if (mKeyguardShowing) {
+                PropertyAnimator.setProperty(this, KEYGUARD_HEADS_UP_SHOWING_AMOUNT,
+                        showingKeyguardHeadsUp ? 1.0f : 0.0f, KEYGUARD_HUN_PROPERTIES,
+                        true /* animate */);
+            } else {
+                PropertyAnimator.applyImmediately(this, KEYGUARD_HEADS_UP_SHOWING_AMOUNT, 0.0f);
+            }
+        }
+    }
+
+    private void setKeyguardHeadsUpShowingAmount(float amount) {
+        mKeyguardHeadsUpShowingAmount = amount;
+        updateHeaderKeyguardAlpha();
+    }
+
+    private float getKeyguardHeadsUpShowingAmount() {
+        return mKeyguardHeadsUpShowingAmount;
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
@@ -2847,7 +2875,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     protected void setHorizontalPanelTranslation(float translation) {
-        mNotificationStackScroller.setHorizontalPanelTranslation(translation);
+        mNotificationStackScroller.setTranslationX(translation);
         mQsFrame.setTranslationX(translation);
         int size = mVerticalTranslationListener.size();
         for (int i = 0; i < size; i++) {
