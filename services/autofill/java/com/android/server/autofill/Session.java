@@ -546,21 +546,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
             return;
         }
-        final int canceledRequest = mRemoteFillService.cancelCurrentRequest();
+        mRemoteFillService.cancelCurrentRequest().whenComplete((canceledRequest, err) -> {
+            if (err != null) {
+                Slog.e(TAG, "cancelCurrentRequest(): unexpected exception", err);
+                return;
+            }
 
-        // Remove the FillContext as there will never be a response for the service
-        if (canceledRequest != INVALID_REQUEST_ID && mContexts != null) {
-            final int numContexts = mContexts.size();
+            // Remove the FillContext as there will never be a response for the service
+            if (canceledRequest != INVALID_REQUEST_ID && mContexts != null) {
+                final int numContexts = mContexts.size();
 
-            // It is most likely the last context, hence search backwards
-            for (int i = numContexts - 1; i >= 0; i--) {
-                if (mContexts.get(i).getRequestId() == canceledRequest) {
-                    if (sDebug) Slog.d(TAG, "cancelCurrentRequest(): id = " + canceledRequest);
-                    mContexts.remove(i);
-                    break;
+                // It is most likely the last context, hence search backwards
+                for (int i = numContexts - 1; i >= 0; i--) {
+                    if (mContexts.get(i).getRequestId() == canceledRequest) {
+                        if (sDebug) Slog.d(TAG, "cancelCurrentRequest(): id = " + canceledRequest);
+                        mContexts.remove(i);
+                        break;
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
@@ -2090,8 +2095,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         updateValuesForSaveLocked();
 
         // Remove pending fill requests as the session is finished.
-        cancelCurrentRequestLocked();
 
+        cancelCurrentRequestLocked();
         final ArrayList<FillContext> contexts = mergePreviousSessionLocked( /* forSave= */ true);
 
         final SaveRequest saveRequest =
