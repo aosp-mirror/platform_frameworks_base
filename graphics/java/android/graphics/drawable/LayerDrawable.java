@@ -139,9 +139,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final ChildDrawable[] r = new ChildDrawable[length];
         for (int i = 0; i < length; i++) {
             r[i] = new ChildDrawable(mLayerState.mDensity);
-            r[i].mDrawable = layers[i];
-            layers[i].setCallback(this);
-            mLayerState.mChildrenChangingConfigurations |= layers[i].getChangingConfigurations();
+            Drawable child = layers[i];
+            r[i].mDrawable = child;
+            if (child != null) {
+                child.setCallback(this);
+                mLayerState.mChildrenChangingConfigurations |= child.getChangingConfigurations();
+            }
         }
         mLayerState.mNumChildren = length;
         mLayerState.mChildren = r;
@@ -416,7 +419,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         final ChildDrawable[] layers = mLayerState.mChildren;
         final int N = mLayerState.mNumChildren;
         for (int i = 0; i < N; i++) {
-            if (layers[i].mDrawable.isProjected()) {
+            Drawable childDrawable = layers[i].mDrawable;
+            if (childDrawable != null && childDrawable.isProjected()) {
                 return true;
             }
         }
