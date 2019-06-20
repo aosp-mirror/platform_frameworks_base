@@ -28,7 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
-import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.service.appprediction.AppPredictionService;
 import android.util.ArrayMap;
@@ -37,7 +37,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
-import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Per-user instance of {@link AppPredictionManagerService}.
@@ -108,15 +108,10 @@ public class AppPredictionPerUserService extends
         if (service != null) {
             service.onCreatePredictionSession(context, sessionId);
 
-            mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context, () -> {
-                synchronized (mLock) {
-                    AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
-                    if (sessionInfo != null) {
-                        sessionInfo.removeAllCallbacksLocked();
-                        mSessionInfos.remove(sessionId);
-                    }
-                }
-            }));
+            if (!mSessionInfos.containsKey(sessionId)) {
+                mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
+                        this::removeAppPredictionSessionInfo));
+            }
         }
     }
 
@@ -212,8 +207,7 @@ public class AppPredictionPerUserService extends
 
             AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
             if (sessionInfo != null) {
-                sessionInfo.removeAllCallbacksLocked();
-                mSessionInfos.remove(sessionId);
+                sessionInfo.destroy();
             }
         }
     }
@@ -273,6 +267,15 @@ public class AppPredictionPerUserService extends
         }
     }
 
+    private void removeAppPredictionSessionInfo(AppPredictionSessionId sessionId) {
+        if (isDebug()) {
+            Slog.d(TAG, "removeAppPredictionSessionInfo(): sessionId=" + sessionId);
+        }
+        synchronized (mLock) {
+            mSessionInfos.remove(sessionId);
+        }
+    }
+
     @GuardedBy("mLock")
     @Nullable
     private RemoteAppPredictionService getRemoteServiceLocked() {
@@ -295,55 +298,71 @@ public class AppPredictionPerUserService extends
     }
 
     private static final class AppPredictionSessionInfo {
-        private final AppPredictionSessionId mSessionId;
-        private final AppPredictionContext mContext;
-        private final ArrayList<IPredictionCallback> mCallbacks = new ArrayList<>();
-        private final IBinder.DeathRecipient mBinderDeathHandler;
+        private static final boolean DEBUG = false;  // Do not submit with true
 
-        AppPredictionSessionInfo(AppPredictionSessionId id, AppPredictionContext context,
-                IBinder.DeathRecipient binderDeathHandler) {
+        private final AppPredictionSessionId mSessionId;
+        private final AppPredictionContext mPredictionContext;
+        private final Consumer<AppPredictionSessionId> mRemoveSessionInfoAction;
+
+        private final RemoteCallbackList<IPredictionCallback> mCallbacks =
+                new RemoteCallbackList<IPredictionCallback>() {
+                    @Override
+                    public void onCallbackDied(IPredictionCallback callback) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Binder died for session Id=" + mSessionId
+                                    + " and callback=" + callback.asBinder());
+                        }
+                        if (mCallbacks.getRegisteredCallbackCount() == 0) {
+                            destroy();
+                        }
+                    }
+                };
+
+        AppPredictionSessionInfo(AppPredictionSessionId id, AppPredictionContext predictionContext,
+                Consumer<AppPredictionSessionId> removeSessionInfoAction) {
+            if (DEBUG) {
+                Slog.d(TAG, "Creating AppPredictionSessionInfo for session Id=" + id);
+            }
             mSessionId = id;
-            mContext = context;
-            mBinderDeathHandler = binderDeathHandler;
+            mPredictionContext = predictionContext;
+            mRemoveSessionInfoAction = removeSessionInfoAction;
         }
 
         void addCallbackLocked(IPredictionCallback callback) {
-            if (mBinderDeathHandler != null) {
-                try {
-                    callback.asBinder().linkToDeath(mBinderDeathHandler, 0);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to link to death: " + e);
-                }
+            if (DEBUG) {
+                Slog.d(TAG, "Storing callback for session Id=" + mSessionId
+                        + " and callback=" + callback.asBinder());
             }
-            mCallbacks.add(callback);
+            mCallbacks.register(callback);
         }
 
         void removeCallbackLocked(IPredictionCallback callback) {
-            if (mBinderDeathHandler != null) {
-                callback.asBinder().unlinkToDeath(mBinderDeathHandler, 0);
+            if (DEBUG) {
+                Slog.d(TAG, "Removing callback for session Id=" + mSessionId
+                        + " and callback=" + callback.asBinder());
             }
-            mCallbacks.remove(callback);
+            mCallbacks.unregister(callback);
         }
 
-        void removeAllCallbacksLocked() {
-            if (mBinderDeathHandler != null) {
-                for (IPredictionCallback callback : mCallbacks) {
-                    callback.asBinder().unlinkToDeath(mBinderDeathHandler, 0);
-                }
+        void destroy() {
+            if (DEBUG) {
+                Slog.d(TAG, "Removing all callbacks for session Id=" + mSessionId
+                        + " and " + mCallbacks.getRegisteredCallbackCount() + " callbacks.");
             }
-            mCallbacks.clear();
+            mCallbacks.kill();
+            mRemoveSessionInfoAction.accept(mSessionId);
         }
 
         void resurrectSessionLocked(AppPredictionPerUserService service) {
-            if (service.isDebug()) {
+            int callbackCount = mCallbacks.getRegisteredCallbackCount();
+            if (DEBUG) {
                 Slog.d(TAG, "Resurrecting remote service (" + service.getRemoteServiceLocked()
                         + ") for session Id=" + mSessionId + " and "
-                        + mCallbacks.size() + " callbacks.");
+                        + callbackCount + " callbacks.");
             }
-            service.onCreatePredictionSessionLocked(mContext, mSessionId);
-            for (IPredictionCallback callback : mCallbacks) {
-                service.registerPredictionUpdatesLocked(mSessionId, callback);
-            }
+            service.onCreatePredictionSessionLocked(mPredictionContext, mSessionId);
+            mCallbacks.broadcast(
+                    callback -> service.registerPredictionUpdatesLocked(mSessionId, callback));
         }
     }
 }
