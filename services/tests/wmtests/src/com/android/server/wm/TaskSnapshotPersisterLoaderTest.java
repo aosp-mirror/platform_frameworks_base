@@ -145,7 +145,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
     @Test
     public void testLowResolutionPersistAndLoadSnapshot() {
-        TaskSnapshot a = createSnapshot(0.5f /* reducedResolution */);
+        TaskSnapshot a = new TaskSnapshotBuilder()
+                .setScale(0.5f)
+                .setReducedResolution(true)
+                .build();
         assertTrue(a.isReducedResolution());
         mPersister.persistSnapshot(1 , mTestUserId, a);
         mPersister.waitForQueueEmpty();
@@ -250,6 +253,27 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertNotNull(snapshotB);
         assertEquals(0, snapshotA.getSystemUiVisibility());
         assertEquals(lightBarFlags, snapshotB.getSystemUiVisibility());
+    }
+
+    @Test
+    public void testScalePersistAndLoadSnapshot() {
+        TaskSnapshot a = new TaskSnapshotBuilder()
+                .setScale(0.25f)
+                .build();
+        TaskSnapshot b = new TaskSnapshotBuilder()
+                .setScale(0.75f)
+                .build();
+        assertEquals(0.25f, a.getScale(), 1E-5);
+        assertEquals(0.75f, b.getScale(), 1E-5);
+        mPersister.persistSnapshot(1, mTestUserId, a);
+        mPersister.persistSnapshot(2, mTestUserId, b);
+        mPersister.waitForQueueEmpty();
+        final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
+        assertNotNull(snapshotA);
+        assertNotNull(snapshotB);
+        assertEquals(0.25f, snapshotA.getScale(), 1E-5);
+        assertEquals(0.75f, snapshotB.getScale(), 1E-5);
     }
 
     @Test

@@ -64,13 +64,6 @@ public class RotationContextButton extends ContextualButton implements
     }
 
     @Override
-    public void onDestroy() {
-        if (mRotationButtonController != null) {
-            mRotationButtonController.cleanUp();
-        }
-    }
-
-    @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
     }

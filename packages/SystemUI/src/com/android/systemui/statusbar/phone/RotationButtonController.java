@@ -26,7 +26,7 @@ import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
-import android.os.Message;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.IRotationWatcher.Stub;
@@ -34,6 +34,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -42,6 +43,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
@@ -64,8 +66,10 @@ public class RotationButtonController {
     private boolean mPendingRotationSuggestion;
     private boolean mHoveringRotationSuggestion;
     private RotationLockController mRotationLockController;
+    private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
     private TaskStackListenerImpl mTaskStackListener;
     private Consumer<Integer> mRotWatcherListener;
+    private boolean mListenersRegistered = false;
     private boolean mIsNavigationBarShowing;
 
     private final Runnable mRemoveRotationProposal =
@@ -73,22 +77,17 @@ public class RotationButtonController {
     private final Runnable mCancelPendingRotationProposal =
             () -> mPendingRotationSuggestion = false;
     private Animator mRotateHideAnimator;
-    private boolean mAccessibilityFeedbackEnabled;
 
     private final Context mContext;
     private final RotationButton mRotationButton;
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     private final Stub mRotationWatcher = new Stub() {
         @Override
         public void onRotationChanged(final int rotation) throws RemoteException {
-            if (mRotationButton.getCurrentView() == null) {
-                return;
-            }
-
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
-            Handler h = mRotationButton.getCurrentView().getHandler();
-            Message msg = Message.obtain(h, () -> {
+            mMainThreadHandler.postAtFrontOfQueue(() -> {
                 // If the screen rotation changes while locked, potentially update lock to flow with
                 // new screen rotation and hide any showing suggestions.
                 if (mRotationLockController.isRotationLocked()) {
@@ -102,8 +101,6 @@ public class RotationButtonController {
                     mRotWatcherListener.accept(rotation);
                 }
             });
-            msg.setAsynchronous(true);
-            h.sendMessageAtFrontOfQueue(msg);
         }
     };
 
@@ -124,38 +121,47 @@ public class RotationButtonController {
         mStyleRes = style;
         mIsNavigationBarShowing = true;
         mRotationLockController = Dependency.get(RotationLockController.class);
+        mAccessibilityManagerWrapper = Dependency.get(AccessibilityManagerWrapper.class);
 
         // Register the task stack listener
         mTaskStackListener = new TaskStackListenerImpl();
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mRotationButton.setOnClickListener(this::onRotateSuggestionClick);
         mRotationButton.setOnHoverListener(this::onRotateSuggestionHover);
+    }
 
+    void registerListeners() {
+        if (mListenersRegistered) {
+            return;
+        }
+
+        mListenersRegistered = true;
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .watchRotation(mRotationWatcher, mContext.getDisplay().getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
     }
 
-    void cleanUp() {
-        // Unregister the task stack listener
-        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+    void unregisterListeners() {
+        if (!mListenersRegistered) {
+            return;
+        }
 
+        mListenersRegistered = false;
         try {
             WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(mRotationWatcher);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+
+        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
     void addRotationCallback(Consumer<Integer> watcher) {
         mRotWatcherListener = watcher;
-    }
-
-    void setAccessibilityFeedbackEnabled(boolean flag) {
-        mAccessibilityFeedbackEnabled = flag;
     }
 
     void setRotationLockedAtAngle(int rotationSuggestion) {
@@ -185,7 +191,7 @@ public class RotationButtonController {
 
         // Clear any pending suggestion flag as it has either been nullified or is being shown
         mPendingRotationSuggestion = false;
-        view.removeCallbacks(mCancelPendingRotationProposal);
+        mMainThreadHandler.removeCallbacks(mCancelPendingRotationProposal);
 
         // Handle the visibility change and animation
         if (visible) { // Appear and change (cannot force)
@@ -255,13 +261,9 @@ public class RotationButtonController {
             return;
         }
 
-        final View currentView = mRotationButton.getCurrentView();
-
         // If window rotation matches suggested rotation, remove any current suggestions
         if (rotation == windowRotation) {
-            if (currentView != null) {
-                currentView.removeCallbacks(mRemoveRotationProposal);
-            }
+            mMainThreadHandler.removeCallbacks(mRemoveRotationProposal);
             setRotateSuggestionButtonState(false /* visible */);
             return;
         }
@@ -285,11 +287,9 @@ public class RotationButtonController {
             // If the navbar isn't shown, flag the rotate icon to be shown should the navbar become
             // visible given some time limit.
             mPendingRotationSuggestion = true;
-            if (currentView != null) {
-                currentView.removeCallbacks(mCancelPendingRotationProposal);
-                currentView.postDelayed(mCancelPendingRotationProposal,
-                        NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS);
-            }
+            mMainThreadHandler.removeCallbacks(mCancelPendingRotationProposal);
+            mMainThreadHandler.postDelayed(mCancelPendingRotationProposal,
+                    NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS);
         }
     }
 
@@ -334,9 +334,7 @@ public class RotationButtonController {
     private void onRotationSuggestionsDisabled() {
         // Immediately hide the rotate button and clear any planned removal
         setRotateSuggestionButtonState(false /* visible */, true /* force */);
-        if (mRotationButton.getCurrentView() != null) {
-            mRotationButton.getCurrentView().removeCallbacks(mRemoveRotationProposal);
-        }
+        mMainThreadHandler.removeCallbacks(mRemoveRotationProposal);
     }
 
     private void showAndLogRotationSuggestion() {
@@ -369,10 +367,6 @@ public class RotationButtonController {
     }
 
     private void rescheduleRotationTimeout(final boolean reasonHover) {
-        if (mRotationButton.getCurrentView() == null) {
-            return;
-        }
-
         // May be called due to a new rotation proposal or a change in hover state
         if (reasonHover) {
             // Don't reschedule if a hide animator is running
@@ -382,16 +376,16 @@ public class RotationButtonController {
         }
 
         // Stop any pending removal
-        mRotationButton.getCurrentView().removeCallbacks(mRemoveRotationProposal);
+        mMainThreadHandler.removeCallbacks(mRemoveRotationProposal);
         // Schedule timeout
-        mRotationButton.getCurrentView().postDelayed(mRemoveRotationProposal,
+        mMainThreadHandler.postDelayed(mRemoveRotationProposal,
                 computeRotationProposalTimeout());
     }
 
     private int computeRotationProposalTimeout() {
-        if (mAccessibilityFeedbackEnabled) return 10000;
-        if (mHoveringRotationSuggestion) return 8000;
-        return 5000;
+        return mAccessibilityManagerWrapper.getRecommendedTimeoutMillis(
+                mHoveringRotationSuggestion ? 16000 : 5000,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
     private boolean isRotateSuggestionIntroduced() {

@@ -3,7 +3,6 @@ package com.android.keyguard;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -34,6 +33,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -569,11 +569,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 view.setScaleX(scale);
                 view.setScaleY(scale);
             });
-            animator.addListener(new AnimatorListenerAdapter() {
+            animator.addListener(new KeepAwakeAnimationListener(getContext()) {
                 @Override
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
                     view.setVisibility(startVisibility);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
                     animation.removeListener(this);
                 }
             });

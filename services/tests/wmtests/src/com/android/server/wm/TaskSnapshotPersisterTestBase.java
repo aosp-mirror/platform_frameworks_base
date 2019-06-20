@@ -77,12 +77,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot() {
-        return createSnapshot(1f /* scale */);
-    }
-
-    TaskSnapshot createSnapshot(float scale) {
         return new TaskSnapshotBuilder()
-                .setScale(scale)
                 .build();
     }
 
@@ -92,6 +87,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     static class TaskSnapshotBuilder {
 
         private float mScale = 1f;
+        private boolean mReducedResolution = false;
         private boolean mIsRealSnapshot = true;
         private boolean mIsTranslucent = false;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
@@ -99,6 +95,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
         TaskSnapshotBuilder setScale(float scale) {
             mScale = scale;
+            return this;
+        }
+
+        TaskSnapshotBuilder setReducedResolution(boolean reducedResolution) {
+            mReducedResolution = reducedResolution;
             return this;
         }
 
@@ -130,7 +131,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             buffer.unlockCanvasAndPost(c);
             return new TaskSnapshot(new ComponentName("", ""), buffer,
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT, TEST_INSETS,
-                    mScale < 1f /* reducedResolution */, mScale, mIsRealSnapshot,
+                    mReducedResolution, mScale, mIsRealSnapshot,
                     mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }
     }

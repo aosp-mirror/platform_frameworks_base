@@ -871,9 +871,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         boolean[] feedbackEnabled = new boolean[1];
         int a11yFlags = getA11yButtonState(feedbackEnabled);
 
-        mNavigationBarView.getRotationButtonController().setAccessibilityFeedbackEnabled(
-                feedbackEnabled[0]);
-
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
         mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);

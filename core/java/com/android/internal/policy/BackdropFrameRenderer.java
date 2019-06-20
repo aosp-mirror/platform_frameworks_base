@@ -380,7 +380,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         // don't want the navigation bar background be moving around when resizing in docked mode.
         // However, we need it for the transitions into/out of docked mode.
         if (mNavigationBarColor != null && fullscreen) {
-            DecorView.getNavigationBarRect(width, height, stableInsets, systemInsets, mTmpRect);
+            DecorView.getNavigationBarRect(width, height, stableInsets, systemInsets, mTmpRect, 1f);
             mNavigationBarColor.setBounds(mTmpRect);
             mNavigationBarColor.draw(canvas);
         }
