@@ -322,6 +322,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mNavigationBarView.getLightTransitionsController().restoreState(savedInstanceState);
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
+        mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -467,8 +468,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
             updateSystemUiStateFlags(-1);
-            mNavigationBarView.getRotationButtonController().onNavigationBarWindowVisibilityChange(
-                    isNavBarWindowVisible());
+            mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
         }
     }
 

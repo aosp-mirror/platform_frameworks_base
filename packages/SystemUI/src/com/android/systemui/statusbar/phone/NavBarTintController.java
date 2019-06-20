@@ -45,6 +45,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     private final NavigationBarView mNavigationBarView;
     private final LightBarTransitionsController mLightBarController;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
+    private boolean mWindowVisible;
 
     private final CompositionSamplingListener mSamplingListener;
     private final Runnable mUpdateSamplingListener = this::updateSamplingListener;
@@ -148,7 +149,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
             mSamplingListenerRegistered = false;
             CompositionSamplingListener.unregister(mSamplingListener);
         }
-        if (mSamplingEnabled && !mSamplingBounds.isEmpty()
+        if (mSamplingEnabled && mWindowVisible && !mSamplingBounds.isEmpty()
                 && mNavigationBarView.isAttachedToWindow()) {
             if (!mNavigationBarView.getViewRootImpl().getSurfaceControl().isValid()) {
                 // The view may still be attached, but the surface backing the window can be
@@ -180,6 +181,11 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         }
     }
 
+    public void setWindowVisible(boolean visible) {
+        mWindowVisible = visible;
+        requestUpdateSamplingListener();
+    }
+
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
     }
@@ -194,6 +200,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         pw.println("  mSamplingBounds: " + mSamplingBounds);
         pw.println("  mLastMedianLuma: " + mLastMedianLuma);
         pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
+        pw.println("  mWindowVisible: " + mWindowVisible);
     }
 
     public static boolean isEnabled(Context context, int navBarMode) {
