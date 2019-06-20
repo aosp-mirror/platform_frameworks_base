@@ -399,8 +399,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"उघडण्यासाठी पुन्हा टॅप करा"</string>
-    <!-- no translation found for keyguard_unlock (6035822649218712063) -->
-    <skip />
+    <string name="keyguard_unlock" msgid="6035822649218712063">"उघडण्यासाठी वर स्वाइप करा"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"हे डिव्हाइस तुमची संस्था व्यवस्थापित करते"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने व्यवस्थापित केले आहे"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनसाठी चिन्हावरून स्वाइप करा"</string>

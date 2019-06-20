@@ -197,7 +197,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Modification du réseau de l\'opérateur"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Ouvrir les détails de la batterie"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batterie : <xliff:g id="NUMBER">%d</xliff:g> pour cent"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> pour cent de batterie : il reste environ <xliff:g id="TIME">%2$s</xliff:g>, en fonction de votre utilisation"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Batterie chargée à <xliff:g id="PERCENTAGE">%1$s</xliff:g> pour cent : il reste environ <xliff:g id="TIME">%2$s</xliff:g> d\'autonomie, selon votre utilisation"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batterie en charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Paramètres système"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifications"</string>
@@ -451,9 +451,9 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Économiseur de batterie activé"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Limite les performances et les données en arrière-plan."</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Désactiver l\'économiseur de batterie"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Pendant que vous enregistrez ou diffusez du contenu, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> peut capturer des informations sensibles affichées à l\'écran ou lues par votre appareil, y compris des contenus audio, des mots de passe, des informations de paiement, des photos et des messages."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Pendant que vous enregistrez ou diffusez du contenu, l\'appli <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> peut capturer des informations sensibles affichées à l\'écran ou lues par votre appareil, y compris des contenus audio, des mots de passe, des informations de paiement, des photos et des messages."</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Pendant que vous enregistrez ou diffusez du contenu, le service concerné peut capturer des informations sensibles affichées à l\'écran ou lues par votre appareil, y compris des contenus audio, des mots de passe, des informations de paiement, des photos et des messages."</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Exposition d\'informations sensibles lors de l\'enregistrement ou de la diffusion de contenu"</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Présence d\'informations sensibles lors de l\'enregistrement ou de la diffusion de contenu"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne plus afficher"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gérer"</string>
