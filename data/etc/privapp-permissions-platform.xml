@@ -119,8 +119,6 @@ applications that come with the platform
         <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
-        <!-- This permission will be removed in R. -->
-        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
