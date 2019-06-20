@@ -2419,6 +2419,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
 
+                final boolean isSameViewEntered = Objects.equals(mCurrentViewId, viewState.id);
                 // Update the view states first...
                 mCurrentViewId = viewState.id;
                 if (value != null) {
@@ -2449,6 +2450,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mUi.hideFillUi(this);
                     mCurrentViewId = viewState.id;
                     hideAugmentedAutofillLocked(viewState);
+                }
+
+                if (isSameViewEntered) {
+                    return;
                 }
 
                 // If the ViewState is ready to be displayed, onReady() will be called.
