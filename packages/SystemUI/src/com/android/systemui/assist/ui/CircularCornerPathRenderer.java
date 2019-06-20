@@ -53,11 +53,12 @@ public final class CircularCornerPathRenderer extends CornerPathRenderer {
                 break;
             case TOP_RIGHT:
                 mPath.moveTo(mWidth, mCornerRadiusTop);
-                mPath.arcTo(mWidth - mCornerRadiusTop, 0, mWidth, mCornerRadiusTop, 0, -90, true);
+                mPath.arcTo(mWidth - mCornerRadiusTop * 2, 0, mWidth, mCornerRadiusTop * 2, 0, -90,
+                        true);
                 break;
             case TOP_LEFT:
                 mPath.moveTo(mCornerRadiusTop, 0);
-                mPath.arcTo(0, 0, mCornerRadiusTop, mCornerRadiusTop, 270, -90, true);
+                mPath.arcTo(0, 0, mCornerRadiusTop * 2, mCornerRadiusTop * 2, 270, -90, true);
                 break;
         }
         return mPath;
