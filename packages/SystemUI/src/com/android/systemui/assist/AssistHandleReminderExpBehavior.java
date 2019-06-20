@@ -57,8 +57,8 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private static final String LEARNING_EVENT_COUNT_KEY = "reminder_exp_learning_event_count";
     private static final String LEARNED_HINT_LAST_SHOWN_KEY =
             "reminder_exp_learned_hint_last_shown";
-    private static final long DEFAULT_LEARNING_TIME_MS = TimeUnit.DAYS.toMillis(200);
-    private static final int DEFAULT_LEARNING_COUNT = 30000;
+    private static final long DEFAULT_LEARNING_TIME_MS = TimeUnit.DAYS.toMillis(10);
+    private static final int DEFAULT_LEARNING_COUNT = 10;
     private static final long DEFAULT_SHOW_AND_GO_DELAYED_SHORT_DELAY_MS = 150;
     private static final long DEFAULT_SHOW_AND_GO_DELAYED_LONG_DELAY_MS =
             TimeUnit.SECONDS.toMillis(1);
@@ -66,7 +66,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             TimeUnit.SECONDS.toMillis(3);
     private static final boolean DEFAULT_SUPPRESS_ON_LOCKSCREEN = false;
     private static final boolean DEFAULT_SUPPRESS_ON_LAUNCHER = false;
-    private static final boolean DEFAULT_SUPPRESS_ON_APPS = false;
+    private static final boolean DEFAULT_SUPPRESS_ON_APPS = true;
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
