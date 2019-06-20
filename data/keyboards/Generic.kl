@@ -408,6 +408,8 @@ key 522   STAR
 key 523   POUND
 key 580   APP_SWITCH
 key 582   VOICE_ASSIST
+# Linux KEY_ASSISTANT
+key 583   ASSIST
 
 # Keys defined by HID usages
 key usage 0x0c006F BRIGHTNESS_UP
