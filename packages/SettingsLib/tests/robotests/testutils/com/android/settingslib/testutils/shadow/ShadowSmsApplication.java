@@ -16,29 +16,31 @@
 
 package com.android.settingslib.testutils.shadow;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.telecom.DefaultDialerManager;
+
+import com.android.internal.telephony.SmsApplication;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 
-@Implements(DefaultDialerManager.class)
-public class ShadowDefaultDialerManager {
+@Implements(SmsApplication.class)
+public class ShadowSmsApplication {
 
-    private static String sDefaultDialer;
+    private static ComponentName sDefaultSmsApplication;
 
     @Resetter
     public void reset() {
-        sDefaultDialer = null;
+        sDefaultSmsApplication = null;
     }
 
     @Implementation
-    protected static String getDefaultDialerApplication(Context context) {
-        return sDefaultDialer;
+    protected static ComponentName getDefaultSmsApplication(Context context, boolean update) {
+        return sDefaultSmsApplication;
     }
 
-    public static void setDefaultDialerApplication(String dialer) {
-        sDefaultDialer = dialer;
+    public static void setDefaultSmsApplication(ComponentName cn) {
+        sDefaultSmsApplication = cn;
     }
 }
