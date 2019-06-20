@@ -27,7 +27,7 @@ java_library {
     installable: true,
 
     // Make sure that the implementaion only relies on SDK or system APIs.
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     libs: [
         // The order matters. android_system_* library should come later.
         "framework_media_annotation",

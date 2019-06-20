@@ -131,7 +131,7 @@ public final class BluetoothSocket implements Closeable {
     private boolean mExcludeSdp = false; /* when true no SPP SDP record will be created */
     private boolean mAuthMitm = false;   /* when true Man-in-the-middle protection will be enabled*/
     private boolean mMin16DigitPin = false; /* Minimum 16 digit pin for sec mode 2 connections */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link BluetoothSocket} public API instead.")
     private ParcelFileDescriptor mPfd;
     @UnsupportedAppUsage
     private LocalSocket mSocket;

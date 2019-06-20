@@ -28,6 +28,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITION
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -225,10 +226,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void finishDrawing(IWindow window) {
+    public void finishDrawing(IWindow window,
+            @Nullable SurfaceControl.Transaction postDrawTransaction) {
         if (WindowManagerService.localLOGV) Slog.v(
             TAG_WM, "IWindow finishDrawing called for " + window);
-        mService.finishDrawingWindow(this, window);
+        mService.finishDrawingWindow(this, window, postDrawTransaction);
     }
 
     @Override

@@ -5094,7 +5094,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void finishBooting() {
-        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
+                Trace.TRACE_TAG_ACTIVITY_MANAGER);
         t.traceBegin("FinishBooting");
 
         synchronized (this) {
@@ -5168,7 +5169,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Let system services know.
-        mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_BOOT_COMPLETED);
 
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
@@ -8866,9 +8867,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (goingCallback != null) {
                     goingCallback.run();
                 }
+                t.traceEnd(); // PhaseActivityManagerReady
                 return;
             }
 
+            t.traceBegin("controllersReady");
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mActivityTaskManager.onSystemReady();
@@ -8876,6 +8879,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.onSystemReady();
             mAppOpsService.systemReady();
             mSystemReady = true;
+            t.traceEnd();
         }
 
         try {
@@ -8884,6 +8888,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .getSerial();
         } catch (RemoteException e) {}
 
+        t.traceBegin("killProcesses");
         ArrayList<ProcessRecord> procsToKill = null;
         synchronized(mPidsSelfLocked) {
             for (int i=mPidsSelfLocked.size()-1; i>=0; i--) {
@@ -8911,17 +8916,28 @@ public class ActivityManagerService extends IActivityManager.Stub
             // we won't trample on them any more.
             mProcessesReady = true;
         }
+        t.traceEnd(); // KillProcesses
 
         Slog.i(TAG, "System now ready");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY, SystemClock.uptimeMillis());
 
+        t.traceBegin("updateTopComponentForFactoryTest");
         mAtmInternal.updateTopComponentForFactoryTest();
+        t.traceEnd();
 
+        t.traceBegin("watchDeviceProvisioning");
         watchDeviceProvisioning(mContext);
+        t.traceEnd();
 
+        t.traceBegin("retrieveSettings");
         retrieveSettings();
-        mUgmInternal.onSystemReady();
+        t.traceEnd();
 
+        t.traceBegin("Ugm.onSystemReady");
+        mUgmInternal.onSystemReady();
+        t.traceEnd();
+
+        t.traceBegin("updateForceBackgroundCheck");
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
         if (pmi != null) {
             pmi.registerLowPowerModeObserver(ServiceType.FORCE_BACKGROUND_CHECK,
@@ -8931,8 +8947,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         } else {
             Slog.wtf(TAG, "PowerManagerInternal not found.");
         }
+        t.traceEnd();
 
         if (goingCallback != null) goingCallback.run();
+
+        t.traceBegin("getCurrentUser"); // should be fast, but these methods acquire locks
         // Check the current user here as a user can be started inside goingCallback.run() from
         // other system services.
         final int currentUserId = mUserController.getCurrentUserId();
@@ -8943,17 +8962,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new RuntimeException("System user not started while current user is:"
                     + currentUserId);
         }
+        t.traceEnd();
+
         t.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
-        mSystemServiceManager.startUser(currentUserId);
+        mSystemServiceManager.startUser(t, currentUserId);
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
             // unlocked we'll come back around and start unaware apps
+            t.traceBegin("startPersistentApps");
             startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
+            t.traceEnd();
 
             // Start up initial activity.
             mBooting = true;
@@ -8963,6 +8986,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (UserManager.isSplitSystemUser() &&
                     Settings.Secure.getInt(mContext.getContentResolver(),
                          Settings.Secure.USER_SETUP_COMPLETE, 0) != 0) {
+                t.traceBegin("enableHomeActivity");
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
@@ -8971,63 +8995,81 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
+                t.traceEnd();
             }
+            t.traceBegin("startHomeOnAllDisplays");
             mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+            t.traceEnd();
 
+            t.traceBegin("showSystemReadyErrorDialogs");
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
+            t.traceEnd();
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            long ident = Binder.clearCallingIdentity();
-            try {
-                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        currentUserId);
-                intent = new Intent(Intent.ACTION_USER_STARTING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode, String data,
-                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
-                                    throws RemoteException {
-                            }
-                        }, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        UserHandle.USER_ALL);
-            } catch (Throwable e) {
-                Slog.wtf(TAG, "Failed sending first user broadcasts", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            boolean isSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+            if (isSystemUser) {
+                t.traceBegin("sendUserStartBroadcast");
+                final int callingUid = Binder.getCallingUid();
+                final int callingPid = Binder.getCallingPid();
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null, OP_NONE,
+                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            currentUserId);
+                    intent = new Intent(Intent.ACTION_USER_STARTING);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent, null,
+                            new IIntentReceiver.Stub() {
+                                @Override
+                                public void performReceive(Intent intent, int resultCode,
+                                        String data, Bundle extras, boolean ordered, boolean sticky,
+                                        int sendingUser) {}
+                            }, 0, null, null, new String[] {INTERACT_ACROSS_USERS}, OP_NONE, null,
+                            true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            UserHandle.USER_ALL);
+                } catch (Throwable e) {
+                    Slog.wtf(TAG, "Failed sending first user broadcasts", e);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+                t.traceEnd();
+            } else {
+                Slog.i(TAG, "Not sending multi-user broadcasts for non-system user "
+                        + currentUserId);
             }
-            mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
-            mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
+            t.traceBegin("resumeTopActivities");
+            mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
+            t.traceEnd();
+
+            if (isSystemUser) {
+                t.traceBegin("sendUserSwitchBroadcasts");
+                mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+                t.traceEnd();
+            }
+
+            t.traceBegin("setBinderProxies");
             BinderInternal.nSetBinderProxyCountWatermarks(BINDER_PROXY_HIGH_WATERMARK,
                     BINDER_PROXY_LOW_WATERMARK);
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.setBinderProxyCountCallback(
-                    new BinderInternal.BinderProxyLimitListener() {
-                        @Override
-                        public void onLimitReached(int uid) {
-                            Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
-                                    + Process.myUid());
-                            BinderProxy.dumpProxyDebugInfo();
-                            if (uid == Process.SYSTEM_UID) {
-                                Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
-                            } else {
-                                killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
-                                        "Too many Binders sent to SYSTEM");
-                            }
+                    (uid) -> {
+                        Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
+                                + Process.myUid());
+                        BinderProxy.dumpProxyDebugInfo();
+                        if (uid == Process.SYSTEM_UID) {
+                            Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
+                        } else {
+                            killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                                    "Too many Binders sent to SYSTEM");
                         }
                     }, mHandler);
+            t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
             t.traceEnd(); // PhaseActivityManagerReady

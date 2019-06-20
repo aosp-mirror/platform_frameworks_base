@@ -18,6 +18,7 @@
 
 #include "DeferredLayerUpdater.h"
 #include "LayerDrawable.h"
+#include "LightingInfo.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "hwui/Bitmap.h"
@@ -99,7 +100,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
             mRenderThread.getGrContext(), backendRT, this->getSurfaceOrigin(), colorType,
             mSurfaceColorSpace, &props));
 
-    SkiaPipeline::updateLighting(lightGeometry, lightInfo);
+    LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
                 SkMatrix::I());
     layerUpdateQueue->clear();
