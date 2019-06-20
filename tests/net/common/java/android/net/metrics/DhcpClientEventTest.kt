@@ -16,11 +16,9 @@
 
 package android.net.metrics
 
-import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.internal.util.ParcelableTestUtil
-import com.android.internal.util.TestUtils
+import com.android.testutils.assertParcelSane
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,11 +28,6 @@ private const val FAKE_MESSAGE = "test"
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class DhcpClientEventTest {
-    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
-        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
-        TestUtils.assertParcelingIsLossless(obj)
-    }
-
     @Test
     fun testBuilderAndParcel() {
         val dhcpClientEvent = DhcpClientEvent.Builder()
@@ -45,6 +38,6 @@ class DhcpClientEventTest {
         assertEquals(FAKE_MESSAGE, dhcpClientEvent.msg)
         assertEquals(Integer.MAX_VALUE, dhcpClientEvent.durationMs)
 
-        testParcel(dhcpClientEvent, 2)
+        assertParcelSane(dhcpClientEvent, 2)
     }
 }
