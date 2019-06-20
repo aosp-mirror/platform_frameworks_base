@@ -21,9 +21,9 @@ java_library {
     srcs: ["java/**/*.java", "java/**/*.kt"],
     static_libs: [
         "androidx.test.rules",
-        "frameworks-net-testutils",
         "junit",
         "mockito-target-minus-junit4",
+        "net-tests-utils",
         "platform-test-annotations",
     ],
     libs: [

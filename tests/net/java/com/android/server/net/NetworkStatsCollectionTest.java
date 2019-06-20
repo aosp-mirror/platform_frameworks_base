@@ -29,6 +29,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.net.NetworkStatsCollection.multiplySafe;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -43,7 +44,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
-import android.test.MoreAsserts;
 import android.text.format.DateUtils;
 import android.util.RecurrenceRule;
 
@@ -240,11 +240,11 @@ public class NetworkStatsCollectionTest {
                 60 * MINUTE_IN_MILLIS, entry);
 
         // Verify the set of relevant UIDs for each access level.
-        MoreAsserts.assertEquals(new int[] { myUid },
+        assertArrayEquals(new int[] { myUid },
                 collection.getRelevantUids(NetworkStatsAccess.Level.DEFAULT));
-        MoreAsserts.assertEquals(new int[] { Process.SYSTEM_UID, myUid, otherUidInSameUser },
+        assertArrayEquals(new int[] { Process.SYSTEM_UID, myUid, otherUidInSameUser },
                 collection.getRelevantUids(NetworkStatsAccess.Level.USER));
-        MoreAsserts.assertEquals(
+        assertArrayEquals(
                 new int[] { Process.SYSTEM_UID, myUid, otherUidInSameUser, uidInDifferentUser },
                 collection.getRelevantUids(NetworkStatsAccess.Level.DEVICE));
 

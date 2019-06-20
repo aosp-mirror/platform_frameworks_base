@@ -27,14 +27,16 @@ import static android.system.OsConstants.RT_SCOPE_LINK;
 import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
+import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
+import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
+import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -217,67 +219,56 @@ public class LinkAddressTest {
                 l1.isSameAddressAs(l2));
     }
 
-    private void assertLinkAddressesEqual(LinkAddress l1, LinkAddress l2) {
-        assertTrue(l1 + " unexpectedly not equal to " + l2, l1.equals(l2));
-        assertTrue(l2 + " unexpectedly not equal to " + l1, l2.equals(l1));
-        assertEquals(l1.hashCode(), l2.hashCode());
-    }
-
-    private void assertLinkAddressesNotEqual(LinkAddress l1, LinkAddress l2) {
-        assertFalse(l1 + " unexpectedly equal to " + l2, l1.equals(l2));
-        assertFalse(l2 + " unexpectedly equal to " + l1, l2.equals(l1));
-    }
-
     @Test
     public void testEqualsAndSameAddressAs() {
         LinkAddress l1, l2, l3;
 
         l1 = new LinkAddress("2001:db8::1/64");
         l2 = new LinkAddress("2001:db8::1/64");
-        assertLinkAddressesEqual(l1, l2);
+        assertEqualBothWays(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         l2 = new LinkAddress("2001:db8::1/65");
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsNotSameAddressAs(l1, l2);
 
         l2 = new LinkAddress("2001:db8::2/64");
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsNotSameAddressAs(l1, l2);
 
 
         l1 = new LinkAddress("192.0.2.1/24");
         l2 = new LinkAddress("192.0.2.1/24");
-        assertLinkAddressesEqual(l1, l2);
+        assertEqualBothWays(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         l2 = new LinkAddress("192.0.2.1/23");
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsNotSameAddressAs(l1, l2);
 
         l2 = new LinkAddress("192.0.2.2/24");
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsNotSameAddressAs(l1, l2);
 
 
         // Check equals() and isSameAddressAs() on identical addresses with different flags.
         l1 = new LinkAddress(V6_ADDRESS, 64);
         l2 = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_UNIVERSE);
-        assertLinkAddressesEqual(l1, l2);
+        assertEqualBothWays(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         l2 = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED, RT_SCOPE_UNIVERSE);
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         // Check equals() and isSameAddressAs() on identical addresses with different scope.
         l1 = new LinkAddress(V4_ADDRESS, 24);
         l2 = new LinkAddress(V4_ADDRESS, 24, 0, RT_SCOPE_UNIVERSE);
-        assertLinkAddressesEqual(l1, l2);
+        assertEqualBothWays(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         l2 = new LinkAddress(V4_ADDRESS, 24, 0, RT_SCOPE_HOST);
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsSameAddressAs(l1, l2);
 
         // Addresses with the same start or end bytes aren't equal between families.
@@ -291,10 +282,10 @@ public class LinkAddressTest {
         assertTrue(Arrays.equals(ipv4Bytes, l2FirstIPv6Bytes));
         assertTrue(Arrays.equals(ipv4Bytes, l3LastIPv6Bytes));
 
-        assertLinkAddressesNotEqual(l1, l2);
+        assertNotEqualEitherWay(l1, l2);
         assertIsNotSameAddressAs(l1, l2);
 
-        assertLinkAddressesNotEqual(l1, l3);
+        assertNotEqualEitherWay(l1, l3);
         assertIsNotSameAddressAs(l1, l3);
 
         // Because we use InetAddress, an IPv4 address is equal to its IPv4-mapped address.
@@ -302,7 +293,7 @@ public class LinkAddressTest {
         String addressString = V4 + "/24";
         l1 = new LinkAddress(addressString);
         l2 = new LinkAddress("::ffff:" + addressString);
-        assertLinkAddressesEqual(l1, l2);
+        assertEqualBothWays(l1, l2);
         assertIsSameAddressAs(l1, l2);
     }
 
@@ -319,25 +310,6 @@ public class LinkAddressTest {
         assertNotEquals(l1.hashCode(), l2.hashCode());
     }
 
-    private LinkAddress passThroughParcel(LinkAddress l) {
-        Parcel p = Parcel.obtain();
-        LinkAddress l2 = null;
-        try {
-            l.writeToParcel(p, 0);
-            p.setDataPosition(0);
-            l2 = LinkAddress.CREATOR.createFromParcel(p);
-        } finally {
-            p.recycle();
-        }
-        assertNotNull(l2);
-        return l2;
-    }
-
-    private void assertParcelingIsLossless(LinkAddress l) {
-      LinkAddress l2 = passThroughParcel(l);
-      assertEquals(l, l2);
-    }
-
     @Test
     public void testParceling() {
         LinkAddress l;
@@ -346,7 +318,7 @@ public class LinkAddressTest {
         assertParcelingIsLossless(l);
 
         l = new LinkAddress(V4 + "/28", IFA_F_PERMANENT, RT_SCOPE_LINK);
-        assertParcelingIsLossless(l);
+        assertParcelSane(l, 4);
     }
 
     private void assertGlobalPreferred(LinkAddress l, String msg) {

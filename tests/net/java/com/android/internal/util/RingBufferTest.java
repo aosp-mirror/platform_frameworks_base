@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
@@ -25,9 +26,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RingBufferTest {
@@ -36,7 +34,7 @@ public class RingBufferTest {
     public void testEmptyRingBuffer() {
         RingBuffer<String> buffer = new RingBuffer<>(String.class, 100);
 
-        assertArraysEqual(new String[0], buffer.toArray());
+        assertArrayEquals(new String[0], buffer.toArray());
     }
 
     @Test
@@ -65,7 +63,7 @@ public class RingBufferTest {
         buffer.append("e");
 
         String[] expected = {"a", "b", "c", "d", "e"};
-        assertArraysEqual(expected, buffer.toArray());
+        assertArrayEquals(expected, buffer.toArray());
     }
 
     @Test
@@ -73,19 +71,19 @@ public class RingBufferTest {
         RingBuffer<String> buffer = new RingBuffer<>(String.class, 1);
 
         buffer.append("a");
-        assertArraysEqual(new String[]{"a"}, buffer.toArray());
+        assertArrayEquals(new String[]{"a"}, buffer.toArray());
 
         buffer.append("b");
-        assertArraysEqual(new String[]{"b"}, buffer.toArray());
+        assertArrayEquals(new String[]{"b"}, buffer.toArray());
 
         buffer.append("c");
-        assertArraysEqual(new String[]{"c"}, buffer.toArray());
+        assertArrayEquals(new String[]{"c"}, buffer.toArray());
 
         buffer.append("d");
-        assertArraysEqual(new String[]{"d"}, buffer.toArray());
+        assertArrayEquals(new String[]{"d"}, buffer.toArray());
 
         buffer.append("e");
-        assertArraysEqual(new String[]{"e"}, buffer.toArray());
+        assertArrayEquals(new String[]{"e"}, buffer.toArray());
     }
 
     @Test
@@ -100,7 +98,7 @@ public class RingBufferTest {
         buffer.append("e");
 
         String[] expected1 = {"a", "b", "c", "d", "e"};
-        assertArraysEqual(expected1, buffer.toArray());
+        assertArrayEquals(expected1, buffer.toArray());
 
         String[] expected2 = new String[capacity];
         int firstIndex = 0;
@@ -111,22 +109,22 @@ public class RingBufferTest {
             buffer.append("x");
             expected2[i] = "x";
         }
-        assertArraysEqual(expected2, buffer.toArray());
+        assertArrayEquals(expected2, buffer.toArray());
 
         buffer.append("x");
         expected2[firstIndex] = "x";
-        assertArraysEqual(expected2, buffer.toArray());
+        assertArrayEquals(expected2, buffer.toArray());
 
         for (int i = 0; i < 10; i++) {
             for (String s : expected2) {
                 buffer.append(s);
             }
         }
-        assertArraysEqual(expected2, buffer.toArray());
+        assertArrayEquals(expected2, buffer.toArray());
 
         buffer.append("a");
         expected2[lastIndex] = "a";
-        assertArraysEqual(expected2, buffer.toArray());
+        assertArrayEquals(expected2, buffer.toArray());
     }
 
     @Test
@@ -143,7 +141,7 @@ public class RingBufferTest {
             expected[i] = new DummyClass1();
             expected[i].x = capacity * i;
         }
-        assertArraysEqual(expected, buffer.toArray());
+        assertArrayEquals(expected, buffer.toArray());
 
         for (int i = 0; i < capacity; ++i) {
             if (actual[i] != buffer.getNextSlot()) {
@@ -177,18 +175,4 @@ public class RingBufferTest {
     }
 
     private static final class DummyClass3 {}
-
-    static <T> void assertArraysEqual(T[] expected, T[] got) {
-        if (expected.length != got.length) {
-            fail(Arrays.toString(expected) + " and " + Arrays.toString(got)
-                    + " did not have the same length");
-        }
-
-        for (int i = 0; i < expected.length; i++) {
-            if (!Objects.equals(expected[i], got[i])) {
-                fail(Arrays.toString(expected) + " and " + Arrays.toString(got)
-                        + " were not equal");
-            }
-        }
-    }
 }
