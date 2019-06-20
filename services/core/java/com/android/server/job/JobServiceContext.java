@@ -251,7 +251,7 @@ public final class JobServiceContext implements ServiceConnection {
             try {
                 binding = mContext.bindServiceAsUser(intent, this,
                         Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                        | Context.BIND_NOT_VISIBLE | Context.BIND_ADJUST_BELOW_PERCEPTIBLE,
+                        | Context.BIND_NOT_PERCEPTIBLE,
                         new UserHandle(job.getUserId()));
             } catch (SecurityException e) {
                 // Some permission policy, for example INTERACT_ACROSS_USERS and
