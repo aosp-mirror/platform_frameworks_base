@@ -68,7 +68,7 @@ public class NetworkStatsFactory {
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
 
-    private boolean mUseBpfStats;
+    private final boolean mUseBpfStats;
 
     private INetd mNetdService;
 
@@ -302,6 +302,17 @@ public class NetworkStatsFactory {
         return readNetworkStatsDetail(UID_ALL, INTERFACES_ALL, TAG_ALL);
     }
 
+    @GuardedBy("sPersistentDataLock")
+    private void requestSwapActiveStatsMapLocked() throws RemoteException {
+        // Ask netd to do a active map stats swap. When the binder call successfully returns,
+        // the system server should be able to safely read and clean the inactive map
+        // without race problem.
+        if (mNetdService == null) {
+            mNetdService = NetdService.getInstance();
+        }
+        mNetdService.trafficSwapActiveStatsMap();
+    }
+
     /**
      * Reads the detailed UID stats based on the provided parameters
      *
@@ -312,24 +323,6 @@ public class NetworkStatsFactory {
      * @return the NetworkStats instance containing network statistics at the present time.
      */
     public NetworkStats readNetworkStatsDetail(
-            int limitUid, @Nullable String[] limitIfaces, int limitTag) throws IOException {
-        return readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag);
-    }
-
-    @GuardedBy("sPersistentDataLock")
-    private void requestSwapActiveStatsMapLocked() throws RemoteException {
-        // Ask netd to do a active map stats swap. When the binder call successfully returns,
-        // the system server should be able to safely read and clean the inactive map
-        // without race problem.
-        if (mUseBpfStats) {
-            if (mNetdService == null) {
-                mNetdService = NetdService.getInstance();
-            }
-            mNetdService.trafficSwapActiveStatsMap();
-        }
-    }
-
-    private NetworkStats readNetworkStatsDetailInternal(
             int limitUid, String[] limitIfaces, int limitTag) throws IOException {
         // In order to prevent deadlocks, anything protected by this lock MUST NOT call out to other
         // code that will acquire other locks within the system server. See b/134244752.
