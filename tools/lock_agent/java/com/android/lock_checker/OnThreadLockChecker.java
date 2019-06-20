@@ -220,7 +220,7 @@ class OnThreadLockChecker implements LockHook.LockChecker {
         heldLocks.remove(index);
     }
 
-    private static class Violation {
+    private static class Violation implements LockHook.Violation {
         int mSelfTid;
         String mSelfName;
         Object mAlreadyHeld;
@@ -323,7 +323,6 @@ class OnThreadLockChecker implements LockHook.LockChecker {
         if (LockHook.shouldDumpStacktrace(mStacktraceHasher.get(), mDumpedStacktraceHashes,
                 Boolean.TRUE, v.mStack, 0, to)) {
             mNumDetectedUnique.incrementAndGet();
-            LockHook.wtf(v.toString());
             LockHook.addViolation(v);
         }
     }
