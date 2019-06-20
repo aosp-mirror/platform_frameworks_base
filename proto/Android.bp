@@ -5,7 +5,7 @@ java_library_static {
         type: "nano",
     },
     srcs: ["src/**/*.proto"],
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     // Pin java_version until jarjar is certified to support later versions. http://b/72703434
     java_version: "1.8",
     target: {

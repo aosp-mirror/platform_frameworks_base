@@ -16,7 +16,7 @@
 
 android_app {
     name: "framework-res",
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     certificate: "platform",
 
     // Soong special-cases framework-res to install this alongside
