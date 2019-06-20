@@ -1311,12 +1311,6 @@ class WindowStateAnimator {
             return;
         }
 
-        // We don't apply animation for application main window here since this window type
-        // should be controlled by AppWindowToken in general.
-        if (mAttrType == TYPE_BASE_APPLICATION) {
-            return;
-        }
-
         final int transit;
         if (mEnterAnimationPending) {
             mEnterAnimationPending = false;
@@ -1324,7 +1318,13 @@ class WindowStateAnimator {
         } else {
             transit = WindowManagerPolicy.TRANSIT_SHOW;
         }
-        applyAnimationLocked(transit, true);
+
+        // We don't apply animation for application main window here since this window type
+        // should be controlled by AppWindowToken in general.
+        if (mAttrType != TYPE_BASE_APPLICATION) {
+            applyAnimationLocked(transit, true);
+        }
+
         if (mService.mAccessibilityController != null) {
             mService.mAccessibilityController.onWindowTransitionLocked(mWin, transit);
         }
