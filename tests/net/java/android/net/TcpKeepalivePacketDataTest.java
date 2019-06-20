@@ -16,13 +16,13 @@
 
 package android.net;
 
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.net.SocketKeepalive.InvalidPacketException;
-
-import com.android.internal.util.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(testInfo.tos, resultData.ipTos);
         assertEquals(testInfo.ttl, resultData.ipTtl);
 
-        TestUtils.assertParcelingIsLossless(resultData);
+        assertParcelingIsLossless(resultData);
 
         final byte[] packet = resultData.getPacket();
         // IP version and IHL
