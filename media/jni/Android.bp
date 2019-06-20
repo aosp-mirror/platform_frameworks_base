@@ -149,7 +149,6 @@ cc_library_shared {
         "libhidlbase",
         "libhidlmemory",
         "libhidltransport",
-        "libhwbinder_noltopgo",
         "libbinderthreadstate",
 
         // MediaPlayer2 implementation
