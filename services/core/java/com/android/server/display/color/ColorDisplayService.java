@@ -226,7 +226,7 @@ public final class ColorDisplayService extends SystemService {
         }
     }
 
-    private void onUserChanged(int userHandle) {
+    @VisibleForTesting void onUserChanged(int userHandle) {
         final ContentResolver cr = getContext().getContentResolver();
 
         if (mCurrentUser != UserHandle.USER_NULL) {
