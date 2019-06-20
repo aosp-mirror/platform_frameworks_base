@@ -786,6 +786,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         inflateStatusBarWindow(context);
         mStatusBarWindow.setService(this);
+        mStatusBarWindow.setBypassController(mKeyguardBypassController);
         mStatusBarWindow.setOnTouchListener(getStatusBarWindowTouchListener());
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
@@ -798,6 +799,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
                 .createNotificationIconAreaController(context, this,
+                        mWakeUpCoordinator, mKeyguardBypassController,
                         mStatusBarStateController, mNotificationListener);
         mWakeUpCoordinator.setIconAreaController(mNotificationIconAreaController);
         inflateShelf();
@@ -3570,6 +3572,9 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
+        mKeyguardBypassController.setBouncerShowing(bouncerShowing);
+        mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
+        mStatusBarWindow.setBouncerShowing(bouncerShowing);
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3621,6 +3626,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
+            mWakeUpCoordinator.setFullyAwake(false);
+            mKeyguardBypassController.onStartedGoingToSleep();
         }
 
         @Override
@@ -3643,6 +3650,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onFinishedWakingUp() {
+            mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mLaunchCameraWhenFinishedWaking) {
                 mNotificationPanel.launchCamera(false /* animate */, mLastCameraLaunchSource);

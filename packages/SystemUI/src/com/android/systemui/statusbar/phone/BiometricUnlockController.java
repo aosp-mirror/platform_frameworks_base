@@ -242,7 +242,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         }
     }
 
-    private void startWakeAndUnlock(BiometricSourceType biometricSourceType) {
+    public void startWakeAndUnlock(BiometricSourceType biometricSourceType) {
         startWakeAndUnlock(calculateMode(biometricSourceType));
     }
 
