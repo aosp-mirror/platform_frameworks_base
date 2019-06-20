@@ -41,6 +41,8 @@ import android.util.Slog;
 
 import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
 
+import java.util.concurrent.CompletableFuture;
+
 final class RemoteFillService
         extends AbstractSinglePendingRequestRemoteService<RemoteFillService, IAutoFillService> {
 
@@ -103,26 +105,21 @@ final class RemoteFillService
      * <p>This can be used when the request is unnecessary or will be superceeded by a request that
      * will soon be queued.
      *
-     * @return the id of the canceled request, or {@link FillRequest#INVALID_REQUEST_ID} if no
-     *         {@link PendingFillRequest} was canceled.
+     * @return the future id of the canceled request, or {@link FillRequest#INVALID_REQUEST_ID} if
+     *          no {@link PendingFillRequest} was canceled.
      */
-    // TODO(b/117779333): move this logic to super class (and make mPendingRequest private)
-    public int cancelCurrentRequest() {
-        if (isDestroyed()) {
-            return INVALID_REQUEST_ID;
-        }
-
-        int requestId = INVALID_REQUEST_ID;
-        if (mPendingRequest != null) {
-            if (mPendingRequest instanceof PendingFillRequest) {
-                requestId = ((PendingFillRequest) mPendingRequest).mRequest.getId();
+    public CompletableFuture<Integer> cancelCurrentRequest() {
+        return CompletableFuture.supplyAsync(() -> {
+            if (isDestroyed()) {
+                return INVALID_REQUEST_ID;
             }
 
-            mPendingRequest.cancel();
-            mPendingRequest = null;
-        }
-
-        return requestId;
+            BasePendingRequest<RemoteFillService, IAutoFillService> canceledRequest =
+                    handleCancelPendingRequest();
+            return canceledRequest instanceof PendingFillRequest
+                    ? ((PendingFillRequest) canceledRequest).mRequest.getId()
+                    : INVALID_REQUEST_ID;
+        }, mHandler::post);
     }
 
     public void onFillRequest(@NonNull FillRequest request) {
