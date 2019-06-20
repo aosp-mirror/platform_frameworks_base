@@ -660,6 +660,10 @@ public final class NotificationEntry {
         return row != null && row.isHeadsUp();
     }
 
+    public boolean showingPulsing() {
+        return row != null && row.showingPulsing();
+    }
+
     public void setHeadsUp(boolean shouldHeadsUp) {
         if (row != null) row.setHeadsUp(shouldHeadsUp);
     }
