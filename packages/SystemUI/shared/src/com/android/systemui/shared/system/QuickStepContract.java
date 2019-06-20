@@ -21,7 +21,9 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import android.annotation.IntDef;
+import android.content.Context;
 import android.content.res.Resources;
+import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -98,6 +100,18 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
         return str.toString();
+    }
+
+    /**
+     * Ratio of quickstep touch slop (when system takes over the touch) to view touch slop
+     */
+    public static final float QUICKSTEP_TOUCH_SLOP_RATIO = 3;
+
+    /**
+     * Touch slop for quickstep gesture
+     */
+    public static final float getQuickStepTouchSlopPx(Context context) {
+        return QUICKSTEP_TOUCH_SLOP_RATIO * ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     /**
