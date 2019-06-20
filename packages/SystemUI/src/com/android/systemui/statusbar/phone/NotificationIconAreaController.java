@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -41,7 +42,8 @@ import java.util.function.Function;
  * normally reserved for notifications.
  */
 public class NotificationIconAreaController implements DarkReceiver,
-        StatusBarStateController.StateListener {
+        StatusBarStateController.StateListener,
+        NotificationWakeUpCoordinator.WakeUpListener {
 
     public static final String HIGH_PRIORITY = "high_priority";
     private static final long AOD_ICONS_APPEAR_DURATION = 200;
@@ -51,6 +53,8 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
     private final StatusBarStateController mStatusBarStateController;
     private final NotificationMediaManager mMediaManager;
+    private final NotificationWakeUpCoordinator mWakeUpCoordinator;
+    private final KeyguardBypassController mBypassController;
     private final DozeParameters mDozeParameters;
     @VisibleForTesting
     final NotificationListener.NotificationSettingsListener mSettingsListener =
@@ -91,6 +95,8 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     public NotificationIconAreaController(Context context, StatusBar statusBar,
             StatusBarStateController statusBarStateController,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
             NotificationListener notificationListener,
             NotificationMediaManager notificationMediaManager) {
         mStatusBar = statusBar;
@@ -102,6 +108,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         mMediaManager = notificationMediaManager;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
         mDozeParameters = DozeParameters.getInstance(mContext);
+        mWakeUpCoordinator = wakeUpCoordinator;
+        wakeUpCoordinator.addListener(this);
+        mBypassController = keyguardBypassController;
 
         initializeNotificationAreaViews(context);
         reloadAodColor();
@@ -238,7 +247,8 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
-            boolean hideRepliedMessages, boolean hideCurrentMedia, boolean hideCenteredIcon) {
+            boolean hideRepliedMessages, boolean hideCurrentMedia, boolean hideCenteredIcon,
+            boolean hidePulsing) {
 
         final boolean isCenteredNotificationIcon = entry.centeredIcon != null
                 && Objects.equals(entry.centeredIcon, mCenteredIconView);
@@ -270,6 +280,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (!showAmbient && entry.shouldSuppressStatusBar()) {
             return false;
         }
+        if (hidePulsing && entry.showingPulsing()) {
+            return false;
+        }
         return true;
     }
 
@@ -292,7 +305,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* hideDismissed */,
                 false /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
-                true /* hide centered icon */);
+                true /* hide centered icon */,
+                false /* hidePulsing */);
     }
 
     public void updateStatusBarIcons() {
@@ -302,7 +316,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
-                true /* hide centered icon */);
+                true /* hide centered icon */,
+                false /* hidePulsing */);
     }
 
     private void updateCenterIcon() {
@@ -312,7 +327,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* hideDismissed */,
                 false /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
-                false /* hide centered icon */);
+                false /* hide centered icon */,
+                false /* hidePulsing */);
     }
 
     public void updateAodIcons() {
@@ -322,7 +338,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
                 true /* hideCurrentMedia */,
-                true /* hide centered icon */);
+                true /* hide centered icon */,
+                mBypassController.getBypassEnabled() /* hidePulsing */);
     }
 
     @VisibleForTesting
@@ -338,11 +355,12 @@ public class NotificationIconAreaController implements DarkReceiver,
      * @param showAmbient should ambient notification icons be shown
      * @param hideDismissed should dismissed icons be hidden
      * @param hideRepliedMessages should messages that have been replied to be hidden
+     * @param hidePulsing should pulsing notifications be hidden
      */
     private void updateIconsForLayout(Function<NotificationEntry, StatusBarIconView> function,
             NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
             boolean hideDismissed, boolean hideRepliedMessages, boolean hideCurrentMedia,
-            boolean hideCenteredIcon) {
+            boolean hideCenteredIcon, boolean hidePulsing) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -352,7 +370,7 @@ public class NotificationIconAreaController implements DarkReceiver,
             if (view instanceof ExpandableNotificationRow) {
                 NotificationEntry ent = ((ExpandableNotificationRow) view).getEntry();
                 if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
-                        hideRepliedMessages, hideCurrentMedia, hideCenteredIcon)) {
+                        hideRepliedMessages, hideCurrentMedia, hideCenteredIcon, hidePulsing)) {
                     StatusBarIconView iconView = function.apply(ent);
                     if (iconView != null) {
                         toShow.add(iconView);
@@ -514,6 +532,7 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     @Override
     public void onStateChanged(int newState) {
+        updateAodIconsVisibility();
         updateAnimations();
     }
 
@@ -562,17 +581,31 @@ public class NotificationIconAreaController implements DarkReceiver,
         }
     }
 
-    public void setFullyHidden(boolean fullyHidden) {
-        if (mFullyHidden != fullyHidden) {
-            mFullyHidden = fullyHidden;
-            if (fullyHidden) {
-                appearAodIcons();
-            }
+    @Override
+    public void onFullyHiddenChanged(boolean fullyHidden) {
+        if (fullyHidden && !mBypassController.getBypassEnabled()) {
+            appearAodIcons();
+        }
+        updateAodIconsVisibility();
+        updateAodIcons();
+    }
+
+    @Override
+    public void onPulseExpansionChanged(boolean expandingChanged) {
+        if (expandingChanged) {
             updateAodIconsVisibility();
         }
     }
 
     private void updateAodIconsVisibility() {
-        mAodIcons.setVisibility(mFullyHidden ? View.VISIBLE : View.INVISIBLE);
+        boolean visible = mBypassController.getBypassEnabled()
+                || mWakeUpCoordinator.getNotificationsFullyHidden();
+        if (mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
+            visible = false;
+        }
+        if (visible && mWakeUpCoordinator.isPulseExpanding()) {
+            visible = false;
+        }
+        mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 }

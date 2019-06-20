@@ -40,7 +40,7 @@
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Vaš administrator ne dozvoljava instaliranje aplikacija iz nepoznatih izvora"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ovaj korisnik ne može instalirati nepoznate aplikacije"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ovom korisniku nije dozvoljeno instaliranje aplikacija"</string>
-    <string name="ok" msgid="7871959885003339302">"UREDU"</string>
+    <string name="ok" msgid="7871959885003339302">"Uredu"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Uprav. aplik."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nedostatak prostora"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Ne možete instalirati aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>. Oslobodite prostor u pohrani i pokušajte ponovo."</string>

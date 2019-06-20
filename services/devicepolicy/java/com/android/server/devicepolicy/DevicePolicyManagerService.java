@@ -6443,7 +6443,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .setAdmin(admin)
                     .setStrings(vpnPackage)
                     .setBoolean(lockdown)
-                    .setInt(/* number of vpn packages */ 0)
+                    .setInt(lockdownWhitelist != null ? lockdownWhitelist.size() : 0)
                     .write();
         } finally {
             mInjector.binderRestoreCallingIdentity(token);

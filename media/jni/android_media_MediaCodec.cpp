@@ -211,21 +211,22 @@ void JMediaCodec::registerSelf() {
 }
 
 void JMediaCodec::release() {
-    if (mCodec != NULL) {
-        mCodec->release();
-        mCodec.clear();
-        mInitStatus = NO_INIT;
-    }
+    std::call_once(mReleaseFlag, [this] {
+        if (mCodec != NULL) {
+            mCodec->release();
+            mInitStatus = NO_INIT;
+        }
 
-    if (mLooper != NULL) {
-        mLooper->unregisterHandler(id());
-        mLooper->stop();
-        mLooper.clear();
-    }
+        if (mLooper != NULL) {
+            mLooper->unregisterHandler(id());
+            mLooper->stop();
+            mLooper.clear();
+        }
+    });
 }
 
 JMediaCodec::~JMediaCodec() {
-    if (mCodec != NULL || mLooper != NULL) {
+    if (mLooper != NULL) {
         /* MediaCodec and looper should have been released explicitly already
          * in setMediaCodec() (see comments in setMediaCodec()).
          *

@@ -247,7 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"เชื่อมต่อไม่ได้"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
-    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ลดการหมดเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>

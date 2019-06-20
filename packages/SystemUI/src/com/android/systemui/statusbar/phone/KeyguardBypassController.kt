@@ -34,19 +34,34 @@ class KeyguardBypassController {
     private val statusBarStateController: StatusBarStateController
 
     /**
+     * The pending unlock type which is set if the bypass was blocked when it happened.
+     */
+    private var pendingUnlockType: BiometricSourceType? = null
+
+    lateinit var unlockController: BiometricUnlockController
+    var isPulseExpanding = false
+
+    /**
      * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
      */
     var bypassEnabled: Boolean = false
         get() = field && unlockMethodCache.isUnlockingWithFacePossible
         private set
 
-    lateinit var unlockController: BiometricUnlockController
+    var bouncerShowing: Boolean = false
 
     @Inject
     constructor(context: Context, tunerService: TunerService,
                 statusBarStateController: StatusBarStateController) {
         unlockMethodCache = UnlockMethodCache.getInstance(context)
         this.statusBarStateController = statusBarStateController
+        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onStateChanged(newState: Int) {
+                if (newState != StatusBarState.KEYGUARD) {
+                    pendingUnlockType = null;
+                }
+            }
+        })
         val faceManager = context.getSystemService(FaceManager::class.java)
         if (faceManager?.isHardwareDetected != true) {
             return
@@ -72,11 +87,35 @@ class KeyguardBypassController {
      * @return false if we can not wake and unlock right now
      */
     fun onBiometricAuthenticated(biometricSourceType: BiometricSourceType): Boolean {
-        if (bypassEnabled && statusBarStateController.state != StatusBarState.KEYGUARD) {
-            // We're bypassing but not actually on the lockscreen, the user should decide when
-            // to unlock
-            return false
+        if (bypassEnabled) {
+            if (bouncerShowing) {
+                // Whenever the bouncer is showing, we want to unlock. Otherwise we can get stuck
+                // in the shade locked where the bouncer wouldn't unlock
+                return true
+            }
+            if (statusBarStateController.state != StatusBarState.KEYGUARD) {
+                // We're bypassing but not actually on the lockscreen, the user should decide when
+                // to unlock
+                return false
+            }
+            if (isPulseExpanding) {
+                pendingUnlockType = biometricSourceType
+                return false
+            }
         }
         return true
+    }
+
+    fun maybePerformPendingUnlock() {
+        if (pendingUnlockType != null) {
+            if (onBiometricAuthenticated(pendingUnlockType!!)) {
+                unlockController.startWakeAndUnlock(pendingUnlockType)
+                pendingUnlockType = null
+            }
+        }
+    }
+
+    fun onStartedGoingToSleep() {
+        pendingUnlockType = null
     }
 }
