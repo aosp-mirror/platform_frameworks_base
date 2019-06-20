@@ -51,11 +51,22 @@ java_library {
     installable: true,
 }
 
+cc_binary {
+    name: "lockagent_crasher",
+    srcs: ["crasher.cpp"],
+    static_libs: ["libbase_ndk"],
+    shared_libs: ["liblog"],
+    sdk_version: "current",
+    stl: "c++_static",
+    compile_multilib: "first",
+}
+
 sh_binary {
     name: "start_with_lockagent",
     src: "start_with_lockagent.sh",
     required: [
         "liblockagent",
         "lockagent",
+        "lockagent_crasher",
     ],
 }
