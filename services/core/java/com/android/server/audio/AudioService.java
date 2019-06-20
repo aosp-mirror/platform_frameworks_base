@@ -2520,8 +2520,9 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.muteMicrophone(on);
             Binder.restoreCallingIdentity(identity);
             if (on != currentMute) {
-                mContext.sendBroadcast(new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
-                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+                mContext.sendBroadcastAsUser(
+                        new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
+                                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
             }
         }
     }
