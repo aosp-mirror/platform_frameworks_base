@@ -712,11 +712,25 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public boolean matches(WifiConfiguration config) {
         if (config.isPasspoint()) {
             return (isPasspoint() && config.FQDN.equals(mConfig.FQDN));
-        } else {
-            // Normal non-Passpoint network
-            return ssid.equals(removeDoubleQuotes(config.SSID))
-                    && security == getSecurity(config)
-                    && (mConfig == null || mConfig.shared == config.shared);
+        }
+
+        if (!ssid.equals(removeDoubleQuotes(config.SSID))
+                || (mConfig != null && mConfig.shared != config.shared)) {
+            return false;
+        }
+
+        final int configSecurity = getSecurity(config);
+        final WifiManager wifiManager = getWifiManager();
+        switch (security) {
+            case SECURITY_PSK_SAE_TRANSITION:
+                return configSecurity == SECURITY_PSK
+                        || (wifiManager.isWpa3SaeSupported() && configSecurity == SECURITY_SAE);
+            case SECURITY_OWE_TRANSITION:
+                return configSecurity == SECURITY_NONE
+                        || (wifiManager.isEnhancedOpenSupported()
+                                && configSecurity == SECURITY_OWE);
+            default:
+                return security == configSecurity;
         }
     }
 
