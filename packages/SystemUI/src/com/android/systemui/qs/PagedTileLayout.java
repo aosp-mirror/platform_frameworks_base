@@ -244,7 +244,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private void emptyAndInflateOrRemovePages() {
         final int nTiles = mTiles.size();
-        int numPages = nTiles / mPages.get(0).maxTiles();
+        // We should always have at least one page, even if it's empty.
+        int numPages = Math.max(nTiles / mPages.get(0).maxTiles(), 1);
+
         // Add one more not full page if needed
         numPages += (nTiles % mPages.get(0).maxTiles() == 0 ? 0 : 1);
 
@@ -434,11 +436,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
 
         public boolean isFull() {
-            return mRecords.size() >= mColumns * mRows;
+            return mRecords.size() >= maxTiles();
         }
 
         public int maxTiles() {
-            return mColumns * mRows;
+            // Each page should be able to hold at least one tile. If there's not enough room to
+            // show even 1 or there are no tiles, it probably means we are in the middle of setting
+            // up.
+            return Math.max(mColumns * mRows, 1);
         }
 
         @Override
