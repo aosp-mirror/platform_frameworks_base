@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -223,7 +224,10 @@ public class BubbleView extends FrameLayout {
 
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
-            iconDrawable = buildIconWithTint(iconDrawable, n.color);
+            AdaptiveIconDrawable adaptiveIconDrawable = buildIconWithTint(iconDrawable, n.color);
+            Path iconPath = adaptiveIconDrawable.getIconMask();
+            mBadgedImageView.drawDot(iconPath);
+            iconDrawable = adaptiveIconDrawable;
         }
         BitmapInfo bitmapInfo = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
                 null /* user */,
@@ -240,7 +244,7 @@ public class BubbleView extends FrameLayout {
         return mBadgeColor;
     }
 
-    private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
+    private AdaptiveIconDrawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
         iconDrawable = checkTint(iconDrawable, backgroundColor);
         InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
         ColorDrawable background = new ColorDrawable(backgroundColor);

@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -33,10 +32,10 @@ import com.android.systemui.R;
  */
 public class BadgedImageView extends ImageView {
 
-    private DotRenderer mDotRenderer;
     private Rect mTempBounds = new Rect();
-    private Point mTempPoint = new Point();
 
+    private DotRenderer mDotRenderer;
+    private DotRenderer.DrawParams mDrawParams;
     private int mIconBitmapSize;
     private int mDotColor;
     private float mDotScale = 0f;
@@ -62,30 +61,33 @@ public class BadgedImageView extends ImageView {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-
-        Path iconShapePath = new Path();
-        float radius = DEFAULT_PATH_SIZE * 0.5f;
-        iconShapePath.addCircle(radius /* x */, radius /* y */, radius, Path.Direction.CW);
-        mDotRenderer = new DotRenderer(mIconBitmapSize, iconShapePath, DEFAULT_PATH_SIZE);
+        mDrawParams = new DotRenderer.DrawParams();
 
         TypedArray ta = context.obtainStyledAttributes(
-                new int[] {android.R.attr.colorBackgroundFloating});
+                new int[]{android.R.attr.colorBackgroundFloating});
         ta.recycle();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mShowDot) {
-            getDrawingRect(mTempBounds);
-            mTempPoint.set((getWidth() - mIconBitmapSize) / 2, getPaddingTop());
-            DotRenderer.DrawParams params = new DotRenderer.DrawParams();
-            params.color = mDotColor;
-            params.iconBounds = mTempBounds;
-            params.leftAlign = mOnLeft;
-            params.scale = mDotScale;
-            mDotRenderer.draw(canvas, params);
+        if (!mShowDot) {
+            return;
         }
+        getDrawingRect(mTempBounds);
+
+        mDrawParams.color = mDotColor;
+        mDrawParams.iconBounds = mTempBounds;
+        mDrawParams.leftAlign = mOnLeft;
+        mDrawParams.scale = mDotScale;
+
+        if (mDotRenderer == null) {
+            Path circlePath = new Path();
+            float radius = DEFAULT_PATH_SIZE * 0.5f;
+            circlePath.addCircle(radius /* x */, radius /* y */, radius, Path.Direction.CW);
+            mDotRenderer = new DotRenderer(mIconBitmapSize, circlePath, DEFAULT_PATH_SIZE);
+        }
+        mDotRenderer.draw(canvas, mDrawParams);
     }
 
     /**
@@ -124,14 +126,18 @@ public class BadgedImageView extends ImageView {
     }
 
     /**
+     * @param iconPath The new icon path to use when calculating dot position.
+     */
+    public void drawDot(Path iconPath) {
+        mDotRenderer = new DotRenderer(mIconBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+        invalidate();
+    }
+
+    /**
      * How big the dot should be, fraction from 0 to 1.
      */
     public void setDotScale(float fraction) {
         mDotScale = fraction;
         invalidate();
-    }
-
-    public float getDotScale() {
-        return mDotScale;
     }
 }
