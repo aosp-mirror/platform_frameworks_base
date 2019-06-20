@@ -149,7 +149,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
-import android.telephony.ims.RcsManager;
+import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -552,11 +552,11 @@ final class SystemServiceRegistry {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
 
-        registerService(Context.TELEPHONY_RCS_SERVICE, RcsManager.class,
-                new CachedServiceFetcher<RcsManager>() {
+        registerService(Context.TELEPHONY_RCS_MESSAGE_SERVICE, RcsMessageManager.class,
+                new CachedServiceFetcher<RcsMessageManager>() {
                     @Override
-                    public RcsManager createService(ContextImpl ctx) {
-                        return new RcsManager(ctx.getOuterContext());
+                    public RcsMessageManager createService(ContextImpl ctx) {
+                        return new RcsMessageManager(ctx.getOuterContext());
                     }
                 });
 

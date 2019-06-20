@@ -35,7 +35,7 @@ import android.telephony.ims.RcsThreadQueryResultParcelable;
  * RPC definition between RCS storage APIs and phone process.
  * {@hide}
  */
-interface IRcs {
+interface IRcsMessage {
     /////////////////////////
     // RcsMessageStore APIs
     /////////////////////////

@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
@@ -25,15 +26,20 @@ import android.net.Uri;
 import java.util.List;
 
 /**
- * RcsMessageStore is the application interface to RcsProvider and provides access methods to
+ * RcsMessageManager is the application interface to RcsProvider and provides access methods to
  * RCS related database tables.
  *
  * @hide
  */
-public class RcsMessageStore {
+@SystemService(Context.TELEPHONY_RCS_MESSAGE_SERVICE)
+public class RcsMessageManager {
     RcsControllerCall mRcsControllerCall;
 
-    RcsMessageStore(Context context) {
+    /**
+     * Use {@link Context#getSystemService(String)} to get an instance of this service.
+     * @hide
+     */
+    public RcsMessageManager(Context context) {
         mRcsControllerCall = new RcsControllerCall(context);
     }
 
