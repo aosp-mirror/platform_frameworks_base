@@ -144,10 +144,9 @@ public class SystemUIFactory {
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar, StatusBarStateController statusBarStateController,
-            NotificationListener listener) {
+            StatusBar statusBar, StatusBarStateController statusBarStateController) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
-                listener, Dependency.get(NotificationMediaManager.class));
+                Dependency.get(NotificationMediaManager.class));
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,
