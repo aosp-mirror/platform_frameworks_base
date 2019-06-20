@@ -802,12 +802,7 @@ public class TaskStack extends WindowContainer<Task> implements
         if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
             return;
         }
-        if (getWindowConfiguration().tasksAreFloating()) {
-            // Don't crop freeform windows to the stack.
-            transaction.setWindowCrop(mSurfaceControl, -1, -1);
-        } else {
-            transaction.setWindowCrop(mSurfaceControl, width, height);
-        }
+        transaction.setWindowCrop(mSurfaceControl, width, height);
         mLastSurfaceSize.set(width, height);
     }
 
