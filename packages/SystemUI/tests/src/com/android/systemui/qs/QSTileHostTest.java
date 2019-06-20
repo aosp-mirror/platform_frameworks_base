@@ -18,23 +18,28 @@ package com.android.systemui.qs;
 
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.CollectionUtils;
 import com.android.systemui.DumpController;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -108,7 +113,6 @@ public class QSTileHostTest extends SysuiTestCase {
                             return null;
                     }
                 });
-
     }
 
     @Test
@@ -121,6 +125,26 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testLoadTileSpecs_nullSetting() {
         List<String> tiles = QSTileHost.loadTileSpecs(mContext, null);
         assertFalse(tiles.isEmpty());
+    }
+
+    @Test
+    public void testInvalidSpecUsesDefault() {
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.string.quick_settings_tiles, "spec1,spec2");
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "not-valid");
+
+        assertEquals(2, mQSTileHost.getTiles().size());
+    }
+
+    @Test
+    public void testSpecWithInvalidDoesNotUseDefault() {
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.string.quick_settings_tiles, "spec1,spec2");
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec2,not-valid");
+
+        assertEquals(1, mQSTileHost.getTiles().size());
+        QSTile element = CollectionUtils.firstOrNull(mQSTileHost.getTiles());
+        assertTrue(element instanceof TestTile2);
     }
 
     @Test
@@ -152,6 +176,21 @@ public class QSTileHostTest extends SysuiTestCase {
 
         @Override
         public void onPluginDisconnected(QSFactory plugin) {
+        }
+
+        @Override
+        public void changeTiles(List<String> previousTiles, List<String> newTiles) {
+            String previousSetting = Settings.Secure.getStringForUser(
+                    getContext().getContentResolver(), TILES_SETTING,
+                    ActivityManager.getCurrentUser());
+            super.changeTiles(previousTiles, newTiles);
+            // After tiles are changed, make sure to call onTuningChanged with the new setting if it
+            // changed
+            String newSetting = Settings.Secure.getStringForUser(getContext().getContentResolver(),
+                    TILES_SETTING, ActivityManager.getCurrentUser());
+            if (!previousSetting.equals(newSetting)) {
+                onTuningChanged(TILES_SETTING, newSetting);
+            }
         }
     }
 
