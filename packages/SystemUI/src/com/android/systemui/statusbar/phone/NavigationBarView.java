@@ -533,6 +533,11 @@ public class NavigationBarView extends FrameLayout implements
         return KeyButtonDrawable.create(mContext, icon, hasShadow);
     }
 
+    public void setWindowVisible(boolean visible) {
+        mTintController.setWindowVisible(visible);
+        mRotationButtonController.onNavigationBarWindowVisibilityChange(visible);
+    }
+
     @Override
     public void setLayoutDirection(int layoutDirection) {
         reloadNavIcons();
