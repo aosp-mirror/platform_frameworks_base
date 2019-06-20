@@ -37,8 +37,10 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,7 +53,8 @@ import kotlin.math.max
 class PulseExpansionHandler @Inject
 constructor(context: Context,
             private val wakeUpCoordinator: NotificationWakeUpCoordinator,
-            private val bypassController: KeyguardBypassController) : Gefingerpoken {
+            private val bypassController: KeyguardBypassController,
+            private val headsUpManager: HeadsUpManagerPhone) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
@@ -67,9 +70,12 @@ constructor(context: Context,
             val changed = field != value
             field = value
             bypassController.isPulseExpanding = value
-            if (changed && !value && !leavingLockscreen) {
-                bypassController.maybePerformPendingUnlock()
-                pulseExpandAbortListener?.run()
+            if (changed) {
+                headsUpManager.unpinAll(true /* userUnPinned */)
+                if (!value && !leavingLockscreen) {
+                    bypassController.maybePerformPendingUnlock()
+                    pulseExpandAbortListener?.run()
+                }
             }
         }
     var leavingLockscreen: Boolean = false

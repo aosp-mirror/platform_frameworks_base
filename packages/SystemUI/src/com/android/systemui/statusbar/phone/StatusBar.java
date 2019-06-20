@@ -1537,10 +1537,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                 });
             }
         } else {
-            if (!mNotificationPanel.isFullyCollapsed() || mNotificationPanel.isTracking()) {
+            boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
+                    && mState == StatusBarState.KEYGUARD;
+            if (!mNotificationPanel.isFullyCollapsed() || mNotificationPanel.isTracking()
+                    || bypassKeyguard) {
                 // We are currently tracking or is open and the shade doesn't need to be kept
                 // open artificially.
                 mStatusBarWindowController.setHeadsUpShowing(false);
+                if (bypassKeyguard) {
+                    mStatusBarWindowController.setForceStatusBarVisible(false);
+                }
             } else {
                 // we need to keep the panel open artificially, let's wait until the animation
                 // is finished.
@@ -1554,15 +1560,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 });
             }
         }
-    }
-
-    @Override
-    public void onHeadsUpPinned(NotificationEntry entry) {
-        dismissVolumeDialog();
-    }
-
-    @Override
-    public void onHeadsUpUnPinned(NotificationEntry entry) {
     }
 
     @Override

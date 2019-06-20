@@ -356,6 +356,7 @@ public class NotificationPanelView extends PanelView implements
     private Runnable mOnReinflationListener;
     private int mDarkIconSize;
     private int mHeadsUpInset;
+    private boolean mHeadsUpPinnedMode;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -2029,7 +2030,8 @@ public class NotificationPanelView extends PanelView implements
                 !mHeadsUpManager.hasPinnedHeadsUp()) {
             alpha = getFadeoutAlpha();
         }
-        if (mBarState == StatusBarState.KEYGUARD && !mHintAnimationRunning) {
+        if (mBarState == StatusBarState.KEYGUARD && !mHintAnimationRunning
+                && !mKeyguardBypassController.getBypassEnabled()) {
             alpha *= mClockPositionResult.clockAlpha;
         }
         mNotificationStackScroller.setAlpha(alpha);
@@ -2750,16 +2752,26 @@ public class NotificationPanelView extends PanelView implements
                     mHeadsUpExistenceChangedRunnable);
         }
         updateGestureExclusionRect();
+        mHeadsUpPinnedMode = inPinnedMode;
+        updateHeadsUpVisibility();
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         mHeadsUpAnimatingAway = headsUpAnimatingAway;
         mNotificationStackScroller.setHeadsUpAnimatingAway(headsUpAnimatingAway);
+        updateHeadsUpVisibility();
+    }
+
+    private void updateHeadsUpVisibility() {
+        ((PhoneStatusBarView) mBar).setHeadsUpVisible(mHeadsUpAnimatingAway || mHeadsUpPinnedMode);
     }
 
     @Override
     public void onHeadsUpPinned(NotificationEntry entry) {
-        mNotificationStackScroller.generateHeadsUpAnimation(entry.getHeadsUpAnimationView(), true);
+        if (!isOnKeyguard()) {
+            mNotificationStackScroller.generateHeadsUpAnimation(entry.getHeadsUpAnimationView(),
+                    true);
+        }
     }
 
     @Override
@@ -2768,7 +2780,7 @@ public class NotificationPanelView extends PanelView implements
         // When we're unpinning the notification via active edge they remain heads-upped,
         // we need to make sure that an animation happens in this case, otherwise the notification
         // will stick to the top without any interaction.
-        if (isFullyCollapsed() && entry.isRowHeadsUp()) {
+        if (isFullyCollapsed() && entry.isRowHeadsUp() && !isOnKeyguard()) {
             mNotificationStackScroller.generateHeadsUpAnimation(
                     entry.getHeadsUpAnimationView(), false);
             entry.setHeadsUpIsVisible();
@@ -2891,7 +2903,8 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isPanelVisibleBecauseOfHeadsUp() {
-        return mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway;
+        return (mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway)
+                && mBarState == StatusBarState.SHADE;
     }
 
     @Override
