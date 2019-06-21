@@ -60,7 +60,8 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
     };
 
-    BrightLineFalsingManager(FalsingDataProvider falsingDataProvider, SensorManager sensorManager) {
+    public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
+            SensorManager sensorManager) {
         mDataProvider = falsingDataProvider;
         mSensorManager = sensorManager;
         mClassifiers = new ArrayList<>();
