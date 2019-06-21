@@ -228,6 +228,8 @@ class OnThreadLockChecker implements LockHook.LockChecker {
         AnnotatedStackTraceElement[] mStack;
         OrderData mOppositeData;
 
+        private static final int STACK_OFFSET = 4;
+
         Violation(Thread self, Object alreadyHeld, Object lock,
                 AnnotatedStackTraceElement[] stack, OrderData oppositeData) {
             this.mSelfTid = (int) self.getId();
@@ -284,6 +286,26 @@ class OnThreadLockChecker implements LockHook.LockChecker {
                     lock.getClass().getName());
         }
 
+        // Synthesize an exception.
+        public Throwable getException() {
+            RuntimeException inner = new RuntimeException("Previously locked");
+            inner.setStackTrace(synthesizeStackTrace(mOppositeData.mStack));
+
+            RuntimeException outer = new RuntimeException(toString(), inner);
+            outer.setStackTrace(synthesizeStackTrace(mStack));
+
+            return outer;
+        }
+
+        private StackTraceElement[] synthesizeStackTrace(AnnotatedStackTraceElement[] stack) {
+
+            StackTraceElement[] out = new StackTraceElement[stack.length - STACK_OFFSET];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = stack[i + STACK_OFFSET].getStackTraceElement();
+            }
+            return out;
+        }
+
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("Lock inversion detected!\n");
@@ -294,7 +316,7 @@ class OnThreadLockChecker implements LockHook.LockChecker {
             sb.append(" on thread ").append(mOppositeData.mTid).append(" (")
                     .append(mOppositeData.mThreadName).append(")");
             sb.append(" at:\n");
-            sb.append(getAnnotatedStackString(mOppositeData.mStack, 4,
+            sb.append(getAnnotatedStackString(mOppositeData.mStack, STACK_OFFSET,
                     describeLocking(mAlreadyHeld, "will lock"), getTo(mOppositeData.mStack, mLock)
                     + 1, "    | "));
             sb.append("  Locking ");
@@ -303,7 +325,8 @@ class OnThreadLockChecker implements LockHook.LockChecker {
             sb.append(describeLock(mLock));
             sb.append(" on thread ").append(mSelfTid).append(" (").append(mSelfName).append(")");
             sb.append(" at:\n");
-            sb.append(getAnnotatedStackString(mStack, 4, describeLocking(mLock, "will lock"),
+            sb.append(getAnnotatedStackString(mStack, STACK_OFFSET,
+                    describeLocking(mLock, "will lock"),
                     getTo(mStack, mAlreadyHeld) + 1, "    | "));
 
             return sb.toString();
