@@ -131,8 +131,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ৱাই- ফাই কলিং"</string>
-    <!-- no translation found for wfcSpnFormat_spn_wifi_calling_vo_hyphen (1730997175789582756) -->
-    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> ৱাই-ফাই কলিং"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN কল"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN কল"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ৱাই-ফাই"</string>
@@ -577,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"আপোনাৰ মুখখন ঢাকি ৰখা বস্তুবোৰ আঁতৰাওক।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"স্ক্ৰীণৰ একেবাৰে ওপৰৰ কাষত থকা ছেন্সৰটো চাফা কৰক।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ক’লা বাৰডালকে ধৰি আপোনাৰ স্ক্রীণৰ ওপৰৰ অংশ চাফা কৰক"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>
@@ -888,7 +887,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"আনলক ক্ষেত্ৰ বিস্তাৰ কৰক।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"শ্লাইডৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"আৰ্হিৰদ্বাৰা আনলক।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"গৰাকীৰ মুখাৱয়বৰদ্বাৰা আনলক।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"মুখাৱয়বৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"পিনৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"ছিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"ছিম পিইউকে আনলক।"</string>

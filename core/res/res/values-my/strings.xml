@@ -199,7 +199,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"အသံတိတ်စနစ်"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"wirelessအားဖွင့်မည်"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"wirelessအားပိတ်မည်"</string>
-    <string name="screen_lock" msgid="799094655496098153">"ဖုန်းမျက်နှာပြင်အား သော့ချရန်"</string>
+    <string name="screen_lock" msgid="799094655496098153">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
     <string name="power_off" msgid="4266614107412865048">"စက်ပိတ်ပါ"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ဖုန်းမြည်သံပိတ်ထားသည်"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"တုန်ခါခြင်း ဖုန်းမြည်သံ"</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"တီဗွီ ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"ဖုန်းမျက်နှာပြင်အား သော့ချရန်"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ပါဝါပိတ်ရန်"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"အရေးပေါ်"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
@@ -296,7 +296,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များ ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"အသံဖမ်းခြင်း"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား အသံဖမ်းယူခွင့် ပေးလိုပါသလား။"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ကို အသံဖမ်းယူခွင့် ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"ကိုယ်လက်လှုပ်ရှားမှု"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ခွင့် ပေးလိုပါသလား။"</string>
@@ -308,7 +308,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ခေါ်ဆိုထားသော မှတ်တမ်းများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ကို ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"စက်၏ အာရုံခံစနစ်များ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ အရေးကြီးသောလက္ခဏာ အာရုံခံကိရိယာ ဒေတာများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"သင့်မျက်နှာကို ကွယ်နေသည့်အရာအားလုံး ဖယ်ပါ။"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"မျက်နှာပြင်ထိပ်ရှိ အာရုံခံဆင်ဆာကို သန့်ရှင်းပါ။"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"အနက်ရောင်ဘားအပါအဝင် ဖန်သားပြင်ထိပ်ကို သန့်ရှင်းရေး လုပ်ပါ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
@@ -1671,7 +1671,7 @@
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (မျက်နှာပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် အများသုံးစွဲနိုင်မှုခလုတ်ကို ဖိထားပါ။"</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချေင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="3768006783166984410">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>

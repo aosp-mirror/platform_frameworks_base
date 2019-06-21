@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Tournez un peu moins la tête."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Tournez un peu moins la tête."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Retirez tout ce qui cache votre visage."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Nettoyez le capteur en haut de l\'écran."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. valider visage. Matériel non disponible."</string>
@@ -1667,7 +1667,7 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Appuyez de manière prolongée sur les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Choisissez un service à utiliser lorsque vous appuyez sur le bouton Accessibilité :"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choisissez un service à utiliser avec le geste d\'accessibilité (balayez l\'écran de bas en haut avec deux doigts) :"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser avec le geste d\'accessibilité (balayez l\'écran de bas en haut avec trois doigts) :"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser avec le geste d\'accessibilité (balayer l\'écran de bas en haut avec trois doigts) :"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pour changer de service, appuyez de manière prolongée sur le bouton Accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour changer de service, balayez l\'écran vers le haut avec deux doigts et appuyez de manière prolongée."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pour changer de service, balayez l\'écran vers le haut avec trois doigts et appuyez de manière prolongée."</string>
@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Rechercher une mise à jour"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ouvrir l\'application de SMS pour afficher le message"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Fonctionnalités peuvent être limitées"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Des fonctions peuvent être limitées"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil professionnel verrouillé"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Appuyez pour déverrouiller profil pro"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connecté à <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"तपाईंको अनुहार लुकाउने सबै कुरा लुकाउनुहोस्।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"स्क्रिनको शीर्ष कुनामा रहेको सेन्सर सफा गर्नुहोस्।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"कालो रङको पट्टीलगायत आफ्नो स्क्रिनको माथिल्लो भाग सफा गर्नुहोस्"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>

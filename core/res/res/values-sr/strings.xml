@@ -269,7 +269,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB веза"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Апликација је покренута"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Активна апликација"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Апликације које троше батерију"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи батерију"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Апликације (<xliff:g id="NUMBER">%1$d</xliff:g>) користе батерију"</string>
@@ -579,7 +579,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Мало мање померите главу."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Мало мање померите главу."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Уклоните све што вам заклања лице."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Очистите сензор на горњој ивици екрана."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Очистите горњи део екрана, укључујући црну траку"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Провера лица није успела. Хардвер није доступан."</string>
