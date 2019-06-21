@@ -18,7 +18,6 @@
 #include <SkPaintFilterCanvas.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
-#include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
 
 #include <optional>
