@@ -266,7 +266,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ਕਨੈਕਸ਼ਨ"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"ਐਪ ਚੱਲ ਰਹੀ ਹੈ"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"ਚੱਲ ਰਹੀ ਐਪ"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ਬੈਟਰੀ ਦੀ ਖਪਤ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ਐਪਾਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ"</string>
@@ -576,7 +576,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਲੁਕਾਉਣ ਵਾਲੀ ਕੋਈ ਵੀ ਚੀਜ਼ ਹਟਾਓ।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰਲੇ ਕਿਨਾਰੇ ਦਾ ਸੈਂਸਰ ਸਾਫ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ਕਾਲੀ ਪੱਟੀ ਸਮੇਤ, ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
@@ -1668,7 +1668,7 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਟੈਪ ਕਰਕੇ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
