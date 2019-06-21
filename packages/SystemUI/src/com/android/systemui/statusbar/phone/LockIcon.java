@@ -143,6 +143,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                 public void onStrongAuthStateChanged(int userId) {
                     update();
                 }
+
+                @Override
+                public void onBiometricsCleared() {
+                    update();
+                }
     };
 
     @Inject
