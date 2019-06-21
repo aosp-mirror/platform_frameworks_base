@@ -644,6 +644,16 @@ import java.util.concurrent.locks.ReentrantLock;
  <p>
  Also since {@link android.os.Build.VERSION_CODES#M}, you can change the output Surface
  dynamically using {@link #setOutputSurface setOutputSurface}.
+ <p>
+ When rendering output to a Surface, the Surface may be configured to drop excessive frames (that
+ are not consumed by the Surface in a timely manner). Or it may be configured to not drop excessive
+ frames. In the latter mode if the Surface is not consuming output frames fast enough, it will
+ eventually block the decoder. Prior to {@link android.os.Build.VERSION_CODES#Q} the exact behavior
+ was undefined, with the exception that View surfaces (SuerfaceView or TextureView) always dropped
+ excessive frames. Since {@link android.os.Build.VERSION_CODES#Q} the default behavior is to drop
+ excessive frames. Applications can opt out of this behavior for non-View surfaces (such as
+ ImageReader or SurfaceTexture) by targeting SDK {@link android.os.Build.VERSION_CODES#Q} and
+ setting the key {@code "allow-frame-drop"} to {@code 0} in their configure format.
 
  <h4>Transformations When Rendering onto Surface</h4>
 
