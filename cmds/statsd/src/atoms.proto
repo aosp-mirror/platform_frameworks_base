@@ -317,6 +317,8 @@ message Atom {
             216 [(log_from_module) = "permissioncontroller"];
         AppPermissionsFragmentViewed app_permissions_fragment_viewed =
             217 [(log_from_module) = "permissioncontroller"];
+        PermissionAppsFragmentViewed permission_apps_fragment_viewed =
+            218  [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6742,6 +6744,37 @@ message AppPermissionsFragmentViewed {
       ALLOWED = 1;
       ALLOWED_FOREGROUND = 2;
       DENIED = 3;
+    }
+    optional Category category = 6;
+}
+
+/**
+* Information about a PermissionAppsFragment viewed by user.
+* Logged from ui/handheld/PermissionAppsFragment.java
+*/
+message PermissionAppsFragmentViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // id which identifies single view as every view might have several logging records
+    // with different package information attached
+    optional int64 view_id = 2;
+
+    // Permission group viewed
+    optional string permission_group_name = 3;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 4 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 5;
+
+    // Category in which app is included
+    enum Category {
+        UNDEFINED = 0;
+        ALLOWED = 1;
+        ALLOWED_FOREGROUND = 2;
+        DENIED = 3;
     }
     optional Category category = 6;
 }
