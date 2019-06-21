@@ -266,7 +266,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració per a botigues"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexió USB"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"S\'està executant una aplicació"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Aplicació en execució"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplicacions que consumeixen bateria"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> està consumint bateria"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicacions estan consumint bateria"</string>
@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunes funcions poden limitar-se"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunes funcions poden ser limitades"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil professional bloquejat"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca per desbloquejar el perfil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"S\'ha connectat a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
