@@ -237,7 +237,7 @@ public class TrustManagerService extends SystemService {
                         Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
-                                0 /* default */,
+                                1 /* default */,
                                 mCurrentUser) != 0;
             } else if (LOCK_SCREEN_WHEN_TRUST_LOST.equals(uri)) {
                 mLockWhenTrustLost =
