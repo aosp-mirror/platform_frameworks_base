@@ -8703,15 +8703,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceSystemUserOrPermission(permission);
     }
 
-    private void enforceManagedProfile(int userHandle, String message) {
-        if(!isManagedProfile(userHandle)) {
-            throw new SecurityException("You can not " + message + " outside a managed profile.");
+    private void enforceManagedProfile(int userId, String message) {
+        if (!isManagedProfile(userId)) {
+            throw new SecurityException(String.format(
+                    "You can not %s outside a managed profile, userId = %d", message, userId));
         }
     }
 
-    private void enforceNotManagedProfile(int userHandle, String message) {
-        if(isManagedProfile(userHandle)) {
-            throw new SecurityException("You can not " + message + " for a managed profile.");
+    private void enforceNotManagedProfile(int userId, String message) {
+        if (isManagedProfile(userId)) {
+            throw new SecurityException(String.format(
+                    "You can not %s for a managed profile, userId = %d", message, userId));
         }
     }
 
