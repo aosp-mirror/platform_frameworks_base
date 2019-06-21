@@ -69,7 +69,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
@@ -115,7 +115,6 @@ public class PipMenuActivity extends Activity {
     private LinearLayout mActionsGroup;
     private View mSettingsButton;
     private View mDismissButton;
-    private ImageView mExpandButton;
     private int mBetweenActionPaddingLand;
 
     private AnimatorSet mMenuContainerAnimator;
@@ -246,7 +245,6 @@ public class PipMenuActivity extends Activity {
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
-        mExpandButton = findViewById(R.id.expand_button);
 
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
@@ -482,7 +480,7 @@ public class PipMenuActivity extends Activity {
                 // Ensure we have as many buttons as actions
                 final LayoutInflater inflater = LayoutInflater.from(this);
                 while (mActionsGroup.getChildCount() < mActions.size()) {
-                    final ImageView actionView = (ImageView) inflater.inflate(
+                    final ImageButton actionView = (ImageButton) inflater.inflate(
                             R.layout.pip_menu_action, mActionsGroup, false);
                     mActionsGroup.addView(actionView);
                 }
@@ -499,7 +497,7 @@ public class PipMenuActivity extends Activity {
                         (stackBounds.width() > stackBounds.height());
                 for (int i = 0; i < mActions.size(); i++) {
                     final RemoteAction action = mActions.get(i);
-                    final ImageView actionView = (ImageView) mActionsGroup.getChildAt(i);
+                    final ImageButton actionView = (ImageButton) mActionsGroup.getChildAt(i);
 
                     // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(this, d -> {
