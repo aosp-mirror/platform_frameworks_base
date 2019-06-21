@@ -581,7 +581,7 @@
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ликот не може да се потврди. Хардвер - недостапен."</string>
     <string name="face_error_timeout" msgid="981512090365729465">"Пробајте „Отклучување со лик“ повторно."</string>
-    <string name="face_error_no_space" msgid="2712120617457553825">"Не зачувува податоци за нов лик. Прво избришете стар."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"Не се зачуваа податоците за нов лик. Избришете го стариот."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Операцијата со лице се откажа."</string>
     <string name="face_error_user_canceled" msgid="5317030072349668946">"„Отклучувањето со лик“ е откажано од корисникот."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Премногу обиди. Обидете се повторно подоцна."</string>

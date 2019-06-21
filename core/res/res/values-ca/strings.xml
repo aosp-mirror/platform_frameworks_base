@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunes funcions poden limitar-se"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunes funcions poden ser limitades"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil professional bloquejat"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca per desbloquejar el perfil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"S\'ha connectat a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
