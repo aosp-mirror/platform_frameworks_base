@@ -234,17 +234,8 @@ package android.graphics.drawable {
 
 package android.hardware {
 
-  public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
-    method @Deprecated public void destroy();
-    method @Deprecated public boolean isDestroyed();
-  }
-
   public final class SensorDirectChannel implements java.nio.channels.Channel {
     method @Deprecated public boolean isValid();
-  }
-
-  public abstract class SensorManager {
-    method @Deprecated public int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
   }
 
 }
