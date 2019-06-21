@@ -615,10 +615,11 @@ public class SmsMessage extends SmsMessageBase {
                         }
                         addr.origBytes = data;
                         Rlog.pii(LOG_TAG, "Addr=" + addr.toString());
-                        mOriginatingAddress = addr;
-                        if (parameterId == DESTINATION_ADDRESS) {
-                            // Original address awlays indicates one sender's address for 3GPP2
-                            // Here add recipient address support along with 3GPP
+                        if (parameterId == ORIGINATING_ADDRESS) {
+                            env.origAddress = addr;
+                            mOriginatingAddress = addr;
+                        } else {
+                            env.destAddress = addr;
                             mRecipientAddress = addr;
                         }
                         break;
@@ -636,6 +637,11 @@ public class SmsMessage extends SmsMessageBase {
                             subdata[index] = convertDtmfToAscii(b);
                         }
                         subAddr.origBytes = subdata;
+                        if (parameterId == ORIGINATING_SUB_ADDRESS) {
+                            env.origSubaddress = subAddr;
+                        } else {
+                            env.destSubaddress = subAddr;
+                        }
                         break;
                     case BEARER_REPLY_OPTION:
                         dis.read(parameterData, 0, parameterLen);
@@ -665,9 +671,6 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         // link the filled objects to this SMS
-        mOriginatingAddress = addr;
-        env.origAddress = addr;
-        env.origSubaddress = subAddr;
         mEnvelope = env;
         mPdu = pdu;
 
@@ -706,12 +709,12 @@ public class SmsMessage extends SmsMessageBase {
 
         if (mOriginatingAddress != null) {
             decodeSmsDisplayAddress(mOriginatingAddress);
-            if (VDBG) Rlog.v(LOG_TAG, "SMS originating address: "
-                    + mOriginatingAddress.address);
+            if (VDBG) Rlog.v(LOG_TAG, "SMS originating address: " + mOriginatingAddress.address);
         }
 
         if (mRecipientAddress != null) {
             decodeSmsDisplayAddress(mRecipientAddress);
+            if (VDBG) Rlog.v(LOG_TAG, "SMS destination address: " + mRecipientAddress.address);
         }
 
         if (mBearerData.msgCenterTimeStamp != null) {
