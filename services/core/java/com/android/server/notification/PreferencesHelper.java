@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -686,6 +687,11 @@ public class PreferencesHelper implements RankingConfig {
                     }
                 }
 
+                if (existing.getOriginalImportance() == IMPORTANCE_UNSPECIFIED) {
+                    existing.setOriginalImportance(channel.getImportance());
+                    needsPolicyFileChange = true;
+                }
+
                 updateConfig();
                 return needsPolicyFileChange;
             }
@@ -719,7 +725,7 @@ public class PreferencesHelper implements RankingConfig {
             if (!r.showBadge) {
                 channel.setShowBadge(false);
             }
-
+            channel.setOriginalImportance(channel.getImportance());
             r.channels.put(channel.getId(), channel);
             if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
                 updateChannelsBypassingDnd(mContext.getUserId());
