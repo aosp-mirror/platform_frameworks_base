@@ -19,6 +19,8 @@
 #include <memory>
 #include <sstream>
 
+#include <unistd.h>
+
 #include <jni.h>
 
 #include <jvmti.h>
@@ -26,10 +28,14 @@
 #include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/macros.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+
+#include <nativehelper/scoped_utf_chars.h>
 
 // We need dladdr.
 #if !defined(__APPLE__) && !defined(_WIN32)
@@ -61,6 +67,8 @@
 namespace {
 
 JavaVM* gJavaVM = nullptr;
+bool gForkCrash = false;
+bool gJavaCrash = false;
 
 // Converts a class name to a type descriptor
 // (ex. "java.lang.String" to "Ljava/lang/String;")
@@ -372,7 +380,7 @@ void prepareHook(jvmtiEnv* env) {
     }
 }
 
-jint attach(JavaVM* vm, char* options ATTRIBUTE_UNUSED, void* reserved ATTRIBUTE_UNUSED) {
+jint attach(JavaVM* vm, char* options, void* reserved ATTRIBUTE_UNUSED) {
     gJavaVM = vm;
 
     jvmtiEnv* env;
@@ -383,7 +391,64 @@ jint attach(JavaVM* vm, char* options ATTRIBUTE_UNUSED, void* reserved ATTRIBUTE
 
     prepareHook(env);
 
+    std::vector<std::string> config = android::base::Split(options, ",");
+    for (const std::string& c : config) {
+        if (c == "native_crash") {
+            gForkCrash = true;
+        } else if (c == "java_crash") {
+            gJavaCrash = true;
+        }
+    }
+
     return JVMTI_ERROR_NONE;
+}
+
+extern "C" JNIEXPORT
+jboolean JNICALL Java_com_android_lock_1checker_LockHook_getNativeHandlingConfig(JNIEnv*, jclass) {
+    return gForkCrash ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_android_lock_1checker_LockHook_getSimulateCrashConfig(JNIEnv*, jclass) {
+    return gJavaCrash ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_android_lock_1checker_LockHook_nWtf(JNIEnv* env, jclass,
+        jstring msg) {
+    if (!gForkCrash || msg == nullptr) {
+        return;
+    }
+
+    // Create a native crash with the given message. Decouple from the current crash to create a
+    // tombstone but continue on.
+    //
+    // TODO: Once there are not so many reports, consider making this fatal for the calling process.
+    ScopedUtfChars utf(env, msg);
+    if (utf.c_str() == nullptr) {
+        return;
+    }
+    const char* args[] = {
+        "/system/bin/lockagent_crasher",
+        utf.c_str(),
+        nullptr
+    };
+    pid_t pid = fork();
+    if (pid < 0) {
+        return;
+    }
+    if (pid == 0) {
+        // Double fork so we return quickly. Leave init to deal with the zombie.
+        pid_t pid2 = fork();
+        if (pid2 == 0) {
+            execv(args[0], const_cast<char* const*>(args));
+            _exit(1);
+            __builtin_unreachable();
+        }
+        _exit(0);
+        __builtin_unreachable();
+    }
+    int status;
+    waitpid(pid, &status, 0);  // Ignore any results.
 }
 
 extern "C" JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM* vm, char* options, void* reserved) {
