@@ -17,6 +17,7 @@
 package com.android.server.incident;
 
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -358,10 +359,12 @@ class PendingReports {
     private void sendBroadcast(ComponentName receiver, int primaryUser) {
         final Intent intent = new Intent(Intent.ACTION_PENDING_INCIDENT_REPORTS_CHANGED);
         intent.setComponent(receiver);
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setBackgroundActivityStartsAllowed(true);
 
         // Send it to the primary user.
         mContext.sendBroadcastAsUser(intent, UserHandle.getUserHandleForUid(primaryUser),
-                android.Manifest.permission.APPROVE_INCIDENT_REPORTS);
+                android.Manifest.permission.APPROVE_INCIDENT_REPORTS, options.toBundle());
     }
 
     /**
