@@ -48,19 +48,6 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
     private final StatusBarStateController mStatusBarStateController;
     private final NotificationMediaManager mMediaManager;
-    @VisibleForTesting
-    final NotificationListener.NotificationSettingsListener mSettingsListener =
-            new NotificationListener.NotificationSettingsListener() {
-                @Override
-                public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
-                    if (NotificationUtils.useNewInterruptionModel(mContext)) {
-                        mShowLowPriority = !hideSilentStatusIcons;
-                        if (mNotificationScrollLayout != null) {
-                            updateStatusBarIcons();
-                        }
-                    }
-                }
-            };
 
     private int mIconSize;
     private int mIconHPadding;
@@ -78,7 +65,6 @@ public class NotificationIconAreaController implements DarkReceiver,
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
     private boolean mFullyDark;
-    private boolean mShowLowPriority = true;
     private boolean mAnimationsEnabled;
 
     /**
@@ -88,7 +74,6 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     public NotificationIconAreaController(Context context, StatusBar statusBar,
             StatusBarStateController statusBarStateController,
-            NotificationListener notificationListener,
             NotificationMediaManager notificationMediaManager) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
@@ -97,7 +82,6 @@ public class NotificationIconAreaController implements DarkReceiver,
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
-        notificationListener.addNotificationSettingsListener(mSettingsListener);
 
         initializeNotificationAreaViews(context);
     }
@@ -258,7 +242,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
                 true /* showAmbient */,
-                !mFullyDark /* showLowPriority */,
+                true /* showLowPriority */,
                 false /* hideDismissed */,
                 mFullyDark /* hideRepliedMessages */,
                 mFullyDark /* hideCurrentMedia */,
@@ -268,7 +252,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
                 false /* showAmbient */,
-                mShowLowPriority /* showLowPriority */,
+                true /* showLowPriority */,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
@@ -278,7 +262,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private void updateCenterIcon() {
         updateIconsForLayout(entry -> entry.centeredIcon, mCenteredIcon,
                 false /* showAmbient */,
-                !mFullyDark /* showLowPriority */,
+                true /* showLowPriority */,
                 false /* hideDismissed */,
                 false /* hideRepliedMessages */,
                 mFullyDark /* hideCurrentMedia */,
@@ -302,11 +286,6 @@ public class NotificationIconAreaController implements DarkReceiver,
         boolean inShade = mStatusBarStateController.getState() == StatusBarState.SHADE;
         mCenteredIcon.setAnimationsEnabled(mAnimationsEnabled && inShade);
         mNotificationIcons.setAnimationsEnabled(mAnimationsEnabled && inShade);
-    }
-
-    @VisibleForTesting
-    boolean shouldShouldLowPriorityIcons() {
-        return mShowLowPriority;
     }
 
     /**
