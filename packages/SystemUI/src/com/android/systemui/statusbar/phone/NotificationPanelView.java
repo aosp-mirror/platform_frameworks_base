@@ -56,6 +56,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -154,6 +155,7 @@ public class NotificationPanelView extends PanelView implements
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final KeyguardUpdateMonitor mUpdateMonitor;
 
     @VisibleForTesting
     protected KeyguardAffordanceHelper mAffordanceHelper;
@@ -382,6 +384,7 @@ public class NotificationPanelView extends PanelView implements
         });
         mThemeResId = context.getThemeResId();
         mKeyguardBypassController = bypassController;
+        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         dynamicPrivacyController.addListener(this);
 
         mBottomAreaShadeAlphaAnimator = ValueAnimator.ofFloat(1f, 0);
@@ -2423,6 +2426,7 @@ public class NotificationPanelView extends PanelView implements
             onUnlockHintFinished();
             return;
         }
+        mUpdateMonitor.requestFaceAuth();
         super.startUnlockHintAnimation();
     }
 
