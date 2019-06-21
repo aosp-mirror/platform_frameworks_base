@@ -311,6 +311,8 @@ message Atom {
             213 [(log_from_module) = "permissioncontroller"];
         LocationAccessCheckNotificationAction location_access_check_notification_action =
             214 [(log_from_module) = "permissioncontroller"];
+        AppPermissionFragmentActionReported app_permission_fragment_action_reported =
+            215 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6636,4 +6638,28 @@ message LocationAccessCheckNotificationAction {
 
     // View / interaction recorded
     optional Result result = 4;
+}
+
+/**
+ * Information about a permission grant or revoke made by user inside AppPermissionFragment
+ */
+message AppPermissionFragmentActionReported {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // unique value identifying a permission group change. A permission group change might result
+    // in multiple of these atoms
+    optional int64 change_id = 2;
+
+    // UID of package the permission belongs to
+    optional int32 uid = 3 [(is_uid) = true];
+
+    // Name of package the permission belongs to
+    optional string package_name = 4;
+
+    // The permission to be granted
+    optional string permission_name = 5;
+
+    // The result of the permission grant
+    optional bool permission_granted = 6;
 }
