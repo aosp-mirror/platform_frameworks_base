@@ -51,6 +51,7 @@ namespace android {
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
+extern int register_android_content_XmlBlock(JNIEnv* env);
 extern int register_android_content_res_ApkAssets(JNIEnv* env);
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
@@ -73,6 +74,7 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
+extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
@@ -91,6 +93,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
     {"android.content.AssetManager", REG_JNI(register_android_content_AssetManager)},
     {"android.content.StringBlock", REG_JNI(register_android_content_StringBlock)},
+    {"android.content.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
     {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
     {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
     {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
@@ -126,6 +129,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
     {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
     {"android.os.Trace", REG_JNI(register_android_os_Trace)},
+    {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
     {"android.util.Log", REG_JNI(register_android_util_Log)},
     {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
     {"com.android.internal.util.VirtualRefBasePtr", REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
