@@ -83,6 +83,7 @@ public class AmbientState {
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
     private HeadsUpManager mHeadUpManager;
+    private Runnable mOnPulseHeightChangedListener;
 
     public AmbientState(
             Context context,
@@ -191,7 +192,7 @@ public class AmbientState {
     public void setHideAmount(float hidemount) {
         if (hidemount == 1.0f && mHideAmount != hidemount) {
             // Whenever we are fully hidden, let's reset the pulseHeight again
-            mPulseHeight = MAX_PULSE_HEIGHT;
+            setPulseHeight(MAX_PULSE_HEIGHT);
         }
         mHideAmount = hidemount;
     }
@@ -502,7 +503,20 @@ public class AmbientState {
     }
 
     public void setPulseHeight(float height) {
-        mPulseHeight = height;
+        if (height != mPulseHeight) {
+            mPulseHeight = height;
+            if (mOnPulseHeightChangedListener != null) {
+                mOnPulseHeightChangedListener.run();
+            }
+        }
+    }
+
+    public float getPulseHeight() {
+        if (mPulseHeight == MAX_PULSE_HEIGHT) {
+            // If we're not pulse expanding, the height should be 0
+            return 0;
+        }
+        return mPulseHeight;
     }
 
     public void setDozeAmount(float dozeAmount) {
@@ -510,7 +524,7 @@ public class AmbientState {
             mDozeAmount = dozeAmount;
             if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
                 // We woke all the way up, let's reset the pulse height
-                mPulseHeight = MAX_PULSE_HEIGHT;
+                setPulseHeight(MAX_PULSE_HEIGHT);
             }
         }
     }
@@ -521,5 +535,13 @@ public class AmbientState {
      */
     public boolean isFullyAwake() {
         return mDozeAmount == 0.0f;
+    }
+
+    public void setOnPulseHeightChangedListener(Runnable onPulseHeightChangedListener) {
+        mOnPulseHeightChangedListener = onPulseHeightChangedListener;
+    }
+
+    public Runnable getOnPulseHeightChangedListener() {
+        return mOnPulseHeightChangedListener;
     }
 }

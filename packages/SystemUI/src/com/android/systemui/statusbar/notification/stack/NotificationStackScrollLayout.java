@@ -630,7 +630,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     /**
      * @return the height at which we will wake up when pulsing
      */
-    public float getPulseHeight() {
+    public float getWakeUpHeight() {
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         if (firstChild != null) {
             return firstChild.getCollapsedHeight();
@@ -984,6 +984,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(view, needsAnimation);
         }
+    }
+
+    public boolean isPulseExpanding() {
+        return mAmbientState.isPulseExpanding();
     }
 
     @Override
@@ -2782,7 +2786,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         } else {
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(topPadding, animate);
+        setTopPadding(topPadding, animate && !mKeyguardBypassController.getBypassEnabled());
         setExpandedHeight(mExpandedHeight);
     }
 
@@ -3276,7 +3280,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
-        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress) {
+        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
             if (fromMoreCard) {
@@ -3284,7 +3288,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             mNeedsAnimation = true;
         }
-        if (isHeadsUp(child) && mAnimationsEnabled && !mChangePositionInProgress) {
+        if (isHeadsUp(child) && mAnimationsEnabled && !mChangePositionInProgress
+                && !isFullyHidden()) {
             mAddedHeadsUpChildren.add(child);
             mChildrenToAddAnimated.remove(child);
         }
@@ -5585,6 +5590,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return Math.max(0, height - mAmbientState.getInnerHeight(true /* ignorePulseHeight */));
     }
 
+    public float getPulseHeight() {
+        return mAmbientState.getPulseHeight();
+    }
+
     /**
      * Set the amount how much we're dozing. This is different from how hidden the shade is, when
      * the notification is pulsing.
@@ -5596,7 +5605,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     public void wakeUpFromPulse() {
-        setPulseHeight(getPulseHeight());
+        setPulseHeight(getWakeUpHeight());
         // Let's place the hidden views at the end of the pulsing notification to make sure we have
         // a smooth animation
         boolean firstVisibleView = true;
@@ -5630,6 +5639,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             // The bottom might change because we're using the final actual height of the view
             mAnimateBottomOnLayout = true;
         }
+    }
+
+    public void setOnPulseHeightChangedListener(Runnable listener) {
+        mAmbientState.setOnPulseHeightChangedListener(listener);
     }
 
     /**

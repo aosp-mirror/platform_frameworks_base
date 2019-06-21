@@ -222,8 +222,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
             mClockPlugin = null;
         }
         if (plugin == null) {
-            mClockView.setVisibility(View.VISIBLE);
-            mClockViewBold.setVisibility(View.INVISIBLE);
+            if (mShowingHeader) {
+                mClockView.setVisibility(View.GONE);
+                mClockViewBold.setVisibility(View.VISIBLE);
+            } else {
+                mClockView.setVisibility(View.VISIBLE);
+                mClockViewBold.setVisibility(View.INVISIBLE);
+            }
             mKeyguardStatusArea.setVisibility(View.VISIBLE);
             return;
         }
@@ -401,10 +406,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * these cases.
      */
     void setKeyguardShowingHeader(boolean hasHeader) {
-        if (mShowingHeader == hasHeader || hasCustomClock()) {
+        if (mShowingHeader == hasHeader) {
             return;
         }
         mShowingHeader = hasHeader;
+        if (hasCustomClock()) {
+            return;
+        }
 
         float smallFontSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.widget_small_font_size);

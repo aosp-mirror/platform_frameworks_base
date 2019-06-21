@@ -344,7 +344,6 @@ package android.os {
   public final class SystemClock {
     method @NonNull public static java.time.Clock elapsedRealtimeClock();
     method @NonNull public static java.time.Clock uptimeClock();
-    method @Deprecated @NonNull public static java.time.Clock uptimeMillisClock();
   }
 
   public class TestLooperManager {

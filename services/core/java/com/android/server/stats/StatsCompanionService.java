@@ -1989,10 +1989,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
                         e.writeString(pkg.packageName);
-                        e.writeInt(permissionFlags);
-
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
+                        e.writeInt(permissionFlags);
 
                         pulledData.add(e);
                     }
