@@ -6321,13 +6321,15 @@ public final class Settings {
                 "lock_screen_allow_remote_input";
 
         /**
-         * Indicates which clock face to show on lock screen and AOD.
+         * Indicates which clock face to show on lock screen and AOD formatted as a serialized
+         * {@link org.json.JSONObject} with the format:
+         *     {"clock": id, "_applied_timestamp": timestamp}
          * @hide
          */
         public static final String LOCK_SCREEN_CUSTOM_CLOCK_FACE = "lock_screen_custom_clock_face";
 
         private static final Validator LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR =
-                ANY_STRING_VALIDATOR;
+                SettingsValidators.JSON_OBJECT_VALIDATOR;
 
         /**
          * Indicates which clock face to show on lock screen and AOD while docked.
