@@ -309,6 +309,8 @@ message Atom {
             212 [(log_from_module) = "permissioncontroller"];
         GrantPermissionsActivityButtonActions grant_permissions_activity_button_actions =
             213 [(log_from_module) = "permissioncontroller"];
+        LocationAccessCheckNotificationAction location_access_check_notification_action =
+            214 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6635,4 +6637,32 @@ message GrantPermissionsActivityButtonActions {
 
     // Button clicked by user - same as bit flags in buttons_presented with only single bit set
     optional int32 button_clicked = 5;
+}
+
+/**
+ * Information about LocationAccessCheck notification presented to user
+ */
+message LocationAccessCheckNotificationAction {
+
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // Uid of package for which location access check is presented
+    optional int32 package_uid = 2;
+
+    // Name of package for which location access check is presented
+    optional string package_name = 3;
+
+    enum Result {
+        UNDEFINED = 0;
+        // notification was presented to the user
+        NOTIFICATION_PRESENTED = 1;
+        // notification was declined by the user
+        NOTIFICATION_DECLINED = 2;
+        // notification was clicked by the user
+        NOTIFICATION_CLICKED = 3;
+    }
+
+    // View / interaction recorded
+    optional Result result = 4;
 }
