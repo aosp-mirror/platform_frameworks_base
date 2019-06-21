@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
+import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,6 +86,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
 
+    // Used to help track down re-entrant calls to our update methods, which will cause bugs.
+    private boolean mPerformingUpdate;
+
     @Inject
     public NotificationViewHierarchyManager(Context context,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -123,6 +126,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      */
     //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
+        Assert.isMainThread();
+        beginUpdate();
+
         ArrayList<NotificationEntry> activeNotifications = mEntryManager.getNotificationData()
                 .getActiveNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
@@ -248,9 +254,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         // clear the map again for the next usage
         mTmpChildOrderMap.clear();
 
-        updateRowStates();
+        updateRowStatesInternal();
 
         mListContainer.onNotificationViewUpdateFinished();
+
+        endUpdate();
     }
 
     private void addNotificationChildrenAndSort() {
@@ -334,6 +342,13 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      * Updates expanded, dimmed and locked states of notification rows.
      */
     public void updateRowStates() {
+        Assert.isMainThread();
+        beginUpdate();
+        updateRowStatesInternal();
+        endUpdate();
+    }
+
+    private void updateRowStatesInternal() {
         Trace.beginSection("NotificationViewHierarchyManager#updateRowStates");
         final int N = mListContainer.getContainerChildCount();
 
@@ -424,5 +439,19 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     @Override
     public void onDynamicPrivacyChanged() {
         updateNotificationViews();
+    }
+
+    private void beginUpdate() {
+        if (mPerformingUpdate) {
+            throw new IllegalStateException("Re-entrant code during update.");
+        }
+        mPerformingUpdate = true;
+    }
+
+    private void endUpdate() {
+        if (!mPerformingUpdate) {
+            throw new IllegalStateException("Manager state has become desynced.");
+        }
+        mPerformingUpdate = false;
     }
 }
