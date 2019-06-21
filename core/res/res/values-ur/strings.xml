@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"اپنا سر تھوڑا کم کریں۔"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"اپنا سر تھوڑا کم کریں۔"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"آپ کے چہرہ کو چھپانے والی ہر چیز کو ہٹائیں۔"</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"سیاہ بار سمیت، اپنی اسکرین کے اوپری حصے کو صاف کریں"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
@@ -1672,8 +1671,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (دو انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (تین انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"سروسز کے مابین سوئچ کرنے کے لیے، ایکسیسبیلٹی بٹن کو ٹچ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"سروسز کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے سوائپ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"سروسز کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے سوائپ کرکے ہولڈ کریں۔"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"سروسز کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"سروسز کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"میگنیفکیشن"</string>
     <string name="user_switched" msgid="3768006783166984410">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>

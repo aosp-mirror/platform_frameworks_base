@@ -568,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Beweg das Smartphone nach links."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Beweg das Smartphone nach rechts."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Gesicht wurde nicht erkannt. Blicke aufs Telefon."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Gesicht wurde nicht gefunden. Blicke aufs Telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Neig den Kopf etwas weniger stark."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Neig den Kopf etwas weniger stark."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Entferne alles, was dein Gesicht verdeckt."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Reinige den oberen Teil deines Bildschirms, einschließlich der schwarzen Leiste"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -941,7 +940,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Ermöglicht der App, den Browserverlauf und die Lesezeichen auf deinem Fernseher zu bearbeiten. Damit kann die App Browserdaten löschen und ändern. Hinweis: Diese Berechtigung kann nicht von Browsern von Drittanbietern oder anderen Apps mit Internetfunktionen erzwungen werden."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ermöglicht der App, den Browserverlauf und die Lesezeichen auf deinem Telefon zu ändern. Damit kann die App Browserdaten löschen und ändern. Hinweis: Diese Berechtigung kann nicht von Browsern von Drittanbietern oder anderen Apps mit Internetfunktionen erzwungen werden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"Wecker stellen"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Alarm in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Weckruf in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailboxnachrichten hinzufügen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ermöglicht der App, Nachrichten zu deinem Mailbox-Posteingang hinzuzufügen"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
@@ -1667,9 +1666,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> wurde durch die Bedienungshilfenverknüpfung aktiviert"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> wurde durch die Bedienungshilfenverknüpfung deaktiviert"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Halten Sie beide Lautstärketasten drei Sekunden lang gedrückt, um <xliff:g id="SERVICE_NAME">%1$s</xliff:g> zu verwenden"</string>
-    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Wähle einen Dienst aus, der verwendet wird, wenn du auf die Schaltfläche für die Bedienungshilfen tippst:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wähle einen Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet wird (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wähle einen Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet wird (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Wähle den Dienst aus, der verwendet werden soll, wenn du auf die Schaltfläche für die Bedienungshilfen tippst:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wähle den Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wähle den Dienst aus, der mit der Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Wenn du zwischen den Diensten wechseln möchtest, halte die Schaltfläche für die Bedienungshilfen gedrückt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Wenn du zwischen den Diensten wechseln möchtest, wische mit zwei Fingern nach oben und halte sie gedrückt."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Wenn du zwischen den Diensten wechseln möchtest, wische mit drei Fingern nach oben und halte sie gedrückt."</string>

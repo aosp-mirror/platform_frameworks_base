@@ -568,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mova o telemóvel para a esquerda."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mova o telemóvel para a direita."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Olhe mais diretamente para o dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Não é possível ver o seu rosto. Olhe p/ telemóvel."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Não consigo ver o rosto. Olhe para o telemóvel."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Demasiado movimento. Mantenha o telemóvel firme."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Volte a inscrever o rosto."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Impossível reconhecer o rosto. Tente novamente."</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Rode a cabeça um pouco menos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Rode a cabeça um pouco menos."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Remova tudo o que esteja a ocultar o seu rosto."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Limpe a parte superior do ecrã, incluindo a barra preta."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Não pode validar o rosto. Hardware não disponível."</string>

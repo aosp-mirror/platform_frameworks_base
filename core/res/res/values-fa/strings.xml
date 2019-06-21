@@ -551,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"نماد اثر انگشت"</string>
-    <string name="permlab_manageFace" msgid="7262837876352591553">"‏مدیریت سخت‌افزار face unlock"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
-    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"‏استفاده از سخت‌افزار face unlock"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"‏به برنامه امکان می‌دهد از سخت‌افزار face unlock برای احراز هویت استفاده کند"</string>
-    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face unlock"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای احراز هویت استفاده کند"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"بازگشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
@@ -577,20 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
-    <string name="face_error_timeout" msgid="981512090365729465">"‏face unlock را دوباره امتحان کنید."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"«بازگشایی با چهره» را دوباره امتحان کنید."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"عملیات شناسایی چهره لغو شد."</string>
-    <string name="face_error_user_canceled" msgid="5317030072349668946">"‏کاربر Face unlock را لغو کرد."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"کاربر «بازگشایی با چهره» را لغو کرد."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"‏تعداد تلاش‌ها بیش‌ازحد مجاز است. Face unlock غیرفعال است."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «بازگشایی با چهره» غیرفعال است."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"چهره تأیید نشد. دوباره امتحان کنید."</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"‏face unlock را راه‌اندازی نکردید."</string>
-    <string name="face_error_hw_not_present" msgid="8302690289757559738">"‏Face unlock در این دستگاه پشتیبانی نمی‌شود."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
     <string name="face_name_template" msgid="7004562145809595384">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -819,7 +818,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"دوباره امتحان کنید"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"‏دفعات تلاش برای Face Unlock از حداکثر مجاز بیشتر شد"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"دفعات تلاش برای «بازگشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"سیم‌کارتی در تلویزیون وجود ندارد."</string>
@@ -889,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"باز کردن قفل با الگو."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"باز کردن قفل با چهره."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"بازگشایی با چهره."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"باز کردن قفل با پین."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"قفل پین سیم‌کارت باز شد."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"‏قفل Puk سیم‌کارت باز شد."</string>
@@ -1667,7 +1666,7 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
-    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"سرویسی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"سرویسی را انتخاب کنید که می‌خواهید هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده شود:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"برای جابه‌جایی بین سرویس‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه‌دارید."</string>

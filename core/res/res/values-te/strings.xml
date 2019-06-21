@@ -254,7 +254,7 @@
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"వర్చువల్ కీబోర్డ్"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"భౌతిక కీబోర్డ్"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"భద్రత"</string>
-    <string name="notification_channel_car_mode" msgid="3553380307619874564">"కారు మోడ్"</string>
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"కార్‌ మోడ్"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"ఖాతా స్థితి"</string>
     <string name="notification_channel_developer" msgid="7579606426860206060">"డెవలపర్ సందేశాలు"</string>
     <string name="notification_channel_developer_important" msgid="5251192042281632002">"ముఖ్యమైన డెవలపర్ సందేశాలు"</string>
@@ -263,7 +263,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"నెట్‌వర్క్ హెచ్చరికలు"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN స్థితి"</string>
-    <string name="notification_channel_device_admin" msgid="8353118887482520565">"మీ IT నిర్వాహకులు నుండి వచ్చే హెచ్చరికలు"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"మీ IT నిర్వాహకుల నుండి వచ్చే హెచ్చరికలు"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"హెచ్చరికలు"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"రిటైల్ డెమో"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB కనెక్షన్"</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"మీ తలను ఎడమ/కుడి వైపుగా ఇంకాస్త తిప్పండి."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"నల్లని పట్టీతో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
@@ -1586,7 +1585,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"బ్రౌజర్‌ను ప్రారంభించాలా?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"కాల్‌ను ఆమోదించాలా?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ఎల్లప్పుడూ"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి మాత్రమే"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"సెట్టింగ్‌లు"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s కార్యాలయ ప్రొఫైల్‌కు మద్దతు ఇవ్వదు"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"టాబ్లెట్"</string>
