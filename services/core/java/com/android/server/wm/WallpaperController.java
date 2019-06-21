@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
@@ -612,10 +611,10 @@ class WallpaperController {
             if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
                     "*** WALLPAPER DRAW TIMEOUT");
 
-            // If there was a recents animation in progress, cancel that animation
+            // If there was a pending recents animation, start the animation anyways (it's better
+            // to not see the wallpaper than for the animation to not start)
             if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().cancelAnimation(
-                        REORDER_MOVE_TO_ORIGINAL_POSITION, "wallpaperDrawPendingTimeout");
+                mService.getRecentsAnimationController().startAnimation();
             }
             return true;
         }
