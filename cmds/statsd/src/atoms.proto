@@ -3283,6 +3283,8 @@ message BiometricErrorOccurred {
     optional int32 error_info_vendor = 7;
     // Dictates if this message should trigger additional debugging.
     optional bool debug = 8;
+    // Time spent during the authentication attempt.
+    optional int64 latency_millis = 9;
 }
 
 /**
