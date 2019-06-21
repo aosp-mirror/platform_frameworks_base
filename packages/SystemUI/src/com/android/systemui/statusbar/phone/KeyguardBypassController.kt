@@ -49,6 +49,14 @@ class KeyguardBypassController {
         private set
 
     var bouncerShowing: Boolean = false
+    var qSExpanded = false
+        set(value) {
+            val changed = field != value
+            field = value
+            if (changed && !value) {
+                maybePerformPendingUnlock()
+            }
+        }
 
     @Inject
     constructor(context: Context, tunerService: TunerService,
@@ -98,7 +106,7 @@ class KeyguardBypassController {
                 // to unlock
                 return false
             }
-            if (isPulseExpanding) {
+            if (isPulseExpanding || qSExpanded) {
                 pendingUnlockType = biometricSourceType
                 return false
             }
