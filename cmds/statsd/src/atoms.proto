@@ -313,6 +313,8 @@ message Atom {
             214 [(log_from_module) = "permissioncontroller"];
         AppPermissionFragmentActionReported app_permission_fragment_action_reported =
             215 [(log_from_module) = "permissioncontroller"];
+        AppPermissionFragmentViewed app_permission_fragment_viewed =
+            216 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6662,4 +6664,21 @@ message AppPermissionFragmentActionReported {
 
     // The result of the permission grant
     optional bool permission_granted = 6;
+}
+
+/**
+* Information about a AppPermissionFragment viewed by user
+*/
+message AppPermissionFragmentViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    // Permission group viewed
+    optional string permission_group_name = 4;
 }
