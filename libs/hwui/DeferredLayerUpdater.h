@@ -24,9 +24,6 @@
 #include <system/graphics.h>
 #include <utils/StrongPointer.h>
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
 #include "renderstate/RenderState.h"
 #include "surfacetexture/SurfaceTexture.h"
 #include "Layer.h"
@@ -67,15 +64,7 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(const sp<SurfaceTexture>& consumer) {
-        if (consumer.get() != mSurfaceTexture.get()) {
-            mSurfaceTexture = consumer;
-
-            GLenum target = consumer->getCurrentTextureTarget();
-            LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
-                                "set unsupported SurfaceTexture with target %x", target);
-        }
-    }
+    ANDROID_API void setSurfaceTexture(const sp<SurfaceTexture>& consumer);
 
     ANDROID_API void updateTexImage() { mUpdateTexImage = true; }
 
