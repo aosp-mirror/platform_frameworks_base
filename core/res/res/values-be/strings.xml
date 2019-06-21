@@ -893,7 +893,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Разгарнуць вобласць разблакіроўкі."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Разблакiроўка слайда."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Узор разблакiроўкі."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Фэйскантроль"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Распазнаванне твару"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-код разблакiроўкі."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Разблакіроўка SIM-карты з дапамогай PIN-кода."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Разблакіроўка SIM-карты з дапамогай PUK-кода."</string>
@@ -951,7 +951,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"змяніць дазволы геапазіцыянавання для браўзэра"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дазваляе прыкладанням змяняць дазволы геалакацыі браўзэра. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта, каб дазваляць адпраўку інфармацыі аб месцазнаходжанні выпадковым вэб-сайтам."</string>
     <string name="save_password_message" msgid="767344687139195790">"Вы хочаце, каб браўзэр запомніў гэты пароль?"</string>
-    <string name="save_password_notnow" msgid="6389675316706699758">"Не цяпер"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"Не зараз"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомніць"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Ніколі"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"У вас няма дазволу на адкрыццё гэтай старонкі."</string>
@@ -1714,11 +1714,11 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў адключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Выберыце службу для выкарыстання пры націску кнопкі \"Спецыяльныя магчымасці\":"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"З дапамогай жэста спецыяльных магчымасцей (правядзіце двума пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"З дапамогай жэста спецыяльных магчымасцей (правядзіце трыма пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"З дапамогай жэста спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"З дапамогай жэста спецыяльных магчымасцей (правесці трыма пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Каб пераключыцца на другую службу, націсніце і ўтрымлівайце кнопку спецыяльных магчымасцей."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Каб пераключыцца на другую службу, правядзіце ўверх двума пальцамі, утрымліваючы іх на экране."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Каб пераключыцца на другую службу, правядзіце ўверх трыма пальцамі, утрымліваючы іх на экране."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Каб пераключыцца на іншую службу, правядзіце ўверх трыма пальцамі, утрымліваючы іх на экране."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Павелічэнне"</string>
     <string name="user_switched" msgid="3768006783166984410">"Бягучы карыстальнік <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Пераход да <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -1971,7 +1971,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас ёсць новыя паведамленні"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Праглядзець праз праграму для SMS"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Частка функц. можа быць абмеж."</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Функцыі могуць быць абмежаваныя"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Рабочы профіль заблакіраваны"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Кран., каб разбл. раб. профіль"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Падлучана да <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

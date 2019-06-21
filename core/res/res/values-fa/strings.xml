@@ -817,7 +817,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"دوباره امتحان کنید"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"‏دفعات تلاش برای Face Unlock از حداکثر مجاز بیشتر شد"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"دفعات تلاش برای «بازگشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"سیم‌کارتی در تلویزیون وجود ندارد."</string>
@@ -887,7 +887,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"باز کردن قفل با الگو."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"باز کردن قفل با چهره."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"بازگشایی با چهره."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"باز کردن قفل با پین."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"قفل پین سیم‌کارت باز شد."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"‏قفل Puk سیم‌کارت باز شد."</string>
@@ -1665,7 +1665,7 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
-    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"سرویسی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"سرویسی را انتخاب کنید که می‌خواهید هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده شود:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"برای جابه‌جایی بین سرویس‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه‌دارید."</string>

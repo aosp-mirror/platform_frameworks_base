@@ -219,7 +219,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"सुरक्षित मोडमध्ये रीबूट करा"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"तुम्ही सुरक्षित मोडमध्ये रीबूट करू इच्छिता? हे तुम्ही इंस्टॉल केलेले सर्व तृतीय पक्ष अॅप्लिकेशन अक्षम करेल. तुम्ही पुन्हा रीबूट करता तेव्हा ते पुनर्संचयित केले जातील."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"अलीकडील"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"अलीकडील कोणतेही अॅप्स नाहीत."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"अलीकडील कोणतेही अ‍ॅप्स नाहीत."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"टॅबलेट पर्याय"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"टीव्ही पर्याय"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"फोन पर्याय"</string>
@@ -256,7 +256,7 @@
     <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षितता"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"कार मोड"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"खाते स्थिती"</string>
-    <string name="notification_channel_developer" msgid="7579606426860206060">"विकसक मेसेज"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"डेव्हलपर मेसेज"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"अपडेट"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"नेटवर्क स्थिती"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्क सूचना"</string>
@@ -267,7 +267,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"रीटेल डेमो"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB कनेक्‍शन"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"APP चालत आहे"</string>
-    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"अॅप्‍समुळे बॅटरी संपत आहे"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"बॅटरी लवकर संपवणारी अॅप्‍स"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> बॅटरी वापरत आहे"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> अॅप्‍स बॅटरी वापरत आहेत"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
@@ -278,21 +278,21 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"आपल्या संपर्कांवर प्रवेश"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे संपर्क अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे संपर्क अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अ‍ॅक्सेस करू द्यायचे?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"तुम्ही अ‍ॅप वापरत असताना अ‍ॅपला फक्त स्थानाचा अॅक्सेस असेल"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"तुम्ही अ‍ॅप वापरत असताना अ‍ॅपला फक्त स्थानाचा अ‍ॅक्सेस असेल"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला &lt;b&gt;प्रत्येक वेळी&lt;/b&gt; या डिव्हाइसच्या स्थानाचा अ‍ॅक्सेस द्यायचा?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"अ‍ॅप सध्या फक्त तुम्ही अ‍ॅप वापरत असतानाच स्थान अ‍ॅक्सेस करू शकते"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS मेसेज पाठवणे आणि पाहणे हे"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला एसएमएस पाठवू आणि पाहू द्यायचे?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"स्टोरेज"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अॅक्सेस"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अ‍ॅक्सेस"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड"</string>
@@ -305,13 +305,13 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"फोन कॉल लॉग वाचा आणि लिहा"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोन कॉल लॉग अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोन कॉल लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कॉल आणि व्यवस्थापित"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोन कॉल करू आणि ते व्यवस्थापित करू द्यायचे?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"शरीर सेन्सर"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अॅक्सेस करा"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या महत्त्वाच्या लक्षणांविषयीचा सेन्सर डेटा अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अ‍ॅक्सेस करा"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या महत्त्वाच्या लक्षणांविषयीचा सेन्सर डेटा अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडोमधील आशय पुन्हा मिळवा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तुम्ही वापरत असलेल्‍या विंडोमधील आशय तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
@@ -354,15 +354,15 @@
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"हा अ‍ॅप तुमच्या फोनवर स्टोअर केलेले सर्व SMS (मजकूर) मेसेज वाचू शकतो."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"मजकूर मेसेज मिळवा (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी तुम्हाला पाठविलेले मेसेज तुम्हाला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
-    <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
+    <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अ‍ॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अ‍ॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अ‍ॅप्लिकेशन वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अ‍ॅप ला अनुमती देऊ शकतात."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डिव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
-    <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अॅप्स पुनर्क्रमित करा"</string>
+    <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अ‍ॅप्स पुनर्क्रमित करा"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"समोर आणि पार्श्वभूमीवर कार्ये हलविण्यासाठी अ‍ॅप ला अनुमती देते. अ‍ॅप हे आपल्या इनपुटशिवाय करू शकतो."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सुरू करा"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"कार मोड सक्षम करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्य अॅप्स बंद करा"</string>
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्य अ‍ॅप्स बंद करा"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"अन्य अ‍ॅप्सच्या पार्श्वभूमी प्रक्रिया समाप्त करण्यासाठी अ‍ॅप ला अनुमती देते. यामुळे अन्य अ‍ॅप्स चालणे थांबू शकते."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"हा अ‍ॅप इतर अ‍ॅप्सच्या शीर्षस्थानी दिसू शकतो."</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"हे अ‍ॅप इतर अ‍ॅप्सच्या शीर्षस्थानी किंवा स्क्रीनच्या इतर भागांवर दिसू शकतो. हे सामान्य अ‍ॅप वापरात व्यत्यय आणू शकते किंवा इतर अ‍ॅप्सची डिस्प्ले पद्धत बदलू शकते."</string>
@@ -390,7 +390,7 @@
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"रोचक प्रसारणे पाठविण्यासाठी अ‍ॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो फोनला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"तुमचे संपर्क वाचा"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अ‍ॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अ‍ॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"तुम्ही विशिष्ट लोकांना इतर मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप्सला अनुमती देतात. ही परवागनी अॅप्सला तुमचा संपर्क डेटा सेव्ह करण्यासाठी अनुमती देते आणि दुर्भावनापूर्ण अॅप्स तुम्हाला न कळविता संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"तुम्ही विशिष्ट लोकांना इतर मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अ‍ॅप्सला अनुमती देतात. ही परवागनी अ‍ॅप्सला तुमचा संपर्क डेटा सेव्ह करण्यासाठी अनुमती देते आणि दुर्भावनापूर्ण अ‍ॅप्स तुम्हाला न कळविता संपर्क डेटा शेअर करू शकतात."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अ‍ॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अ‍ॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"तुमचे संपर्क सुधारित करा"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अ‍ॅप ला अनुमती देते."</string>
@@ -400,9 +400,9 @@
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"हा अ‍ॅप तुमचा कॉल इतिहास वाचू शकता."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"कॉल लॉग लिहा"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमचा कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीर सेंसर (हृदय गती मॉनिटरसारखे) अॅक्सेस करा"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीर सेंसर (हृदय गती मॉनिटरसारखे) अ‍ॅक्सेस करा"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
@@ -412,7 +412,7 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"हा अ‍ॅप आपल्या टॅब्लेटवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"हा अ‍ॅप आपल्या टीव्हीवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"हा अ‍ॅप आपल्या फोनवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अ‍ॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्थान प्रदाता आदेश अॅक्सेस करा"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्थान प्रदाता आदेश अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अ‍ॅपला अतिरिक्त स्‍थान प्रदाता आदेशावर प्रवेश करण्‍याची अनुमती देते. हे कदाचित अ‍ॅपला GPS किंवा इतर स्‍थान स्रोत च्या ऑपरेशनमध्‍ये हस्तक्षेप करण्‍याची अनुमती देऊ शकते."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"फक्त फोरग्राउंडमध्ये अचूकपणे अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच तुमचे अचूक स्थान मिळवू शकते. या स्थान सेवा सुरू करणे आणि त्या वापरण्यासाठी अ‍ॅपसाठी तुमच्या फोनवर उपलब्ध करणे आवश्यक आहे, यामुळे बॅटरी वापर वाढू शकतो."</string>
@@ -420,8 +420,8 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. त्या वापरण्याकरता अ‍ॅपसाठी, या स्थान सेवा सुरू करणे आणि त्या तुमच्या टॅबलेटवर उपलब्ध करणे आवश्यक आहे."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. त्या वापरण्याकरता अ‍ॅपसाठी, या स्थान सेवा सुरू करणे आणि त्या तुमच्या टीव्हीवर उपलब्ध करणे आवश्यक आहे."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. ते वापरण्याकरता अ‍ॅपसाठी, या स्थान सेवा सुरू करणे आणि त्या तुमच्या फोनवर उपलब्ध करणे आवश्यक आहे."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"बॅकग्राउंडमध्ये स्थान अॅक्सेस करू शकतो"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"याला अंदाजे किंवा अचूक स्थान अॅक्सेस करण्यास अतिरिक्त मंजूरी दिल्यास, बॅकग्राउंडमध्ये चालतांना अ‍ॅप स्थान अॅक्सेस करू शकतो."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"बॅकग्राउंडमध्ये स्थान अ‍ॅक्सेस करू शकतो"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"याला अंदाजे किंवा अचूक स्थान अ‍ॅक्सेस करण्यास अतिरिक्त मंजूरी दिल्यास, बॅकग्राउंडमध्ये चालतांना अ‍ॅप स्थान अ‍ॅक्सेस करू शकतो."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"आपल्या ऑडिओ सेटिंग्ज बदला"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"व्हॉल्यूम आणि आउटपुटसाठी कोणता स्पीकर वापरला आहे यासारख्या समग्र ऑडिओ सेटिंग्ज सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडिओ रेकॉर्ड"</string>
@@ -436,10 +436,10 @@
     <string name="permdesc_vibrate" msgid="6284989245902300945">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"आपल्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देते. यामुळे अनपेक्षित शुल्क किंवा कॉल लागू शकतात. लक्षात ठेवा की हे आणीबाणीच्या नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देत नाही. दुर्भावनापूर्ण अ‍ॅप्स नी आपल्या पुष्टिकरणाशिवाय कॉल केल्यामुळे तुमचे पैसे खर्च होऊ शकतात."</string>
-    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा अॅक्सेस करा"</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अ‍ॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_callCompanionApp" msgid="3599252979411970473">"सिस्टम वापरून कॉल पाहा आणि नियंत्रण ठेवा."</string>
@@ -481,12 +481,12 @@
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"वाय-फाय कनेक्शन पहा"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"वाय-फाय सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या वाय-फाय डीव्हाइसचे नाव यासारख्या, वाय-फाय नेटवर्किंग विषयीची माहिती पाहण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाय-फाय वरून कनेक्ट करा आणि डिस्कनेक्ट करा"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय अॅक्सेस बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉंफिगरेशनमध्ये बदल करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय अ‍ॅक्सेस बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉंफिगरेशनमध्ये बदल करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अ‍ॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"केवळ तुमचा टीव्ही न वापरता, एकाधिक पत्ते वापरून एका वाय-फाय नेटवकवरील सर्व डीव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अ‍ॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग्ज अॅक्सेस करा"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग्ज अ‍ॅक्सेस करा"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब्लूटूथ टॅबलेट कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"स्थानिक ब्लूटूथ टीव्ही कॉंफिगर करण्यासाठी आणि दूरस्थ डीव्हाइससह शोधण्यासाठी आणि जोडण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब्लूटूथ फोन कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
@@ -622,7 +622,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क धोरण व्यवस्थापित करा"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"नेटवर्क धोरणे व्यवस्थापित करण्यासाठी आणि अ‍ॅप-विशिष्ट नियम परिभाषित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क वापर हिशोब सुधारित करा"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"अॅप्स वर नेटवर्क वापराचा हिशोब कसा घेतला जातो हे सुधारित करण्यासाठी अॅप्स ला अनुमती देते. सामान्य अॅप्सद्वारे वापरण्यासाठी नाही."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"अ‍ॅप्स वर नेटवर्क वापराचा हिशोब कसा घेतला जातो हे सुधारित करण्यासाठी अ‍ॅप्स ला अनुमती देते. सामान्य अ‍ॅप्सद्वारे वापरण्यासाठी नाही."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"प्रवेश सूचना"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"अनुप्रयोगाला इतर अ‍ॅप्‍सद्वारे पोस्‍ट केलेल्‍यांसह पुनर्प्राप्त करण्‍याची, तपासण्‍याची आणि सूचना साफ करण्‍याची अनुमती देते."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना ऐकणार्‍या सेवेशी प्रतिबद्ध"</string>
@@ -637,17 +637,17 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"अनु्प्रयोगाला नेटवर्क स्‍थितींवरील निरीक्षणे ऐकण्‍यासाठी अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट डिव्हाइस कॅलिब्रेशन बदला"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"स्पर्श स्क्रीनची कॅलिब्रेशन प्राचले सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. सामान्य अ‍ॅप्स साठी कधीही आवश्यक नसते."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रे अॅक्सेस करा"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रे अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM प्रमाणपत्रांची तरतूद करण्यासाठी आणि वापरण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्सकरिता कधीही आवश्यकता नसते."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"वर्तमान Android बीम स्थानांतरणांविषयी माहिती प्राप्त करण्यासाठी या अनुप्रयोगास अनुमती देते"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रे काढा"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यकता नसते."</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अ‍ॅप्स साठी कधीही आवश्यकता नसते."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक मेसेजिंग सेवेसाठी प्रतिबद्ध"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"वाहक मेसेजिंग सेवेचा शीर्ष-स्तर इंटरफेस बाइंड करण्यासाठी होल्डरला अनुमती देतो. सामान्‍य अ‍ॅप्‍सकरिता हे कधीही आवश्‍यक नसते."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"वाहक सेवांवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"वाहक सेवांवर प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य अॅप्ससाठी कधीही आवश्यकता नसावी."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"व्यत्यय आणू नका अॅक्सेस करा"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"व्यत्यय आणू नका अ‍ॅक्सेस करा"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
@@ -1153,7 +1153,7 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"डाउनलोड केलेल्या सिस्टम सेटिंग्ज &gt; Apps &gt; मधील डीफॉल्ट साफ करा."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"क्रिया निवडा"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB डिव्हाइससाठी अ‍ॅप निवडा"</string>
-    <string name="noApplications" msgid="2991814273936504689">"कोणतेही अॅप्स ही क्रिया करू शकत नाहीत."</string>
+    <string name="noApplications" msgid="2991814273936504689">"कोणतेही अ‍ॅप्स ही क्रिया करू शकत नाहीत."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबला आहे"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबली आहे"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबतो"</string>
@@ -1198,9 +1198,9 @@
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करत आहे…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अ‍ॅप ऑप्टिमाइझ करत आहे."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अ‍ॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
-    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"रन होणारे <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"गेमवर परत जाण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="387882830435195342">"गेम निवडा"</string>
     <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"अधिक चांगल्या कामगिरीसाठी, एकावेळी यापैकी केवळ एक गेम चालू ठेवता येईल."</string>
@@ -1265,7 +1265,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"नेटवर्कवर साइन इन करा"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ला इंटरनेट अॅक्सेस नाही"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ला इंटरनेट अ‍ॅक्सेस नाही"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"कनेक्ट केले"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ला मर्यादित कनेक्टिव्हिटी आहे"</string>
@@ -1274,7 +1274,7 @@
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"तुमचा हॉटस्पॉट बँड बदलला आहे."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"हे डिव्हाइस तुमच्या फक्त ५GHz साठी प्राधान्याला सपोर्ट करत नाही. त्याऐवजी, हे डिव्हाइस ५GHz बँड उपलब्ध असताना वापरेल."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> वर स्विच केले"</string>
-    <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेटचा अॅक्सेस नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरते. शुल्क लागू शकते."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेटचा अ‍ॅक्सेस नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरते. शुल्क लागू शकते."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> वरून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> वर स्विच केले"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"मोबाइल डेटा"</item>
@@ -1317,14 +1317,14 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"पाठवा"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रद्द करा"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"माझी वड लक्षात ठेवा"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"तुम्ही हे नंतर सेटिंग्ज आणि अॅप्स मध्ये बदलू शकता"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"तुम्ही हे नंतर सेटिंग्ज आणि अ‍ॅप्स मध्ये बदलू शकता"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"नेहमी अनुमती द्या"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कधीही अनुमती देऊ नका"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"सिम कार्ड काढले"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"तुम्ही एक वैध सिम कार्ड घालून प्रारंभ करेपर्यंत मोबाईल नेटवर्क अनुपलब्ध असेल."</string>
     <string name="sim_done_button" msgid="827949989369963775">"पूर्ण झाले"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोडले"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अ‍ॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"मोबाइल सेवा अ‍ॅक्टिव्हेट करा"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"तुमचे नवीन सिम अ‍ॅक्टिव्हेट करण्यासाठी वाहकाचे अ‍ॅप डाउनलोड करा"</string>
@@ -1364,7 +1364,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रीपोर्ट घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल शेअर करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रीपोर्ट शेअर करत आहे..."</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"आपल्या प्रशासकाने या डिव्हाइसचे समस्या निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अॅप्स आणि डेटा शेअर केले जाऊ शकतात."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"आपल्या प्रशासकाने या डिव्हाइसचे समस्या निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अ‍ॅप्स आणि डेटा शेअर केले जाऊ शकतात."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"शेअर करा"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"नकार द्या"</string>
     <string name="select_input_method" msgid="4653387336791222978">"इनपुट पद्धत निवडा"</string>
@@ -1441,7 +1441,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"कार्यान्वित करा"</string>
     <string name="dial_number_using" msgid="5789176425167573586">\n"<xliff:g id="NUMBER">%s</xliff:g> वापरून नंबर डायल करा"</string>
     <string name="create_contact_using" msgid="4947405226788104538">\n"<xliff:g id="NUMBER">%s</xliff:g> वापरून संपर्क तयार करा"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"खालील एक किंवा अधिक अॅप्स आपल्या खात्यावर, आता आणि भविष्यात प्रवेश करण्याच्या परवानगीची विनंती करतात."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"खालील एक किंवा अधिक अ‍ॅप्स आपल्या खात्यावर, आता आणि भविष्यात प्रवेश करण्याच्या परवानगीची विनंती करतात."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"तुम्ही या विनंतीस अनुमती देऊ इच्छिता?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"प्रवेश विनंती"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमती द्या"</string>
@@ -1807,7 +1807,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"ओके"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"बॅटरी सेव्‍हर हे वैशिष्ट्य बॅटरीचे आयुष्य वाढवण्‍यासाठी बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करते. "<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करतो."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"डेटा सर्व्हर डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठवण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असा असू शकतो."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा सर्व्हर डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठवण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेव्हर चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -2031,5 +2031,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"थेट शेअर करणे उपलब्ध नाही"</string>
-    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"अॅप्स सूची"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"अ‍ॅप्स सूची"</string>
 </resources>

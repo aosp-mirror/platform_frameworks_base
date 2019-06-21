@@ -439,7 +439,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा ऐक्‍सेस करें"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपके हस्‍तक्षेप के बिना कॉल करने के लिए, ऐप को IMS सेवा का उपयोग करने देती है."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फ़ोन की स्‍थिति और पहचान पढ़ें"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स  को डिवाइस की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और डिवाइस आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स को डिवाइस की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और डिवाइस आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर तय करने देती है."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"सिस्टम के माध्यम से कॉल रूट करें"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करने के अनुभव को बेहतर बनाने के लिए ऐप्लिकेशन को सिस्टम के माध्यम से उसके कॉल रूट करने देती है."</string>
     <string name="permlab_callCompanionApp" msgid="3599252979411970473">"सिस्टम के ज़रिए कॉल देखना और नियंत्रित करना."</string>
@@ -991,8 +991,8 @@
     <string name="minutes" msgid="5646001005827034509">"मिनट"</string>
     <string name="second" msgid="3184235808021478">"सेकंड"</string>
     <string name="seconds" msgid="3161515347216589235">"सेकंड"</string>
-    <string name="week" msgid="5617961537173061583">"सप्ताह"</string>
-    <string name="weeks" msgid="6509623834583944518">"सप्ताह"</string>
+    <string name="week" msgid="5617961537173061583">"हफ़्ता"</string>
+    <string name="weeks" msgid="6509623834583944518">"हफ़्ता"</string>
     <string name="year" msgid="4001118221013892076">"वर्ष"</string>
     <string name="years" msgid="6881577717993213522">"वर्ष"</string>
     <string name="now_string_shortest" msgid="8912796667087856402">"अभी"</string>
@@ -1849,7 +1849,7 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"छोटा करें"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"परेशान ना करें"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"बंद रहने का समय"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"सप्ताह की रात"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इवेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"सोते समय"</string>
@@ -1982,7 +1982,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"नुकसान पहुंचाने वाले ऐप का पता चला"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"बदलाव करें"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"कॉल अाैर सूचनाअाें के लिए डिवाइस वाइब्रेट हाेगा"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल अाैर सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"सिस्टम में हुए बदलाव"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"परेशान न करें"</string>
