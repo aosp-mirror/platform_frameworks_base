@@ -122,10 +122,6 @@ package android.content {
 
 package android.content.pm {
 
-  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field @Deprecated public String volumeUuid;
-  }
-
   public class PackageInfo implements android.os.Parcelable {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
   }

@@ -783,8 +783,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public float minAspectRatio;
 
-    /** @removed */
-    @Deprecated
+    /** @hide */
     public String volumeUuid;
 
     /**
