@@ -3434,18 +3434,6 @@
          TODO: move to input HAL once ready. -->
     <string name="config_doubleTouchGestureEnableFile"></string>
 
-    <!-- Controls how we deal with externally connected physical keyboards.
-         0 - When using this device, it is not clear for users to recognize when the physical
-             keyboard is (should be) connected and when it is (should be) disconnected.  Most of
-             phones and tablets with Bluetooth keyboard would fall into this category because the
-             connected Bluetooth keyboard may or may not be nearby the host device.
-         1 - When using this device, it is clear for users to recognize when the physical
-             keyboard is (should be) connected and when it is (should be) disconnected.
-             Devices with wired USB keyboard is one clear example.  Some 2-in-1 convertible
-             tablets with dedicated keyboards may have the same affordance to wired USB keyboard.
-    -->
-    <integer name="config_externalHardKeyboardBehavior">0</integer>
-
     <!-- Package of the unbundled tv remote service which can connect to tv
          remote provider -->
     <string name="config_tvRemoteServicePackage" translatable="false"></string>
