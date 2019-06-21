@@ -194,6 +194,12 @@ public final class SystemUiDeviceConfigFlags {
      * Allow touch passthrough above assist area during a session.
      */
     public static final String ASSIST_TAP_PASSTHROUGH = "assist_tap_passthrough";
+  
+    /**
+     * (bool) Whether to use the new BrightLineFalsingManager.
+     */
+    public static final String BRIGHTLINE_FALSING_MANAGER_ENABLED =
+            "brightline_falsing_manager_enabled";
 
     private SystemUiDeviceConfigFlags() { }
 }
