@@ -263,7 +263,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Hálózati értesítések"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Van elérhető hálózat"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-állapot"</string>
-    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Rendszergazda általi értesítések"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Értesítések a rendszergazdától"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Értesítések"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Kiskereskedelmi bemutató"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-kapcsolat"</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Kicsit kevésbé fordítsa el a fejét."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Kicsit kevésbé fordítsa el a fejét."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Távolítson el mindent, ami takarja az arcát."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Tisztítsa meg a képernyő tetejét, a fekete sávot is beleértve."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Sikertelen arcellenőrzés. A hardver nem érhető el."</string>

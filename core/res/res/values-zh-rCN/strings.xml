@@ -521,7 +521,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"允许该应用修改您的照片收藏。"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"从您的媒体收藏中读取位置信息"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"允许该应用从您的媒体收藏中读取位置信息。"</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"验证是您本人"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"验证您的身份"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"生物识别硬件无法使用"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"身份验证已取消"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"无法识别"</string>
@@ -568,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"请将手机向左移动。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"请将手机向右移动。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不清您的脸部，请直视手机。"</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不到您的脸部，请直视手机。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"已无法识别人脸，请重试。"</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"请将您的头稍微上下倾斜。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"请将您的头稍微左右旋转。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"请移除所有遮挡您面部的物体。"</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"请将屏幕顶部（包括黑色条栏）清理干净"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"无法验证人脸。硬件无法使用。"</string>
@@ -857,7 +856,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐号解锁"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"图案尝试次数过多"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的Google帐号登录。"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的 Google 帐号登录。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密码"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登录"</string>
@@ -1636,7 +1635,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐号。"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的 Google 帐号。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密码"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登录"</string>

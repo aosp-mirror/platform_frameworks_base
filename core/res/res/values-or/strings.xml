@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
@@ -1670,7 +1669,7 @@
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"ଆପଣ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ଟାପ୍ କରିବା ସମୟରେ ଏକ ସେବା ବ୍ୟବହାର କରିବା ପାଇଁ ବାଛନ୍ତୁ:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚର୍ ବ୍ୟବହାର କରିବା ପାଇଁ ଏକ ସେବା ବାଛନ୍ତୁ (ଦୁଇଟି ଆଙ୍ଗୁଠିରେ ସ୍କ୍ରିନ୍‍ର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ଆକ୍ସେସିବିଲିଟୀ ଜେଶ୍ଚର୍ ବ୍ୟବହାର କରିବା ପାଇଁ ଏକ ସେବା ବାଛନ୍ତୁ (ତିନିଟି ଆଙ୍ଗୁଠିରେ ସ୍କ୍ରିନ୍‍ର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ସେବାଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବା ପାଇଁ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ସ୍ପର୍ଶ ଓ ଧରି ରଖନ୍ତୁ।"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ସେବାଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବା ପାଇଁ ଆକ୍ସେସିବିଲିଟୀ ବଟନ୍ ସ୍ପର୍ଶ କରନ୍ତୁ ଓ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ସେବାଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବା ପାଇଁ ଦୁଇଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ ଏବଂ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ସେବାଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବା ପାଇଁ ତିନିଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ ଏବଂ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>

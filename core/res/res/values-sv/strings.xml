@@ -888,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Expandera upplåsningsytan."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Lås upp genom att dra."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Lås upp med grafiskt lösenord."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Lås upp med Ansiktslås."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ansiktslås."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Lås upp med PIN-kod."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Lås upp med SIM-kortets pinkod."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Lås upp med SIM-kortets PUK-kod."</string>
