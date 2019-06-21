@@ -1670,7 +1670,7 @@
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer trois doigts du bas de l\'écran vers le haut) :"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pour basculer entre les services, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour basculer entre les services, balayez deux doigts vers le haut et maintenez-les sur l\'écran."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pour basculer entre les services, balayez trois doigts vers le haut et maintenez-les sur l\'écran."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pour changer de service, balayez trois doigts vers le haut et maintenez-les sur l\'écran."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zoom"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Changement d\'utilisateur (<xliff:g id="NAME">%1$s</xliff:g>) en cours…"</string>
@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Vérifier la présence de mises à jour"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ouvrez l\'application de messagerie texte pour l\'afficher"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Certaines fonctionnal. sont limitées"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Des fonctionnalités sont limitées"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil professionnel verrouillé"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Touch. pr déver. profil profess."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connecté à <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
