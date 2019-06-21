@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Acts as a cache and utility class for FalsingClassifiers.
  */
-class FalsingDataProvider {
+public class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
@@ -51,7 +51,7 @@ class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
 
-    FalsingDataProvider(Context context) {
+    public FalsingDataProvider(Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
