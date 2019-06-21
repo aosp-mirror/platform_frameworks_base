@@ -38,11 +38,12 @@ import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
 import android.provider.Settings;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.View;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -95,7 +96,8 @@ import java.util.ArrayList;
  * Tests for {@link NotificationStackScrollLayout}.
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     private NotificationStackScrollLayout mStackScroller;  // Normally test this
@@ -123,6 +125,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Before
     @UiThreadTest
     public void setUp() throws Exception {
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+
         mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
         Settings.Secure.putInt(mContext.getContentResolver(),
