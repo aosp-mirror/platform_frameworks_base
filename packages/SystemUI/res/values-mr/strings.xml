@@ -46,11 +46,11 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टेदर केले"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धती सेट करा"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"वास्तविक कीबोर्ड"</string>
-    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे का?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे का?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इंस्टॉल केलेली अॅप्स या USB उपसाधनासह कार्य करत नाहीत. <xliff:g id="URL">%1$s</xliff:g> येथे या उपसाधनाविषयी अधिक जाणून घ्या"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इंस्टॉल केलेली अ‍ॅप्स या USB उपसाधनासह कार्य करत नाहीत. <xliff:g id="URL">%1$s</xliff:g> येथे या उपसाधनाविषयी अधिक जाणून घ्या"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB उपसाधन"</string>
     <string name="label_view" msgid="6304565553218192990">"पहा"</string>
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> कनेक्ट केलेली असताना नेहमी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडा"</string>
@@ -381,7 +381,7 @@
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC अक्षम केले आहे"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC सक्षम केले आहे"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"अ‍ॅप्स स्विच करण्यासाठी वर स्वाइप करा"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"अॅप्स वर झटपट स्विच करण्यासाठी उजवीकडे ड्रॅग करा"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"अ‍ॅप्स वर झटपट स्विच करण्यासाठी उजवीकडे ड्रॅग करा"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"अवलोकन टॉगल करा."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज झाली"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज होत आहे"</string>
@@ -439,14 +439,14 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"वर्तमान वापरकर्ता लॉगआउट करा"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"वापरकर्त्यास लॉगआउट करा"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नवीन वापरकर्ता जोडायचा?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अॅप्स अपडेट करू शकतो."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
     <string name="user_limit_reached_title" msgid="7374910700117359177">"वापरकर्ता मर्यादा गाठली"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
       <item quantity="other">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यांपर्यंत जोडू शकता.</item>
       <item quantity="one">फक्त एक वापरकर्ता तयार केला जाऊ शकतो.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"वापरकर्त्यास काढायचे?"</string>
-    <string name="user_remove_user_message" msgid="1453218013959498039">"या वापरकर्त्याचे सर्व अॅप्स आणि डेटा काढून टाकला जाईल."</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"या वापरकर्त्याचे सर्व अ‍ॅप्स आणि डेटा काढून टाकला जाईल."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"काढा"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"बॅटरी सेव्‍हर चालू आहे"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"कामगिरी आणि पार्श्वभूमीवरील डेटा कमी करते"</string>
@@ -489,8 +489,8 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"धोरणे पहा"</string>
-    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकते आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस तुमची संस्‍था व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकतो आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अ‍ॅक्सेस, अ‍ॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकते आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस तुमची संस्‍था व्यवस्थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अ‍ॅक्सेस, अ‍ॅप्स, तुमच्या डिव्हाइस शी संबंधित डेटा आणि तुमच्या डिव्हाइस च्या ठिकाणाची माहिती मॉनिटर करू शकतो आणि ती व्यवस्थापित करू शकतो.\n\nआणखी माहितीसाठी, तुमच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
@@ -501,7 +501,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"तुमचे वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तुमचे डिव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"तुमचे डिव्हाइस व्यवस्थापित करण्यासाठी <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> वापरते."</string>
-    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, आपल्या डिव्हाइशी संबंधित डेटा आणि डिव्हाइसच्या स्थान माहितीचे निरीक्षण आणि व्यवस्थापन करू शकतो."</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट प्रवेश, अ‍ॅप्स, आपल्या डिव्हाइशी संबंधित डेटा आणि डिव्हाइसच्या स्थान माहितीचे निरीक्षण आणि व्यवस्थापन करू शकतो."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"अधिक जाणून घ्या"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तुम्ही <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -511,7 +511,7 @@
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"विश्वासू क्रेडेंशियल उघडा"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे निरीक्षण करते.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डिव्हाइस आणि नेटवर्क अॅक्टिव्हिटीचे परीक्षण करू शकतो."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nतुमचा प्रशासक ईमेल, अॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nतुमचा प्रशासक ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -855,7 +855,7 @@
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"उजवा शॉर्टकट देखील अनलॉक करतो"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"काहीही नाही"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> लाँच करा"</string>
-    <string name="tuner_other_apps" msgid="4726596850501162493">"इतर अॅप्स"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"इतर अ‍ॅप्स"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"मंडळ"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"अधिक आयकन"</string>
     <string name="tuner_minus" msgid="4806116839519226809">"उणे आयकन"</string>
@@ -890,7 +890,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"अॅप्‍स बॅकग्राउंडमध्‍ये चालू आहेत"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"मोबाइल डेटा बंद करायचा?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"तुम्हाला <xliff:g id="CARRIER">%s</xliff:g> मधून डेटा किंवा इंटरनेटचा अॅक्सेस नसेल. इंटरनेट फक्त वाय-फाय मार्फत उपलब्ध असेल."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"तुम्हाला <xliff:g id="CARRIER">%s</xliff:g> मधून डेटा किंवा इंटरनेटचा अ‍ॅक्सेस नसेल. इंटरनेट फक्त वाय-फाय मार्फत उपलब्ध असेल."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"तुमचा वाहक"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"अ‍ॅप परवानगी विनंती अस्पष्‍ट करत असल्‍याने, सेटिंग्ज तुमचा प्रतिसाद पडताळू शकत नाहीत."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवण्याची अनुमती द्यायची का?"</string>

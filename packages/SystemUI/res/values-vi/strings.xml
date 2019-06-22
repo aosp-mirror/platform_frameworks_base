@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Cài đặt âm thanh"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mở rộng"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Thu gọn"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Tự động chú thích nội dung"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Tự động tạo phụ đề cho nội dung nghe nhìn"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Đóng mẹo về chú thích"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Lớp phủ phụ đề"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"bật"</string>

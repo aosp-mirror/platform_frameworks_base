@@ -44,9 +44,11 @@ import java.util.concurrent.Executor;
  * {@link SocketKeepalive.Callback#onStopped} if the operation was successful or
  * {@link SocketKeepalive.Callback#onError} if an error occurred.
  *
- * The device SHOULD support keepalive offload. If it does not, it MUST reply with
+ * For cellular, the device MUST support at least 1 keepalive slot.
+ *
+ * For WiFi, the device SHOULD support keepalive offload. If it does not, it MUST reply with
  * {@link SocketKeepalive.Callback#onError} with {@code ERROR_UNSUPPORTED} to any keepalive offload
- * request. If it does, it MUST support at least 3 concurrent keepalive slots per transport.
+ * request. If it does, it MUST support at least 3 concurrent keepalive slots.
  */
 public abstract class SocketKeepalive implements AutoCloseable {
     static final String TAG = "SocketKeepalive";

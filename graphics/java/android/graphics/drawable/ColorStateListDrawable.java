@@ -25,6 +25,7 @@ import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.util.MathUtils;
 
 /**
@@ -133,6 +134,12 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     @Override
     public @PixelFormat.Opacity int getOpacity() {
         return mColorDrawable.getOpacity();
+    }
+
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+        mColorDrawable.setBounds(bounds);
     }
 
     @Override

@@ -254,7 +254,7 @@
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"가상 키보드"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"물리적 키보드"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"보안"</string>
-    <string name="notification_channel_car_mode" msgid="3553380307619874564">"운전모드"</string>
+    <string name="notification_channel_car_mode" msgid="3553380307619874564">"운전 모드"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"계정 상태"</string>
     <string name="notification_channel_developer" msgid="7579606426860206060">"개발자 메시지"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"업데이트"</string>
@@ -360,8 +360,8 @@
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"앱이 프로필 소유자와 기기 소유자를 설정하도록 허용합니다."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"실행 중인 앱 순서 재지정"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 사용자의 입력 없이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다."</string>
-    <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전모드 사용"</string>
-    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"앱이 운전모드를 사용할 수 있도록 허용합니다."</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전 모드 사용"</string>
+    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"앱이 운전 모드를 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"다른 앱 종료"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 다른 앱이 실행 중지될 수 있습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"이 앱은 다른 앱 위에 표시될 수 있음"</string>

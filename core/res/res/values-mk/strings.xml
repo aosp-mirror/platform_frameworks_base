@@ -581,7 +581,7 @@
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ликот не може да се потврди. Хардвер - недостапен."</string>
     <string name="face_error_timeout" msgid="3202585609451248103">"Пробајте ја проверката на лице повторно."</string>
-    <string name="face_error_no_space" msgid="2712120617457553825">"Не зачувува податоци за нов лик. Прво избришете стар."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"Не се зачуваа податоците за нов лик. Избришете го стариот."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Операцијата со лик се откажа"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Проверката на ликот е откажана од корисникот"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Премногу обиди. Обидете се повторно подоцна."</string>

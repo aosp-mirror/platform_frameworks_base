@@ -259,7 +259,7 @@
     <string name="notification_channel_security" msgid="7345516133431326347">"Sigurnost"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"Način rada u automobilu"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"Status računa"</string>
-    <string name="notification_channel_developer" msgid="7579606426860206060">"Poruke programera"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Poruke za programere"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"Ažuriranja"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Status mreže"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Mrežna upozorenja"</string>
@@ -269,7 +269,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Prodajna demonstracija"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Pokrenuta je aplikacija"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Pokrenuta aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacije koje troše bateriju"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> troši bateriju"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Broj aplikacija koje troše bateriju: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
@@ -321,7 +321,7 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Stavke koje dodirnete bit će izgovorene naglas, a ekran možete istraživati koristeći pokrete."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Prati tekst koji unosite"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obuhvata lične podatke kao što su brojevi kreditnih kartica i lozinke."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolira uvećanje prikaza na ekranu"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolira uvećavanje prikaza na ekranu"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolira stepen uvećanja prikaza na ekranu i podešavanje položaja."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Praviti pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirivati, prevlačiti, hvatati prstima i praviti druge pokrete."</string>
@@ -1694,10 +1694,10 @@
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Odaberite uslugu koja će se koristiti kada dodirnete dugme za pristupačnost:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Odaberite uslugu koja će se koristiti kada izvedete pokret za pristupačnost (s dva prsta prevucite prema gore s dna ekrana):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Odaberite uslugu koja će se koristiti kada izvedete pokret za pristupačnost (s tri prsta prevucite prema gore s dna ekrana):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Za prebacivanje između usluga dodirnite i zadržite dugme za pristupačnost."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Za prebacivanje između usluga s dva prsta prevucite prema gore i zadržite."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Za prebacivanje između usluga s tri prsta prevucite prema gore i zadržite."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Uvećanje"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Da prebacujete između usluga, dodirnite i zadržite dugme za pristupačnost."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Da prebacujete između usluga, s dva prsta prevucite prema gore i zadržite."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Da prebacujete između usluga, s tri prsta prevucite prema gore i zadržite."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Uvećavanje"</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prebacivanje na korisnika <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Odjava korisnika <xliff:g id="NAME">%1$s</xliff:g>…"</string>

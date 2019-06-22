@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ការកំណត់សំឡេង"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ដាក់ចំណងជើងមេឌៀដោយស្វ័យប្រវត្តិ"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ដាក់អក្សររត់លើមេឌៀដោយស្វ័យប្រវត្តិ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"គន្លឹះអក្សររត់"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"ការដាក់ត្រួតគ្នា​លើអក្សររត់"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"បើក"</string>

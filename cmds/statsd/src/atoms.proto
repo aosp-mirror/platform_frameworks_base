@@ -309,6 +309,16 @@ message Atom {
             212 [(log_from_module) = "permissioncontroller"];
         GrantPermissionsActivityButtonActions grant_permissions_activity_button_actions =
             213 [(log_from_module) = "permissioncontroller"];
+        LocationAccessCheckNotificationAction location_access_check_notification_action =
+            214 [(log_from_module) = "permissioncontroller"];
+        AppPermissionFragmentActionReported app_permission_fragment_action_reported =
+            215 [(log_from_module) = "permissioncontroller"];
+        AppPermissionFragmentViewed app_permission_fragment_viewed =
+            216 [(log_from_module) = "permissioncontroller"];
+        AppPermissionsFragmentViewed app_permissions_fragment_viewed =
+            217 [(log_from_module) = "permissioncontroller"];
+        PermissionAppsFragmentViewed permission_apps_fragment_viewed =
+            218  [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -6606,4 +6616,134 @@ message GrantPermissionsActivityButtonActions {
 
     // Button clicked by user - same as bit flags in buttons_presented with only single bit set
     optional int32 button_clicked = 5;
+}
+
+/**
+ * Information about LocationAccessCheck notification presented to user
+ */
+message LocationAccessCheckNotificationAction {
+
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // Uid of package for which location access check is presented
+    optional int32 package_uid = 2;
+
+    // Name of package for which location access check is presented
+    optional string package_name = 3;
+
+    enum Result {
+        UNDEFINED = 0;
+        // notification was presented to the user
+        NOTIFICATION_PRESENTED = 1;
+        // notification was declined by the user
+        NOTIFICATION_DECLINED = 2;
+        // notification was clicked by the user
+        NOTIFICATION_CLICKED = 3;
+    }
+
+    // View / interaction recorded
+    optional Result result = 4;
+}
+
+/**
+ * Information about a permission grant or revoke made by user inside AppPermissionFragment
+ */
+message AppPermissionFragmentActionReported {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // unique value identifying a permission group change. A permission group change might result
+    // in multiple of these atoms
+    optional int64 change_id = 2;
+
+    // UID of package the permission belongs to
+    optional int32 uid = 3 [(is_uid) = true];
+
+    // Name of package the permission belongs to
+    optional string package_name = 4;
+
+    // The permission to be granted
+    optional string permission_name = 5;
+
+    // The result of the permission grant
+    optional bool permission_granted = 6;
+}
+
+/**
+* Information about a AppPermissionFragment viewed by user
+*/
+message AppPermissionFragmentViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    // Permission group viewed
+    optional string permission_group_name = 4;
+}
+
+/**
+* Information about a AppPermissionsFragment viewed by user
+*/
+message AppPermissionsFragmentViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // id which identifies single view as every view might have several logging records
+    // with different package information attached
+    optional int64 view_id = 2;
+
+    // Permission group viewed
+    optional string permission_group_name = 3;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 4 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 5;
+
+    // Category in which permission is included
+    enum Category {
+      UNDEFINED = 0;
+      ALLOWED = 1;
+      ALLOWED_FOREGROUND = 2;
+      DENIED = 3;
+    }
+    optional Category category = 6;
+}
+
+/**
+* Information about a PermissionAppsFragment viewed by user.
+* Logged from ui/handheld/PermissionAppsFragment.java
+*/
+message PermissionAppsFragmentViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // id which identifies single view as every view might have several logging records
+    // with different package information attached
+    optional int64 view_id = 2;
+
+    // Permission group viewed
+    optional string permission_group_name = 3;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 4 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 5;
+
+    // Category in which app is included
+    enum Category {
+        UNDEFINED = 0;
+        ALLOWED = 1;
+        ALLOWED_FOREGROUND = 2;
+        DENIED = 3;
+    }
+    optional Category category = 6;
 }
