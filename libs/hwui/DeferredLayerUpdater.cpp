@@ -15,6 +15,9 @@
  */
 #include "DeferredLayerUpdater.h"
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include "renderstate/RenderState.h"
 #include "utils/PaintUtils.h"
 
@@ -36,6 +39,16 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
     setTransform(nullptr);
     mRenderState.removeContextCallback(this);
     destroyLayer();
+}
+
+void DeferredLayerUpdater::setSurfaceTexture(const sp<SurfaceTexture>& consumer) {
+    if (consumer.get() != mSurfaceTexture.get()) {
+        mSurfaceTexture = consumer;
+
+        GLenum target = consumer->getCurrentTextureTarget();
+        LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
+                            "set unsupported SurfaceTexture with target %x", target);
+    }
 }
 
 void DeferredLayerUpdater::onContextDestroyed() {

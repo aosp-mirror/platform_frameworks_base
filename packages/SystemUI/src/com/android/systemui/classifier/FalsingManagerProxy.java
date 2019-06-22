@@ -16,31 +16,51 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_MANAGER_ENABLED;
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
+import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
+import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
+import com.android.systemui.classifier.brightline.FalsingDataProvider;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.util.AsyncSensorManager;
 
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Simple passthrough implementation of {@link FalsingManager} allowing plugins to swap in.
  *
  * {@link FalsingManagerImpl} is used when a Plugin is not loaded.
  */
+@Singleton
 public class FalsingManagerProxy implements FalsingManager {
 
     private FalsingManager mInternalFalsingManager;
+    private final Handler mMainHandler;
 
     @Inject
-    FalsingManagerProxy(Context context, PluginManager pluginManager) {
-        mInternalFalsingManager = new FalsingManagerImpl(context);
+    FalsingManagerProxy(Context context, PluginManager pluginManager,
+            @Named(MAIN_HANDLER_NAME) Handler handler) {
+        mMainHandler = handler;
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                command -> mMainHandler.post(command),
+                properties -> onDeviceConfigPropertiesChanged(context, properties.getNamespace())
+        );
+        setupFalsingManager(context);
         final PluginListener<FalsingPlugin> mPluginListener = new PluginListener<FalsingPlugin>() {
             public void onPluginConnected(FalsingPlugin plugin, Context context) {
                 FalsingManager pluginFalsingManager = plugin.getFalsingManager(context);
@@ -55,6 +75,40 @@ public class FalsingManagerProxy implements FalsingManager {
         };
 
         pluginManager.addPluginListener(mPluginListener, FalsingPlugin.class);
+    }
+
+    private void onDeviceConfigPropertiesChanged(Context context, String namespace) {
+        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+            return;
+        }
+
+        setupFalsingManager(context);
+    }
+
+    /**
+     * Chooses the FalsingManager implementation.
+     */
+    @VisibleForTesting
+    public void setupFalsingManager(Context context) {
+        boolean brightlineEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, false);
+        if (!brightlineEnabled) {
+            mInternalFalsingManager = new FalsingManagerImpl(context);
+        } else {
+            mInternalFalsingManager = new BrightLineFalsingManager(
+                    new FalsingDataProvider(context),
+                    Dependency.get(AsyncSensorManager.class)
+            );
+        }
+
+    }
+
+    /**
+     * Returns the FalsingManager implementation in use.
+     */
+    @VisibleForTesting
+    FalsingManager getInternalFalsingManager() {
+        return mInternalFalsingManager;
     }
 
     @Override
