@@ -124,7 +124,9 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Դեմքի նույնականացում"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Դեմքը ճանաչվեց"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Հաստատվեց"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Հպեք մատնահետքերի սկաներին"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Հպեք մատնահետքի սկաներին"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Մատնահետքի պատկերակ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Դեմքի ճանաչում…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Դեմքի պատկերակ"</string>
@@ -206,7 +208,7 @@
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS-ը միացված է:"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS-ի ստացում:"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Հեռամուտքագրիչը միացված է:"</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Զանգի թրթռոց:"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Թրթռազանգ:"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Զանգակը լռեցված է:"</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />

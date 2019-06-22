@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"მიმდინარეობს თქვენი სახის ძებნა"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"სახის ამოცნობილია"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"დადასტურებული"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"თითის ანაბეჭდის ხატულა"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"მიმდინარეობს თქვენი ძიება…"</string>
@@ -529,7 +531,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ხმის პარამეტრები"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"გავრცობა"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ჩაკეცვა"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ავტომატური სუბტიტრების მედია"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"მედიის ავტომ. სუბტიტრირება"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"მინიშნება სუბტიტრებისთვის"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"სუბტიტრების გადაფარვა"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ჩართვა"</string>
