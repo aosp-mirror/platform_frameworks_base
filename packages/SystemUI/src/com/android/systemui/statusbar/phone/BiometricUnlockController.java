@@ -84,15 +84,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     public static final int MODE_UNLOCK = 5;
 
     /**
-     * Mode in which fingerprint brings up the bouncer because fingerprint unlocking is currently
-     * not allowed.
-     */
-    public static final int MODE_DISMISS_BOUNCER = 6;
-
-    /**
      * Mode in which fingerprint wakes and unlocks the device from a dream.
      */
-    public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 7;
+    public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 6;
 
     /**
      * How much faster we collapse the lockscreen when authenticating with biometric.
@@ -283,15 +277,18 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             wakeUp.run();
         }
         switch (mMode) {
-            case MODE_DISMISS_BOUNCER:
-                Trace.beginSection("MODE_DISMISS");
-                mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
-                        false /* strongAuth */);
+            case MODE_UNLOCK:
+                Trace.beginSection("MODE_UNLOCK");
+                if (!wasDeviceInteractive) {
+                    mPendingShowBouncer = true;
+                } else {
+                    mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
+                            false /* strongAuth */);
+                }
                 Trace.endSection();
                 break;
-            case MODE_UNLOCK:
             case MODE_SHOW_BOUNCER:
-                Trace.beginSection("MODE_UNLOCK or MODE_SHOW_BOUNCER");
+                Trace.beginSection("MODE_SHOW_BOUNCER");
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
@@ -381,6 +378,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
+                // Let's not wake-up to lock screen when not bypassing, otherwise the notification
+                // would move as the user tried to tap it.
                 return faceStayingOnKeyguard ? MODE_NONE : MODE_WAKE_AND_UNLOCK_PULSING;
             } else if (!face && (unlockingAllowed || !mUnlockMethodCache.isMethodSecure())) {
                 return MODE_WAKE_AND_UNLOCK;
@@ -388,9 +387,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                 if (!(mDozeScrimController.isPulsing() && !unlockingAllowed)) {
                     Log.wtf(TAG, "Face somehow arrived when the device was not interactive");
                 }
-                // We could theoretically return MODE_NONE, but this means that the device
-                // would be not interactive, unlocked, and the user would not see the device state.
-                return MODE_ONLY_WAKE;
+                if (faceStayingOnKeyguard) {
+                    // We could theoretically return MODE_NONE, but this means that the device
+                    // would be not interactive, unlocked, and the user would not see the device
+                    // state.
+                    return MODE_ONLY_WAKE;
+                } else {
+                    // Wake-up fading out nicely
+                    return MODE_WAKE_AND_UNLOCK_PULSING;
+                }
             } else {
                 return MODE_SHOW_BOUNCER;
             }
@@ -399,10 +404,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            if ((mStatusBarKeyguardViewManager.isBouncerShowing()
-                    || mStatusBarKeyguardViewManager.isBouncerPartiallyVisible())
+            if ((mStatusBarKeyguardViewManager.isBouncerShowing())
                     && unlockingAllowed) {
-                return MODE_DISMISS_BOUNCER;
+                return MODE_UNLOCK;
             } else if (unlockingAllowed) {
                 return faceStayingOnKeyguard ? MODE_ONLY_WAKE : MODE_UNLOCK;
             } else if (face) {

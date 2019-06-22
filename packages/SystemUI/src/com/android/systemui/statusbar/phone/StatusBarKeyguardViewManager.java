@@ -677,10 +677,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mBouncer.isShowing();
     }
 
-    public boolean isBouncerPartiallyVisible() {
-        return mBouncer.isPartiallyVisible();
-    }
-
     public boolean isFullscreenBouncer() {
         return mBouncer.isFullscreenBouncer();
     }
