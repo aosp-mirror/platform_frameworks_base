@@ -59,6 +59,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     private static final String KEY_TRY_AGAIN_VISIBILITY = "key_try_again_visibility";
     private static final String KEY_CONFIRM_VISIBILITY = "key_confirm_visibility";
+    private static final String KEY_CONFIRM_ENABLED = "key_confirm_enabled";
     private static final String KEY_STATE = "key_state";
     private static final String KEY_ERROR_TEXT_VISIBILITY = "key_error_text_visibility";
     private static final String KEY_ERROR_TEXT_STRING = "key_error_text_string";
@@ -232,6 +233,10 @@ public abstract class BiometricDialogView extends LinearLayout {
             handleResetMessage();
             updateState(STATE_AUTHENTICATING);
             showTryAgainButton(false /* show */);
+
+            mPositiveButton.setVisibility(View.VISIBLE);
+            mPositiveButton.setEnabled(false);
+
             mCallback.onTryAgainPressed();
         });
 
@@ -243,6 +248,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     public void onSaveState(Bundle bundle) {
         bundle.putInt(KEY_TRY_AGAIN_VISIBILITY, mTryAgainButton.getVisibility());
         bundle.putInt(KEY_CONFIRM_VISIBILITY, mPositiveButton.getVisibility());
+        bundle.putBoolean(KEY_CONFIRM_ENABLED, mPositiveButton.isEnabled());
         bundle.putInt(KEY_STATE, mState);
         bundle.putInt(KEY_ERROR_TEXT_VISIBILITY, mErrorText.getVisibility());
         bundle.putCharSequence(KEY_ERROR_TEXT_STRING, mErrorText.getText());
@@ -261,6 +267,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                     mContext.getTheme());
             image.setColorFilter(mDevicePolicyManager.getOrganizationColorForUser(mUserId),
                     PorterDuff.Mode.DARKEN);
+            backgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             backgroundView.setImageDrawable(image);
         } else {
             backgroundView.setImageDrawable(null);
@@ -275,9 +282,15 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         if (mRestoredState == null) {
             updateState(STATE_AUTHENTICATING);
-            mErrorText.setText(getHintStringResourceId());
-            mErrorText.setContentDescription(mContext.getString(getHintStringResourceId()));
-            mErrorText.setVisibility(View.VISIBLE);
+            final int hint = getHintStringResourceId();
+            if (hint != 0) {
+                mErrorText.setText(hint);
+                mErrorText.setContentDescription(mContext.getString(hint));
+                mErrorText.setVisibility(View.VISIBLE);
+            } else {
+                mErrorText.setVisibility(View.INVISIBLE);
+            }
+            announceAccessibilityEvent();
         } else {
             updateState(mState);
         }
@@ -425,6 +438,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         mErrorText.setText(message);
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
+        mErrorText.setVisibility(View.VISIBLE);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RESET_MESSAGE),
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
@@ -458,7 +472,9 @@ public abstract class BiometricDialogView extends LinearLayout {
     public void updateState(int newState) {
         if (newState == STATE_PENDING_CONFIRMATION) {
             mHandler.removeMessages(MSG_RESET_MESSAGE);
-            mErrorText.setVisibility(View.INVISIBLE);
+            mErrorText.setTextColor(mTextColor);
+            mErrorText.setText(R.string.biometric_dialog_tap_confirm);
+            mErrorText.setVisibility(View.VISIBLE);
             announceAccessibilityEvent();
             mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(true);
@@ -489,6 +505,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         mTryAgainButton.setVisibility(tryAgainVisibility);
         final int confirmVisibility = bundle.getInt(KEY_CONFIRM_VISIBILITY);
         mPositiveButton.setVisibility(confirmVisibility);
+        final boolean confirmEnabled = bundle.getBoolean(KEY_CONFIRM_ENABLED);
+        mPositiveButton.setEnabled(confirmEnabled);
         mState = bundle.getInt(KEY_STATE);
         mErrorText.setText(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
         mErrorText.setContentDescription(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));

@@ -1904,7 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Yangilanish borligini tekshirish"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ko‘rish uchun SMS ilovasini oching"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Ayrim funksiyalar cheklanishi mumkin"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Ishchi profil yopiq"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Qulfini ochish uchun bosing"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> qurilmasiga ulandi"</string>

@@ -170,6 +170,8 @@ public class BiometricService extends SystemService {
         // the authentication.
         byte[] mTokenEscrow;
 
+        // Timestamp when authentication started
+        private long mStartTimeMs;
         // Timestamp when hardware authentication occurred
         private long mAuthenticatedTimeMs;
 
@@ -1076,6 +1078,9 @@ public class BiometricService extends SystemService {
                     latency,
                     Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
+
+            final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
+
             int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
                     ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
                     : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
@@ -1087,7 +1092,8 @@ public class BiometricService extends SystemService {
                         + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
                         + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
-                        + ", Error: " + error);
+                        + ", Error: " + error
+                        + ", Latency: " + latency);
             }
             // Auth canceled
             StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
@@ -1098,7 +1104,8 @@ public class BiometricService extends SystemService {
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     error,
                     0 /* vendorCode */,
-                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
+                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId),
+                    latency);
         }
     }
 
@@ -1422,6 +1429,9 @@ public class BiometricService extends SystemService {
                     && mCurrentAuthSession.mState == STATE_AUTH_PAUSED;
 
             mCurrentAuthSession = mPendingAuthSession;
+
+            // Time starts when lower layers are ready to start the client.
+            mCurrentAuthSession.mStartTimeMs = System.currentTimeMillis();
             mPendingAuthSession = null;
 
             mCurrentAuthSession.mState = STATE_AUTH_STARTED;

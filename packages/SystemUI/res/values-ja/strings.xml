@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"顔を認証中です"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"確認しました"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"指紋認証センサーをタップしてください"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋アイコン"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"顔を認証しています…"</string>
@@ -529,7 +531,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"音声の設定"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"自動字幕起こしメディア"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"メディアの自動字幕起こし"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"字幕のヒントを閉じる"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"字幕のオーバーレイ"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"有効にする"</string>

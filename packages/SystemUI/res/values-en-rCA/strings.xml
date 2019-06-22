@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Looking for your face"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Face authenticated"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmed"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tap Confirm to complete"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Touch the fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerprint icon"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Looking for you…"</string>
@@ -529,7 +530,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Sound settings"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expand"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Collapse"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automatically caption media"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automatically subtitle media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Close captions tip"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Captions overlay"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"enable"</string>

@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Güncellemeleri denetle"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Görüntülemek için SMS uygulamasını açın"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Bazı işlevler sınırlı olabilir"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Bazı işlevler sınırlanabilir"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"İş profili kilitlendi"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmak için dokunun"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> cihazına bağlandı"</string>

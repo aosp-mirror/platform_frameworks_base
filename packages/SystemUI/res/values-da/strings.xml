@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Søger efter dit ansigt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Ansigtet er godkendt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bekræftet"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tryk på Bekræft for at udføre"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Sæt fingeren på fingeraftrykslæseren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon for fingeraftryk"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Forsøger at finde dig…"</string>
@@ -832,7 +833,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Luk"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Indstillinger"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk ned for at afvise"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk ned for at fjerne"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises som integreret billede"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>

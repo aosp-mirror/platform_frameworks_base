@@ -1668,7 +1668,7 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਟੈਪ ਕਰਕੇ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਕ੍ਰੋਲ ਕਰੋ):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਸੇਵਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"ਸੇਵਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>

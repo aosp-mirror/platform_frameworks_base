@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"உறுதிப்படுத்தப்பட்டது"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"கைரேகை ஐகான்"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"உங்கள் முகத்தைத் தேடுகிறது…"</string>
@@ -399,8 +401,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"திறக்க, மீண்டும் தட்டவும்"</string>
-    <!-- no translation found for keyguard_unlock (6035822649218712063) -->
-    <skip />
+    <string name="keyguard_unlock" msgid="6035822649218712063">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"இந்தச் சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"இந்தச் சாதனத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ஃபோனிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>

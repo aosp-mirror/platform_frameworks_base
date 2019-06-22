@@ -184,8 +184,8 @@ public final class ProcessList {
     // is not entirely fatal but is generally a bad idea.
     static final int BACKUP_APP_ADJ = 300;
 
-    // This is a process bound by the system that's more important than services but not so
-    // perceptible that it affects the user immediately if killed.
+    // This is a process bound by the system (or other app) that's more important than services but
+    // not so perceptible that it affects the user immediately if killed.
     static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
 
     // This is a process only hosting components that are perceptible to the
@@ -279,7 +279,7 @@ public final class ProcessList {
     // can't give it a different value for every possible kind of process.
     private final int[] mOomAdj = new int[] {
             FOREGROUND_APP_ADJ, VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ,
-            BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_LMK_FIRST_ADJ
+            PERCEPTIBLE_LOW_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_LMK_FIRST_ADJ
     };
     // These are the low-end OOM level limits.  This is appropriate for an
     // HVGA or smaller phone with less than 512MB.  Values are in KB.

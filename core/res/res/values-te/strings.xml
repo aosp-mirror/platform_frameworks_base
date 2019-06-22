@@ -1584,7 +1584,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"బ్రౌజర్‌ను ప్రారంభించాలా?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"కాల్‌ను ఆమోదించాలా?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ఎల్లప్పుడూ"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి మాత్రమే"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"సెట్టింగ్‌లు"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s కార్యాలయ ప్రొఫైల్‌కు మద్దతు ఇవ్వదు"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"టాబ్లెట్"</string>

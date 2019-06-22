@@ -48,9 +48,11 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -145,10 +147,13 @@ public class SystemUIFactory {
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar, StatusBarStateController statusBarStateController,
-            NotificationListener listener) {
+            StatusBar statusBar,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
+            StatusBarStateController statusBarStateController) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
-                listener, Dependency.get(NotificationMediaManager.class));
+                wakeUpCoordinator, keyguardBypassController,
+                Dependency.get(NotificationMediaManager.class));
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,

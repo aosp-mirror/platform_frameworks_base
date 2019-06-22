@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Распознавание лица"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Лицо распознано"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Подтверждено"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок отпечатка пальца"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Поиск лица…"</string>
@@ -197,7 +199,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Сменить сеть"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Сведения о расходе заряда батареи"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Заряд батареи в процентах: <xliff:g id="NUMBER">%d</xliff:g>."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Заряд батареи – <xliff:g id="PERCENTAGE">%1$s</xliff:g> %. При текущем уровне расхода его хватит примерно на такое время: <xliff:g id="TIME">%2$s</xliff:g>."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Заряд батареи в процентах: <xliff:g id="PERCENTAGE">%1$s</xliff:g>. Оценка оставшегося времени работы: <xliff:g id="TIME">%2$s</xliff:g>."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Зарядка батареи. Текущий заряд: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Настройки"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Уведомления"</string>
@@ -457,7 +459,7 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Режим энергосбережения включен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Откл. фоновой передачи данных"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Отключить режим энергосбережения"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"При записи сообщений или трансляции экрана приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" может получить доступ к конфиденциальной информации, которая отображается на экране или воспроизводится на устройстве, например к аудиозаписям, паролям, фото, сообщениям и платежным данным."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"При записи сообщений или трансляции экрана приложение <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> может получить доступ к конфиденциальной информации, которая отображается на экране или воспроизводится на устройстве, например к аудиозаписям, паролям, фото, сообщениям и платежным данным."</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"При записи сообщений или трансляции экрана сервис может получить доступ к конфиденциальной информации, которая отображается на экране или воспроизводится на устройстве, например к аудиозаписям, паролям, фото, сообщениям и платежным данным."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Раскрытие личной информации при записи или трансляции"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Больше не показывать"</string>

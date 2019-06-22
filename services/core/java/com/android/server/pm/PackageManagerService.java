@@ -1505,7 +1505,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         final List<String> whitelistedRestrictedPermissions = ((args.installFlags
                                 & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0
                                     && parentRes.pkg != null)
-                                ? parentRes.pkg.requestedPermissions : null;
+                                ? parentRes.pkg.requestedPermissions
+                                : args.whitelistedRestrictedPermissions;
 
                         // Handle the parent package
                         handlePackagePostInstall(parentRes, grantPermissions,

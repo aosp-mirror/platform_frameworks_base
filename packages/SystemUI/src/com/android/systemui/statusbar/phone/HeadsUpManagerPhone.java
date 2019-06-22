@@ -472,8 +472,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             Runnable removeHeadsUpRunnable = () -> {
                 if (!mVisualStabilityManager.isReorderingAllowed()
                         // We don't want to allow reordering while pulsing, but headsup need to
-                        // time out if we're dozing.
-                        && !mStatusBarStateController.isDozing()) {
+                        // time out anyway
+                        && !entry.showingPulsing()) {
                     mEntriesToRemoveWhenReorderingAllowed.add(entry);
                     mVisualStabilityManager.addReorderingAllowedCallback(
                             HeadsUpManagerPhone.this);

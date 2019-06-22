@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在尋找您的臉孔"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"臉孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"已確認"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"請輕觸指紋感應器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋圖示"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在搜尋您的臉孔…"</string>
