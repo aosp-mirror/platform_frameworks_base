@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -33,9 +34,11 @@ import com.android.systemui.SystemUIFactory;
 
 /**
  * CarFacetButton is a ui component designed to be used as a shortcut for an app of a defined
- * category. It can also render a indicator impling that there are more options of apps to launch
+ * category. It can also render a indicator implying that there are more options of apps to launch
  * using this component. This is done with a "More icon" currently an arrow as defined in the layout
  * file. The class is to serve as an example.
+ *
+ * New activity will be launched on the same display as the button is on.
  * Usage example: A button that allows a user to select a music app and indicate that there are
  * other music apps installed.
  */
@@ -111,15 +114,20 @@ public class CarFacetButton extends LinearLayout {
             }
 
             setOnClickListener(v -> {
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mContext.getDisplayId());
                 intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
-                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
             });
 
             if (longPressIntentString != null) {
                 final Intent longPressIntent = Intent.parseUri(longPressIntentString,
                         Intent.URI_INTENT_SCHEME);
                 setOnLongClickListener(v -> {
-                    mContext.startActivityAsUser(longPressIntent, UserHandle.CURRENT);
+                    ActivityOptions options = ActivityOptions.makeBasic();
+                    options.setLaunchDisplayId(mContext.getDisplayId());
+                    mContext.startActivityAsUser(longPressIntent, options.toBundle(),
+                            UserHandle.CURRENT);
                     return true;
                 });
             }
@@ -192,9 +200,9 @@ public class CarFacetButton extends LinearLayout {
     /**
      * Updates the visual state to let the user know if it's been selected.
      *
-     * @param selected     true if should update the alpha of the icon to selected, false otherwise
+     * @param selected true if should update the alpha of the icon to selected, false otherwise
      * @param showMoreIcon true if the "more icon" should be shown, false otherwise. Note this
-     *                     is ignored if the attribute useMoreIcon is set to false
+     * is ignored if the attribute useMoreIcon is set to false
      */
     public void setSelected(boolean selected, boolean showMoreIcon) {
         mSelected = selected;
@@ -207,7 +215,7 @@ public class CarFacetButton extends LinearLayout {
 
     /**
      * @return The id of the display the button is on or Display.INVALID_DISPLAY if it's not yet on
-     *         a display.
+     * a display.
      */
     public int getDisplayId() {
         Display display = getDisplay();
