@@ -54,7 +54,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
 
-    <application android:debuggable="true">
+    <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.systemui.screenshot.ScreenshotStubActivity" />
 
