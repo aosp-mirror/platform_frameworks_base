@@ -267,14 +267,14 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"通知"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"販売店デモ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 接続"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"アプリを実行しています"</string>
-    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"アプリが電池を消費しています"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"実行中のアプリ"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"電池を消費しているアプリ"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"タップして電池やデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android システム"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"個人用プロファイルに切り替える"</string>
     <string name="managed_profile_label" msgid="8947929265267690522">"仕事用プロファイルに切り替える"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"顔を隠しているものをすべて外してください"</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"黒いバーを含め、画面の上部をきれいにしてください"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"顔を確認できません。ハードウェアを利用できません。"</string>

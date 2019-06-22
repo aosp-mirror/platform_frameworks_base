@@ -710,6 +710,9 @@ public class NotificationPanelView extends PanelView implements
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusView.getClockPreferredY(totalHeight);
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
+            final boolean hasVisibleNotifications =
+                    !bypassEnabled && mNotificationStackScroller.getVisibleNotificationCount() != 0;
+            mKeyguardStatusView.setHasVisibleNotifications(hasVisibleNotifications);
             mClockPositionAlgorithm.setup(
                     mStatusBarMinHeight,
                     totalHeight - bottomPadding,
@@ -720,7 +723,7 @@ public class NotificationPanelView extends PanelView implements
                             - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
                     clockPreferredY,
                     hasCustomClock(),
-                    mNotificationStackScroller.getVisibleNotificationCount() != 0,
+                    hasVisibleNotifications,
                     mInterpolatedDarkAmount,
                     mEmptyDragAmount,
                     bypassEnabled,
@@ -1384,6 +1387,7 @@ public class NotificationPanelView extends PanelView implements
             mStatusBar.setQsExpanded(expanded);
             mNotificationContainerParent.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
+            mKeyguardBypassController.setQSExpanded(expanded);
         }
     }
 

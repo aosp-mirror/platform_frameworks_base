@@ -81,10 +81,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        for (MotionEvent motionEvent : mMotionEvents) {
-            motionEvent.recycle();
-        }
-        mMotionEvents.clear();
+        clearMotionEvents();
     }
 
     @Test
@@ -403,43 +400,43 @@ public class ZigZagClassifierTest extends SysuiTestCase {
             mOffsetX = rand.nextInt(2000) - 1000;
             mOffsetY = rand.nextInt(2000) - 1000;
             try {
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_fewTouchesVertical();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_vertical();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testFail_horizontalStraightVerticalZigZag();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testFail_horizontalZigZagVerticalStraight();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testFail_minimumTouchesHorizontal();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testFail_minimumTouchesVertical();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_fewTouchesHorizontal();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_fortyFiveDegreesStraight();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_horizontal();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_horizontalStraightVerticalZigZag();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 testPass_horizontalZigZagVerticalStraight();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between0And45();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between45And90();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between90And135();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between135And180();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between180And225();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between225And270();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between270And315();
-                mMotionEvents.clear();
+                clearMotionEvents();
                 test_between315And360();
             } catch (AssertionError e) {
                 throw new AssertionError("Random origin failure in iteration " + i, e);
@@ -447,6 +444,12 @@ public class ZigZagClassifierTest extends SysuiTestCase {
         }
     }
 
+    private void clearMotionEvents() {
+        for (MotionEvent motionEvent : mMotionEvents) {
+            motionEvent.recycle();
+        }
+        mMotionEvents.clear();
+    }
 
     private void appendMotionEvent(float x, float y) {
         x += mOffsetX;

@@ -943,12 +943,6 @@ public abstract class SensorManager {
     /** @hide */
     protected abstract void destroyDirectChannelImpl(SensorDirectChannel channel);
 
-    /** @removed */
-    @Deprecated
-    public int configureDirectChannel(SensorDirectChannel channel, Sensor sensor, int rateLevel) {
-        return configureDirectChannelImpl(channel, sensor, rateLevel);
-    }
-
     /** @hide */
     protected abstract int configureDirectChannelImpl(
             SensorDirectChannel channel, Sensor s, int rate);

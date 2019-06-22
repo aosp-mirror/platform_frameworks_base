@@ -267,6 +267,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                     mContext.getTheme());
             image.setColorFilter(mDevicePolicyManager.getOrganizationColorForUser(mUserId),
                     PorterDuff.Mode.DARKEN);
+            backgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             backgroundView.setImageDrawable(image);
         } else {
             backgroundView.setImageDrawable(null);

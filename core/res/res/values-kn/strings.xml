@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ನಿಮ್ಮ ತಲೆಯನ್ನು ಹೆಚ್ಚು ತಿರುಗಿಸಬೇಡಿ."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ನಿಮ್ಮ ತಲೆಯನ್ನು ಸ್ವಲ್ಪ ಕಡಿಮೆ ತಿರುಗಿಸಿ."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರೆಮಾಡುವ ಯಾವುದನ್ನಾದರೂ ತೆಗೆದುಹಾಕಿ."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ಬ್ಲ್ಯಾಕ್ ಬಾರ್ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲ್ಭಾಗವನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
@@ -889,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ಅನ್‌ಲಾಕ್ ಪ್ರದೇಶವನ್ನು ವಿಸ್ತರಿಸು."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ಸ್ಲೈಡ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ಪ್ಯಾಟರ್ನ್ ಅನ್‌ಲಾಕ್."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ಮುಖದ ಅನ್‌ಲಾಕ್."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ಫೇಸ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ಪಿನ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"ಸಿಮ್‌ ಪಿನ್‌ ಅನ್‌ಲಾಕ್ ಮಾಡಿ."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"ಸಿಮ್‌ PUK ಅನ್‌ಲಾಕ್ ಮಾಡಿ."</string>

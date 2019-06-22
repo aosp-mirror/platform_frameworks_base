@@ -583,8 +583,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Trochę mniej obróć głowę."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Trochę mniej obróć głowę."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Usuń wszystko, co zasłania Ci twarz."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Wyczyść górną krawędź ekranu, w tym czarny pasek"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
@@ -1717,10 +1716,10 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Naciśnij i przytrzymaj oba przyciski głośności przez trzy sekundy, by użyć usługi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Wybierz usługę używaną po kliknięciu przycisku ułatwień dostępu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wybierz usługę używaną w przypadku gestu ułatwień dostępu (przesunięcie dwoma palcami z dołu ekranu w górę):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wybierz usługę używaną w przypadku gestu ułatwień dostępu (przesunięcie trzema palcami z dołu ekranu w górę):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Aby przełączać usługi, kliknij i przytrzymaj przycisk ułatwień dostępu."</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wybierz usługę, której chcesz używać w połączeniu z gestami ułatwień dostępu (przesuń trzema palcami z dołu ekranu w górę):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Aby przełączać usługi, naciśnij i przytrzymaj przycisk ułatwień dostępu."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Aby przełączać usługi, przesuń dwoma palcami w górę i przytrzymaj."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Aby przełączać usługi, przesuń trzema palcami w górę i przytrzymaj."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Aby przełączyć usługi, przesuń trzema palcami w górę i przytrzymaj."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Powiększenie"</string>
     <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Przełączam na użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>

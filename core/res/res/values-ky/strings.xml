@@ -255,7 +255,7 @@
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Аппараттык баскычтоп"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Коопсуздук"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"Унаа режими"</string>
-    <string name="notification_channel_account" msgid="7577959168463122027">"Каттоо эсебинин абалы"</string>
+    <string name="notification_channel_account" msgid="7577959168463122027">"Аккаунттун абалы"</string>
     <string name="notification_channel_developer" msgid="7579606426860206060">"Иштеп чыгуучунун билдирүүлөрү"</string>
     <string name="notification_channel_developer_important" msgid="5251192042281632002">"Иштеп чыгуучулардын маанилүү билдирүүлөрү"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"Жаңыртуулар"</string>
@@ -577,8 +577,7 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
-    <!-- no translation found for face_acquired_sensor_dirty (7905138627046865579) -->
-    <skip />
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Жүз ырасталбай жатат. Аппараттык камсыздоо жеткиликсиз."</string>
@@ -1671,10 +1670,10 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштей турган кызматты тандаңыз:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн кызматты тандаңыз (эки манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн кызматты тандаңыз (үч манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Атайын мүмкүнчүлүктөр жаңсоосу аркылуу иштетиле турган кызматты тандаңыз (үч манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Кызматтарды которуштуруу үчүн Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Кызматтарды которуштуруу үчүн эки манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Кызматтарды которуштуруу үчүн үч манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Башка кызматка которулуу үчүн үч манжаңыз менен экранды өйдө сүрүп, кармап туруңуз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Чоңойтуу"</string>
     <string name="user_switched" msgid="3768006783166984410">"Учурдагы колдонуучу <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> дегенге которулууда…"</string>
@@ -1907,7 +1906,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Жаңыртууну издөө"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Сизге жаңы билдирүүлөр келди"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Көрүү үчүн SMS колдонмосун ачыңыз"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Айрым функциялар чектелиши мүмкүн"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Жумуш профили кулпуланган"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Таптап жумуш профилин ачыңыз"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> менен туташты"</string>

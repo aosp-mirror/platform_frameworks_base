@@ -581,14 +581,14 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. verificare volto. Hardware non disponibile."</string>
-    <string name="face_error_timeout" msgid="981512090365729465">"Riprova lo Sblocco col sorriso."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Riprova Sblocco col sorriso."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Imposs. salvare dati nuovi volti. Elimina un volto vecchio."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operazione associata al volto annullata."</string>
     <string name="face_error_user_canceled" msgid="5317030072349668946">"Sblocco col sorriso annullato dall\'utente."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Troppi tentativi. Riprova più tardi."</string>
     <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Troppi tentativi. Sblocco col sorriso disattivato"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Impossibile verificare il volto. Riprova."</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Non hai configurato lo Sblocco col sorriso."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Non hai configurato Sblocco col sorriso."</string>
     <string name="face_error_hw_not_present" msgid="8302690289757559738">"Sblocco col sorriso non supportato su questo dispositivo."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
@@ -1904,7 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Verifica la presenza di aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Apri l\'app SMS per la visualizzazione"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Funzionalità potenzialmente limitate"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Alcune funzionalità sono limitate"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profilo di lavoro bloccato"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Tocca per sbloc. prof. di lav."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

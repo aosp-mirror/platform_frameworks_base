@@ -4556,12 +4556,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         lastFocus = displayContent.mLastFocus;
                         newFocus = displayContent.mCurrentFocus;
-                    }
-                    if (lastFocus == newFocus) {
-                        // Focus is not changing, so nothing to do.
-                        return;
-                    }
-                    synchronized (mGlobalLock) {
+                        if (lastFocus == newFocus) {
+                            // Focus is not changing, so nothing to do.
+                            return;
+                        }
                         displayContent.mLastFocus = newFocus;
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Focus moving from " + lastFocus +
                                 " to " + newFocus + " displayId=" + displayContent.getDisplayId());

@@ -239,13 +239,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             | Context.BIND_SHOWING_UI
             | Context.BIND_SCHEDULE_LIKE_TOP_APP;
 
-    @Retention(SOURCE)
-    @IntDef({HardKeyboardBehavior.WIRELESS_AFFORDANCE, HardKeyboardBehavior.WIRED_AFFORDANCE})
-    private @interface  HardKeyboardBehavior {
-        int WIRELESS_AFFORDANCE = 0;
-        int WIRED_AFFORDANCE = 1;
-    }
-
     /**
      * A protected broadcast intent action for internal use for {@link PendingIntent} in
      * the notification.
@@ -689,8 +682,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
-    @HardKeyboardBehavior
-    private final int mHardKeyboardBehavior;
 
     /**
      * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
@@ -1465,8 +1456,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
-        mHardKeyboardBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_externalHardKeyboardBehavior);
         mIsLowRam = ActivityManager.isLowRamDeviceStatic();
 
         Bundle extras = new Bundle();
@@ -2435,13 +2424,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         if (mWindowManagerInternal.isHardKeyboardAvailable()) {
-            if (mHardKeyboardBehavior == HardKeyboardBehavior.WIRELESS_AFFORDANCE) {
-                // When physical keyboard is attached, we show the ime switcher (or notification if
-                // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
-                // exists in the IME switcher dialog.  Might be OK to remove this condition once
-                // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
-                return true;
-            }
+            // When physical keyboard is attached, we show the ime switcher (or notification if
+            // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
+            // exists in the IME switcher dialog.  Might be OK to remove this condition once
+            // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
+            return true;
         } else if ((visibility & InputMethodService.IME_VISIBLE) == 0) {
             return false;
         }
