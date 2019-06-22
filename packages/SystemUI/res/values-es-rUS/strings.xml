@@ -215,7 +215,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación ignorada"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Pantalla de notificaciones"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla bloqueada"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueo"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Configuración"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Recientes"</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Pantalla bloqueada del perfil de trabajo"</string>
@@ -827,7 +827,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar orden de configuración"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla bloqueada"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla de bloqueo"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expandir"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Cerrar"</string>

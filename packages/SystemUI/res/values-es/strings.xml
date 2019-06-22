@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Ajustes de sonido"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mostrar"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ocultar"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtítulos autom. multimedia"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Transcripción instantánea"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Cerrar las recomendaciones de subtítulos"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Superposición de subtítulos"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"habilitar"</string>
