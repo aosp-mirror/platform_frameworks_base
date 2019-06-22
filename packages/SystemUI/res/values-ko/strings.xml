@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"얼굴을 찾는 중"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"얼굴이 인증되었습니다."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"확인함"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"지문 센서를 터치하세요."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"지문 아이콘"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"찾는 중..."</string>
@@ -529,7 +531,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"소리 설정"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"펼치기"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"접기"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"자동 자막 미디어"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"미디어 자막 자동 생성"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"자막 팁 닫기"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"캡션 오버레이"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"사용"</string>

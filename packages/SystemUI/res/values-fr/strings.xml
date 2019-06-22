@@ -72,7 +72,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Enregistrement capture écran…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement de la capture d\'écran…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Capture d\'écran enregistrée"</string>
-    <string name="screenshot_saved_text" msgid="7574667448002050363">"Appuyez pour afficher votre capture d\'écran"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Appuyez pour voir la capture d\'écran"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"Impossible d\'enregistrer la capture d\'écran"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Essayez de nouveau de faire une capture d\'écran"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Recherche de votre visage…"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmé"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Appuyez sur \"Confirmer\" pour terminer"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Appuyez sur le lecteur d\'empreinte digitale"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icône d\'empreinte digitale"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Recherche de votre visage…"</string>
@@ -412,7 +413,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorité\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge sans fil (à 100 % dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge sans fil (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge... (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge rapide… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge lente… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
