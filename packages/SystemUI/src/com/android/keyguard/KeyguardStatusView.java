@@ -145,6 +145,13 @@ public class KeyguardStatusView extends GridLayout implements
         return mClockView.hasCustomClock();
     }
 
+    /**
+     * Set whether or not the lock screen is showing notifications.
+     */
+    public void setHasVisibleNotifications(boolean hasVisibleNotifications) {
+        mClockView.setHasVisibleNotifications(hasVisibleNotifications);
+    }
+
     private void setEnableMarquee(boolean enabled) {
         if (DEBUG) Log.v(TAG, "Schedule setEnableMarquee: " + (enabled ? "Enable" : "Disable"));
         if (enabled) {

@@ -49,6 +49,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.wakelock.SettableWakeLock;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -76,6 +78,12 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private ZenModeController mZenModeController;
+    @Mock
+    private SettableWakeLock mMediaWakeLock;
+    @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -210,6 +218,20 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         verify(mContentResolver, never()).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
+    @Test
+    public void onDestroy_noCrash() {
+        mProvider.onDestroy();
+    }
+
+    @Test
+    public void onDestroy_unregisterListeners() {
+        mProvider.registerClockUpdate();
+        mProvider.onDestroy();
+        verify(mMediaWakeLock).setAcquired(eq(false));
+        verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
+        verify(mKeyguardUpdateMonitor).removeCallback(any());
+    }
+
     private class TestableKeyguardSliceProvider extends KeyguardSliceProvider {
         int mCleanDateFormatInvokations;
         private int mCounter;
@@ -223,6 +245,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
             super.onCreateSliceProvider();
             mAlarmManager = KeyguardSliceProviderTest.this.mAlarmManager;
             mContentResolver = KeyguardSliceProviderTest.this.mContentResolver;
+            mZenModeController = KeyguardSliceProviderTest.this.mZenModeController;
+            mMediaWakeLock = KeyguardSliceProviderTest.this.mMediaWakeLock;
             return true;
         }
 
@@ -239,7 +263,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
         @Override
         public KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
-            return mock(KeyguardUpdateMonitor.class);
+            return mKeyguardUpdateMonitor;
         }
 
         @Override

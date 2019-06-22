@@ -2374,6 +2374,11 @@ enum PageId {
     // Settings > Apps and notifications > Notifications > Gentle notifications
     GENTLE_NOTIFICATIONS_SCREEN = 1715;
 
+    // OPEN: Settings > System > Gestures > Global Actions Panel
+    // CATEGORY: SETTINGS
+    // OS: Q
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1728;
+
     // OPEN: Settings > Display > Dark Theme
     // CATEGORY: SETTINGS
     // OS: Q
@@ -2384,9 +2389,4 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     MODULE_LICENSES_DASHBOARD = 1746;
-
-    // OPEN: Settings > System > Gestures > Global Actions Panel
-    // CATEGORY: SETTINGS
-    // OS: Q
-    GLOBAL_ACTIONS_PANEL_SETTINGS = 1800;
 }

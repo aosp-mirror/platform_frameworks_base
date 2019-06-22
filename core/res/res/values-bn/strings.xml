@@ -887,7 +887,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"আনলক এলাকা প্রসারিত করুন৷"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"স্লাইড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"প্যাটার্ন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"মুখের সাহায্যে আনলক করুন৷"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"মুখের সাহায্যে আনলক৷"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"পিন দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"সিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"সিম পিইউকে আনলক।"</string>
@@ -1668,7 +1668,7 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যবহার করতে ভলিউম কী বোতাম ৩ সেকেন্ডের জন্য চেপে ধরে রাখুন"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"অ্যাক্সেসিবিলিটি বোতামে ট্যাপ করে ব্যবহার করার জন্য এই পরিষেবাটি বেছে নিন:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"অ্যাক্সেসিবিলিটি জেসচারের সাহায্যে ব্যবহার করার জন্য এই পরিষেবা বেছে নিন (দুটি আঙুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"অ্যাক্সেসিবিলিটি জেসচারের সাহায্যে ব্যবহার করার জন্য এই পরিষেবা বেছে নিন (তিনটি আঙুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"অ্যাক্সেসিবিলিটি জেসচারের সাহায্যে ব্যবহার করার জন্য এই পরিষেবা বেছে নিন (তিনটি আঙ্গুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে অ্যাক্সেসিবিলিটি বোতামটি টাচ করে ধরে রাখুন।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে, দুটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে রাখুন।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"একটি পরিষেবা থেকে অন্য পরিষেবায় পাল্টাতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে রাখুন।"</string>

@@ -553,7 +553,7 @@
     <string name="permlab_manageFace" msgid="7262837876352591553">"dhibiti maunzi ya kufungua kwa uso"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Huruhusu programu iombe njia za kuongeza na kufuta violezo vya uso vitakavyotumiwa."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"tumia maunzi ya kufungua kwa uso"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Huruhusu programu itumie maunzi ya kufungua kwa uso kwa ajili ya uthibitishaji"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Huruhusu programu itumie maunzi ya kufungua kwa uso ili kuthibitisha"</string>
     <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Kufungua kwa uso"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Sajili uso wako tena"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ili kuimarisha utambuzi, tafadhali sajili uso wako tena"</string>
@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Sogeza simu upande wa kushoto."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Sogeza simu upande wa kulia."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Tafadhali angalia kifaa chako moja kwa moja."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Imeshindwa kuona uso wako. Angalia simu."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Uso wako hauonekani. Angalia simu."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Tafadhali sajili uso wako tena."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Haiwezi tena kutambua uso. Jaribu tena."</string>
@@ -585,7 +585,7 @@
     <string name="face_error_canceled" msgid="283945501061931023">"Utendaji wa kitambulisho umeghairiwa."</string>
     <string name="face_error_user_canceled" msgid="5317030072349668946">"Kufungua kwa uso kumeghairiwa na mtumiaji."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Umejaribu mara nyingi mno. Umezima kipengele cha kufungua kwa uso."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Umejaribu mara nyingi mno. Kipengele cha kufungua kwa uso kimezimwa."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Imeshindwa kuthibitisha uso. Jaribu tena."</string>
     <string name="face_error_not_enrolled" msgid="4016937174832839540">"Hujaweka mipangilio ya kufungua kwa uso."</string>
     <string name="face_error_hw_not_present" msgid="8302690289757559738">"Kufungua kwa uso hakutumiki kwenye kifaa hiki."</string>
@@ -817,7 +817,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Jaribu tena"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Jaribu tena"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Fungua kifaa ili upate data na vipengele vyote"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Majaribio ya Juu ya Kufungua Uso yamezidishwa"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu Kufungua kwa Uso"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Hakuna SIM kadi"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Hakuna SIM kadi katika kompyuta ndogo."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Hakuna SIM kadi katika runinga."</string>

@@ -1670,8 +1670,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (دو انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (تین انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"سروسز کے مابین سوئچ کرنے کے لیے، ایکسیسبیلٹی بٹن کو ٹچ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"سروسز کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے سوائپ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"سروسز کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے سوائپ کرکے ہولڈ کریں۔"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"سروسز کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"سروسز کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"میگنیفکیشن"</string>
     <string name="user_switched" msgid="3768006783166984410">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>

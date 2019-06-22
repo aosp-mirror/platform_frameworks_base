@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -57,20 +59,8 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mBypassController;
     private final DozeParameters mDozeParameters;
-    @VisibleForTesting
-    final NotificationListener.NotificationSettingsListener mSettingsListener =
-            new NotificationListener.NotificationSettingsListener() {
-                @Override
-                public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
-                    if (NotificationUtils.useNewInterruptionModel(mContext)) {
-                        mShowLowPriority = !hideSilentStatusIcons;
-                        if (mNotificationScrollLayout != null) {
-                            updateStatusBarIcons();
-                        }
-                    }
-                }
-            };
 
+    private boolean mShowSilentOnLockscreen = true;
     private int mIconSize;
     private int mIconHPadding;
     private int mIconTint = Color.WHITE;
@@ -87,7 +77,6 @@ public class NotificationIconAreaController implements DarkReceiver,
     private final Rect mTintArea = new Rect();
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
-    private boolean mShowLowPriority = true;
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -99,7 +88,6 @@ public class NotificationIconAreaController implements DarkReceiver,
             StatusBarStateController statusBarStateController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
-            NotificationListener notificationListener,
             NotificationMediaManager notificationMediaManager) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
@@ -108,7 +96,6 @@ public class NotificationIconAreaController implements DarkReceiver,
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
-        notificationListener.addNotificationSettingsListener(mSettingsListener);
         mDozeParameters = DozeParameters.getInstance(mContext);
         mWakeUpCoordinator = wakeUpCoordinator;
         wakeUpCoordinator.addListener(this);
@@ -116,6 +103,11 @@ public class NotificationIconAreaController implements DarkReceiver,
 
         initializeNotificationAreaViews(context);
         reloadAodColor();
+
+        TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable((key, newValue) -> {
+            mShowSilentOnLockscreen = "1".equals(newValue);
+        }, Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS);
     }
 
     protected View inflateIconArea(LayoutInflater inflater) {
@@ -314,7 +306,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
                 false /* showAmbient */,
-                mShowLowPriority /* showLowPriority */,
+                true /* showLowPriority */,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
@@ -336,17 +328,12 @@ public class NotificationIconAreaController implements DarkReceiver,
     public void updateAodNotificationIcons() {
         updateIconsForLayout(entry -> entry.aodIcon, mAodIcons,
                 false /* showAmbient */,
-                mShowLowPriority /* showLowPriority */,
+                mShowSilentOnLockscreen /* showLowPriority */,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
                 true /* hideCurrentMedia */,
                 true /* hide centered icon */,
                 mBypassController.getBypassEnabled() /* hidePulsing */);
-    }
-
-    @VisibleForTesting
-    boolean shouldShouldLowPriorityIcons() {
-        return mShowLowPriority;
     }
 
     /**

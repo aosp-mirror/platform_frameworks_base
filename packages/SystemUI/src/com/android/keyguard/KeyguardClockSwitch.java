@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.os.Build;
+import android.transition.Fade;
 import android.transition.Transition;
 import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
@@ -114,6 +115,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Maintain state so that a newly connected plugin can be initialized.
      */
     private float mDarkAmount;
+
+    /**
+     * Boolean value indicating if notifications are visible on lock screen.
+     */
+    private boolean mHasVisibleNotifications;
 
     /**
      * If the Keyguard Slice has a header (big center-aligned text.)
@@ -222,8 +228,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
             mClockPlugin = null;
         }
         if (plugin == null) {
-            mClockView.setVisibility(View.VISIBLE);
-            mClockViewBold.setVisibility(View.INVISIBLE);
+            if (mShowingHeader) {
+                mClockView.setVisibility(View.GONE);
+                mClockViewBold.setVisibility(View.VISIBLE);
+            } else {
+                mClockView.setVisibility(View.VISIBLE);
+                mClockViewBold.setVisibility(View.INVISIBLE);
+            }
             mKeyguardStatusArea.setVisibility(View.VISIBLE);
             return;
         }
@@ -320,6 +331,24 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mClockPlugin != null) {
             mClockPlugin.setDarkAmount(darkAmount);
         }
+        updateBigClockAlpha();
+    }
+
+    /**
+     * Set whether or not the lock screen is showing notifications.
+     */
+    void setHasVisibleNotifications(boolean hasVisibleNotifications) {
+        if (hasVisibleNotifications == mHasVisibleNotifications) {
+            return;
+        }
+        mHasVisibleNotifications = hasVisibleNotifications;
+        if (mDarkAmount == 0f && mBigClockContainer != null) {
+            // Starting a fade transition since the visibility of the big clock will change.
+            TransitionManager.beginDelayedTransition(mBigClockContainer,
+                    new Fade().setDuration(KeyguardSliceView.DEFAULT_ANIM_DURATION / 2).addTarget(
+                            mBigClockContainer));
+        }
+        updateBigClockAlpha();
     }
 
     public Paint getPaint() {
@@ -396,15 +425,30 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    private void updateBigClockAlpha() {
+        if (mBigClockContainer != null) {
+            final float alpha = mHasVisibleNotifications ? mDarkAmount : 1f;
+            mBigClockContainer.setAlpha(alpha);
+            if (alpha == 0f) {
+                mBigClockContainer.setVisibility(INVISIBLE);
+            } else if (mBigClockContainer.getVisibility() == INVISIBLE) {
+                mBigClockContainer.setVisibility(VISIBLE);
+            }
+        }
+    }
+
     /**
      * Sets if the keyguard slice is showing a center-aligned header. We need a smaller clock in
      * these cases.
      */
     void setKeyguardShowingHeader(boolean hasHeader) {
-        if (mShowingHeader == hasHeader || hasCustomClock()) {
+        if (mShowingHeader == hasHeader) {
             return;
         }
         mShowingHeader = hasHeader;
+        if (hasCustomClock()) {
+            return;
+        }
 
         float smallFontSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.widget_small_font_size);

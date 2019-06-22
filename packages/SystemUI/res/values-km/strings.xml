@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"កំពុង​ផ្ទៀងផ្ទាត់​មុខរបស់អ្នក"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"បានបញ្ជាក់"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ប៉ះ​ឧបករណ៍​ចាប់ស្នាម​ម្រាមដៃ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"រូបតំណាង​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"កំពុងស្វែងរកអ្នក…"</string>
@@ -451,9 +453,9 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"កម្មវិធីសន្សំថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"បិទ​កម្មវិធី​សន្សំ​ថ្ម"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"នៅពេល​កំពុងថត ឬបញ្ជូន <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> អាច​ថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់ពី​ឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់ រូបថត និងសារ​ជាដើម។"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"នៅពេល​កំពុងថត ឬភ្ជាប់ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> អាច​ថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់ពី​ឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់ រូបថត និងសារ​ជាដើម។"</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"នៅពេល​កំពុងថត ឬបញ្ជូន សេវាកម្មដែល​ផ្ដល់មុខងារនេះ​អាចថតព័ត៌មាន​រសើប​ទាំងឡាយ​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក រួមទាំង​ព័ត៌មាន​រសើប​ដូចជា សំឡេង ពាក្យ​សម្ងាត់ ព័ត៌មាន​បង់ប្រាក់​ រូបថត និងសារ​ជាដើម។"</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"បង្ហាញព័ត៌មានរសើប​ អំឡុងពេលបញ្ជូន/ថត"</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"ការបង្ហាញព័ត៌មានរសើប​ អំឡុងពេលភ្ជាប់/ថត"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"គ្រប់គ្រង"</string>
@@ -529,7 +531,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ការកំណត់សំឡេង"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ដាក់ចំណងជើងមេឌៀដោយស្វ័យប្រវត្តិ"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ដាក់អក្សររត់លើមេឌៀដោយស្វ័យប្រវត្តិ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"គន្លឹះអក្សររត់"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"ការដាក់ត្រួតគ្នា​លើអក្សររត់"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"បើក"</string>

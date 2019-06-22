@@ -1605,7 +1605,7 @@ public class TelephonyManager {
      *     higher, then a SecurityException is thrown.</li>
      * </ul>
      *
-     * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
+     * @deprecated Use {@link #getImei} which returns IMEI for GSM or {@link #getMeid} which returns
      * MEID for CDMA.
      */
     @Deprecated
@@ -1648,7 +1648,7 @@ public class TelephonyManager {
      *
      * @param slotIndex of which deviceID is returned
      *
-     * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
+     * @deprecated Use {@link #getImei} which returns IMEI for GSM or {@link #getMeid} which returns
      * MEID for CDMA.
      */
     @Deprecated
@@ -1672,23 +1672,8 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
-     *
-     * <p>If the calling app does not meet one of these requirements then this method will behave
-     * as follows:
-     *
-     * <ul>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
-     *     READ_PHONE_STATE permission then null is returned.</li>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
-     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
-     *     higher, then a SecurityException is thrown.</li>
-     * </ul>
+     * See {@link #getImei(int)} for details on the required permissions and behavior
+     * when the caller does not hold sufficient permissions.
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -1700,12 +1685,17 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
-     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
-     * access is deprecated and will be removed in a future release.
+     * <p>This API requires one of the following:
+     * <ul>
+     *     <li>The caller holds the READ_PRIVILEGED_PHONE_STATE permission.</li>
+     *     <li>If the caller is the device or profile owner, the caller holds the
+     *     {@link Manifest.permission#READ_PHONE_STATE} permission.</li>
+     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()}.</li>
+     *     <li>The caller is the default SMS app for the device.</li>
+     * </ul>
+     * <p>The profile owner is an app that owns a managed profile on the device; for more details
+     * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     * Access by profile owners is deprecated and will be removed in a future release.
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
      * as follows:
