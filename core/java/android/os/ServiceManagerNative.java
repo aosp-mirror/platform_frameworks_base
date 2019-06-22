@@ -127,17 +127,6 @@ class ServiceManagerProxy implements IServiceManager {
         return array;
     }
 
-    public void setPermissionController(IPermissionController controller)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IServiceManager.descriptor);
-        data.writeStrongBinder(controller.asBinder());
-        mRemote.transact(SET_PERMISSION_CONTROLLER_TRANSACTION, data, reply, 0);
-        reply.recycle();
-        data.recycle();
-    }
-
     @UnsupportedAppUsage
     private IBinder mRemote;
 }
