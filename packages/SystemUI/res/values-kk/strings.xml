@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Құрылғы бетіңізді талдап жатыр."</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Бет танылды."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Расталды"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Саусақ ізін оқу сканерін түртіңіз"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Саусақ ізі белгішесі"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Бет ізделуде…"</string>
@@ -875,7 +877,7 @@
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Қолданба орнатылмай-ақ ашылды. Толығырақ мәлімет алу үшін түртіңіз."</string>
     <string name="app_info" msgid="6856026610594615344">"Қолданба ақпараты"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Браузерге өту"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Мобильдік деректер"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Мобильдік интернет"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="3241721038678469804">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi өшірулі"</string>

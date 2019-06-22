@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"آپ کا چہرہ تلاش کیا جا رہا ہے"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"چہرے کی تصدیق ہو گئی"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"تصدیق شدہ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"مکمل کرنے کیلئے \'تصدیق کریں\' تھپتھپائیں"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"فنگر پرنٹ آئیکن"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"آپ کے لیے تلاش کیا جا رہا ہے…"</string>
@@ -453,7 +454,7 @@
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"بیٹری سیور آف کریں"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"ریکارڈ یا کاسٹ کرنے کے دوران، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کسی بھی ایسی حساس معلومات کو کیپچر کر سکتا ہے جو آپ کی اسکرین پر ڈسپلے ہوتی ہے یا آپ کے آلہ سے چلائی جاتی ہے، بشمول حساس معلومات جیسے کہ آڈیو، پاسورڈز، ادائیگی کی معلومات، تصاویر اور پیغامات۔"</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ریکارڈ یا کاسٹ کرنے کے دوران، اس فنکشن کی خدمت کا فراہم کنندہ کسی بھی ایسی حساس معلومات کو کیپچر کر سکتا ہے جو آپ کی اسکرین پر ڈسپلے ہوتی ہے یا آپ کے آلہ سے چلائی جاتی ہے، بشمول حساس معلومات جیسے کہ آڈیو، پاسورڈز، ادائیگی کی معلومات، تصاویر اور پیغامات۔"</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"کاسٹ/ریکارڈ کرنے کے دوران حساس معلومات کا افشاء کیا جا رہا ہے"</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"کاسٹ/ریکارڈ کرنے کے دوران حساس معلومات کا افشاء"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوبارہ نہ دکھائیں"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"سبھی کو صاف کریں"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"نظم کریں"</string>

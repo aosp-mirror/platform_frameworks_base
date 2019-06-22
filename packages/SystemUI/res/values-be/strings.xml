@@ -124,6 +124,8 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Ідзе пошук твару"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Пацверджана"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Дакраніцеся да сканера адбіткаў пальцаў"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок адбіткаў пальцаў"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ідзе пошук вашага твару…"</string>
@@ -664,7 +666,7 @@
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Тут канфігурыраваць гэту групу апавяшчэнняў забаронена"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Праксіраванае апавяшчэнне"</string>
     <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Усе апавяшчэнні праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="see_more_title" msgid="5358726697042112726">"Разгарнуць"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Яшчэ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Гэта праграма выкарыстоўвае камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Гэта праграма выкарыстоўвае мікрафон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Гэта праграма паказваецца на экране паверх іншых праграм."</string>
