@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"အသံဆက်တင်များ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"တိုးချဲ့ရန်"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ခေါက်သိမ်းရန်..."</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"အလိုလို မီဒီယာ စာတန်းထိုးရန်"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"အလိုအလျောက် စာတန်းထိုးရန်"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"စာတန်းအကြံပြုချက်ကို ပိတ်ပါ"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"စာတန်းများ ထပ်ပိုးရန်"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ဖွင့်ရန်"</string>

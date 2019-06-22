@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Configuració del so"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Amplia"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Replega"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtítols automàtics"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtitula el contingut multimèdia automàticament"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Tanca el consell sobre subtítols"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Superposició de subtítols"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"activar"</string>
