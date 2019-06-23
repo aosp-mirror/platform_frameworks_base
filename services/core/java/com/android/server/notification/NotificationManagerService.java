@@ -7151,6 +7151,10 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
+        if (userId == UserHandle.USER_ALL) {
+            userId = USER_SYSTEM;
+        }
+
         try {
             final String[] pkgs = mPackageManager.getPackagesForUid(callingUid);
             if (pkgs == null) {
