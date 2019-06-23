@@ -79,7 +79,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A service to manage multiple clients that want to access the face HAL API.
@@ -99,6 +101,104 @@ public class FaceService extends BiometricServiceBase {
 
     private static final String NOTIFICATION_TAG = "FaceService";
     private static final int NOTIFICATION_ID = 1;
+
+    /**
+     * Events for bugreports.
+     */
+    public static final class AuthenticationEvent {
+        private long mStartTime;
+        private long mLatency;
+        // Only valid if mError is 0
+        private boolean mAuthenticated;
+        private int mError;
+        // Only valid if mError is ERROR_VENDOR
+        private int mVendorError;
+
+        AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
+                int vendorError) {
+            mStartTime = startTime;
+            mLatency = latency;
+            mAuthenticated = authenticated;
+            mError = error;
+            mVendorError = vendorError;
+        }
+
+        public String toString(Context context) {
+            return "Start: " + mStartTime
+                    + "\tLatency: " + mLatency
+                    + "\tAuthenticated: " + mAuthenticated
+                    + "\tError: " + mError
+                    + "\tVendorCode: " + mVendorError
+                    + "\t" + FaceManager.getErrorString(context, mError, mVendorError);
+        }
+    }
+
+    /**
+     * Keep a short historical buffer of stats, with an aggregated usage time.
+     */
+    private class UsageStats {
+        static final int EVENT_LOG_SIZE = 100;
+
+        Context mContext;
+        List<AuthenticationEvent> mAuthenticationEvents;
+
+        int acceptCount;
+        int rejectCount;
+        Map<Integer, Integer> mErrorCount;
+
+        long acceptLatency;
+        long rejectLatency;
+        Map<Integer, Long> mErrorLatency;
+
+        UsageStats(Context context) {
+            mAuthenticationEvents = new ArrayList<>();
+            mErrorCount = new HashMap<>();
+            mErrorLatency = new HashMap<>();
+            mContext = context;
+        }
+
+        void addEvent(AuthenticationEvent event) {
+            if (mAuthenticationEvents.size() >= EVENT_LOG_SIZE) {
+                mAuthenticationEvents.remove(0);
+            }
+            mAuthenticationEvents.add(event);
+
+            if (event.mAuthenticated) {
+                acceptCount++;
+                acceptLatency += event.mLatency;
+            } else if (event.mError == 0) {
+                rejectCount++;
+                rejectLatency += event.mLatency;
+            } else {
+                mErrorCount.put(event.mError, mErrorCount.getOrDefault(event.mError, 0) + 1);
+                mErrorLatency.put(event.mError,
+                        mErrorLatency.getOrDefault(event.mError, 0l) + event.mLatency);
+            }
+        }
+
+        void print(PrintWriter pw) {
+            pw.println("Events since last reboot: " + mAuthenticationEvents.size());
+            for (int i = 0; i < mAuthenticationEvents.size(); i++) {
+                pw.println(mAuthenticationEvents.get(i).toString(mContext));
+            }
+
+            // Dump aggregated usage stats
+            // TODO: Remove or combine with json dump in a future release
+            pw.println("Accept\tCount: " + acceptCount + "\tLatency: " + acceptLatency
+                    + "\tAverage: " + (acceptCount > 0 ? acceptLatency / acceptCount : 0));
+            pw.println("Reject\tCount: " + rejectCount + "\tLatency: " + rejectLatency
+                    + "\tAverage: " + (rejectCount > 0 ? rejectLatency / rejectCount : 0));
+
+            for (Integer key : mErrorCount.keySet()) {
+                final int count = mErrorCount.get(key);
+                pw.println("Error" + key + "\tCount: " + count
+                        + "\tLatency: " + mErrorLatency.getOrDefault(key, 0l)
+                        + "\tAverage: " + (count > 0 ? mErrorLatency.getOrDefault(key, 0l) / count
+                        : 0)
+                        + "\t" + FaceManager.getErrorString(mContext, key, 0 /* vendorCode */));
+            }
+        }
+    }
 
     private final class FaceAuthClient extends AuthenticationClientImpl {
         private int mLastAcquire;
@@ -131,6 +231,13 @@ public class FaceService extends BiometricServiceBase {
                 boolean authenticated, ArrayList<Byte> token) {
             final boolean result = super.onAuthenticated(identifier, authenticated, token);
 
+            mUsageStats.addEvent(new AuthenticationEvent(
+                    getStartTimeMs(),
+                    System.currentTimeMillis() - getStartTimeMs() /* latency */,
+                    authenticated,
+                    0 /* error */,
+                    0 /* vendorError */));
+
             // For face, the authentication lifecycle ends either when
             // 1) Authenticated == true
             // 2) Error occurred
@@ -138,6 +245,18 @@ public class FaceService extends BiometricServiceBase {
             // Fingerprint currently does not end when the third condition is met which is a bug,
             // but let's leave it as-is for now.
             return result || !authenticated;
+        }
+
+        @Override
+        public boolean onError(long deviceId, int error, int vendorCode) {
+            mUsageStats.addEvent(new AuthenticationEvent(
+                    getStartTimeMs(),
+                    System.currentTimeMillis() - getStartTimeMs() /* latency */,
+                    false /* authenticated */,
+                    error,
+                    vendorCode));
+
+            return super.onError(deviceId, error, vendorCode);
         }
 
         @Override
@@ -690,6 +809,7 @@ public class FaceService extends BiometricServiceBase {
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
+    private UsageStats mUsageStats;
     // One of the AuthenticationClient constants
     private int mCurrentUserLockoutMode;
 
@@ -899,6 +1019,8 @@ public class FaceService extends BiometricServiceBase {
 
     public FaceService(Context context) {
         super(context);
+
+        mUsageStats = new UsageStats(context);
 
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
 
@@ -1169,8 +1291,9 @@ public class FaceService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
-        pw.println("HAL Deaths: " + mHALDeathCount);
-        mHALDeathCount = 0;
+        pw.println("HAL deaths since last reboot: " + mHALDeathCount);
+
+        mUsageStats.print(pw);
     }
 
     private void dumpProto(FileDescriptor fd) {

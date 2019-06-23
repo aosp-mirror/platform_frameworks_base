@@ -1035,8 +1035,7 @@ public class FingerprintService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
-        pw.println("HAL Deaths: " + mHALDeathCount);
-        mHALDeathCount = 0;
+        pw.println("HAL deaths since last reboot: " + mHALDeathCount);
     }
 
     private void dumpProto(FileDescriptor fd) {
