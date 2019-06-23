@@ -284,15 +284,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         // AOD wallpapers should fade away after a while.
         // Docking pulses may take a long time, wallpapers should also fade away after a while.
-        if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
-                && mState == ScrimState.AOD) {
-            if (!mWallpaperVisibilityTimedOut) {
-                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
-            }
+        mWallpaperVisibilityTimedOut = false;
+        if (shouldFadeAwayWallpaper()) {
+            mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                    AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
         } else {
             mTimeTicker.cancel();
-            mWallpaperVisibilityTimedOut = false;
         }
 
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
@@ -311,6 +308,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         dispatchScrimState(mScrimBehind.getViewAlpha());
+    }
+
+    private boolean shouldFadeAwayWallpaper() {
+        if (!mWallpaperSupportsAmbientMode) {
+            return false;
+        }
+
+        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
+            return true;
+        }
+
+        if (mState == ScrimState.PULSING
+                && mCallback != null && mCallback.shouldTimeoutWallpaper()) {
+            return true;
+        }
+
+        return false;
     }
 
     public ScrimState getState() {
@@ -387,6 +401,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             setOrAdaptCurrentAnimation(mScrimInFront);
 
             dispatchScrimState(mScrimBehind.getViewAlpha());
+
+            // Reset wallpaper timeout if it's already timeout like expanding panel while PULSING
+            // and docking.
+            if (mWallpaperVisibilityTimedOut) {
+                mWallpaperVisibilityTimedOut = false;
+                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+            }
         }
     }
 
@@ -924,6 +946,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         default void onFinished() {
         }
         default void onCancelled() {
+        }
+        /** Returns whether to timeout wallpaper or not. */
+        default boolean shouldTimeoutWallpaper() {
+            return false;
         }
     }
 
