@@ -120,7 +120,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 BiometricSourceType.FINGERPRINT);
 
         verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
-        verify(mStatusBarKeyguardViewManager).animateCollapsePanels(anyFloat());
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(eq(false));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
                 BiometricSourceType.FACE);
 
-        verify(mStatusBarKeyguardViewManager).animateCollapsePanels(anyFloat());
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(eq(false));
     }
 
     @Test
