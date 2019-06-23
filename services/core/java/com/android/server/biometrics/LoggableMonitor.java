@@ -33,6 +33,10 @@ public abstract class LoggableMonitor {
 
     private long mFirstAcquireTimeMs;
 
+    protected long getFirstAcquireTimeMs() {
+        return mFirstAcquireTimeMs;
+    }
+
     /**
      * Only valid for AuthenticationClient.
      * @return true if the client is authenticating for a crypto operation.
