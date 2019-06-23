@@ -52,7 +52,7 @@
             style="@style/NavigationBarButton"
             systemui:categories="android.intent.category.APP_MAPS"
             systemui:icon="@drawable/car_ic_navigation"
-            systemui:intent="intent:#Intent;component=com.android.car.carlauncher/.CarLauncher;category=android.intent.category.APP_MAPS;launchFlags=0x24000000;end"
+            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MAPS;launchFlags=0x14000000;end"
             systemui:selectedIcon="@drawable/car_ic_navigation_selected"
             systemui:useMoreIcon="false"
         />
