@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mugitu telefonoa ezkerretara."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mugitu telefonoa eskuinetara."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Begiratu zuzenago gailuari."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ez da agertzen aurpegia. Begiratu telefonoari."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ez da hautematen aurpegia. Begiratu telefonoari."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Mugimendu gehiegi dago. Eutsi tinko telefonoari."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Erregistratu berriro aurpegia."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ez dugu ezagutzen aurpegi hori. Saiatu berriro."</string>
