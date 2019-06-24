@@ -1871,7 +1871,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CREATE_SERVICE:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, ("serviceCreate: " + String.valueOf(msg.obj)));
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                ("serviceCreate: " + String.valueOf(msg.obj)));
+                    }
                     handleCreateService((CreateServiceData)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
@@ -1887,7 +1890,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SERVICE_ARGS:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, ("serviceStart: " + String.valueOf(msg.obj)));
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                ("serviceStart: " + String.valueOf(msg.obj)));
+                    }
                     handleServiceArgs((ServiceArgsData)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
