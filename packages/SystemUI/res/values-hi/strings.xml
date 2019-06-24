@@ -124,8 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"आपके चेहरे की पुष्टि की जा रही है"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"चेहरे की पुष्टि हो गई"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"पुष्टि हो गई"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"आपको पहचान रहा है…"</string>
@@ -635,7 +634,7 @@
     <string name="notification_channel_minimized" msgid="1664411570378910931">"इन सूचनाओं को छोटा कर दिया जाएगा"</string>
     <string name="notification_channel_silenced" msgid="2877199534497961942">"ये सूचनाएं बिना आवाज़ के दिखाई जाएंगी"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ये सूचनाएं आपको अलर्ट करेंगी"</string>
-    <string name="inline_blocking_helper" msgid="3055064577771478591">"अाप अक्सर इन सूचनाओं को खारिज कर देते हैं. \nआगे भी इन्हें देखना जारी रखना चाहते हैं?"</string>
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"आप अक्सर इन सूचनाओं को खारिज कर देते हैं. \nआगे भी इन्हें देखना जारी रखना चाहते हैं?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"हो गया"</string>
     <string name="inline_ok_button" msgid="975600017662930615">"लागू करें"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ये सूचनाएं दिखाना जारी रखें?"</string>

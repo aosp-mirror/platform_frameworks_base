@@ -124,8 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Đang tìm khuôn mặt của bạn"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ðã xác nhận"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Nhấn vào Xác nhận để hoàn tất"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Chạm vào cảm biến vân tay"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Biểu tượng vân tay"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Đang tìm kiếm bạn…"</string>
