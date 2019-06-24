@@ -1743,6 +1743,13 @@
                  - {@code true} for apps with targetSdkVersion < 29.
              -->
         <attr name="requestLegacyExternalStorage" format="boolean" />
+
+        <!-- If {@code true} this app declares that it should be visible to all other apps on
+             device, regardless of what they declare via the {@code queries} tags in their
+             manifest.
+
+             The default value is {@code false}. -->
+        <attr name="forceQueryable" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -1976,6 +1983,12 @@
         be the same as the apk's package name. -->
         <attr name="name" />
     </declare-styleable>
+
+    <declare-styleable name="AndroidManifestQueries" parent="AndroidManifest" />
+    <declare-styleable name="AndroidManifestQueriesPackage" parent="AndroidManifestQueries">
+        <attr name="name" />
+    </declare-styleable>
+    <declare-styleable name="AndroidManifestQueriesIntent" parent="AndroidManifestQueries" />
 
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself
@@ -2477,6 +2490,7 @@
             <!-- High dynamic range color mode. -->
             <enum name="hdr" value="2" />
         </attr>
+        <attr name="forceQueryable" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

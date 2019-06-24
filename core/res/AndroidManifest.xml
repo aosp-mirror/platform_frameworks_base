@@ -4598,6 +4598,7 @@
                  android:supportsRtl="true"
                  android:theme="@style/Theme.DeviceDefault.Light.DarkActionBar"
                  android:defaultToDeviceProtectedStorage="true"
+                 android:forceQueryable="true"
                  android:directBootAware="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.DeviceDefault.Resolver"
