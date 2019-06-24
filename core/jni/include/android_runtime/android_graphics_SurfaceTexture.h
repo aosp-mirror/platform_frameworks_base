@@ -17,8 +17,6 @@
 #ifndef _ANDROID_GRAPHICS_SURFACETEXTURE_H
 #define _ANDROID_GRAPHICS_SURFACETEXTURE_H
 
-#include <android/native_window.h>
-
 #include "jni.h"
 
 namespace android {
@@ -26,7 +24,6 @@ namespace android {
 class IGraphicBufferProducer;
 class SurfaceTexture;
 
-extern sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(JNIEnv* env, jobject thiz);
 extern bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz);
 
 /* Gets the underlying C++ SurfaceTexture object from a SurfaceTexture Java object. */
