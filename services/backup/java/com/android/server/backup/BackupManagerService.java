@@ -195,16 +195,20 @@ public class BackupManagerService {
     }
 
     boolean isAbleToServeUser(int userId) {
-        return getServiceUsers().get(UserHandle.USER_SYSTEM) != null
-                && getServiceUsers().get(userId) != null;
+        return getUserServices().get(UserHandle.USER_SYSTEM) != null
+                && getUserServices().get(userId) != null;
     }
 
     /**
-     *  Returns a lst of users currently unlocked that have a
-     *  {@link UserBackupManagerService} registered.
+     *  Returns a list of users currently unlocked that have a {@link UserBackupManagerService}
+     *  registered.
+     *
+     *  Warning: Do NOT modify returned object as it's used inside.
+     *
+     *  TODO: Return a copy or only expose read-only information through other means.
      */
     @VisibleForTesting
-    public SparseArray<UserBackupManagerService> getServiceUsers() {
+    public SparseArray<UserBackupManagerService> getUserServices() {
         return mServiceUsers;
     }
 
@@ -495,7 +499,8 @@ public class BackupManagerService {
 
     /**
      * Returns a {@link UserHandle} for the user that has {@code ancestralSerialNumber} as the
-     * serial number of the its ancestral work profile.
+     * serial number of the its ancestral work profile or null if there is no {@link
+     * UserBackupManagerService} associated with that user.
      *
      * <p> The ancestral work profile is set by {@link #setAncestralSerialNumber(long)}
      * and it corresponds to the profile that was used to restore to the callers profile.
@@ -504,16 +509,18 @@ public class BackupManagerService {
     public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
         int callingUserId = Binder.getCallingUserHandle().getIdentifier();
         long oldId = Binder.clearCallingIdentity();
-        int[] userIds;
+        final int[] userIds;
         try {
-            userIds = mContext.getSystemService(UserManager.class).getProfileIds(callingUserId,
-                    false);
+            userIds =
+                    mContext
+                            .getSystemService(UserManager.class)
+                            .getProfileIds(callingUserId, false);
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
 
         for (int userId : userIds) {
-            UserBackupManagerService userBackupManagerService = getServiceUsers().get(userId);
+            UserBackupManagerService userBackupManagerService = getUserServices().get(userId);
             if (userBackupManagerService != null) {
                 if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
                     return UserHandle.of(userId);
@@ -880,28 +887,35 @@ public class BackupManagerService {
     }
 
     /** Implementation to receive lifecycle event callbacks for system services. */
-    public static final class Lifecycle extends SystemService {
+    public static class Lifecycle extends SystemService {
         public Lifecycle(Context context) {
+            this(context, new Trampoline(context));
+        }
+
+        @VisibleForTesting
+        Lifecycle(Context context, Trampoline trampoline) {
             super(context);
-            sInstance = new Trampoline(context);
+            sInstance = trampoline;
         }
 
         @Override
         public void onStart() {
-            publishBinderService(Context.BACKUP_SERVICE, sInstance);
+            publishService(Context.BACKUP_SERVICE, sInstance);
         }
 
         @Override
         public void onUnlockUser(int userId) {
-            if (userId == UserHandle.USER_SYSTEM) {
-                sInstance.initializeService();
-            }
-            sInstance.unlockUser(userId);
+            sInstance.onUnlockUser(userId);
         }
 
         @Override
         public void onStopUser(int userId) {
-            sInstance.stopUser(userId);
+            sInstance.onStopUser(userId);
+        }
+
+        @VisibleForTesting
+        void publishService(String name, IBinder service) {
+            publishBinderService(name, service);
         }
     }
 }
