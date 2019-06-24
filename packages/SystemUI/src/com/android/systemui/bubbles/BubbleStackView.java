@@ -180,12 +180,10 @@ public class BubbleStackView extends FrameLayout {
     private int mExpandedAnimateYDistance;
     private int mPointerHeight;
     private int mStatusBarHeight;
-    private int mPipDismissHeight;
     private int mImeOffset;
     private BubbleIconFactory mBubbleIconFactory;
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
-    private boolean mImeVisible;
 
     /** Whether the stack is currently on the left side of the screen, or animating there. */
     private boolean mStackOnLeftOrWillBe = false;
@@ -315,8 +313,6 @@ public class BubbleStackView extends FrameLayout {
 
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mPipDismissHeight = mContext.getResources().getDimensionPixelSize(
-                R.dimen.pip_dismiss_gradient_height);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         mDisplaySize = new Point();
@@ -405,8 +401,6 @@ public class BubbleStackView extends FrameLayout {
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
-            mImeVisible = keyboardHeight != 0;
-
             float newY = getExpandedViewY();
             if (newY < 0) {
                 // TODO: This means our expanded content is too big to fit on screen. Right now
