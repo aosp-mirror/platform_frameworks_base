@@ -20,7 +20,6 @@
 #include "Debug.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
-#include "renderstate/RenderState.h"
 #include "renderthread/CanvasContext.h"
 #include "utils/FatVector.h"
 #include "utils/MathUtils.h"
