@@ -57,13 +57,6 @@ public interface IServiceManager extends IInterface
      */
     String[] listServices(int dumpFlags) throws RemoteException;
 
-    /**
-     * Assign a permission controller to the service manager.  After set, this
-     * interface is checked before any services are added.
-     */
-    void setPermissionController(IPermissionController controller)
-            throws RemoteException;
-
     static final String descriptor = "android.os.IServiceManager";
 
     int GET_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
