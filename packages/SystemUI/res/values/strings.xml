@@ -885,10 +885,10 @@
     <string name="quick_settings_night_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
     <!-- QuickSettings: Secondary text for when the Night Light or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
-    <!-- QuickSettings: Label for the toggle to activate Dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
-    <string name="quick_settings_ui_mode_night_label">Dark Theme</string>
-    <!-- QuickSettings: Label for the Dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
-    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark Theme\nBattery saver</string>
+    <!-- QuickSettings: Label for the toggle to activate dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
+    <string name="quick_settings_ui_mode_night_label">Dark theme</string>
+    <!-- QuickSettings: Label for the dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
+    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark theme\nBattery saver</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
