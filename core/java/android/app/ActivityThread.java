@@ -703,6 +703,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         boolean autofillCompatibilityEnabled;
 
+        long[] disabledCompatChanges;
+
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -920,7 +922,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial, boolean autofillCompatibilityEnabled) {
+                String buildSerial, boolean autofillCompatibilityEnabled,
+                long[] disabledCompatChanges) {
 
             if (services != null) {
                 if (false) {
@@ -968,6 +971,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.initProfilerInfo = profilerInfo;
             data.buildSerial = buildSerial;
             data.autofillCompatibilityEnabled = autofillCompatibilityEnabled;
+            data.disabledCompatChanges = disabledCompatChanges;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -5670,6 +5674,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
 
+        AppCompatCallbacks.install(data.disabledCompatChanges);
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);

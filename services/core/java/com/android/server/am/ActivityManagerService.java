@@ -452,20 +452,10 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
-import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
-import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.ActivityManagerServiceDumpServicesProto;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.GrantUriProto;
-import com.android.server.am.ImportanceTokenProto;
-import com.android.server.am.MemInfoDumpProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.am.NeededUriGrantsProto;
-import com.android.server.am.ProcessOomProto;
-import com.android.server.am.ProcessToGcProto;
-import com.android.server.am.StickyBroadcastProto;
+import com.android.server.compat.CompatConfig;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -478,11 +468,11 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -7673,6 +7663,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
+            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
@@ -7688,7 +7679,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, disabledCompatChanges);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -7697,7 +7688,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, disabledCompatChanges);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
