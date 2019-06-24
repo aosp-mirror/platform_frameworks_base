@@ -32,6 +32,7 @@ import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -168,6 +169,8 @@ public final class MediaSession {
      * @param sessionInfo A bundle for additional information about this session.
      *                    Controllers can get this information by calling
      *                    {@link MediaController#getSessionInfo()}.
+     *                    An {@link IllegalArgumentException} will be thrown if this contains
+     *                    any non-framework Parcelable objects.
      */
     public MediaSession(@NonNull Context context, @NonNull String tag,
             @Nullable Bundle sessionInfo) {
@@ -177,6 +180,11 @@ public final class MediaSession {
         if (TextUtils.isEmpty(tag)) {
             throw new IllegalArgumentException("tag cannot be null or empty");
         }
+        if (hasCustomParcelable(sessionInfo)) {
+            throw new IllegalArgumentException("sessionInfo shouldn't contain any custom "
+                    + "parcelables");
+        }
+
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new CallbackStub(this);
@@ -596,6 +604,35 @@ public final class MediaSession {
             case PlaybackState.STATE_CONNECTING:
             case PlaybackState.STATE_PLAYING:
                 return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the given bundle includes non-framework Parcelables.
+     */
+    static boolean hasCustomParcelable(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            return false;
+        }
+
+        // Try writing the bundle to parcel, and read it with framework classloader.
+        Parcel parcel = null;
+        try {
+            parcel = Parcel.obtain();
+            parcel.writeBundle(bundle);
+            parcel.setDataPosition(0);
+            Bundle out = parcel.readBundle(null);
+
+            // Calling Bundle#size() will trigger Bundle#unparcel().
+            out.size();
+        } catch (BadParcelableException e) {
+            Log.d(TAG, "Custom parcelable in bundle.", e);
+            return true;
+        } finally {
+            if (parcel != null) {
+                parcel.recycle();
+            }
         }
         return false;
     }

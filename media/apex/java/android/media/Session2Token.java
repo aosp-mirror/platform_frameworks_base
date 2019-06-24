@@ -118,11 +118,11 @@ public final class Session2Token implements Parcelable {
         mUid = uid;
         mType = TYPE_SESSION_SERVICE;
         mSessionLink = null;
-        mExtras = null;
+        mExtras = Bundle.EMPTY;
     }
 
     Session2Token(int uid, int type, String packageName, Session2Link sessionLink,
-            Bundle tokenExtras) {
+            @NonNull Bundle tokenExtras) {
         mUid = uid;
         mType = type;
         mPackageName = packageName;
@@ -139,7 +139,16 @@ public final class Session2Token implements Parcelable {
         mServiceName = in.readString();
         mSessionLink = in.readParcelable(null);
         mComponentName = ComponentName.unflattenFromString(in.readString());
-        mExtras = in.readBundle();
+
+        Bundle extras = in.readBundle();
+        if (extras == null) {
+            Log.w(TAG, "extras shouldn't be null.");
+            extras = Bundle.EMPTY;
+        } else if (MediaSession2.hasCustomParcelable(extras)) {
+            Log.w(TAG, "extras contain custom parcelable. Ignoring.");
+            extras = Bundle.EMPTY;
+        }
+        mExtras = extras;
     }
 
     @Override
@@ -220,7 +229,7 @@ public final class Session2Token implements Parcelable {
      */
     @NonNull
     public Bundle getExtras() {
-        return mExtras == null ? Bundle.EMPTY : mExtras;
+        return new Bundle(mExtras);
     }
 
     Session2Link getSessionLink() {
