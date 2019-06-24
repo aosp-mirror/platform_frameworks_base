@@ -4755,7 +4755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
-        app.setCurrentSchedulingGroup(app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT);
+        mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);
         app.hasShownUi = false;
@@ -18337,16 +18337,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void startProcess(String processName, ApplicationInfo info,
-                boolean knownToBeDead, String hostingType, ComponentName hostingName) {
+        public void startProcess(String processName, ApplicationInfo info, boolean knownToBeDead,
+                boolean isTop, String hostingType, ComponentName hostingName) {
             try {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "startProcess:"
                             + processName);
                 }
                 synchronized (ActivityManagerService.this) {
+                    // If the process is known as top app, set a hint so when the process is
+                    // started, the top priority can be applied immediately to avoid cpu being
+                    // preempted by other processes before attaching the process of top app.
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
-                            new HostingRecord(hostingType, hostingName),
+                            new HostingRecord(hostingType, hostingName, isTop),
                             false /* allowWhileBooting */, false /* isolated */,
                             true /* keepIfLarge */);
                 }
