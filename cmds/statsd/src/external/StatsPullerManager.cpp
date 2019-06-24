@@ -156,6 +156,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // system_ion_heap_size
         {android::util::SYSTEM_ION_HEAP_SIZE,
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
+        // process_system_ion_heap_size
+        {android::util::PROCESS_SYSTEM_ION_HEAP_SIZE,
+         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_SYSTEM_ION_HEAP_SIZE)}},
         // temperature
         {android::util::TEMPERATURE,
          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
