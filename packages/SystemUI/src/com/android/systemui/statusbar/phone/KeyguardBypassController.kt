@@ -49,6 +49,7 @@ class KeyguardBypassController {
         private set
 
     var bouncerShowing: Boolean = false
+    var launchingAffordance: Boolean = false
     var qSExpanded = false
         set(value) {
             val changed = field != value
@@ -104,6 +105,9 @@ class KeyguardBypassController {
             if (statusBarStateController.state != StatusBarState.KEYGUARD) {
                 // We're bypassing but not actually on the lockscreen, the user should decide when
                 // to unlock
+                return false
+            }
+            if (launchingAffordance) {
                 return false
             }
             if (isPulseExpanding || qSExpanded) {
