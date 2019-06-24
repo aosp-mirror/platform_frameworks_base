@@ -400,8 +400,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mHeadsUpStatusBarView.onDarkChanged(area, darkIntensity, tint);
     }
 
-    public void setPublicMode(boolean publicMode) {
-        mHeadsUpStatusBarView.setPublicMode(publicMode);
+    public void onStateChanged() {
         updateTopEntry();
     }
 
