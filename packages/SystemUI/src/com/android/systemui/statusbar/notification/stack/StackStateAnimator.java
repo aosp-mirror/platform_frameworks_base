@@ -61,6 +61,7 @@ public class StackStateAnimator {
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
     public static final int ANIMATION_DELAY_HEADS_UP = 120;
     public static final int ANIMATION_DELAY_HEADS_UP_CLICKED= 120;
+    private static final int MAX_STAGGER_COUNT = 5;
 
     private final int mGoToFullShadeAppearingTranslation;
     private final int mPulsingAppearingTranslation;
@@ -78,8 +79,6 @@ public class StackStateAnimator {
     private long mCurrentLength;
     private long mCurrentAdditionalDelay;
 
-    /** The current index for the last child which was not added in this event set. */
-    private int mCurrentLastNotAddedIndex;
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
     private int mHeadsUpAppearHeightBottom;
@@ -137,7 +136,8 @@ public class StackStateAnimator {
         mAnimationFilter.applyCombination(mNewEvents);
         mCurrentAdditionalDelay = additionalDelay;
         mCurrentLength = NotificationStackScrollLayout.AnimationEvent.combineLength(mNewEvents);
-        mCurrentLastNotAddedIndex = findLastNotAddedIndex();
+        // Used to stagger concurrent animations' delays and durations for visual effect
+        int animationStaggerCount = 0;
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
@@ -147,7 +147,10 @@ public class StackStateAnimator {
                 continue;
             }
 
-            initAnimationProperties(child, viewState);
+            if (mAnimationProperties.wasAdded(child) && animationStaggerCount < MAX_STAGGER_COUNT) {
+                animationStaggerCount++;
+            }
+            initAnimationProperties(child, viewState, animationStaggerCount);
             viewState.animateTo(child, mAnimationProperties);
         }
         if (!isRunning()) {
@@ -161,10 +164,10 @@ public class StackStateAnimator {
     }
 
     private void initAnimationProperties(ExpandableView child,
-            ExpandableViewState viewState) {
+            ExpandableViewState viewState, int animationStaggerCount) {
         boolean wasAdded = mAnimationProperties.wasAdded(child);
         mAnimationProperties.duration = mCurrentLength;
-        adaptDurationWhenGoingToFullShade(child, viewState, wasAdded);
+        adaptDurationWhenGoingToFullShade(child, viewState, wasAdded, animationStaggerCount);
         mAnimationProperties.delay = 0;
         if (wasAdded || mAnimationFilter.hasDelays
                         && (viewState.yTranslation != child.getTranslationY()
@@ -174,16 +177,15 @@ public class StackStateAnimator {
                         || viewState.clipTopAmount != child.getClipTopAmount()
                         || viewState.dark != child.isDark())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
-                    + calculateChildAnimationDelay(viewState);
+                    + calculateChildAnimationDelay(viewState, animationStaggerCount);
         }
     }
 
     private void adaptDurationWhenGoingToFullShade(ExpandableView child,
-            ExpandableViewState viewState, boolean wasAdded) {
+            ExpandableViewState viewState, boolean wasAdded, int animationStaggerCount) {
         if (wasAdded && mAnimationFilter.hasGoToFullShadeEvent) {
             child.setTranslationY(child.getTranslationY() + mGoToFullShadeAppearingTranslation);
-            float longerDurationFactor = viewState.notGoneIndex - mCurrentLastNotAddedIndex;
-            longerDurationFactor = (float) Math.pow(longerDurationFactor, 0.7f);
+            float longerDurationFactor = (float) Math.pow(animationStaggerCount, 0.7f);
             mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50 +
                     (long) (100 * longerDurationFactor);
         }
@@ -214,25 +216,10 @@ public class StackStateAnimator {
         return true;
     }
 
-    private int findLastNotAddedIndex() {
-        int childCount = mHostLayout.getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
-
-            ExpandableViewState viewState = child.getViewState();
-            if (viewState == null || child.getVisibility() == View.GONE) {
-                continue;
-            }
-            if (!mNewAddChildren.contains(child)) {
-                return viewState.notGoneIndex;
-            }
-        }
-        return -1;
-    }
-
-    private long calculateChildAnimationDelay(ExpandableViewState viewState) {
+    private long calculateChildAnimationDelay(ExpandableViewState viewState,
+            int animationStaggerCount) {
         if (mAnimationFilter.hasGoToFullShadeEvent) {
-            return calculateDelayGoToFullShade(viewState);
+            return calculateDelayGoToFullShade(viewState, animationStaggerCount);
         }
         if (mAnimationFilter.customDelay != AnimationFilter.NO_DELAY) {
             return mAnimationFilter.customDelay;
@@ -286,13 +273,13 @@ public class StackStateAnimator {
         return minDelay;
     }
 
-    private long calculateDelayGoToFullShade(ExpandableViewState viewState) {
+    private long calculateDelayGoToFullShade(ExpandableViewState viewState,
+            int animationStaggerCount) {
         int shelfIndex = mShelf.getNotGoneIndex();
         float index = viewState.notGoneIndex;
         long result = 0;
         if (index > shelfIndex) {
-            float diff = index - shelfIndex;
-            diff = (float) Math.pow(diff, 0.7f);
+            float diff = (float) Math.pow(animationStaggerCount, 0.7f);
             result += (long) (diff * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE * 0.25);
             index = shelfIndex;
         }
