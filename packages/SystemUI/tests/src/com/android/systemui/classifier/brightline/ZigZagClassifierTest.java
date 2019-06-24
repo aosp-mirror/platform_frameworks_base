@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -85,6 +86,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_fewTouchesVertical() {
         assertThat(mClassifier.isFalseTouch(), is(false));
         appendMotionEvent(0, 0);
@@ -94,6 +96,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_vertical() {
         appendMotionEvent(0, 0);
         appendMotionEvent(0, 100);
@@ -102,6 +105,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_fewTouchesHorizontal() {
         assertThat(mClassifier.isFalseTouch(), is(false));
         appendMotionEvent(0, 0);
@@ -111,6 +115,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_horizontal() {
         appendMotionEvent(0, 0);
         appendMotionEvent(100, 0);
@@ -120,6 +125,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
 
 
     @Test
+    @Ignore("Memory Leak?")
     public void testFail_minimumTouchesVertical() {
         appendMotionEvent(0, 0);
         appendMotionEvent(0, 100);
@@ -128,6 +134,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testFail_minimumTouchesHorizontal() {
         appendMotionEvent(0, 0);
         appendMotionEvent(100, 0);
@@ -136,6 +143,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_fortyFiveDegreesStraight() {
         appendMotionEvent(0, 0);
         appendMotionEvent(10, 10);
@@ -144,6 +152,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_horizontalZigZagVerticalStraight() {
         // This test looks just like testFail_horizontalZigZagVerticalStraight but with
         // a longer y range, making it look straighter.
@@ -154,6 +163,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testPass_horizontalStraightVerticalZigZag() {
         // This test looks just like testFail_horizontalStraightVerticalZigZag but with
         // a longer x range, making it look straighter.
@@ -164,6 +174,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testFail_horizontalZigZagVerticalStraight() {
         // This test looks just like testPass_horizontalZigZagVerticalStraight but with
         // a shorter y range, making it look more crooked.
@@ -174,6 +185,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void testFail_horizontalStraightVerticalZigZag() {
         // This test looks just like testPass_horizontalStraightVerticalZigZag but with
         // a shorter x range, making it look more crooked.
@@ -184,6 +196,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between0And45() {
         appendMotionEvent(0, 0);
         appendMotionEvent(100, 5);
@@ -210,6 +223,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between45And90() {
         appendMotionEvent(0, 0);
         appendMotionEvent(10, 50);
@@ -236,6 +250,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between90And135() {
         appendMotionEvent(0, 0);
         appendMotionEvent(-10, 50);
@@ -262,6 +277,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between135And180() {
         appendMotionEvent(0, 0);
         appendMotionEvent(-120, 10);
@@ -288,6 +304,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between180And225() {
         appendMotionEvent(0, 0);
         appendMotionEvent(-120, -10);
@@ -314,6 +331,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between225And270() {
         appendMotionEvent(0, 0);
         appendMotionEvent(-12, -20);
@@ -340,6 +358,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between270And315() {
         appendMotionEvent(0, 0);
         appendMotionEvent(12, -20);
@@ -366,6 +385,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_between315And360() {
         appendMotionEvent(0, 0);
         appendMotionEvent(120, -20);
@@ -392,6 +412,7 @@ public class ZigZagClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("Memory Leak?")
     public void test_randomOrigins() {
         // The purpose of this test is to try all the other tests from different starting points.
         // We use a pre-determined seed to make this test repeatable.
