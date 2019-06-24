@@ -1658,13 +1658,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean shouldListenForFace() {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
+        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
+        final boolean isLockOutOrLockDown =
+                strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT
+                        || strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser
-                && !mSecureCameraLaunched;
+                && !mSecureCameraLaunched && !isLockOutOrLockDown;
     }
 
     /**
