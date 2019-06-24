@@ -1271,6 +1271,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private void pullProcessSystemIonHeapSize(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        // TODO(b/130526489): Read from debugfs.
+    }
+
     private void pullBinderCallsStats(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2331,6 +2337,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.SYSTEM_ION_HEAP_SIZE: {
                 pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
+                pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BINDER_CALLS: {
