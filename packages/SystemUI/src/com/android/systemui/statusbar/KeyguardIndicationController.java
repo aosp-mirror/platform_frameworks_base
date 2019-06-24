@@ -81,6 +81,7 @@ public class KeyguardIndicationController implements StateListener,
     private static final int MSG_CLEAR_BIOMETRIC_MSG = 2;
     private static final int MSG_SWIPE_UP_TO_UNLOCK = 3;
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
+    private static final float BOUNCE_ANIMATION_FINAL_Y = 0f;
 
     private final Context mContext;
     private final ShadeController mShadeController;
@@ -422,7 +423,6 @@ public class KeyguardIndicationController implements StateListener,
         int animateDownDuration = mContext.getResources().getInteger(
                 R.integer.wired_charging_keyguard_text_animation_duration_down);
         textView.animate().cancel();
-        float translation = textView.getTranslationY();
         ViewClippingUtil.setClippingDeactivated(textView, true, mClippingParams);
         textView.animate()
                 .translationYBy(yTranslation)
@@ -438,7 +438,7 @@ public class KeyguardIndicationController implements StateListener,
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
-                        textView.setTranslationY(translation);
+                        textView.setTranslationY(BOUNCE_ANIMATION_FINAL_Y);
                         mCancelled = true;
                     }
 
@@ -452,15 +452,11 @@ public class KeyguardIndicationController implements StateListener,
                         textView.animate()
                                 .setDuration(animateDownDuration)
                                 .setInterpolator(Interpolators.BOUNCE)
-                                .translationY(translation)
+                                .translationY(BOUNCE_ANIMATION_FINAL_Y)
                                 .setListener(new AnimatorListenerAdapter() {
                                     @Override
-                                    public void onAnimationCancel(Animator animation) {
-                                        textView.setTranslationY(translation);
-                                    }
-
-                                    @Override
                                     public void onAnimationEnd(Animator animation) {
+                                        textView.setTranslationY(BOUNCE_ANIMATION_FINAL_Y);
                                         ViewClippingUtil.setClippingDeactivated(textView, false,
                                                 mClippingParams);
                                     }
