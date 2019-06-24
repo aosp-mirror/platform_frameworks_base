@@ -2325,6 +2325,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserFaceAuthenticated.clear();
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT);
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FACE);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onBiometricsCleared();
+            }
+        }
     }
 
     public boolean isSimPinVoiceSecure() {
