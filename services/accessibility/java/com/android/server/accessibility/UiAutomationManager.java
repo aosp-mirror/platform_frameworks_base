@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.DumpUtils;
@@ -246,7 +247,8 @@ class UiAutomationManager {
                     // another thread.
                     if (serviceInterface != null) {
                         service.linkToDeath(this, 0);
-                        serviceInterface.init(this, mId, mOverlayWindowToken);
+                        serviceInterface.init(this, mId,
+                                mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
                     }
                 } catch (RemoteException re) {
                     Slog.w(LOG_TAG, "Error initialized connection", re);
