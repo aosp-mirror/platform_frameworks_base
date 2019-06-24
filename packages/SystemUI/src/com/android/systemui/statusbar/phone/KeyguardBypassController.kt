@@ -22,6 +22,7 @@ import android.hardware.face.FaceManager
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.tuner.TunerService
 import javax.inject.Inject
@@ -61,7 +62,8 @@ class KeyguardBypassController {
 
     @Inject
     constructor(context: Context, tunerService: TunerService,
-                statusBarStateController: StatusBarStateController) {
+                statusBarStateController: StatusBarStateController,
+                lockscreenUserManager: NotificationLockscreenUserManager) {
         unlockMethodCache = UnlockMethodCache.getInstance(context)
         this.statusBarStateController = statusBarStateController
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
@@ -88,6 +90,7 @@ class KeyguardBypassController {
                                         KeyguardUpdateMonitor.getCurrentUser()) != 0
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+        lockscreenUserManager.addUserChangedListener { pendingUnlockType = null }
     }
 
     /**
