@@ -22,20 +22,11 @@ import android.os.Bundle;
 import android.telephony.IFinancialSmsCallback;
 import com.android.internal.telephony.SmsRawData;
 
-/** Interface for applications to access the ICC phone book.
+/**
+ * Interface for applications to access the ICC phone book.
  *
- * <p>The following code snippet demonstrates a static method to
- * retrieve the ISms interface from Android:</p>
- * <pre>private static ISms getSmsInterface()
-            throws DeadObjectException {
-    IServiceManager sm = ServiceManagerNative.getDefault();
-    ISms ss;
-    ss = ISms.Stub.asInterface(sm.getService("isms"));
-    return ss;
-}
- * </pre>
+ * See also SmsManager.java.
  */
-
 interface ISms {
     /**
      * Retrieves all messages currently stored on ICC.
