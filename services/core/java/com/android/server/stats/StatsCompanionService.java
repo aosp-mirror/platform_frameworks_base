@@ -25,6 +25,7 @@ import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readSystemIonHeapSizeFromDebugfs;
@@ -39,7 +40,6 @@ import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
-import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -1170,17 +1170,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 LocalServices.getService(
                         ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            final MemoryStat memoryStat = readMemoryStatFromFilesystem(processMemoryState.uid,
+                    processMemoryState.pid);
+            if (memoryStat == null) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(processMemoryState.uid);
             e.writeString(processMemoryState.processName);
             e.writeInt(processMemoryState.oomScore);
-            e.writeLong(processMemoryState.pgfault);
-            e.writeLong(processMemoryState.pgmajfault);
-            e.writeLong(processMemoryState.rssInBytes);
-            e.writeLong(processMemoryState.cacheInBytes);
-            e.writeLong(processMemoryState.swapInBytes);
+            e.writeLong(memoryStat.pgfault);
+            e.writeLong(memoryStat.pgmajfault);
+            e.writeLong(memoryStat.rssInBytes);
+            e.writeLong(memoryStat.cacheInBytes);
+            e.writeLong(memoryStat.swapInBytes);
             e.writeLong(0);  // unused
-            e.writeLong(processMemoryState.startTimeNanos);
+            e.writeLong(memoryStat.startTimeNanos);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
             pulledData.add(e);
         }
     }
@@ -1213,20 +1219,31 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
             e.writeLong(memoryStat.swapInBytes);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
             pulledData.add(e);
         }
+    }
+
+    private static int anonAndSwapInKilobytes(MemoryStat memoryStat) {
+        return (int) ((memoryStat.anonRssInBytes + memoryStat.swapInBytes) / 1024);
     }
 
     private void pullProcessMemoryHighWaterMark(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryHighWaterMark> results = LocalServices.getService(
-                ActivityManagerInternal.class).getMemoryHighWaterMarkForProcesses();
-        for (ProcessMemoryHighWaterMark processMemoryHighWaterMark : results) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(
+                        ActivityManagerInternal.class).getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            final long rssHighWaterMarkInBytes =
+                    readRssHighWaterMarkFromProcfs(managedProcess.pid);
+            if (rssHighWaterMarkInBytes == 0) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(processMemoryHighWaterMark.uid);
-            e.writeString(processMemoryHighWaterMark.processName);
-            e.writeLong(processMemoryHighWaterMark.rssHighWaterMarkInBytes);
+            e.writeInt(managedProcess.uid);
+            e.writeString(managedProcess.processName);
+            e.writeLong(rssHighWaterMarkInBytes);
             pulledData.add(e);
         }
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
