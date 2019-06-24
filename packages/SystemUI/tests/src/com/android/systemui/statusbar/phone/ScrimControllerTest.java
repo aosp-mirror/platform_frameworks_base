@@ -508,6 +508,38 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transitionToPulsing_withTimeoutWallpaperCallback_willHideWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+
+        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
+            @Override
+            public boolean shouldTimeoutWallpaper() {
+                return true;
+            }
+        });
+
+        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
+    }
+
+    @Test
+    public void transitionToPulsing_withDefaultCallback_wontHideWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+
+        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {});
+
+        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
+    }
+
+    @Test
+    public void transitionToPulsing_withoutCallback_wontHideWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+
+        mScrimController.transitionTo(ScrimState.PULSING);
+
+        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
+    }
+
+    @Test
     public void testConservesExpansionOpacityAfterTransition() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.setPanelExpansion(0.5f);
