@@ -347,6 +347,7 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
+import com.android.server.compat.CompatConfig;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
@@ -5027,6 +5028,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
+            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
@@ -5042,7 +5044,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions);
+                        buildSerial, autofillOptions, contentCaptureOptions,
+                        disabledCompatChanges);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -5051,7 +5054,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions);
+                        buildSerial, autofillOptions, contentCaptureOptions,
+                        disabledCompatChanges);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

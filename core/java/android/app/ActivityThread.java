@@ -791,6 +791,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         @Nullable
         ContentCaptureOptions contentCaptureOptions;
 
+        long[] disabledCompatChanges;
+
         @Override
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
@@ -1003,7 +1005,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions) {
+                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1051,6 +1053,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.buildSerial = buildSerial;
             data.autofillOptions = autofillOptions;
             data.contentCaptureOptions = contentCaptureOptions;
+            data.disabledCompatChanges = disabledCompatChanges;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -6144,10 +6147,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
-
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
 
+        AppCompatCallbacks.install(data.disabledCompatChanges);
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);
