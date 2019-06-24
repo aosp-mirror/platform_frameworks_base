@@ -19,14 +19,17 @@
 #include <SkImageEncoder.h>
 #include <SkImageInfo.h>
 #include <SkImagePriv.h>
+#include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkSerialProcs.h>
 #include "LightingInfo.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
+#include "tools/SkSharingProc.h"
 #include "utils/TraceUtils.h"
 
 #include <unistd.h>
@@ -99,7 +102,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             SkASSERT(layerNode->getLayerSurface());
             SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
             if (!displayList || displayList->isEmpty()) {
-                SkDEBUGF(("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName()));
+                ALOGE("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName());
                 return;
             }
 
@@ -233,58 +236,138 @@ static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filen
         if (stream.isValid()) {
             stream.write(data->data(), data->size());
             stream.flush();
-            SkDebugf("SKP Captured Drawing Output (%d bytes) for frame. %s", stream.bytesWritten(),
+            ALOGD("SKP Captured Drawing Output (%zu bytes) for frame. %s", stream.bytesWritten(),
                      filename.c_str());
         }
     });
 }
 
-SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
-    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+// Note multiple SkiaPipeline instances may be loaded if more than one app is visible.
+// Each instance may observe the filename changing and try to record to a file of the same name.
+// Only the first one will succeed. There is no scope available here where we could coordinate
+// to cause this function to return true for only one of the instances.
+bool SkiaPipeline::shouldStartNewFileCapture() {
+    // Don't start a new file based capture if one is currently ongoing.
+    if (mCaptureMode != CaptureMode::None) { return false; }
+
+    // A new capture is started when the filename property changes.
+    // Read the filename property.
+    std::string prop = base::GetProperty(PROPERTY_CAPTURE_SKP_FILENAME, "0");
+    // if the filename property changed to a valid value
+    if (prop[0] != '0' && mCapturedFile != prop) {
+        // remember this new filename
+        mCapturedFile = prop;
+        // and get a property indicating how many frames to capture.
+        mCaptureSequence = base::GetIntProperty(PROPERTY_CAPTURE_SKP_FRAMES, 1);
         if (mCaptureSequence <= 0) {
-            std::string prop = base::GetProperty(PROPERTY_CAPTURE_SKP_FILENAME, "0");
-            if (prop[0] != '0' && mCapturedFile != prop) {
-                mCapturedFile = prop;
-                mCaptureSequence = base::GetIntProperty(PROPERTY_CAPTURE_SKP_FRAMES, 1);
-            }
+            return false;
+        } else if (mCaptureSequence == 1) {
+            mCaptureMode = CaptureMode::SingleFrameSKP;
+        } else {
+            mCaptureMode = CaptureMode::MultiFrameSKP;
         }
-        if (mCaptureSequence > 0 || mPictureCapturedCallback) {
-            mRecorder.reset(new SkPictureRecorder());
-            SkCanvas* pictureCanvas =
-                    mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
-                                              SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
-            mNwayCanvas = std::make_unique<SkNWayCanvas>(surface->width(), surface->height());
-            mNwayCanvas->addCanvas(surface->getCanvas());
-            mNwayCanvas->addCanvas(pictureCanvas);
-            return mNwayCanvas.get();
+        return true;
+    }
+    return false;
+}
+
+// performs the first-frame work of a multi frame SKP capture. Returns true if successful.
+bool SkiaPipeline::setupMultiFrameCapture() {
+    ALOGD("Set up multi-frame capture, frames = %d", mCaptureSequence);
+    // We own this stream and need to hold it until close() finishes.
+    auto stream = std::make_unique<SkFILEWStream>(mCapturedFile.c_str());
+    if (stream->isValid()) {
+        mOpenMultiPicStream = std::move(stream);
+        mSerialContext.reset(new SkSharingSerialContext());
+        SkSerialProcs procs;
+        procs.fImageProc = SkSharingSerialContext::serializeImage;
+        procs.fImageCtx = mSerialContext.get();
+        // SkDocuments don't take owership of the streams they write.
+        // we need to keep it until after mMultiPic.close()
+        // procs is passed as a pointer, but just as a method of having an optional default.
+        // procs doesn't need to outlive this Make call.
+        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs);
+        return true;
+    } else {
+        ALOGE("Could not open \"%s\" for writing.", mCapturedFile.c_str());
+        mCaptureSequence = 0;
+        mCaptureMode = CaptureMode::None;
+        return false;
+    }
+}
+
+SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
+    if (CC_LIKELY(!Properties::skpCaptureEnabled)) {
+        return surface->getCanvas(); // Bail out early when capture is not turned on.
+    }
+    // Note that shouldStartNewFileCapture tells us if this is the *first* frame of a capture.
+    if (shouldStartNewFileCapture() && mCaptureMode == CaptureMode::MultiFrameSKP) {
+        if (!setupMultiFrameCapture()) {
+            return surface->getCanvas();
         }
     }
-    return surface->getCanvas();
+
+    // Create a canvas pointer, fill it depending on what kind of capture is requested (if any)
+    SkCanvas* pictureCanvas = nullptr;
+    switch (mCaptureMode) {
+        case CaptureMode::CallbackAPI:
+        case CaptureMode::SingleFrameSKP:
+            mRecorder.reset(new SkPictureRecorder());
+            pictureCanvas = mRecorder->beginRecording(surface->width(), surface->height(),
+                nullptr, SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+            break;
+        case CaptureMode::MultiFrameSKP:
+            // If a multi frame recording is active, initialize recording for a single frame of a
+            // multi frame file.
+            pictureCanvas = mMultiPic->beginPage(surface->width(), surface->height());
+            break;
+        case CaptureMode::None:
+            // Returning here in the non-capture case means we can count on pictureCanvas being
+            // non-null below.
+            return surface->getCanvas();
+    }
+
+    // Setting up an nway canvas is common to any kind of capture.
+    mNwayCanvas = std::make_unique<SkNWayCanvas>(surface->width(), surface->height());
+    mNwayCanvas->addCanvas(surface->getCanvas());
+    mNwayCanvas->addCanvas(pictureCanvas);
+    return mNwayCanvas.get();
 }
 
 void SkiaPipeline::endCapture(SkSurface* surface) {
+    if (CC_LIKELY(mCaptureMode == CaptureMode::None)) { return; }
     mNwayCanvas.reset();
-    if (CC_UNLIKELY(mRecorder.get())) {
-        ATRACE_CALL();
+    ATRACE_CALL();
+    if (mCaptureSequence > 0 && mCaptureMode == CaptureMode::MultiFrameSKP) {
+        mMultiPic->endPage();
+        mCaptureSequence--;
+        if (mCaptureSequence == 0) {
+            mCaptureMode = CaptureMode::None;
+            // Pass mMultiPic and mOpenMultiPicStream to a background thread, which will handle
+            // the heavyweight serialization work and destroy them. mOpenMultiPicStream is released
+            // to a bare pointer because keeping it in a smart pointer makes the lambda
+            // non-copyable. The lambda is only called once, so this is safe.
+            SkFILEWStream* stream = mOpenMultiPicStream.release();
+            CommonPool::post([doc = std::move(mMultiPic), stream]{
+                ALOGD("Finalizing multi frame SKP");
+                doc->close();
+                delete stream;
+                ALOGD("Multi frame SKP complete.");
+            });
+        }
+    } else {
         sk_sp<SkPicture> picture = mRecorder->finishRecordingAsPicture();
         if (picture->approximateOpCount() > 0) {
-            if (mCaptureSequence > 0) {
-                ATRACE_BEGIN("picture->serialize");
-                auto data = picture->serialize();
-                ATRACE_END();
-
-                // offload saving to file in a different thread
-                if (1 == mCaptureSequence) {
-                    savePictureAsync(data, mCapturedFile);
-                } else {
-                    savePictureAsync(data, mCapturedFile + "_" + std::to_string(mCaptureSequence));
-                }
-                mCaptureSequence--;
-            }
             if (mPictureCapturedCallback) {
                 std::invoke(mPictureCapturedCallback, std::move(picture));
+            } else {
+                // single frame skp to file
+                auto data = picture->serialize();
+                savePictureAsync(data, mCapturedFile);
+                mCaptureSequence = 0;
             }
         }
+        mCaptureMode = CaptureMode::None;
         mRecorder.reset();
     }
 }
@@ -305,7 +388,6 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
 
     // initialize the canvas for the current frame, that might be a recording canvas if SKP
     // capture is enabled.
-    std::unique_ptr<SkPictureRecorder> recorder;
     SkCanvas* canvas = tryCapture(surface.get());
 
     renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas, preTransform);
