@@ -338,6 +338,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mDisplayWindowingMode = windowingMode;
     }
 
+    /** @hide */
+    @WindowingMode
+    public int getDisplayWindowingMode() {
+        return mDisplayWindowingMode;
+    }
 
     public void setActivityType(@ActivityType int activityType) {
         if (mActivityType == activityType) {
