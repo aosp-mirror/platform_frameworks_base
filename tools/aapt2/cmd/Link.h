@@ -24,6 +24,7 @@
 #include "Resource.h"
 #include "split/TableSplitter.h"
 #include "format/binary/TableFlattener.h"
+#include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
 #include "trace/TraceBuffer.h"
 
@@ -81,6 +82,7 @@ struct LinkOptions {
 
   // Flattening options.
   TableFlattenerOptions table_flattener_options;
+  SerializeTableOptions proto_table_flattener_options;
   bool keep_raw_values = false;
 
   // Split APK options.
@@ -245,9 +247,9 @@ class LinkCommand : public Command {
             "<add-resource> tags.",
         &options_.auto_add_overlay);
     AddOptionalSwitch("--override-styles-instead-of-overlaying",
-                      "Causes styles defined in -R resources to replace previous definitions\n"
-                      "instead of merging into them\n",
-                      &options_.override_styles_instead_of_overlaying);
+        "Causes styles defined in -R resources to replace previous definitions\n"
+            "instead of merging into them\n",
+        &options_.override_styles_instead_of_overlaying);
     AddOptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml.",
         &options_.manifest_fixer_options.rename_manifest_package);
     AddOptionalFlag("--rename-instrumentation-target-package",
@@ -283,13 +285,18 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--strict-visibility",
         "Do not allow overlays with different visibility levels.",
         &options_.strict_visibility);
-    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
-    AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
-                    &trace_folder_);
+    AddOptionalSwitch("--exclude-sources",
+        "Do not serialize source file information when generating resources in\n"
+            "Protobuf format.",
+        &options_.proto_table_flattener_options.exclude_sources);
+    AddOptionalFlag("--trace-folder",
+        "Generate systrace json trace fragment to specified folder.",
+        &trace_folder_);
     AddOptionalSwitch("--merge-only",
-          "Only merge the resources, without verifying resource references. This flag\n"
-          "should only be used together with the --static-lib flag.",
-          &options_.merge_only);
+        "Only merge the resources, without verifying resource references. This flag\n"
+            "should only be used together with the --static-lib flag.",
+        &options_.merge_only);
+    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
   }
 
   int Action(const std::vector<std::string>& args) override;
