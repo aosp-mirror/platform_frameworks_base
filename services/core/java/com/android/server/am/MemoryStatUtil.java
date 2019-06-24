@@ -69,6 +69,8 @@ public final class MemoryStatUtil {
             Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
     private static final Pattern PROCFS_RSS_IN_KILOBYTES =
             Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
+    private static final Pattern PROCFS_ANON_RSS_IN_KILOBYTES =
+            Pattern.compile("RssAnon:\\s*(\\d+)\\s*kB");
     private static final Pattern PROCFS_SWAP_IN_KILOBYTES =
             Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
 
@@ -204,6 +206,8 @@ public final class MemoryStatUtil {
             memoryStat.pgmajfault = Long.parseLong(splits[PGMAJFAULT_INDEX]);
             memoryStat.rssInBytes =
                 tryParseLong(PROCFS_RSS_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
+            memoryStat.anonRssInBytes =
+                tryParseLong(PROCFS_ANON_RSS_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
             memoryStat.swapInBytes =
                 tryParseLong(PROCFS_SWAP_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
             memoryStat.startTimeNanos = Long.parseLong(splits[START_TIME_INDEX]) * JIFFY_NANOS;
@@ -284,9 +288,11 @@ public final class MemoryStatUtil {
         public long pgfault;
         /** Number of major page faults */
         public long pgmajfault;
-        /** Number of bytes of anonymous and swap cache memory */
+        /** For memcg stats, the anon rss + swap cache size. Otherwise total RSS. */
         public long rssInBytes;
-        /** Number of bytes of page cache memory */
+        /** Number of bytes of the anonymous RSS. Only present for non-memcg stats. */
+        public long anonRssInBytes;
+        /** Number of bytes of page cache memory. Only present for memcg stats. */
         public long cacheInBytes;
         /** Number of bytes of swap usage */
         public long swapInBytes;
