@@ -3958,7 +3958,7 @@ message ProcessMemoryState {
     optional int64 page_major_fault = 5;
 
     // RSS
-    // Value is read from /proc/PID/stat, field 24. Or from memory.stat, field
+    // Value is read from /proc/PID/status. Or from memory.stat, field
     // total_rss if per-app memory cgroups are enabled.
     optional int64 rss_in_bytes = 6;
 
@@ -3978,6 +3978,9 @@ message ProcessMemoryState {
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22. 0 if read from per-app memory cgroups.
     optional int64 start_time_nanos = 10;
+
+    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
+    optional int32 anon_rss_and_swap_in_kilobytes = 11;
 }
 
 /*
@@ -4000,7 +4003,7 @@ message NativeProcessMemoryState {
     optional int64 page_major_fault = 4;
 
     // RSS
-    // Value read from /proc/PID/stat, field 24.
+    // Value read from /proc/PID/status.
     optional int64 rss_in_bytes = 5;
 
     // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
@@ -4013,6 +4016,9 @@ message NativeProcessMemoryState {
     // SWAP
     // Value read from /proc/PID/status, field VmSwap.
     optional int64 swap_in_bytes = 8;
+
+    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
+    optional int32 anon_rss_and_swap_in_kilobytes = 9;
 }
 
 /*
