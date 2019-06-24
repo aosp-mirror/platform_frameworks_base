@@ -23,7 +23,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -313,8 +312,6 @@ class NotificationSwipeHelper extends SwipeHelper
     public void setTranslation(View v, float translate) {
         if (v instanceof ExpandableNotificationRow) {
             ((ExpandableNotificationRow) v).setTranslation(translate);
-        } else {
-            Log.wtf(TAG, "setTranslation should only be called on an ExpandableNotificationRow.");
         }
     }
 
@@ -324,7 +321,6 @@ class NotificationSwipeHelper extends SwipeHelper
             return ((ExpandableNotificationRow) v).getTranslation();
         }
         else {
-            Log.wtf(TAG, "getTranslation should only be called on an ExpandableNotificationRow.");
             return 0f;
         }
     }
