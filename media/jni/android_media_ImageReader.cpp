@@ -360,10 +360,8 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
           __FUNCTION__, width, height, format, maxImages);
 
     PublicFormat publicFormat = static_cast<PublicFormat>(format);
-    nativeFormat = android_view_Surface_mapPublicFormatToHalFormat(
-        publicFormat);
-    nativeDataspace = android_view_Surface_mapPublicFormatToHalDataspace(
-        publicFormat);
+    nativeFormat = mapPublicFormatToHalFormat(publicFormat);
+    nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -729,8 +727,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     jobject byteBuffer = NULL;
 
     PublicFormat publicReaderFormat = static_cast<PublicFormat>(readerFormat);
-    int halReaderFormat = android_view_Surface_mapPublicFormatToHalFormat(
-        publicReaderFormat);
+    int halReaderFormat = mapPublicFormatToHalFormat(publicReaderFormat);
 
     if (isFormatOpaque(halReaderFormat) && numPlanes > 0) {
         String8 msg;
@@ -796,8 +793,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         return static_cast<jint>(PublicFormat::PRIVATE);
     } else {
         BufferItem* buffer = Image_getBufferItem(env, thiz);
-        int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
-                static_cast<PublicFormat>(readerFormat));
+        int readerHalFormat = mapPublicFormatToHalFormat(static_cast<PublicFormat>(readerFormat));
         int32_t fmt = applyFormatOverrides(
                 buffer->mGraphicBuffer->getPixelFormat(), readerHalFormat);
         // Override the image format to HAL_PIXEL_FORMAT_YCbCr_420_888 if the actual format is
@@ -808,8 +804,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         if (isPossiblyYUV(fmt)) {
             fmt = HAL_PIXEL_FORMAT_YCbCr_420_888;
         }
-        PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-                fmt, buffer->mDataSpace);
+        PublicFormat publicFmt = mapHalFormatDataspaceToPublicFormat(fmt, buffer->mDataSpace);
         return static_cast<jint>(publicFmt);
     }
 }
