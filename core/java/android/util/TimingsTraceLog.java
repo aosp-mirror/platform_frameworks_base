@@ -21,10 +21,10 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.os.Trace;
 
-import java.util.ArrayDeque;
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
 
 /**
@@ -37,16 +37,37 @@ import java.util.List;
 public class TimingsTraceLog {
     // Debug boot time for every step if it's non-user build.
     private static final boolean DEBUG_BOOT_TIME = !Build.IS_USER;
-    private final Deque<Pair<String, Long>> mStartTimes =
-            DEBUG_BOOT_TIME ? new ArrayDeque<>() : null;
+
+    // Maximum number of nested calls that are stored
+    private static final int MAX_NESTED_CALLS = 10;
+
+    private final String[] mStartNames;
+    private final long[] mStartTimes;
+
     private final String mTag;
-    private long mTraceTag;
-    private long mThreadId;
+    private final long mTraceTag;
+    private final long mThreadId;
+    private final int mMaxNestedCalls;
+
+    private int mCurrentLevel = -1;
 
     public TimingsTraceLog(String tag, long traceTag) {
+        this(tag, traceTag, DEBUG_BOOT_TIME ? MAX_NESTED_CALLS : -1);
+    }
+
+    @VisibleForTesting
+    public TimingsTraceLog(String tag, long traceTag, int maxNestedCalls) {
         mTag = tag;
         mTraceTag = traceTag;
         mThreadId = Thread.currentThread().getId();
+        mMaxNestedCalls = maxNestedCalls;
+        if (maxNestedCalls > 0) {
+            mStartNames = new String[maxNestedCalls];
+            mStartTimes = new long[maxNestedCalls];
+        } else {
+            mStartNames = null;
+            mStartTimes = null;
+        }
     }
 
     /**
@@ -56,27 +77,41 @@ public class TimingsTraceLog {
     public void traceBegin(String name) {
         assertSameThread();
         Trace.traceBegin(mTraceTag, name);
-        if (DEBUG_BOOT_TIME) {
-            mStartTimes.push(Pair.create(name, SystemClock.elapsedRealtime()));
+
+        if (!DEBUG_BOOT_TIME) return;
+
+        if (mCurrentLevel + 1 >= mMaxNestedCalls) {
+            Slog.w(mTag, "not tracing duration of '" + name + "' because already reached "
+                    + mMaxNestedCalls + " levels");
+            return;
         }
+
+        mCurrentLevel++;
+        mStartNames[mCurrentLevel] = name;
+        mStartTimes[mCurrentLevel] = SystemClock.elapsedRealtime();
     }
 
     /**
      * End tracing previously {@link #traceBegin(String) started} section.
-     * Also {@link #logDuration logs} the duration.
+     *
+     * <p>Also {@link #logDuration logs} the duration.
      */
     public void traceEnd() {
         assertSameThread();
         Trace.traceEnd(mTraceTag);
-        if (!DEBUG_BOOT_TIME) {
-            return;
-        }
-        if (mStartTimes.peek() == null) {
+
+        if (!DEBUG_BOOT_TIME) return;
+
+        if (mCurrentLevel < 0) {
             Slog.w(mTag, "traceEnd called more times than traceBegin");
             return;
         }
-        Pair<String, Long> event = mStartTimes.pop();
-        logDuration(event.first, (SystemClock.elapsedRealtime() - event.second));
+
+        final String name = mStartNames[mCurrentLevel];
+        final long duration = SystemClock.elapsedRealtime() - mStartTimes[mCurrentLevel];
+        mCurrentLevel--;
+
+        logDuration(name, duration);
     }
 
     private void assertSameThread() {
@@ -89,7 +124,7 @@ public class TimingsTraceLog {
     }
 
     /**
-     * Log the duration so it can be parsed by external tools for performance reporting
+     * Logs a duration so it can be parsed by external tools for performance reporting.
      */
     public void logDuration(String name, long timeMs) {
         Slog.d(mTag, name + " took to complete: " + timeMs + "ms");
@@ -105,10 +140,11 @@ public class TimingsTraceLog {
      */
     @NonNull
     public final List<String> getUnfinishedTracesForDebug() {
-        if (mStartTimes == null || mStartTimes.isEmpty()) return Collections.emptyList();
-
-        final ArrayList<String> stack = new ArrayList<>(mStartTimes.size());
-        mStartTimes.descendingIterator().forEachRemaining((pair) -> stack.add(pair.first));
-        return stack;
+        if (mStartTimes == null || mCurrentLevel < 0) return Collections.emptyList();
+        final ArrayList<String> list = new ArrayList<>(mCurrentLevel + 1);
+        for (int i = 0; i <= mCurrentLevel; i++) {
+            list.add(mStartNames[i]);
+        }
+        return list;
     }
 }
