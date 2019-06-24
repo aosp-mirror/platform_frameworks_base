@@ -34,7 +34,6 @@ import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.STATS_PER_UID;
-import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.TrafficStats.UID_TETHERING;
 
@@ -90,7 +89,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
-import com.android.server.net.NetworkStatsFactory;
 
 import com.google.android.collect.Maps;
 
@@ -163,8 +161,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
             new RemoteCallbackList<>();
-
-    private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
     @GuardedBy("mTetheringStatsProviders")
     private final HashMap<ITetheringStatsProvider, String>
@@ -1207,36 +1203,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public NetworkStats getNetworkStatsSummaryDev() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            return mStatsFactory.readNetworkStatsSummaryDev();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public NetworkStats getNetworkStatsSummaryXt() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            return mStatsFactory.readNetworkStatsSummaryXt();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public NetworkStats getNetworkStatsDetail() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            return mStatsFactory.readNetworkStatsDetail();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void setInterfaceQuota(String iface, long quotaBytes) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
@@ -1533,16 +1499,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public boolean isBandwidthControlEnabled() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return true;
-    }
-
-    @Override
-    public NetworkStats getNetworkStatsUidDetail(int uid, String[] ifaces) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
