@@ -105,19 +105,15 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
     private final HashSet<Integer> mMediaInvisibleStates;
     private final Object mMediaToken = new Object();
-    @VisibleForTesting
-    protected SettableWakeLock mMediaWakeLock;
-    @VisibleForTesting
-    protected ZenModeController mZenModeController;
+    private SettableWakeLock mMediaWakeLock;
+    private ZenModeController mZenModeController;
     private String mDatePattern;
     private DateFormat mDateFormat;
     private String mLastText;
     private boolean mRegistered;
     private String mNextAlarm;
     private NextAlarmController mNextAlarmController;
-    @VisibleForTesting
     protected AlarmManager mAlarmManager;
-    @VisibleForTesting
     protected ContentResolver mContentResolver;
     private AlarmManager.AlarmClockInfo mNextAlarmInfo;
     private PendingIntent mPendingIntent;
@@ -307,42 +303,20 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public boolean onCreateSliceProvider() {
-        synchronized (this) {
-            KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
-            if (oldInstance != null) {
-                oldInstance.onDestroy();
-            }
-
-            mAlarmManager = getContext().getSystemService(AlarmManager.class);
-            mContentResolver = getContext().getContentResolver();
-            mNextAlarmController = new NextAlarmControllerImpl(getContext());
-            mNextAlarmController.addCallback(this);
-            mZenModeController = new ZenModeControllerImpl(getContext(), mHandler);
-            mZenModeController.addCallback(this);
-            mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
-            mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
-            mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
-                    "media");
-            KeyguardSliceProvider.sInstance = this;
-            registerClockUpdate();
-            updateClockLocked();
-        }
+        mAlarmManager = getContext().getSystemService(AlarmManager.class);
+        mContentResolver = getContext().getContentResolver();
+        mNextAlarmController = new NextAlarmControllerImpl(getContext());
+        mNextAlarmController.addCallback(this);
+        mZenModeController = new ZenModeControllerImpl(getContext(), mHandler);
+        mZenModeController.addCallback(this);
+        mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
+        mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
+        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
+                "media");
+        KeyguardSliceProvider.sInstance = this;
+        registerClockUpdate();
+        updateClockLocked();
         return true;
-    }
-
-    @VisibleForTesting
-    protected void onDestroy() {
-        synchronized (this) {
-            mNextAlarmController.removeCallback(this);
-            mZenModeController.removeCallback(this);
-            mMediaWakeLock.setAcquired(false);
-            mAlarmManager.cancel(mUpdateNextAlarm);
-            if (mRegistered) {
-                mRegistered = false;
-                getKeyguardUpdateMonitor().removeCallback(mKeyguardUpdateMonitorCallback);
-                getContext().unregisterReceiver(mIntentReceiver);
-            }
-        }
     }
 
     @Override
@@ -382,8 +356,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
      * Registers a broadcast receiver for clock updates, include date, time zone and manually
      * changing the date/time via the settings app.
      */
-    @VisibleForTesting
-    protected void registerClockUpdate() {
+    private void registerClockUpdate() {
         synchronized (this) {
             if (mRegistered) {
                 return;
