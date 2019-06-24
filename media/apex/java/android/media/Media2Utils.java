@@ -75,5 +75,4 @@ public class Media2Utils {
         Log.v(TAG, "storeCookies: cookieHandler: " + cookieHandler + " Cookies: " + cookies);
 
     }
-
 }

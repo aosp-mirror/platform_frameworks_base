@@ -378,12 +378,22 @@ public abstract class MediaSession2Service extends Service {
                                 callingPkg,
                                 pid == 0 ? connectionRequest.getInt(KEY_PID) : pid,
                                 uid);
+
+                        Bundle connectionHints = connectionRequest.getBundle(KEY_CONNECTION_HINTS);
+                        if (connectionHints == null) {
+                            Log.w(TAG, "connectionHints shouldn't be null.");
+                            connectionHints = Bundle.EMPTY;
+                        } else if (MediaSession2.hasCustomParcelable(connectionHints)) {
+                            Log.w(TAG, "connectionHints contain custom parcelable. Ignoring.");
+                            connectionHints = Bundle.EMPTY;
+                        }
+
                         final ControllerInfo controllerInfo = new ControllerInfo(
                                 remoteUserInfo,
                                 service.getMediaSessionManager()
                                         .isTrustedForMediaControl(remoteUserInfo),
                                 caller,
-                                connectionRequest.getBundle(KEY_CONNECTION_HINTS));
+                                connectionHints);
 
                         if (DEBUG) {
                             Log.d(TAG, "Handling incoming connection request from the"
