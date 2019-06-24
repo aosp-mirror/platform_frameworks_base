@@ -58,9 +58,6 @@ cc_library_shared {
         "android.hardware.cas.native@1.0",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
-
-        // to speed up later users of this library
-        "libsfplugin_ccodec",
     ],
 
     header_libs: ["libhardware_headers"],
