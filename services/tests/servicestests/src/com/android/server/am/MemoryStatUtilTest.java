@@ -233,6 +233,7 @@ public class MemoryStatUtilTest {
         assertEquals(0, stat.cacheInBytes);
         assertEquals(22 * BYTES_IN_KILOBYTE, stat.swapInBytes);
         assertEquals(2222 * JIFFY_NANOS, stat.startTimeNanos);
+        assertEquals(37860 * BYTES_IN_KILOBYTE, stat.anonRssInBytes);
     }
 
     @Test
