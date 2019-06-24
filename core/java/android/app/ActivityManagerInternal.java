@@ -168,18 +168,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isUidActive(int uid);
 
     /**
-     * Returns a list that contains the memory stats for currently running processes.
+     * Returns a list of running processes along with corresponding uids, pids and their oom score.
      *
      * Only processes managed by ActivityManagerService are included.
      */
     public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
-
-    /**
-     * Returns a list that contains the memory high-water mark for currently running processes.
-     *
-     * Only processes managed by ActivityManagerService are included.
-     */
-    public abstract List<ProcessMemoryHighWaterMark> getMemoryHighWaterMarkForProcesses();
 
     /**
      * Checks to see if the calling pid is allowed to handle the user. Returns adjusted user id as
