@@ -92,15 +92,14 @@ public class InvocationLightsView extends View
         mPaint.setStrokeJoin(Paint.Join.MITER);
         mPaint.setAntiAlias(true);
 
-        int cornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
-        int cornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
+
         int displayWidth = DisplayUtils.getWidth(context);
         int displayHeight = DisplayUtils.getHeight(context);
-        CircularCornerPathRenderer cornerPathRenderer = new CircularCornerPathRenderer(
-                cornerRadiusBottom, cornerRadiusTop, displayWidth, displayHeight);
-        mGuide = new PerimeterPathGuide(context, cornerPathRenderer,
+        mGuide = new PerimeterPathGuide(context, createCornerPathRenderer(context),
                 mStrokeWidth / 2, displayWidth, displayHeight);
 
+        int cornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
+        int cornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
         mViewHeight = Math.max(cornerRadiusBottom, cornerRadiusTop);
 
         final int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
@@ -242,6 +241,19 @@ public class InvocationLightsView extends View
         mAssistInvocationLights.get(index).setLength(length);
     }
 
+    /**
+     * Returns CornerPathRenderer to be used for rendering invocation lights.
+     *
+     * To render corners that aren't circular, override this method in a subclass.
+     */
+    protected CornerPathRenderer createCornerPathRenderer(Context context) {
+        int displayWidth = DisplayUtils.getWidth(context);
+        int displayHeight = DisplayUtils.getHeight(context);
+        int cornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
+        int cornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
+        return new CircularCornerPathRenderer(
+                cornerRadiusBottom, cornerRadiusTop, displayWidth, displayHeight);
+    }
     /**
      * Receives an intensity from 0 (lightest) to 1 (darkest) and sets the handle color
      * appropriately. Intention is to match the home handle color.
