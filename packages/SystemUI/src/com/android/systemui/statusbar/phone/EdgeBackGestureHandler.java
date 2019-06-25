@@ -66,6 +66,7 @@ import java.util.concurrent.Executor;
 public class EdgeBackGestureHandler implements DisplayListener {
 
     private static final String TAG = "EdgeBackGestureHandler";
+    private static final int MAX_LONG_PRESS_TIMEOUT = 250;
 
     private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
         @Override
@@ -168,7 +169,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
         // before the app starts to react to it.
         // TODO(b/130352502) Tune this value and extract into a constant
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 0.75f;
-        mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
+        mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
+                ViewConfiguration.getLongPressTimeout());
 
         mNavBarHeight = res.getDimensionPixelSize(R.dimen.navigation_bar_frame_height);
         mMinArrowPosition = res.getDimensionPixelSize(R.dimen.navigation_edge_arrow_min_y);
