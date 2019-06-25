@@ -54,7 +54,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -503,8 +502,6 @@ public class FaceService extends BiometricServiceBase {
             try {
                 if (args.length > 1 && "--hal".equals(args[0])) {
                     dumpHal(fd, Arrays.copyOfRange(args, 1, args.length, args.getClass()));
-                } else if (args.length > 0 && "--proto".equals(args[0])) {
-                    dumpProto(fd);
                 } else {
                     dumpInternal(pw);
                 }
@@ -1294,49 +1291,6 @@ public class FaceService extends BiometricServiceBase {
         pw.println("HAL deaths since last reboot: " + mHALDeathCount);
 
         mUsageStats.print(pw);
-    }
-
-    private void dumpProto(FileDescriptor fd) {
-        final ProtoOutputStream proto = new ProtoOutputStream(fd);
-        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
-            final int userId = user.getUserHandle().getIdentifier();
-
-            final long userToken = proto.start(FaceServiceDumpProto.USERS);
-
-            proto.write(FaceUserStatsProto.USER_ID, userId);
-            proto.write(FaceUserStatsProto.NUM_FACES,
-                    getBiometricUtils().getBiometricsForUser(getContext(), userId).size());
-
-            // Normal face authentications (e.g. lockscreen)
-            final PerformanceStats normal = mPerformanceMap.get(userId);
-            if (normal != null) {
-                final long countsToken = proto.start(FaceUserStatsProto.NORMAL);
-                proto.write(FaceActionStatsProto.ACCEPT, normal.accept);
-                proto.write(FaceActionStatsProto.REJECT, normal.reject);
-                proto.write(FaceActionStatsProto.ACQUIRE, normal.acquire);
-                proto.write(FaceActionStatsProto.LOCKOUT, normal.lockout);
-                proto.write(FaceActionStatsProto.LOCKOUT_PERMANENT, normal.lockout);
-                proto.end(countsToken);
-            }
-
-            // Statistics about secure face transactions (e.g. to unlock password
-            // storage, make secure purchases, etc.)
-            final PerformanceStats crypto = mCryptoPerformanceMap.get(userId);
-            if (crypto != null) {
-                final long countsToken = proto.start(FaceUserStatsProto.CRYPTO);
-                proto.write(FaceActionStatsProto.ACCEPT, crypto.accept);
-                proto.write(FaceActionStatsProto.REJECT, crypto.reject);
-                proto.write(FaceActionStatsProto.ACQUIRE, crypto.acquire);
-                proto.write(FaceActionStatsProto.LOCKOUT, crypto.lockout);
-                proto.write(FaceActionStatsProto.LOCKOUT_PERMANENT, crypto.lockout);
-                proto.end(countsToken);
-            }
-
-            proto.end(userToken);
-        }
-        proto.flush();
-        mPerformanceMap.clear();
-        mCryptoPerformanceMap.clear();
     }
 
     private void dumpHal(FileDescriptor fd, String[] args) {
