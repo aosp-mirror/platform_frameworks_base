@@ -222,6 +222,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final long LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS = 1000;
     // Default update duration in milliseconds for REQUEST_LOCATION.
     private static final long LOCATION_UPDATE_DURATION_MILLIS = 10 * 1000;
+    // Update duration extension multiplier for emergency REQUEST_LOCATION.
+    private static final int EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER = 3;
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
@@ -724,15 +726,28 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Context.LOCATION_SERVICE);
         String provider;
         LocationChangeListener locationListener;
+        LocationRequest locationRequest = new LocationRequest()
+                .setInterval(LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS)
+                .setFastestInterval(LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS);
 
         if (independentFromGnss) {
             // For fast GNSS TTFF
             provider = LocationManager.NETWORK_PROVIDER;
             locationListener = mNetworkLocationListener;
+            locationRequest.setQuality(LocationRequest.POWER_LOW);
         } else {
             // For Device-Based Hybrid (E911)
             provider = LocationManager.FUSED_PROVIDER;
             locationListener = mFusedLocationListener;
+            locationRequest.setQuality(LocationRequest.ACCURACY_FINE);
+        }
+
+        locationRequest.setProvider(provider);
+
+        // Ignore location settings if in emergency mode.
+        if (isUserEmergency && mNIHandler.getInEmergency()) {
+            locationRequest.setLocationSettingsIgnored(true);
+            durationMillis *= EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER;
         }
 
         Log.i(TAG,
@@ -740,14 +755,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
                         provider, durationMillis));
 
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(provider,
-                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /* minDistance= */ 0,
-                /* singleShot= */ false);
-
-        // Ignore location settings if in emergency mode.
-        if (isUserEmergency && mNIHandler.getInEmergency()) {
-            locationRequest.setLocationSettingsIgnored(true);
-        }
         try {
             locationManager.requestLocationUpdates(locationRequest,
                     locationListener, mHandler.getLooper());
@@ -765,6 +772,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void injectBestLocation(Location location) {
+        if (DEBUG) {
+            Log.d(TAG, "injectBestLocation: " + location);
+        }
         int gnssLocationFlags = LOCATION_HAS_LAT_LONG |
                 (location.hasAltitude() ? LOCATION_HAS_ALTITUDE : 0) |
                 (location.hasSpeed() ? LOCATION_HAS_SPEED : 0) |
@@ -869,6 +879,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void handleUpdateLocation(Location location) {
         if (location.hasAccuracy()) {
+            if (DEBUG) {
+                Log.d(TAG, "injectLocation: " + location);
+            }
             native_inject_location(location.getLatitude(), location.getLongitude(),
                     location.getAccuracy());
         }
