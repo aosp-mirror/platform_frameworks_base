@@ -10922,6 +10922,9 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null || availableNetworks == null) {
+                if (executor == null || callback == null) {
+                    return;
+                }
                 Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
                     callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
                 }));
