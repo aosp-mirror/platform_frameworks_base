@@ -558,8 +558,8 @@ public interface ServiceConnector<I extends IInterface> {
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "onServiceConnected " + name + ": ", e);
             }
-            processQueue();
             onServiceConnectionStatusChanged(mService, true);
+            processQueue();
         }
 
         @Override
