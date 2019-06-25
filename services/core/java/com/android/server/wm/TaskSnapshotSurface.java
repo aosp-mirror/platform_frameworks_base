@@ -317,6 +317,11 @@ class TaskSnapshotSurface implements StartingSurface {
             throw new IllegalStateException("mSurface does not hold a valid surface.");
         }
         final SurfaceSession session = new SurfaceSession();
+        // We consider nearly matched dimensions as there can be rounding errors and the user won't
+        // notice very minute differences from scaling one dimension more than the other
+        final boolean aspectRatioMismatch = Math.abs(
+                ((float) buffer.getWidth() / buffer.getHeight())
+                - ((float) mFrame.width() / mFrame.height())) > 0.01f;
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
         mChildSurfaceControl = new SurfaceControl.Builder(session)
@@ -328,16 +333,21 @@ class TaskSnapshotSurface implements StartingSurface {
         Surface surface = new Surface();
         surface.copyFrom(mChildSurfaceControl);
 
-        // Clip off ugly navigation bar.
-        final Rect crop = calculateSnapshotCrop();
-        final Rect frame = calculateSnapshotFrame(crop);
+        final Rect frame;
         SurfaceControl.openTransaction();
         try {
             // We can just show the surface here as it will still be hidden as the parent is
             // still hidden.
             mChildSurfaceControl.show();
-            mChildSurfaceControl.setWindowCrop(crop);
-            mChildSurfaceControl.setPosition(frame.left, frame.top);
+            if (aspectRatioMismatch) {
+                // Clip off ugly navigation bar.
+                final Rect crop = calculateSnapshotCrop();
+                frame = calculateSnapshotFrame(crop);
+                mChildSurfaceControl.setWindowCrop(crop);
+                mChildSurfaceControl.setPosition(frame.left, frame.top);
+            } else {
+                frame = null;
+            }
 
             // Scale the mismatch dimensions to fill the task bounds
             final float scale = 1 / mSnapshot.getScale();
@@ -348,10 +358,12 @@ class TaskSnapshotSurface implements StartingSurface {
         surface.attachAndQueueBuffer(buffer);
         surface.release();
 
-        final Canvas c = mSurface.lockCanvas(null);
-        drawBackgroundAndBars(c, frame);
-        mSurface.unlockCanvasAndPost(c);
-        mSurface.release();
+        if (aspectRatioMismatch) {
+            final Canvas c = mSurface.lockCanvas(null);
+            drawBackgroundAndBars(c, frame);
+            mSurface.unlockCanvasAndPost(c);
+            mSurface.release();
+        }
     }
 
     /**
