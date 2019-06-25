@@ -1387,13 +1387,12 @@ class ActivityStack extends ConfigurationContainer {
             }
 
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Comparing existing cls="
-                    + taskIntent.getComponent().flattenToShortString()
+                    + (task.realActivity != null ? task.realActivity.flattenToShortString() : "")
                     + "/aff=" + r.getTaskRecord().rootAffinity + " to new cls="
                     + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
             // TODO Refactor to remove duplications. Check if logic can be simplified.
-            if (taskIntent != null && taskIntent.getComponent() != null &&
-                    taskIntent.getComponent().compareTo(cls) == 0 &&
-                    Objects.equals(documentData, taskDocumentData)) {
+            if (task.realActivity != null && task.realActivity.compareTo(cls) == 0
+                    && Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching class!");
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,
