@@ -489,7 +489,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (oldDevice == null || oldDevice.getPhysicalAddress() != path) {
             addCecDevice(new HdmiDeviceInfo(
                     address, path, mService.pathToPortId(path), type,
-                    Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(address)));
+                    Constants.UNKNOWN_VENDOR_ID, ""));
             // if we are adding a new device info, send out a give osd name command
             // to update the name of the device in TIF
             mService.sendCecCommand(
@@ -526,7 +526,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return true;
         }
 
-        if (deviceInfo.getDisplayName().equals(osdName)) {
+        if (deviceInfo.getDisplayName() != null
+            && deviceInfo.getDisplayName().equals(osdName)) {
             Slog.d(TAG, "Ignore incoming <Set Osd Name> having same osd name:" + message);
             return true;
         }
