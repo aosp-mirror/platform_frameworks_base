@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ApkAssets;
 import android.os.PatternMatcher;
@@ -69,6 +70,8 @@ public class NavigationModeController implements Dumpable {
     private static final String TAG = NavigationModeController.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    private static final int SYSTEM_APP_MASK =
+            ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
     static final String SHARED_PREFERENCES_NAME = "navigation_mode_controller_preferences";
     static final String PREFS_SWITCHED_FROM_GESTURE_NAV_KEY = "switched_from_gesture_nav";
 
@@ -315,6 +318,10 @@ public class NavigationModeController implements Dumpable {
             return;
         }
 
+        Log.d(TAG, "Switching system navigation to 3-button mode:"
+                + " defaultLauncher=" + getDefaultLauncherPackageName(mCurrentUserContext)
+                + " contextUser=" + mCurrentUserContext.getUserId());
+
         setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
         showNotification(mCurrentUserContext, R.string.notification_content_system_nav_changed);
         mCurrentUserContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -355,9 +362,10 @@ public class NavigationModeController implements Dumpable {
         if (defaultLauncherPackageName == null) {
             return null;
         }
-        ComponentName recentsComponentName = ComponentName.unflattenFromString(
-                context.getString(com.android.internal.R.string.config_recentsComponentName));
-        return recentsComponentName.getPackageName().equals(defaultLauncherPackageName);
+        if (isSystemApp(context, defaultLauncherPackageName)) {
+            return true;
+        }
+        return false;
     }
 
     private String getDefaultLauncherPackageName(Context context) {
@@ -366,6 +374,17 @@ public class NavigationModeController implements Dumpable {
             return null;
         }
         return cn.getPackageName();
+    }
+
+    /** Returns true if the app for the given package name is a system app for this device */
+    private boolean isSystemApp(Context context, String packageName) {
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_META_DATA);
+            return ai != null && ((ai.flags & SYSTEM_APP_MASK) != 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private void showNotification(Context context, int resId) {
