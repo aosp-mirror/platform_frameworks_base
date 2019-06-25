@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.hardware.face.FaceManager
 import android.provider.Settings
@@ -73,6 +74,9 @@ class KeyguardBypassController {
                 }
             }
         })
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return
+        }
         val faceManager = context.getSystemService(FaceManager::class.java)
         if (faceManager?.isHardwareDetected != true) {
             return
