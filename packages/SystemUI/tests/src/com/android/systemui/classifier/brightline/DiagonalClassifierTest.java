@@ -28,10 +28,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -40,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class DiagonalClassifierTest extends SysuiTestCase {
+public class DiagonalClassifierTest extends ClassifierTest {
 
     // Next variable is not actually five, but is very close. 5 degrees is currently the value
     // used in the diagonal classifier, so we want slightly less than that to deal with
@@ -57,21 +55,24 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     private FalsingClassifier mClassifier;
 
     @Before
-    @Ignore("Memory Leak?")
     public void setup() {
+        super.setup();
         MockitoAnnotations.initMocks(this);
         mClassifier = new DiagonalClassifier(mDataProvider);
     }
 
+    @After
+    public void tearDown() {
+        super.tearDown();
+    }
+
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_UnknownAngle() {
         when(mDataProvider.getAngle()).thenReturn(Float.MAX_VALUE);
         assertThat(mClassifier.isFalseTouch(), is(false));
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_VerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(UP_IN_RADIANS);
         assertThat(mClassifier.isFalseTouch(), is(false));
@@ -81,7 +82,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_MostlyVerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(UP_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
         assertThat(mClassifier.isFalseTouch(), is(false));
@@ -97,7 +97,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_BarelyVerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(
                 UP_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
@@ -117,7 +116,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_HorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(RIGHT_IN_RADIANS);
         assertThat(mClassifier.isFalseTouch(), is(false));
@@ -127,7 +125,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_MostlyHorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(RIGHT_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
         assertThat(mClassifier.isFalseTouch(), is(false));
@@ -143,7 +140,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_BarelyHorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
@@ -163,7 +159,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testPass_AffordanceSwipe() {
         when(mDataProvider.getInteractionType()).thenReturn(LEFT_AFFORDANCE);
         when(mDataProvider.getAngle()).thenReturn(
@@ -182,7 +177,6 @@ public class DiagonalClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Memory Leak?")
     public void testFail_DiagonalSwipe() {
         // Horizontal Swipes
         when(mDataProvider.isVertical()).thenReturn(false);
