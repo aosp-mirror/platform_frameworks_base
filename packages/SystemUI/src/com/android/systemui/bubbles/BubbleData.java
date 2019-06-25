@@ -591,7 +591,6 @@ public class BubbleData {
 
     boolean shouldAutoExpand(NotificationEntry entry) {
         Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
-        return metadata != null && metadata.getAutoExpandBubble()
-                && BubbleController.isForegroundApp(mContext, entry.notification.getPackageName());
+        return metadata != null && metadata.getAutoExpandBubble();
     }
 }

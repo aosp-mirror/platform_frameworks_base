@@ -42,7 +42,6 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -684,8 +683,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
         boolean suppressNotification = entry.getBubbleMetadata() != null
-                && entry.getBubbleMetadata().isNotificationSuppressed()
-                && isForegroundApp(mContext, entry.notification.getPackageName());
+                && entry.getBubbleMetadata().isNotificationSuppressed();
         Bubble b = mBubbleData.getBubbleWithKey(entry.key);
         if (b != null && mBubbleData.getSelectedBubble() == b && mBubbleData.isExpanded()) {
             // If we're expanded & selected don't show in shade
@@ -709,18 +707,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * Return true if the applications with the package name is running in foreground.
-     *
-     * @param context application context.
-     * @param pkgName application package name.
-     */
-    public static boolean isForegroundApp(Context context, String pkgName) {
-        ActivityManager am = context.getSystemService(ActivityManager.class);
-        List<RunningTaskInfo> tasks = am.getRunningTasks(1 /* maxNum */);
-        return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 
     /**
