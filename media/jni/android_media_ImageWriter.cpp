@@ -819,8 +819,8 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz) {
     }
 
     // ImageWriter doesn't support data space yet, assuming it is unknown.
-    PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-            buffer->getPixelFormat(), HAL_DATASPACE_UNKNOWN);
+    PublicFormat publicFmt = mapHalFormatDataspaceToPublicFormat(buffer->getPixelFormat(),
+                                                                 HAL_DATASPACE_UNKNOWN);
     return static_cast<jint>(publicFmt);
 }
 
@@ -918,7 +918,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
     // Create all SurfacePlanes
     PublicFormat publicWriterFormat = static_cast<PublicFormat>(writerFormat);
-    writerFormat = android_view_Surface_mapPublicFormatToHalFormat(publicWriterFormat);
+    writerFormat = mapPublicFormatToHalFormat(publicWriterFormat);
     for (int i = 0; i < numPlanes; i++) {
         Image_getLockedImageInfo(env, &lockedImg, i, writerFormat,
                 &pData, &dataSize, &pixelStride, &rowStride);
