@@ -48,7 +48,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 
@@ -76,8 +75,6 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private NotificationMediaManager mNotificationMediaManager;
     @Mock
     private StatusBarStateController mStatusBarStateController;
-    @Mock
-    private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private ZenModeController mZenModeController;
     @Mock

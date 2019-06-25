@@ -25,7 +25,9 @@ import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readSystemIonHeapSizeFromDebugfs;
 
@@ -39,7 +41,6 @@ import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
-import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -137,6 +138,7 @@ import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.am.MemoryStatUtil.IonAllocations;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.storage.DiskStatsFileLogger;
@@ -1170,17 +1172,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 LocalServices.getService(
                         ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            final MemoryStat memoryStat = readMemoryStatFromFilesystem(processMemoryState.uid,
+                    processMemoryState.pid);
+            if (memoryStat == null) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(processMemoryState.uid);
             e.writeString(processMemoryState.processName);
             e.writeInt(processMemoryState.oomScore);
-            e.writeLong(processMemoryState.pgfault);
-            e.writeLong(processMemoryState.pgmajfault);
-            e.writeLong(processMemoryState.rssInBytes);
-            e.writeLong(processMemoryState.cacheInBytes);
-            e.writeLong(processMemoryState.swapInBytes);
+            e.writeLong(memoryStat.pgfault);
+            e.writeLong(memoryStat.pgmajfault);
+            e.writeLong(memoryStat.rssInBytes);
+            e.writeLong(memoryStat.cacheInBytes);
+            e.writeLong(memoryStat.swapInBytes);
             e.writeLong(0);  // unused
-            e.writeLong(processMemoryState.startTimeNanos);
+            e.writeLong(memoryStat.startTimeNanos);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
             pulledData.add(e);
         }
     }
@@ -1213,20 +1221,31 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
             e.writeLong(memoryStat.swapInBytes);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
             pulledData.add(e);
         }
+    }
+
+    private static int anonAndSwapInKilobytes(MemoryStat memoryStat) {
+        return (int) ((memoryStat.anonRssInBytes + memoryStat.swapInBytes) / 1024);
     }
 
     private void pullProcessMemoryHighWaterMark(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryHighWaterMark> results = LocalServices.getService(
-                ActivityManagerInternal.class).getMemoryHighWaterMarkForProcesses();
-        for (ProcessMemoryHighWaterMark processMemoryHighWaterMark : results) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(
+                        ActivityManagerInternal.class).getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            final long rssHighWaterMarkInBytes =
+                    readRssHighWaterMarkFromProcfs(managedProcess.pid);
+            if (rssHighWaterMarkInBytes == 0) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(processMemoryHighWaterMark.uid);
-            e.writeString(processMemoryHighWaterMark.processName);
-            e.writeLong(processMemoryHighWaterMark.rssHighWaterMarkInBytes);
+            e.writeInt(managedProcess.uid);
+            e.writeString(managedProcess.processName);
+            e.writeLong(rssHighWaterMarkInBytes);
             pulledData.add(e);
         }
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
@@ -1252,6 +1271,21 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(systemIonHeapSizeInBytes);
         pulledData.add(e);
+    }
+
+    private void pullProcessSystemIonHeapSize(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
+        for (IonAllocations allocations : result) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(getUidForPid(allocations.pid));
+            e.writeString(readCmdlineFromProcfs(allocations.pid));
+            e.writeInt((int) (allocations.totalSizeInBytes / 1024));
+            e.writeInt(allocations.count);
+            e.writeInt((int) (allocations.maxSizeInBytes / 1024));
+            pulledData.add(e);
+        }
     }
 
     private void pullBinderCallsStats(
@@ -2314,6 +2348,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.SYSTEM_ION_HEAP_SIZE: {
                 pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
+                pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BINDER_CALLS: {
