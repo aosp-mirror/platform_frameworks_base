@@ -220,7 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Reti"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Attiva logging dettagliato Wi-Fi"</string>
-    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limitazione della ricerca di reti Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limita ricerca di reti Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra dispositivi Bluetooth senza nome"</string>

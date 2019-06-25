@@ -34,7 +34,7 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"पासवर्ड तपासा आणि पुन्‍हा प्रयत्‍न करा"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"परिक्षेत्रामध्ये नाही"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"स्वयंचलितपणे कनेक्ट करणार नाही"</string>
-    <string name="wifi_no_internet" msgid="4663834955626848401">"इंटरनेट अॅक्सेस नाही"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"इंटरनेट अ‍ॅक्सेस नाही"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे सेव्ह केले"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s द्वारे स्वयंचलितपणे कनेक्ट केले"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदात्याद्वारे स्वयंचलितपणे कनेक्ट केले"</string>
@@ -46,7 +46,7 @@
     <string name="wifi_limited_connection" msgid="7717855024753201527">"मर्यादित कनेक्शन"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"इंटरनेट नाही"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"साइन इन करणे आवश्यक आहे"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"अॅक्सेस पॉइंट तात्पुरते भरलेले"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"अ‍ॅक्सेस पॉइंट तात्पुरते भरलेले"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ने कनेक्‍ट केले"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ने उपलब्‍ध"</string>
     <string name="osu_opening_provider" msgid="5488997661548640424">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> उघडत आहे"</string>
@@ -74,8 +74,8 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"कनेक्ट केले (फोन नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"कनेक्ट केले (मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"कनेक्ट केले (फोन किंवा मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"अॅक्टिव्ह, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"अॅक्टिव्ह, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"अ‍ॅक्टिव्ह, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"अ‍ॅक्टिव्ह, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी"</string>
     <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"अ‍ॅक्टिव्ह"</string>
@@ -83,12 +83,12 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"इनपुट डिव्हाइस"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"इंटरनेट अॅक्सेस"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"इंटरनेट अ‍ॅक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क शेअरिंग"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क सामायिकरणासाठी वापरा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"इंटरनेट कनेक्शन शेअररण"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"मजकूर मेसेज"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम अॅक्सेस"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम अ‍ॅक्सेस"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ऑडिओ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"श्रवण यंत्रे"</string>
@@ -102,7 +102,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"इनपुट डिव्हाइसवर कनेक्ट केले"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"इंटरनेट अॅक्सेससाठी डिव्हाइसशी कनेक्ट केले"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"डिव्हाइससह स्थानिक इंटरनेट कनेक्शन शेअर करत आहे"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"इंटरनेट अॅक्सेस करण्यासाठी वापरा"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"इंटरनेट अ‍ॅक्सेस करण्यासाठी वापरा"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"नकाशासाठी वापरा"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM प्रवेशासाठी वापरा"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"मीडिया ऑडिओसाठी वापरा"</string>
@@ -113,7 +113,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"पेअर करा"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"पेअर करा"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"रद्द करा"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्‍ट केल्यावर पेअरींग तुमचे संपर्क आणि कॉल इतिहास यामध्ये अॅक्सेस देते."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्‍ट केल्यावर पेअरींग तुमचे संपर्क आणि कॉल इतिहास यामध्ये अ‍ॅक्सेस देते."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी जोडू शकलो नाही."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"अयोग्य पिन किंवा पासकीमुळे <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सह जोडू शकलो नाही."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी संवाद प्रस्थापित करू शकत नाही."</string>
@@ -138,15 +138,15 @@
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"नेटवर्क उघडा"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"सुरक्षित नेटवर्क"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"काढलेले अॅप्स"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"काढलेले अॅप्स आणि वापरकर्ते"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"काढलेले अ‍ॅप्स"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"काढलेले अ‍ॅप्स आणि वापरकर्ते"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"सिस्टम अपडेट"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB टेदरिंग"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"पोर्टेबल हॉटस्पॉट"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ब्लूटूथ टेदरिंग"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"टेदरिंग"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"टेदरिंग आणि पोर्टेबल हॉटस्पॉट"</string>
-    <string name="managed_user_title" msgid="8109605045406748842">"सर्व कार्य अॅप्स"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"सर्व कार्य अ‍ॅप्स"</string>
     <string name="user_guest" msgid="8475274842845401871">"अतिथी"</string>
     <string name="unknown" msgid="1592123443519355854">"अज्ञात"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"वापरकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -200,7 +200,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"या वापरकर्त्यासाठी डेव्हलपर पर्याय उपलब्ध नाहीत"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"या वापरकर्त्यासाठी VPN सेटिंग्ज उपलब्ध नाहीत"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"या वापरकर्त्यासाठी टेदरिंग सेटिंग्ज उपलब्ध नाहीत"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"या वापरकर्त्यासाठी अॅक्सेस बिंदू नाव सेटिंग्ज उपलब्ध नाहीत"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"या वापरकर्त्यासाठी अ‍ॅक्सेस बिंदू नाव सेटिंग्ज उपलब्ध नाहीत"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB डीबग करणे"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB कनेक्ट केलेले असताना डीबग मोड"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डीबग करणारी प्रमाणीकरणे रीव्होक करा"</string>
@@ -261,14 +261,14 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"दृश्‍य विशेषता तपासणी सुरू करा"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"जरी वाय-फाय चालू असले तरीही, मोबाईल डेटा नेहमी चालू ठेवा (नेटवर्क जलदरीत्या स्विच करण्यासाठी)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"उपलब्ध असल्यास टेदरिंग हार्डवेअर प्रवेग वापरा"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"वाय-फाय चालू असतानाही मोबाइल डेटा नेहमी सुरू ठेवा (नेटवर्क जलदरीत्या स्विच करण्यासाठी)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"उपलब्ध असल्यास टेदरिंग हार्डवेअर अॅक्सिलरेशन वापरा"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB डीबग करण्यास अनुमती द्यायची?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग करण्याचा हेतू फक्त विकास उद्देशांसाठी आहे. याचा वापर तुमचा कॉंप्युटर आणि तुमचे डिव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय तुमच्या डिव्हाइस वर अॅप्स इंस्टॉल करा आणि लॉग डेटा वाचा."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"तुम्ही पूर्वी अॉथोराइझ केलेल्या सर्व संगणकांवरुन USB डीबग करण्यासाठी अॅक्सेस रीव्होक करायचा?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग करण्याचा हेतू फक्त विकास उद्देशांसाठी आहे. याचा वापर तुमचा कॉंप्युटर आणि तुमचे डिव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय तुमच्या डिव्हाइस वर अ‍ॅप्स इंस्टॉल करा आणि लॉग डेटा वाचा."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"तुम्ही पूर्वी अॉथोराइझ केलेल्या सर्व संगणकांवरुन USB डीबग करण्यासाठी अ‍ॅक्सेस रीव्होक करायचा?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील अॅप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वर अॅप्स पडताळून पाहा"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वर अ‍ॅप्स पडताळून पाहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
@@ -290,7 +290,7 @@
     <string name="media_category" msgid="4388305075496848353">"मीडिया"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"परीक्षण"</string>
     <string name="strict_mode" msgid="1938795874357830695">"कठोर मोड सुरू"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"मुख्य थ्रेडवर अॅप्स मोठी कार्ये करतात तेव्हा स्क्रीन फ्लॅश करा"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"मुख्य थ्रेडवर अ‍ॅप्स मोठी कार्ये करतात तेव्हा स्क्रीन फ्लॅश करा"</string>
     <string name="pointer_location" msgid="6084434787496938001">"पॉइंटर स्थान"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"वर्तमान स्पर्श डेटा दर्शविणारे स्क्रीन ओव्हरले"</string>
     <string name="show_touches" msgid="2642976305235070316">"टॅप दाखवा"</string>
@@ -322,7 +322,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ट्रांझिशन अॅनिमेशन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"अॅनिमेटर कालावधी स्केल"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"दुय्यम डिस्प्ले सिम्युलेट करा"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"अॅप्स"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"अ‍ॅप्स"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"अॅक्टिव्हिटी ठेवू नका"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"वापरकर्त्याने प्रत्येक अॅक्टिव्हिटी सोडताच ती नष्ट करा"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"पार्श्वभूमी प्रक्रिया मर्यादा"</string>
@@ -353,7 +353,7 @@
     <item msgid="8280754435979370728">"डोळ्यांनी पाहिले तसे नैसर्गिक रंग"</item>
     <item msgid="5363960654009010371">"डिजिटल सामग्रीसाठी ऑप्टिमाइझ केलेले रंग"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="9042996804461901648">"स्टँडबाय अॅप्स"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"स्टँडबाय अ‍ॅप्स"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"निष्क्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"अ‍ॅप स्टँडबाय स्थिती: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
