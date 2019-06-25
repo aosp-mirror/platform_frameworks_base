@@ -234,6 +234,17 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mStatusBarState = newState;
     }
 
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        if (!isDozing) {
+            // Let's make sure all huns we got while dozing time out within the normal timeout
+            // duration. Otherwise they could get stuck for a very long time
+            for (AlertEntry entry : mAlertEntries.values()) {
+                entry.updateEntry(true /* updatePostTime */);
+            }
+        }
+    }
+
     /**
      * Set that we are exiting the headsUp pinned mode, but some notifications might still be
      * animating out. This is used to keep the touchable regions in a sane state.
