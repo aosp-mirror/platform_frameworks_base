@@ -72,7 +72,7 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"แอปนี้จำเป็นสำหรับผู้ใช้หรือโปรไฟล์บางส่วน และถอนการติดตั้งไปแล้วสำหรับส่วนอื่น"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"แอปนี้จำเป็นสำหรับโปรไฟล์ของคุณและถอนการติดตั้งไม่ได้"</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ผู้ดูแลระบบอุปกรณ์กำหนดให้ใช้แอปนี้และถอนการติดตั้งไม่ได้"</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"จัดการแอปผู้ดูแลระบบอุปกรณ์"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"จัดการแอปดูแลอุปกรณ์"</string>
     <string name="manage_users" msgid="1243995386982560813">"จัดการผู้ใช้"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"ถอนการติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"พบปัญหาในการแยกวิเคราะห์แพ็กเกจ"</string>
