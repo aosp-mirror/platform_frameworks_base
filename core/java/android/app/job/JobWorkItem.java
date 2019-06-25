@@ -55,15 +55,6 @@ final public class JobWorkItem implements Parcelable {
     }
 
     /**
-     * @deprecated replaced by {@link #JobWorkItem(Intent, long, long)}
-     * @removed
-     */
-    @Deprecated
-    public JobWorkItem(Intent intent, @BytesLong long networkBytes) {
-        this(intent, networkBytes, NETWORK_BYTES_UNKNOWN);
-    }
-
-    /**
      * Create a new piece of work, which can be submitted to
      * {@link JobScheduler#enqueue JobScheduler.enqueue}.
      * <p>
@@ -87,25 +78,6 @@ final public class JobWorkItem implements Parcelable {
      */
     public Intent getIntent() {
         return mIntent;
-    }
-
-    /**
-     * @deprecated replaced by {@link #getEstimatedNetworkDownloadBytes()} and
-     *             {@link #getEstimatedNetworkUploadBytes()}.
-     * @removed
-     */
-    @Deprecated
-    public @BytesLong long getEstimatedNetworkBytes() {
-        if (mNetworkDownloadBytes == NETWORK_BYTES_UNKNOWN
-                && mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
-            return NETWORK_BYTES_UNKNOWN;
-        } else if (mNetworkDownloadBytes == NETWORK_BYTES_UNKNOWN) {
-            return mNetworkUploadBytes;
-        } else if (mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
-            return mNetworkDownloadBytes;
-        } else {
-            return mNetworkDownloadBytes + mNetworkUploadBytes;
-        }
     }
 
     /**

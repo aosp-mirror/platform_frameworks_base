@@ -134,13 +134,22 @@ public class ConnectivityControllerTest {
     public void testInsane() throws Exception {
         final Network net = new Network(101);
         final JobInfo.Builder job = createJob()
-                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1))
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
         // Slow network is too slow
         assertFalse(ConnectivityController.isSatisfied(createJobStatus(job), net,
                 createCapabilities().setLinkUpstreamBandwidthKbps(1)
                         .setLinkDownstreamBandwidthKbps(1), mConstants));
+        // Slow downstream
+        assertFalse(ConnectivityController.isSatisfied(createJobStatus(job), net,
+                createCapabilities().setLinkUpstreamBandwidthKbps(1024)
+                        .setLinkDownstreamBandwidthKbps(1), mConstants));
+        // Slow upstream
+        assertFalse(ConnectivityController.isSatisfied(createJobStatus(job), net,
+                createCapabilities().setLinkUpstreamBandwidthKbps(1)
+                        .setLinkDownstreamBandwidthKbps(1024), mConstants));
         // Fast network looks great
         assertTrue(ConnectivityController.isSatisfied(createJobStatus(job), net,
                 createCapabilities().setLinkUpstreamBandwidthKbps(1024)
@@ -151,7 +160,8 @@ public class ConnectivityControllerTest {
     public void testCongestion() throws Exception {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final JobInfo.Builder job = createJob()
-                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1))
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         final JobStatus early = createJobStatus(job, now - 1000, now + 2000);
         final JobStatus late = createJobStatus(job, now - 2000, now + 1000);
@@ -178,12 +188,13 @@ public class ConnectivityControllerTest {
     public void testRelaxed() throws Exception {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final JobInfo.Builder job = createJob()
-                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1))
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
         final JobStatus early = createJobStatus(job, now - 1000, now + 2000);
         final JobStatus late = createJobStatus(job, now - 2000, now + 1000);
 
-        job.setIsPrefetch(true);
+        job.setPrefetch(true);
         final JobStatus earlyPrefetch = createJobStatus(job, now - 1000, now + 2000);
         final JobStatus latePrefetch = createJobStatus(job, now - 2000, now + 1000);
 
