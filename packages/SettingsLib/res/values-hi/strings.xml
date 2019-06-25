@@ -37,7 +37,7 @@
     <string name="wifi_no_internet" msgid="4663834955626848401">"इंटरनेट नहीं है"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s के ज़रिए ऑटोमैटिक रूप से कनेक्ट है"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदाता के ज़रिए अपने आप कनेक्ट है"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग कंपनी के ज़रिए अपने आप कनेक्ट है"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="connected_via_app" msgid="5571999941988929520">"<xliff:g id="NAME">%1$s</xliff:g> के ज़रिए कनेक्ट किया गया"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>

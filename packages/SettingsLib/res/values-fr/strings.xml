@@ -146,7 +146,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Partage connexion Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Partage de connexion"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Partage de connexion"</string>
-    <string name="managed_user_title" msgid="8109605045406748842">"Toutes applis profession."</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Toutes les applis professionnelles"</string>
     <string name="user_guest" msgid="8475274842845401871">"Invité"</string>
     <string name="unknown" msgid="1592123443519355854">"Inconnu"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Utilisateur : <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -243,7 +243,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Désactivé"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatique"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nom d\'hôte du fournisseur DNS privé"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Saisissez le nom d\'hôte du fournisseur DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Indiquez le nom d\'hôte du fournisseur DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Impossible de se connecter"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
@@ -385,8 +385,8 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Temps restant en fonction de votre utilisation (<xliff:g id="LEVEL">%2$s</xliff:g>) : environ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> en fonction de votre utilisation (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> en fonction de votre utilisation"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> selon utilisation (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> selon utilisation"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Jusqu\'à <xliff:g id="TIME">%1$s</xliff:g>"</string>
