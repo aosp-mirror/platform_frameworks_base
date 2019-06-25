@@ -319,6 +319,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
 
     /**
+     * Transition flag: Keyguard is going away with subtle animation.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {

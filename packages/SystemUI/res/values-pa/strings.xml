@@ -124,8 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਿਰਤ ਹੋਇਆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ਪੁਸ਼ਟੀ ਕੀਤੀ ਗਈ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ਪੂਰਾ ਕਰਨ ਲਈ ਪੁਸ਼ਟੀ ਕਰੋ \'ਤੇ ਟੈਪ ਕਰੋ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ਤੁਹਾਡੀ ਪਛਾਣ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>

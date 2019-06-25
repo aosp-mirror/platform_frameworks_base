@@ -124,11 +124,10 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在查找您的面孔"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"面孔身份验证成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"已确认"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"点按“确认”即可完成"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"请触摸指纹传感器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指纹图标"</string>
-    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在查找中…"</string>
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在查找您的面孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"面孔图标"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"兼容性缩放按钮。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"将小屏幕的图片放大在较大屏幕上显示。"</string>
