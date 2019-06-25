@@ -45,11 +45,25 @@ interface IMediaRouterService {
     void registerClient2AsUser(IMediaRouter2Client client, String packageName, int userId);
     void unregisterClient2(IMediaRouter2Client client);
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
+    /**
+     * Changes the selected route of the client.
+     *
+     * @param client Client to change it's selected route.
+     * @param route Route to be selected.
+     */
+    void selectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
     void setControlCategories(IMediaRouter2Client client, in List<String> categories);
 
     void registerManagerAsUser(IMediaRouter2Manager manager,
             String packageName, int userId);
     void unregisterManager(IMediaRouter2Manager manager);
-    void setRemoteRoute(IMediaRouter2Manager manager,
-            int uid, String routeId, boolean explicit);
+    /**
+     * Changes the selected route of an application.
+     *
+     * @param manager Manager that calls the method
+     * @param uid UID of the client that will change the selected route.
+     * @param route Route to be selected.
+     */
+    void selectClientRoute2(IMediaRouter2Manager manager, int clientUid,
+            in @nullable MediaRoute2Info route);
 }

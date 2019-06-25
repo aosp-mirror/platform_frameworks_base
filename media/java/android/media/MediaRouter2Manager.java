@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -59,8 +60,9 @@ public class MediaRouter2Manager {
     @GuardedBy("sLock")
     final ArrayList<CallbackRecord> mCallbacks = new ArrayList<>();
 
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
     @NonNull
-    private List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
+    List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
@@ -93,17 +95,12 @@ public class MediaRouter2Manager {
     public void addCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) {
 
-        if (executor == null) {
-            throw new IllegalArgumentException("executor must not be null");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("callback must not be null");
-        }
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(callback, "callback must not be null");
 
         synchronized (sLock) {
-            final int index = findCallbackRecord(callback);
-            if (index >= 0) {
-                Log.w(TAG, "Ignore adding the same callback twice.");
+            if (findCallbackRecordIndex(callback) >= 0) {
+                Log.w(TAG, "Ignoring to add the same callback twice.");
                 return;
             }
             if (mCallbacks.size() == 0) {
@@ -116,7 +113,9 @@ public class MediaRouter2Manager {
                     Log.e(TAG, "Unable to register media router manager.", ex);
                 }
             }
-            mCallbacks.add(new CallbackRecord(executor, callback));
+            CallbackRecord record = new CallbackRecord(executor, callback);
+            mCallbacks.add(record);
+            record.notifyRoutes();
         }
     }
 
@@ -131,7 +130,7 @@ public class MediaRouter2Manager {
         }
 
         synchronized (sLock) {
-            final int index = findCallbackRecord(callback);
+            final int index = findCallbackRecordIndex(callback);
             if (index < 0) {
                 Log.w(TAG, "Ignore removing unknown callback. " + callback);
                 return;
@@ -148,7 +147,7 @@ public class MediaRouter2Manager {
         }
     }
 
-    private int findCallbackRecord(Callback callback) {
+    private int findCallbackRecordIndex(Callback callback) {
         final int count = mCallbacks.size();
         for (int i = 0; i < count; i++) {
             if (mCallbacks.get(i).mCallback == callback) {
@@ -162,12 +161,12 @@ public class MediaRouter2Manager {
      * Selects media route for the specified application uid.
      *
      * @param uid The uid of the application that should change it's media route.
-     * @param routeId The id of the route to select
+     * @param route The route to select
      */
-    public void selectRoute(int uid, String routeId) {
+    public void selectRoute(int uid, MediaRoute2Info route) {
         if (mClient != null) {
             try {
-                mMediaRouterService.setRemoteRoute(mClient, uid, routeId, /* explicit= */true);
+                mMediaRouterService.selectClientRoute2(mClient, uid, route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -182,7 +181,7 @@ public class MediaRouter2Manager {
     public void unselectRoute(int uid) {
         if (mClient != null) {
             try {
-                mMediaRouterService.setRemoteRoute(mClient, uid, null, /* explicit= */ true);
+                mMediaRouterService.selectClientRoute2(mClient, uid, null);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -220,15 +219,18 @@ public class MediaRouter2Manager {
                 if (prevRoute == null) {
                     notifyRouteAdded(routeInfo);
                 } else {
-                    //TODO: Notify only it's really changed.
-                    notifyRouteChanged(routeInfo);
+                    if (!Objects.equals(prevRoute, routeInfo)) {
+                        notifyRouteChanged(routeInfo);
+                    }
                     updatedRouteIds.add(routeInfo.getId());
                 }
             }
             final Collection<MediaRoute2Info> prevRoutes = prevProvider.getRoutes();
 
             for (MediaRoute2Info prevRoute : prevRoutes) {
-                notifyRouteRemoved(prevRoute);
+                if (!updatedRouteIds.contains(prevRoute.getId())) {
+                    notifyRouteRemoved(prevRoute);
+                }
             }
         } else {
             for (MediaRoute2Info routeInfo: routes) {
@@ -267,15 +269,15 @@ public class MediaRouter2Manager {
         for (MediaRoute2ProviderInfo provider : providers) {
             updateProvider(provider);
         }
-        //TODO: Call notifyProviderRemoved for removed providers.
+        //TODO: Call notifyRouteRemoved for the routes of the removed providers.
 
         //TODO: Filter invalid providers.
         mProviders = providers;
     }
 
-    void notifyRouteSelected(int uid, String routeId) {
+    void notifyRouteSelected(int uid, MediaRoute2Info route) {
         for (CallbackRecord record : mCallbacks) {
-            record.mExecutor.execute(() -> record.mCallback.onRouteSelected(uid, routeId));
+            record.mExecutor.execute(() -> record.mCallback.onRouteSelected(uid, route));
         }
     }
 
@@ -289,41 +291,35 @@ public class MediaRouter2Manager {
     /**
      * Interface for receiving events about media routing changes.
      */
-    public abstract static class Callback {
+    public static class Callback {
         /**
          * Called when a route is added.
          */
-        public void onRouteAdded(MediaRoute2Info routeInfo) {}
+        public void onRouteAdded(@NonNull MediaRoute2Info routeInfo) {}
 
         /**
          * Called when a route is changed.
          */
-        public void onRouteChanged(MediaRoute2Info routeInfo) {}
+        public void onRouteChanged(@NonNull MediaRoute2Info routeInfo) {}
 
         /**
          * Called when a route is removed.
          */
-        public void onRouteRemoved(MediaRoute2Info routeInfo) {}
+        public void onRouteRemoved(@NonNull MediaRoute2Info routeInfo) {}
 
         /**
-         * Called when a route is selected for some application uid.
-         * @param uid
-         * @param routeId
+         * Called when a route is selected for an application.
+         * @param uid uid of the application
+         * @param route selected route of the application.
          */
-        public abstract void onRouteSelected(int uid, String routeId);
+        public void onRouteSelected(int uid, @Nullable MediaRoute2Info route) {}
 
         /**
          * Called when the control categories of an application is changed.
          * @param uid the uid of the app that changed control categories
          * @param categories the changed categories
          */
-        public abstract void onControlCategoriesChanged(int uid, List<String> categories);
-
-        /**
-         * Called when the provider updates its information
-         * @param info the changed provider information
-         */
-        public void onProviderInfoUpdated(MediaRoute2ProviderInfo info) {}
+        public void onControlCategoriesChanged(int uid, @NonNull List<String> categories) {}
     }
 
     final class CallbackRecord {
@@ -334,13 +330,22 @@ public class MediaRouter2Manager {
             mExecutor = executor;
             mCallback = callback;
         }
+
+        void notifyRoutes() {
+            for (MediaRoute2ProviderInfo provider : mProviders) {
+                for (MediaRoute2Info routeInfo : provider.getRoutes()) {
+                    mExecutor.execute(
+                            () -> mCallback.onRouteAdded(routeInfo));
+                }
+            }
+        }
     }
 
     class Client extends IMediaRouter2Manager.Stub {
         @Override
-        public void notifyRouteSelected(int uid, String routeId) {
+        public void notifyRouteSelected(int uid, MediaRoute2Info route) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyRouteSelected,
-                    MediaRouter2Manager.this, uid, routeId));
+                    MediaRouter2Manager.this, uid, route));
         }
 
         @Override
