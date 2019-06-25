@@ -2053,7 +2053,7 @@ enum PageId {
     // OS: P
     WIFI_SCANNING_NEEDED_DIALOG = 1373;
 
-    // OPEN: Settings > System > Gestures > Swipe up gesture
+    // OPEN: Settings > System > Gestures > System navigation
     // CATEGORY: SETTINGS
     // OS: P
     SETTINGS_GESTURE_SWIPE_UP = 1374;
@@ -2389,4 +2389,16 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     MODULE_LICENSES_DASHBOARD = 1746;
+
+    // OPEN: Settings > System > Gestures > System navigation > Info icon
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Info icon is visible only when gesture navigation is not available and disabled
+    SETTINGS_GESTURE_NAV_NOT_AVAILABLE_DLG = 1747;
+
+    // OPEN: Settings > System > Gestures > System navigation > Gear icon
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Gear icon is shown next to gesture navigation preference and opens sensitivity dialog
+    SETTINGS_GESTURE_NAV_BACK_SENSITIVITY_DLG = 1748;
 }
