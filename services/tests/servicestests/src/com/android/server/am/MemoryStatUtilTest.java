@@ -23,12 +23,17 @@ import static com.android.server.am.MemoryStatUtil.parseCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseIonHeapSizeFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromProcfs;
+import static com.android.server.am.MemoryStatUtil.parseProcessIonHeapSizesFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.parseVmHWMFromProcfs;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.am.MemoryStatUtil.IonAllocations;
 
 import org.junit.Test;
 
@@ -178,32 +183,70 @@ public class MemoryStatUtilTest {
             + "voluntary_ctxt_switches:\t903\n"
             + "nonvoluntary_ctxt_switches:\t104\n";
 
+    // Repeated lines have been removed.
     private static final String DEBUG_SYSTEM_ION_HEAP_CONTENTS = String.join(
-            "          client              pid             size\n",
-            "----------------------------------------------------\n",
-            " audio@2.0-servi              765             4096\n",
-            " audio@2.0-servi              765            61440\n",
-            " audio@2.0-servi              765             4096\n",
-            "     voip_client               96             8192\n",
-            "     voip_client               96             4096\n",
-            "   system_server             1232         16728064\n",
-            "  surfaceflinger              611         50642944\n",
-            "----------------------------------------------------\n",
-            "orphaned allocations (info is from last known client):\n",
-            "----------------------------------------------------\n",
-            "  total orphaned                0\n",
-            "          total          55193600\n",
-            "   deferred free                0\n",
-            "----------------------------------------------------\n",
-            "0 order 4 highmem pages in uncached pool = 0 total\n",
-            "0 order 4 lowmem pages in uncached pool = 0 total\n",
-            "1251 order 4 lowmem pages in cached pool = 81985536 total\n",
-            "VMID 8: 0 order 4 highmem pages in secure pool = 0 total\n",
-            "VMID  8: 0 order 4 lowmem pages in secure pool = 0 total\n",
-            "--------------------------------------------\n",
-            "uncached pool = 4096 cached pool = 83566592 secure pool = 0\n",
-            "pool total (uncached + cached + secure) = 83570688\n",
-            "--------------------------------------------\n");
+            "\n",
+            "          client              pid             size",
+            "----------------------------------------------------",
+            " audio@2.0-servi              765             4096",
+            " audio@2.0-servi              765            61440",
+            " audio@2.0-servi              765             4096",
+            "     voip_client               96             8192",
+            "     voip_client               96             4096",
+            "   system_server             1232         16728064",
+            "  surfaceflinger              611         50642944",
+            "----------------------------------------------------",
+            "orphaned allocations (info is from last known client):",
+            "----------------------------------------------------",
+            "  total orphaned                0",
+            "          total          55193600",
+            "   deferred free                0",
+            "----------------------------------------------------",
+            "0 order 4 highmem pages in uncached pool = 0 total",
+            "0 order 4 lowmem pages in uncached pool = 0 total",
+            "1251 order 4 lowmem pages in cached pool = 81985536 total",
+            "VMID 8: 0 order 4 highmem pages in secure pool = 0 total",
+            "VMID  8: 0 order 4 lowmem pages in secure pool = 0 total",
+            "--------------------------------------------",
+            "uncached pool = 4096 cached pool = 83566592 secure pool = 0",
+            "pool total (uncached + cached + secure) = 83570688",
+            "--------------------------------------------");
+
+    // Repeated lines have been removed.
+    private static final String DEBUG_SYSTEM_ION_HEAP_CONTENTS_SARGO = String.join(
+            "\n",
+            "          client              pid             size      page counts"
+                    + "--------------------------------------------------       4K       8K      "
+                    + "16K      32K      64K     128K     256K     512K       1M       2M       "
+                    + "4M      >=8M",
+            "   system_server             1705         58097664    13120      532        "
+                    + "0        0        0        0        0        0        0        0        "
+                    + "0        0M",
+            " audio@2.0-servi              851            16384        0        2        0        "
+                    + "0        0        0        0        0        0        0        "
+                    + "0        0M",
+            " audio@2.0-servi              851             4096        1        0        0       "
+                    + " 0        0        0        0        0        0        0        0        "
+                    + "0M",
+            " audio@2.0-servi              851             4096        1        0      "
+                    + "  0        0        0        0        0        0        0        0        "
+                    + "0        0M",
+            "----------------------------------------------------",
+            "orphaned allocations (info is from last known client):",
+            "----------------------------------------------------",
+            "  total orphaned                0",
+            "          total         159928320",
+            "   deferred free                0",
+            "----------------------------------------------------",
+            "0 order 4 highmem pages in uncached pool = 0 total",
+            "0 order 4 lowmem pages in uncached pool = 0 total",
+            "1251 order 4 lowmem pages in cached pool = 81985536 total",
+            "VMID 8: 0 order 4 highmem pages in secure pool = 0 total",
+            "VMID  8: 0 order 4 lowmem pages in secure pool = 0 total",
+            "--------------------------------------------",
+            "uncached pool = 4096 cached pool = 83566592 secure pool = 0",
+            "pool total (uncached + cached + secure) = 83570688",
+            "--------------------------------------------");
 
     @Test
     public void testParseMemoryStatFromMemcg_parsesCorrectValues() {
@@ -323,5 +366,47 @@ public class MemoryStatUtilTest {
     @Test
     public void testParseIonHeapSizeFromDebugfs_correctValue() {
         assertEquals(55193600, parseIonHeapSizeFromDebugfs(DEBUG_SYSTEM_ION_HEAP_CONTENTS));
+
+        assertEquals(159928320, parseIonHeapSizeFromDebugfs(DEBUG_SYSTEM_ION_HEAP_CONTENTS_SARGO));
+    }
+
+    @Test
+    public void testParseProcessIonHeapSizesFromDebugfs_emptyContents() {
+        assertEquals(0, parseProcessIonHeapSizesFromDebugfs("").size());
+
+        assertEquals(0, parseProcessIonHeapSizesFromDebugfs(null).size());
+    }
+
+    @Test
+    public void testParseProcessIonHeapSizesFromDebugfs_invalidValue() {
+        assertEquals(0, parseProcessIonHeapSizesFromDebugfs("<<no-value>>").size());
+    }
+
+    @Test
+    public void testParseProcessIonHeapSizesFromDebugfs_correctValue1() {
+        assertThat(parseProcessIonHeapSizesFromDebugfs(DEBUG_SYSTEM_ION_HEAP_CONTENTS))
+                .containsExactly(
+                        createIonAllocations(765, 61440 + 4096 + 4096, 3, 61440),
+                        createIonAllocations(96, 8192 + 4096, 2, 8192),
+                        createIonAllocations(1232, 16728064, 1, 16728064),
+                        createIonAllocations(611, 50642944, 1, 50642944));
+    }
+
+    @Test
+    public void testParseProcessIonHeapSizesFromDebugfs_correctValue2() {
+        assertThat(parseProcessIonHeapSizesFromDebugfs(DEBUG_SYSTEM_ION_HEAP_CONTENTS_SARGO))
+                .containsExactly(
+                        createIonAllocations(1705, 58097664, 1, 58097664),
+                        createIonAllocations(851, 16384 + 4096 + 4096, 3, 16384));
+    }
+
+    private static IonAllocations createIonAllocations(int pid, long totalSizeInBytes, int count,
+            long maxSizeInBytes) {
+        IonAllocations allocations = new IonAllocations();
+        allocations.pid = pid;
+        allocations.totalSizeInBytes = totalSizeInBytes;
+        allocations.count = count;
+        allocations.maxSizeInBytes = maxSizeInBytes;
+        return allocations;
     }
 }
