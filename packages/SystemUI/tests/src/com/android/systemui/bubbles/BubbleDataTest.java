@@ -785,6 +785,21 @@ public class BubbleDataTest extends SysuiTestCase {
         assertExpandedChangedTo(false);
     }
 
+    @Test
+    public void test_doRemove_setsBubbleRemoved() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        assertThat(mBubbleA1.isRemoved()).isFalse();
+        assertThat(mBubbleData.getBubbleWithKey(mEntryA1.key)).isNotNull();
+        Bubble b = mBubbleData.getBubbleWithKey(mEntryA1.key);
+        assertThat(b.isRemoved()).isFalse();
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        assertThat(b.isRemoved()).isTrue();
+        assertThat(mBubbleData.getBubbleWithKey(mEntryA1.key)).isNull();
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);

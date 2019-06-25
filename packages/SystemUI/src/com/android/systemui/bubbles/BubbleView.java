@@ -56,7 +56,7 @@ public class BubbleView extends FrameLayout {
 
     private boolean mSuppressDot = false;
 
-    private NotificationEntry mEntry;
+    private Bubble mBubble;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -88,15 +88,15 @@ public class BubbleView extends FrameLayout {
     }
 
     /**
-     * Populates this view with a notification.
+     * Populates this view with a bubble.
      * <p>
-     * This should only be called when a new notification is being set on the view, updates to the
-     * current notification should use {@link #update(NotificationEntry)}.
+     * This should only be called when a new bubble is being set on the view, updates to the
+     * current bubble should use {@link #update(Bubble)}.
      *
-     * @param entry the notification to display as a bubble.
+     * @param bubble the bubble to display in this view.
      */
-    public void setNotif(NotificationEntry entry) {
-        mEntry = entry;
+    public void setBubble(Bubble bubble) {
+        mBubble = bubble;
     }
 
     /**
@@ -104,7 +104,7 @@ public class BubbleView extends FrameLayout {
      */
     @Nullable
     public NotificationEntry getEntry() {
-        return mEntry;
+        return mBubble != null ? mBubble.getEntry() : null;
     }
 
     /**
@@ -112,14 +112,14 @@ public class BubbleView extends FrameLayout {
      */
     @Nullable
     public String getKey() {
-        return (mEntry != null) ? mEntry.key : null;
+        return (mBubble != null) ? mBubble.getKey() : null;
     }
 
     /**
-     * Updates the UI based on the entry, updates badge and animates messages as needed.
+     * Updates the UI based on the bubble, updates badge and animates messages as needed.
      */
-    public void update(NotificationEntry entry) {
-        mEntry = entry;
+    public void update(Bubble bubble) {
+        mBubble = bubble;
         updateViews();
     }
 
@@ -136,7 +136,7 @@ public class BubbleView extends FrameLayout {
      */
     @Nullable
     public ExpandableNotificationRow getRowView() {
-        return (mEntry != null) ? mEntry.getRow() : null;
+        return (mBubble != null) ? mBubble.getEntry().getRow() : null;
     }
 
     /** Changes the dot's visibility to match the bubble view's state. */
@@ -175,7 +175,7 @@ public class BubbleView extends FrameLayout {
      * after animation if requested.
      */
     private void updateDotVisibility(boolean animate, Runnable after) {
-        boolean showDot = getEntry().showInShadeWhenBubble() && !mSuppressDot;
+        boolean showDot = mBubble.showInShadeWhenBubble() && !mSuppressDot;
 
         if (animate) {
             animateDot(showDot, after);
@@ -213,20 +213,14 @@ public class BubbleView extends FrameLayout {
     }
 
     void updateViews() {
-        if (mEntry == null || mBubbleIconFactory == null) {
+        if (mBubble == null || mBubbleIconFactory == null) {
             return;
         }
-        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
-        Notification n = mEntry.notification.getNotification();
-        Icon ic;
-        boolean needsTint;
-        if (metadata != null) {
-            ic = metadata.getIcon();
-            needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
-        } else {
-            needsTint = n.getLargeIcon() == null;
-            ic = needsTint ? n.getSmallIcon() : n.getLargeIcon();
-        }
+        Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
+        Notification n = mBubble.getEntry().notification.getNotification();
+        Icon ic = metadata.getIcon();
+        boolean needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
+
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
             iconDrawable = buildIconWithTint(iconDrawable, n.color);
@@ -239,7 +233,7 @@ public class BubbleView extends FrameLayout {
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgeColor = badgeColor;
         mBadgedImageView.setDotColor(badgeColor);
-        animateDot(mEntry.showInShadeWhenBubble() /* showDot */, null /* after */);
+        animateDot(mBubble.showInShadeWhenBubble() /* showDot */, null /* after */);
     }
 
     int getBadgeColor() {
