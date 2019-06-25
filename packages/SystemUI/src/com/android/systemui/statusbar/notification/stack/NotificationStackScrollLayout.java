@@ -3402,10 +3402,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
             ExpandableNotificationRow row = eventPair.first;
             boolean isHeadsUp = eventPair.second;
+            if (isHeadsUp != row.isHeadsUp()) {
+                // For cases where we have a heads up showing and appearing again we shouldn't
+                // do the animations at all.
+                continue;
+            }
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
             boolean onBottom = false;
             boolean pinnedAndClosed = row.isPinned() && !mIsExpanded;
-            if (!mIsExpanded && !isHeadsUp) {
+            boolean performDisappearAnimation = !mIsExpanded
+                    // Only animate if we still have pinned heads up, otherwise we just have the
+                    // regular collapse animation of the lock screen
+                    || (mKeyguardBypassController.getBypassEnabled() && onKeyguard()
+                            && mHeadsUpManager.hasPinnedHeadsUp());
+            if (performDisappearAnimation && !isHeadsUp) {
                 type = row.wasJustClicked()
                         ? AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                         : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
@@ -6252,6 +6262,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mAmbientState.onDragFinished(animView);
             updateContinuousShadowDrawing();
             updateContinuousBackgroundDrawing();
+            if (animView instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
+                if (row.isPinned() && !canChildBeDismissed(row)
+                        && row.getStatusBarNotification().getNotification().fullScreenIntent
+                                == null) {
+                    mHeadsUpManager.removeNotification(row.getStatusBarNotification().getKey(),
+                            true /* removeImmediately */);
+                }
+            }
         }
 
         @Override

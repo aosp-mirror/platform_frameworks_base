@@ -248,7 +248,7 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (onlyShowCenteredIcon) {
             return isCenteredNotificationIcon;
         }
-        if (hideCenteredIcon && isCenteredNotificationIcon) {
+        if (hideCenteredIcon && isCenteredNotificationIcon && !entry.isRowHeadsUp()) {
             return false;
         }
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
