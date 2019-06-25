@@ -262,7 +262,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Овозможи лажни локации"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Овозможете проверка на атрибутот на приказот"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Секогаш држи го активен мобилниот интернет, дури и при активно Wi-Fi (за брзо префрлување мрежа)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Ако е достапно, користете хардверско забрзување за врзување"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Ако е достапно, користи хардверско забрзување за врзување"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Овозможи отстранување грешки на USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отстранувањето грешки на USB е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Отповикај пристап кон отстранување грешка од USB од сите претходно овластени компјутери?"</string>

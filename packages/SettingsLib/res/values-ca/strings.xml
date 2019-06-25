@@ -220,7 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Xarxes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Activa el registre Wi‑Fi detallat"</string>
-    <string name="wifi_scan_throttling" msgid="160014287416479843">"Regulació de la cerca de xarxes Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limitació de la cerca de xarxes Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dades mòbils sempre actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Acceleració per maquinari per a compartició de xarxa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra els dispositius Bluetooth sense el nom"</string>
