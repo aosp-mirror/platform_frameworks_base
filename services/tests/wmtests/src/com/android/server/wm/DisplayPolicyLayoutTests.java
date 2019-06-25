@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.Gravity.BOTTOM;
+import static android.view.Gravity.LEFT;
+import static android.view.Gravity.RIGHT;
+import static android.view.Gravity.TOP;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -26,9 +30,11 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -66,6 +72,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private WindowState mWindow;
     private int mRotation = ROTATION_0;
     private boolean mHasDisplayCutout;
+    private static final int DECOR_WINDOW_INSET = 50;
 
     @Before
     public void setUp() throws Exception {
@@ -518,6 +525,58 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
             assertEquals(0, mWindow.mAttrs.systemUiVisibility);
             assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         }
+    }
+
+    @Test
+    public void testScreenDecorWindows() {
+        synchronized (mWm.mGlobalLock) {
+            final WindowState decorWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
+                    "decorWindow");
+            decorWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+            decorWindow.mAttrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
+            addWindow(decorWindow);
+            addWindow(mWindow);
+
+            // Decor on top
+            updateDecorWindow(decorWindow, MATCH_PARENT, DECOR_WINDOW_INSET, TOP);
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), DECOR_WINDOW_INSET, NAV_BAR_HEIGHT);
+
+            // Decor on bottom
+            updateDecorWindow(decorWindow, MATCH_PARENT, DECOR_WINDOW_INSET, BOTTOM);
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT,
+                    DECOR_WINDOW_INSET);
+
+            // Decor on the left
+            updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, MATCH_PARENT, LEFT);
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+            assertInsetBy(mWindow.getContentFrameLw(), DECOR_WINDOW_INSET, STATUS_BAR_HEIGHT, 0,
+                    NAV_BAR_HEIGHT);
+
+            // Decor on the right
+            updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, MATCH_PARENT, RIGHT);
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+            assertInsetBy(mWindow.getContentFrameLw(), 0, STATUS_BAR_HEIGHT, DECOR_WINDOW_INSET,
+                    NAV_BAR_HEIGHT);
+
+            // Decor not allowed as inset
+            updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, DECOR_WINDOW_INSET, TOP);
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        }
+    }
+
+    private void updateDecorWindow(WindowState decorWindow, int width, int height, int gravity) {
+        decorWindow.mAttrs.width = width;
+        decorWindow.mAttrs.height = height;
+        decorWindow.mAttrs.gravity = gravity;
+        decorWindow.setRequestedSize(width, height);
     }
 
     /**
