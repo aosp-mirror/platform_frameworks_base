@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Move o teléfono cara á esquerda."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Move o teléfono cara á dereita."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira o dispositivo de forma máis directa."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Non se pode ver a túa cara. Mira o teléfono."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Non se ve a túa cara. Mira para o teléfono"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Demasiado movemento. Non movas o teléfono."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Volve rexistrar a túa cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Xa non se pode recoñecer a cara. Téntao de novo."</string>

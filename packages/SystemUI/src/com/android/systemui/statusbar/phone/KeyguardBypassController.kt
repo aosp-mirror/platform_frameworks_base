@@ -22,6 +22,7 @@ import android.hardware.face.FaceManager
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.tuner.TunerService
 import javax.inject.Inject
@@ -49,6 +50,7 @@ class KeyguardBypassController {
         private set
 
     var bouncerShowing: Boolean = false
+    var launchingAffordance: Boolean = false
     var qSExpanded = false
         set(value) {
             val changed = field != value
@@ -60,7 +62,8 @@ class KeyguardBypassController {
 
     @Inject
     constructor(context: Context, tunerService: TunerService,
-                statusBarStateController: StatusBarStateController) {
+                statusBarStateController: StatusBarStateController,
+                lockscreenUserManager: NotificationLockscreenUserManager) {
         unlockMethodCache = UnlockMethodCache.getInstance(context)
         this.statusBarStateController = statusBarStateController
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
@@ -87,6 +90,7 @@ class KeyguardBypassController {
                                         KeyguardUpdateMonitor.getCurrentUser()) != 0
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
+        lockscreenUserManager.addUserChangedListener { pendingUnlockType = null }
     }
 
     /**
@@ -104,6 +108,9 @@ class KeyguardBypassController {
             if (statusBarStateController.state != StatusBarState.KEYGUARD) {
                 // We're bypassing but not actually on the lockscreen, the user should decide when
                 // to unlock
+                return false
+            }
+            if (launchingAffordance) {
                 return false
             }
             if (isPulseExpanding || qSExpanded) {

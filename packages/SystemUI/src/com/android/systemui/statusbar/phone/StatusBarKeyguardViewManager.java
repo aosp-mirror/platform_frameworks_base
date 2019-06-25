@@ -808,6 +808,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mStatusBar.isInLaunchTransition();
     }
 
+
+    /**
+     * @return Whether subtle animation should be used for unlocking the device.
+     */
+    public boolean shouldSubtleWindowAnimationsForUnlock() {
+        return mStatusBar.mKeyguardBypassController.getBypassEnabled()
+                && mStatusBar.mState == StatusBarState.KEYGUARD;
+    }
+
     public boolean isGoingToNotificationShade() {
         return ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
                 .leaveOpenOnKeyguardHide();

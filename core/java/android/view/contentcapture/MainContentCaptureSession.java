@@ -428,14 +428,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         final int flushFrequencyMs;
-        if (reason == FLUSH_REASON_IDLE_TIMEOUT) {
-            flushFrequencyMs = mManager.mOptions.idleFlushingFrequencyMs;
-        } else if (reason == FLUSH_REASON_TEXT_CHANGE_TIMEOUT) {
+        if (reason == FLUSH_REASON_TEXT_CHANGE_TIMEOUT) {
             flushFrequencyMs = mManager.mOptions.textChangeFlushingFrequencyMs;
         } else {
-            Log.e(TAG, "handleScheduleFlush(" + getDebugState(reason) + "): not called with a "
-                    + "timeout reason.");
-            return;
+            if (reason != FLUSH_REASON_IDLE_TIMEOUT) {
+                if (sDebug) {
+                    Log.d(TAG, "handleScheduleFlush(" + getDebugState(reason) + "): not a timeout "
+                            + "reason because mDirectServiceInterface is not ready yet");
+                }
+            }
+            flushFrequencyMs = mManager.mOptions.idleFlushingFrequencyMs;
         }
 
         mNextFlush = System.currentTimeMillis() + flushFrequencyMs;

@@ -322,7 +322,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10059
+    // Next: 10062
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -385,6 +385,7 @@ message Atom {
         FaceSettings face_settings = 10058;
         CoolingDevice cooling_device = 10059;
         AppOps app_ops = 10060;
+        ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3960,7 +3961,7 @@ message ProcessMemoryState {
     optional int64 page_major_fault = 5;
 
     // RSS
-    // Value is read from /proc/PID/stat, field 24. Or from memory.stat, field
+    // Value is read from /proc/PID/status. Or from memory.stat, field
     // total_rss if per-app memory cgroups are enabled.
     optional int64 rss_in_bytes = 6;
 
@@ -3980,6 +3981,9 @@ message ProcessMemoryState {
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22. 0 if read from per-app memory cgroups.
     optional int64 start_time_nanos = 10;
+
+    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
+    optional int32 anon_rss_and_swap_in_kilobytes = 11;
 }
 
 /*
@@ -4002,7 +4006,7 @@ message NativeProcessMemoryState {
     optional int64 page_major_fault = 4;
 
     // RSS
-    // Value read from /proc/PID/stat, field 24.
+    // Value read from /proc/PID/status.
     optional int64 rss_in_bytes = 5;
 
     // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
@@ -4015,6 +4019,9 @@ message NativeProcessMemoryState {
     // SWAP
     // Value read from /proc/PID/status, field VmSwap.
     optional int64 swap_in_bytes = 8;
+
+    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
+    optional int32 anon_rss_and_swap_in_kilobytes = 9;
 }
 
 /*
@@ -6363,6 +6370,28 @@ message GpuStatsAppInfo {
 message SystemIonHeapSize {
     // Size of the system ion heap in bytes.
     optional int64 size_in_bytes = 1;
+}
+
+/*
+ * Logs the per-process size of the system ion heap.
+ *
+ * Pulled from StatsCompanionService.
+ */
+message ProcessSystemIonHeapSize {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name (from /proc/PID/cmdline).
+    optional string process_name = 2;
+
+    // Sum of sizes of all allocations.
+    optional int32 total_size_in_kilobytes = 3;
+
+    // Number of allocations.
+    optional int32 allocation_count = 4;
+
+    // Size of the largest allocation.
+    optional int32 max_size_in_kilobytes = 5;
 }
 
 /**

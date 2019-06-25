@@ -414,7 +414,7 @@ public final class MediaController {
     /**
      * Gets the additional session information which was set when the session was created.
      *
-     * @return The additional session information, or {@link Bundle#EMPTY} if not set.
+     * @return The additional session information, or an empty {@link Bundle} if not set.
      */
     @NonNull
     public Bundle getSessionInfo() {
@@ -430,6 +430,10 @@ public final class MediaController {
         }
 
         if (mSessionInfo == null) {
+            Log.w(TAG, "sessionInfo shouldn't be null.");
+            mSessionInfo = Bundle.EMPTY;
+        } else if (MediaSession.hasCustomParcelable(mSessionInfo)) {
+            Log.w(TAG, "sessionInfo contains custom parcelable. Ignoring.");
             mSessionInfo = Bundle.EMPTY;
         }
         return new Bundle(mSessionInfo);

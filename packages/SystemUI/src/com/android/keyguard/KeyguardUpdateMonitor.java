@@ -88,6 +88,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import com.google.android.collect.Lists;
 
@@ -237,6 +238,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private List<SubscriptionInfo> mSubscriptionInfo;
     private TrustManager mTrustManager;
     private UserManager mUserManager;
+    private KeyguardBypassController mKeyguardBypassController;
     private int mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
     private int mFaceRunningState = BIOMETRIC_STATE_STOPPED;
     private LockPatternUtils mLockPatternUtils;
@@ -1658,13 +1660,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean shouldListenForFace() {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
+        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
+        final boolean isLockOutOrLockDown =
+                strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT
+                        || strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
+        // There's no reason to ask the HAL for authentication when the user can dismiss the
+        // bouncer, unless we're bypassing and need to auto-dismiss the lock screen even when
+        // TrustAgents or biometrics are keeping the device unlocked.
+        boolean bypassEnabled = mKeyguardBypassController != null
+                && mKeyguardBypassController.getBypassEnabled();
+        boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || bypassEnabled;
+
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
-                && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
+                && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser
-                && !mSecureCameraLaunched;
+                && !mSecureCameraLaunched && !isLockOutOrLockDown;
     }
 
     /**
@@ -2235,6 +2249,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         sendUpdates(callback);
     }
 
+    public void setKeyguardBypassController(KeyguardBypassController keyguardBypassController) {
+        mKeyguardBypassController = keyguardBypassController;
+    }
+
     public boolean isSwitchingUser() {
         return mSwitchingUser;
     }
@@ -2325,6 +2343,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserFaceAuthenticated.clear();
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT);
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FACE);
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onBiometricsCleared();
+            }
+        }
     }
 
     public boolean isSimPinVoiceSecure() {
