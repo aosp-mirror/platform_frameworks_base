@@ -502,6 +502,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testStartHomeOnAllDisplays() {
         mockResolveHomeActivity();
+        mockResolveSecondaryHomeActivity();
 
         // Create secondary displays.
         final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
@@ -817,7 +818,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     /**
-     * Mock {@link RootActivityContainerTests#resolveHomeActivity} for returning consistent activity
+     * Mock {@link RootActivityContainer#resolveHomeActivity} for returning consistent activity
      * info for test cases (the original implementation will resolve from the real package manager).
      */
     private ActivityInfo mockResolveHomeActivity() {
@@ -829,5 +830,21 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         doReturn(aInfoDefault).when(mRootActivityContainer).resolveHomeActivity(anyInt(),
                 refEq(homeIntent));
         return aInfoDefault;
+    }
+
+    /**
+     * Mock {@link RootActivityContainer#resolveSecondaryHomeActivity} for returning consistent
+     * activity info for test cases (the original implementation will resolve from the real package
+     * manager).
+     */
+    private void mockResolveSecondaryHomeActivity() {
+        final Intent secondaryHomeIntent = mService
+                .getSecondaryHomeIntent(null /* preferredPackage */);
+        final ActivityInfo aInfoSecondary = new ActivityInfo();
+        aInfoSecondary.name = "fakeSecondaryHomeActivity";
+        aInfoSecondary.applicationInfo = new ApplicationInfo();
+        aInfoSecondary.applicationInfo.packageName = "fakeSecondaryHomePackage";
+        doReturn(Pair.create(aInfoSecondary, secondaryHomeIntent)).when(mRootActivityContainer)
+                .resolveSecondaryHomeActivity(anyInt(), anyInt());
     }
 }

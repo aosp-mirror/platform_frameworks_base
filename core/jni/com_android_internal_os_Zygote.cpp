@@ -609,11 +609,25 @@ static void SetCapabilities(uint64_t permitted, uint64_t effective, uint64_t inh
   }
 }
 
-static void SetSchedulerPolicy(fail_fn_t fail_fn) {
-  errno = -set_sched_policy(0, SP_DEFAULT);
-  if (errno != 0) {
-    fail_fn(CREATE_ERROR("set_sched_policy(0, SP_DEFAULT) failed: %s", strerror(errno)));
+static void SetSchedulerPolicy(fail_fn_t fail_fn, bool is_top_app) {
+  SchedPolicy policy = is_top_app ? SP_TOP_APP : SP_DEFAULT;
+
+  if (is_top_app && cpusets_enabled()) {
+    errno = -set_cpuset_policy(0, policy);
+    if (errno != 0) {
+      fail_fn(CREATE_ERROR("set_cpuset_policy(0, %d) failed: %s", policy, strerror(errno)));
+    }
   }
+
+  errno = -set_sched_policy(0, policy);
+  if (errno != 0) {
+    fail_fn(CREATE_ERROR("set_sched_policy(0, %d) failed: %s", policy, strerror(errno)));
+  }
+
+  // We are going to lose the permission to set scheduler policy during the specialization, so make
+  // sure that we don't cache the fd of cgroup path that may cause sepolicy violation by writing
+  // value to the cached fd directly when creating new thread.
+  DropTaskProfilesResourceCaching();
 }
 
 static int UnmountTree(const char* path) {
@@ -990,7 +1004,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint mount_external, jstring managed_se_info,
                              jstring managed_nice_name, bool is_system_server,
                              bool is_child_zygote, jstring managed_instruction_set,
-                             jstring managed_app_data_dir) {
+                             jstring managed_app_data_dir, bool is_top_app) {
   const char* process_name = is_system_server ? "system_server" : "zygote";
   auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1058,6 +1072,9 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // privileged syscalls used below still need to be accessible in app process.
   SetUpSeccompFilter(uid, is_child_zygote);
 
+  // Must be called before losing the permission to set scheduler policy.
+  SetSchedulerPolicy(fail_fn, is_top_app);
+
   if (setresuid(uid, uid, uid) == -1) {
     fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
   }
@@ -1105,8 +1122,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   }
 
   SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities, fail_fn);
-
-  SetSchedulerPolicy(fail_fn);
 
   __android_log_close();
   stats_log_close();
@@ -1185,6 +1200,7 @@ static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gi
   /*
    *  Grant the following capabilities to the Bluetooth user:
    *    - CAP_WAKE_ALARM
+   *    - CAP_NET_ADMIN
    *    - CAP_NET_RAW
    *    - CAP_NET_BIND_SERVICE (for DHCP client functionality)
    *    - CAP_SYS_NICE (for setting RT priority for audio-related threads)
@@ -1192,6 +1208,7 @@ static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gi
 
   if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
     capabilities |= (1LL << CAP_WAKE_ALARM);
+    capabilities |= (1LL << CAP_NET_ADMIN);
     capabilities |= (1LL << CAP_NET_RAW);
     capabilities |= (1LL << CAP_NET_BIND_SERVICE);
     capabilities |= (1LL << CAP_SYS_NICE);
@@ -1384,7 +1401,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
-        jstring instruction_set, jstring app_data_dir) {
+        jstring instruction_set, jstring app_data_dir, jboolean is_top_app) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
@@ -1415,7 +1432,8 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        capabilities, capabilities,
                        mount_external, se_info, nice_name, false,
-                       is_child_zygote == JNI_TRUE, instruction_set, app_data_dir);
+                       is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
+                       is_top_app == JNI_TRUE);
     }
     return pid;
 }
@@ -1442,7 +1460,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        permitted_capabilities, effective_capabilities,
                        MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
-                       false, nullptr, nullptr);
+                       false, nullptr, nullptr, /* is_top_app= */ false);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -1559,18 +1577,20 @@ static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
  * @param is_child_zygote  If the process is to become a WebViewZygote
  * @param instruction_set  The instruction set expected/requested by the new application
  * @param app_data_dir  Path to the application's data directory
+ * @param is_top_app  If the process is for top (high priority) application
  */
 static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
     JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
     jint runtime_flags, jobjectArray rlimits,
     jint mount_external, jstring se_info, jstring nice_name,
-    jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir) {
+    jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app) {
   jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
   SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                    capabilities, capabilities,
                    mount_external, se_info, nice_name, false,
-                   is_child_zygote == JNI_TRUE, instruction_set, app_data_dir);
+                   is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
+                   is_top_app == JNI_TRUE);
 }
 
 /**
@@ -1736,7 +1756,7 @@ static void com_android_internal_os_Zygote_nativeBoostUsapPriority(JNIEnv* env, 
 
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Z)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
@@ -1749,7 +1769,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeForkUsap", "(II[IZ)I",
       (void *) com_android_internal_os_Zygote_nativeForkUsap },
     { "nativeSpecializeAppProcess",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Z)V",
       (void *) com_android_internal_os_Zygote_nativeSpecializeAppProcess },
     { "nativeInitNativeState", "(Z)V",
       (void *) com_android_internal_os_Zygote_nativeInitNativeState },

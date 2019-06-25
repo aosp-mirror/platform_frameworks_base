@@ -451,6 +451,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void selectRoute2(IMediaRouter2Client client, MediaRoute2Info route) {
+        mService2.selectRoute2(client, route);
+    }
+
+    // Binder call
+    @Override
     public void sendControlRequest(IMediaRouter2Client client, MediaRoute2Info route,
             Intent request) {
         mService2.sendControlRequest(client, route, request);
@@ -475,9 +481,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void setRemoteRoute(IMediaRouter2Manager manager,
-            int uid, String routeId, boolean explicit) {
-        mService2.setRemoteRoute(manager, uid, routeId, explicit);
+    public void selectClientRoute2(IMediaRouter2Manager manager,
+            int clientUid, MediaRoute2Info route) {
+        mService2.selectClientRoute2(manager, clientUid, route);
     }
 
     // Binder call

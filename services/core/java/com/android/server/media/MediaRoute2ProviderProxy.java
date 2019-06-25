@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -98,6 +99,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
     }
 
+    @Nullable
     public MediaRoute2ProviderInfo getProviderInfo() {
         return mProviderInfo;
     }

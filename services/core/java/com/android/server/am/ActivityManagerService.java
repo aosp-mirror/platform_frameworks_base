@@ -120,8 +120,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSER
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
@@ -178,7 +176,6 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
@@ -348,7 +345,6 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.appop.AppOpsService;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
@@ -4755,7 +4751,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
-        app.setCurrentSchedulingGroup(app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT);
+        mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);
         app.hasShownUi = false;
@@ -17892,40 +17888,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (mPidsSelfLocked) {
                 for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
                     final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                    final int pid = r.pid;
-                    final int uid = r.uid;
-                    final MemoryStat memoryStat = readMemoryStatFromFilesystem(uid, pid);
-                    if (memoryStat == null) {
-                        continue;
-                    }
-                    ProcessMemoryState processMemoryState =
-                            new ProcessMemoryState(uid,
-                                    r.processName,
-                                    r.curAdj,
-                                    memoryStat.pgfault,
-                                    memoryStat.pgmajfault,
-                                    memoryStat.rssInBytes,
-                                    memoryStat.cacheInBytes,
-                                    memoryStat.swapInBytes,
-                                    memoryStat.startTimeNanos);
-                    processMemoryStates.add(processMemoryState);
+                    processMemoryStates.add(
+                            new ProcessMemoryState(r.uid, r.pid, r.processName, r.curAdj));
                 }
             }
             return processMemoryStates;
-        }
-
-        @Override
-        public List<ProcessMemoryHighWaterMark> getMemoryHighWaterMarkForProcesses() {
-            List<ProcessMemoryHighWaterMark> results = new ArrayList<>();
-            synchronized (mPidsSelfLocked) {
-                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
-                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
-                    final long rssHighWaterMarkInBytes = readRssHighWaterMarkFromProcfs(r.pid);
-                    results.add(new ProcessMemoryHighWaterMark(r.uid, r.processName,
-                            rssHighWaterMarkInBytes));
-                }
-            }
-            return results;
         }
 
         @Override
@@ -18337,16 +18304,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void startProcess(String processName, ApplicationInfo info,
-                boolean knownToBeDead, String hostingType, ComponentName hostingName) {
+        public void startProcess(String processName, ApplicationInfo info, boolean knownToBeDead,
+                boolean isTop, String hostingType, ComponentName hostingName) {
             try {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "startProcess:"
                             + processName);
                 }
                 synchronized (ActivityManagerService.this) {
+                    // If the process is known as top app, set a hint so when the process is
+                    // started, the top priority can be applied immediately to avoid cpu being
+                    // preempted by other processes before attaching the process of top app.
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
-                            new HostingRecord(hostingType, hostingName),
+                            new HostingRecord(hostingType, hostingName, isTop),
                             false /* allowWhileBooting */, false /* isolated */,
                             true /* keepIfLarge */);
                 }

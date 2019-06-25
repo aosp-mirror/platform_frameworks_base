@@ -3815,6 +3815,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsCallerInstantApp_userAllNotification() throws Exception {
+        ApplicationInfo info = new ApplicationInfo();
+        info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(info);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
+
+        assertTrue(mService.isCallerInstantApp(45770, UserHandle.USER_ALL));
+
+        info.privateFlags = 0;
+        assertFalse(mService.isCallerInstantApp(575370, UserHandle.USER_ALL ));
+    }
+
+    @Test
     public void testResolveNotificationUid_sameApp_nonSystemUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();

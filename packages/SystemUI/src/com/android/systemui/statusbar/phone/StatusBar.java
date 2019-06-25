@@ -680,6 +680,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 

@@ -126,19 +126,6 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
     return android_view_Surface_createFromSurface(env, surface);
 }
 
-int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
-    return mapPublicFormatToHalFormat(f);
-}
-
-android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
-        PublicFormat f) {
-    return mapPublicFormatToHalDataspace(f);
-}
-
-PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-        int format, android_dataspace dataSpace) {
-    return mapHalFormatDataspaceToPublicFormat(format, dataSpace);
-}
 // ----------------------------------------------------------------------------
 
 static inline bool isSurfaceValid(const sp<Surface>& sur) {

@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
@@ -166,6 +167,22 @@ public class MediaRouter2 {
             }
         }
         return -1;
+    }
+
+    /**
+     * Selects the specified route.
+     *
+     * @param route The route to select.
+     */
+    //TODO: add a parameter for category (e.g. mirroring/casting)
+    public void selectRoute(@Nullable MediaRoute2Info route) {
+        if (mClient != null) {
+            try {
+                mMediaRouterService.selectRoute2(mClient, route);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to select route.", ex);
+            }
+        }
     }
 
     /**

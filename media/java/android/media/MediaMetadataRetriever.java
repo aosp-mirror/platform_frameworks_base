@@ -67,16 +67,16 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public void setDataSource(String path) throws IllegalArgumentException {
         if (path == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("null path");
         }
 
         try (FileInputStream is = new FileInputStream(path)) {
             FileDescriptor fd = is.getFD();
             setDataSource(fd, 0, 0x7ffffffffffffffL);
         } catch (FileNotFoundException fileEx) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(path + " does not exist");
         } catch (IOException ioEx) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("couldn't open " + path);
         }
     }
 
@@ -155,7 +155,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public void setDataSource(Context context, Uri uri)
         throws IllegalArgumentException, SecurityException {
         if (uri == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("null uri");
         }
 
         String scheme = uri.getScheme();
@@ -170,14 +170,14 @@ public class MediaMetadataRetriever implements AutoCloseable {
             try {
                 fd = resolver.openAssetFileDescriptor(uri, "r");
             } catch(FileNotFoundException e) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("could not access " + uri);
             }
             if (fd == null) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("got null FileDescriptor for " + uri);
             }
             FileDescriptor descriptor = fd.getFileDescriptor();
             if (!descriptor.valid()) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("got invalid FileDescriptor for " + uri);
             }
             // Note: using getDeclaredLength so that our behavior is the same
             // as previous versions when the content provider is returning

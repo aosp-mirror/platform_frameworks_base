@@ -46,21 +46,6 @@ extern jobject android_view_Surface_createFromSurface(JNIEnv* env,
 extern jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
         const sp<IGraphicBufferProducer>& bufferProducer);
 
-/* Convert from android.graphics.ImageFormat/PixelFormat enums to graphics.h HAL
- * format */
-extern int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f);
-
-/* Convert from android.graphics.ImageFormat/PixelFormat enums to graphics.h HAL
- * dataspace */
-extern android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
-        PublicFormat f);
-
-/* Convert from HAL format, dataspace pair to
- * android.graphics.ImageFormat/PixelFormat.
- * For unknown/unspecified pairs, returns PublicFormat::UNKNOWN */
-extern PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-        int format, android_dataspace dataSpace);
-
 } // namespace android
 
 #endif // _ANDROID_VIEW_SURFACE_H

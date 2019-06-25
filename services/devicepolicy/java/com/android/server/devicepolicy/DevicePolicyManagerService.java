@@ -11020,7 +11020,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
             mLockPatternUtils.setLockScreenDisabled(disabled, userId);
-            mInjector.getIWindowManager().dismissKeyguard(null /* callback */, null /* message */);
+            if (disabled) {
+                mInjector
+                        .getIWindowManager()
+                        .dismissKeyguard(null /* callback */, null /* message */);
+            }
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_KEYGUARD_DISABLED)
                     .setAdmin(who)
