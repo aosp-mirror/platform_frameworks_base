@@ -239,7 +239,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -283,7 +282,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -357,7 +355,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -398,7 +395,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildMobile3gState(IMSI_1)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
 
@@ -433,7 +429,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1536L, 12L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
         forcePollAndWaitForIdle();
@@ -473,7 +468,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -531,7 +525,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildMobile3gState(IMSI_1)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
 
@@ -558,7 +551,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
         forcePollAndWaitForIdle();
@@ -588,7 +580,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -646,7 +637,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -690,7 +680,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -740,7 +729,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -797,7 +785,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState(true /* isMetered */)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -837,7 +824,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
             new NetworkState[] {buildMobile3gState(IMSI_1, true /* isRoaming */)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
 
@@ -875,7 +861,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildMobile3gState(IMSI_1)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states));
 
@@ -916,7 +901,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         NetworkState[] states = new NetworkState[] {buildWifiState()};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectBandwidthControlCheck();
 
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states));
 
@@ -1057,7 +1041,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private void expectSystemReady() throws Exception {
         expectNetworkStatsSummary(buildEmptyStats());
-        expectBandwidthControlCheck();
     }
 
     private String getActiveIface(NetworkState... states) throws Exception {
@@ -1123,10 +1106,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         when(mSettings.getXtPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
         when(mSettings.getUidPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
         when(mSettings.getUidTagPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
-    }
-
-    private void expectBandwidthControlCheck() throws Exception {
-        when(mNetManager.isBandwidthControlEnabled()).thenReturn(true);
     }
 
     private void assertStatsFilesExist(boolean exist) {
