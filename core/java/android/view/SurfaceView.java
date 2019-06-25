@@ -97,8 +97,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * artifacts may occur on previous versions of the platform when its window is
  * positioned asynchronously.</p>
  */
-public class SurfaceView extends View
-        implements ViewRootImpl.WindowStoppedCallback, ViewRootImpl.SurfaceChangedCallback {
+public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallback {
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
 
@@ -120,7 +119,7 @@ public class SurfaceView extends View
     boolean mDrawFinished = false;
 
     final Rect mScreenRect = new Rect();
-    final SurfaceSession mSurfaceSession = new SurfaceSession();
+    SurfaceSession mSurfaceSession;
 
     SurfaceControl mSurfaceControl;
     // In the case of format changes we switch out the surface in-place
@@ -243,22 +242,11 @@ public class SurfaceView extends View
         updateSurface();
     }
 
-    /** @hide */
-    @Override
-    public void surfaceChangedCallback(SurfaceControl.Transaction transaction) {
-        if (getViewRootImpl() != null && mBackgroundControl != null && mSurfaceControl != null) {
-            SurfaceControl sc = getViewRootImpl().getSurfaceControl();
-            transaction.setRelativeLayer(mBackgroundControl, sc, Integer.MIN_VALUE);
-            transaction.setRelativeLayer(mSurfaceControl, sc, mSubLayer);
-        }
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
         getViewRootImpl().addWindowStoppedCallback(this);
-        getViewRootImpl().addSurfaceChangedCallback(this);
         mWindowStopped = false;
 
         mViewVisibility = getVisibility() == VISIBLE;
@@ -333,7 +321,6 @@ public class SurfaceView extends View
         // the SurfaceHolder forward, most live wallpapers do it.
         if (viewRoot != null) {
             viewRoot.removeWindowStoppedCallback(this);
-            viewRoot.removeSurfaceChangedCallback(this);
         }
 
         mAttachedToWindow = false;
@@ -615,34 +602,21 @@ public class SurfaceView extends View
                 mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
 
                 if (creating) {
+                    viewRoot.createBoundsSurface(mSubLayer);
+                    mSurfaceSession = new SurfaceSession();
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();
-                    // SurfaceView hierarchy
-                    // ViewRootImpl surface
-                    //   - bounds layer (crops all child surfaces to parent surface insets)
-                    //     - SurfaceView surface (drawn relative to ViewRootImpl surface)
-                    //     - Background color layer (drawn behind all SurfaceView surfaces)
-                    //
-                    // The bounds layer is used to crop the surface view so it does not draw into
-                    // the parent surface inset region. Since there can be multiple surface views
-                    // below or above the parent surface, one option is to create multiple bounds
-                    // layer for each z order. The other option, the one implement is to create
-                    // a single bounds layer and set z order for each child surface relative to the
-                    // parent surface.
-                    // When creating the surface view, we parent it to the bounds layer and then
-                    // set the relative z order. When the parent surface changes, we have to
-                    // make sure to update the relative z via ViewRootImpl.SurfaceChangedCallback.
                     final String name = "SurfaceView - " + viewRoot.getTitle().toString();
-                    mSurfaceControl =
-                            new SurfaceControl.Builder(mSurfaceSession)
-                                    .setName(name)
-                                    .setOpaque((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)
-                                    .setBufferSize(mSurfaceWidth, mSurfaceHeight)
-                                    .setFormat(mFormat)
-                                    .setParent(viewRoot.getBoundsLayer())
-                                    .setFlags(mSurfaceFlags)
-                                    .build();
+
+                    mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                        .setName(name)
+                        .setOpaque((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)
+                        .setBufferSize(mSurfaceWidth, mSurfaceHeight)
+                        .setFormat(mFormat)
+                        .setParent(viewRoot.getSurfaceControl())
+                        .setFlags(mSurfaceFlags)
+                        .build();
                     mBackgroundControl = new SurfaceControl.Builder(mSurfaceSession)
                         .setName("Background for -" + name)
                         .setOpaque(true)
@@ -665,7 +639,7 @@ public class SurfaceView extends View
 
                     SurfaceControl.openTransaction();
                     try {
-                        mSurfaceControl.setRelativeLayer(viewRoot.getSurfaceControl(), mSubLayer);
+                        mSurfaceControl.setLayer(mSubLayer);
 
                         if (mViewVisibility) {
                             mSurfaceControl.show();
