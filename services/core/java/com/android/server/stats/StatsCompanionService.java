@@ -27,6 +27,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readSystemIonHeapSizeFromDebugfs;
 
@@ -137,6 +138,7 @@ import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.am.MemoryStatUtil.IonAllocations;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.storage.DiskStatsFileLogger;
@@ -1274,7 +1276,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullProcessSystemIonHeapSize(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        // TODO(b/130526489): Read from debugfs.
+        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
+        for (IonAllocations allocations : result) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(getUidForPid(allocations.pid));
+            e.writeString(readCmdlineFromProcfs(allocations.pid));
+            e.writeInt((int) (allocations.totalSizeInBytes / 1024));
+            e.writeInt(allocations.count);
+            e.writeInt((int) (allocations.maxSizeInBytes / 1024));
+            pulledData.add(e);
+        }
     }
 
     private void pullBinderCallsStats(
