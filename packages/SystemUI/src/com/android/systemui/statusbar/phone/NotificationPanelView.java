@@ -2430,7 +2430,6 @@ public class NotificationPanelView extends PanelView implements
             onUnlockHintFinished();
             return;
         }
-        mUpdateMonitor.requestFaceAuth();
         super.startUnlockHintAnimation();
     }
 
@@ -2651,10 +2650,14 @@ public class NotificationPanelView extends PanelView implements
         switch (mBarState) {
             case StatusBarState.KEYGUARD:
                 if (!mDozingOnDown) {
-                    mLockscreenGestureLogger.write(
-                            MetricsEvent.ACTION_LS_HINT,
-                            0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-                    startUnlockHintAnimation();
+                    if (mKeyguardBypassController.getBypassEnabled()) {
+                        mUpdateMonitor.requestFaceAuth();
+                    } else {
+                        mLockscreenGestureLogger.write(
+                                MetricsEvent.ACTION_LS_HINT,
+                                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+                        startUnlockHintAnimation();
+                    }
                 }
                 return true;
             case StatusBarState.SHADE_LOCKED:
