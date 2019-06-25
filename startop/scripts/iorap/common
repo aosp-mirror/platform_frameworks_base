@@ -15,7 +15,7 @@
 # limitations under the License.
 
 DIR_IORAP_COMMON="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-APP_STARTUP_DIR="$DIR/../app_startup/"
+APP_STARTUP_DIR="$DIR_IORAP_COMMON/../app_startup/"
 source "$APP_STARTUP_DIR/lib/common"
 
 IORAPD_DATA_PATH="/data/misc/iorapd"
