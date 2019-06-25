@@ -326,6 +326,8 @@
              grantable in its full form to apps that meet special criteria
              per platform policy. Otherwise, a weaker form of the permission
              would be granted. The weak grant depends on the permission.
+             <p>What weak grant means is described in the documentation of
+             the permissions.
         -->
         <flag name="softRestricted" value="0x8" />
         <!-- This permission is restricted immutably which means that its
