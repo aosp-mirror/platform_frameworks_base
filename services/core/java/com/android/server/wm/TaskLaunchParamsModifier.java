@@ -211,7 +211,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (!currentParams.isEmpty() && !hasInitialBounds
                 && (!currentParams.hasPreferredDisplay()
                     || displayId == currentParams.mPreferredDisplayId)) {
-            if (currentParams.hasWindowingMode()) {
+            // Only set windowing mode if display is in freeform. If the display is in fullscreen
+            // mode we should only launch a task in fullscreen mode.
+            if (currentParams.hasWindowingMode() && display.inFreeformWindowingMode()) {
                 launchMode = currentParams.mWindowingMode;
                 fullyResolvedCurrentParam = launchMode != WINDOWING_MODE_FREEFORM;
                 if (DEBUG) {

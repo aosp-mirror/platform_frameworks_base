@@ -346,6 +346,19 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testLaunchesFullscreenOnFullscreenDisplayWithFreeformHistory() {
+        mCurrent.mPreferredDisplayId = Display.INVALID_DISPLAY;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(0, 0, 200, 100);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
     public void testRespectsFullyResolvedCurrentParam_Fullscreen() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
@@ -1174,6 +1187,19 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
+    public void returnsNonFullscreenBoundsOnFullscreenDisplayWithFreeformHistory() {
+        mCurrent.mPreferredDisplayId = Display.INVALID_DISPLAY;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(0, 0, 200, 100);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+
+        // Returned bounds with in fullscreen mode will be set to last non-fullscreen bounds.
+        assertEquals(new Rect(0, 0, 200, 100), mCurrent.mBounds);
+    }
+
+    @Test
     public void testAdjustsBoundsToFitInDisplayFullyResolvedBounds() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
@@ -1186,7 +1212,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
+                mActivity, /* source */ null, options, mCurrent, mResult));
 
         assertEquals(new Rect(0, 0, 300, 300), mResult.mBounds);
     }
