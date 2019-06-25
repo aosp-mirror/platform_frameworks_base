@@ -17,7 +17,6 @@
 package com.android.systemui.bubbles;
 
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
@@ -44,10 +43,8 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
 import android.hardware.face.FaceManager;
 import android.service.notification.ZenModeConfig;
@@ -69,6 +66,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -84,16 +82,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubbleControllerTest extends SysuiTestCase {
-
-    // Some APIs rely on the app being foreground, check is via pkg name
-    private static final String FOREGROUND_TEST_PKG_NAME = "com.android.systemui.tests";
 
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
@@ -126,8 +118,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
-    private ExpandableNotificationRow mAutoExpandRow;
-    private ExpandableNotificationRow mSuppressNotifRow;
     private ExpandableNotificationRow mNonBubbleNotifRow;
 
     @Mock
@@ -158,18 +148,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();
-
-        // Some bubbles want to auto expand
-        Notification.BubbleMetadata autoExpandMetadata =
-                getBuilder().setAutoExpandBubble(true).build();
-        mAutoExpandRow = mNotificationTestHelper.createBubble(autoExpandMetadata,
-                FOREGROUND_TEST_PKG_NAME);
-
-        // Some bubbles want to suppress notifs
-        Notification.BubbleMetadata suppressNotifMetadata =
-                getBuilder().setSuppressNotification(true).build();
-        mSuppressNotifRow = mNotificationTestHelper.createBubble(suppressNotifMetadata,
-                FOREGROUND_TEST_PKG_NAME);
 
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
@@ -402,14 +380,16 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testAutoExpand_FailsNotForeground() {
         assertFalse(mBubbleController.isStackExpanded());
+        setMetadataFlags(mRow.getEntry(),
+                Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE, false /* enableFlag */);
 
         // Add the auto expand bubble
-        mEntryListener.onPendingEntryAdded(mAutoExpandRow.getEntry());
-        mBubbleController.updateBubble(mAutoExpandRow.getEntry());
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // Expansion shouldn't change
         verify(mBubbleExpandListener, never()).onBubbleExpandChanged(false /* expanded */,
-                mAutoExpandRow.getEntry().key);
+                mRow.getEntry().key);
         assertFalse(mBubbleController.isStackExpanded());
 
         // # of bubbles should change
@@ -418,51 +398,33 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testAutoExpand_SucceedsForeground() {
-        final CountDownLatch latch = new CountDownLatch(1);
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                latch.countDown();
-            }
-        };
-        IntentFilter filter = new IntentFilter(BubblesTestActivity.BUBBLE_ACTIVITY_OPENED);
-        mContext.registerReceiver(receiver, filter);
-
-        assertFalse(mBubbleController.isStackExpanded());
-
-        // Make ourselves foreground
-        Intent i = new Intent(mContext, BubblesTestActivity.class);
-        i.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(i);
-
-        try {
-            latch.await(100, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        setMetadataFlags(mRow.getEntry(),
+                Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE, true /* enableFlag */);
 
         // Add the auto expand bubble
-        mEntryListener.onPendingEntryAdded(mAutoExpandRow.getEntry());
-        mBubbleController.updateBubble(mAutoExpandRow.getEntry());
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // Expansion should change
         verify(mBubbleExpandListener).onBubbleExpandChanged(true /* expanded */,
-                mAutoExpandRow.getEntry().key);
+                mRow.getEntry().key);
         assertTrue(mBubbleController.isStackExpanded());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
-        mContext.unregisterReceiver(receiver);
     }
 
     @Test
     public void testSuppressNotif_FailsNotForeground() {
+        setMetadataFlags(mRow.getEntry(),
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, false /* enableFlag */);
+
         // Add the suppress notif bubble
-        mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
-        mBubbleController.updateBubble(mSuppressNotifRow.getEntry());
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // Should show in shade because we weren't forground
-        assertTrue(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
+        assertTrue(mRow.getEntry().showInShadeWhenBubble());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
@@ -470,39 +432,18 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testSuppressNotif_SucceedsForeground() {
-        final CountDownLatch latch = new CountDownLatch(1);
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                latch.countDown();
-            }
-        };
-        IntentFilter filter = new IntentFilter(BubblesTestActivity.BUBBLE_ACTIVITY_OPENED);
-        mContext.registerReceiver(receiver, filter);
-
-        assertFalse(mBubbleController.isStackExpanded());
-
-        // Make ourselves foreground
-        Intent i = new Intent(mContext, BubblesTestActivity.class);
-        i.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(i);
-
-        try {
-            latch.await(100, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        setMetadataFlags(mRow.getEntry(),
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, true /* enableFlag */);
 
         // Add the suppress notif bubble
-        mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
-        mBubbleController.updateBubble(mSuppressNotifRow.getEntry());
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // Should NOT show in shade because we were foreground
-        assertFalse(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
+        assertFalse(mRow.getEntry().showInShadeWhenBubble());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
-        mContext.unregisterReceiver(receiver);
     }
 
     @Test
@@ -657,10 +598,10 @@ public class BubbleControllerTest extends SysuiTestCase {
         }
     }
 
-    public static class TestableNotificationInterruptionStateProvider extends
+    static class TestableNotificationInterruptionStateProvider extends
             NotificationInterruptionStateProvider {
 
-        public TestableNotificationInterruptionStateProvider(Context context,
+        TestableNotificationInterruptionStateProvider(Context context,
                 NotificationFilter filter, StatusBarStateController controller) {
             super(context, filter, controller);
             mUseHeadsUp = true;
@@ -676,5 +617,22 @@ public class BubbleControllerTest extends SysuiTestCase {
         return new Notification.BubbleMetadata.Builder()
                 .setIntent(bubbleIntent)
                 .setIcon(Icon.createWithResource(mContext, R.drawable.android));
+    }
+
+    /**
+     * Sets the bubble metadata flags for this entry. These flags are normally set by
+     * NotificationManagerService when the notification is sent, however, these tests do not
+     * go through that path so we set them explicitly when testing.
+     */
+    private void setMetadataFlags(NotificationEntry entry, int flag, boolean enableFlag) {
+        Notification.BubbleMetadata bubbleMetadata =
+                entry.notification.getNotification().getBubbleMetadata();
+        int flags = bubbleMetadata.getFlags();
+        if (enableFlag) {
+            flags |= flag;
+        } else {
+            flags &= ~flag;
+        }
+        bubbleMetadata.setFlags(flags);
     }
 }
