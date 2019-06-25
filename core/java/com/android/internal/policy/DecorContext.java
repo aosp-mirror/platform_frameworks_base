@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.content.AutofillOptions;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -95,6 +96,15 @@ public class DecorContext extends ContextThemeWrapper {
     @Override
     public AssetManager getAssets() {
         return mActivityResources.getAssets();
+    }
+
+    @Override
+    public AutofillOptions getAutofillOptions() {
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getAutofillOptions();
+        }
+        return null;
     }
 
     @Override
