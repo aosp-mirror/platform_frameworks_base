@@ -435,18 +435,6 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     }
 
     @Override
-    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-    }
-
-    @Override
-    public void onHeadsUpPinned(NotificationEntry entry) {
-    }
-
-    @Override
-    public void onHeadsUpUnPinned(NotificationEntry entry) {
-    }
-
-    @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         onAlertStateChanged(entry, isHeadsUp);
     }

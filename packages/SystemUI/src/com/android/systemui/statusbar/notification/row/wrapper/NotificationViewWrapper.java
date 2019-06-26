@@ -224,7 +224,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
-    public int getHeaderTranslation() {
+    public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
     }
 

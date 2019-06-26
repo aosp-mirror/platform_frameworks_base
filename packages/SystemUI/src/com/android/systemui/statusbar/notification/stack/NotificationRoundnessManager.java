@@ -18,10 +18,14 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.NUM_SECTIONS;
 
+
+import android.util.MathUtils;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -33,12 +37,13 @@ import javax.inject.Singleton;
  * A class that manages the roundness for notification views
  */
 @Singleton
-class NotificationRoundnessManager implements OnHeadsUpChangedListener {
+public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     private final ActivatableNotificationView[] mFirstInSectionViews;
     private final ActivatableNotificationView[] mLastInSectionViews;
     private final ActivatableNotificationView[] mTmpFirstInSectionViews;
     private final ActivatableNotificationView[] mTmpLastInSectionViews;
+    private final KeyguardBypassController mBypassController;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
@@ -46,11 +51,12 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     private float mAppearFraction;
 
     @Inject
-    NotificationRoundnessManager() {
+    NotificationRoundnessManager(KeyguardBypassController keyguardBypassController) {
         mFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpFirstInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
         mTmpLastInSectionViews = new ActivatableNotificationView[NUM_SECTIONS];
+        mBypassController = keyguardBypassController;
     }
 
     @Override
@@ -124,18 +130,18 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
             return 1.0f;
         }
-        if (view.showingPulsing()) {
-            return 1.0f;
-        }
         if (isFirstInSection(view, true /* include first section */) && top) {
             return 1.0f;
         }
         if (isLastInSection(view, true /* include last section */) && !top) {
             return 1.0f;
         }
-        if (view == mTrackedHeadsUp && mAppearFraction <= 0.0f) {
+        if (view == mTrackedHeadsUp) {
             // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
             // rounded.
+            return MathUtils.saturate(1.0f - mAppearFraction);
+        }
+        if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
             return 1.0f;
         }
         return 0.0f;
@@ -232,6 +238,10 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
+        ExpandableNotificationRow previous = mTrackedHeadsUp;
         mTrackedHeadsUp = row;
+        if (previous != null) {
+            updateView(previous, true /* animate */);
+        }
     }
 }
