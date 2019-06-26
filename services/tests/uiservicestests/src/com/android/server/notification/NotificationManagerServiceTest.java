@@ -131,6 +131,7 @@ import android.text.Html;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Xml;
 
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
@@ -138,6 +139,7 @@ import androidx.test.InstrumentationRegistry;
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiServiceTestCase;
@@ -156,9 +158,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -3060,10 +3066,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testBackupEmptySound() throws Exception {
+        NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        channel.setSound(Uri.EMPTY, null);
+
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        channel.writeXmlForBackup(serializer, getContext());
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        NotificationChannel restored = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        restored.populateFromXmlForRestore(parser, getContext());
+
+        assertNull(restored.getSound());
+    }
+
+    @Test
     public void testBackup() throws Exception {
         int systemChecks = mService.countSystemChecks;
         mBinderService.getBackupPayload(1);
         assertEquals(1, mService.countSystemChecks - systemChecks);
+    }
+
+    @Test
+    public void testEmptyVibration_noException() throws Exception {
+        NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        channel.setVibrationPattern(new long[0]);
+
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        channel.writeXml(serializer);
     }
 
     @Test

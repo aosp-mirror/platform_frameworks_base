@@ -15,8 +15,6 @@
  */
 package android.app;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -86,6 +84,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
     private static final String ATT_ALLOW_BUBBLE = "can_bubble";
+    private static final String ATT_ORIG_IMP = "orig_imp";
     private static final String DELIMITER = ",";
 
     /**
@@ -151,6 +150,7 @@ public final class NotificationChannel implements Parcelable {
     private String mName;
     private String mDesc;
     private int mImportance = DEFAULT_IMPORTANCE;
+    private int mOriginalImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
     private Uri mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
@@ -234,6 +234,7 @@ public final class NotificationChannel implements Parcelable {
         mBlockableSystem = in.readBoolean();
         mAllowBubbles = in.readBoolean();
         mImportanceLockedByOEM = in.readBoolean();
+        mOriginalImportance = in.readInt();
     }
 
     @Override
@@ -288,6 +289,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeBoolean(mBlockableSystem);
         dest.writeBoolean(mAllowBubbles);
         dest.writeBoolean(mImportanceLockedByOEM);
+        dest.writeInt(mOriginalImportance);
     }
 
     /**
@@ -307,6 +309,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void setFgServiceShown(boolean shown) {
         mFgServiceShown = shown;
     }
@@ -314,6 +317,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void setDeleted(boolean deleted) {
         mDeleted = deleted;
     }
@@ -322,6 +326,7 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public void setBlockableSystem(boolean blockableSystem) {
         mBlockableSystem = blockableSystem;
     }
@@ -641,6 +646,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public boolean isBlockableSystem() {
         return mBlockableSystem;
     }
@@ -675,6 +681,22 @@ public final class NotificationChannel implements Parcelable {
     @TestApi
     public boolean isImportanceLockedByCriticalDeviceFunction() {
         return mImportanceLockedDefaultApp;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public int getOriginalImportance() {
+        return mOriginalImportance;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setOriginalImportance(int importance) {
+        mOriginalImportance = importance;
     }
 
     /**
@@ -729,6 +751,7 @@ public final class NotificationChannel implements Parcelable {
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
+        setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
     }
 
     @Nullable
@@ -850,6 +873,9 @@ public final class NotificationChannel implements Parcelable {
         if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
             out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
         }
+        if (getOriginalImportance() != DEFAULT_IMPORTANCE) {
+            out.attribute(null, ATT_ORIG_IMP, Integer.toString(getOriginalImportance()));
+        }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
         // truth and so aren't written to this xml file
@@ -896,6 +922,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_GROUP, getGroup());
         record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
         record.put(ATT_ALLOW_BUBBLE, canBubble());
+        // TODO: original importance
         return record;
     }
 
@@ -1005,7 +1032,8 @@ public final class NotificationChannel implements Parcelable {
                 && Objects.equals(getGroup(), that.getGroup())
                 && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
                 && mImportanceLockedByOEM == that.mImportanceLockedByOEM
-                && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp;
+                && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
+                && mOriginalImportance == that.mOriginalImportance;
     }
 
     @Override
@@ -1015,7 +1043,7 @@ public final class NotificationChannel implements Parcelable {
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
                 getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
-                mImportanceLockedByOEM, mImportanceLockedDefaultApp);
+                mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1045,6 +1073,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAllowBubbles=" + mAllowBubbles
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
+                + ", mOriginalImp=" + mOriginalImportance
                 + '}';
         pw.println(prefix + output);
     }
@@ -1073,6 +1102,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAllowBubbles=" + mAllowBubbles
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
+                + ", mOriginalImp=" + mOriginalImportance
                 + '}';
     }
 
