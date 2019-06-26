@@ -67,6 +67,7 @@ enum NsRcode {
     // NS_R_BADSIG  = 16,
     NS_R_BADKEY = 17;
     NS_R_BADTIME = 18;
+    NS_R_INTERNAL_ERROR = 254;
     NS_R_TIMEOUT = 255;
 }
 
