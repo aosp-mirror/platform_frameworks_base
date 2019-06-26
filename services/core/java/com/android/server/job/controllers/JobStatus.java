@@ -305,7 +305,8 @@ public final class JobStatus {
      */
     ContentObserverController.JobInstance contentObserverJobInstance;
 
-    private long totalNetworkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+    private long mTotalNetworkDownloadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+    private long mTotalNetworkUploadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
 
     /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
     /////// states change.
@@ -787,35 +788,39 @@ public final class JobStatus {
     }
 
     private void updateEstimatedNetworkBytesLocked() {
-        totalNetworkBytes = computeEstimatedNetworkBytesLocked();
-    }
+        mTotalNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+        mTotalNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
 
-    private long computeEstimatedNetworkBytesLocked() {
-        // If any component of the job has unknown usage, we don't have a
-        // complete picture of what data will be used, and we have to treat the
-        // entire job as unknown.
-        long totalNetworkBytes = 0;
-        long networkBytes = job.getEstimatedNetworkBytes();
-        if (networkBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
-            return JobInfo.NETWORK_BYTES_UNKNOWN;
-        } else {
-            totalNetworkBytes += networkBytes;
-        }
         if (pendingWork != null) {
             for (int i = 0; i < pendingWork.size(); i++) {
-                networkBytes = pendingWork.get(i).getEstimatedNetworkBytes();
-                if (networkBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
-                    return JobInfo.NETWORK_BYTES_UNKNOWN;
-                } else {
-                    totalNetworkBytes += networkBytes;
+                if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    // If any component of the job has unknown usage, we don't have a
+                    // complete picture of what data will be used, and we have to treat the
+                    // entire up/download as unknown.
+                    long downloadBytes = pendingWork.get(i).getEstimatedNetworkDownloadBytes();
+                    if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                        mTotalNetworkDownloadBytes += downloadBytes;
+                    }
+                }
+                if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    // If any component of the job has unknown usage, we don't have a
+                    // complete picture of what data will be used, and we have to treat the
+                    // entire up/download as unknown.
+                    long uploadBytes = pendingWork.get(i).getEstimatedNetworkUploadBytes();
+                    if (uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                        mTotalNetworkUploadBytes += uploadBytes;
+                    }
                 }
             }
         }
-        return totalNetworkBytes;
     }
 
-    public long getEstimatedNetworkBytes() {
-        return totalNetworkBytes;
+    public long getEstimatedNetworkDownloadBytes() {
+        return mTotalNetworkDownloadBytes;
+    }
+
+    public long getEstimatedNetworkUploadBytes() {
+        return mTotalNetworkUploadBytes;
     }
 
     /** Does this job have any sort of networking constraint? */
@@ -1524,9 +1529,13 @@ public final class JobStatus {
                 pw.print(prefix); pw.print("  Network type: ");
                 pw.println(job.getRequiredNetwork());
             }
-            if (totalNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                pw.print(prefix); pw.print("  Network bytes: ");
-                pw.println(totalNetworkBytes);
+            if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                pw.print(prefix); pw.print("  Network download bytes: ");
+                pw.println(mTotalNetworkDownloadBytes);
+            }
+            if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                pw.print(prefix); pw.print("  Network upload bytes: ");
+                pw.println(mTotalNetworkUploadBytes);
             }
             if (job.getMinLatencyMillis() != 0) {
                 pw.print(prefix); pw.print("  Minimum latency: ");
@@ -1721,8 +1730,13 @@ public final class JobStatus {
             if (job.getRequiredNetwork() != null) {
                 job.getRequiredNetwork().writeToProto(proto, JobStatusDumpProto.JobInfo.REQUIRED_NETWORK);
             }
-            if (totalNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_BYTES, totalNetworkBytes);
+            if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_DOWNLOAD_BYTES,
+                        mTotalNetworkDownloadBytes);
+            }
+            if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_UPLOAD_BYTES,
+                        mTotalNetworkUploadBytes);
             }
             proto.write(JobStatusDumpProto.JobInfo.MIN_LATENCY_MS, job.getMinLatencyMillis());
             proto.write(JobStatusDumpProto.JobInfo.MAX_EXECUTION_DELAY_MS, job.getMaxExecutionDelayMillis());

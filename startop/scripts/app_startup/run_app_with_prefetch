@@ -101,6 +101,15 @@ parse_arguments() {
     esac
     shift
   done
+
+  if [[ $when == "aot" ]]; then
+    # TODO: re-implement aot later for experimenting.
+    echo "Error: --when $when is unsupported" >&2
+    exit 1
+  elif [[ $when != "jit" ]]; then
+    echo "Error: --when must be one of (aot jit)." >&2
+    exit 1
+  fi
 }
 
 echo_to_output_file() {
@@ -212,6 +221,12 @@ perform_aot() {
   local the_when="$1" # user: aot, jit
   local the_mode="$2" # warm, cold, fadvise, mlock, etc.
 
+  # iorapd readahead for jit+(mlock/fadvise)
+  if [[ $the_when == "jit" && $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+    iorapd_readahead_enable
+    return 0
+  fi
+
   if [[ $the_when != "aot" ]]; then
     # TODO: just in time implementation.. should probably use system server.
     return 0
@@ -250,13 +265,18 @@ perform_post_launch_cleanup() {
   local the_when="$1" # user: aot, jit
   local the_mode="$2" # warm, cold, fadvise, mlock, etc.
   local logcat_timestamp="$3"  # timestamp from before am start.
+  local res
 
   if [[ $the_when != "aot" ]]; then
     if [[ $the_mode != 'warm' && $the_mode != 'cold' ]]; then
       # Validate that readahead completes.
       # If this fails for some reason, then this will also discard the timing of the run.
       iorapd_readahead_wait_until_finished "$package" "$activity" "$logcat_timestamp" "$timeout"
-      return $?
+      res=$?
+
+      iorapd_readahead_disable
+
+      return $res
     fi
     # Don't need to do anything for warm or cold.
     return 0

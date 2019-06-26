@@ -833,7 +833,15 @@ message JobStatusDumpProto {
 
         optional .android.net.NetworkRequestProto required_network = 18;
 
-        optional int64 total_network_bytes = 19;
+        reserved 19; // total_network_bytes
+
+        // The estimated download bytes of the job. Will have a value of
+        // {@link JobInfo.NETWORK_BYTES_UNKNOWN} if any part of the job download is unknown.
+        optional int64 total_network_download_bytes = 25;
+
+        // The estimated upload bytes of the job. Will have a value of
+        // {@link JobInfo.NETWORK_BYTES_UNKNOWN} if any part of the job upload is unknown.
+        optional int64 total_network_upload_bytes = 26;
 
         optional int64 min_latency_ms = 20;
         optional int64 max_execution_delay_ms = 21;
@@ -852,6 +860,8 @@ message JobStatusDumpProto {
 
         optional bool has_early_constraint = 23;
         optional bool has_late_constraint = 24;
+
+        // Next tag: 27
     }
     optional JobInfo job_info = 6;
 

@@ -17,7 +17,10 @@
 #include "jni.h"
 #include "core_jni_helpers.h"
 
+#include <sstream>
+#include <iostream>
 #include <unicode/putil.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -72,47 +75,51 @@ struct RegJNIRec {
     int (*mProc)(JNIEnv*);
 };
 
-static const RegJNIRec gRegJNI[] = {
-    REG_JNI(register_android_animation_PropertyValuesHolder),
-    REG_JNI(register_android_graphics_Bitmap),
-    REG_JNI(register_android_graphics_BitmapFactory),
-    REG_JNI(register_android_graphics_ByteBufferStreamAdaptor),
-    REG_JNI(register_android_graphics_Canvas),
-    REG_JNI(register_android_graphics_ColorFilter),
-    REG_JNI(register_android_graphics_ColorSpace),
-    REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
-    REG_JNI(register_android_graphics_DrawFilter),
-    REG_JNI(register_android_graphics_FontFamily),
-    REG_JNI(register_android_graphics_Graphics),
-    REG_JNI(register_android_graphics_ImageDecoder),
-    REG_JNI(register_android_graphics_MaskFilter),
-    REG_JNI(register_android_graphics_Matrix),
-    REG_JNI(register_android_graphics_NinePatch),
-    REG_JNI(register_android_graphics_Paint),
-    REG_JNI(register_android_graphics_Path),
-    REG_JNI(register_android_graphics_PathEffect),
-    REG_JNI(register_android_graphics_PathMeasure),
-    REG_JNI(register_android_graphics_Picture),
-    REG_JNI(register_android_graphics_Region),
-    REG_JNI(register_android_graphics_Shader),
-    REG_JNI(register_android_graphics_Typeface),
-    REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
-    REG_JNI(register_android_graphics_drawable_VectorDrawable),
-    REG_JNI(register_android_graphics_fonts_Font),
-    REG_JNI(register_android_graphics_fonts_FontFamily),
-    REG_JNI(register_android_graphics_text_LineBreaker),
-    REG_JNI(register_android_graphics_text_MeasuredText),
-    REG_JNI(register_android_util_PathParser),
-    REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
-    REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper),
+// Map of all possible class names to register to their corresponding JNI registration function pointer
+// The actual list of registered classes will be determined at runtime via the com.android.tools.layoutlib.create.NativeConfig class
+static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
+    {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
+    {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
+    {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
+    {"android.graphics.ByteBufferStreamAdaptor", REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
+    {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
+    {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
+    {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
+    {"android.graphics.CreateJavaOutputStreamAdaptor", REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor)},
+    {"android.graphics.DrawFilter", REG_JNI(register_android_graphics_DrawFilter)},
+    {"android.graphics.FontFamily", REG_JNI(register_android_graphics_FontFamily)},
+    {"android.graphics.Graphics", REG_JNI(register_android_graphics_Graphics)},
+    {"android.graphics.ImageDecoder", REG_JNI(register_android_graphics_ImageDecoder)},
+    {"android.graphics.MaskFilter", REG_JNI(register_android_graphics_MaskFilter)},
+    {"android.graphics.Matrix", REG_JNI(register_android_graphics_Matrix)},
+    {"android.graphics.NinePatch", REG_JNI(register_android_graphics_NinePatch)},
+    {"android.graphics.Paint", REG_JNI(register_android_graphics_Paint)},
+    {"android.graphics.Path", REG_JNI(register_android_graphics_Path)},
+    {"android.graphics.PathEffect", REG_JNI(register_android_graphics_PathEffect)},
+    {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
+    {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
+    {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
+    {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
+    {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
+    {"android.graphics.drawable.AnimatedVectorDrawable", REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable)},
+    {"android.graphics.drawable.VectorDrawable", REG_JNI(register_android_graphics_drawable_VectorDrawable)},
+    {"android.graphics.fonts.Font", REG_JNI(register_android_graphics_fonts_Font)},
+    {"android.graphics.fonts.FontFamily", REG_JNI(register_android_graphics_fonts_FontFamily)},
+    {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
+    {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
+    {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
+    {"com.android.internal.util.VirtualRefBasePtr", REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
+    {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper", REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
 };
 
 // Vector to store the names of classes that need delegates of their native methods
 static vector<string> classesToDelegate;
 
-static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env) {
-    for (size_t i = 0; i < count; i++) {
-        if (array[i].mProc(env) < 0) {
+static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& jniRegMap,
+        const vector<string>& classesToRegister, JNIEnv* env) {
+
+    for (const string& className : classesToRegister) {
+        if (jniRegMap.at(className).mProc(env) < 0) {
             return -1;
         }
     }
@@ -146,12 +153,10 @@ int AndroidRuntime::registerNativeMethods(JNIEnv* env,
     }
 
     jclass clazz = env->FindClass(className);
-
     return env->RegisterNatives(clazz, gMethods, numMethods);
 }
 
-JNIEnv* AndroidRuntime::getJNIEnv()
-{
+JNIEnv* AndroidRuntime::getJNIEnv() {
     JNIEnv* env;
     if (javaVM->GetEnv((void**) &env, JNI_VERSION_1_6) != JNI_OK)
         return nullptr;
@@ -160,6 +165,25 @@ JNIEnv* AndroidRuntime::getJNIEnv()
 
 JavaVM* AndroidRuntime::getJavaVM() {
     return javaVM;
+}
+
+static vector<string> parseCsv(const string& csvString) {
+    vector<string>   result;
+    istringstream stream(csvString);
+    string segment;
+    while(getline(stream, segment, ','))
+    {
+        result.push_back(segment);
+    }
+    return result;
+}
+
+static vector<string> parseCsv(JNIEnv* env, jstring csvJString) {
+    const char* charArray = env->GetStringUTFChars(csvJString, 0);
+    string csvString(charArray);
+    vector<string> result = parseCsv(csvString);
+    env->ReleaseStringUTFChars(csvJString, charArray);
+    return result;
 }
 
 } // namespace android
@@ -173,32 +197,32 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
+    // Configuration is stored as java System properties.
+    // Get a reference to System.getProperty
+    jclass system = FindClassOrDie(env, "java/lang/System");
+    jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
+                                                         "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+
     // Get the names of classes that have to delegate their native methods
+    auto delegateNativesToNativesString =
+            (jstring) env->CallStaticObjectMethod(system,
+                    getPropertyMethod, env->NewStringUTF("delegate_natives_to_natives"),
+                    env->NewStringUTF(""));
+    classesToDelegate = parseCsv(env, delegateNativesToNativesString);
 
-    jclass createInfo = FindClassOrDie(env, "com/android/tools/layoutlib/create/NativeConfig");
-    jfieldID arrayId = GetStaticFieldIDOrDie(env, createInfo,
-            "DELEGATE_CLASS_NATIVES_TO_NATIVES", "[Ljava/lang/String;");
-    jobjectArray array = (jobjectArray) env->GetStaticObjectField(createInfo, arrayId);
-    jsize size = env->GetArrayLength(array);
+    // Get the names of classes that need to register their native methods
+    auto nativesClassesJString =
+            (jstring) env->CallStaticObjectMethod(system,
+                                                  getPropertyMethod, env->NewStringUTF("native_classes"),
+                                                  env->NewStringUTF(""));
+    vector<string> classesToRegister = parseCsv(env, nativesClassesJString);
 
-    for (int i=0; i < size; ++i) {
-        jstring string = (jstring) env->GetObjectArrayElement(array, i);
-        const char* charArray = env->GetStringUTFChars(string, 0);
-        std::string className = std::string(charArray);
-        std::replace(className.begin(), className.end(), '.', '/');
-        classesToDelegate.push_back(className);
-        env->ReleaseStringUTFChars(string, charArray);
-    }
-
-    if (register_jni_procs(gRegJNI, NELEM(gRegJNI), env) < 0) {
+    if (register_jni_procs(gRegJNIMap, classesToRegister, env) < 0) {
         return JNI_ERR;
     }
 
     // Set the location of ICU data
-    jclass system = FindClassOrDie(env, "java/lang/System");
-    jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
-        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-    jstring stringPath = (jstring) (jstring) env->CallStaticObjectMethod(system,
+    auto stringPath = (jstring) env->CallStaticObjectMethod(system,
         getPropertyMethod, env->NewStringUTF("icu.dir"),
         env->NewStringUTF(""));
     const char* path = env->GetStringUTFChars(stringPath, 0);

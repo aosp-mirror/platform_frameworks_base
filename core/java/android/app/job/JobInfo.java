@@ -481,25 +481,6 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * @deprecated replaced by {@link #getEstimatedNetworkDownloadBytes()} and
-     *             {@link #getEstimatedNetworkUploadBytes()}.
-     * @removed
-     */
-    @Deprecated
-    public @BytesLong long getEstimatedNetworkBytes() {
-        if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN
-                && networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
-            return NETWORK_BYTES_UNKNOWN;
-        } else if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN) {
-            return networkUploadBytes;
-        } else if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
-            return networkDownloadBytes;
-        } else {
-            return networkDownloadBytes + networkUploadBytes;
-        }
-    }
-
-    /**
      * Return the estimated size of download traffic that will be performed by
      * this job, in bytes.
      *
@@ -1178,16 +1159,6 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * @deprecated replaced by
-         *             {@link #setEstimatedNetworkBytes(long, long)}.
-         * @removed
-         */
-        @Deprecated
-        public Builder setEstimatedNetworkBytes(@BytesLong long networkBytes) {
-            return setEstimatedNetworkBytes(networkBytes, NETWORK_BYTES_UNKNOWN);
-        }
-
-        /**
          * Set the estimated size of network traffic that will be performed by
          * this job, in bytes.
          * <p>
@@ -1494,15 +1465,6 @@ public class JobInfo implements Parcelable {
                 mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
             }
             return this;
-        }
-
-        /**
-         * @removed
-         * @deprecated replaced with {@link #setPrefetch(boolean)}
-         */
-        @Deprecated
-        public Builder setIsPrefetch(boolean isPrefetch) {
-            return setPrefetch(isPrefetch);
         }
 
         /**

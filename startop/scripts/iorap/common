@@ -45,11 +45,36 @@ iorapd_perfetto_enable() {
   iorapd_reset # iorapd only reads this flag when initializing
 }
 
-# Enable perfetto tracing.
+# Disable perfetto tracing.
 # Subsequent launches of applications will no longer record perfetto trace protobufs.
 iorapd_perfetto_disable() {
   verbose_print 'disable perfetto'
   adb shell setprop iorapd.perfetto.enable false
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+# Enable readahead
+# Subsequent launches of an application will be sped up by iorapd readahead prefetching
+# (Provided an appropriate compiled trace exists for that application)
+iorapd_readahead_enable() {
+  if [[ "$(adb shell getprop iorapd.readahead.enable)" == true ]]; then
+    verbose_print 'enable readahead [already enabled]'
+    return 0
+  fi
+  verbose_print 'enable readahead [reset iorapd]'
+  adb shell setprop iorapd.readahead.enable true
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+# Disable readahead
+# Subsequent launches of an application will be not be sped up by iorapd readahead prefetching.
+iorapd_readahead_disable() {
+  if [[ "$(adb shell getprop iorapd.readahead.enable)" == false ]]; then
+    verbose_print 'disable readahead [already disabled]'
+    return 0
+  fi
+  verbose_print 'disable readahead [reset iorapd]'
+  adb shell setprop iorapd.readahead.enable false
   iorapd_reset # iorapd only reads this flag when initializing
 }
 
