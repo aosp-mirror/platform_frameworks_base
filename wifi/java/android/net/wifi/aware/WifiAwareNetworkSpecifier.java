@@ -31,11 +31,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Network specifier object used to request a Wi-Fi Aware network. Apps do not create these objects
- * directly but obtain them using
- * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])} or
- * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)} or their secure (Passphrase)
- * versions.
+ * Network specifier object used to request a Wi-Fi Aware network. Apps should use the
+ * {@link WifiAwareNetworkSpecifier.Builder} class to create an instance.
  */
 public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
     /**
