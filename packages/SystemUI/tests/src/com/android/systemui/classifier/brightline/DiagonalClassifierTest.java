@@ -28,8 +28,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class DiagonalClassifierTest extends SysuiTestCase {
+public class DiagonalClassifierTest extends ClassifierTest {
 
     // Next variable is not actually five, but is very close. 5 degrees is currently the value
     // used in the diagonal classifier, so we want slightly less than that to deal with
@@ -57,8 +56,14 @@ public class DiagonalClassifierTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        super.setup();
         MockitoAnnotations.initMocks(this);
         mClassifier = new DiagonalClassifier(mDataProvider);
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
