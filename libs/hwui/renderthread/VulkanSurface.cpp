@@ -52,11 +52,11 @@ static int InvertTransform(int transform) {
 static int ConvertVkTransformToNative(VkSurfaceTransformFlagsKHR transform) {
     switch (transform) {
         case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_270;
+            return NATIVE_WINDOW_TRANSFORM_ROT_90;
         case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
             return NATIVE_WINDOW_TRANSFORM_ROT_180;
         case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_90;
+            return NATIVE_WINDOW_TRANSFORM_ROT_270;
         case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
         case VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR:
         default:
@@ -211,7 +211,7 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
      */
     WindowInfo windowInfo;
 
-    windowInfo.transform = ConvertVkTransformToNative(caps.supportedTransforms);
+    windowInfo.transform = ConvertVkTransformToNative(caps.currentTransform);
     windowInfo.size = SkISize::Make(caps.currentExtent.width, caps.currentExtent.height);
 
     const SkISize minSize = SkISize::Make(caps.minImageExtent.width, caps.minImageExtent.height);
