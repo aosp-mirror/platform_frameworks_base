@@ -91,7 +91,7 @@ public final class SurfaceControl implements Parcelable {
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
     private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder displayToken,
-            IBinder layerHandleToken, Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
+            long layerObject, Rect sourceCrop, float frameScale, long[] excludeLayerObjects);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -103,7 +103,7 @@ public final class SurfaceControl implements Parcelable {
 
     private static native void nativeSetLayer(long transactionObj, long nativeObject, int zorder);
     private static native void nativeSetRelativeLayer(long transactionObj, long nativeObject,
-            IBinder relativeTo, int zorder);
+            long relativeToObject, int zorder);
     private static native void nativeSetPosition(long transactionObj, long nativeObject,
             float x, float y);
     private static native void nativeSetGeometryAppliesWithResize(long transactionObj,
@@ -173,18 +173,17 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long transactionObj, long nativeObject,
-            IBinder handle, long frame);
+            long barrierObject, long frame);
     private static native void nativeDeferTransactionUntilSurface(long transactionObj,
             long nativeObject,
             long surfaceObject, long frame);
     private static native void nativeReparentChildren(long transactionObj, long nativeObject,
-            IBinder handle);
+            long newParentObject);
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
     private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
-    private static native IBinder nativeGetHandle(long nativeObject);
     private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
@@ -1023,9 +1022,9 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void deferTransactionUntil(IBinder handle, long frame) {
+    public void deferTransactionUntil(SurfaceControl barrier, long frame) {
         synchronized(SurfaceControl.class) {
-            sGlobalTransaction.deferTransactionUntil(this, handle, frame);
+            sGlobalTransaction.deferTransactionUntil(this, barrier, frame);
         }
     }
 
@@ -1041,9 +1040,9 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void reparentChildren(IBinder newParentHandle) {
+    public void reparentChildren(SurfaceControl newParent) {
         synchronized(SurfaceControl.class) {
-            sGlobalTransaction.reparentChildren(this, newParentHandle);
+            sGlobalTransaction.reparentChildren(this, newParent);
         }
     }
 
@@ -1073,13 +1072,6 @@ public final class SurfaceControl implements Parcelable {
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.setOverrideScalingMode(this, scalingMode);
         }
-    }
-
-    /**
-     * @hide
-     */
-    public IBinder getHandle() {
-        return nativeGetHandle(mNativeObject);
     }
 
     /**
@@ -1989,7 +1981,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * Captures a layer and its children and returns a {@link GraphicBuffer} with the content.
      *
-     * @param layerHandleToken The root layer to capture.
+     * @param layer            The root layer to capture.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
      *                         Rect()' or null if no cropping is desired.
      * @param frameScale       The desired scale of the returned buffer; the raw
@@ -1998,20 +1990,25 @@ public final class SurfaceControl implements Parcelable {
      * @return Returns a GraphicBuffer that contains the layer capture.
      * @hide
      */
-    public static ScreenshotGraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
+    public static ScreenshotGraphicBuffer captureLayers(SurfaceControl layer, Rect sourceCrop,
             float frameScale) {
         final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, null);
+        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale, null);
     }
 
     /**
      * Like {@link captureLayers} but with an array of layer handles to exclude.
      * @hide
      */
-    public static ScreenshotGraphicBuffer captureLayersExcluding(IBinder layerHandleToken,
-            Rect sourceCrop, float frameScale, IBinder[] exclude) {
+    public static ScreenshotGraphicBuffer captureLayersExcluding(SurfaceControl layer,
+            Rect sourceCrop, float frameScale, SurfaceControl[] exclude) {
         final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, exclude);
+        long[] nativeExcludeObjects = new long[exclude.length];
+        for (int i = 0; i < exclude.length; i++) {
+            nativeExcludeObjects[i] = exclude[i].mNativeObject;
+        }
+        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale,
+                nativeExcludeObjects);
     }
 
     /**
@@ -2228,8 +2225,7 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setRelativeLayer(SurfaceControl sc, SurfaceControl relativeTo, int z) {
             sc.checkNotReleased();
-            nativeSetRelativeLayer(mNativeObject, sc.mNativeObject,
-                    relativeTo.getHandle(), z);
+            nativeSetRelativeLayer(mNativeObject, sc.mNativeObject, relativeTo.mNativeObject, z);
             return this;
         }
 
@@ -2416,13 +2412,14 @@ public final class SurfaceControl implements Parcelable {
          * @hide
          */
         @UnsupportedAppUsage
-        public Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle,
+        public Transaction deferTransactionUntil(SurfaceControl sc, SurfaceControl barrier,
                 long frameNumber) {
             if (frameNumber < 0) {
                 return this;
             }
             sc.checkNotReleased();
-            nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, handle, frameNumber);
+            nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, barrier.mNativeObject,
+                    frameNumber);
             return this;
         }
 
@@ -2444,9 +2441,9 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public Transaction reparentChildren(SurfaceControl sc, IBinder newParentHandle) {
+        public Transaction reparentChildren(SurfaceControl sc, SurfaceControl newParent) {
             sc.checkNotReleased();
-            nativeReparentChildren(mNativeObject, sc.mNativeObject, newParentHandle);
+            nativeReparentChildren(mNativeObject, sc.mNativeObject, newParent.mNativeObject);
             return this;
         }
 

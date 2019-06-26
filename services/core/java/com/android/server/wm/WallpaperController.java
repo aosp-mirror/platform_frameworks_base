@@ -735,7 +735,7 @@ class WallpaperController {
         bounds.offsetTo(0, 0);
 
         SurfaceControl.ScreenshotGraphicBuffer wallpaperBuffer = SurfaceControl.captureLayers(
-                wallpaperWindowState.getSurfaceControl().getHandle(), bounds, 1 /* frameScale */);
+                wallpaperWindowState.getSurfaceControl(), bounds, 1 /* frameScale */);
 
         if (wallpaperBuffer == null) {
             Slog.w(TAG_WM, "Failed to screenshot wallpaper");

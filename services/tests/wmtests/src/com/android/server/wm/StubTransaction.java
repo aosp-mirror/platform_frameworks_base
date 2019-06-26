@@ -145,8 +145,8 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle,
-            long frameNumber) {
+    public SurfaceControl.Transaction deferTransactionUntil(SurfaceControl sc,
+            SurfaceControl barrier, long frameNumber) {
         return this;
     }
 
@@ -158,7 +158,8 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc, IBinder newParentHandle) {
+    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc,
+            SurfaceControl newParent) {
         return this;
     }
 

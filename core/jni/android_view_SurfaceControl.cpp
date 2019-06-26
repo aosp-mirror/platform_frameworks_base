@@ -272,11 +272,11 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
 }
 
 static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
-        jobject layerHandleToken, jobject sourceCropObj, jfloat frameScale,
-        jobjectArray excludeArray) {
+        jlong layerObject, jobject sourceCropObj, jfloat frameScale,
+        jlongArray excludeObjectArray) {
 
-    sp<IBinder> layerHandle = ibinderForJavaObject(env, layerHandleToken);
-    if (layerHandle == NULL) {
+    auto layer = reinterpret_cast<SurfaceControl *>(layerObject);
+    if (layer == NULL) {
         return NULL;
     }
 
@@ -286,19 +286,20 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
     }
 
     std::unordered_set<sp<IBinder>,ISurfaceComposer::SpHash<IBinder>> excludeHandles;
-    if (excludeArray != NULL) {
-        const jsize len = env->GetArrayLength(excludeArray);
+    if (excludeObjectArray != NULL) {
+        const jsize len = env->GetArrayLength(excludeObjectArray);
         excludeHandles.reserve(len);
 
+        const jlong* objects = env->GetLongArrayElements(excludeObjectArray, nullptr);
         for (jsize i = 0; i < len; i++) {
-            jobject obj = env->GetObjectArrayElement(excludeArray, i);
-            if (obj == nullptr) {
+            auto excludeObject = reinterpret_cast<SurfaceControl *>(objects[i]);
+            if (excludeObject == nullptr) {
                 jniThrowNullPointerException(env, "Exclude layer is null");
                 return NULL;
             }
-            sp<IBinder> excludeHandle = ibinderForJavaObject(env, obj);
-            excludeHandles.emplace(excludeHandle);
+            excludeHandles.emplace(excludeObject->getHandle());
         }
+        env->ReleaseLongArrayElements(excludeObjectArray, const_cast<jlong*>(objects), JNI_ABORT);
     }
 
     sp<GraphicBuffer> buffer;
@@ -308,7 +309,7 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTok
         const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
         dataspace = pickDataspaceFromColorMode(colorMode);
     }
-    status_t res = ScreenshotClient::captureChildLayers(layerHandle, dataspace,
+    status_t res = ScreenshotClient::captureChildLayers(layer->getHandle(), dataspace,
                                                         ui::PixelFormat::RGBA_8888, sourceCrop,
                                                         excludeHandles, frameScale, &buffer);
     if (res != NO_ERROR) {
@@ -360,15 +361,12 @@ static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong transactionObj,
 
 static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
-        jobject relativeTo, jint zorder) {
+        jlong relativeToObject, jint zorder) {
 
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> handle = ibinderForJavaObject(env, relativeTo);
-
-    {
-        auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->setRelativeLayer(ctrl, handle, zorder);
-    }
+    auto relative = reinterpret_cast<SurfaceControl *>(relativeToObject);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->setRelativeLayer(ctrl, relative->getHandle(), zorder);
 }
 
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -465,7 +463,7 @@ static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactio
             env, inputWindow);
     handle->updateInfo();
 
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     transaction->setInputWindowInfo(ctrl, *handle->getInfo());
 }
 
@@ -1109,15 +1107,11 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
 }
 
 static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jobject handleObject, jlong frameNumber) {
+        jlong nativeObject, jlong barrierObject, jlong frameNumber) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> handle = ibinderForJavaObject(env, handleObject);
-
-    {
-        auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->deferTransactionUntil_legacy(ctrl, handle, frameNumber);
-    }
+    auto barrier = reinterpret_cast<SurfaceControl *>(barrierObject);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->deferTransactionUntil_legacy(ctrl, barrier->getHandle(), frameNumber);
 }
 
 static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1133,15 +1127,12 @@ static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong 
 
 static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
-        jobject newParentObject) {
+        jlong newParentObject) {
 
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<IBinder> handle = ibinderForJavaObject(env, newParentObject);
-
-    {
-        auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->reparentChildren(ctrl, handle);
-    }
+    auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->reparentChildren(ctrl, newParent->getHandle());
 }
 
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1149,11 +1140,8 @@ static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong newParentObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
-
-    {
-        auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
-    }
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
 }
 
 static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1171,11 +1159,6 @@ static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong transa
 
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     transaction->setOverrideScalingMode(ctrl, scalingMode);
-}
-
-static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    return javaObjectForIBinder(env, ctrl->getHandle());
 }
 
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
@@ -1313,7 +1296,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetEarlyWakeup },
     {"nativeSetLayer", "(JJI)V",
             (void*)nativeSetLayer },
-    {"nativeSetRelativeLayer", "(JJLandroid/os/IBinder;I)V",
+    {"nativeSetRelativeLayer", "(JJJI)V",
             (void*)nativeSetRelativeLayer },
     {"nativeSetPosition", "(JJFF)V",
             (void*)nativeSetPosition },
@@ -1391,11 +1374,11 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeGetProtectedContentSupport", "()Z",
             (void*)nativeGetProtectedContentSupport },
-    {"nativeDeferTransactionUntil", "(JJLandroid/os/IBinder;J)V",
+    {"nativeDeferTransactionUntil", "(JJJJ)V",
             (void*)nativeDeferTransactionUntil },
     {"nativeDeferTransactionUntilSurface", "(JJJJ)V",
             (void*)nativeDeferTransactionUntilSurface },
-    {"nativeReparentChildren", "(JJLandroid/os/IBinder;)V",
+    {"nativeReparentChildren", "(JJJ)V",
             (void*)nativeReparentChildren } ,
     {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
@@ -1403,15 +1386,13 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSeverChildren } ,
     {"nativeSetOverrideScalingMode", "(JJI)V",
             (void*)nativeSetOverrideScalingMode },
-    {"nativeGetHandle", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetHandle },
     {"nativeScreenshot",
             "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)"
             "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeScreenshot },
     {"nativeCaptureLayers",
-            "(Landroid/os/IBinder;Landroid/os/IBinder;Landroid/graphics/Rect;"
-            "F[Landroid/os/IBinder;)"
+            "(Landroid/os/IBinder;JLandroid/graphics/Rect;"
+            "F[J)"
             "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",

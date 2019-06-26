@@ -4918,7 +4918,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
                 t.deferTransactionUntil(mSurfaceControl,
-                        mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                        mWinAnimator.mSurfaceController.mSurfaceControl,
                         getFrameNumber());
             }
         }
