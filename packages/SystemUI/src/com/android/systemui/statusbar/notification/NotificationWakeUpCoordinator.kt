@@ -38,7 +38,7 @@ import javax.inject.Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
         private val mContext: Context,
         private val mHeadsUpManagerPhone: HeadsUpManagerPhone,
-        private val mStatusBarStateController: StatusBarStateController,
+        private val statusBarStateController: StatusBarStateController,
         private val bypassController: KeyguardBypassController)
     : OnHeadsUpChangedListener, StatusBarStateController.StateListener {
 
@@ -69,6 +69,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val mDozeParameters: DozeParameters
     private var pulseExpanding: Boolean = false
     private val wakeUpListeners = arrayListOf<WakeUpListener>()
+    private var state: Int = StatusBarState.KEYGUARD
+
     var fullyAwake: Boolean = false
 
     var willWakeUp = false
@@ -111,14 +113,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
             if (bypassController.bypassEnabled) {
                 // We also allow pulsing on the lock screen!
                 canShow = canShow || (mWakingUp || willWakeUp || fullyAwake)
-                        && mStatusBarStateController.state == StatusBarState.KEYGUARD
+                        && statusBarStateController.state == StatusBarState.KEYGUARD
             }
             return canShow
         }
 
     init {
         mHeadsUpManagerPhone.addListener(this)
-        mStatusBarStateController.addCallback(this)
+        statusBarStateController.addCallback(this)
         mDozeParameters = DozeParameters.getInstance(mContext)
     }
 
@@ -217,13 +219,21 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     override fun onStateChanged(newState: Int) {
         updateDozeAmountIfBypass();
+        if (bypassController.bypassEnabled &&
+                newState == StatusBarState.KEYGUARD && state == StatusBarState.SHADE_LOCKED
+                && (!statusBarStateController.isDozing || shouldAnimateVisibility())) {
+            // We're leaving shade locked. Let's animate the notifications away
+            setNotificationsVisible(visible = true, increaseSpeed = false, animate = false)
+            setNotificationsVisible(visible = false, increaseSpeed = false, animate = true)
+        }
+        this.state = newState
     }
 
     private fun updateDozeAmountIfBypass(): Boolean {
         if (bypassController.bypassEnabled) {
             var amount = 1.0f;
-            if (mStatusBarStateController.state == StatusBarState.SHADE
-                    || mStatusBarStateController.state == StatusBarState.SHADE_LOCKED) {
+            if (statusBarStateController.state == StatusBarState.SHADE
+                    || statusBarStateController.state == StatusBarState.SHADE_LOCKED) {
                 amount = 0.0f;
             }
             setDozeAmount(amount,  amount)
