@@ -278,7 +278,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 // an existing task.
                 adjustBoundsToAvoidConflictInDisplay(display, outParams.mBounds);
             }
-        } else {
+        } else if (display.inFreeformWindowingMode()) {
             if (source != null && source.inFreeformWindowingMode()
                     && resolvedMode == WINDOWING_MODE_FREEFORM
                     && outParams.mBounds.isEmpty()
