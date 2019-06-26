@@ -152,6 +152,24 @@ abstract class DisplayDevice {
     public void setRequestedColorModeLocked(int colorMode) {
     }
 
+    /**
+     * Sends the Auto Low Latency Mode (ALLM) signal over HDMI, or requests an internal display to
+     * switch to a low-latency mode.
+     *
+     * @param on Whether to set ALLM on or off.
+     */
+    public void setAutoLowLatencyModeLocked(boolean on) {
+    }
+
+    /**
+     * Sends a ContentType=Game signal over HDMI, or requests an internal display to switch to a
+     * game mode (generally lower latency).
+     *
+     * @param on Whether to send a ContentType=Game signal or not
+     */
+    public void setGameContentTypeLocked(boolean on) {
+    }
+
     public void onOverlayChangedLocked() {
     }
 

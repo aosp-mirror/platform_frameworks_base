@@ -88,6 +88,7 @@ final class LogicalDisplay {
     private boolean mHasContent;
 
     private int mRequestedColorMode;
+    private boolean mRequestedMinimalPostProcessing;
 
     private DisplayModeDirector.DesiredDisplayModeSpecs mDesiredDisplayModeSpecs =
             new DisplayModeDirector.DesiredDisplayModeSpecs();
@@ -284,6 +285,8 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.minimalPostProcessingSupported =
+                    deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
@@ -362,6 +365,9 @@ final class LogicalDisplay {
                     new DisplayModeDirector.DesiredDisplayModeSpecs());
             device.setRequestedColorModeLocked(0);
         }
+
+        device.setAutoLowLatencyModeLocked(mRequestedMinimalPostProcessing);
+        device.setGameContentTypeLocked(mRequestedMinimalPostProcessing);
 
         // Only grab the display info now as it may have been changed based on the requests above.
         final DisplayInfo displayInfo = getDisplayInfoLocked();
@@ -485,6 +491,23 @@ final class LogicalDisplay {
         mRequestedColorMode = colorMode;
     }
 
+    /**
+     * Returns the last requested minimal post processing setting.
+     */
+    public boolean getRequestedMinimalPostProcessingLocked() {
+        return mRequestedMinimalPostProcessing;
+    }
+
+    /**
+     * Instructs the connected display to do minimal post processing. This is implemented either
+     * via HDMI 2.1 ALLM or HDMI 1.4 ContentType=Game.
+     *
+     * @param on Whether to set minimal post processing on/off on the connected display.
+     */
+    public void setRequestedMinimalPostProcessingLocked(boolean on) {
+        mRequestedMinimalPostProcessing = on;
+    }
+
     /** Returns the pending requested color mode. */
     public int getRequestedColorModeLocked() {
         return mRequestedColorMode;
@@ -542,5 +565,6 @@ final class LogicalDisplay {
                 mPrimaryDisplayDevice.getNameLocked() : "null"));
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
         pw.println("mOverrideDisplayInfo=" + mOverrideDisplayInfo);
+        pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
     }
 }

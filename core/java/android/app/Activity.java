@@ -7871,6 +7871,7 @@ public class Activity extends ContextThemeWrapper
         mCurrentConfig = config;
 
         mWindow.setColorMode(info.colorMode);
+        mWindow.setPreferMinimalPostProcessing(info.preferMinimalPostProcessing);
 
         setAutofillOptions(application.getAutofillOptions());
         setContentCaptureOptions(application.getContentCaptureOptions());
