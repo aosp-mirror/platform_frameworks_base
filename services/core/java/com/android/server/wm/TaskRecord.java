@@ -1908,7 +1908,7 @@ class TaskRecord extends ConfigurationContainer {
     /**
      * Saves launching state if necessary so that we can launch the activity to its latest state.
      * It only saves state if this task has been shown to user and it's in fullscreen or freeform
-     * mode.
+     * mode on freeform displays.
      */
     void saveLaunchingStateIfNeeded() {
         if (!hasBeenVisible) {
@@ -1917,8 +1917,15 @@ class TaskRecord extends ConfigurationContainer {
         }
 
         final int windowingMode = getWindowingMode();
-        if (windowingMode != WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-                && windowingMode != WindowConfiguration.WINDOWING_MODE_FREEFORM) {
+        if (windowingMode != WINDOWING_MODE_FULLSCREEN
+                && windowingMode != WINDOWING_MODE_FREEFORM) {
+            return;
+        }
+
+        // Don't persist state if display isn't in freeform mode. Then the task will be launched
+        // back to its last state in a freeform display when it's launched in a freeform display
+        // next time.
+        if (getWindowConfiguration().getDisplayWindowingMode() != WINDOWING_MODE_FREEFORM) {
             return;
         }
 
