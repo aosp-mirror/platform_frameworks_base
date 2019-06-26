@@ -23,6 +23,7 @@
 #include <utils/threads.h>
 
 #include <android/graphics/Region.h>
+#include <gui/SurfaceControl.h>
 #include <ui/Region.h>
 
 #include "android_hardware_input_InputWindowHandle.h"
@@ -32,8 +33,9 @@
 namespace android {
 
 struct WeakRefHandleField {
-    jfieldID handle;
+    jfieldID ctrl;
     jmethodID get;
+    jfieldID mNativeObject;
 };
 
 static struct {
@@ -63,7 +65,7 @@ static struct {
     jfieldID displayId;
     jfieldID portalToDisplayId;
     jfieldID replaceTouchableRegionWithCrop;
-    WeakRefHandleField touchableRegionCropHandle;
+    WeakRefHandleField touchableRegionSurfaceControl;
 } gInputWindowHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -172,19 +174,27 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.replaceTouchableRegionWithCrop = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop);
 
-    jobject handleObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.touchableRegionCropHandle.handle);
-    if (handleObj) {
+    jobject weakSurfaceCtrl = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl);
+    bool touchableRegionCropHandleSet = false;
+    if (weakSurfaceCtrl) {
         // Promote java weak reference.
-        jobject strongHandleObj = env->CallObjectMethod(handleObj,
-                gInputWindowHandleClassInfo.touchableRegionCropHandle.get);
-        if (strongHandleObj) {
-            mInfo.touchableRegionCropHandle = ibinderForJavaObject(env, strongHandleObj);
-            env->DeleteLocalRef(strongHandleObj);
-        } else {
-            mInfo.touchableRegionCropHandle.clear();
+        jobject strongSurfaceCtrl = env->CallObjectMethod(weakSurfaceCtrl,
+                gInputWindowHandleClassInfo.touchableRegionSurfaceControl.get);
+        if (strongSurfaceCtrl) {
+            jlong mNativeObject = env->GetLongField(strongSurfaceCtrl,
+                    gInputWindowHandleClassInfo.touchableRegionSurfaceControl.mNativeObject);
+            if (mNativeObject) {
+                auto ctrl = reinterpret_cast<SurfaceControl *>(mNativeObject);
+                mInfo.touchableRegionCropHandle = ctrl->getHandle();
+                touchableRegionCropHandleSet = true;
+            }
+            env->DeleteLocalRef(strongSurfaceCtrl);
         }
-        env->DeleteLocalRef(handleObj);
+        env->DeleteLocalRef(weakSurfaceCtrl);
+    }
+    if (!touchableRegionCropHandleSet) {
+        mInfo.touchableRegionCropHandle.clear();
     }
 
     env->DeleteLocalRef(obj);
@@ -340,11 +350,17 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     jclass weakRefClazz;
     FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");
 
-    GET_METHOD_ID(gInputWindowHandleClassInfo.touchableRegionCropHandle.get, weakRefClazz,
+    GET_METHOD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.get, weakRefClazz,
              "get", "()Ljava/lang/Object;")
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionCropHandle.handle, clazz,
-            "touchableRegionCropHandle", "Ljava/lang/ref/WeakReference;");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl, clazz,
+            "touchableRegionSurfaceControl", "Ljava/lang/ref/WeakReference;");
+
+    jclass surfaceControlClazz;
+    FIND_CLASS(surfaceControlClazz, "android/view/SurfaceControl");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.mNativeObject,
+        surfaceControlClazz, "mNativeObject", "J");
+
     return 0;
 }
 

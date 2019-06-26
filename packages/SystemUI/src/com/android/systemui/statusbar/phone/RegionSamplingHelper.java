@@ -18,12 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.IBinder;
-import android.provider.Settings;
 import android.view.CompositionSamplingListener;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -181,8 +178,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
                 unregisterSamplingListener();
                 mSamplingListenerRegistered = true;
                 CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
-                        stopLayerControl != null ? stopLayerControl.getHandle() : null,
-                        mSamplingRequestBounds);
+                        stopLayerControl, mSamplingRequestBounds);
                 mRegisteredSamplingBounds.set(mSamplingRequestBounds);
                 mRegisteredStopLayer = stopLayerControl;
             }

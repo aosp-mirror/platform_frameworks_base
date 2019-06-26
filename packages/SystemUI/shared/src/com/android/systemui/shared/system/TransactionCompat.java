@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
 
@@ -84,12 +83,6 @@ public class TransactionCompat {
 
     public TransactionCompat setCornerRadius(SurfaceControlCompat surfaceControl, float radius) {
         mTransaction.setCornerRadius(surfaceControl.mSurfaceControl, radius);
-        return this;
-    }
-
-    public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
-            IBinder handle, long frameNumber) {
-        mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, handle, frameNumber);
         return this;
     }
 

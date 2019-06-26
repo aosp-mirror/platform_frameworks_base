@@ -258,7 +258,7 @@ class TaskSnapshotController {
         mTmpRect.offsetTo(0, 0);
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
                 SurfaceControl.captureLayers(
-                        task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
+                        task.getSurfaceControl(), mTmpRect, scaleFraction);
         final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
                 : null;
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {

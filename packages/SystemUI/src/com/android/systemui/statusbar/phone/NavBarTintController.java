@@ -159,7 +159,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
             }
             mSamplingListenerRegistered = true;
             CompositionSamplingListener.register(mSamplingListener, DEFAULT_DISPLAY,
-                    mNavigationBarView.getViewRootImpl().getSurfaceControl().getHandle(),
+                    mNavigationBarView.getViewRootImpl().getSurfaceControl(),
                     mSamplingBounds);
         }
     }
