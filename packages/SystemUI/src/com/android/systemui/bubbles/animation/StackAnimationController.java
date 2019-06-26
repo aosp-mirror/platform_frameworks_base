@@ -199,18 +199,18 @@ public class StackAnimationController extends
      */
     public void springStack(float destinationX, float destinationY) {
         springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_X,
-                    new SpringForce()
+                new SpringForce()
                         .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
-                    0 /* startXVelocity */,
-                    destinationX);
+                0 /* startXVelocity */,
+                destinationX);
 
         springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_Y,
-                    new SpringForce()
+                new SpringForce()
                         .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
-                    0 /* startYVelocity */,
-                    destinationY);
+                0 /* startYVelocity */,
+                destinationY);
     }
 
     /**
@@ -264,12 +264,12 @@ public class StackAnimationController extends
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 /* destination */ null);
 
-        mLayout.setEndActionForMultipleProperties(
+        setEndActionForMultipleProperties(
                 () -> {
                     mRestingStackPosition = new PointF();
                     mRestingStackPosition.set(mStackPosition);
-                    mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
-                    mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
+                    removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
+                    removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
                 },
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
@@ -319,7 +319,7 @@ public class StackAnimationController extends
             SpringForce spring,
             Float finalPosition) {
         Log.d(TAG, String.format("Flinging %s.",
-                        PhysicsAnimationLayout.getReadablePropertyName(property)));
+                PhysicsAnimationLayout.getReadablePropertyName(property)));
 
         StackPositionProperty firstBubbleProperty = new StackPositionProperty(property);
         final float currentValue = firstBubbleProperty.getValue(this);
@@ -370,8 +370,8 @@ public class StackAnimationController extends
         cancelStackPositionAnimation(DynamicAnimation.TRANSLATION_X);
         cancelStackPositionAnimation(DynamicAnimation.TRANSLATION_Y);
 
-        mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
-        mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
+        removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
+        removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
     }
 
     /** Save the current IME height so that we know where the stack bounds should be. */

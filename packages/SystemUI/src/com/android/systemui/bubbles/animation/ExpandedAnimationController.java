@@ -18,6 +18,7 @@ package com.android.systemui.bubbles.animation;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.View;
@@ -27,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 import com.google.android.collect.Sets;
@@ -47,11 +49,11 @@ public class ExpandedAnimationController
      */
     private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
-    /** How much to scale down bubbles when they're animating in/out. */
-    private static final float ANIMATE_SCALE_PERCENT = 0.5f;
+    /** Duration of the expand/collapse target path animation. */
+    private static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
 
-    /** The stack position to collapse back to in {@link #collapseBackToStack}. */
-    private PointF mCollapseToPoint;
+    /** Stiffness for the expand/collapse path-following animation. */
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
@@ -116,7 +118,7 @@ public class ExpandedAnimationController
         mAnimatingExpand = true;
         mAfterExpand = after;
 
-        startOrUpdateExpandAnimation();
+        startOrUpdatePathAnimation(true /* expanding */);
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
@@ -126,7 +128,7 @@ public class ExpandedAnimationController
         mAfterCollapse = after;
         mCollapsePoint = collapsePoint;
 
-        startOrUpdateCollapseAnimation();
+        startOrUpdatePathAnimation(false /* expanding */);
     }
 
     /**
@@ -141,40 +143,86 @@ public class ExpandedAnimationController
         mScreenWidth = mDisplaySize.x;
     }
 
-    private void startOrUpdateExpandAnimation() {
-        animationsForChildrenFromIndex(
-                0, /* startIndex */
-                (index, animation) -> animation.position(getBubbleLeft(index), getExpandedY()))
-                .startAll(() -> {
-                    mAnimatingExpand = false;
+    /**
+     * Animates the bubbles along a curved path, either to expand them along the top or collapse
+     * them back into a stack.
+     */
+    private void startOrUpdatePathAnimation(boolean expanding) {
+        Runnable after;
 
-                    if (mAfterExpand != null) {
-                        mAfterExpand.run();
-                    }
+        if (expanding) {
+            after = () -> {
+                mAnimatingExpand = false;
 
-                    mAfterExpand = null;
-                });
-    }
+                if (mAfterExpand != null) {
+                    mAfterExpand.run();
+                }
 
-    private void startOrUpdateCollapseAnimation() {
-        // Stack to the left if we're going to the left, or right if not.
-        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
-        animationsForChildrenFromIndex(
-                0, /* startIndex */
-                (index, animation) -> {
-                    animation.position(
-                            mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx),
-                            mCollapsePoint.y);
-                })
-                .startAll(() -> {
-                    mAnimatingCollapse = false;
+                mAfterExpand = null;
+            };
+        } else {
+            after = () -> {
+                mAnimatingCollapse = false;
 
-                    if (mAfterCollapse != null) {
-                        mAfterCollapse.run();
-                    }
+                if (mAfterCollapse != null) {
+                    mAfterCollapse.run();
+                }
 
-                    mAfterCollapse = null;
-                });
+                mAfterCollapse = null;
+            };
+        }
+
+        // Animate each bubble individually, since each path will end in a different spot.
+        animationsForChildrenFromIndex(0, (index, animation) -> {
+            final View bubble = mLayout.getChildAt(index);
+
+            // Start a path at the bubble's current position.
+            final Path path = new Path();
+            path.moveTo(bubble.getTranslationX(), bubble.getTranslationY());
+
+            final float expandedY = getExpandedY();
+            if (expanding) {
+                // If we're expanding, first draw a line from the bubble's current position to the
+                // top of the screen.
+                path.lineTo(bubble.getTranslationX(), expandedY);
+
+                // Then, draw a line across the screen to the bubble's resting position.
+                path.lineTo(getBubbleLeft(index), expandedY);
+            } else {
+                final float sideMultiplier =
+                        mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
+                final float stackedX = mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx);
+
+                // If we're collapsing, draw a line from the bubble's current position to the side
+                // of the screen where the bubble will be stacked.
+                path.lineTo(stackedX, expandedY);
+
+                // Then, draw a line down to the stack position.
+                path.lineTo(stackedX, mCollapsePoint.y);
+            }
+
+            // The lead bubble should be the bubble with the longest distance to travel when we're
+            // expanding, and the bubble with the shortest distance to travel when we're collapsing.
+            // During expansion from the left side, the last bubble has to travel to the far right
+            // side, so we have it lead and 'pull' the rest of the bubbles into place. From the
+            // right side, the first bubble is traveling to the top left, so it leads. During
+            // collapse to the left, the first bubble has the shortest travel time back to the stack
+            // position, so it leads (and vice versa).
+            final boolean firstBubbleLeads =
+                    (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+                            || (!expanding && mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            final int startDelay = firstBubbleLeads
+                    ? (index * 10)
+                    : ((mLayout.getChildCount() - index) * 10);
+
+            animation
+                    .followAnimatedTargetAlongPath(
+                            path,
+                            EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
+                            Interpolators.LINEAR /* targetAnimInterpolator */)
+                    .withStartDelay(startDelay)
+                    .withStiffness(EXPAND_COLLAPSE_ANIM_STIFFNESS);
+        }).startAll(after);
     }
 
     /** Prepares the given bubble to be dragged out. */
@@ -358,9 +406,9 @@ public class ExpandedAnimationController
         // If a bubble is added while the expand/collapse animations are playing, update the
         // animation to include the new bubble.
         if (mAnimatingExpand) {
-            startOrUpdateExpandAnimation();
+            startOrUpdatePathAnimation(true /* expanding */);
         } else if (mAnimatingCollapse) {
-            startOrUpdateCollapseAnimation();
+            startOrUpdatePathAnimation(false /* expanding */);
         } else {
             child.setTranslationX(getBubbleLeft(index));
             animationForChild(child)
