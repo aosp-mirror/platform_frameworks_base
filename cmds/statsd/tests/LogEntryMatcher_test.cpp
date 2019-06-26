@@ -29,6 +29,7 @@ using std::unordered_map;
 using std::vector;
 
 const int32_t TAG_ID = 123;
+const int32_t TAG_ID_2 = 28;  // hardcoded tag of atom with uid field
 const int FIELD_ID_1 = 1;
 const int FIELD_ID_2 = 2;
 const int FIELD_ID_3 = 2;
@@ -295,6 +296,45 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
     attributionMatcher->mutable_matches_tuple()->mutable_field_value_matcher(1)
         ->set_eq_string("location1");
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+}
+
+TEST(AtomMatcherTest, TestUidFieldMatcher) {
+    UidMap uidMap;
+    uidMap.updateMap(
+        1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+        {android::String16("v1"), android::String16("v1"), android::String16("v2"),
+         android::String16("v1"), android::String16("v2")},
+        {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
+         android::String16("Pkg2"), android::String16("PkG3")} /* package name list */,
+        {android::String16(""), android::String16(""), android::String16(""),
+         android::String16(""), android::String16("")});
+
+    // Set up matcher
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
+    simpleMatcher->set_atom_id(TAG_ID);
+    simpleMatcher->add_field_value_matcher()->set_field(1);
+    simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("pkg0");
+
+    // Set up the event
+    LogEvent event(TAG_ID, 0);
+    event.write(1111);
+    event.init();
+
+    LogEvent event2(TAG_ID_2, 0);
+    event2.write(1111);
+    event2.write("some value");
+    event2.init();
+
+    // Tag not in kAtomsWithUidField
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    // Tag found in kAtomsWithUidField and has matching uid
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event2));
+
+    // Tag found in kAtomsWithUidField but has non-matching uid
+    simpleMatcher->mutable_field_value_matcher(0)->set_eq_string("Pkg2");
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event2));
 }
 
 TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {

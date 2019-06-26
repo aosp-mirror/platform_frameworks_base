@@ -84,7 +84,7 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
 
 bool tryMatchString(const UidMap& uidMap, const Field& field, const Value& value,
                     const string& str_match) {
-    if (isAttributionUidField(field, value)) {
+    if (isAttributionUidField(field, value) || isUidField(field, value)) {
         int uid = value.int_value;
         auto aidIt = UidMap::sAidToUidMapping.find(str_match);
         if (aidIt != UidMap::sAidToUidMapping.end()) {
