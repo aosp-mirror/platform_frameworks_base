@@ -77,14 +77,10 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, effect, usageForAttributes(attributes), reason, mToken);
+            mService.vibrate(uid, opPkg, effect, attributes, reason, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
-    }
-
-    private static int usageForAttributes(AudioAttributes attributes) {
-        return attributes != null ? attributes.getUsage() : AudioAttributes.USAGE_UNKNOWN;
     }
 
     @Override

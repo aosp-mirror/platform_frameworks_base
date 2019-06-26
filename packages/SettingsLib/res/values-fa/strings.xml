@@ -261,7 +261,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"مکان‌های کاذب مجاز هستند"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"مکان‌های کاذب مجاز هستند"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"فعال کردن نمایش بازبینی ویژگی"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده سلولی همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده تلفن همراه همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اشتراک‌گذاری اینترنت درصورت دردسترس بودن"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏اشکال‌زدایی USB انجام شود؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏اشکال‌زدایی USB فقط برای اهداف برنامه‌نویسی در نظر گرفته شده است. از آن برای رونوشت‌برداری داده بین رایانه و دستگاهتان، نصب برنامه‌ها در دستگاهتان بدون اعلان و خواندن داده‌های گزارش استفاده کنید."</string>
