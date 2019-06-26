@@ -4747,7 +4747,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         boolean nowFullyHidden = mAmbientState.isFullyHidden();
         boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
         if (nowFullyHidden != wasFullyHidden) {
-            setVisibility(mAmbientState.isFullyHidden() ? View.INVISIBLE : View.VISIBLE);
+            updateVisibility();
         }
         if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -4758,6 +4758,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();
         requestChildrenUpdate();
+    }
+
+    private void updateVisibility() {
+        boolean shouldShow = !mAmbientState.isFullyHidden() || !onKeyguard();
+        setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5268,6 +5273,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         onUpdateRowStates();
 
         mEntryManager.updateNotifications();
+        updateVisibility();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
