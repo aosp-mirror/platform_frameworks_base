@@ -25,25 +25,27 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class PointerCountClassifierTest extends SysuiTestCase {
+public class PointerCountClassifierTest extends ClassifierTest {
 
-    @Mock
-    private FalsingDataProvider mDataProvider;
     private FalsingClassifier mClassifier;
 
     @Before
     public void setup() {
-        mClassifier = new PointerCountClassifier(mDataProvider);
+        super.setup();
+        mClassifier = new PointerCountClassifier(getDataProvider());
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
@@ -53,9 +55,7 @@ public class PointerCountClassifierTest extends SysuiTestCase {
 
     @Test
     public void testPass_singlePointer() {
-        MotionEvent motionEvent = MotionEvent.obtain(1, 1, MotionEvent.ACTION_DOWN, 1, 1, 0);
-        mClassifier.onTouchEvent(motionEvent);
-        motionEvent.recycle();
+        mClassifier.onTouchEvent(appendDownEvent(1, 1));
         assertThat(mClassifier.isFalseTouch(), is(false));
     }
 
