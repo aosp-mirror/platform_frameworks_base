@@ -905,7 +905,7 @@ final class AccessibilityController {
                 }
 
                 public void releaseSurface() {
-                    mSurfaceControl.remove();
+                    mService.mTransactionFactory.make().remove(mSurfaceControl).apply();
                     mSurface.release();
                 }
 

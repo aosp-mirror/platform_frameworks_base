@@ -162,7 +162,7 @@ class WindowSurfaceController {
         }
         try {
             if (mSurfaceControl != null) {
-                mSurfaceControl.remove();
+                mTmpTransaction.remove(mSurfaceControl).apply();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
