@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
@@ -46,6 +45,7 @@ import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -97,8 +97,6 @@ public class KeyguardIndicationController implements StateListener,
     private final LockPatternUtils mLockPatternUtils;
     private final DockManager mDockManager;
 
-    private final int mSlowThreshold;
-    private final int mFastThreshold;
     private final LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
@@ -176,10 +174,6 @@ public class KeyguardIndicationController implements StateListener,
         }
         mWakeLock = new SettableWakeLock(wakeLock, TAG);
         mLockPatternUtils = lockPatternUtils;
-
-        Resources res = context.getResources();
-        mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
-        mFastThreshold = res.getInteger(R.integer.config_chargingFastThreshold);
 
         mUserManager = context.getSystemService(UserManager.class);
         mBatteryInfo = iBatteryStats;
@@ -483,12 +477,12 @@ public class KeyguardIndicationController implements StateListener,
         int chargingId;
         if (mPowerPluggedInWired) {
             switch (mChargingSpeed) {
-                case KeyguardUpdateMonitor.BatteryStatus.CHARGING_FAST:
+                case BatteryStatus.CHARGING_FAST:
                     chargingId = hasChargingTime
                             ? R.string.keyguard_indication_charging_time_fast
                             : R.string.keyguard_plugged_in_charging_fast;
                     break;
-                case KeyguardUpdateMonitor.BatteryStatus.CHARGING_SLOWLY:
+                case BatteryStatus.CHARGING_SLOWLY:
                     chargingId = hasChargingTime
                             ? R.string.keyguard_indication_charging_time_slowly
                             : R.string.keyguard_plugged_in_charging_slowly;
@@ -619,7 +613,7 @@ public class KeyguardIndicationController implements StateListener,
         public static final int HIDE_DELAY_MS = 5000;
 
         @Override
-        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
+        public void onRefreshBatteryInfo(BatteryStatus status) {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
             boolean wasPluggedIn = mPowerPluggedIn;
@@ -627,7 +621,7 @@ public class KeyguardIndicationController implements StateListener,
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
-            mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
+            mChargingSpeed = status.getChargingSpeed(mContext);
             mBatteryLevel = status.level;
             try {
                 mChargingTimeRemaining = mPowerPluggedIn

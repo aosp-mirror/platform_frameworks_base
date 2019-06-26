@@ -1029,8 +1029,10 @@
     <string name="battery_info_status_unknown">Unknown</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging from an unknown source.  -->
     <string name="battery_info_status_charging">Charging</string>
-    <!-- [CHAR_LIMIT=20] Battery use screen with lower case.  Battery status shown in chart label when charging from an unknown source.  -->
-    <string name="battery_info_status_charging_lower">charging</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is fast.  -->
+    <string name="battery_info_status_charging_fast">Charging rapidly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is slow.  -->
+    <string name="battery_info_status_charging_slow">Charging slowly</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->

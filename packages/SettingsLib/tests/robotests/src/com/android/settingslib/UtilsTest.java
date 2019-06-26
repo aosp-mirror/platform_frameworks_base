@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.os.BatteryManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -122,12 +123,12 @@ public class UtilsTest {
     public void testGetDefaultStorageManagerDaysToRetain_storageManagerDaysToRetainUsesResources() {
         Resources resources = mock(Resources.class);
         when(resources.getInteger(
-                        eq(
-                                com.android
-                                        .internal
-                                        .R
-                                        .integer
-                                        .config_storageManagerDaystoRetainDefault)))
+                eq(
+                        com.android
+                                .internal
+                                .R
+                                .integer
+                                .config_storageManagerDaystoRetainDefault)))
                 .thenReturn(60);
         assertThat(Utils.getDefaultStorageManagerDaysToRetain(resources)).isEqualTo(60);
     }
@@ -147,7 +148,8 @@ public class UtilsTest {
         private static Map<String, Integer> map = new HashMap<>();
 
         @Implementation
-        public static boolean putIntForUser(ContentResolver cr, String name, int value, int userHandle) {
+        public static boolean putIntForUser(ContentResolver cr, String name, int value,
+                int userHandle) {
             map.put(name, value);
             return true;
         }
@@ -309,5 +311,34 @@ public class UtilsTest {
 
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_OUT_OF_SERVICE);
+    }
+
+    @Test
+    public void getBatteryStatus_statusIsFull_returnFullString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_full));
+    }
+
+    @Test
+    public void getBatteryStatus_batteryLevelIs100_returnFullString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
+                BatteryManager.BATTERY_STATUS_FULL);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_full));
+    }
+
+    @Test
+    public void getBatteryStatus_batteryLevel99_returnChargingString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
+                BatteryManager.BATTERY_STATUS_CHARGING);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_charging));
     }
 }
