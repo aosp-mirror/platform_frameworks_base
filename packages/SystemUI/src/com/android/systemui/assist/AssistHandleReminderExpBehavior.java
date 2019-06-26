@@ -67,6 +67,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private static final boolean DEFAULT_SUPPRESS_ON_LOCKSCREEN = false;
     private static final boolean DEFAULT_SUPPRESS_ON_LAUNCHER = false;
     private static final boolean DEFAULT_SUPPRESS_ON_APPS = true;
+    private static final boolean DEFAULT_SHOW_WHEN_TAUGHT = false;
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
@@ -309,7 +310,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             return;
         }
 
-        if (mIsDozing || mIsNavBarHidden || mOnLockscreen) {
+        if (mIsDozing || mIsNavBarHidden || mOnLockscreen || !getShowWhenTaught()) {
             mAssistHandleCallbacks.hide();
         } else if (justUnlocked) {
             long currentEpochDay = LocalDate.now().toEpochDay();
@@ -429,6 +430,12 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 DEFAULT_SUPPRESS_ON_APPS);
     }
 
+    private boolean getShowWhenTaught() {
+        return mPhenotypeHelper.getBoolean(
+                SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_WHEN_TAUGHT,
+                DEFAULT_SHOW_WHEN_TAUGHT);
+    }
+
     @Override
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "Current AssistHandleReminderExpBehavior State:");
@@ -480,5 +487,9 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SUPPRESS_ON_APPS
                 + "="
                 + getSuppressOnApps());
+        pw.println(prefix + "      "
+                + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_WHEN_TAUGHT
+                + "="
+                + getShowWhenTaught());
     }
 }
