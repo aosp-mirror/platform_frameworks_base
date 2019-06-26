@@ -51,9 +51,10 @@ public abstract class WindowManagerInternal {
         /**
          * Called when the windows for accessibility changed.
          *
+         * @param forceSend Send the windows for accessibility even if they haven't changed.
          * @param windows The windows for accessibility.
          */
-        public void onWindowsForAccessibilityChanged(List<WindowInfo> windows);
+        void onWindowsForAccessibilityChanged(boolean forceSend, List<WindowInfo> windows);
     }
 
     /**
