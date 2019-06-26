@@ -637,6 +637,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         private static String argCountPrefix(int argCount) {
             switch (argCount) {
                 case MASK_ARG_COUNT: return "";
+                case 0: return "";
                 case 1: return "";
                 case 2: return "Bi";
                 case 3: return "Tri";
@@ -646,7 +647,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                 case 7: return "Hept";
                 case 8: return "Oct";
                 case 9: return "Nona";
-                default: throw new IllegalArgumentException("" + argCount);
+                default: return "" + argCount + "arg";
             }
         }
 

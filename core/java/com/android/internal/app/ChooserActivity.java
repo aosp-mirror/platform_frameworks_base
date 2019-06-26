@@ -2327,9 +2327,11 @@ public class ChooserActivity extends ResolverActivity {
 
         private static final int MAX_SUGGESTED_APP_TARGETS = 4;
         private static final int MAX_CHOOSER_TARGETS_PER_APP = 2;
-        private static final int MAX_SHORTCUT_TARGETS_PER_APP = 8;
 
         private static final int MAX_SERVICE_TARGETS = 8;
+
+        private final int mMaxShortcutTargetsPerApp =
+                getResources().getInteger(R.integer.config_maxShortcutTargetsPerApp);
 
         private int mNumShortcutResults = 0;
 
@@ -2648,7 +2650,7 @@ public class ChooserActivity extends ResolverActivity {
             final float baseScore = getBaseScore(origTarget, isShortcutResult);
             Collections.sort(targets, mBaseTargetComparator);
 
-            final int maxTargets = isShortcutResult ? MAX_SHORTCUT_TARGETS_PER_APP
+            final int maxTargets = isShortcutResult ? mMaxShortcutTargetsPerApp
                                        : MAX_CHOOSER_TARGETS_PER_APP;
             float lastScore = 0;
             boolean shouldNotify = false;
