@@ -7694,7 +7694,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
         final WindowState touchedWindow = windowForClientLocked(null, touchedToken, false);
-        if (touchedWindow == null) {
+        if (touchedWindow == null || !touchedWindow.canReceiveKeys()) {
             return;
         }
 
