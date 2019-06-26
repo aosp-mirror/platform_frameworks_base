@@ -89,6 +89,8 @@ final class LogicalDisplay {
 
     private int[] mAllowedDisplayModes = new int[0];
     private int mRequestedColorMode;
+    private boolean mShouldSetAllm;
+    private boolean mShouldSetGameContentType;
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
@@ -282,6 +284,8 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.minimalPostProcessingSupported =
+                    deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
@@ -359,6 +363,9 @@ final class LogicalDisplay {
             device.setAllowedDisplayModesLocked(new int[] {0});
             device.setRequestedColorModeLocked(0);
         }
+
+        device.setAutoLowLatencyModeLocked(mShouldSetAllm);
+        device.setGameContentTypeLocked(mShouldSetGameContentType);
 
         // Only grab the display info now as it may have been changed based on the requests above.
         final DisplayInfo displayInfo = getDisplayInfoLocked();
@@ -479,6 +486,26 @@ final class LogicalDisplay {
      */
     public void setRequestedColorModeLocked(int colorMode) {
         mRequestedColorMode = colorMode;
+    }
+
+    /**
+     * Sends the Auto Low Latency Mode (ALLM) signal over HDMI, or requests an internal display to
+     * switch to a low-latency mode.
+     *
+     * @param on Whether to set ALLM on or off.
+     */
+    public void setAutoLowLatencyMode(boolean on) {
+        mShouldSetAllm = on;
+    }
+
+    /**
+     * Sends a ContentType=Game signal over HDMI, or requests an internal display to switch to a
+     * game mode (generally lower latency).
+     *
+     * @param on Whether to send a ContentType=Game signal or not
+     */
+    public void setGameContentType(boolean on) {
+        mShouldSetGameContentType = on;
     }
 
     /** Returns the pending requested color mode. */

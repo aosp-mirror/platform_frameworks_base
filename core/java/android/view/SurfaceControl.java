@@ -168,6 +168,8 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetActiveColorMode(IBinder displayToken);
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
             int colorMode);
+    private static native void nativeSetAutoLowLatencyMode(IBinder displayToken, boolean on);
+    private static native void nativeSetGameContentType(IBinder displayToken, boolean on);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long transactionObj, long nativeObject,
@@ -184,6 +186,9 @@ public final class SurfaceControl implements Parcelable {
             int scalingMode);
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
+
+    private static native boolean nativeGetAutoLowLatencyModeSupport(IBinder displayToken);
+    private static native boolean nativeGetGameContentTypeSupport(IBinder displayToken);
 
     private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
             InputWindowHandle handle);
@@ -1618,6 +1623,28 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
+    public static void setAutoLowLatencyMode(IBinder displayToken, boolean on) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeSetAutoLowLatencyMode(displayToken, on);
+    }
+
+    /**
+     * @hide
+     */
+    public static void setGameContentType(IBinder displayToken, boolean on) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeSetGameContentType(displayToken, on);
+    }
+
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage
     public static void setDisplayProjection(IBinder displayToken,
             int orientation, Rect layerStackRect, Rect displayRect) {
@@ -1664,6 +1691,28 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         return nativeGetHdrCapabilities(displayToken);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean getAutoLowLatencyModeSupport(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeGetAutoLowLatencyModeSupport(displayToken);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean getGameContentTypeSupport(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeGetGameContentTypeSupport(displayToken);
     }
 
     /**
