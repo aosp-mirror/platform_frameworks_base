@@ -176,5 +176,11 @@ public final class SystemUiDeviceConfigFlags {
     public static final String ASSIST_HANDLES_SUPPRESS_ON_APPS =
             "assist_handles_suppress_on_apps";
 
+    /**
+     * (bool) Whether to use the new BrightLineFalsingManager.
+     */
+    public static final String BRIGHTLINE_FALSING_MANAGER_ENABLED =
+            "brightline_falsing_manager_enabled";
+
     private SystemUiDeviceConfigFlags() { }
 }

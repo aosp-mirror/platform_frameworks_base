@@ -2052,8 +2052,11 @@ public class AudioService extends IAudioService.Stub
             setRingerMode(getNewRingerMode(stream, index, flags),
                     TAG + ".onSetStreamVolume", false /*external*/);
         }
-        // setting non-zero volume for a muted stream unmutes the stream and vice versa
-        mStreamStates[stream].mute(index == 0);
+        // setting non-zero volume for a muted stream unmutes the stream and vice versa,
+        // except for BT SCO stream where only explicit mute is allowed to comply to BT requirements
+        if (streamType != AudioSystem.STREAM_BLUETOOTH_SCO) {
+            mStreamStates[stream].mute(index == 0);
+        }
     }
 
     private void enforceModifyAudioRoutingPermission() {
@@ -2131,14 +2134,11 @@ public class AudioService extends IAudioService.Stub
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
             return;
         }
-        if ((streamType == AudioManager.STREAM_VOICE_CALL ||
-                streamType == AudioManager.STREAM_BLUETOOTH_SCO) &&
-                (index == 0) &&
-                (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_PHONE_STATE)
+        if ((streamType == AudioManager.STREAM_VOICE_CALL) && (index == 0)
+                && (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED)) {
-            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL or"
-                    + " STREAM_BLUETOOTH_SCO and index 0 without"
+            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL and index 0 without"
                     + " MODIFY_PHONE_STATE  callingPackage=" + callingPackage);
             return;
         }
@@ -4641,6 +4641,16 @@ public class AudioService extends IAudioService.Stub
             return index;
         }
 
+        private void setStreamVolumeIndex(int index, int device) {
+            // Only set audio policy BT SCO stream volume to 0 when the stream is actually muted.
+            // This allows RX path muting by the audio HAL only when explicitly muted but not when
+            // index is just set to 0 to repect BT requirements
+            if (mStreamType == AudioSystem.STREAM_BLUETOOTH_SCO && index == 0 && !mIsMuted) {
+                index = 1;
+            }
+            AudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
+        }
+
         // must be called while synchronized VolumeStreamState.class
         /*package*/ void applyDeviceVolume_syncVSS(int device, boolean isAvrcpAbsVolSupported) {
             int index;
@@ -4655,7 +4665,7 @@ public class AudioService extends IAudioService.Stub
             } else {
                 index = (getIndex(device) + 5)/10;
             }
-            AudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
+            setStreamVolumeIndex(index, device);
         }
 
         public void applyAllVolumes() {
@@ -4678,7 +4688,7 @@ public class AudioService extends IAudioService.Stub
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
-                        AudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
+                        setStreamVolumeIndex(index, device);
                     }
                 }
                 // apply default volume last: by convention , default device volume will be used
@@ -4688,8 +4698,7 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     index = (getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)/10;
                 }
-                AudioSystem.setStreamVolumeIndexAS(
-                        mStreamType, index, AudioSystem.DEVICE_OUT_DEFAULT);
+                setStreamVolumeIndex(index, AudioSystem.DEVICE_OUT_DEFAULT);
             }
         }
 

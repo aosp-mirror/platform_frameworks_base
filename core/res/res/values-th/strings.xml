@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"เลื่อนโทรศัพท์ไปทางขวา"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"โปรดมองตรงมาที่อุปกรณ์"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ไม่เห็นหน้า มองที่โทรศัพท์"</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ไม่เห็นหน้าเลย ลองมองที่โทรศัพท์"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"มีการเคลื่อนไหวมากเกินไป ถือโทรศัพท์นิ่งๆ"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"จำใบหน้าไม่ได้แล้ว ลองอีกครั้ง"</string>

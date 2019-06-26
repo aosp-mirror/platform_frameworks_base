@@ -529,7 +529,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ხმის პარამეტრები"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"გავრცობა"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ჩაკეცვა"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ავტომატური სუბტიტრების მედია"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"მედიის ავტომ. სუბტიტრირება"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"მინიშნება სუბტიტრებისთვის"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"სუბტიტრების გადაფარვა"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ჩართვა"</string>

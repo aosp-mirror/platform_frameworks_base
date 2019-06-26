@@ -832,7 +832,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Luk"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Indstillinger"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk ned for at afvise"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk ned for at fjerne"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises som integreret billede"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>

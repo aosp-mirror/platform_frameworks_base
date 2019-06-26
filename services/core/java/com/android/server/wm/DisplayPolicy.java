@@ -1494,8 +1494,6 @@ public class DisplayPolicy {
         }
 
         sTmpRect.setEmpty();
-        sTmpDockedFrame.set(displayFrames.mDock);
-
         final int displayId = displayFrames.mDisplayId;
         final Rect dockFrame = displayFrames.mDock;
         final int displayHeight = displayFrames.mDisplayHeight;
@@ -1508,11 +1506,13 @@ public class DisplayPolicy {
                 continue;
             }
 
-            w.getWindowFrames().setFrames(sTmpDockedFrame /* parentFrame */,
-                    sTmpDockedFrame /* displayFrame */, sTmpDockedFrame /* overscanFrame */,
-                    sTmpDockedFrame /* contentFrame */, sTmpDockedFrame /* visibleFrame */,
-                    sTmpRect /* decorFrame */, sTmpDockedFrame /* stableFrame */,
-                    sTmpDockedFrame /* outsetFrame */);
+            w.getWindowFrames().setFrames(displayFrames.mUnrestricted /* parentFrame */,
+                    displayFrames.mUnrestricted /* displayFrame */,
+                    displayFrames.mUnrestricted /* overscanFrame */,
+                    displayFrames.mUnrestricted /* contentFrame */,
+                    displayFrames.mUnrestricted /* visibleFrame */, sTmpRect /* decorFrame */,
+                    displayFrames.mUnrestricted /* stableFrame */,
+                    displayFrames.mUnrestricted /* outsetFrame */);
             w.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
             w.computeFrameLw();
             final Rect frame = w.getFrameLw();

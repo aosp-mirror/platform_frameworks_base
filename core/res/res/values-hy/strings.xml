@@ -256,7 +256,7 @@
     <string name="notification_channel_security" msgid="7345516133431326347">"Անվտանգություն"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"Մեքենայի ռեժիմ"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"Հաշվի կարգավիճակ"</string>
-    <string name="notification_channel_developer" msgid="7579606426860206060">"Մշակողի հաղորդագրություններ"</string>
+    <string name="notification_channel_developer" msgid="7579606426860206060">"Հաղորդագրություններ ծրագրավորողների համար"</string>
     <string name="notification_channel_updates" msgid="4794517569035110397">"Թարմացումներ"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Ցանցի կարգավիճակ"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Ցանցային զգուշացումներ"</string>
@@ -1665,12 +1665,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Մատչելիության դյուրանցումն միացրել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Մատչելիության դյուրանցումն անջատել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"«<xliff:g id="SERVICE_NAME">%1$s</xliff:g>» ծառայությունն օգտագործելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակները"</string>
-    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Ընտրեք գործառույթ, որը կգործարկվի «Հատուկ գործառույթներ» կոճակին հպելու դեպքում՝"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Ընտրեք գործառույթ, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երկու մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Ընտրեք գործառույթ, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երեք մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Մեկ գործառույթից մյուսն անցնելու համար հպեք «Հատուկ գործառույթներ» կոճակին և պահեք:"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Մեկ գործառույթից մյուսն անցնելու համար երկու մատը սահեցրեք վերև և պահեք:"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Մեկ գործառույթից մյուսն անցնելու համար երեք մատը սահեցրեք վերև և պահեք:"</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Ընտրեք ծառայությունը, որը կգործարկվի «Հատուկ գործառույթներ» կոճակին հպելու դեպքում՝"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Ընտրեք ծառայությունը, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երկու մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Ընտրեք ծառայությունը, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երեք մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Մեկ ծառայությունից մյուսին անցնելու համար հպեք «Հատուկ գործառույթներ» կոճակին և պահեք:"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Մեկ ծառայությունից մյուսին անցնելու համար երկու մատը սահեցրեք վերև և պահեք:"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Մեկ ծառայությունից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք:"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Խոշորացում"</string>
     <string name="user_switched" msgid="3768006783166984410">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Փոխարկվում է <xliff:g id="NAME">%1$s</xliff:g>-ին..."</string>
@@ -1903,7 +1903,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Դուք ունեք նոր հաղորդագրություններ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Դիտելու համար բացել SMS հավելվածը"</string>
-    <string name="profile_encrypted_title" msgid="4260432497586829134">"Որոշ գործառույթներ կարող են չգործել"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Աշխատանքային պրոֆիլը կողպված է"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Հպեք՝ այն ապակողպելու համար"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Միացված է <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-ին"</string>

@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.storage.IStorageManager;
 import android.provider.Settings;
 import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
@@ -38,8 +37,6 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-
-import com.android.internal.content.PackageHelper;
 
 import libcore.io.Streams;
 
@@ -858,18 +855,31 @@ public class RecoverySystem {
     public static void rebootPromptAndWipeUserData(Context context, String reason)
             throws IOException {
         boolean checkpointing = false;
+        boolean needReboot = false;
+        IVold vold = null;
+        try {
+            vold = IVold.Stub.asInterface(ServiceManager.checkService("vold"));
+            if (vold != null) {
+                checkpointing = vold.needsCheckpoint();
+            } else  {
+                Log.w(TAG, "Failed to get vold");
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to check for checkpointing");
+        }
 
         // If we are running in checkpointing mode, we should not prompt a wipe.
         // Checkpointing may save us. If it doesn't, we will wind up here again.
-        try {
-            IStorageManager storageManager = PackageHelper.getStorageManager();
-            if (storageManager.needsCheckpoint()) {
-                Log.i(TAG, "Rescue Party requested wipe. Aborting update instead.");
-                storageManager.abortChanges("rescueparty", false);
-                return;
+        if (checkpointing) {
+            try {
+                vold.abortChanges("rescueparty", false);
+                Log.i(TAG, "Rescue Party requested wipe. Aborting update");
+            } catch (Exception e) {
+                Log.i(TAG, "Rescue Party requested wipe. Rebooting instead.");
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                pm.reboot("rescueparty");
             }
-        } catch (RemoteException e) {
-            Log.i(TAG, "Failed to handle with checkpointing. Continuing with wipe.");
+            return;
         }
 
         String reasonArg = null;

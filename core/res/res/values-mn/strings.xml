@@ -267,7 +267,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Жижиглэнгийн жишээ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB холболт"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Апп ажиллаж байна"</string>
-    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Апп батерей ашиглаж байна"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Апп батарей ашиглаж байна"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> батерей ашиглаж байна"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батерей ашиглаж байна"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
@@ -887,7 +887,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Түгжээгүй хэсгийг өргөсгөх."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Тайлах гулсуулалт."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Тайлах хээ."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Нүүрээр тайлах"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Царайгаар тайлах"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Тайлах пин."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Sim-н пин кодыг тайлна уу."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Sim-н Puk кодыг тайлна уу."</string>
@@ -1665,10 +1665,10 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Хүртээмжийн товчлол <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаасан"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Хүртээмжийн товчлол <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г унтраасан"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г ашиглахын тулд дууны түвшнийг ихэсгэх, багасгах түлхүүрийг 3 секундийн турш зэрэг дарна уу"</string>
-    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Хүртээмжийн товчлуурыг товшихдоо ашиглах үйлчилгээг сонгоно уу:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Хүртээмжийн зангаатай ашиглах үйлчилгээг сонгоно уу (хоёр хуруугаараа дэлгэцийн доороос дээш шударна уу):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Хүртээмжийн зангаатай ашиглах үйлчилгээг сонгоно уу (гурван хуруугаараа дэлгэцийн доороос дээш шударна уу):"</string>
-    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Үйлчилгээнүүд хооронд сэлгэхийн тулд хүртээмжийн товчлуурт хүрээд удаан дарна уу."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Хандалтын товчлуурыг товшихдоо ашиглах үйлчилгээг сонгоно уу:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Хандалтын зангаатай ашиглах үйлчилгээг сонгоно уу (хоёр хуруугаараа дэлгэцийн доороос дээш шударна уу):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Хандалтын зангаатай ашиглах үйлчилгээг сонгоно уу (гурван хуруугаараа дэлгэцийн доороос дээш шударна уу):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Үйлчилгээнүүд хооронд сэлгэхийн тулд хандалтын товчлуурт хүрээд удаан дарна уу."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Үйлчилгээнүүд хооронд сэлгэхийн тулд хоёр хуруугаараа дээш шудраад удаан дарна уу."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Үйлчилгээнүүд хооронд сэлгэхийн тулд гурван хуруугаараа дээш шудраад удаан дарна уу."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Томруулах"</string>
