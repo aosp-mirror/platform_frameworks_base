@@ -39,6 +39,7 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -52,8 +53,10 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseSetArray;
 import android.view.Display;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -72,10 +75,12 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -101,7 +106,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
-            DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE})
+            DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
+            DISMISS_USER_CHANGED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -112,6 +118,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_NOTIF_CANCEL = 5;
     static final int DISMISS_ACCESSIBILITY_ACTION = 6;
     static final int DISMISS_NO_LONGER_BUBBLE = 7;
+    static final int DISMISS_USER_CHANGED = 8;
 
     public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
@@ -128,6 +135,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
 
+    // Tracks the id of the current (foreground) user.
+    private int mCurrentUserId;
+    // Saves notification keys of active bubbles when users are switched.
+    private final SparseSetArray<String> mSavedBubbleKeysPerUser;
+
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
     private final ZenModeController mZenModeController;
@@ -138,6 +150,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
+
+    // Listens to user switch so bubbles can be saved and restored.
+    private final NotificationLockscreenUserManager mNotifUserManager;
 
     /** Last known orientation, used to detect orientation changes in {@link #onConfigChanged}. */
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -193,18 +208,22 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
-            ZenModeController zenModeController) {
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager) {
         this(context, statusBarWindowController, data, null /* synchronizer */,
-                configurationController, interruptionStateProvider, zenModeController);
+                configurationController, interruptionStateProvider, zenModeController,
+                notifUserManager);
     }
 
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
-            ZenModeController zenModeController) {
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
+        mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
@@ -247,6 +266,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        mSavedBubbleKeysPerUser = new SparseSetArray<>();
+        mCurrentUserId = mNotifUserManager.getCurrentUserId();
+        mNotifUserManager.addUserChangedListener(
+                newUserId -> {
+                    saveBubbles(mCurrentUserId);
+                    mBubbleData.dismissAll(DISMISS_USER_CHANGED);
+                    restoreBubbles(newUserId);
+                    mCurrentUserId = newUserId;
+                });
     }
 
     /**
@@ -265,6 +294,45 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.setExpandListener(mExpandListener);
             }
         }
+    }
+
+    /**
+     * Records the notification key for any active bubbles. These are used to restore active
+     * bubbles when the user returns to the foreground.
+     *
+     * @param userId the id of the user
+     */
+    private void saveBubbles(@UserIdInt int userId) {
+        // First clear any existing keys that might be stored.
+        mSavedBubbleKeysPerUser.remove(userId);
+        // Add in all active bubbles for the current user.
+        for (Bubble bubble: mBubbleData.getBubbles()) {
+            mSavedBubbleKeysPerUser.add(userId, bubble.getKey());
+        }
+    }
+
+    /**
+     * Promotes existing notifications to Bubbles if they were previously bubbles.
+     *
+     * @param userId the id of the user
+     */
+    private void restoreBubbles(@UserIdInt int userId) {
+        NotificationData notificationData =
+                mNotificationEntryManager.getNotificationData();
+        ArraySet<String> savedBubbleKeys = mSavedBubbleKeysPerUser.get(userId);
+        if (savedBubbleKeys == null) {
+            // There were no bubbles saved for this used.
+            return;
+        }
+        for (NotificationEntry e : notificationData.getNotificationsForCurrentUser()) {
+            if (savedBubbleKeys.contains(e.key)
+                    && mNotificationInterruptionStateProvider.shouldBubbleUp(e)
+                    && canLaunchInActivityView(mContext, e)) {
+                updateBubble(e, /* suppressFlyout= */ true);
+            }
+        }
+        // Finally, remove the entries for this user now that bubbles are restored.
+        mSavedBubbleKeysPerUser.remove(mCurrentUserId);
     }
 
     @Override
@@ -400,11 +468,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
+        updateBubble(notif, /* supressFlyout */ false);
+    }
+
+    void updateBubble(NotificationEntry notif, boolean suppressFlyout) {
         // If this is an interruptive notif, mark that it's interrupted
         if (notif.importance >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        mBubbleData.notificationEntryUpdated(notif);
+        mBubbleData.notificationEntryUpdated(notif, suppressFlyout);
     }
 
     /**
@@ -444,8 +516,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
                 // The bubble notification sticks around in the data as long as the bubble is
                 // not dismissed and the app hasn't cancelled the notification.
-                boolean bubbleExtended = entry.isBubble() && !bubble.isRemoved()
-                        && userRemovedNotif;
+                boolean bubbleExtended = entry.isBubble() && userRemovedNotif;
                 if (bubbleExtended) {
                     bubble.setShowInShadeWhenBubble(false);
                     bubble.setShowBubbleDot(false);
@@ -454,7 +525,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                     mNotificationEntryManager.updateNotifications();
                     return true;
-                } else if (!userRemovedNotif && !bubble.isRemoved()) {
+                } else if (!userRemovedNotif) {
                     // This wasn't a user removal so we should remove the bubble as well
                     mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
                     return false;
@@ -488,7 +559,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 removeBubble(entry.key, DISMISS_NO_LONGER_BUBBLE);
             } else if (shouldBubble) {
                 Bubble b = mBubbleData.getBubbleWithKey(entry.key);
-                b.setRemoved(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry);
             }
         }
@@ -530,22 +600,25 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 @DismissReason final int reason = removed.second;
                 mStackView.removeBubble(bubble);
 
-                if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
-                        && !bubble.showInShadeWhenBubble()) {
-                    // The bubble is gone & the notification is gone, time to actually remove it
-                    mNotificationEntryManager.performRemoveNotification(
-                            bubble.getEntry().notification, UNDEFINED_DISMISS_REASON);
-                } else {
-                    // Update the flag for SysUI
-                    bubble.getEntry().notification.getNotification().flags &= ~FLAG_BUBBLE;
+                // If the bubble is removed for user switching, leave the notification in place.
+                if (reason != DISMISS_USER_CHANGED) {
+                    if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
+                            && !bubble.showInShadeWhenBubble()) {
+                        // The bubble is gone & the notification is gone, time to actually remove it
+                        mNotificationEntryManager.performRemoveNotification(
+                                bubble.getEntry().notification, UNDEFINED_DISMISS_REASON);
+                    } else {
+                        // Update the flag for SysUI
+                        bubble.getEntry().notification.getNotification().flags &= ~FLAG_BUBBLE;
 
-                    // Make sure NoMan knows it's not a bubble anymore so anyone querying it will
-                    // get right result back
-                    try {
-                        mBarService.onNotificationBubbleChanged(bubble.getKey(),
-                                false /* isBubble */);
-                    } catch (RemoteException e) {
-                        // Bad things have happened
+                        // Make sure NoMan knows it's not a bubble anymore so anyone querying it
+                        // will get right result back
+                        try {
+                            mBarService.onNotificationBubbleChanged(bubble.getKey(),
+                                    false /* isBubble */);
+                        } catch (RemoteException e) {
+                            // Bad things have happened
+                        }
                     }
                 }
             }

@@ -74,6 +74,9 @@ class Bubble {
      */
     private boolean mShowBubbleUpdateDot = true;
 
+    /** Whether flyout text should be suppressed, regardless of any other flags or state. */
+    private boolean mSuppressFlyout;
+
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
         return user.getIdentifier() + "|" + entry.notification.getPackageName();
@@ -142,6 +145,12 @@ class Bubble {
         return mExpandedView;
     }
 
+    void cleanupExpandedState() {
+        if (mExpandedView != null) {
+            mExpandedView.cleanUpExpandedState();
+        }
+    }
+
     void inflate(LayoutInflater inflater, BubbleStackView stackView) {
         if (mInflated) {
             return;
@@ -169,22 +178,6 @@ class Bubble {
         if (mExpandedView != null) {
             mExpandedView.setContentVisibility(visibility);
         }
-    }
-
-    void setRemoved() {
-        mIsRemoved = true;
-        // TODO: move this somewhere where it can be guaranteed not to run until safe from flicker
-        if (mExpandedView != null) {
-            mExpandedView.cleanUpExpandedState();
-        }
-    }
-
-    void setRemoved(boolean removed) {
-        mIsRemoved = removed;
-    }
-
-    boolean isRemoved() {
-        return mIsRemoved;
     }
 
     void updateEntry(NotificationEntry entry) {
@@ -268,7 +261,17 @@ class Bubble {
      * Whether the flyout for the bubble should be shown.
      */
     boolean showFlyoutForBubble() {
-        return !mEntry.shouldSuppressPeek() && !mEntry.shouldSuppressNotificationList();
+        return !mSuppressFlyout && !mEntry.shouldSuppressPeek()
+                && !mEntry.shouldSuppressNotificationList();
+    }
+
+    /**
+     * Set whether the flyout text for the bubble should be shown when an update is received.
+     *
+     * @param suppressFlyout whether the flyout text is shown
+     */
+    void setSuppressFlyout(boolean suppressFlyout) {
+        mSuppressFlyout = suppressFlyout;
     }
 
     /**

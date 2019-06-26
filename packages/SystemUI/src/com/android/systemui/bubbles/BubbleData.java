@@ -164,7 +164,7 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    public void notificationEntryUpdated(NotificationEntry entry) {
+    void notificationEntryUpdated(NotificationEntry entry, boolean suppressFlyout) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
@@ -172,6 +172,7 @@ public class BubbleData {
         if (bubble == null) {
             // Create a new bubble
             bubble = new Bubble(mContext, entry);
+            bubble.setSuppressFlyout(suppressFlyout);
             doAdd(bubble);
             trim();
         } else {
@@ -304,7 +305,6 @@ public class BubbleData {
             Bubble newSelected = mBubbles.get(newIndex);
             setSelectedBubbleInternal(newSelected);
         }
-        bubbleToRemove.setRemoved();
         maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
     }
 
@@ -319,7 +319,6 @@ public class BubbleData {
         setSelectedBubbleInternal(null);
         while (!mBubbles.isEmpty()) {
             Bubble bubble = mBubbles.remove(0);
-            bubble.setRemoved();
             maybeSendDeleteIntent(reason, bubble.getEntry());
             mStateChange.bubbleRemoved(bubble, reason);
         }
