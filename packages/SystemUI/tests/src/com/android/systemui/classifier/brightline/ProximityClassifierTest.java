@@ -31,8 +31,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +44,7 @@ import java.lang.reflect.Field;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ProximityClassifierTest extends SysuiTestCase {
+public class ProximityClassifierTest extends ClassifierTest {
 
     private static final long NS_PER_MS = 1000000;
 
@@ -57,10 +56,16 @@ public class ProximityClassifierTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        super.setup();
         MockitoAnnotations.initMocks(this);
         when(mDataProvider.getInteractionType()).thenReturn(GENERIC);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(false);
         mClassifier = new ProximityClassifier(mDistanceClassifier, mDataProvider);
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
     }
 
     @Test
