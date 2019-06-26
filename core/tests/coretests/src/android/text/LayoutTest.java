@@ -743,6 +743,9 @@ public class LayoutTest {
         assertPrimaryIsTrailingPrevious(
                 RTL + LRI + RTL + LTR + PDI + RTL,
                 new boolean[]{false, false, true, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                "",
+                new boolean[]{false});
     }
 }
 
