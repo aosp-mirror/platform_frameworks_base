@@ -162,6 +162,11 @@ public class BubbleStackView extends FrameLayout {
     private BubbleFlyoutView mFlyout;
     /** Runnable that fades out the flyout and then sets it to GONE. */
     private Runnable mHideFlyout = () -> animateFlyoutCollapsed(true, 0 /* velX */);
+    /**
+     * Callback to run after the flyout hides. Also called if a new flyout is shown before the
+     * previous one animates out.
+     */
+    private Runnable mAfterFlyoutHides;
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
     private OnLayoutChangeListener mOrientationChangedListener;
@@ -286,9 +291,6 @@ public class BubbleStackView extends FrameLayout {
 
     private BubbleDismissView mDismissContainer;
     private Runnable mAfterMagnet;
-
-    private boolean mSuppressNewDot = false;
-    private boolean mSuppressFlyout = false;
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -693,9 +695,6 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
-        if (bubble.getIconView() != null) {
-            bubble.getIconView().setSuppressDot(mSuppressNewDot, false /* animate */);
-        }
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
@@ -1294,46 +1293,22 @@ public class BubbleStackView extends FrameLayout {
                         : 0f);
     }
 
+    /** Updates the dot visibility, this is used in response to a zen mode config change. */
+    void updateDots() {
+        int bubbsCount = mBubbleContainer.getChildCount();
+        for (int i = 0; i < bubbsCount; i++) {
+            BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
+            // If nothing changed the animation won't happen
+            bv.updateDotVisibility(true /* animate */);
+        }
+    }
+
     /**
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getExpandedViewY() {
         return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop + mPointerHeight;
     }
-
-    /**
-     * Called when the height of the currently expanded view has changed (not via an
-     * update to the bubble's desired height but for some other reason, e.g. permission view
-     * goes away).
-     */
-    void onExpandedHeightChanged() {
-        if (mIsExpanded) {
-            requestUpdate();
-        }
-    }
-
-    /** Sets whether all bubbles in the stack should not show the 'new' dot. */
-    void setSuppressNewDot(boolean suppressNewDot) {
-        mSuppressNewDot = suppressNewDot;
-
-        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
-            BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
-            bv.setSuppressDot(suppressNewDot, true /* animate */);
-        }
-    }
-
-    /**
-     * Sets whether the flyout should not appear, even if the notif otherwise would generate one.
-     */
-    void setSuppressFlyout(boolean suppressFlyout) {
-        mSuppressFlyout = suppressFlyout;
-    }
-
-    /**
-     * Callback to run after the flyout hides. Also called if a new flyout is shown before the
-     * previous one animates out.
-     */
-    private Runnable mAfterFlyoutHides;
 
     /**
      * Animates in the flyout for the given bubble, if available, and then hides it after some time.
@@ -1347,7 +1322,7 @@ public class BubbleStackView extends FrameLayout {
                 && !isExpanded()
                 && !mIsExpansionAnimating
                 && !mIsGestureInProgress
-                && !mSuppressFlyout) {
+                && bubble.showFlyoutForBubble()) {
             if (bubble.getIconView() != null) {
                 // Temporarily suppress the dot while the flyout is visible.
                 bubble.getIconView().setSuppressDot(
@@ -1365,20 +1340,20 @@ public class BubbleStackView extends FrameLayout {
                         return;
                     }
 
+                    final boolean suppressDot = !bubble.showBubbleDot();
                     // If we're going to suppress the dot, make it visible first so it'll
                     // visibly animate away.
-                    if (mSuppressNewDot) {
+                    if (suppressDot) {
                         bubble.getIconView().setSuppressDot(
                                 false /* suppressDot */, false /* animate */);
                     }
-
                     // Reset dot suppression. If we're not suppressing due to DND, then
                     // stop suppressing it with no animation (since the flyout has
                     // transformed into the dot). If we are suppressing due to DND, animate
                     // it away.
                     bubble.getIconView().setSuppressDot(
-                            mSuppressNewDot /* suppressDot */,
-                            mSuppressNewDot /* animate */);
+                            suppressDot /* suppressDot */,
+                            suppressDot /* animate */);
                 };
 
                 // Post in case layout isn't complete and getWidth returns 0.

@@ -23,6 +23,7 @@ import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
@@ -734,6 +735,16 @@ public final class NotificationEntry {
      */
     public boolean shouldSuppressNotificationList() {
         return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+    }
+
+
+    /**
+     * Returns whether {@link Policy#SUPPRESSED_EFFECT_BADGE}
+     * is set for this entry. This badge is not an app badge, but rather an indicator of "unseen"
+     * content. Typically this is referred to as a "dot" internally in Launcher & SysUI code.
+     */
+    public boolean shouldSuppressNotificationDot() {
+        return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_BADGE);
     }
 
     /**
