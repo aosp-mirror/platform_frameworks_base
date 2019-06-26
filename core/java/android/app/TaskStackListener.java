@@ -26,6 +26,7 @@ import android.os.RemoteException;
 /**
  * Classes interested in observing only a subset of changes using ITaskStackListener can extend
  * this class to avoid having to implement all the methods.
+ *
  * @hide
  */
 public abstract class TaskStackListener extends ITaskStackListener.Stub {
@@ -176,5 +177,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
+    }
+
+    @Override
+    public void onTaskDisplayChanged(int taskId, int newDisplayId) throws RemoteException {
     }
 }
