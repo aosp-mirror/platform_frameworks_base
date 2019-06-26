@@ -4168,4 +4168,6 @@
          one bar higher than they actually are -->
     <bool name="config_inflateSignalStrength">false</bool>
 
+    <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
+    <integer name="config_maxShortcutTargetsPerApp">3</integer>
 </resources>
