@@ -27,7 +27,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 StartReorderBarrierDrawable::StartReorderBarrierDrawable(SkiaDisplayList* data)
-        : mEndChildIndex(0), mBeginChildIndex(data->mChildNodes.size()), mDisplayList(data) {}
+        : mEndChildIndex(-1), mBeginChildIndex(data->mChildNodes.size()), mDisplayList(data) {}
 
 void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     if (mChildren.empty()) {
