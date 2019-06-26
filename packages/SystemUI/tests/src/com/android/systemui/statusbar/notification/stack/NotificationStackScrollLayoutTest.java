@@ -200,17 +200,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAntiBurnInOffset() {
-        final int burnInOffset = 30;
-        mStackScroller.setAntiBurnInOffsetX(burnInOffset);
-        mStackScroller.setHideAmount(0.0f, 0.0f);
-        Assert.assertEquals(0 /* expected */, mStackScroller.getTranslationX(), 0.01 /* delta */);
-        mStackScroller.setHideAmount(1.0f, 1.0f);
-        Assert.assertEquals(burnInOffset /* expected */, mStackScroller.getTranslationX(),
-                0.01 /* delta */);
-    }
-
-    @Test
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
         when(mBar.areNotificationsHidden()).thenReturn(true);

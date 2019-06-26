@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflaterTest;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -78,7 +79,8 @@ public class NotificationTestHelper {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         StatusBarStateController stateController = mock(StatusBarStateController.class);
         mGroupManager = new NotificationGroupManager(stateController);
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController);
+        mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController,
+                mock(KeyguardBypassController.class));
         mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
