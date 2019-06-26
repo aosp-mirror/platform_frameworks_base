@@ -161,7 +161,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean deviceSensitive = devicePublic
                     && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
                     currentUserId);
-            ent.getRow().setSensitive(sensitive, deviceSensitive);
+            ent.setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.notification)) {
                 NotificationEntry summary = mGroupManager.getGroupSummary(ent.notification);
