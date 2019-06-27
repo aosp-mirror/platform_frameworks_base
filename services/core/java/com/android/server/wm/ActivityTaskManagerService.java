@@ -3741,7 +3741,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     voiceInteractor);
             long token = Binder.clearCallingIdentity();
             try {
-                startRunningVoiceLocked(voiceSession, activityToCallback.appInfo.uid);
+                startRunningVoiceLocked(voiceSession, activityToCallback.info.applicationInfo.uid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -4108,8 +4108,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         final ActivityStack stack = r.getActivityStack();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
-                        MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
-                                r.shortComponentName, r.supportsEnterPipOnTaskSwitch);
+                        MetricsLoggerWrapper.logPictureInPictureEnter(mContext,
+                                r.info.applicationInfo.uid, r.shortComponentName,
+                                r.supportsEnterPipOnTaskSwitch);
                         logPictureInPictureArgs(params);
                     }
                 };

@@ -245,8 +245,6 @@ final class ActivityRecord extends ConfigurationContainer {
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
 
-    private static final boolean SHOW_ACTIVITY_START_TIME = true;
-
     private static final String ATTR_ID = "id";
     private static final String TAG_INTENT = "intent";
     private static final String ATTR_USERID = "user_id";
@@ -262,9 +260,7 @@ final class ActivityRecord extends ConfigurationContainer {
     // TODO: Remove after unification
     AppWindowToken mAppWindowToken;
 
-    final ActivityInfo info; // all about me
-    // TODO: This is duplicated state already contained in info.applicationInfo - remove
-    ApplicationInfo appInfo; // information about activity's app
+    final ActivityInfo info; // activity info provided by developer in AndroidManifest
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
@@ -447,7 +443,8 @@ final class ActivityRecord extends ConfigurationContainer {
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("mActivityComponent=");
                 pw.println(mActivityComponent.flattenToShortString());
-        if (appInfo != null) {
+        if (info != null && info.applicationInfo != null) {
+            final ApplicationInfo appInfo = info.applicationInfo;
             pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
             if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
                 pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
@@ -617,7 +614,6 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     void updateApplicationInfo(ApplicationInfo aInfo) {
-        appInfo = aInfo;
         info.applicationInfo = aInfo;
     }
 
@@ -991,7 +987,6 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         taskAffinity = aInfo.taskAffinity;
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
-        appInfo = aInfo.applicationInfo;
         nonLocalizedLabel = aInfo.nonLocalizedLabel;
         labelRes = aInfo.labelRes;
         if (nonLocalizedLabel == null && labelRes == 0) {
@@ -1050,7 +1045,8 @@ final class ActivityRecord extends ConfigurationContainer {
 
         mRotationAnimationHint = aInfo.rotationAnimation;
         lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (appInfo.isPrivilegedApp() && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
+        if (info.applicationInfo.isPrivilegedApp()
+                && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
                 || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
             lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
         }
@@ -1120,7 +1116,8 @@ final class ActivityRecord extends ConfigurationContainer {
                     task.voiceSession != null, container.getDisplayContent(),
                     ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this)
                             * 1000000L, fullscreen,
-                    (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, appInfo.targetSdkVersion,
+                    (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0,
+                    info.applicationInfo.targetSdkVersion,
                     info.screenOrientation, mRotationAnimationHint,
                     mLaunchTaskBehind, isAlwaysFocusable());
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
@@ -1289,7 +1286,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
         } else if (mAtmService.getRecentTasks().isRecentsComponent(mActivityComponent,
-                appInfo.uid)) {
+                info.applicationInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
@@ -1487,7 +1484,7 @@ final class ActivityRecord extends ConfigurationContainer {
      */
     private boolean checkEnterPictureInPictureAppOpsState() {
         return mAtmService.getAppOpsService().checkOperation(
-                OP_PICTURE_IN_PICTURE, appInfo.uid, packageName) == MODE_ALLOWED;
+                OP_PICTURE_IN_PICTURE, info.applicationInfo.uid, packageName) == MODE_ALLOWED;
     }
 
     boolean isAlwaysFocusable() {
@@ -2466,8 +2463,8 @@ final class ActivityRecord extends ConfigurationContainer {
 
         if (windowFromSameProcessAsActivity) {
             return mAtmService.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
-                    anrActivity.shortComponentName, anrActivity.appInfo, shortComponentName,
-                    app, false, reason);
+                    anrActivity.shortComponentName, anrActivity.info.applicationInfo,
+                    shortComponentName, app, false, reason);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
@@ -3363,7 +3360,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // If a device is in VR mode, and we're transitioning into VR ui mode, add ignore ui mode
         // to the config change.
         // For O and later, apps will be required to add configChanges="uimode" to their manifest.
-        if (appInfo.targetSdkVersion < O
+        if (info.applicationInfo.targetSdkVersion < O
                 && requestedVrComponent != null
                 && onlyVrUiModeChanged) {
             configChanged |= CONFIG_UI_MODE;
