@@ -282,6 +282,7 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_AOD:
                 mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
                 mDozeSensors.setListening(true);
+                mDozeSensors.setPaused(false);
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState);
                 }
@@ -289,12 +290,13 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:
                 mDozeSensors.setProxListening(true);
-                mDozeSensors.setListening(false);
+                mDozeSensors.setPaused(true);
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
                 mDozeSensors.setTouchscreenSensorsListening(false);
                 mDozeSensors.setProxListening(true);
+                mDozeSensors.setPaused(false);
                 break;
             case DOZE_PULSE_DONE:
                 mDozeSensors.requestTemporaryDisable();
