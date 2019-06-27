@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación está limitada a números de marcación fija."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de reenvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Se ha activado el servicio."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se activó el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Se ha desactivado el servicio."</string>
@@ -1668,7 +1668,7 @@
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Mantén presionadas ambas teclas de volumen durante tres segundos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Elige un servicio para usar cuando presiones el botón de accesibilidad:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Elige un servicio para usar cuando realices el gesto de accesibilidad (deslizar dos dedos hacia arriba desde la parte inferior de la pantalla):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Elige un servicio para usar cuando realices el gesto de accesibilidad (deslizar tres dedos hacia arriba desde la parte inferior de la pantalla):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Elige el servicio que se usará cuando realices el gesto de accesibilidad (deslizar tres dedos hacia arriba desde la parte inferior de la pantalla):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Para cambiar de servicio, mantén presionado el botón de accesibilidad."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Para cambiar de servicio, desliza dos dedos hacia arriba y mantén presionado."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Para cambiar de servicio, desliza tres dedos hacia arriba y mantén presionado."</string>
