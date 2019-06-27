@@ -23,7 +23,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
-        <activity android:name=".EmptyActivity">
+
+        <activity
+            android:label="Complex Layout Test"
+            android:name=".ComplexLayoutInflationActivity"
+            android:exported="true" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +36,41 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LayoutInflation" android:exported="true" />
+        <activity
+            android:label="Empty Activity Layout Test"
+            android:name=".EmptyActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:label="FrameLayout Layout Test"
+            android:name=".FrameLayoutInflationActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:label="TextView Layout Test"
+            android:name=".TextViewInflationActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
