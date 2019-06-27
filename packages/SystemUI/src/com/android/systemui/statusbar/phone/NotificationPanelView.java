@@ -290,6 +290,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mIsFullWidth;
     private boolean mBlockingExpansionForCurrentTouch;
 
+    private boolean mExpectingOpenPanelGesture;
+
     /**
      * Current dark amount that follows regular interpolation curve of animation.
      */
@@ -1246,6 +1248,28 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
+    /**
+     * Input focus transfer is about to happen.
+     */
+    public void startWaitingForOpenPanelGesture() {
+        if (!isFullyCollapsed()) {
+            return;
+        }
+        mExpectingOpenPanelGesture = true;
+        onTrackingStarted();
+    }
+
+    /**
+     * Input focus transfer has already happened as this view decided to intercept
+     * very first down event.
+     */
+    public void stopWaitingForOpenPanelGesture() {
+        if (mExpectingOpenPanelGesture) {
+            mExpectingOpenPanelGesture = false;
+            onTrackingStopped(false);
+        }
+    }
+
     @Override
     protected boolean flingExpands(float vel, float vectorVel, float x, float y) {
         boolean expands = super.flingExpands(vel, vectorVel, x, y);
@@ -1258,8 +1282,12 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected boolean hasConflictingGestures() {
-        return mBarState != StatusBarState.SHADE;
+    protected boolean shouldGestureWaitForTouchSlop() {
+        if (mExpectingOpenPanelGesture) {
+            mExpectingOpenPanelGesture = false;
+            return false;
+        }
+        return isFullyCollapsed() || mBarState != StatusBarState.SHADE;
     }
 
     @Override
