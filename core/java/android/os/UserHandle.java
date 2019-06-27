@@ -68,6 +68,7 @@ public final class UserHandle implements Parcelable {
     public static final @NonNull UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
 
     /** @hide An undefined user id */
+    @UnsupportedAppUsage
     public static final @UserIdInt int USER_NULL = -10000;
 
     /**
