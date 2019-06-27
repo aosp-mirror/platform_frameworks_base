@@ -67,6 +67,8 @@ extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
+extern int register_android_view_RenderNode(JNIEnv* env);
+extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
 
@@ -83,6 +85,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
     {"android.graphics.ByteBufferStreamAdaptor", REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
     {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
+    {"android.graphics.RenderNode", REG_JNI(register_android_view_RenderNode)},
     {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
     {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
     {"android.graphics.CreateJavaOutputStreamAdaptor", REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor)},
@@ -98,6 +101,7 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.PathEffect", REG_JNI(register_android_graphics_PathEffect)},
     {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
     {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
+    {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},
     {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
     {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
     {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
