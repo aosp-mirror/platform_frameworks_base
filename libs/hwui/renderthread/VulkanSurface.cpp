@@ -83,42 +83,45 @@ void VulkanSurface::ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const 
     }
 
     windowInfo->actualSize = windowSize;
-    if (windowInfo->transform & HAL_TRANSFORM_ROT_90) {
+    if (windowInfo->transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
         windowInfo->actualSize.set(windowSize.height(), windowSize.width());
     }
 
     windowInfo->preTransform = GetPreTransformMatrix(windowInfo->size, windowInfo->transform);
 }
 
-static bool ResetNativeWindow(ANativeWindow* window) {
-    // -- Reset the native window --
-    // The native window might have been used previously, and had its properties
-    // changed from defaults. That will affect the answer we get for queries
-    // like MIN_UNDEQUEUED_BUFFERS. Reset to a known/default state before we
-    // attempt such queries.
+static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
+    ATRACE_CALL();
 
     int err = native_window_api_connect(window, NATIVE_WINDOW_API_EGL);
     if (err != 0) {
-        ALOGW("native_window_api_connect failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_api_connect failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     // this will match what we do on GL so pick that here.
     err = window->setSwapInterval(window, 1);
     if (err != 0) {
-        ALOGW("native_window->setSwapInterval(1) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window->setSwapInterval(1) failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     err = native_window_set_shared_buffer_mode(window, false);
     if (err != 0) {
-        ALOGW("native_window_set_shared_buffer_mode(false) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_set_shared_buffer_mode(false) failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     err = native_window_set_auto_refresh(window, false);
     if (err != 0) {
-        ALOGW("native_window_set_auto_refresh(false) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_set_auto_refresh(false) failed: %s (%d)", strerror(-err), err);
+        return false;
+    }
+
+    err = native_window_set_scaling_mode(window, NATIVE_WINDOW_SCALING_MODE_FREEZE);
+    if (err != 0) {
+        ALOGE("native_window_set_scaling_mode(NATIVE_WINDOW_SCALING_MODE_FREEZE) failed: %s (%d)",
+              strerror(-err), err);
         return false;
     }
 
@@ -133,69 +136,92 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     const SkISize minSize = SkISize::Make(1, 1);
     const SkISize maxSize = SkISize::Make(4096, 4096);
 
-    /*
-     * Populate Window Info struct
-     */
-    WindowInfo windowInfo;
+    // Connect and set native window to default configurations.
+    if (!ConnectAndSetWindowDefaults(window)) {
+        return nullptr;
+    }
 
-    int err;
+    // Initialize WindowInfo struct.
+    WindowInfo windowInfo;
+    if (!InitializeWindowInfoStruct(window, colorMode, colorType, colorSpace, vkManager,
+                                    extraBuffers, minSize, maxSize, &windowInfo)) {
+        return nullptr;
+    }
+
+    // Now we attempt to modify the window.
+    if (!UpdateWindow(window, windowInfo)) {
+        return nullptr;
+    }
+
+    return new VulkanSurface(window, windowInfo, minSize, maxSize, grContext);
+}
+
+bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
+                                               SkColorType colorType,
+                                               sk_sp<SkColorSpace> colorSpace,
+                                               const VulkanManager& vkManager,
+                                               uint32_t extraBuffers, const SkISize& minSize,
+                                               const SkISize& maxSize, WindowInfo* outWindowInfo) {
+    ATRACE_CALL();
+
     int width, height;
-    err = window->query(window, NATIVE_WINDOW_DEFAULT_WIDTH, &width);
+    int err = window->query(window, NATIVE_WINDOW_DEFAULT_WIDTH, &width);
     if (err != 0 || width < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, width);
-        return nullptr;
+        return false;
     }
     err = window->query(window, NATIVE_WINDOW_DEFAULT_HEIGHT, &height);
     if (err != 0 || height < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, height);
-        return nullptr;
+        return false;
     }
-    windowInfo.size = SkISize::Make(width, height);
+    outWindowInfo->size = SkISize::Make(width, height);
 
     int query_value;
     err = window->query(window, NATIVE_WINDOW_TRANSFORM_HINT, &query_value);
     if (err != 0 || query_value < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return nullptr;
+        return false;
     }
-    windowInfo.transform = query_value;
+    outWindowInfo->transform = query_value;
 
-    ComputeWindowSizeAndTransform(&windowInfo, minSize, maxSize);
+    ComputeWindowSizeAndTransform(outWindowInfo, minSize, maxSize);
 
     err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return nullptr;
+        return false;
     }
-    windowInfo.bufferCount = static_cast<uint32_t>(query_value) + sTargetBufferCount + extraBuffers;
+    outWindowInfo->bufferCount =
+            static_cast<uint32_t>(query_value) + sTargetBufferCount + extraBuffers;
 
     err = window->query(window, NATIVE_WINDOW_MAX_BUFFER_COUNT, &query_value);
     if (err != 0 || query_value < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return nullptr;
+        return false;
     }
-    if (windowInfo.bufferCount > static_cast<uint32_t>(query_value)) {
+    if (outWindowInfo->bufferCount > static_cast<uint32_t>(query_value)) {
         // Application must settle for fewer images than desired:
-        windowInfo.bufferCount = static_cast<uint32_t>(query_value);
+        outWindowInfo->bufferCount = static_cast<uint32_t>(query_value);
     }
 
-    windowInfo.dataspace = HAL_DATASPACE_V0_SRGB;
+    outWindowInfo->dataspace = HAL_DATASPACE_V0_SRGB;
     if (colorMode == ColorMode::WideColorGamut) {
         skcms_Matrix3x3 surfaceGamut;
         LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&surfaceGamut),
                             "Could not get gamut matrix from color space");
         if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
-            windowInfo.dataspace = HAL_DATASPACE_V0_SCRGB;
+            outWindowInfo->dataspace = HAL_DATASPACE_V0_SCRGB;
         } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDCIP3, sizeof(surfaceGamut)) == 0) {
-            windowInfo.dataspace = HAL_DATASPACE_DISPLAY_P3;
+            outWindowInfo->dataspace = HAL_DATASPACE_DISPLAY_P3;
         } else {
             LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
         }
     }
 
-    windowInfo.pixelFormat = ColorTypeToPixelFormat(colorType);
+    outWindowInfo->pixelFormat = ColorTypeToPixelFormat(colorType);
     VkFormat vkPixelFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    if (windowInfo.pixelFormat == PIXEL_FORMAT_RGBA_FP16) {
+    if (outWindowInfo->pixelFormat == PIXEL_FORMAT_RGBA_FP16) {
         vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
     }
 
@@ -232,31 +258,23 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
             vkManager.mPhysicalDevice, &imageFormatInfo, &imgFormProps);
     if (VK_SUCCESS != res) {
         ALOGE("Failed to query GetPhysicalDeviceImageFormatProperties2");
-        return nullptr;
+        return false;
     }
 
     uint64_t consumerUsage;
-    native_window_get_consumer_usage(window, &consumerUsage);
-    windowInfo.windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
-
-    /*
-     * Now we attempt to modify the window!
-     */
-    if (!UpdateWindow(window, windowInfo)) {
-        return nullptr;
+    err = native_window_get_consumer_usage(window, &consumerUsage);
+    if (err != 0) {
+        ALOGE("native_window_get_consumer_usage failed: %s (%d)", strerror(-err), err);
+        return false;
     }
+    outWindowInfo->windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
 
-    return new VulkanSurface(window, windowInfo, minSize, maxSize, grContext);
+    return true;
 }
 
 bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo) {
     ATRACE_CALL();
 
-    if (!ResetNativeWindow(window)) {
-        return false;
-    }
-
-    // -- Configure the native window --
     int err = native_window_set_buffers_format(window, windowInfo.pixelFormat);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_format(%d) failed: %s (%d)",
@@ -295,16 +313,6 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    // Vulkan defaults to NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW, but this is different than
-    // HWUI's expectation
-    err = native_window_set_scaling_mode(window, NATIVE_WINDOW_SCALING_MODE_FREEZE);
-    if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_scaling_mode(SCALE_TO_WINDOW) "
-              "failed: %s (%d)",
-              strerror(-err), err);
-        return false;
-    }
-
     err = native_window_set_buffer_count(window, windowInfo.bufferCount);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%zu) failed: %s (%d)",
@@ -319,7 +327,7 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    return err == 0;
+    return true;
 }
 
 VulkanSurface::VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo,
