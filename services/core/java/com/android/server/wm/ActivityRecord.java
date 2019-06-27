@@ -244,8 +244,6 @@ final class ActivityRecord extends ConfigurationContainer {
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
-    // TODO(b/67864419): Remove once recents component is overridden
-    private static final String LEGACY_RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -1290,8 +1288,8 @@ final class ActivityRecord extends ConfigurationContainer {
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (mActivityComponent.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME)
-                || mAtmService.getRecentTasks().isRecentsComponent(mActivityComponent, appInfo.uid)) {
+        } else if (mAtmService.getRecentTasks().isRecentsComponent(mActivityComponent,
+                appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
