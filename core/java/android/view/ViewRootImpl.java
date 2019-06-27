@@ -609,10 +609,13 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private String mTag = TAG;
-
     public ViewRootImpl(Context context, Display display) {
+        this(context, display, WindowManagerGlobal.getWindowSession());
+    }
+
+    public ViewRootImpl(Context context, Display display, IWindowSession session) {
         mContext = context;
-        mWindowSession = WindowManagerGlobal.getWindowSession();
+        mWindowSession = session;
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread();
