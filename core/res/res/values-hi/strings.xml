@@ -30,7 +30,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"वॉयस मेल"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"वॉइसमेल"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"कनेक्‍शन समस्‍या या अमान्‍य MMI कोड."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"कार्रवाई केवल फ़िक्‍स्‍ड डायलिंग नंबर के लिए प्रतिबंधित है."</string>
@@ -97,7 +97,7 @@
     <string name="notification_channel_sim" msgid="4052095493875188564">"सिम की स्थिति"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"पीयर ने टेलीटाइपराइटर (TTY) मोड फ़ुल का अनुरोध किया"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"पीयर ने टेलीटाइपराइटर (TTY) मोड एचसीओ (HCO) का अनुरोध किया"</string>
-    <string name="peerTtyModeVco" msgid="1742404978686538049">"पीयर ने टेलीटाइपराइटर (TTY) मोड वीसीअो (VCO) का अनुरोध किया"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"पीयर ने टेलीटाइपराइटर (TTY) मोड वीसीओ (VCO) का अनुरोध किया"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"पीयर ने टेलीटाइपराइटर (TTY) मोड बंद का अनुरोध किया"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"आवाज़"</string>
     <string name="serviceClassData" msgid="872456782077937893">"डेटा"</string>
@@ -335,7 +335,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"शॉर्टकट अनइंस्टॉल करें"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ऐप्‍लिकेशन को उपयोगकर्ता की रोक के बिना होमस्‍क्रीन शॉर्टकट निकालने की अनुमति देता है."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"किया जाने वाला कॉल (आउटगोइंग) कहीं और भेजें"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"एेप कॉल को किसी और नंबर पर भेजने या कॉल को पूरी तरह रद्द करने के विकल्प के साथ, किए गए कॉल (आउटगोइंग) के नंबर को देख सकता है."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ऐप कॉल को किसी और नंबर पर भेजने या कॉल को पूरी तरह रद्द करने के विकल्प के साथ, किए गए कॉल (आउटगोइंग) के नंबर को देख सकता है."</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"फ़ोन कॉल का जवाब दें"</string>
     <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"ऐप्लिकेशन को किसी इनकमिंग फ़ोन कॉल का जवाब देने देती है."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"मैसेज (एसएमएस) पाएं"</string>
@@ -399,9 +399,9 @@
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग पढ़ें"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"यह ऐप्लिकेशन आपका कॉल इतिहास पढ़ सकता है."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"कॉल लॉग लिखें"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"एेप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके टैबलेट के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले एेप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"एेप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके टीवी के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले एेप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"एेप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके फ़ोन के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले एेप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ऐप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके टैबलेट के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले ऐप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ऐप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके टीवी के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले ऐप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ऐप को आने वाला कॉल (इनकमिंग) और किया जाने वाला कॉल (आउटगोइंग) डेटा सहित, आपके फ़ोन के कॉल लॉग को बदलने की अनुमति देता है. धोखा देने वाले ऐप, इसका इस्तेमाल करके आपके कॉल लॉग को मिटा या बदल सकते हैं."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीर के लिए बने सेंसर (जैसे हृदय गति मॉनीटर) को एक्सेस करें"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ऐप को आपकी शारीरिक स्‍थिति, जैसे आपकी हृदय गति पर नज़र रखने वाले सेंसर के डेटा तक पहुंचने देती है."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
@@ -594,7 +594,7 @@
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"चेहरे का आइकॉन"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह तय किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"समन्‍वयन बंद या चालू टॉगल करें"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ऐप्स  को किसी खाते की समन्वयन सेटिंग संशोधित करने देता है. उदाहरण के लिए, इसका उपयोग लोग ऐप्स  का समन्‍वयन किसी खाते से सक्षम करने में हो सकता है."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"समन्वयन आंकड़े पढ़ें"</string>
@@ -640,7 +640,7 @@
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्र एक्सेस करें"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ऐप्लिकेशन को DRM प्रमाणपत्रों का प्रावधान और उपयोग करने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होना चाहिए."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android बीम ट्रांसफ़र की स्थिति पाएं"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"इस एेप को मौजूदा Android बीम ट्रांसफ़र के बारे में जानकारी पाने की अनुमति दें."</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"इस ऐप को मौजूदा Android बीम ट्रांसफ़र के बारे में जानकारी पाने की अनुमति दें."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रों को निकाल सकता है"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"ऐप्‍लिकेशन को DRM प्रमाणपत्रों को निकालने देता है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होनी चाहिए."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी की संदेश सेवा से जुड़ें"</string>
@@ -1150,7 +1150,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"चित्र कैप्चर करें"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"इस कार्रवाई के लिए डिफ़ॉल्‍ट के तौर पर इस्तेमाल करें"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"किसी भिन्न ऐप्स का उपयोग करें"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"सिस्‍टम सेटिंग और डाउनलोड किए गए एेप में डिफ़ॉल्‍ट साफ़ करें."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"सिस्‍टम सेटिंग और डाउनलोड किए गए ऐप में डिफ़ॉल्‍ट साफ़ करें."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"कोई कार्रवाई चुनें"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB डिवाइस के लिए कोई ऐप्स  चुनें"</string>
     <string name="noApplications" msgid="2991814273936504689">"कोई भी ऐप्स यह कार्यवाही नहीं कर सकता."</string>
@@ -1326,8 +1326,8 @@
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाइल नेटवर्क की पहुंच पाने लिए अपना डिवाइस फिर से चालू करें."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"फिर से शुरू करें"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"माेबाइल सेवा चालू करें"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"अपना नया सिम चालू करने के लिए मोबाइल और इंटरनेट सेवा देने वाली कंपनी का एेप्लिकेशन डाउनलोड करें"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"अपना नया सिम चालू करने के लिए <xliff:g id="APP_NAME">%1$s</xliff:g> एेप्लिकेशन डाउनलाेड करें"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"अपना नया सिम चालू करने के लिए मोबाइल और इंटरनेट सेवा देने वाली कंपनी का ऐप्लिकेशन डाउनलोड करें"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"अपना नया सिम चालू करने के लिए <xliff:g id="APP_NAME">%1$s</xliff:g> ऐप्लिकेशन डाउनलाेड करें"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ऐप्लिकेशन डाउनलोड करें"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नई SIM डाली गई"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"इसे सेट करने के लिए टैप करें"</string>
@@ -1550,17 +1550,17 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB मेमोरी"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"बदलाव करें"</string>
     <string name="data_usage_warning_title" msgid="6499834033204801605">"डेटा खर्च की चेतावनी"</string>
-    <string name="data_usage_warning_body" msgid="7340198905103751676">"अाप <xliff:g id="APP">%s</xliff:g> डेटा इस्तेमाल कर चुके हैं"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"आप <xliff:g id="APP">%s</xliff:g> डेटा इस्तेमाल कर चुके हैं"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"मोबाइल डेटा की सीमा पार हो गई है"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा की सीमा पूरी हो गई"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"आपकी मौजूदा बिलिंग साइकिल के बाकी दिनों के लिए डेटा का इस्तेमाल राेक दिया गया है"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"माेबाइल डेटा की सीमा से ज़्यादा"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"वाई-फ़ाई की सीमा से ज़्यादा डेटा खर्च"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"अाप अपनी तय सीमा से <xliff:g id="SIZE">%s</xliff:g> ज़्यादा डेटा इस्तेमाल कर चुके हैं"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"आप अपनी तय सीमा से <xliff:g id="SIZE">%s</xliff:g> ज़्यादा डेटा इस्तेमाल कर चुके हैं"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमि डेटा प्रतिबंधित है"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"प्रतिबंध निकालने के लिए टैप करें."</string>
     <string name="data_usage_rapid_title" msgid="1809795402975261331">"माेबाइल डेटा का ज़्यादा इस्तेमाल"</string>
-    <string name="data_usage_rapid_body" msgid="6897825788682442715">"आपके एेप्लिकेशन ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"आपके ऐप्लिकेशन ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
     <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"सुरक्षा प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"यह प्रमाणपत्र मान्य है."</string>
@@ -1983,11 +1983,11 @@
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"बदलाव करें"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल अाैर सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"सिस्टम में हुए बदलाव"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"परेशान न करें"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"नई सुविधा: परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ज़्यादा जानने अाैर बदलाव करने के लिए टैप करें."</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ज़्यादा जानने और बदलाव करने के लिए टैप करें."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
