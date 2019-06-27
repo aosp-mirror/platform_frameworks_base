@@ -180,6 +180,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
+    private final NetworkStatsFactory mStatsFactory;
     private final AlarmManager mAlarmManager;
     private final Clock mClock;
     private final TelephonyManager mTeleManager;
@@ -329,8 +330,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         NetworkStatsService service = new NetworkStatsService(context, networkManager, alarmManager,
                 wakeLock, getDefaultClock(), TelephonyManager.getDefault(),
-                new DefaultNetworkStatsSettings(context), new NetworkStatsObservers(),
-                getDefaultSystemDir(), getDefaultBaseDir());
+                new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
+                new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir());
         service.registerLocalService();
 
         HandlerThread handlerThread = new HandlerThread(TAG);
@@ -347,7 +348,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     NetworkStatsService(Context context, INetworkManagementService networkManager,
             AlarmManager alarmManager, PowerManager.WakeLock wakeLock, Clock clock,
             TelephonyManager teleManager, NetworkStatsSettings settings,
-            NetworkStatsObservers statsObservers, File systemDir, File baseDir) {
+            NetworkStatsFactory factory, NetworkStatsObservers statsObservers, File systemDir,
+            File baseDir) {
         mContext = checkNotNull(context, "missing Context");
         mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
         mAlarmManager = checkNotNull(alarmManager, "missing AlarmManager");
@@ -355,6 +357,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
         mTeleManager = checkNotNull(teleManager, "missing TelephonyManager");
         mWakeLock = checkNotNull(wakeLock, "missing WakeLock");
+        mStatsFactory = checkNotNull(factory, "missing factory");
         mStatsObservers = checkNotNull(statsObservers, "missing NetworkStatsObservers");
         mSystemDir = checkNotNull(systemDir, "missing systemDir");
         mBaseDir = checkNotNull(baseDir, "missing baseDir");
@@ -752,14 +755,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO: switch to data layer stats once kernel exports
         // for now, read network layer stats and flatten across all ifaces
-        final long token = Binder.clearCallingIdentity();
-        final NetworkStats networkLayer;
-        try {
-            networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid,
-                    NetworkStats.INTERFACES_ALL);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        final NetworkStats networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
 
         // splice in operation counts
         networkLayer.spliceOperationsFrom(mUidOperations);
@@ -1190,7 +1186,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                             mobileIfaces.add(stackedIface);
                         }
 
-                        NetworkStatsFactory.noteStackedIface(stackedIface, baseIface);
+                        mStatsFactory.noteStackedIface(stackedIface, baseIface);
                     }
                 }
             }
@@ -1220,7 +1216,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats xtSnapshot = getNetworkStatsXt();
         Trace.traceEnd(TRACE_TAG_NETWORK);
         Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotDev");
-        final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
+        final NetworkStats devSnapshot = readNetworkStatsSummaryDev();
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // Tethering snapshot for dev and xt stats. Counts per-interface data from tethering stats
@@ -1614,6 +1610,30 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    private NetworkStats readNetworkStatsSummaryDev() {
+        try {
+            return mStatsFactory.readNetworkStatsSummaryDev();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private NetworkStats readNetworkStatsSummaryXt() {
+        try {
+            return mStatsFactory.readNetworkStatsSummaryXt();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private NetworkStats readNetworkStatsUidDetail(int uid, String[] ifaces, int tag) {
+        try {
+            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, tag);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /**
      * Return snapshot of current UID statistics, including any
      * {@link TrafficStats#UID_TETHERING}, video calling data usage, and {@link #mUidOperations}
@@ -1624,8 +1644,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private NetworkStats getNetworkStatsUidDetail(String[] ifaces)
             throws RemoteException {
-        final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL,
-                ifaces);
+        final NetworkStats uidSnapshot = readNetworkStatsUidDetail(UID_ALL,  ifaces, TAG_ALL);
 
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
@@ -1655,7 +1674,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return snapshot of current XT statistics with video calling data usage statistics.
      */
     private NetworkStats getNetworkStatsXt() throws RemoteException {
-        final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
+        final NetworkStats xtSnapshot = readNetworkStatsSummaryXt();
 
         final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
