@@ -16,11 +16,19 @@
 
 package com.android.startop.test;
 
-import android.app.Activity;
+import android.os.Bundle;
 
 /**
- * The simplest possible Android activity, for testing startup with no
- * app-specific behavior.
+ * This activity inflates a reasonably complex layout to see the impact of
+ * layout inflation. The layout is supported by the viewcompiler, so this can be
+ * used for testing precompiled layout performance.
  */
-public class EmptyActivity extends Activity {
+public class ComplexLayoutInflationActivity extends LayoutInflationActivity {
+    protected void onCreate(Bundle savedInstanceState) {
+        Bundle newState = savedInstanceState == null
+                ? new Bundle() : new Bundle(savedInstanceState);
+        newState.putInt(LAYOUT_ID, R.layout.activity_main);
+
+        super.onCreate(newState);
+    }
 }
