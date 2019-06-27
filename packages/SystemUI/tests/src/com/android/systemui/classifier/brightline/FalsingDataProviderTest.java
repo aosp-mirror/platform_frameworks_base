@@ -22,12 +22,12 @@ import static org.junit.Assert.assertThat;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,24 +37,32 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class FalsingDataProviderTest extends SysuiTestCase {
+public class FalsingDataProviderTest extends ClassifierTest {
 
     private FalsingDataProvider mDataProvider;
 
     @Before
     public void setup() {
-        mDataProvider = new FalsingDataProvider(getContext());
+        super.setup();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics.xdpi = 100;
+        displayMetrics.ydpi = 100;
+        displayMetrics.widthPixels = 1000;
+        displayMetrics.heightPixels = 1000;
+        mDataProvider = new FalsingDataProvider(displayMetrics);
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
+        mDataProvider.onSessionEnd();
     }
 
     @Test
     public void test_trackMotionEvents() {
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 2, 9);
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 4, 7);
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_UP, 3, 6, 5);
-
-        mDataProvider.onMotionEvent(motionEventA);
-        mDataProvider.onMotionEvent(motionEventB);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendDownEvent(2, 9));
+        mDataProvider.onMotionEvent(appendMoveEvent(4, 7));
+        mDataProvider.onMotionEvent(appendUpEvent(6, 5));
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
         assertThat(motionEventList.size(), is(3));
@@ -70,20 +78,12 @@ public class FalsingDataProviderTest extends SysuiTestCase {
         assertThat(motionEventList.get(0).getY(), is(9f));
         assertThat(motionEventList.get(1).getY(), is(7f));
         assertThat(motionEventList.get(2).getY(), is(5f));
-
-        motionEventA.recycle();
-        motionEventB.recycle();
-        motionEventC.recycle();
     }
 
     @Test
     public void test_trackRecentMotionEvents() {
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 2, 9);
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 800, 4, 7);
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_UP, 1200, 6, 5);
-
-        mDataProvider.onMotionEvent(motionEventA);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendDownEvent(2, 9, 1));
+        mDataProvider.onMotionEvent(appendMoveEvent(4, 7, 800));
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
         assertThat(motionEventList.size(), is(2));
@@ -96,7 +96,7 @@ public class FalsingDataProviderTest extends SysuiTestCase {
         assertThat(motionEventList.get(0).getY(), is(9f));
         assertThat(motionEventList.get(1).getY(), is(7f));
 
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendUpEvent(6, 5, 1200));
 
         // Still two events, but event a is gone.
         assertThat(motionEventList.size(), is(2));
@@ -115,18 +115,14 @@ public class FalsingDataProviderTest extends SysuiTestCase {
         assertThat(firstRealMotionEvent.getEventTime(), is(1L));
         assertThat(firstRealMotionEvent.getX(), is(2f));
         assertThat(firstRealMotionEvent.getY(), is(9f));
-
-        motionEventA.recycle();
-        motionEventB.recycle();
-        motionEventC.recycle();
     }
 
     @Test
     public void test_unpackMotionEvents() {
         // Batching only works for motion events of the same type.
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 1, 2, 9);
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 4, 7);
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 3, 6, 5);
+        MotionEvent motionEventA = appendMoveEvent(2, 9);
+        MotionEvent motionEventB = appendMoveEvent(4, 7);
+        MotionEvent motionEventC = appendMoveEvent(6, 5);
         motionEventA.addBatch(motionEventB);
         motionEventA.addBatch(motionEventC);
         // Note that calling addBatch changes properties on the original event, not just it's
@@ -148,114 +144,86 @@ public class FalsingDataProviderTest extends SysuiTestCase {
         assertThat(motionEventList.get(0).getY(), is(9f));
         assertThat(motionEventList.get(1).getY(), is(7f));
         assertThat(motionEventList.get(2).getY(), is(5f));
-
-        motionEventA.recycle();
-        motionEventB.recycle();
-        motionEventC.recycle();
     }
 
     @Test
     public void test_getAngle() {
-        MotionEvent motionEventOrigin = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 0, 0);
+        MotionEvent motionEventOrigin = appendDownEvent(0, 0);
 
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 1, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventA);
+        mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
         assertThat((double) mDataProvider.getAngle(), closeTo(Math.PI / 4, .001));
-        motionEventA.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -1, -1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendMoveEvent(-1, -1));
         assertThat((double) mDataProvider.getAngle(), closeTo(5 * Math.PI / 4, .001));
-        motionEventB.recycle();
         mDataProvider.onSessionEnd();
 
 
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 2, 0);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendMoveEvent(2, 0));
         assertThat((double) mDataProvider.getAngle(), closeTo(0, .001));
-        motionEventC.recycle();
         mDataProvider.onSessionEnd();
     }
 
     @Test
     public void test_isHorizontal() {
-        MotionEvent motionEventOrigin = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 0, 0);
+        MotionEvent motionEventOrigin = appendDownEvent(0, 0);
 
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 1, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventA);
+        mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
         assertThat(mDataProvider.isHorizontal(), is(false));
-        motionEventA.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 2, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendMoveEvent(2, 1));
         assertThat(mDataProvider.isHorizontal(), is(true));
-        motionEventB.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -3, -1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendMoveEvent(-3, -1));
         assertThat(mDataProvider.isHorizontal(), is(true));
-        motionEventC.recycle();
         mDataProvider.onSessionEnd();
     }
 
     @Test
     public void test_isVertical() {
-        MotionEvent motionEventOrigin = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 0, 0);
+        MotionEvent motionEventOrigin = appendDownEvent(0, 0);
 
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 1, 0);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventA);
+        mDataProvider.onMotionEvent(appendMoveEvent(1, 0));
         assertThat(mDataProvider.isVertical(), is(false));
-        motionEventA.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 0, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendMoveEvent(0, 1));
         assertThat(mDataProvider.isVertical(), is(true));
-        motionEventB.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -3, -10);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendMoveEvent(-3, -10));
         assertThat(mDataProvider.isVertical(), is(true));
-        motionEventC.recycle();
         mDataProvider.onSessionEnd();
     }
 
     @Test
     public void test_isRight() {
-        MotionEvent motionEventOrigin = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 0, 0);
+        MotionEvent motionEventOrigin = appendDownEvent(0, 0);
 
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 1, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventA);
+        mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
         assertThat(mDataProvider.isRight(), is(true));
-        motionEventA.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 0, 1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendMoveEvent(0, 1));
         assertThat(mDataProvider.isRight(), is(false));
-        motionEventB.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -3, -10);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendMoveEvent(-3, -10));
         assertThat(mDataProvider.isRight(), is(false));
-        motionEventC.recycle();
         mDataProvider.onSessionEnd();
     }
 
@@ -263,31 +231,21 @@ public class FalsingDataProviderTest extends SysuiTestCase {
     public void test_isUp() {
         // Remember that our y axis is flipped.
 
-        MotionEvent motionEventOrigin = obtainMotionEvent(MotionEvent.ACTION_DOWN, 1, 0, 0);
+        MotionEvent motionEventOrigin = appendDownEvent(0, 0);
 
-        MotionEvent motionEventA = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 1, -1);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventA);
+        mDataProvider.onMotionEvent(appendMoveEvent(1, -1));
         assertThat(mDataProvider.isUp(), is(true));
-        motionEventA.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventB = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, 0, 0);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventB);
+        mDataProvider.onMotionEvent(appendMoveEvent(0, 0));
         assertThat(mDataProvider.isUp(), is(false));
-        motionEventB.recycle();
         mDataProvider.onSessionEnd();
 
-        MotionEvent motionEventC = obtainMotionEvent(MotionEvent.ACTION_MOVE, 2, -3, 10);
         mDataProvider.onMotionEvent(motionEventOrigin);
-        mDataProvider.onMotionEvent(motionEventC);
+        mDataProvider.onMotionEvent(appendMoveEvent(-3, 10));
         assertThat(mDataProvider.isUp(), is(false));
-        motionEventC.recycle();
         mDataProvider.onSessionEnd();
-    }
-
-    private MotionEvent obtainMotionEvent(int action, long eventTimeMs, float x, float y) {
-        return MotionEvent.obtain(1, eventTimeMs, action, x, y, 0);
     }
 }

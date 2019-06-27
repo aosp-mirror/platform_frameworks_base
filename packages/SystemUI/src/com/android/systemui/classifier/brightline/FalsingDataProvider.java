@@ -16,7 +16,6 @@
 
 package com.android.systemui.classifier.brightline;
 
-import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -51,8 +50,7 @@ public class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
 
-    public FalsingDataProvider(Context context) {
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+    public FalsingDataProvider(DisplayMetrics displayMetrics) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
@@ -145,12 +143,20 @@ public class FalsingDataProvider {
 
     boolean isHorizontal() {
         recalculateData();
+        if (mRecentMotionEvents.isEmpty()) {
+            return false;
+        }
+
         return Math.abs(mFirstRecentMotionEvent.getX() - mLastMotionEvent.getX()) > Math
                 .abs(mFirstRecentMotionEvent.getY() - mLastMotionEvent.getY());
     }
 
     boolean isRight() {
         recalculateData();
+        if (mRecentMotionEvents.isEmpty()) {
+            return false;
+        }
+
         return mLastMotionEvent.getX() > mFirstRecentMotionEvent.getX();
     }
 
@@ -160,6 +166,10 @@ public class FalsingDataProvider {
 
     boolean isUp() {
         recalculateData();
+        if (mRecentMotionEvents.isEmpty()) {
+            return false;
+        }
+
         return mLastMotionEvent.getY() < mFirstRecentMotionEvent.getY();
     }
 
@@ -168,8 +178,13 @@ public class FalsingDataProvider {
             return;
         }
 
-        mFirstRecentMotionEvent = mRecentMotionEvents.get(0);
-        mLastMotionEvent = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1);
+        if (mRecentMotionEvents.isEmpty()) {
+            mFirstRecentMotionEvent = null;
+            mLastMotionEvent = null;
+        } else {
+            mFirstRecentMotionEvent = mRecentMotionEvents.get(0);
+            mLastMotionEvent = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1);
+        }
 
         calculateAngleInternal();
 
@@ -245,5 +260,7 @@ public class FalsingDataProvider {
         }
 
         mRecentMotionEvents.clear();
+
+        mDirty = true;
     }
 }

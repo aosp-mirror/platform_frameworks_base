@@ -177,6 +177,11 @@ public final class SystemUiDeviceConfigFlags {
             "assist_handles_suppress_on_apps";
 
     /**
+     * (bool) Whether to show handles when taught.
+     */
+    public static final String ASSIST_HANDLES_SHOW_WHEN_TAUGHT = "assist_handles_show_when_taught";
+
+    /**
      * (bool) Whether to use the new BrightLineFalsingManager.
      */
     public static final String BRIGHTLINE_FALSING_MANAGER_ENABLED =

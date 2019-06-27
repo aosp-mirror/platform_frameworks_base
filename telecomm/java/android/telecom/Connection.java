@@ -1793,6 +1793,11 @@ public abstract class Connection extends Conferenceable {
     private ConnectionService mConnectionService;
     private Bundle mExtras;
     private final Object mExtrasLock = new Object();
+    /**
+     * The direction of the connection; used where an existing connection is created and we need to
+     * communicate to Telecom whether its incoming or outgoing.
+     */
+    private @Call.Details.CallDirection int mCallDirection = Call.Details.DIRECTION_UNKNOWN;
 
     /**
      * Tracks the key set for the extras bundle provided on the last invocation of
@@ -3356,5 +3361,22 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onConnectionEvent(this, event, extras);
         }
+    }
+
+    /**
+     * @return The direction of the call.
+     * @hide
+     */
+    public final @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
+    }
+
+    /**
+     * Sets the direction of this connection.
+     * @param callDirection The direction of this connection.
+     * @hide
+     */
+    public void setCallDirection(@Call.Details.CallDirection int callDirection) {
+        mCallDirection = callDirection;
     }
 }
