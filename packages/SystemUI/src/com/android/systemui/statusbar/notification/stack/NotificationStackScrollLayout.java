@@ -837,7 +837,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 break;
             }
         }
-        if (!mAmbientState.isDozing() || anySectionHasVisibleChild) {
+        boolean shouldDrawBackground;
+        if (mKeyguardBypassController.getBypassEnabled() && onKeyguard()) {
+            shouldDrawBackground = isPulseExpanding();
+        } else {
+            shouldDrawBackground = !mAmbientState.isDozing() || anySectionHasVisibleChild;
+        }
+        if (shouldDrawBackground) {
             drawBackgroundRects(canvas, left, right, top, backgroundTopAnimationOffset);
         }
 
