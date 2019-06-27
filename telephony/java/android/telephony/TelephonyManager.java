@@ -4901,8 +4901,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_ACTIVITY_NONE;
-            return telephony.getDataActivity(
-                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+            return telephony.getDataActivity();
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_ACTIVITY_NONE;
@@ -4950,8 +4949,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_DISCONNECTED;
-            return telephony.getDataState(
-                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+            return telephony.getDataState();
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;
