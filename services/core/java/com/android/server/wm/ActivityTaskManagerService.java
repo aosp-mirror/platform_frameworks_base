@@ -6506,6 +6506,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     return;
                 }
+                process.mIsImeProcess = true;
                 process.registerDisplayConfigurationListenerLocked(activityDisplay);
             }
         }
