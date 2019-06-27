@@ -4087,7 +4087,7 @@ public class ActivityManager {
      * Action an app can implement to handle reports from {@link #setWatchHeapLimit(long)}.
      * If your package has an activity handling this action, it will be launched with the
      * heap data provided to it the same way as {@link Intent#ACTION_SEND}.  Note that to
-     * match the activty must support this action and a MIME type of "*&#47;*".
+     * match, the activity must support this action and a MIME type of "*&#47;*".
      */
     public static final String ACTION_REPORT_HEAP_LIMIT = "android.app.action.REPORT_HEAP_LIMIT";
 

@@ -139,6 +139,7 @@ import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToS
 
 import android.Manifest;
 import android.Manifest.permission;
+import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -299,10 +300,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManagerInternal;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
@@ -502,6 +501,41 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Necessary ApplicationInfo flags to mark an app as persistent
     static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
+
+    // Intent sent when remote bugreport collection has been completed
+    private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
+            "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
+
+    /**
+     * Broadcast sent when heap dump collection has been completed.
+     */
+    @BroadcastBehavior(includeBackground = true, protectedBroadcast = true)
+    private static final String ACTION_HEAP_DUMP_FINISHED =
+            "com.android.internal.intent.action.HEAP_DUMP_FINISHED";
+
+    /**
+     * The process we are reporting
+     */
+    private static final String EXTRA_HEAP_DUMP_PROCESS_NAME =
+            "com.android.internal.extra.heap_dump.PROCESS_NAME";
+
+    /**
+     * The size limit the process reached.
+     */
+    private static final String EXTRA_HEAP_DUMP_SIZE_BYTES =
+            "com.android.internal.extra.heap_dump.SIZE_BYTES";
+
+    /**
+     * Whether the user initiated the dump or not.
+     */
+    private static final String EXTRA_HEAP_DUMP_IS_USER_INITIATED =
+            "com.android.internal.extra.heap_dump.IS_USER_INITIATED";
+
+    /**
+     * Optional name of package to directly launch.
+     */
+    private static final String EXTRA_HEAP_DUMP_REPORT_PACKAGE =
+            "com.android.internal.extra.heap_dump.REPORT_PACKAGE";
 
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
@@ -1332,7 +1366,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mProfileType = 0;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
-    String mMemWatchDumpFile;
+    Uri mMemWatchDumpUri;
     int mMemWatchDumpPid;
     int mMemWatchDumpUid;
     private boolean mMemWatchIsUserInitiated;
@@ -1519,7 +1553,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
     static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 49;
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 50;
-    static final int DELETE_DUMPHEAP_MSG = 51;
+    static final int ABORT_DUMPHEAP_MSG = 51;
     static final int DISPATCH_UIDS_CHANGED_UI_MSG = 53;
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 56;
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 57;
@@ -1788,11 +1822,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final boolean isUserInitiated;
                 synchronized (ActivityManagerService.this) {
                     uid = mMemWatchDumpUid;
-                    if (uid == SYSTEM_UID) {
-                        procName = mContext.getString(R.string.android_system_label);
-                    } else {
-                        procName = mMemWatchDumpProcName;
-                    }
+                    procName = mMemWatchDumpProcName;
                     Pair<Long, String> val = mMemWatchProcesses.get(procName, uid);
                     if (val == null) {
                         val = mMemWatchProcesses.get(procName, 0);
@@ -1805,6 +1835,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         reportPackage = null;
                     }
                     isUserInitiated = mMemWatchIsUserInitiated;
+
+                    mMemWatchDumpUri = null;
+                    mMemWatchDumpProcName = null;
+                    mMemWatchDumpPid = -1;
+                    mMemWatchDumpUid = -1;
                 }
                 if (procName == null) {
                     return;
@@ -1813,65 +1848,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_PSS) Slog.d(TAG_PSS,
                         "Showing dump heap notification from " + procName + "/" + uid);
 
-                INotificationManager inm = NotificationManager.getService();
-                if (inm == null) {
-                    return;
-                }
+                Intent dumpFinishedIntent = new Intent(ACTION_HEAP_DUMP_FINISHED);
+                // Send this only to the Shell package.
+                dumpFinishedIntent.setPackage("com.android.shell");
+                dumpFinishedIntent.putExtra(Intent.EXTRA_UID, uid);
+                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_IS_USER_INITIATED, isUserInitiated);
+                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_SIZE_BYTES, memLimit);
+                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_REPORT_PACKAGE, reportPackage);
+                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_PROCESS_NAME, procName);
 
-                final int titleId = isUserInitiated
-                        ? R.string.dump_heap_ready_notification : R.string.dump_heap_notification;
-                String text = mContext.getString(titleId, procName);
-
-                Intent deleteIntent = new Intent();
-                deleteIntent.setAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
-                Intent intent = new Intent();
-                intent.setClassName("android", DumpHeapActivity.class.getName());
-                intent.putExtra(DumpHeapActivity.KEY_PROCESS, procName);
-                intent.putExtra(DumpHeapActivity.KEY_SIZE, memLimit);
-                intent.putExtra(DumpHeapActivity.KEY_IS_USER_INITIATED, isUserInitiated);
-                intent.putExtra(DumpHeapActivity.KEY_IS_SYSTEM_PROCESS, uid == SYSTEM_UID);
-                if (reportPackage != null) {
-                    intent.putExtra(DumpHeapActivity.KEY_DIRECT_LAUNCH, reportPackage);
-                }
-                int userId = UserHandle.getUserId(uid);
-                Notification notification =
-                        new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
-                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                        .setAutoCancel(true)
-                        .setTicker(text)
-                        .setColor(mContext.getColor(
-                                com.android.internal.R.color.system_notification_accent_color))
-                        .setContentTitle(text)
-                        .setContentText(
-                                mContext.getText(R.string.dump_heap_notification_detail))
-                        .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
-                                intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
-                                new UserHandle(userId)))
-                        .setDeleteIntent(PendingIntent.getBroadcastAsUser(mContext, 0,
-                                deleteIntent, 0, UserHandle.SYSTEM))
-                        .build();
-
-                try {
-                    inm.enqueueNotificationWithTag("android", "android", null,
-                            SystemMessage.NOTE_DUMP_HEAP_NOTIFICATION,
-                            notification, userId);
-                } catch (RuntimeException e) {
-                    Slog.w(ActivityManagerService.TAG,
-                            "Error showing notification for dump heap", e);
-                } catch (RemoteException e) {
-                }
+                mContext.sendBroadcastAsUser(dumpFinishedIntent,
+                        UserHandle.getUserHandleForUid(uid));
             } break;
-            case DELETE_DUMPHEAP_MSG: {
-                revokeUriPermission(ActivityThread.currentActivityThread().getApplicationThread(),
-                        null, DumpHeapActivity.JAVA_URI,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                        UserHandle.myUserId());
-                synchronized (ActivityManagerService.this) {
-                    mMemWatchDumpFile = null;
-                    mMemWatchDumpProcName = null;
-                    mMemWatchDumpPid = -1;
-                    mMemWatchDumpUid = -1;
+            case ABORT_DUMPHEAP_MSG: {
+                String procName = (String) msg.obj;
+                if (procName != null) {
+                    synchronized (ActivityManagerService.this) {
+                        if (procName.equals(mMemWatchDumpProcName)) {
+                            mMemWatchDumpProcName = null;
+                            mMemWatchDumpUri = null;
+                            mMemWatchDumpPid = -1;
+                            mMemWatchDumpUid = -1;
+                        }
+                    }
                 }
             } break;
             case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
@@ -5244,17 +5243,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }, pkgFilter);
-
-        IntentFilter dumpheapFilter = new IntentFilter();
-        dumpheapFilter.addAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final long delay = intent.getBooleanExtra(
-                        DumpHeapActivity.EXTRA_DELAY_DELETE, false) ? 5 * 60 * 1000 : 0;
-                mHandler.sendEmptyMessageDelayed(DELETE_DUMPHEAP_MSG, delay);
-            }
-        }, dumpheapFilter);
 
         // Inform checkpointing systems of success
         try {
@@ -10953,7 +10941,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             pw.print("  mMemWatchDumpProcName="); pw.println(mMemWatchDumpProcName);
-            pw.print("  mMemWatchDumpFile="); pw.println(mMemWatchDumpFile);
+            pw.print("  mMemWatchDumpUri="); pw.println(mMemWatchDumpUri);
             pw.print("  mMemWatchDumpPid="); pw.println(mMemWatchDumpPid);
             pw.print("  mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
             pw.print("  mMemWatchIsUserInitiated="); pw.println(mMemWatchIsUserInitiated);
@@ -11250,10 +11238,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final long dtoken = proto.start(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.DUMP);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PROC_NAME, mMemWatchDumpProcName);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.FILE, mMemWatchDumpFile);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PID, mMemWatchDumpPid);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.UID, mMemWatchDumpUid);
+            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PROC_NAME,
+                    mMemWatchDumpProcName);
+            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.URI,
+                    mMemWatchDumpUri.toString());
+            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PID,
+                    mMemWatchDumpPid);
+            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.UID,
+                    mMemWatchDumpUid);
             proto.write(
                     ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.IS_USER_INITIATED,
                     mMemWatchIsUserInitiated);
@@ -16395,56 +16387,44 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private static final class RecordPssRunnable implements Runnable {
-        private final ActivityManagerService mService;
-        private final ProcessRecord mProc;
-        private final File mHeapdumpFile;
+    /** @hide */
+    public static Uri makeHeapDumpUri(String procName) {
+        return Uri.parse("content://com.android.shell.heapdump/" + procName + "_javaheap.bin");
+    }
 
-        RecordPssRunnable(ActivityManagerService service, ProcessRecord proc, File heapdumpFile) {
-            this.mService = service;
-            this.mProc = proc;
-            this.mHeapdumpFile = heapdumpFile;
+    private final class RecordPssRunnable implements Runnable {
+        private final ProcessRecord mProc;
+        private final Uri mDumpUri;
+        private final ContentResolver mContentResolver;
+
+        RecordPssRunnable(ProcessRecord proc, Uri dumpUri, ContentResolver contentResolver) {
+            mProc = proc;
+            mDumpUri = dumpUri;
+            mContentResolver = contentResolver;
         }
 
         @Override
         public void run() {
-            mService.revokeUriPermission(ActivityThread.currentActivityThread()
-                            .getApplicationThread(),
-                    null, DumpHeapActivity.JAVA_URI,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                    UserHandle.myUserId());
-            ParcelFileDescriptor fd = null;
-            try {
-                mHeapdumpFile.delete();
-                fd = ParcelFileDescriptor.open(mHeapdumpFile,
-                        ParcelFileDescriptor.MODE_CREATE
-                        | ParcelFileDescriptor.MODE_TRUNCATE
-                        | ParcelFileDescriptor.MODE_WRITE_ONLY
-                        | ParcelFileDescriptor.MODE_APPEND);
+            try (ParcelFileDescriptor fd = mContentResolver.openFileDescriptor(mDumpUri, "rw")) {
                 IApplicationThread thread = mProc.thread;
                 if (thread != null) {
                     try {
                         if (DEBUG_PSS) {
                             Slog.d(TAG_PSS, "Requesting dump heap from "
-                                    + mProc + " to " + mHeapdumpFile);
+                                    + mProc + " to " + mDumpUri.getPath());
                         }
                         thread.dumpHeap(/* managed= */ true,
                                 /* mallocInfo= */ false, /* runGc= */ false,
-                                mHeapdumpFile.toString(), fd,
+                                mDumpUri.getPath(), fd,
                                 /* finishCallback= */ null);
                     } catch (RemoteException e) {
                     }
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } finally {
-                if (fd != null) {
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                    }
-                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to dump heap", e);
+                // Need to clear the heap dump variables, otherwise no further heap dumps will be
+                // attempted.
+                abortHeapDump(mProc.processName);
             }
         }
     }
@@ -16513,13 +16493,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void startHeapDumpLocked(ProcessRecord proc, boolean isUserInitiated) {
-        final File heapdumpFile = DumpHeapProvider.getJavaFile();
         mMemWatchDumpProcName = proc.processName;
-        mMemWatchDumpFile = heapdumpFile.toString();
+        mMemWatchDumpUri = makeHeapDumpUri(proc.processName);
         mMemWatchDumpPid = proc.pid;
         mMemWatchDumpUid = proc.uid;
         mMemWatchIsUserInitiated = isUserInitiated;
-        BackgroundThread.getHandler().post(new RecordPssRunnable(this, proc, heapdumpFile));
+        Context ctx;
+        try {
+            ctx = mContext.createPackageContextAsUser("android", 0,
+                    UserHandle.getUserHandleForUid(mMemWatchDumpUid));
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException("android package not found.");
+        }
+        BackgroundThread.getHandler().post(
+                new RecordPssRunnable(proc, mMemWatchDumpUri, ctx.getContentResolver()));
     }
 
     /**
@@ -17715,9 +17702,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " does not match last pid " + mMemWatchDumpPid);
                 return;
             }
-            if (mMemWatchDumpFile == null || !mMemWatchDumpFile.equals(path)) {
+            if (mMemWatchDumpUri == null || !mMemWatchDumpUri.getPath().equals(path)) {
                 Slog.w(TAG, "dumpHeapFinished: Calling path " + path
-                        + " does not match last path " + mMemWatchDumpFile);
+                        + " does not match last path " + mMemWatchDumpUri);
                 return;
             }
             if (DEBUG_PSS) Slog.d(TAG_PSS, "Dump heap finished for " + path);
@@ -17726,6 +17713,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Forced gc to clean up the remnant hprof fd.
             Runtime.getRuntime().gc();
         }
+    }
+
+    /** Clear the currently executing heap dump variables so a new heap dump can be started. */
+    private void abortHeapDump(String procName) {
+        Message msg = mHandler.obtainMessage(ABORT_DUMPHEAP_MSG);
+        msg.obj = procName;
+        mHandler.sendMessage(msg);
     }
 
     /** In this method we try to acquire our lock to make sure that we have not deadlocked */

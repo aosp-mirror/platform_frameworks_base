@@ -4728,19 +4728,6 @@
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
-        <activity android:name="com.android.internal.app.DumpHeapActivity"
-                android:theme="@style/Theme.Translucent.NoTitleBar"
-                android:label="@string/dump_heap_title"
-                android:finishOnCloseSystemDialogs="true"
-                android:noHistory="true"
-                android:excludeFromRecents="true"
-                android:process=":ui">
-        </activity>
-        <provider android:name="com.android.server.am.DumpHeapProvider"
-                android:authorities="com.android.server.heapdump"
-                android:grantUriPermissions="true"
-                android:multiprocess="false"
-                android:singleUser="true" />
 
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
