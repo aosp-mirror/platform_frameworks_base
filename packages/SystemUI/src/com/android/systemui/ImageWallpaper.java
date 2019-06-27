@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.HandlerThread;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.util.Size;
@@ -45,10 +46,25 @@ public class ImageWallpaper extends WallpaperService {
     // We delayed destroy render context that subsequent render requests have chance to cancel it.
     // This is to avoid destroying then recreating render context in a very short time.
     private static final int DELAY_FINISH_RENDERING = 1000;
+    private HandlerThread mWorker;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mWorker = new HandlerThread(TAG);
+        mWorker.start();
+    }
 
     @Override
     public Engine onCreateEngine() {
         return new GLEngine(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mWorker.quitSafely();
+        mWorker = null;
     }
 
     class GLEngine extends Engine implements GLWallpaperRenderer.SurfaceProxy, StateListener {
@@ -98,13 +114,14 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
                 float yOffsetStep, int xPixelOffset, int yPixelOffset) {
-            mRenderer.updateOffsets(xOffset, yOffset);
+            mWorker.getThreadHandler().post(() -> mRenderer.updateOffsets(xOffset, yOffset));
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
-            mRenderer.updateAmbientMode(inAmbientMode,
-                    (mNeedTransition || animationDuration != 0) ? animationDuration : 0);
+            long duration = mNeedTransition || animationDuration != 0 ? animationDuration : 0;
+            mWorker.getThreadHandler().post(
+                    () -> mRenderer.updateAmbientMode(inAmbientMode, duration));
         }
 
         @Override
@@ -113,53 +130,61 @@ public class ImageWallpaper extends WallpaperService {
                 mController.removeCallback(this /* StateListener */);
             }
             mController = null;
-            mRenderer.finish();
-            mRenderer = null;
-            mEglHelper.finish();
-            mEglHelper = null;
-            getSurfaceHolder().getSurface().hwuiDestroy();
+
+            mWorker.getThreadHandler().post(() -> {
+                mRenderer.finish();
+                mRenderer = null;
+                mEglHelper.finish();
+                mEglHelper = null;
+                getSurfaceHolder().getSurface().hwuiDestroy();
+            });
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
-            mEglHelper.init(holder);
-            mRenderer.onSurfaceCreated();
+            mWorker.getThreadHandler().post(() -> {
+                mEglHelper.init(holder);
+                mRenderer.onSurfaceCreated();
+            });
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            mRenderer.onSurfaceChanged(width, height);
-            mNeedRedraw = true;
+            mWorker.getThreadHandler().post(() -> {
+                mRenderer.onSurfaceChanged(width, height);
+                mNeedRedraw = true;
+            });
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
-            if (mNeedRedraw) {
-                preRender();
-                requestRender();
-                postRender();
-                mNeedRedraw = false;
-            }
-        }
-
-        @Override
-        public SurfaceHolder getHolder() {
-            return getSurfaceHolder();
+            mWorker.getThreadHandler().post(() -> {
+                if (mNeedRedraw) {
+                    preRender();
+                    requestRender();
+                    postRender();
+                    mNeedRedraw = false;
+                }
+            });
         }
 
         @Override
         public void onStatePostChange() {
             // When back to home, we try to release EGL, which is preserved in lock screen or aod.
             if (mController.getState() == StatusBarState.SHADE) {
-                scheduleFinishRendering();
+                mWorker.getThreadHandler().post(this::scheduleFinishRendering);
             }
         }
 
         @Override
         public void preRender() {
+            mWorker.getThreadHandler().post(this::preRenderInternal);
+        }
+
+        private void preRenderInternal() {
             boolean contextRecreated = false;
             Rect frame = getSurfaceHolder().getSurfaceFrame();
-            getMainThreadHandler().removeCallbacks(mFinishRenderingTask);
+            cancelFinishRenderingTask();
 
             // Check if we need to recreate egl context.
             if (!mEglHelper.hasEglContext()) {
@@ -187,6 +212,10 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void requestRender() {
+            mWorker.getThreadHandler().post(this::requestRenderInternal);
+        }
+
+        private void requestRenderInternal() {
             Rect frame = getSurfaceHolder().getSurfaceFrame();
             boolean readyToRender = mEglHelper.hasEglContext() && mEglHelper.hasEglSurface()
                     && frame.width() > 0 && frame.height() > 0;
@@ -205,12 +234,16 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void postRender() {
-            scheduleFinishRendering();
+            mWorker.getThreadHandler().post(this::scheduleFinishRendering);
+        }
+
+        private void cancelFinishRenderingTask() {
+            mWorker.getThreadHandler().removeCallbacks(mFinishRenderingTask);
         }
 
         private void scheduleFinishRendering() {
-            getMainThreadHandler().removeCallbacks(mFinishRenderingTask);
-            getMainThreadHandler().postDelayed(mFinishRenderingTask, DELAY_FINISH_RENDERING);
+            cancelFinishRenderingTask();
+            mWorker.getThreadHandler().postDelayed(mFinishRenderingTask, DELAY_FINISH_RENDERING);
         }
 
         private void finishRendering() {
