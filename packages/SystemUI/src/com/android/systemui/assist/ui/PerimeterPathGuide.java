@@ -287,9 +287,12 @@ public class PerimeterPathGuide {
         float accum = 0;
         for (int i = 0; i < mRegions.length; i++) {
             mRegions[i].normalizedLength = mRegions[i].absoluteLength / perimeterLength;
-            accum += mRegions[i].normalizedLength;
-            mRegions[i].endCoordinate = accum;
+            accum += mRegions[i].absoluteLength;
+            mRegions[i].endCoordinate = accum / perimeterLength;
         }
+        // Ensure that the last coordinate is 1. Setting it explicitly to avoid floating point
+        // error.
+        mRegions[mRegions.length - 1].endCoordinate = 1f;
     }
 
     private CircularCornerPathRenderer.Corner getRotatedCorner(

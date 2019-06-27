@@ -177,4 +177,12 @@ oneway interface ITaskStackListener {
      * @param displayId the id of the display on which contents are drawn.
      */
     void onSingleTaskDisplayDrawn(int displayId);
+
+    /**
+     * Called when a task is reparented to a stack on a different display.
+     *
+     * @param taskId id of the task which was moved to a different display.
+     * @param newDisplayId id of the new display.
+     */
+    void onTaskDisplayChanged(int taskId, int newDisplayId);
 }

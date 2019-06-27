@@ -43,7 +43,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private static final String HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE =
             "heads_up_status_bar_view_super_parcelable";
     private static final String FIRST_LAYOUT = "first_layout";
-    private static final String PUBLIC_MODE = "public_mode";
     private static final String VISIBILITY = "visibility";
     private static final String ALPHA = "alpha";
     private int mAbsoluteStartPadding;
@@ -54,7 +53,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private Rect mLayoutedIconRect = new Rect();
     private int[] mTmpPosition = new int[2];
     private boolean mFirstLayout = true;
-    private boolean mPublicMode;
     private int mMaxWidth;
     private View mRootView;
     private int mSysWinInset;
@@ -121,7 +119,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         bundle.putParcelable(HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE,
                 super.onSaveInstanceState());
         bundle.putBoolean(FIRST_LAYOUT, mFirstLayout);
-        bundle.putBoolean(PUBLIC_MODE, mPublicMode);
         bundle.putInt(VISIBILITY, getVisibility());
         bundle.putFloat(ALPHA, getAlpha());
 
@@ -139,7 +136,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         Parcelable superState = bundle.getParcelable(HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE);
         super.onRestoreInstanceState(superState);
         mFirstLayout = bundle.getBoolean(FIRST_LAYOUT, true);
-        mPublicMode = bundle.getBoolean(PUBLIC_MODE, false);
         if (bundle.containsKey(VISIBILITY)) {
             setVisibility(bundle.getInt(VISIBILITY));
         }
@@ -166,11 +162,13 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         if (entry != null) {
             mShowingEntry = entry;
             CharSequence text = entry.headsUpStatusBarText;
-            if (mPublicMode) {
+            if (entry.isSensitive()) {
                 text = entry.headsUpStatusBarTextPublic;
             }
             mTextView.setText(text);
-        } else {
+            mShowingEntry.setOnSensitiveChangedListener(() -> setEntry(entry));
+        } else if (mShowingEntry != null){
+            mShowingEntry.setOnSensitiveChangedListener(null);
             mShowingEntry = null;
         }
     }
@@ -271,10 +269,6 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
 
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
         mTextView.setTextColor(DarkIconDispatcher.getTint(area, this, tint));
-    }
-
-    public void setPublicMode(boolean publicMode) {
-        mPublicMode = publicMode;
     }
 
     public void setOnDrawingRectChangedListener(Runnable onDrawingRectChangedListener) {

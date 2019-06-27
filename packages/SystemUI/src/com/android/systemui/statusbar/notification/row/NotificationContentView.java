@@ -713,11 +713,15 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private int getViewHeight(int visibleType) {
+        return getViewHeight(visibleType, false /* forceNoHeader */);
+    }
+
+    private int getViewHeight(int visibleType, boolean forceNoHeader) {
         View view = getViewForVisibleType(visibleType);
         int height = view.getHeight();
         NotificationViewWrapper viewWrapper = getWrapperForView(view);
         if (viewWrapper != null) {
-            height += viewWrapper.getHeaderTranslation();
+            height += viewWrapper.getHeaderTranslation(forceNoHeader);
         }
         return height;
     }
@@ -1748,14 +1752,15 @@ public class NotificationContentView extends FrameLayout {
         return getViewHeight(viewType) + getExtraRemoteInputHeight(mExpandedRemoteInput);
     }
 
-    public int getHeadsUpHeight() {
+    public int getHeadsUpHeight(boolean forceNoHeader) {
         int viewType = VISIBLE_TYPE_HEADSUP;
         if (mHeadsUpChild == null) {
             viewType = VISIBLE_TYPE_CONTRACTED;
         }
         // The headsUp remote input quickly switches to the expanded one, so lets also include that
         // one
-        return getViewHeight(viewType) + getExtraRemoteInputHeight(mHeadsUpRemoteInput)
+        return getViewHeight(viewType, forceNoHeader)
+                + getExtraRemoteInputHeight(mHeadsUpRemoteInput)
                 + getExtraRemoteInputHeight(mExpandedRemoteInput);
     }
 
