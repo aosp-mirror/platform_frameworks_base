@@ -179,8 +179,10 @@ public class NetworkStatsFactory {
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
         mUseBpfStats = useBpfStats;
-        mPersistSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), -1);
-        mTunAnd464xlatAdjustedStats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
+        synchronized (sPersistentDataLock) {
+            mPersistSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), -1);
+            mTunAnd464xlatAdjustedStats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
+        }
     }
 
     public NetworkStats readBpfNetworkStatsDev() throws IOException {
