@@ -1881,8 +1881,7 @@ class ActivityStack extends ConfigurationContainer {
         mRootActivityContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed,
-            String reason) {
+    void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed, String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, r.mUserId,
                     System.identityHashCode(r), r.shortComponentName, reason);
@@ -2177,7 +2176,7 @@ class ActivityStack extends ConfigurationContainer {
                         // sure it matches the current configuration.
                         if (r != starting && notifyClients) {
                             r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
-                                    true /* ignoreStopState */);
+                                    true /* ignoreVisibility */);
                         }
 
                         if (!r.attachedToProcess()) {
@@ -3139,8 +3138,10 @@ class ActivityStack extends ConfigurationContainer {
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.getTaskRecord();
         final int taskId = rTask.taskId;
+        final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && (taskForIdLocked(taskId) == null || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront
+                && (taskForIdLocked(taskId) == null || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
@@ -3199,7 +3200,9 @@ class ActivityStack extends ConfigurationContainer {
 
         task.setFrontOfTask();
 
-        if (!isHomeOrRecentsStack() || numActivities() > 0) {
+        // The transition animation and starting window are not needed if {@code allowMoveToFront}
+        // is false, because the activity won't be visible.
+        if ((!isHomeOrRecentsStack() || numActivities() > 0) && allowMoveToFront) {
             final DisplayContent dc = getDisplay().mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
