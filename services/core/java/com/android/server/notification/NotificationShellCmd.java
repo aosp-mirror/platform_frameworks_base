@@ -46,6 +46,8 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.util.FunctionalUtils;
+
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -136,8 +138,9 @@ public class NotificationShellCmd extends ShellCommand {
                         case "off":
                             interruptionFilter = INTERRUPTION_FILTER_ALL;
                     }
-                    mBinderService.setInterruptionFilter(
-                            mDirectService.getContext().getPackageName(), interruptionFilter);
+                    final int filter = interruptionFilter;
+                    Binder.withCleanCallingIdentity(() -> mBinderService.setInterruptionFilter(
+                            mDirectService.getContext().getPackageName(), filter));
                 }
                 break;
                 case "allow_dnd": {
