@@ -62,7 +62,8 @@ interface ISessionManager {
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
 
-    void setCallback(in ICallback callback);
+    void registerCallback(in ICallback callback);
+    void unregisterCallback(in ICallback callback);
     void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 

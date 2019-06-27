@@ -3864,8 +3864,18 @@ package android.media.audiopolicy {
 package android.media.session {
 
   public final class MediaSessionManager {
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void registerCallback(@NonNull android.media.session.MediaSessionManager.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void unregisterCallback(@NonNull android.media.session.MediaSessionManager.Callback);
+  }
+
+  public abstract static class MediaSessionManager.Callback {
+    ctor public MediaSessionManager.Callback();
+    method public abstract void onAddressedPlayerChanged(android.media.session.MediaSession.Token);
+    method public abstract void onAddressedPlayerChanged(android.content.ComponentName);
+    method public abstract void onMediaKeyEventDispatched(android.view.KeyEvent, android.media.session.MediaSession.Token);
+    method public abstract void onMediaKeyEventDispatched(android.view.KeyEvent, android.content.ComponentName);
   }
 
   public static interface MediaSessionManager.OnMediaKeyListener {
