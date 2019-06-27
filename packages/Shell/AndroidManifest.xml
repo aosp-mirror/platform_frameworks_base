@@ -173,6 +173,8 @@
     <uses-permission android:name="android.permission.MANAGE_WIFI_WHEN_WIRELESS_CONSENT_REQUIRED" />
     <!-- Permission needed to invoke DynamicSystem (AOT) -->
     <uses-permission android:name="android.permission.INSTALL_DYNAMIC_SYSTEM" />
+    <!-- Used to clean up heap dumps on boot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
@@ -201,7 +203,7 @@
 
     <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
     <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
-    
+
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
 
@@ -231,11 +233,24 @@
             </intent-filter>
         </provider>
 
+        <provider android:name=".HeapDumpProvider"
+                  android:authorities="com.android.shell.heapdump"
+                  android:grantUriPermissions="true"
+                  android:exported="true" />
+
         <activity
             android:name=".BugreportWarningActivity"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />
+
+        <activity android:name=".HeapDumpActivity"
+                  android:theme="@*android:style/Theme.Translucent.NoTitleBar"
+                  android:label="@*android:string/dump_heap_title"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:noHistory="true"
+                  android:excludeFromRecents="true"
+                  android:exported="false" />
 
         <receiver
             android:name=".BugreportReceiver"
@@ -251,6 +266,16 @@
             android:permission="android.permission.DUMP">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".HeapDumpReceiver"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.android.internal.intent.action.HEAP_DUMP_FINISHED" />
+                <action android:name="com.android.shell.action.DELETE_HEAP_DUMP" />
             </intent-filter>
         </receiver>
 
