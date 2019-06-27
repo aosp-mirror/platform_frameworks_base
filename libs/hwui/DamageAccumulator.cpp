@@ -137,19 +137,27 @@ void DamageAccumulator::applyMatrix4Transform(DirtyStack* frame) {
     mapRect(frame->matrix4, frame->pendingDirty, &mHead->pendingDirty);
 }
 
-static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRect* out) {
-    if (in.isEmpty()) return;
-    const SkMatrix* transform = props.getTransformMatrix();
-    SkRect temp(in);
+static inline void applyMatrix(const SkMatrix* transform, SkRect* rect) {
     if (transform && !transform->isIdentity()) {
         if (CC_LIKELY(!transform->hasPerspective())) {
-            transform->mapRect(&temp);
+            transform->mapRect(rect);
         } else {
             // Don't attempt to calculate damage for a perspective transform
             // as the numbers this works with can break the perspective
             // calculations. Just give up and expand to DIRTY_MIN/DIRTY_MAX
-            temp.set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
+            rect->set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
         }
+    }
+}
+
+static inline void mapRect(const RenderProperties& props, const SkRect& in, SkRect* out) {
+    if (in.isEmpty()) return;
+    SkRect temp(in);
+    applyMatrix(props.getTransformMatrix(), &temp);
+    if (props.getStaticMatrix()) {
+        applyMatrix(props.getStaticMatrix(), &temp);
+    } else if (props.getAnimationMatrix()) {
+        applyMatrix(props.getAnimationMatrix(), &temp);
     }
     temp.offset(props.getLeft(), props.getTop());
     out->join(temp);
