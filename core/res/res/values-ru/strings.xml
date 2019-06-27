@@ -594,7 +594,7 @@
     <string name="face_error_lockout" msgid="3407426963155388504">"Слишком много попыток. Повторите позже."</string>
     <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Слишком много попыток. Функция \"Фейсконтроль\" отключена."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Не удалось распознать лицо. Повторите попытку."</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Вы не настроили функцию \"Фейсконтроль\"."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Вы не настроили фейсконтроль."</string>
     <string name="face_error_hw_not_present" msgid="8302690289757559738">"Это устройство не поддерживает функцию \"Фейсконтроль\"."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">

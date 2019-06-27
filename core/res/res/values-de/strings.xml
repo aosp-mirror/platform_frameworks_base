@@ -321,8 +321,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich personenbezogener Daten wie Kreditkartennummern und Passwörter."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Displayvergrößerung festlegen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Bewegungen möglich"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Bewegungen möglich."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gesten möglich"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Gesten möglich."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bewegungen auf dem Fingerabdrucksensor"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Erfasst Bewegungen auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>

@@ -30,7 +30,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Tanpa judul&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Tidak ada nomor telepon)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Tidak diketahui"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Kotak Pesan"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Pesan suara"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Masalah sambungan atau kode MMI tidak valid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operasi dibatasi untuk nomor panggilan tetap saja."</string>
@@ -1506,7 +1506,7 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Jangan lakukan apa pun untuk saat ini"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Pilih akun"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Tambahkan akun"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Tambah akun"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Tambahkan akun"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Tambah"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Kurangi"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> sentuh &amp; tahan."</string>
