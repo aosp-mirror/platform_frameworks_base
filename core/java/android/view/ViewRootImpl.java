@@ -1131,7 +1131,13 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void registerRtFrameCallback(FrameDrawingCallback callback) {
         if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(callback);
+            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(frame -> {
+                try {
+                    callback.onFrameDraw(frame);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception while executing onFrameDraw", e);
+                }
+            });
         }
     }
 
