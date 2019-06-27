@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -120,7 +121,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         new StatusBarStateControllerImpl(),
                         bypassController);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator,
-                bypassController);
+                bypassController, mHeadsUpManager, mock(NotificationRoundnessManager.class));
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
                 bypassController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);

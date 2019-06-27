@@ -91,8 +91,7 @@ public abstract class SoftRestrictedPermissionPolicy {
             // Storage uses a special app op to decide the mount state and supports soft restriction
             // where the restricted state allows the permission but only for accessing the medial
             // collections.
-            case READ_EXTERNAL_STORAGE:
-            case WRITE_EXTERNAL_STORAGE: {
+            case READ_EXTERNAL_STORAGE: {
                 final int flags;
                 final boolean applyRestriction;
                 final boolean isWhiteListed;
@@ -145,6 +144,42 @@ public abstract class SoftRestrictedPermissionPolicy {
                         } else {
                             return false;
                         }
+                    }
+                };
+            }
+            case WRITE_EXTERNAL_STORAGE: {
+                final boolean isWhiteListed;
+                final int targetSDK;
+
+                if (appInfo != null) {
+                    final int flags = context.getPackageManager().getPermissionFlags(permission,
+                            appInfo.packageName, user);
+                    isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
+                    targetSDK = appInfo.targetSdkVersion;
+                } else {
+                    isWhiteListed = false;
+                    targetSDK = 0;
+                }
+
+                return new SoftRestrictedPermissionPolicy() {
+                    @Override
+                    public int resolveAppOp() {
+                        return OP_NONE;
+                    }
+
+                    @Override
+                    public int getDesiredOpMode() {
+                        return MODE_DEFAULT;
+                    }
+
+                    @Override
+                    public boolean shouldSetAppOpIfNotDefault() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean canBeGranted() {
+                        return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
                     }
                 };
             }

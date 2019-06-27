@@ -13,7 +13,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
@@ -24,7 +23,6 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -242,11 +240,15 @@ public class NotificationIconAreaController implements DarkReceiver,
     protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
             boolean hideRepliedMessages, boolean hideCurrentMedia, boolean hideCenteredIcon,
-            boolean hidePulsing) {
+            boolean hidePulsing, boolean onlyShowCenteredIcon) {
 
-        final boolean isCenteredNotificationIcon = entry.centeredIcon != null
+        final boolean isCenteredNotificationIcon = mCenteredIconView != null
+                && entry.centeredIcon != null
                 && Objects.equals(entry.centeredIcon, mCenteredIconView);
-        if (hideCenteredIcon == isCenteredNotificationIcon) {
+        if (onlyShowCenteredIcon) {
+            return isCenteredNotificationIcon;
+        }
+        if (hideCenteredIcon && isCenteredNotificationIcon) {
             return false;
         }
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
@@ -299,8 +301,9 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* hideDismissed */,
                 false /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
-                true /* hide centered icon */,
-                false /* hidePulsing */);
+                false /* hide centered icon */,
+                false /* hidePulsing */,
+                false /* onlyShowCenteredIcon */);
     }
 
     public void updateStatusBarIcons() {
@@ -311,7 +314,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 true /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
                 true /* hide centered icon */,
-                false /* hidePulsing */);
+                false /* hidePulsing */,
+                false /* onlyShowCenteredIcon */);
     }
 
     private void updateCenterIcon() {
@@ -322,7 +326,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 false /* hideRepliedMessages */,
                 false /* hideCurrentMedia */,
                 false /* hide centered icon */,
-                false /* hidePulsing */);
+                false /* hidePulsing */,
+                true/* onlyShowCenteredIcon */);
     }
 
     public void updateAodNotificationIcons() {
@@ -333,7 +338,8 @@ public class NotificationIconAreaController implements DarkReceiver,
                 true /* hideRepliedMessages */,
                 true /* hideCurrentMedia */,
                 true /* hide centered icon */,
-                mBypassController.getBypassEnabled() /* hidePulsing */);
+                mBypassController.getBypassEnabled() /* hidePulsing */,
+                false /* onlyShowCenteredIcon */);
     }
 
     /**
@@ -349,7 +355,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     private void updateIconsForLayout(Function<NotificationEntry, StatusBarIconView> function,
             NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
             boolean hideDismissed, boolean hideRepliedMessages, boolean hideCurrentMedia,
-            boolean hideCenteredIcon, boolean hidePulsing) {
+            boolean hideCenteredIcon, boolean hidePulsing, boolean onlyShowCenteredIcon) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -359,7 +365,8 @@ public class NotificationIconAreaController implements DarkReceiver,
             if (view instanceof ExpandableNotificationRow) {
                 NotificationEntry ent = ((ExpandableNotificationRow) view).getEntry();
                 if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
-                        hideRepliedMessages, hideCurrentMedia, hideCenteredIcon, hidePulsing)) {
+                        hideRepliedMessages, hideCurrentMedia, hideCenteredIcon, hidePulsing,
+                        onlyShowCenteredIcon)) {
                     StatusBarIconView iconView = function.apply(ent);
                     if (iconView != null) {
                         toShow.add(iconView);

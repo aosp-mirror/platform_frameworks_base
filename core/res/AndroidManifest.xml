@@ -824,6 +824,11 @@
      grants your app this permission. If you don't need this permission, be sure your <a
      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
      targetSdkVersion}</a> is 4 or higher.
+     <p>Is this permission is not whitelisted for an app that targets an API level before
+     {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
+     <p>Is this permission is not whitelisted for an app that targets an API level
+     {@link android.os.Build.VERSION_CODES#Q} or later the app will be forced into isolated storage.
+     </p>
      -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -845,6 +850,8 @@
          read/write files in your application-specific directories returned by
          {@link android.content.Context#getExternalFilesDir} and
          {@link android.content.Context#getExternalCacheDir}.
+         <p>Is this permission is not whitelisted for an app that targets an API level before
+         {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
     -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -2537,7 +2544,7 @@
     <!-- @SystemApi @TestApi @hide Allows an application to modify config settings.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WRITE_DEVICE_CONFIG"
-        android:protectionLevel="signature|configurator"/>
+        android:protectionLevel="signature|verifier|configurator"/>
 
     <!-- @SystemApi @hide Allows an application to read config settings.
     <p>Not for use by third-party applications. -->

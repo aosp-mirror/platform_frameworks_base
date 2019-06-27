@@ -16,20 +16,17 @@
 
 package com.android.systemui.appops;
 
-import static junit.framework.TestCase.assertFalse;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.pm.PackageManager;
@@ -39,6 +36,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -54,7 +52,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = UserHandle.getUid(0, 0);
     private static final int TEST_UID_OTHER = UserHandle.getUid(1, 0);
-    private static final int TEST_UID_NON_USER_SENSITIVE = UserHandle.getUid(2, 0);
 
     @Mock
     private AppOpsManager mAppOpsManager;
@@ -64,32 +61,16 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private AppOpsController.Callback mCallback;
     @Mock
     private AppOpsControllerImpl.H mMockHandler;
-    @Mock
-    private PermissionFlagsCache mFlagsCache;
 
     private AppOpsControllerImpl mController;
-    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTestableLooper = TestableLooper.get(this);
 
         getContext().addMockSystemService(AppOpsManager.class, mAppOpsManager);
 
-        // All permissions of TEST_UID and TEST_UID_OTHER are user sensitive. None of
-        // TEST_UID_NON_USER_SENSITIVE are user sensitive.
-        getContext().setMockPackageManager(mPackageManager);
-        when(mFlagsCache.getPermissionFlags(anyString(), anyString(),
-                eq(UserHandle.getUserHandleForUid(TEST_UID)))).thenReturn(
-                PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED);
-        when(mFlagsCache.getPermissionFlags(anyString(), anyString(),
-                eq(UserHandle.getUserHandleForUid(TEST_UID_OTHER)))).thenReturn(
-                PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED);
-        when(mFlagsCache.getPermissionFlags(anyString(), anyString(),
-                eq(UserHandle.getUserHandleForUid(TEST_UID_NON_USER_SENSITIVE)))).thenReturn(0);
-
-        mController = new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mFlagsCache);
+        mController = new AppOpsControllerImpl(mContext, Dependency.get(Dependency.BG_LOOPER));
     }
 
     @Test
@@ -113,7 +94,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
         mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
                 AppOpsManager.MODE_ALLOWED);
-        mTestableLooper.processAllMessages();
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
     }
@@ -123,7 +103,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.addCallback(new int[]{AppOpsManager.OP_FINE_LOCATION}, mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        mTestableLooper.processAllMessages();
         verify(mCallback, never()).onActiveStateChanged(
                 anyInt(), anyInt(), anyString(), anyBoolean());
     }
@@ -134,7 +113,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.removeCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        mTestableLooper.processAllMessages();
         verify(mCallback, never()).onActiveStateChanged(
                 anyInt(), anyInt(), anyString(), anyBoolean());
     }
@@ -145,7 +123,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.removeCallback(new int[]{AppOpsManager.OP_CAMERA}, mCallback);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        mTestableLooper.processAllMessages();
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
     }
@@ -182,14 +159,6 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID)).size());
         assertEquals(1,
                 mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID_OTHER)).size());
-    }
-
-    @Test
-    public void nonUserSensitiveOpsAreIgnored() {
-        mController.onOpActiveChanged(AppOpsManager.OP_RECORD_AUDIO,
-                TEST_UID_NON_USER_SENSITIVE, TEST_PACKAGE_NAME, true);
-        assertEquals(0, mController.getActiveAppOpsForUser(
-                UserHandle.getUserId(TEST_UID_NON_USER_SENSITIVE)).size());
     }
 
     @Test

@@ -162,6 +162,9 @@ public class SystemServicesTestRule implements TestRule {
         }
 
         final ActivityTaskManagerService atms = mock(ActivityTaskManagerService.class);
+        final TaskChangeNotificationController taskChangeNotificationController = mock(
+                TaskChangeNotificationController.class);
+        doReturn(taskChangeNotificationController).when(atms).getTaskChangeNotificationController();
         final WindowManagerGlobalLock wmLock = new WindowManagerGlobalLock();
         doReturn(wmLock).when(atms).getGlobalLock();
 

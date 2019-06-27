@@ -1040,6 +1040,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return false;
     }
 
+    public int getHeadsUpHeightWithoutHeader() {
+        return getHeight();
+    }
+
     public interface OnActivatedListener {
         void onActivated(ActivatableNotificationView view);
         void onActivationReset(ActivatableNotificationView view);
