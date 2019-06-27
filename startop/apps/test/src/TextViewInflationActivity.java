@@ -16,11 +16,14 @@
 
 package com.android.startop.test;
 
-import android.app.Activity;
+import android.os.Bundle;
 
-/**
- * The simplest possible Android activity, for testing startup with no
- * app-specific behavior.
- */
-public class EmptyActivity extends Activity {
+public class TextViewInflationActivity extends LayoutInflationActivity {
+    protected void onCreate(Bundle savedInstanceState) {
+        Bundle newState = savedInstanceState == null
+                ? new Bundle() : new Bundle(savedInstanceState);
+        newState.putInt(LAYOUT_ID, R.layout.textview_list);
+
+        super.onCreate(newState);
+    }
 }
