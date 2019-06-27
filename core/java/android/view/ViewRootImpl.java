@@ -1129,7 +1129,7 @@ public final class ViewRootImpl implements ViewParent,
      *
      * @param callback The callback to register.
      */
-    public void registerRtFrameCallback(FrameDrawingCallback callback) {
+    public void registerRtFrameCallback(@NonNull FrameDrawingCallback callback) {
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.registerRtFrameCallback(frame -> {
                 try {
