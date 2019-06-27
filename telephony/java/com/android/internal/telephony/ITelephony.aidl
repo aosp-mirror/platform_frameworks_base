@@ -308,36 +308,18 @@ interface ITelephony {
      */
     List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
 
-    @UnsupportedAppUsage
-    int getCallState();
+     @UnsupportedAppUsage
+     int getCallState();
 
     /**
      * Returns the call state for a slot.
      */
      int getCallStateForSlot(int slotIndex);
 
-    /**
-     * Returns a constant indicating the type of activity on a data connection
-     * (cellular).
-     *
-     * @see #DATA_ACTIVITY_NONE
-     * @see #DATA_ACTIVITY_IN
-     * @see #DATA_ACTIVITY_OUT
-     * @see #DATA_ACTIVITY_INOUT
-     * @see #DATA_ACTIVITY_DORMANT
-     */
-    int getDataActivity(int subId);
-
-    /**
-     * Returns a constant indicating the current data connection state
-     * (cellular).
-     *
-     * @see #DATA_DISCONNECTED
-     * @see #DATA_CONNECTING
-     * @see #DATA_CONNECTED
-     * @see #DATA_SUSPENDED
-     */
-    int getDataState(int subId);
+     @UnsupportedAppUsage
+     int getDataActivity();
+     @UnsupportedAppUsage
+     int getDataState();
 
     /**
      * Returns the current active phone type as integer.
