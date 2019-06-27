@@ -16,8 +16,13 @@
 package com.android.internal.os;
 
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.system.suspend.ISuspendControlService;
+import android.system.suspend.WakeLockInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -58,6 +63,7 @@ public class KernelWakelockReader {
 
     private final String[] mProcWakelocksName = new String[3];
     private final long[] mProcWakelocksData = new long[3];
+    private ISuspendControlService mSuspendControlService = null;
 
     /**
      * Reads kernel wakelock stats and updates the staleStats with the new information.
@@ -117,7 +123,52 @@ public class KernelWakelockReader {
                 }
             }
         }
-        return parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
+
+        updateVersion(staleStats);
+
+        parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
+
+        if (mSuspendControlService == null) {
+            try {
+                mSuspendControlService = ISuspendControlService.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow("suspend_control"));
+            } catch (ServiceNotFoundException e) {
+                Slog.wtf(TAG, "Required service suspend_control not available", e);
+            }
+        }
+
+        try {
+            WakeLockInfo[] wlStats = mSuspendControlService.getWakeLockStats();
+            getNativeWakelockStats(wlStats, staleStats);
+        } catch (RemoteException e) {
+            Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
+        }
+
+        return removeOldStats(staleStats);
+    }
+
+    /**
+     * Reads native wakelock stats from SystemSuspend and updates staleStats with the new
+     * information.
+     * @param staleStats Existing object to update.
+     * @return the updated stats.
+     */
+    @VisibleForTesting
+    public KernelWakelockStats getNativeWakelockStats(WakeLockInfo[] wlStats,
+                                                      final KernelWakelockStats staleStats) {
+        for (WakeLockInfo info : wlStats) {
+            if (!staleStats.containsKey(info.name)) {
+                staleStats.put(info.name, new KernelWakelockStats.Entry((int) info.activeCount,
+                        info.totalTime, sKernelWakelockUpdateVersion));
+            } else {
+                KernelWakelockStats.Entry kwlStats = staleStats.get(info.name);
+                kwlStats.mCount = (int) info.activeCount;
+                kwlStats.mTotalTime = info.totalTime;
+                kwlStats.mVersion = sKernelWakelockUpdateVersion;
+            }
+        }
+
+        return staleStats;
     }
 
     /**
@@ -138,7 +189,6 @@ public class KernelWakelockReader {
         startIndex = endIndex = i + 1;
 
         synchronized(this) {
-            sKernelWakelockUpdateVersion++;
             while (endIndex < len) {
                 for (endIndex=startIndex;
                         endIndex < len && wlBuffer[endIndex] != '\n' && wlBuffer[endIndex] != '\0';
@@ -199,16 +249,35 @@ public class KernelWakelockReader {
                 startIndex = endIndex + 1;
             }
 
-            // Don't report old data.
-            Iterator<KernelWakelockStats.Entry> itr = staleStats.values().iterator();
-            while (itr.hasNext()) {
-                if (itr.next().mVersion != sKernelWakelockUpdateVersion) {
-                    itr.remove();
-                }
-            }
-
-            staleStats.kernelWakelockVersion = sKernelWakelockUpdateVersion;
             return staleStats;
         }
+    }
+
+    /**
+     * Increments sKernelWakelockUpdateVersion and updates the version in staleStats.
+     * @param staleStats Existing object to update.
+     * @return the updated stats.
+     */
+    @VisibleForTesting
+    public KernelWakelockStats updateVersion(KernelWakelockStats staleStats) {
+        sKernelWakelockUpdateVersion++;
+        staleStats.kernelWakelockVersion = sKernelWakelockUpdateVersion;
+        return staleStats;
+    }
+
+    /**
+     * Removes old stats from staleStats.
+     * @param staleStats Existing object to update.
+     * @return the updated stats.
+     */
+    @VisibleForTesting
+    public KernelWakelockStats removeOldStats(final KernelWakelockStats staleStats) {
+        Iterator<KernelWakelockStats.Entry> itr = staleStats.values().iterator();
+        while (itr.hasNext()) {
+            if (itr.next().mVersion != sKernelWakelockUpdateVersion) {
+                itr.remove();
+            }
+        }
+        return staleStats;
     }
 }
