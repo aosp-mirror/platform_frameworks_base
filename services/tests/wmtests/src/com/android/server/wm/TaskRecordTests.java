@@ -16,11 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -29,6 +31,9 @@ import static android.view.Surface.ROTATION_0;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.hamcrest.Matchers.not;
@@ -36,6 +41,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +57,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
@@ -441,6 +448,342 @@ public class TaskRecordTests extends ActivityTestsBase {
         ActivityRecord defaultActivity = new ActivityBuilder(mService).build();
         assertEquals("Should not be the same intent filter.", false,
                 task.isSameIntentFilter(defaultActivity));
+    }
+
+    /** Test that root activity index is reported correctly for several activities in the task. */
+    @Test
+    public void testFindRootIndex() {
+        final TaskRecord task = getTestTask();
+        // Add an extra activity on top of the root one
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The root activity in the task must be reported.",
+                0, task.findRootIndex(false /* effectiveRoot*/));
+    }
+
+    /**
+     * Test that root activity index is reported correctly for several activities in the task when
+     * the activities on the bottom are finishing.
+     */
+    @Test
+    public void testFindRootIndex_finishing() {
+        final TaskRecord task = getTestTask();
+        // Add extra two activities and mark the two on the bottom as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.finishing = true;
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The first non-finishing activity in the task must be reported.",
+                2, task.findRootIndex(false /* effectiveRoot*/));
+    }
+
+    /**
+     * Test that root activity index is reported correctly for several activities in the task when
+     * looking for the 'effective root'.
+     */
+    @Test
+    public void testFindRootIndex_effectiveRoot() {
+        final TaskRecord task = getTestTask();
+        // Add an extra activity on top of the root one
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The root activity in the task must be reported.",
+                0, task.findRootIndex(true /* effectiveRoot*/));
+    }
+
+    /**
+     * Test that root activity index is reported correctly when looking for the 'effective root' in
+     * case when bottom activities are relinquishing task identity or finishing.
+     */
+    @Test
+    public void testFindRootIndex_effectiveRoot_finishingAndRelinquishing() {
+        final TaskRecord task = getTestTask();
+        // Add extra two activities. Mark the one on the bottom with "relinquishTaskIdentity" and
+        // one above as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.finishing = true;
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The first non-finishing activity and non-relinquishing task identity "
+                        + "must be reported.", 2, task.findRootIndex(true /* effectiveRoot*/));
+    }
+
+    /**
+     * Test that root activity index is reported correctly when looking for the 'effective root'
+     * for the case when there is only a single activity that also has relinquishTaskIdentity set.
+     */
+    @Test
+    public void testFindRootIndex_effectiveRoot_relinquishingAndSingleActivity() {
+        final TaskRecord task = getTestTask();
+        // Set relinquishTaskIdentity for the only activity in the task
+        task.getChildAt(0).info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        assertEquals("The root activity in the task must be reported.",
+                0, task.findRootIndex(true /* effectiveRoot*/));
+    }
+
+    /**
+     * Test that the topmost activity index is reported correctly when looking for the
+     * 'effective root' for the case when all activities have relinquishTaskIdentity set.
+     */
+    @Test
+    public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
+        final TaskRecord task = getTestTask();
+        // Set relinquishTaskIdentity for all activities in the task
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        assertEquals("The topmost activity in the task must be reported.",
+                task.getChildCount() - 1, task.findRootIndex(true /* effectiveRoot*/));
+    }
+
+    /** Test that bottom-most activity is reported in {@link TaskRecord#getRootActivity()}. */
+    @Test
+    public void testGetRootActivity() {
+        final TaskRecord task = getTestTask();
+        // Add an extra activity on top of the root one
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The root activity in the task must be reported.",
+                task.getChildAt(0), task.getRootActivity());
+    }
+
+    /**
+     * Test that first non-finishing activity is reported in {@link TaskRecord#getRootActivity()}.
+     */
+    @Test
+    public void testGetRootActivity_finishing() {
+        final TaskRecord task = getTestTask();
+        // Add an extra activity on top of the root one
+        new ActivityBuilder(mService).setTask(task).build();
+        // Mark the root as finishing
+        task.getChildAt(0).finishing = true;
+
+        assertEquals("The first non-finishing activity in the task must be reported.",
+                task.getChildAt(1), task.getRootActivity());
+    }
+
+    /**
+     * Test that relinquishTaskIdentity flag is ignored in {@link TaskRecord#getRootActivity()}.
+     */
+    @Test
+    public void testGetRootActivity_relinquishTaskIdentity() {
+        final TaskRecord task = getTestTask();
+        // Mark the bottom-most activity with FLAG_RELINQUISH_TASK_IDENTITY.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        // Add an extra activity on top of the root one.
+        new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals("The root activity in the task must be reported.",
+                task.getChildAt(0), task.getRootActivity());
+    }
+
+    /**
+     * Test that no activity is reported in {@link TaskRecord#getRootActivity()} when all activities
+     * in the task are finishing.
+     */
+    @Test
+    public void testGetRootActivity_allFinishing() {
+        final TaskRecord task = getTestTask();
+        // Mark the bottom-most activity as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+        // Add an extra activity on top of the root one and mark it as finishing
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.finishing = true;
+
+        assertNull("No activity must be reported if all are finishing", task.getRootActivity());
+    }
+
+    /**
+     * Test that first non-finishing activity is the root of task.
+     */
+    @Test
+    public void testIsRootActivity() {
+        final TaskRecord task = getTestTask();
+        // Mark the bottom-most activity as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+        // Add an extra activity on top of the root one.
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+
+        assertFalse("Finishing activity must not be the root of task", activity0.isRootOfTask());
+        assertTrue("Non-finishing activity must be the root of task", activity1.isRootOfTask());
+    }
+
+    /**
+     * Test that if all activities in the task are finishing, then the one on the bottom is the
+     * root of task.
+     */
+    @Test
+    public void testIsRootActivity_allFinishing() {
+        final TaskRecord task = getTestTask();
+        // Mark the bottom-most activity as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+        // Add an extra activity on top of the root one and mark it as finishing
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.finishing = true;
+
+        assertTrue("Bottom activity must be the root of task", activity0.isRootOfTask());
+        assertFalse("Finishing activity on top must not be the root of task",
+                activity1.isRootOfTask());
+    }
+
+    /**
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)}.
+     */
+    @Test
+    public void testGetTaskForActivity() {
+        final TaskRecord task0 = getTestTask();
+        final ActivityRecord activity0 = task0.getChildAt(0);
+
+        final TaskRecord task1 = getTestTask();
+        final ActivityRecord activity1 = task0.getChildAt(0);
+
+        assertEquals(task0.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
+        assertEquals(task1.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken,  false /* onlyRoot */));
+    }
+
+    /**
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with finishing
+     * activity.
+     */
+    @Test
+    public void testGetTaskForActivity_onlyRoot_finishing() {
+        final TaskRecord task = getTestTask();
+        // Make the current root activity finishing
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+        // Add an extra activity on top - this will be the new root
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        // Add one more on top
+        final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
+        assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
+    }
+
+    /**
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} with activity that
+     * relinquishes task identity.
+     */
+    @Test
+    public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
+        final TaskRecord task = getTestTask();
+        // Make the current root activity relinquish task identity
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        // Add an extra activity on top - this will be the new root
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        // Add one more on top
+        final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
+        assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
+    }
+
+    /**
+     * Test {@link ActivityRecord#getTaskForActivityLocked(IBinder, boolean)} allowing non-root
+     * entries.
+     */
+    @Test
+    public void testGetTaskForActivity_notOnlyRoot() {
+        final TaskRecord task = getTestTask();
+        // Mark the bottom-most activity as finishing.
+        final ActivityRecord activity0 = task.getChildAt(0);
+        activity0.finishing = true;
+
+        // Add an extra activity on top of the root one and make it relinquish task identity
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        // Add one more activity on top
+        final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
+
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, false /* onlyRoot */));
+        assertEquals(task.taskId,
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, false /* onlyRoot */));
+    }
+
+    /**
+     * Test {@link TaskRecord#updateEffectiveIntent()}.
+     */
+    @Test
+    public void testUpdateEffectiveIntent() {
+        // Test simple case with a single activity.
+        final TaskRecord task = getTestTask();
+        final ActivityRecord activity0 = task.getChildAt(0);
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link TaskRecord#updateEffectiveIntent()} with root activity marked as finishing. This
+     * should make the task use the second activity when updating the intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_rootFinishing() {
+        // Test simple case with a single activity.
+        final TaskRecord task = getTestTask();
+        final ActivityRecord activity0 = task.getChildAt(0);
+        // Mark the bottom-most activity as finishing.
+        activity0.finishing = true;
+        // Add an extra activity on top of the root one
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity1));
+    }
+
+    /**
+     * Test {@link TaskRecord#updateEffectiveIntent()} when all activities are finishing or
+     * relinquishing task identity. In this case the root activity should still be used when
+     * updating the intent (legacy behavior).
+     */
+    @Test
+    public void testUpdateEffectiveIntent_allFinishing() {
+        // Test simple case with a single activity.
+        final TaskRecord task = getTestTask();
+        final ActivityRecord activity0 = task.getChildAt(0);
+        // Mark the bottom-most activity as finishing.
+        activity0.finishing = true;
+        // Add an extra activity on top of the root one and make it relinquish task identity
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.finishing = true;
+
+        // Task must still update the intent using the root activity (preserving legacy behavior).
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    private TaskRecord getTestTask() {
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        return stack.getChildAt(0);
     }
 
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,

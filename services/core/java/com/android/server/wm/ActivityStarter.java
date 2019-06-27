@@ -1557,7 +1557,7 @@ class ActivityStarter {
                 }
 
                 if (top != null) {
-                    if (top.frontOfTask) {
+                    if (top.isRootOfTask()) {
                         // Activity aliases may mean we use different intents for the top activity,
                         // so make sure the task now has the identity of the new intent.
                         top.getTaskRecord().setIntent(mStartActivity);
@@ -2260,7 +2260,7 @@ class ActivityStarter {
                         || LAUNCH_SINGLE_TOP == mLaunchMode)
                     && intentActivity.mActivityComponent.equals(
                             mStartActivity.mActivityComponent)) {
-                if (intentActivity.frontOfTask) {
+                if (intentActivity.isRootOfTask()) {
                     intentActivity.getTaskRecord().setIntent(mStartActivity);
                 }
                 deliverNewIntent(intentActivity);

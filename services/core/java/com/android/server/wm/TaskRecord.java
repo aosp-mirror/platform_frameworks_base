@@ -1113,16 +1113,14 @@ class TaskRecord extends ConfigurationContainer {
         return intent != null ? intent : affinityIntent;
     }
 
-    /** Returns the first non-finishing activity from the root. */
+    /** Returns the first non-finishing activity from the bottom. */
     ActivityRecord getRootActivity() {
-        for (int i = 0; i < mActivities.size(); i++) {
-            final ActivityRecord r = mActivities.get(i);
-            if (r.finishing) {
-                continue;
-            }
-            return r;
+        final int rootActivityIndex = findRootIndex(false /* effectiveRoot */);
+        if (rootActivityIndex == -1) {
+            // There are no non-finishing activities in the task.
+            return null;
         }
-        return null;
+        return mActivities.get(rootActivityIndex);
     }
 
     ActivityRecord getTopActivity() {
@@ -1237,27 +1235,6 @@ class TaskRecord extends ConfigurationContainer {
                 || topRunningActivityLocked() != null;
     }
 
-    /** Call after activity movement or finish to make sure that frontOfTask is set correctly */
-    final void setFrontOfTask() {
-        boolean foundFront = false;
-        final int numActivities = mActivities.size();
-        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = mActivities.get(activityNdx);
-            if (foundFront || r.finishing) {
-                r.frontOfTask = false;
-            } else {
-                r.frontOfTask = true;
-                // Set frontOfTask false for every following activity.
-                foundFront = true;
-            }
-        }
-        if (!foundFront && numActivities > 0) {
-            // All activities of this task are finishing. As we ought to have a frontOfTask
-            // activity, make the bottom activity front.
-            mActivities.get(0).frontOfTask = true;
-        }
-    }
-
     /**
      * Reorder the history stack so that the passed activity is brought to the front.
      */
@@ -1272,8 +1249,6 @@ class TaskRecord extends ConfigurationContainer {
         // Make sure window manager is aware of the position change.
         mTask.positionChildAtTop(newTop.mAppWindowToken);
         updateEffectiveIntent();
-
-        setFrontOfTask();
     }
 
     void addActivityToTop(ActivityRecord r) {
@@ -1658,6 +1633,7 @@ class TaskRecord extends ConfigurationContainer {
 
     /** Updates the last task description values. */
     void updateTaskDescription() {
+        // TODO(AM refactor): Cleanup to use findRootIndex()
         // Traverse upwards looking for any break between main task activities and
         // utility activities.
         int activityNdx;
@@ -1736,8 +1712,19 @@ class TaskRecord extends ConfigurationContainer {
         }
     }
 
-    int findEffectiveRootIndex() {
-        int effectiveNdx = 0;
+    /**
+     * Find the index of the root activity in the task. It will be the first activity from the
+     * bottom that is not finishing.
+     *
+     * @param effectiveRoot Flag indicating whether 'effective root' should be returned - an
+     *                      activity that defines the task identity (its base intent). It's the
+     *                      first one that does not have
+     *                      {@link ActivityInfo#FLAG_RELINQUISH_TASK_IDENTITY}.
+     * @return index of the 'root' or 'effective' root in the list of activities, -1 if no eligible
+     *         activity was found.
+     */
+    int findRootIndex(boolean effectiveRoot) {
+        int effectiveNdx = -1;
         final int topActivityNdx = mActivities.size() - 1;
         for (int activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
@@ -1745,15 +1732,22 @@ class TaskRecord extends ConfigurationContainer {
                 continue;
             }
             effectiveNdx = activityNdx;
-            if ((r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+            if (!effectiveRoot || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
                 break;
             }
         }
         return effectiveNdx;
     }
 
+    // TODO (AM refactor): Invoke automatically when there is a change in children
+    @VisibleForTesting
     void updateEffectiveIntent() {
-        final int effectiveRootIndex = findEffectiveRootIndex();
+        int effectiveRootIndex = findRootIndex(true /* effectiveRoot */);
+        if (effectiveRootIndex == -1) {
+            // All activities in the task are either finishing or relinquish task identity.
+            // But we still want to update the intent, so let's use the bottom activity.
+            effectiveRootIndex = 0;
+        }
         final ActivityRecord r = mActivities.get(effectiveRootIndex);
         setIntent(r);
 
