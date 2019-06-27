@@ -46,6 +46,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Objects;
 
@@ -82,6 +83,7 @@ public class PhoneStatusBarView extends PanelBar {
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
+    private boolean mHeadsUpVisible;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -378,5 +380,15 @@ public class PhoneStatusBarView extends PanelBar {
             return new Pair<>(0, size.x - bounds.left);
         }
         return null;
+    }
+
+    public void setHeadsUpVisible(boolean headsUpVisible) {
+        mHeadsUpVisible = headsUpVisible;
+        updateVisibility();
+    }
+
+    @Override
+    protected boolean shouldPanelBeVisible() {
+        return mHeadsUpVisible || super.shouldPanelBeVisible();
     }
 }
