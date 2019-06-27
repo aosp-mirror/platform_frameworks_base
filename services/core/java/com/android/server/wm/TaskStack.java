@@ -1931,8 +1931,12 @@ public class TaskStack extends WindowContainer<Task> implements
     public boolean setPinnedStackAlpha(float alpha) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mWmService.mGlobalLock) {
-            getPendingTransaction().setAlpha(getSurfaceControl(),
-                    mCancelCurrentBoundsAnimation ? 1 : alpha);
+            final SurfaceControl sc = getSurfaceControl();
+            if (sc == null || !sc.isValid()) {
+                // If the stack is already removed, don't bother updating any stack animation
+                return false;
+            }
+            getPendingTransaction().setAlpha(sc, mCancelCurrentBoundsAnimation ? 1 : alpha);
             scheduleAnimation();
             return !mCancelCurrentBoundsAnimation;
         }
