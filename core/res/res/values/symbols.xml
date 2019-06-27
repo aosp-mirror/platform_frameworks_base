@@ -787,6 +787,7 @@
   <java-symbol type="string" name="emergency_calls_only" />
   <java-symbol type="array" name="config_ephemeralResolverPackage" />
   <java-symbol type="array" name="config_forceQueryablePackages" />
+  <java-symbol type="bool" name="config_forceSystemPackagesQueryable" />
   <java-symbol type="string" name="eventTypeAnniversary" />
   <java-symbol type="string" name="eventTypeBirthday" />
   <java-symbol type="string" name="eventTypeCustom" />

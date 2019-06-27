@@ -768,6 +768,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private final AppsFilter mAppsFilter;
+
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
             return PackageManagerService.this.hasSystemFeature(feature, 0);
@@ -2426,6 +2428,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = ApexManager.create(context);
+        mAppsFilter = AppsFilter.create(context);
+
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
@@ -4332,7 +4336,9 @@ public class PackageManagerService extends IPackageManager.Stub
             return !mInstantAppRegistry.isInstantAccessGranted(
                     userId, UserHandle.getAppId(callingUid), ps.appId);
         }
-        return false;
+        int appId = UserHandle.getAppId(callingUid);
+        final SettingBase callingPs = mSettings.getSettingLPr(appId);
+        return mAppsFilter.shouldFilterApplication(callingUid, callingPs, ps, userId);
     }
 
     /**
@@ -11673,6 +11679,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.addScannedPackageLPw(pkg);
 
             mComponentResolver.addAllComponents(pkg, chatty);
+            mAppsFilter.addPackage(pkg, mPackages);
 
             // Don't allow ephemeral applications to define new permissions groups.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
@@ -11883,7 +11890,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void cleanPackageDataStructuresLILPw(PackageParser.Package pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-
+        mAppsFilter.removePackage(pkg.packageName);
         mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = pkg.instrumentation.size();
