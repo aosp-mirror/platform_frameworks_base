@@ -55,7 +55,7 @@ import java.io.PrintWriter;
  * available.
  * </p>
  */
-public class OldNetworkTimeUpdateService extends Binder implements NetworkTimeUpdateService {
+public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeUpdateService {
 
     private static final String TAG = "NetworkTimeUpdateService";
     private static final boolean DBG = false;
@@ -98,7 +98,7 @@ public class OldNetworkTimeUpdateService extends Binder implements NetworkTimeUp
     // connection to happen.
     private int mTryAgainCounter;
 
-    public OldNetworkTimeUpdateService(Context context) {
+    public NetworkTimeUpdateServiceImpl(Context context) {
         mContext = context;
         mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = mContext.getSystemService(AlarmManager.class);

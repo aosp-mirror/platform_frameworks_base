@@ -1303,16 +1303,13 @@ public final class SystemServer {
             }
             traceEnd();
 
-            final boolean useNewTimeServices = true;
-            if (useNewTimeServices) {
-                traceBeginAndSlog("StartTimeDetectorService");
-                try {
-                    mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
-                } catch (Throwable e) {
-                    reportWtf("starting StartTimeDetectorService service", e);
-                }
-                traceEnd();
+            traceBeginAndSlog("StartTimeDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeDetectorService service", e);
             }
+            traceEnd();
 
             if (!isWatch) {
                 traceBeginAndSlog("StartSearchManagerService");
@@ -1487,12 +1484,7 @@ public final class SystemServer {
             if (!isWatch) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
-                    if (useNewTimeServices) {
-                        networkTimeUpdater = new NewNetworkTimeUpdateService(context);
-                    } else {
-                        networkTimeUpdater = new OldNetworkTimeUpdateService(context);
-                    }
-                    Slog.d(TAG, "Using networkTimeUpdater class=" + networkTimeUpdater.getClass());
+                    networkTimeUpdater = new NetworkTimeUpdateServiceImpl(context);
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
