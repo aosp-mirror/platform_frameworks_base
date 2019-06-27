@@ -1196,7 +1196,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
 
         // Returned bounds with in fullscreen mode will be set to last non-fullscreen bounds.
-        assertEquals(new Rect(0, 0, 200, 100), mCurrent.mBounds);
+        assertEquals(new Rect(0, 0, 200, 100), mResult.mBounds);
     }
 
     @Test
