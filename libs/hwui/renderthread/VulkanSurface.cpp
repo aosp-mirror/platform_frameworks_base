@@ -49,21 +49,6 @@ static int InvertTransform(int transform) {
     }
 }
 
-static int ConvertVkTransformToNative(VkSurfaceTransformFlagsKHR transform) {
-    switch (transform) {
-        case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_270;
-        case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_180;
-        case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_90;
-        case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
-        case VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR:
-        default:
-            return 0;
-    }
-}
-
 static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     const int width = windowSize.width();
     const int height = windowSize.height();
@@ -140,105 +125,59 @@ static bool ResetNativeWindow(ANativeWindow* window) {
     return true;
 }
 
-class VkSurfaceAutoDeleter {
-public:
-    VkSurfaceAutoDeleter(VkInstance instance, VkSurfaceKHR surface,
-                         PFN_vkDestroySurfaceKHR destroySurfaceKHR)
-            : mInstance(instance), mSurface(surface), mDestroySurfaceKHR(destroySurfaceKHR) {}
-    ~VkSurfaceAutoDeleter() { destroy(); }
-
-    void destroy() {
-        if (mSurface != VK_NULL_HANDLE) {
-            mDestroySurfaceKHR(mInstance, mSurface, nullptr);
-            mSurface = VK_NULL_HANDLE;
-        }
-    }
-
-private:
-    VkInstance mInstance;
-    VkSurfaceKHR mSurface;
-    PFN_vkDestroySurfaceKHR mDestroySurfaceKHR;
-};
-
 VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
                                      SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
                                      GrContext* grContext, const VulkanManager& vkManager,
                                      uint32_t extraBuffers) {
-    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
-    memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
-    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext = nullptr;
-    surfaceCreateInfo.flags = 0;
-    surfaceCreateInfo.window = window;
-
-    VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-    VkResult res = vkManager.mCreateAndroidSurfaceKHR(vkManager.mInstance, &surfaceCreateInfo,
-                                                      nullptr, &vkSurface);
-    if (VK_SUCCESS != res) {
-        ALOGE("VulkanSurface::Create() vkCreateAndroidSurfaceKHR failed (%d)", res);
-        return nullptr;
-    }
-
-    VkSurfaceAutoDeleter vkSurfaceDeleter(vkManager.mInstance, vkSurface,
-                                          vkManager.mDestroySurfaceKHR);
-
-    SkDEBUGCODE(VkBool32 supported; res = vkManager.mGetPhysicalDeviceSurfaceSupportKHR(
-                                            vkManager.mPhysicalDevice, vkManager.mPresentQueueIndex,
-                                            vkSurface, &supported);
-                // All physical devices and queue families on Android must be capable of
-                // presentation with any native window.
-                SkASSERT(VK_SUCCESS == res && supported););
-
-    // check for capabilities
-    VkSurfaceCapabilitiesKHR caps;
-    res = vkManager.mGetPhysicalDeviceSurfaceCapabilitiesKHR(vkManager.mPhysicalDevice, vkSurface,
-                                                             &caps);
-    if (VK_SUCCESS != res) {
-        ALOGE("VulkanSurface::Create() vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed (%d)", res);
-        return nullptr;
-    }
-
-    LOG_ALWAYS_FATAL_IF(0 == (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR));
-
-    /*
-     * We must destroy the VK Surface before attempting to update the window as doing so after
-     * will cause the native window to be modified in unexpected ways.
-     */
-    vkSurfaceDeleter.destroy();
+    // TODO(http://b/134182502)
+    const SkISize minSize = SkISize::Make(1, 1);
+    const SkISize maxSize = SkISize::Make(4096, 4096);
 
     /*
      * Populate Window Info struct
      */
     WindowInfo windowInfo;
 
-    windowInfo.transform = ConvertVkTransformToNative(caps.supportedTransforms);
-    windowInfo.size = SkISize::Make(caps.currentExtent.width, caps.currentExtent.height);
-
-    const SkISize minSize = SkISize::Make(caps.minImageExtent.width, caps.minImageExtent.height);
-    const SkISize maxSize = SkISize::Make(caps.maxImageExtent.width, caps.maxImageExtent.height);
-    ComputeWindowSizeAndTransform(&windowInfo, minSize, maxSize);
+    int err;
+    int width, height;
+    err = window->query(window, NATIVE_WINDOW_DEFAULT_WIDTH, &width);
+    if (err != 0 || width < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, width);
+        return nullptr;
+    }
+    err = window->query(window, NATIVE_WINDOW_DEFAULT_HEIGHT, &height);
+    if (err != 0 || height < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, height);
+        return nullptr;
+    }
+    windowInfo.size = SkISize::Make(width, height);
 
     int query_value;
-    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    err = window->query(window, NATIVE_WINDOW_TRANSFORM_HINT, &query_value);
     if (err != 0 || query_value < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
         return nullptr;
     }
-    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+    windowInfo.transform = query_value;
 
-    windowInfo.bufferCount = min_undequeued_buffers +
-                             std::max(sTargetBufferCount + extraBuffers, caps.minImageCount);
-    if (caps.maxImageCount > 0 && windowInfo.bufferCount > caps.maxImageCount) {
-        // Application must settle for fewer images than desired:
-        windowInfo.bufferCount = caps.maxImageCount;
+    ComputeWindowSizeAndTransform(&windowInfo, minSize, maxSize);
+
+    err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return nullptr;
     }
+    windowInfo.bufferCount = static_cast<uint32_t>(query_value) + sTargetBufferCount + extraBuffers;
 
-    // Currently Skia requires the images to be color attachments and support all transfer
-    // operations.
-    VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                                   VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                                   VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    LOG_ALWAYS_FATAL_IF((caps.supportedUsageFlags & usageFlags) != usageFlags);
+    err = window->query(window, NATIVE_WINDOW_MAX_BUFFER_COUNT, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return nullptr;
+    }
+    if (windowInfo.bufferCount > static_cast<uint32_t>(query_value)) {
+        // Application must settle for fewer images than desired:
+        windowInfo.bufferCount = static_cast<uint32_t>(query_value);
+    }
 
     windowInfo.dataspace = HAL_DATASPACE_V0_SRGB;
     if (colorMode == ColorMode::WideColorGamut) {
@@ -275,7 +214,10 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     imageFormatInfo.format = vkPixelFormat;
     imageFormatInfo.type = VK_IMAGE_TYPE_2D;
     imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageFormatInfo.usage = usageFlags;
+    // Currently Skia requires the images to be color attachments and support all transfer
+    // operations.
+    imageFormatInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     imageFormatInfo.flags = 0;
 
     VkAndroidHardwareBufferUsageANDROID hwbUsage;
@@ -286,8 +228,8 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     imgFormProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
     imgFormProps.pNext = &hwbUsage;
 
-    res = vkManager.mGetPhysicalDeviceImageFormatProperties2(vkManager.mPhysicalDevice,
-                                                             &imageFormatInfo, &imgFormProps);
+    VkResult res = vkManager.mGetPhysicalDeviceImageFormatProperties2(
+            vkManager.mPhysicalDevice, &imageFormatInfo, &imgFormProps);
     if (VK_SUCCESS != res) {
         ALOGE("Failed to query GetPhysicalDeviceImageFormatProperties2");
         return nullptr;
