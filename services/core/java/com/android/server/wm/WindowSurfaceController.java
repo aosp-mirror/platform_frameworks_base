@@ -33,7 +33,6 @@ import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -123,7 +122,7 @@ class WindowSurfaceController {
     void reparentChildrenInTransaction(WindowSurfaceController other) {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, "REPARENT from: " + this + " to: " + other);
         if ((mSurfaceControl != null) && (other.mSurfaceControl != null)) {
-            mSurfaceControl.reparentChildren(other.getHandle());
+            mSurfaceControl.reparentChildren(other.mSurfaceControl);
         }
     }
 
@@ -162,7 +161,7 @@ class WindowSurfaceController {
         }
         try {
             if (mSurfaceControl != null) {
-                mSurfaceControl.remove();
+                mTmpTransaction.remove(mSurfaceControl).apply();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
@@ -452,9 +451,9 @@ class WindowSurfaceController {
         return false;
     }
 
-    void deferTransactionUntil(IBinder handle, long frame) {
+    void deferTransactionUntil(SurfaceControl barrier, long frame) {
         // TODO: Logging
-        mSurfaceControl.deferTransactionUntil(handle, frame);
+        mSurfaceControl.deferTransactionUntil(barrier, frame);
     }
 
     void forceScaleableInTransaction(boolean force) {
@@ -481,13 +480,6 @@ class WindowSurfaceController {
 
     boolean hasSurface() {
         return mSurfaceControl != null;
-    }
-
-    IBinder getHandle() {
-        if (mSurfaceControl == null) {
-            return null;
-        }
-        return mSurfaceControl.getHandle();
     }
 
     void getSurfaceControl(SurfaceControl outSurfaceControl) {

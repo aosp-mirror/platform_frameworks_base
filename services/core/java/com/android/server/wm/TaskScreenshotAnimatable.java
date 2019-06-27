@@ -47,8 +47,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         }
         final Rect tmpRect = task.getBounds();
         tmpRect.offset(0, 0);
-        return SurfaceControl.captureLayers(
-                task.getSurfaceControl().getHandle(), tmpRect, 1f);
+        return SurfaceControl.captureLayers(task.getSurfaceControl(), tmpRect, 1f);
     }
 
     private TaskScreenshotAnimatable(Task task,

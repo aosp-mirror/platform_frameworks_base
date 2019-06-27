@@ -398,7 +398,7 @@ class WindowStateAnimator {
                 // transparent to the app.
                 if (mWin.mAppToken == null || mWin.mAppToken.isRelaunching() == false) {
                     mPostDrawTransaction.reparentChildren(mPendingDestroySurface.mSurfaceControl,
-                            mSurfaceController.mSurfaceControl.getHandle())
+                            mSurfaceController.mSurfaceControl)
                             .apply();
                 }
             }
@@ -1013,7 +1013,7 @@ class WindowStateAnimator {
                         // the WS position is reset (so the stack position is shown) at the same
                         // time that the buffer size changes.
                         setOffsetPositionForStackResize(false);
-                        mSurfaceController.deferTransactionUntil(mSurfaceController.getHandle(),
+                        mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
                                 mWin.getFrameNumber());
                     } else {
                         final TaskStack stack = mWin.getStack();
@@ -1044,7 +1044,7 @@ class WindowStateAnimator {
         // comes in at the new size (normally position and crop are unfrozen).
         // setGeometryAppliesWithResizeInTransaction accomplishes this for us.
         if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.deferTransactionUntil(mSurfaceController.getHandle(),
+            mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
                     mWin.getFrameNumber());
             mSurfaceController.forceScaleableInTransaction(false);
         }
@@ -1296,7 +1296,7 @@ class WindowStateAnimator {
             final SurfaceControl pendingSurfaceControl = mPendingDestroySurface.mSurfaceControl;
             mPostDrawTransaction.hide(pendingSurfaceControl);
             mPostDrawTransaction.reparentChildren(pendingSurfaceControl,
-                    mSurfaceController.getHandle());
+                    mSurfaceController.mSurfaceControl);
         }
 
         mPostDrawTransaction.apply();

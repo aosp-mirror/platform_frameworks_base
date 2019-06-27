@@ -29,7 +29,6 @@
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 
-#include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <SkSize.h>
@@ -55,7 +54,6 @@ class RenderState;
 
 namespace renderthread {
 
-class EglManager;
 class Frame;
 
 // This per-renderer class manages the bridge between the global EGL context
@@ -216,8 +214,9 @@ private:
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
-    EGLint mLastFrameWidth = 0;
-    EGLint mLastFrameHeight = 0;
+    // The same type as Frame.mWidth and Frame.mHeight
+    int32_t mLastFrameWidth = 0;
+    int32_t mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
     sp<ReliableSurface> mNativeSurface;

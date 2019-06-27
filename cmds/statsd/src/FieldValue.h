@@ -392,6 +392,7 @@ int getUidIfExists(const FieldValue& value);
 void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* output);
 
 bool isAttributionUidField(const Field& field, const Value& value);
+bool isUidField(const Field& field, const Value& value);
 
 bool equalDimensions(const std::vector<Matcher>& dimension_a,
                      const std::vector<Matcher>& dimension_b);

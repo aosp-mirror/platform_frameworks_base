@@ -87,11 +87,11 @@ void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     listener->decStrong((void*)nativeCreate);
 }
 
-void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jobject stopLayerTokenObj,
+void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jlong stopLayerObj,
         jint left, jint top, jint right, jint bottom) {
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
-    sp<IBinder> stopLayerHandle = ibinderForJavaObject(env, stopLayerTokenObj);
-
+    auto stopLayer = reinterpret_cast<SurfaceControl*>(stopLayerObj);
+    sp<IBinder> stopLayerHandle = stopLayer != nullptr ? stopLayer->getHandle() : nullptr;
     if (SurfaceComposerClient::addRegionSamplingListener(
             Rect(left, top, right, bottom), stopLayerHandle, listener) != OK) {
         constexpr auto error_msg = "Couldn't addRegionSamplingListener";
@@ -116,7 +116,7 @@ const JNINativeMethod gMethods[] = {
             (void*)nativeCreate },
     { "nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    { "nativeRegister", "(JLandroid/os/IBinder;IIII)V",
+    { "nativeRegister", "(JJIIII)V",
             (void*)nativeRegister },
     { "nativeUnregister", "(J)V",
             (void*)nativeUnregister }

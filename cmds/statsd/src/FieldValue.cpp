@@ -149,6 +149,18 @@ bool isAttributionUidField(const Field& field, const Value& value) {
     return false;
 }
 
+bool isUidField(const Field& field, const Value& value) {
+    auto it = android::util::AtomsInfo::kAtomsWithUidField.find(field.getTag());
+
+    if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
+        int uidField = it->second;
+        return field.getDepth() == 0 && field.getPosAtDepth(0) == uidField &&
+               value.getType() == INT;
+    }
+
+    return false;
+}
+
 Value::Value(const Value& from) {
     type = from.getType();
     switch (type) {

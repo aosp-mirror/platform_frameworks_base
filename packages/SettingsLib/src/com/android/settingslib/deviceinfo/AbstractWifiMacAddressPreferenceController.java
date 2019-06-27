@@ -69,8 +69,10 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @Override
     public void displayPreference(PreferenceScreen screen) {
         super.displayPreference(screen);
-        mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
-        updateConnectivity();
+        if (isAvailable()) {
+            mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
+            updateConnectivity();
+        }
     }
 
     @Override
