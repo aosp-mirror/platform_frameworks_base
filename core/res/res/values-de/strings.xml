@@ -399,9 +399,9 @@
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufliste lesen"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Diese App kann deine Anrufliste lesen."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"Anrufliste bearbeiten"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste deines Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ermöglicht der App, die Anrufliste deines Fernsehers zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste deines Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so die Einträge in der Anrufliste löschen oder sie ändern."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ermöglicht der App, die Anrufliste deines Fernsehers zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so die Einträge in der Anrufliste löschen oder sie ändern."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so die Einträge in der Anrufliste löschen oder sie ändern."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Pulsmesser zugreifen"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ermöglicht der App, auf Daten von Sensoren zuzugreifen, die deine körperliche Verfassung überwachen, beispielsweise deinen Puls"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Kalendertermine und Details lesen"</string>

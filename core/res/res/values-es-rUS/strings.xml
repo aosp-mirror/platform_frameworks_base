@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación está limitada a números de marcación fija."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de reenvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Se ha activado el servicio."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se activó el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Se ha desactivado el servicio."</string>
