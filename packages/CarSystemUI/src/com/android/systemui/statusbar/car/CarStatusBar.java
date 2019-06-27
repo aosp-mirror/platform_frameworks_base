@@ -346,7 +346,7 @@ public class CarStatusBar extends StatusBar implements
 
         CarSystemUIFactory factory = SystemUIFactory.getInstance();
         mCarFacetButtonController = factory.getCarDependencyComponent()
-            .getCarFacetButtonController();
+                .getCarFacetButtonController();
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
 
@@ -637,13 +637,14 @@ public class CarStatusBar extends StatusBar implements
         }
 
         Rect rect = mNotificationView.getClipBounds();
-        if (rect != null) {
+        if (rect != null && rect.bottom != to) {
             float from = rect.bottom;
             animate(from, to, velocity, isClosing);
             return;
         }
 
-        // We will only be here if the shade is being opened programmatically.
+        // We will only be here if the shade is being opened programmatically or via button when
+        // height of the layout was not calculated.
         ViewTreeObserver notificationTreeObserver = mNotificationView.getViewTreeObserver();
         notificationTreeObserver.addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
