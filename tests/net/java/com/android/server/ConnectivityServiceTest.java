@@ -159,6 +159,7 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
+import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ConditionVariable;
@@ -3128,24 +3129,18 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testInvalidNetworkSpecifier() {
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             NetworkRequest.Builder builder = new NetworkRequest.Builder();
             builder.setNetworkSpecifier(new MatchAllNetworkSpecifier());
-            fail("NetworkRequest builder with MatchAllNetworkSpecifier");
-        } catch (IllegalArgumentException expected) {
-            // expected
-        }
+        });
 
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             NetworkCapabilities networkCapabilities = new NetworkCapabilities();
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
                     ConnectivityManager.TYPE_WIFI);
-            fail("ConnectivityService requestNetwork with MatchAllNetworkSpecifier");
-        } catch (IllegalArgumentException expected) {
-            // expected
-        }
+        });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
             public boolean satisfiedBy(NetworkSpecifier other) { return false; }
@@ -3154,24 +3149,22 @@ public class ConnectivityServiceTest {
             @Override public int describeContents() { return 0; }
             @Override public void writeToParcel(Parcel p, int flags) {}
         }
-        NetworkRequest.Builder builder;
 
-        builder = new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET);
-        try {
+        final NetworkRequest.Builder builder =
+                new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET);
+        assertThrows(ClassCastException.class, () -> {
             builder.setNetworkSpecifier(new NonParcelableSpecifier());
             Parcel parcelW = Parcel.obtain();
             builder.build().writeToParcel(parcelW, 0);
-            fail("Parceling a non-parcelable specifier did not throw an exception");
-        } catch (Exception e) {
-            // expected
-        }
+        });
 
-        builder = new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET);
-        builder.setNetworkSpecifier(new ParcelableSpecifier());
-        NetworkRequest nr = builder.build();
+        final NetworkRequest nr =
+                new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET)
+                .setNetworkSpecifier(new ParcelableSpecifier())
+                .build();
         assertNotNull(nr);
 
-        try {
+        assertThrows(BadParcelableException.class, () -> {
             Parcel parcelW = Parcel.obtain();
             nr.writeToParcel(parcelW, 0);
             byte[] bytes = parcelW.marshall();
@@ -3181,10 +3174,7 @@ public class ConnectivityServiceTest {
             parcelR.unmarshall(bytes, 0, bytes.length);
             parcelR.setDataPosition(0);
             NetworkRequest rereadNr = NetworkRequest.CREATOR.createFromParcel(parcelR);
-            fail("Unparceling a non-framework NetworkSpecifier did not throw an exception");
-        } catch (Exception e) {
-            // expected
-        }
+        });
     }
 
     @Test
@@ -3213,12 +3203,9 @@ public class ConnectivityServiceTest {
         NetworkRequest networkRequest = newWifiRequestBuilder().setNetworkSpecifier(
                 networkSpecifier).build();
         TestNetworkCallback networkCallback = new TestNetworkCallback();
-        try {
+        assertThrows(SecurityException.class, () -> {
             mCm.requestNetwork(networkRequest, networkCallback);
-            fail("Network request with spoofed UID did not throw a SecurityException");
-        } catch (SecurityException e) {
-            // expected
-        }
+        });
     }
 
     @Test
@@ -3230,36 +3217,20 @@ public class ConnectivityServiceTest {
                 .build();
         // Registering a NetworkCallback with signal strength but w/o NETWORK_SIGNAL_STRENGTH_WAKEUP
         // permission should get SecurityException.
-        try {
-            mCm.registerNetworkCallback(r, new NetworkCallback());
-            fail("Expected SecurityException filing a callback with signal strength");
-        } catch (SecurityException expected) {
-            // expected
-        }
+        assertThrows(SecurityException.class, () ->
+                mCm.registerNetworkCallback(r, new NetworkCallback()));
 
-        try {
-            mCm.registerNetworkCallback(r, PendingIntent.getService(
-                    mServiceContext, 0, new Intent(), 0));
-            fail("Expected SecurityException filing a callback with signal strength");
-        } catch (SecurityException expected) {
-            // expected
-        }
+        assertThrows(SecurityException.class, () ->
+                mCm.registerNetworkCallback(r, PendingIntent.getService(
+                        mServiceContext, 0, new Intent(), 0)));
 
         // Requesting a Network with signal strength should get IllegalArgumentException.
-        try {
-            mCm.requestNetwork(r, new NetworkCallback());
-            fail("Expected IllegalArgumentException filing a request with signal strength");
-        } catch (IllegalArgumentException expected) {
-            // expected
-        }
+        assertThrows(IllegalArgumentException.class, () ->
+                mCm.requestNetwork(r, new NetworkCallback()));
 
-        try {
-            mCm.requestNetwork(r, PendingIntent.getService(
-                    mServiceContext, 0, new Intent(), 0));
-            fail("Expected IllegalArgumentException filing a request with signal strength");
-        } catch (IllegalArgumentException expected) {
-            // expected
-        }
+        assertThrows(IllegalArgumentException.class, () ->
+                mCm.requestNetwork(r, PendingIntent.getService(
+                        mServiceContext, 0, new Intent(), 0)));
     }
 
     @Test
@@ -4730,25 +4701,20 @@ public class ConnectivityServiceTest {
         }
 
         // Test that the limit is enforced when MAX_REQUESTS simultaneous requests are added.
-        try {
-            mCm.requestNetwork(networkRequest, new NetworkCallback());
-            fail("Registering " + MAX_REQUESTS + " network requests did not throw exception");
-        } catch (TooManyRequestsException expected) {}
-        try {
-            mCm.registerNetworkCallback(networkRequest, new NetworkCallback());
-            fail("Registering " + MAX_REQUESTS + " network callbacks did not throw exception");
-        } catch (TooManyRequestsException expected) {}
-        try {
-            mCm.requestNetwork(networkRequest,
-                PendingIntent.getBroadcast(mContext, 0, new Intent("c"), 0));
-            fail("Registering " + MAX_REQUESTS + " PendingIntent requests did not throw exception");
-        } catch (TooManyRequestsException expected) {}
-        try {
-            mCm.registerNetworkCallback(networkRequest,
-                PendingIntent.getBroadcast(mContext, 0, new Intent("d"), 0));
-            fail("Registering " + MAX_REQUESTS
-                    + " PendingIntent callbacks did not throw exception");
-        } catch (TooManyRequestsException expected) {}
+        assertThrows(TooManyRequestsException.class, () ->
+                mCm.requestNetwork(networkRequest, new NetworkCallback())
+        );
+        assertThrows(TooManyRequestsException.class, () ->
+                mCm.registerNetworkCallback(networkRequest, new NetworkCallback())
+        );
+        assertThrows(TooManyRequestsException.class, () ->
+                mCm.requestNetwork(networkRequest,
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("c"), 0))
+        );
+        assertThrows(TooManyRequestsException.class, () ->
+                mCm.registerNetworkCallback(networkRequest,
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("d"), 0))
+        );
 
         for (Object o : registered) {
             if (o instanceof NetworkCallback) {
