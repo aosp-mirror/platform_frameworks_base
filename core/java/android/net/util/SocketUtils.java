@@ -70,7 +70,7 @@ public final class SocketUtils {
     @NonNull
     public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex) {
         return new PacketSocketAddress(
-                (short) protocol /* sll_protocol */,
+                protocol /* sll_protocol */,
                 ifIndex /* sll_ifindex */,
                 null /* sll_addr */);
     }
@@ -81,7 +81,7 @@ public final class SocketUtils {
     @NonNull
     public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
         return new PacketSocketAddress(
-                (short) 0 /* sll_protocol */,
+                0 /* sll_protocol */,
                 ifIndex /* sll_ifindex */,
                 hwAddr /* sll_addr */);
     }
