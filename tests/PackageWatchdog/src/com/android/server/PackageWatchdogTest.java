@@ -35,8 +35,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
-import android.net.NetworkStackClient;
-import android.net.NetworkStackClient.NetworkStackHealthListener;
+import android.net.ConnectivityModuleConnector;
+import android.net.ConnectivityModuleConnector.ConnectivityModuleHealthListener;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
@@ -86,11 +86,11 @@ public class PackageWatchdogTest {
     private TestLooper mTestLooper;
     private Context mSpyContext;
     @Mock
-    private NetworkStackClient mMockNetworkStackClient;
+    private ConnectivityModuleConnector mConnectivityModuleConnector;
     @Mock
     private PackageManager mMockPackageManager;
     @Captor
-    private ArgumentCaptor<NetworkStackHealthListener> mNetworkStackCallbackCaptor;
+    private ArgumentCaptor<ConnectivityModuleHealthListener> mConnectivityModuleCallbackCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -736,7 +736,7 @@ public class PackageWatchdogTest {
         wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
 
         // Notify of NetworkStack failure
-        mNetworkStackCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
+        mConnectivityModuleCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -782,18 +782,18 @@ public class PackageWatchdogTest {
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
                 new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
-                        mMockNetworkStackClient);
+                        mConnectivityModuleConnector);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {
             // Only capture the NetworkStack callback for the latest registered watchdog
-            reset(mMockNetworkStackClient);
+            reset(mConnectivityModuleConnector);
             watchdog.onPackagesReady();
             // Verify controller by default is started when packages are ready
             assertTrue(controller.mIsEnabled);
 
-            verify(mMockNetworkStackClient).registerHealthListener(
-                    mNetworkStackCallbackCaptor.capture());
+            verify(mConnectivityModuleConnector).registerHealthListener(
+                    mConnectivityModuleCallbackCaptor.capture());
         }
         return watchdog;
     }
