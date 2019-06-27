@@ -27,15 +27,6 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-static bool IsTransformSupported(int transform) {
-    // For now, only support pure rotations, not flip or flip-and-rotate, until we have
-    // more time to test them and build sample code. As far as I know we never actually
-    // use anything besides pure rotations anyway.
-    return transform == 0 || transform == NATIVE_WINDOW_TRANSFORM_ROT_90 ||
-           transform == NATIVE_WINDOW_TRANSFORM_ROT_180 ||
-           transform == NATIVE_WINDOW_TRANSFORM_ROT_270;
-}
-
 static int InvertTransform(int transform) {
     switch (transform) {
         case NATIVE_WINDOW_TRANSFORM_ROT_90:
@@ -66,28 +57,6 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
             LOG_ALWAYS_FATAL("Unsupported Window Transform (%d)", transform);
     }
     return SkMatrix::I();
-}
-
-void VulkanSurface::ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const SkISize& minSize,
-                                                  const SkISize& maxSize) {
-    SkISize& windowSize = windowInfo->size;
-
-    // clamp width & height to handle currentExtent of -1 and  protect us from broken hints
-    if (windowSize.width() < minSize.width() || windowSize.width() > maxSize.width() ||
-        windowSize.height() < minSize.height() || windowSize.height() > maxSize.height()) {
-        int width = std::min(maxSize.width(), std::max(minSize.width(), windowSize.width()));
-        int height = std::min(maxSize.height(), std::max(minSize.height(), windowSize.height()));
-        ALOGE("Invalid Window Dimensions [%d, %d]; clamping to [%d, %d]", windowSize.width(),
-              windowSize.height(), width, height);
-        windowSize.set(width, height);
-    }
-
-    windowInfo->actualSize = windowSize;
-    if (windowInfo->transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
-        windowInfo->actualSize.set(windowSize.height(), windowSize.width());
-    }
-
-    windowInfo->preTransform = GetPreTransformMatrix(windowInfo->size, windowInfo->transform);
 }
 
 static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
@@ -125,6 +94,24 @@ static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
         return false;
     }
 
+    // Let consumer drive the size of the buffers.
+    err = native_window_set_buffers_dimensions(window, 0, 0);
+    if (err != 0) {
+        ALOGE("native_window_set_buffers_dimensions(0,0) failed: %s (%d)", strerror(-err), err);
+        return false;
+    }
+
+    // Enable auto prerotation, so when buffer size is driven by the consumer
+    // and the transform hint specifies a 90 or 270 degree rotation, the width
+    // and height used for buffer pre-allocation and dequeueBuffer will be
+    // additionally swapped.
+    err = native_window_set_auto_prerotation(window, true);
+    if (err != 0) {
+        ALOGE("VulkanSurface::UpdateWindow() native_window_set_auto_prerotation failed: %s (%d)",
+              strerror(-err), err);
+        return false;
+    }
+
     return true;
 }
 
@@ -132,10 +119,6 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
                                      SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
                                      GrContext* grContext, const VulkanManager& vkManager,
                                      uint32_t extraBuffers) {
-    // TODO(http://b/134182502)
-    const SkISize minSize = SkISize::Make(1, 1);
-    const SkISize maxSize = SkISize::Make(4096, 4096);
-
     // Connect and set native window to default configurations.
     if (!ConnectAndSetWindowDefaults(window)) {
         return nullptr;
@@ -144,7 +127,7 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     // Initialize WindowInfo struct.
     WindowInfo windowInfo;
     if (!InitializeWindowInfoStruct(window, colorMode, colorType, colorSpace, vkManager,
-                                    extraBuffers, minSize, maxSize, &windowInfo)) {
+                                    extraBuffers, &windowInfo)) {
         return nullptr;
     }
 
@@ -153,15 +136,14 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
         return nullptr;
     }
 
-    return new VulkanSurface(window, windowInfo, minSize, maxSize, grContext);
+    return new VulkanSurface(window, windowInfo, grContext);
 }
 
 bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
                                                SkColorType colorType,
                                                sk_sp<SkColorSpace> colorSpace,
                                                const VulkanManager& vkManager,
-                                               uint32_t extraBuffers, const SkISize& minSize,
-                                               const SkISize& maxSize, WindowInfo* outWindowInfo) {
+                                               uint32_t extraBuffers, WindowInfo* outWindowInfo) {
     ATRACE_CALL();
 
     int width, height;
@@ -185,7 +167,13 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
     }
     outWindowInfo->transform = query_value;
 
-    ComputeWindowSizeAndTransform(outWindowInfo, minSize, maxSize);
+    outWindowInfo->actualSize = outWindowInfo->size;
+    if (outWindowInfo->transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+        outWindowInfo->actualSize.set(outWindowInfo->size.height(), outWindowInfo->size.width());
+    }
+
+    outWindowInfo->preTransform =
+            GetPreTransformMatrix(outWindowInfo->size, outWindowInfo->transform);
 
     err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
@@ -290,15 +278,6 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    const SkISize& size = windowInfo.actualSize;
-    err = native_window_set_buffers_dimensions(window, size.width(), size.height());
-    if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_dimensions(%d,%d) "
-              "failed: %s (%d)",
-              size.width(), size.height(), strerror(-err), err);
-        return false;
-    }
-
     // native_window_set_buffers_transform() expects the transform the app is requesting that
     // the compositor perform during composition. With native windows, pre-transform works by
     // rendering with the same transform the compositor is applying (as in Vulkan), but
@@ -331,12 +310,8 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
 }
 
 VulkanSurface::VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo,
-                             SkISize minWindowSize, SkISize maxWindowSize, GrContext* grContext)
-        : mNativeWindow(window)
-        , mWindowInfo(windowInfo)
-        , mGrContext(grContext)
-        , mMinWindowSize(minWindowSize)
-        , mMaxWindowSize(maxWindowSize) {}
+                             GrContext* grContext)
+        : mNativeWindow(window), mWindowInfo(windowInfo), mGrContext(grContext) {}
 
 VulkanSurface::~VulkanSurface() {
     releaseBuffers();
@@ -379,56 +354,49 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     // value at the end of the function if everything dequeued correctly.
     mCurrentBufferInfo = nullptr;
 
-    // check if the native window has been resized or rotated and update accordingly
-    SkISize newSize = SkISize::MakeEmpty();
+    // Query the transform hint synced from the initial Surface connect or last queueBuffer. The
+    // auto prerotation on the buffer is based on the same transform hint in use by the producer.
     int transformHint = 0;
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_WIDTH, &newSize.fWidth);
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_HEIGHT, &newSize.fHeight);
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_TRANSFORM_HINT, &transformHint);
-    if (newSize != mWindowInfo.actualSize || transformHint != mWindowInfo.transform) {
-        WindowInfo newWindowInfo = mWindowInfo;
-        newWindowInfo.size = newSize;
-        newWindowInfo.transform = IsTransformSupported(transformHint) ? transformHint : 0;
-        ComputeWindowSizeAndTransform(&newWindowInfo, mMinWindowSize, mMaxWindowSize);
+    int err =
+            mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_TRANSFORM_HINT, &transformHint);
 
-        int err = 0;
-        if (newWindowInfo.actualSize != mWindowInfo.actualSize) {
-            // reset the native buffers and update the window
-            err = native_window_set_buffers_dimensions(mNativeWindow.get(),
-                                                       newWindowInfo.actualSize.width(),
-                                                       newWindowInfo.actualSize.height());
-            if (err != 0) {
-                ALOGE("native_window_set_buffers_dimensions(%d,%d) failed: %s (%d)",
-                      newWindowInfo.actualSize.width(), newWindowInfo.actualSize.height(),
-                      strerror(-err), err);
-                return nullptr;
-            }
-            // reset the NativeBufferInfo (including SkSurface) associated with the old buffers. The
-            // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
-            releaseBuffers();
-            // TODO should we ask the nativewindow to allocate buffers?
-        }
-
-        if (newWindowInfo.transform != mWindowInfo.transform) {
-            err = native_window_set_buffers_transform(mNativeWindow.get(),
-                                                      InvertTransform(newWindowInfo.transform));
-            if (err != 0) {
-                ALOGE("native_window_set_buffers_transform(%d) failed: %s (%d)",
-                      newWindowInfo.transform, strerror(-err), err);
-                newWindowInfo.transform = mWindowInfo.transform;
-                ComputeWindowSizeAndTransform(&newWindowInfo, mMinWindowSize, mMaxWindowSize);
-            }
-        }
-
-        mWindowInfo = newWindowInfo;
-    }
-
+    // Since auto pre-rotation is enabled, dequeueBuffer to get the consumer driven buffer size
+    // from ANativeWindowBuffer.
     ANativeWindowBuffer* buffer;
     int fence_fd;
-    int err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buffer, &fence_fd);
+    err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buffer, &fence_fd);
     if (err != 0) {
         ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), err);
         return nullptr;
+    }
+
+    SkISize actualSize = SkISize::Make(buffer->width, buffer->height);
+    if (actualSize != mWindowInfo.actualSize || transformHint != mWindowInfo.transform) {
+        if (actualSize != mWindowInfo.actualSize) {
+            // reset the NativeBufferInfo (including SkSurface) associated with the old buffers. The
+            // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
+            mWindowInfo.actualSize = actualSize;
+            releaseBuffers();
+        }
+
+        if (transformHint != mWindowInfo.transform) {
+            err = native_window_set_buffers_transform(mNativeWindow.get(),
+                                                      InvertTransform(transformHint));
+            if (err != 0) {
+                ALOGE("native_window_set_buffers_transform(%d) failed: %s (%d)", transformHint,
+                      strerror(-err), err);
+                mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer, fence_fd);
+                return nullptr;
+            }
+            mWindowInfo.transform = transformHint;
+        }
+
+        mWindowInfo.size = actualSize;
+        if (mWindowInfo.transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+            mWindowInfo.size.set(actualSize.height(), actualSize.width());
+        }
+
+        mWindowInfo.preTransform = GetPreTransformMatrix(mWindowInfo.size, mWindowInfo.transform);
     }
 
     uint32_t idx;
