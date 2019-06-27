@@ -119,7 +119,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
     private float mNavBarButtonAlpha;
-    private MotionEvent mStatusBarGestureDownEvent;
+    private boolean mInputFocusTransferStarted;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
@@ -164,6 +164,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        // TODO: change the method signature to use (boolean inputFocusTransferStarted)
         @Override
         public void onStatusBarMotionEvent(MotionEvent event) {
             if (!verifyCaller("onStatusBarMotionEvent")) {
@@ -175,16 +176,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 mHandler.post(()->{
                     StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                     if (bar != null) {
-                        bar.dispatchNotificationsPanelTouchEvent(event);
 
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
-                            mStatusBarGestureDownEvent = MotionEvent.obtain(event);
+                            mInputFocusTransferStarted = true;
+
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
-                            mStatusBarGestureDownEvent.recycle();
-                            mStatusBarGestureDownEvent = null;
+                            mInputFocusTransferStarted = false;
                         }
+                        bar.onInputFocusTransfer(mInputFocusTransferStarted);
                         event.recycle();
                     }
                 });
@@ -590,14 +591,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public void cleanupAfterDeath() {
-        if (mStatusBarGestureDownEvent != null) {
+        if (mInputFocusTransferStarted) {
             mHandler.post(()-> {
                 StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                 if (bar != null) {
-                    mStatusBarGestureDownEvent.setAction(MotionEvent.ACTION_CANCEL);
-                    bar.dispatchNotificationsPanelTouchEvent(mStatusBarGestureDownEvent);
-                    mStatusBarGestureDownEvent.recycle();
-                    mStatusBarGestureDownEvent = null;
+                    mInputFocusTransferStarted = false;
+                    bar.onInputFocusTransfer(false);
                 }
             });
         }
@@ -782,6 +781,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.println(QuickStepContract.isBackGestureDisabled(mSysUiStateFlags));
         pw.print("    assistantGestureDisabled=");
         pw.println(QuickStepContract.isAssistantGestureDisabled(mSysUiStateFlags));
+        pw.print(" mInputFocusTransferStarted="); pw.println(mInputFocusTransferStarted);
     }
 
     public interface OverviewProxyListener {
