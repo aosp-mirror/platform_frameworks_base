@@ -629,6 +629,12 @@ class CompileContext : public IAaptContext {
     return 0;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    UNIMPLEMENTED(FATAL) << "No Split Name Dependencies be needed in compile phase";
+    static std::set<std::string> empty;
+    return empty;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CompileContext);
 

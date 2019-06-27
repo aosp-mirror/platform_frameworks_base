@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AppInfo.h"
 #include "Link.h"
 
 #include "LoadedApk.h"
@@ -251,6 +252,69 @@ TEST_F(LinkTest, OverrideStylesInsteadOfOverlaying) {
   ASSERT_NE(actual_style, nullptr);
   ASSERT_EQ(actual_style->entries.size(), 1);
   EXPECT_EQ(actual_style->entries[0].key.id, 0x010100d4);  // android:background
+}
+
+TEST_F(LinkTest, AppInfoWithUsesSplit) {
+  StdErrDiagnostics diag;
+  const std::string base_files_dir = GetTestPath("base");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <string name="bar">bar</string>
+                             </resources>)",
+                          base_files_dir, &diag));
+  const std::string base_apk = GetTestPath("base.apk");
+  std::vector<std::string> link_args = {
+      "--manifest", GetDefaultManifest("com.aapt2.app"),
+      "-o", base_apk,
+  };
+  ASSERT_TRUE(Link(link_args, base_files_dir, &diag));
+
+  const std::string feature_manifest = GetTestPath("feature_manifest.xml");
+  WriteFile(feature_manifest, android::base::StringPrintf(R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.aapt2.app" split="feature1">
+      </manifest>)"));
+  const std::string feature_files_dir = GetTestPath("feature");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <string name="foo">foo</string>
+                             </resources>)",
+                          feature_files_dir, &diag));
+  const std::string feature_apk = GetTestPath("feature.apk");
+  const std::string feature_package_id = "0x80";
+  link_args = {
+      "--manifest", feature_manifest,
+      "-I", base_apk,
+      "--package-id", feature_package_id,
+      "-o", feature_apk,
+  };
+  ASSERT_TRUE(Link(link_args, feature_files_dir, &diag));
+
+  const std::string feature2_manifest = GetTestPath("feature2_manifest.xml");
+  WriteFile(feature2_manifest, android::base::StringPrintf(R"(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            package="com.aapt2.app" split="feature2">
+          <uses-split android:name="feature1"/>
+        </manifest>)"));
+  const std::string feature2_files_dir = GetTestPath("feature2");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <string-array name="string_array">
+                                 <item>@string/bar</item>
+                                 <item>@string/foo</item>
+                               </string-array>
+                             </resources>)",
+                          feature2_files_dir, &diag));
+  const std::string feature2_apk = GetTestPath("feature2.apk");
+  const std::string feature2_package_id = "0x81";
+  link_args = {
+      "--manifest", feature2_manifest,
+      "-I", base_apk,
+      "-I", feature_apk,
+      "--package-id", feature2_package_id,
+      "-o", feature2_apk,
+  };
+  ASSERT_TRUE(Link(link_args, feature2_files_dir, &diag));
 }
 
 }  // namespace aapt
