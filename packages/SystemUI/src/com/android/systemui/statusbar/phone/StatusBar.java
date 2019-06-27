@@ -373,6 +373,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     KeyguardBypassController mKeyguardBypassController;
     @Inject
     protected HeadsUpManagerPhone mHeadsUpManager;
+    @Nullable
+    @Inject
+    protected KeyguardLiftController mKeyguardLiftController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
