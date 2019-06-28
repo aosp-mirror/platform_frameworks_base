@@ -23,7 +23,6 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 #include <gui/BufferQueue.h>
 

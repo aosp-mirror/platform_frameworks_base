@@ -34,7 +34,6 @@
 #include <gui/Surface.h>
 #include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
-#include <gui/GLConsumer.h>
 
 #include <ui/Rect.h>
 #include <ui/Region.h>

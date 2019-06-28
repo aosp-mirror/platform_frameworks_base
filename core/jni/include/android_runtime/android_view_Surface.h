@@ -18,7 +18,6 @@
 #define _ANDROID_VIEW_SURFACE_H
 
 #include <android/native_window.h>
-#include <system/graphics.h>
 #include <ui/PublicFormat.h>
 
 #include "jni.h"

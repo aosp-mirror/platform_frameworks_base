@@ -19,7 +19,6 @@
 
 #include "../Properties.h"
 #include "AnimationContext.h"
-#include "EglManager.h"
 #include "Frame.h"
 #include "LayerUpdateQueue.h"
 #include "Properties.h"
@@ -33,8 +32,6 @@
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
 
-#include <cutils/properties.h>
-#include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
 #include <fcntl.h>
