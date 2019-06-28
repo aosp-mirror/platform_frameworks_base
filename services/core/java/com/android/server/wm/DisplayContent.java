@@ -5142,7 +5142,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int[] remainingLeftRight =
                 {mSystemGestureExclusionLimit, mSystemGestureExclusionLimit};
 
-        // Traverse all windows bottom up to assemble the gesture exclusion rects.
+        // Traverse all windows top down to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
             if (w.cantReceiveTouchInput() || !w.isVisible()
@@ -5150,12 +5150,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     || unhandled.isEmpty()) {
                 return;
             }
-            final boolean modal =
-                    (w.mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
 
             // Get the touchable region of the window, and intersect with where the screen is still
             // touchable, i.e. touchable regions on top are not covering it yet.
-            w.getTouchableRegion(touchableRegion);
+            w.getEffectiveTouchableRegion(touchableRegion);
             touchableRegion.op(unhandled, Op.INTERSECT);
 
             if (w.isImplicitlyExcludingAllSystemGestures()) {
