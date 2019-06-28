@@ -184,7 +184,7 @@ public final class AccessibilityManager {
 
     boolean mIsTouchExplorationEnabled;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768939)
+    @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
     AccessibilityPolicy mAccessibilityPolicy;
