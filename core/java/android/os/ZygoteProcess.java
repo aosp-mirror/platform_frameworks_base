@@ -81,7 +81,7 @@ public class ZygoteProcess {
      * not be used if the devices has a DeviceConfig profile pushed to it that contains a value for
      * this key.
      */
-    private static final String USAP_POOL_ENABLED_DEFAULT = "true";
+    private static final String USAP_POOL_ENABLED_DEFAULT = "false";
 
     /**
      * The name of the socket used to communicate with the primary zygote.

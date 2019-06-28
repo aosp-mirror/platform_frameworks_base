@@ -23,4 +23,4 @@ The activity adds an `inflate#activity_main` slice to atrace around the time
 spent in view inflation to make it easier to focus on the time spent in view
 inflation.
 
-    adb shell am start -n com.android.startop.test/.LayoutInflation
+    adb shell am start -n com.android.startop.test/.ComplexLayoutInflationActivity

@@ -277,28 +277,36 @@ public final class TvTrackInfo implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-          return true;
+            return true;
         }
 
         if (!(o instanceof TvTrackInfo)) {
-          return false;
+            return false;
         }
 
         TvTrackInfo obj = (TvTrackInfo) o;
-        return TextUtils.equals(mId, obj.mId)
-                && mType == obj.mType
-                && TextUtils.equals(mLanguage, obj.mLanguage)
-                && TextUtils.equals(mDescription, obj.mDescription)
-                && mEncrypted == obj.mEncrypted
-                && Objects.equals(mExtra, obj.mExtra)
-                && (mType == TYPE_AUDIO
-                        ? mAudioChannelCount == obj.mAudioChannelCount
-                        && mAudioSampleRate == obj.mAudioSampleRate
-                        : (mType == TYPE_VIDEO
-                                ? mVideoWidth == obj.mVideoWidth
-                                && mVideoHeight == obj.mVideoHeight
-                                && mVideoFrameRate == obj.mVideoFrameRate
-                                && mVideoPixelAspectRatio == obj.mVideoPixelAspectRatio : true));
+
+        if (!TextUtils.equals(mId, obj.mId) || mType != obj.mType
+                || !TextUtils.equals(mLanguage, obj.mLanguage)
+                || !TextUtils.equals(mDescription, obj.mDescription)
+                || !Objects.equals(mExtra, obj.mExtra)) {
+            return false;
+        }
+
+        switch (mType) {
+            case TYPE_AUDIO:
+                return mAudioChannelCount == obj.mAudioChannelCount
+                        && mAudioSampleRate == obj.mAudioSampleRate;
+
+            case TYPE_VIDEO:
+                return mVideoWidth == obj.mVideoWidth
+                        && mVideoHeight == obj.mVideoHeight
+                        && mVideoFrameRate == obj.mVideoFrameRate
+                        && mVideoPixelAspectRatio == obj.mVideoPixelAspectRatio
+                        && mVideoActiveFormatDescription == obj.mVideoActiveFormatDescription;
+        }
+
+        return true;
     }
 
     @Override

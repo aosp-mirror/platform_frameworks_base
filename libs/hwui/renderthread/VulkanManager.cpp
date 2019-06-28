@@ -145,12 +145,6 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_INST_PROC(GetPhysicalDeviceImageFormatProperties2);
     GET_INST_PROC(CreateDevice);
     GET_INST_PROC(EnumerateDeviceExtensionProperties);
-    GET_INST_PROC(CreateAndroidSurfaceKHR);
-    GET_INST_PROC(DestroySurfaceKHR);
-    GET_INST_PROC(GetPhysicalDeviceSurfaceSupportKHR);
-    GET_INST_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
-    GET_INST_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
-    GET_INST_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
 
     uint32_t gpuCount;
     LOG_ALWAYS_FATAL_IF(mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr));

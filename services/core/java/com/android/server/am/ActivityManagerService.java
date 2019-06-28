@@ -3767,9 +3767,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<Integer> nativePids) {
         ArrayList<Integer> extraPids = null;
 
-        if (DEBUG_ANR) {
-            Slog.d(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
-        }
+        Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
 
         // Measure CPU usage as soon as we're called in order to get a realistic sampling
         // of the top users at the time of the request.
@@ -3791,8 +3789,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
 
                     extraPids.add(stats.pid);
-                } else if (DEBUG_ANR) {
-                    Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
+                } else {
+                    Slog.i(TAG, "Skipping next CPU consuming process, not a java proc: "
                             + stats.pid);
                 }
             }
@@ -3809,9 +3807,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         File tracesFile = createAnrDumpFile(tracesDir);
         if (tracesFile == null) {
             return null;
-        }
-        if (DEBUG_ANR) {
-            Slog.d(TAG, "Dumping to " + tracesFile.getAbsolutePath());
         }
 
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
@@ -3905,6 +3900,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static void dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
             ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
 
+        Slog.i(TAG, "Dumping to " + tracesFile);
+
         // We don't need any sort of inotify based monitoring when we're dumping traces via
         // tombstoned. Data is piped to an "intercept" FD installed in tombstoned so we're in full
         // control of all writes to the file in question.
@@ -3916,7 +3913,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (firstPids != null) {
             int num = firstPids.size();
             for (int i = 0; i < num; i++) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid " + firstPids.get(i));
+                Slog.i(TAG, "Collecting stacks for pid " + firstPids.get(i));
                 final long timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile,
                                                                 remainingTime);
 
@@ -3936,7 +3933,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Next collect the stacks of the native pids
         if (nativePids != null) {
             for (int pid : nativePids) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                Slog.i(TAG, "Collecting stacks for native pid " + pid);
                 final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
 
                 final long start = SystemClock.elapsedRealtime();
@@ -3960,7 +3957,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Lastly, dump stacks for all extra PIDs from the CPU tracker.
         if (extraPids != null) {
             for (int pid : extraPids) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
+                Slog.i(TAG, "Collecting stacks for extra pid " + pid);
 
                 final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
 
@@ -3976,6 +3973,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+        Slog.i(TAG, "Done dumping");
     }
 
     @Override

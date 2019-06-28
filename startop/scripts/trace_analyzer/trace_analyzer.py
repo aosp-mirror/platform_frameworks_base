@@ -15,334 +15,35 @@
 
 import re
 import sys
+import argparse
 
-from sqlalchemy import create_engine
-from sqlalchemy import Column, Date, Integer, Float, String, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+from lib.trace2db import Trace2Db
 
-from sqlalchemy.orm import sessionmaker
-
-import sqlalchemy
-
-_DEBUG = False
-#_LIMIT = 100000
-_LIMIT = None
-_FLUSH_LIMIT = 10000
-
-Base = declarative_base()
-
-class RawFtraceEntry(Base):
-  __tablename__ = 'raw_ftrace_entries'
-
-  id = Column(Integer, primary_key=True)
-  task_name = Column(String, nullable=True) # <...> -> None.
-  task_pid = Column(String, nullable=False)
-  tgid = Column(Integer, nullable=True)     # ----- -> None.
-  cpu = Column(Integer, nullable=False)
-  timestamp = Column(Float, nullable=False)
-  function = Column(String, nullable=False)
-  function_args = Column(String, nullable=False)
-
-#  __mapper_args__ = {
-#      'polymorphic_identity':'raw_ftrace_entry',
-#      'polymorphic_on':function
-#  }
-
-  @staticmethod
-  def parse(line):
-    # '           <...>-5521  (-----) [003] ...1 17148.446877: tracing_mark_write: trace_event_clock_sync: parent_ts=17148.447266'
-    m = re.match('\s*(.*)-(\d+)\s+\(([^\)]+)\)\s+\[(\d+)\]\s+([\w.]{4})\s+(\d+[.]\d+):\s+(\w+):\s+(.*)', line)
-    if not m:
-      return None
-
-    groups = m.groups()
-    # groups example:
-    # ('<...>',
-    #  '5521',
-    #  '-----',
-    #  '003',
-    #  '...1',
-    #  '17148.446877',
-    #  'tracing_mark_write',
-    #  'trace_event_clock_sync: parent_ts=17148.447266')
-    task_name = groups[0]
-    if task_name == '<...>':
-      task_name = None
-
-    task_pid = int(groups[1])
-    tgid = groups[2]
-    if tgid == '-----':
-      tgid = None
-
-    cpu = int(groups[3])
-    # irq_flags = groups[4]
-    timestamp = float(groups[5])
-    function = groups[6]
-    function_args = groups[7]
-
-    return RawFtraceEntry(task_name=task_name, task_pid=task_pid, tgid=tgid, cpu=cpu,
-                          timestamp=timestamp, function=function, function_args=function_args)
-
-  @staticmethod
-  def parse_dict(line):
-    # '           <...>-5521  (-----) [003] ...1 17148.446877: tracing_mark_write: trace_event_clock_sync: parent_ts=17148.447266'
-    m = re.match('\s*(.*)-(\d+)\s+\(([^\)]+)\)\s+\[(\d+)\]\s+([\w.]{4})\s+(\d+[.]\d+):\s+(\w+):\s+(.*)', line)
-    if not m:
-      return None
-
-    groups = m.groups()
-    # groups example:
-    # ('<...>',
-    #  '5521',
-    #  '-----',
-    #  '003',
-    #  '...1',
-    #  '17148.446877',
-    #  'tracing_mark_write',
-    #  'trace_event_clock_sync: parent_ts=17148.447266')
-    task_name = groups[0]
-    if task_name == '<...>':
-      task_name = None
-
-    task_pid = int(groups[1])
-    tgid = groups[2]
-    if tgid == '-----':
-      tgid = None
-
-    cpu = int(groups[3])
-    # irq_flags = groups[4]
-    timestamp = float(groups[5])
-    function = groups[6]
-    function_args = groups[7]
-
-    return {'task_name': task_name, 'task_pid': task_pid, 'tgid': tgid, 'cpu': cpu, 'timestamp': timestamp, 'function': function, 'function_args': function_args}
-
-#class TracingMarkWriteFtraceEntry(RawFtraceEntry):
-#  __tablename__ = 'tracing_mark_write_ftrace_entries'
+# This script requires 'sqlalchemy' to access the sqlite3 database.
 #
-#  id = Column(Integer, ForeignKey('raw_ftrace_entries.id'), primary_key=True)
-#  mark_type = Column(String(1), nullable=False)
-#  mark_id = Column(Integer, nullable=False)
-#  message = Column(String)
+# $> sudo apt-get install python3-pip
+# $> pip3 install --user sqlalchemy
 #
-##  __mapper_args__ = {
-##      'polymorphic_identity':'tracing_mark_write',
-##  }
-#
-#  @staticmethod
-#  def decode(raw_ftrace_entry):
-#    if raw_ftrace_entry.function != 'tracing_mark_write':
-#      raise ValueError("raw_ftrace_entry must be function 'tracing_mark_write':" + raw_ftrace_entry)
-#
-#    #"B|2446|(Paused)ClearCards|Foo"
-#    match = re.match("([^|]*)\|([^|]*)\|(.*)", raw_ftrace_entry.function_args)
-#
-#    if not match:
-#      return None
-#
-#    # ('B', '2446', '(Paused)ClearCards|Foo')
-#    groups = match.groups()
-#
-#    mark_type = groups[0]
-#    mark_id = int(groups[1])
-#    message = groups[2]
-#
-#    return TracingMarkWriteFtraceEntry(id = raw_ftrace_entry.id,
-#        mark_type = mark_type,
-#        mark_id = mark_id,
-#        message = message)
-
-class SchedSwitch(Base):
-  __tablename__ = 'sched_switches'
-
-  id = Column(Integer, ForeignKey('raw_ftrace_entries.id'), primary_key=True)
-
-  prev_comm = Column(String, nullable=False)
-  prev_pid = Column(Integer, nullable=False)
-  prev_prio = Column(Integer, nullable=False)
-  prev_state = Column(String, nullable=False)
-
-  next_comm = Column(String, nullable=False)
-  next_pid = Column(Integer, nullable=False)
-  next_prio = Column(Integer, nullable=False)
-
-#  __mapper_args__ = {
-#      'polymorphic_identity':'raw_ftrace_entry',
-#      'polymorphic_on':function
-#  }
-
-  @staticmethod
-  def parse_dict(function_args, id = None):
-    # 'prev_comm=kworker/u16:5 prev_pid=13971 prev_prio=120 prev_state=S ==> next_comm=swapper/4 next_pid=0 next_prio=120'
-    m = re.match("prev_comm=(.*) prev_pid=(\d+) prev_prio=(\d+) prev_state=(.*) ==> next_comm=(.*) next_pid=(\d+) next_prio=(\d+) ?", function_args)
-    if not m:
-      return None
-
-    groups = m.groups()
-    # ('kworker/u16:5', '13971', '120', 'S', 'swapper/4', '0', '120')
-    d = {}
-    if id is not None:
-      d['id'] = id
-    d['prev_comm'] = groups[0]
-    d['prev_pid'] = int(groups[1])
-    d['prev_prio'] = int(groups[2])
-    d['prev_state'] = groups[3]
-    d['next_comm'] = groups[4]
-    d['next_pid'] = int(groups[5])
-    d['next_prio'] = int(groups[6])
-
-    return d
-
-class SchedBlockedReason(Base):
-  __tablename__ = 'sched_blocked_reasons'
-
-  id = Column(Integer, ForeignKey('raw_ftrace_entries.id'), primary_key=True)
-
-  pid = Column(Integer, nullable=False)
-  iowait = Column(Integer, nullable=False)
-  caller = Column(String, nullable=False)
-
-  @staticmethod
-  def parse_dict(function_args, id = None):
-    # 'pid=2289 iowait=1 caller=wait_on_page_bit_common+0x2a8/0x5f'
-    m = re.match("pid=(\d+) iowait=(\d+) caller=(.*) ?", function_args)
-    if not m:
-      return None
-
-    groups = m.groups()
-    # ('2289', '1', 'wait_on_page_bit_common+0x2a8/0x5f8')
-    d = {}
-    if id is not None:
-      d['id'] = id
-    d['pid'] = int(groups[0])
-    d['iowait'] = int(groups[1])
-    d['caller'] = groups[2]
-
-    return d
-
-def init_sqlalchemy(db_filename):
-  global _DEBUG
-  engine = create_engine('sqlite:///' + db_filename, echo=_DEBUG)
-
-  # DROP TABLES
-#  Base.metadata.drop_all(engine)
-  # CREATE ... (tables)
-  Base.metadata.create_all(engine)
-
-  Session = sessionmaker(bind=engine)
-  session = Session()
-  return (session, engine)
-
-def insert_pending_entries(engine, kls, lst):
-  if len(lst) > 0:
-    # for some reason, it tries to generate an empty INSERT statement with len=0,
-    # which of course violates the first non-null constraint.
-    try:
-      # Performance-sensitive parsing according to:
-      # https://docs.sqlalchemy.org/en/13/faq/performance.html#i-m-inserting-400-000-rows-with-the-orm-and-it-s-really-slow
-      engine.execute(kls.__table__.insert(), lst)
-      lst.clear()
-    except sqlalchemy.exc.IntegrityError as err:
-      # possibly violating some SQL constraint, print data here.
-      print(err)
-      print(lst)
-      raise
-
-def parse_file(filename, session, engine):
-  global _LIMIT
-  global _FLUSH_LIMIT
-  count = 0
-
-  pending_entries = []
-  pending_sched_switch = []
-  pending_sched_blocked_reasons = []
-
-  def insert_all_pending_entries():
-    insert_pending_entries(engine, RawFtraceEntry, pending_entries)
-    insert_pending_entries(engine, SchedSwitch, pending_sched_switch)
-    insert_pending_entries(engine, SchedBlockedReason, pending_sched_blocked_reasons)
-
-  # use explicit encoding to avoid UnicodeDecodeError.
-  with open(filename, encoding="ISO-8859-1") as f:
-    for l in f:
-
-      if len(l) > 1 and l[0] == '#':
-        continue
-
-      count = count + 1
-
-      if _LIMIT and count >= _LIMIT:
-        break
-
-      raw_ftrace_entry = RawFtraceEntry.parse_dict(l)
-      if not raw_ftrace_entry:
-        print("WARNING: Failed to parse raw ftrace entry: " + l)
-        continue
-
-      pending_entries.append(raw_ftrace_entry)
-
-      if raw_ftrace_entry['function'] == 'sched_switch':
-        sched_switch = SchedSwitch.parse_dict(raw_ftrace_entry['function_args'], count)
-
-        if not sched_switch:
-          print("WARNING: Failed to parse sched_switch: " + l)
-        else:
-          pending_sched_switch.append(sched_switch)
-
-      elif raw_ftrace_entry['function'] == 'sched_blocked_reason':
-        sbr = SchedBlockedReason.parse_dict(raw_ftrace_entry['function_args'], count)
-
-        if not sbr:
-          print("WARNING: Failed to parse sched_blocked_reason: " + l)
-        else:
-          pending_sched_blocked_reasons.append(sbr)
-
-      # Objects are cached in python memory, not yet sent to SQL database.
-      #session.add(raw_ftrace_entry)
-
-      # Send INSERT/UPDATE/etc statements to the underlying SQL database.
-      if count % _FLUSH_LIMIT == 0:
-        # session.flush()
-        #session.bulk_save_objects(pending_entries)
-        #session.bulk_insert_mappings(RawFtraceEntry, pending_entries)
-        insert_all_pending_entries()
-
-  insert_all_pending_entries()
-
-  # Ensure underlying database commits changes from memory to disk.
-  session.commit()
-
-  return count
-
-#def decode_raw_traces(session, engine):
-#  count = 0
-#  global _FLUSH_LIMIT
-#
-#  for tmw in session.query(RawFtraceEntry).filter_by(function = 'tracing_mark_write'):
-#    print(tmw)
-#    decoded = TracingMarkWriteFtraceEntry.decode(tmw)
-#    session.add(decoded)
-#
-#    if count % _FLUSH_LIMIT == 0:
-#      session.flush()
-#
-#  session.commit()
-#
-#  return count
 
 def main(argv):
-  db_filename = sys.argv[1]
-  trace_filename = sys.argv[2]
+  parser = argparse.ArgumentParser(description='Convert ftrace/systrace file into sqlite3 db.')
+  parser.add_argument('db_filename', metavar='sql_filename.db', type=str,
+                      help='path to sqlite3 db filename')
+  parser.add_argument('trace_filename', metavar='systrace.ftrace', type=str,
+                      help='path to ftrace/systrace filename')
+  parser.add_argument('--limit', type=int, help='limit the number of entries parsed [for debugging]')
 
-  session, engine = init_sqlalchemy(db_filename)
+  args = parser.parse_args()
+
+  db_filename = args.db_filename
+  trace_filename = args.trace_filename
+
+  trace2db = Trace2Db(db_filename)
   print("SQL Alchemy db initialized")
 
   # parse 'raw_ftrace_entries' table
-  count = parse_file(trace_filename, session, engine)
+  count = trace2db.parse_file_into_db(trace_filename, limit=args.limit)
   print("Count was ", count)
-
-  # create other tables
-#  count = decode_raw_traces(session, engine)
 
   return 0
 

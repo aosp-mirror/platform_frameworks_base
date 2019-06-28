@@ -96,7 +96,7 @@ public class FalsingManagerProxy implements FalsingManager {
             mInternalFalsingManager = new FalsingManagerImpl(context);
         } else {
             mInternalFalsingManager = new BrightLineFalsingManager(
-                    new FalsingDataProvider(context),
+                    new FalsingDataProvider(context.getResources().getDisplayMetrics()),
                     Dependency.get(AsyncSensorManager.class)
             );
         }

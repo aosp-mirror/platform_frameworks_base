@@ -18,7 +18,7 @@ android_test {
     name: "FeatureSplit1",
     srcs: ["**/*.java"],
     sdk_version: "current",
-    libs: ["FeatureSplitBase"],
+    libs: ["FeatureSplitBase", "FeatureSplit2"],
     aaptflags: [
         "--package-id",
         "0x80",

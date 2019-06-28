@@ -108,6 +108,12 @@ class OptimizeContext : public IAaptContext {
     return sdk_version_;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    UNIMPLEMENTED(FATAL) << "Split Name Dependencies should not be necessary";
+    static std::set<std::string> empty;
+    return empty;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
 

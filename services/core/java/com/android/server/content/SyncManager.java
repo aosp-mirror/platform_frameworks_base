@@ -1533,7 +1533,13 @@ public class SyncManager {
                 }
             }
             if (duplicatesCount > 1) {
-                Slog.e(TAG, "FATAL ERROR! File a bug if you see this.");
+                Slog.wtf(TAG, "duplicates found when scheduling a sync operation: "
+                        + "owningUid=" + syncOperation.owningUid
+                        + "; owningPackage=" + syncOperation.owningPackage
+                        + "; source=" + syncOperation.syncSource
+                        + "; adapter=" + (syncOperation.target != null
+                                            ? syncOperation.target.provider
+                                            : "unknown"));
             }
 
             if (syncOperation != syncToRun) {

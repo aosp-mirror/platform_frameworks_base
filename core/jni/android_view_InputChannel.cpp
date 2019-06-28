@@ -175,6 +175,15 @@ static void android_view_InputChannel_nativeDispose(JNIEnv* env, jobject obj, jb
     }
 }
 
+static void android_view_InputChannel_nativeRelease(JNIEnv* env, jobject obj, jboolean finalized) {
+    NativeInputChannel* nativeInputChannel =
+            android_view_InputChannel_getNativeInputChannel(env, obj);
+    if (nativeInputChannel) {
+        android_view_InputChannel_setNativeInputChannel(env, obj, NULL);
+        delete nativeInputChannel;
+    }
+}
+
 static void android_view_InputChannel_nativeTransferTo(JNIEnv* env, jobject obj,
         jobject otherObj) {
     if (android_view_InputChannel_getNativeInputChannel(env, otherObj) != NULL) {
@@ -274,6 +283,8 @@ static const JNINativeMethod gInputChannelMethods[] = {
             (void*)android_view_InputChannel_nativeOpenInputChannelPair },
     { "nativeDispose", "(Z)V",
             (void*)android_view_InputChannel_nativeDispose },
+    { "nativeRelease", "()V",
+            (void*)android_view_InputChannel_nativeRelease },
     { "nativeTransferTo", "(Landroid/view/InputChannel;)V",
             (void*)android_view_InputChannel_nativeTransferTo },
     { "nativeReadFromParcel", "(Landroid/os/Parcel;)V",

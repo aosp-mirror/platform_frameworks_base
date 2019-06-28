@@ -216,6 +216,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InputWindowHandle;
 import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
@@ -7747,5 +7748,54 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
                     0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
+    }
+
+    /**
+     * Assigns an InputChannel to a SurfaceControl and configures it to receive
+     * touch input according to it's on-screen geometry.
+     *
+     * Used by WindowlessWindowManager to enable input on SurfaceControl embedded
+     * views.
+     */
+    void blessInputSurface(int callingUid, int callingPid, int displayId, SurfaceControl surface,
+            InputChannel outInputChannel) {
+        String name = "Blessed Surface";
+        InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
+        InputChannel inputChannel = inputChannels[0];
+        InputChannel clientChannel = inputChannels[1];
+
+        clientChannel.transferTo(outInputChannel);
+        clientChannel.dispose();
+
+        IBinder token = new Binder();
+        mInputManager.registerInputChannel(inputChannel, token);
+
+        // Prevent the java finalizer from breaking the input channel. But we won't
+        // do any further management so we just release the java ref and let the
+        // InputDispatcher hold the last ref.
+        inputChannel.release();
+
+        InputWindowHandle h = new InputWindowHandle(null, null, displayId);
+        h.token = token;
+        h.name = name;
+        h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        h.layoutParamsType = 0;
+        h.dispatchingTimeoutNanos = -1;
+        h.canReceiveKeys = false;
+        h.hasFocus = false;
+        h.hasWallpaper = false;
+        h.paused = false;
+
+        h.ownerUid = callingUid;
+        h.ownerPid = callingPid;
+
+        h.inputFeatures = 0;
+
+        h.replaceTouchableRegionWithCrop(null);
+
+        SurfaceSession s = new SurfaceSession();
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.setInputWindowInfo(surface, h);
+        t.apply();
     }
 }

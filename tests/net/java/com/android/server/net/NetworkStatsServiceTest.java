@@ -37,6 +37,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.STATS_PER_IFACE;
 import static android.net.NetworkStats.STATS_PER_UID;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
@@ -154,6 +155,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private File mStatsDir;
 
     private @Mock INetworkManagementService mNetManager;
+    private @Mock NetworkStatsFactory mStatsFactory;
     private @Mock NetworkStatsSettings mSettings;
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
@@ -189,8 +191,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         mService = new NetworkStatsService(
                 mServiceContext, mNetManager, mAlarmManager, wakeLock, mClock,
-                TelephonyManager.getDefault(), mSettings, new NetworkStatsObservers(),
-                mStatsDir, getBaseDir(mStatsDir));
+                TelephonyManager.getDefault(), mSettings, mStatsFactory,
+                new NetworkStatsObservers(),  mStatsDir, getBaseDir(mStatsDir));
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
         Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
@@ -205,7 +207,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         mService.systemReady();
         // Verify that system ready fetches realtime stats
-        verify(mNetManager).getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL);
+        verify(mStatsFactory).readNetworkStatsDetail(UID_ALL, INTERFACES_ALL, TAG_ALL);
 
         mSession = mService.openSession();
         assertNotNull("openSession() failed", mSession);
@@ -696,7 +698,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats());
-        when(mNetManager.getNetworkStatsUidDetail(eq(UID_ALL), any()))
+        when(mStatsFactory.readNetworkStatsDetail(eq(UID_ALL), any(), eq(TAG_ALL)))
                 .thenReturn(new NetworkStats(getElapsedRealtime(), 1)
                         .addValues(uidStats));
         when(mNetManager.getNetworkStatsTethering(STATS_PER_UID))
@@ -712,9 +714,10 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         //
         // Additionally, we should have one call from the above call to mService#getDetailedUidStats
         // with the augmented ifaceFilter
-        verify(mNetManager, times(2)).getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL);
-        verify(mNetManager, times(1)).getNetworkStatsUidDetail(
-                eq(UID_ALL), eq(NetworkStatsFactory.augmentWithStackedInterfaces(ifaceFilter)));
+        verify(mStatsFactory, times(2)).readNetworkStatsDetail(UID_ALL, INTERFACES_ALL, TAG_ALL);
+        verify(mStatsFactory, times(1)).readNetworkStatsDetail(
+                eq(UID_ALL), eq(NetworkStatsFactory.augmentWithStackedInterfaces(ifaceFilter)),
+                eq(TAG_ALL));
         assertTrue(ArrayUtils.contains(stats.getUniqueIfaces(), TEST_IFACE));
         assertTrue(ArrayUtils.contains(stats.getUniqueIfaces(), stackedIface));
         assertEquals(2, stats.size());
@@ -1062,11 +1065,11 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private void expectNetworkStatsSummaryDev(NetworkStats summary) throws Exception {
-        when(mNetManager.getNetworkStatsSummaryDev()).thenReturn(summary);
+        when(mStatsFactory.readNetworkStatsSummaryDev()).thenReturn(summary);
     }
 
     private void expectNetworkStatsSummaryXt(NetworkStats summary) throws Exception {
-        when(mNetManager.getNetworkStatsSummaryXt()).thenReturn(summary);
+        when(mStatsFactory.readNetworkStatsSummaryXt()).thenReturn(summary);
     }
 
     private void expectNetworkStatsTethering(int how, NetworkStats stats)
@@ -1080,7 +1083,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private void expectNetworkStatsUidDetail(NetworkStats detail, NetworkStats tetherStats)
             throws Exception {
-        when(mNetManager.getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL)).thenReturn(detail);
+        when(mStatsFactory.readNetworkStatsDetail(UID_ALL, INTERFACES_ALL, TAG_ALL))
+                .thenReturn(detail);
 
         // also include tethering details, since they are folded into UID
         when(mNetManager.getNetworkStatsTethering(STATS_PER_UID)).thenReturn(tetherStats);

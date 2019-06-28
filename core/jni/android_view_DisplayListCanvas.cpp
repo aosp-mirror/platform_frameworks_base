@@ -21,9 +21,9 @@
 #include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
-
+#ifdef __ANDROID__ // Layoutlib does not support Looper and device properties
 #include <utils/Looper.h>
-#include <cutils/properties.h>
+#endif
 
 #include <SkBitmap.h>
 #include <SkRegion.h>
@@ -34,7 +34,9 @@
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
+#ifdef __ANDROID__ // Layoutlib does not support RenderThread
 #include <renderthread/RenderProxy.h>
+#endif
 
 #include "core_jni_helpers.h"
 
@@ -52,6 +54,7 @@ static JNIEnv* jnienv(JavaVM* vm) {
     return env;
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support GL, Looper
 class InvokeRunnableMessage : public MessageHandler {
 public:
     InvokeRunnableMessage(JNIEnv* env, jobject runnable) {
@@ -87,11 +90,13 @@ private:
     sp<Looper> mLooper;
     sp<InvokeRunnableMessage> mMessage;
 };
+#endif
 
 // ---------------- @FastNative -----------------------------
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         jlong canvasPtr, jlong functorPtr, jobject releasedCallback) {
+#ifdef __ANDROID__ // Layoutlib does not support GL
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     sp<GlFunctorReleasedCallbackBridge> bridge;
@@ -99,52 +104,57 @@ static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobje
         bridge = new GlFunctorReleasedCallbackBridge(env, releasedCallback);
     }
     canvas->callDrawGLFunction(functor, bridge.get());
+#endif
 }
 
 
 // ---------------- @CriticalNative -------------------------
 
-static jlong android_view_DisplayListCanvas_createDisplayListCanvas(jlong renderNodePtr,
+static jlong android_view_DisplayListCanvas_createDisplayListCanvas(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
         jint width, jint height) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return reinterpret_cast<jlong>(Canvas::create_recording_canvas(width, height, renderNode));
 }
 
-static void android_view_DisplayListCanvas_resetDisplayListCanvas(jlong canvasPtr,
+static void android_view_DisplayListCanvas_resetDisplayListCanvas(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
         jlong renderNodePtr, jint width, jint height) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     canvas->resetRecording(width, height, renderNode);
 }
 
-static jint android_view_DisplayListCanvas_getMaxTextureSize() {
+static jint android_view_DisplayListCanvas_getMaxTextureSize(CRITICAL_JNI_PARAMS) {
+#ifdef __ANDROID__ // Layoutlib does not support RenderProxy (RenderThread)
     return android::uirenderer::renderthread::RenderProxy::maxTextureSize();
+#else
+    return 4096;
+#endif
 }
 
-static void android_view_DisplayListCanvas_insertReorderBarrier(jlong canvasPtr,
+static void android_view_DisplayListCanvas_insertReorderBarrier(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
         jboolean reorderEnable) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     canvas->insertReorderBarrier(reorderEnable);
 }
 
-static jlong android_view_DisplayListCanvas_finishRecording(jlong canvasPtr) {
+static jlong android_view_DisplayListCanvas_finishRecording(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     return reinterpret_cast<jlong>(canvas->finishRecording());
 }
 
-static void android_view_DisplayListCanvas_drawRenderNode(jlong canvasPtr, jlong renderNodePtr) {
+static void android_view_DisplayListCanvas_drawRenderNode(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong renderNodePtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     canvas->drawRenderNode(renderNode);
 }
 
-static void android_view_DisplayListCanvas_drawTextureLayer(jlong canvasPtr, jlong layerPtr) {
+static void android_view_DisplayListCanvas_drawTextureLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong layerPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     canvas->drawLayer(layer);
 }
 
-static void android_view_DisplayListCanvas_drawRoundRectProps(jlong canvasPtr,
+static void android_view_DisplayListCanvas_drawRoundRectProps(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
         jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr, jlong bottomPropPtr,
         jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
@@ -158,7 +168,7 @@ static void android_view_DisplayListCanvas_drawRoundRectProps(jlong canvasPtr,
     canvas->drawRoundRect(leftProp, topProp, rightProp, bottomProp, rxProp, ryProp, paintProp);
 }
 
-static void android_view_DisplayListCanvas_drawCircleProps(jlong canvasPtr,
+static void android_view_DisplayListCanvas_drawCircleProps(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
         jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
@@ -168,7 +178,7 @@ static void android_view_DisplayListCanvas_drawCircleProps(jlong canvasPtr,
     canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
-static void android_view_DisplayListCanvas_drawWebViewFunctor(jlong canvasPtr, jint functor) {
+static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jint functor) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     canvas->drawWebViewFunctor(functor);
 }

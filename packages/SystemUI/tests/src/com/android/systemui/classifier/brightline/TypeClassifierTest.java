@@ -34,8 +34,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SysuiTestCase;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,15 +43,15 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class TypeClassifierTest extends SysuiTestCase {
+public class TypeClassifierTest extends ClassifierTest {
 
     @Mock
     private FalsingDataProvider mDataProvider;
-
     private FalsingClassifier mClassifier;
 
     @Before
     public void setup() {
+        super.setup();
         MockitoAnnotations.initMocks(this);
         mClassifier = new TypeClassifier(mDataProvider);
     }

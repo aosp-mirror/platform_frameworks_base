@@ -609,10 +609,13 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private String mTag = TAG;
-
     public ViewRootImpl(Context context, Display display) {
+        this(context, display, WindowManagerGlobal.getWindowSession());
+    }
+
+    public ViewRootImpl(Context context, Display display, IWindowSession session) {
         mContext = context;
-        mWindowSession = WindowManagerGlobal.getWindowSession();
+        mWindowSession = session;
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread();
@@ -1131,7 +1134,13 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void registerRtFrameCallback(FrameDrawingCallback callback) {
         if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(callback);
+            mAttachInfo.mThreadedRenderer.registerRtFrameCallback(frame -> {
+                try {
+                    callback.onFrameDraw(frame);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception while executing onFrameDraw", e);
+                }
+            });
         }
     }
 

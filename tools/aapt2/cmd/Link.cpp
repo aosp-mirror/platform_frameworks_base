@@ -140,6 +140,14 @@ class LinkContext : public IAaptContext {
     min_sdk_version_ = minSdk;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    return split_name_dependencies_;
+  }
+
+  void SetSplitNameDependencies(const std::set<std::string>& split_name_dependencies) {
+    split_name_dependencies_ = split_name_dependencies;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
@@ -151,6 +159,7 @@ class LinkContext : public IAaptContext {
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
+  std::set<std::string> split_name_dependencies_;
 };
 
 // A custom delegate that generates compatible pre-O IDs for use with feature splits.
@@ -269,6 +278,7 @@ struct ResourceFileFlattenerOptions {
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
   bool update_proguard_spec = false;
+  bool do_not_fail_on_missing_resources = false;
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
   Maybe<std::regex> regex_to_not_compress;
@@ -435,7 +445,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   xml::StripAndroidStudioAttributes(doc->root.get());
 
   XmlReferenceLinker xml_linker;
-  if (!xml_linker.Consume(context_, doc)) {
+  if (!options_.do_not_fail_on_missing_resources && !xml_linker.Consume(context_, doc)) {
     return {};
   }
 
@@ -961,6 +971,17 @@ class Linker {
       if (xml::Attribute* min_sdk =
               uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
         app_info.min_sdk_version = ResourceUtils::ParseSdkVersion(min_sdk->value);
+      }
+    }
+
+    for (const xml::Element* child_el : manifest_el->GetChildElements()) {
+      if (child_el->namespace_uri.empty() && child_el->name == "uses-split") {
+        if (const xml::Attribute* split_name =
+            child_el->FindAttribute(xml::kSchemaAndroid, "name")) {
+          if (!split_name->value.empty()) {
+            app_info.split_name_dependencies.insert(split_name->value);
+          }
+        }
       }
     }
     return app_info;
@@ -1674,6 +1695,7 @@ class Linker {
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
     file_flattener_options.output_format = options_.output_format;
+    file_flattener_options.do_not_fail_on_missing_resources = options_.merge_only;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
     if (!file_flattener.Flatten(table, writer)) {
@@ -1770,6 +1792,7 @@ class Linker {
     context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or_default(0));
 
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
+    context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
@@ -1901,7 +1924,7 @@ class Linker {
     }
 
     ReferenceLinker linker;
-    if (!linker.Consume(context_, &final_table_)) {
+    if (!options_.merge_only && !linker.Consume(context_, &final_table_)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking references");
       return 1;
     }
@@ -2053,7 +2076,7 @@ class Linker {
       manifest_xml->file.name.package = context_->GetCompilationPackage();
 
       XmlReferenceLinker manifest_linker;
-      if (manifest_linker.Consume(context_, manifest_xml.get())) {
+      if (options_.merge_only || manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
             !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
           error = true;
@@ -2184,6 +2207,12 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     context.GetDiagnostics()->Error(
         DiagMessage()
             << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+    return 1;
+  }
+
+  if (options_.merge_only && !static_lib_) {
+    context.GetDiagnostics()->Error(
+        DiagMessage() << "the --merge-only flag can be only used when building a static library");
     return 1;
   }
 

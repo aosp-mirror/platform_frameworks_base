@@ -309,4 +309,10 @@ interface IWindowSession {
      * Called when the system gesture exclusion has changed.
      */
     void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
+
+    /**
+    * Request the server to call setInputWindowInfo on a given Surface, and return
+    * an input channel where the client can receive input.
+    */
+    void blessInputSurface(int displayId, in SurfaceControl surface, out InputChannel outInputChannel);
 }

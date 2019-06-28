@@ -199,6 +199,7 @@ public class TrustManagerService extends SystemService {
         private final Uri LOCK_SCREEN_WHEN_TRUST_LOST =
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST);
 
+        private final boolean mIsAutomotive;
         private final ContentResolver mContentResolver;
         private boolean mTrustAgentsExtendUnlock;
         private boolean mLockWhenTrustLost;
@@ -210,6 +211,10 @@ public class TrustManagerService extends SystemService {
          */
         SettingsObserver(Handler handler) {
             super(handler);
+
+            PackageManager packageManager = getContext().getPackageManager();
+            mIsAutomotive = packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+
             mContentResolver = getContext().getContentResolver();
             updateContentObserver();
         }
@@ -233,11 +238,15 @@ public class TrustManagerService extends SystemService {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (TRUST_AGENTS_EXTEND_UNLOCK.equals(uri)) {
+                // Smart lock should only extend unlock. The only exception is for automotive,
+                // where it can actively unlock the head unit.
+                int defaultValue = mIsAutomotive ? 0 : 1;
+
                 mTrustAgentsExtendUnlock =
                         Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
-                                1 /* default */,
+                                defaultValue,
                                 mCurrentUser) != 0;
             } else if (LOCK_SCREEN_WHEN_TRUST_LOST.equals(uri)) {
                 mLockWhenTrustLost =
