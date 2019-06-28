@@ -1114,7 +1114,7 @@
     <!-- Size of bubble icon bitmap. -->
     <dimen name="bubble_icon_bitmap_size">52dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
-    <dimen name="bubble_dismiss_encircle_size">56dp</dimen>
+    <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- How much to inset the icon in the circle -->
     <dimen name="bubble_icon_inset">16dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
