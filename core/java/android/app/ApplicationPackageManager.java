@@ -1017,6 +1017,7 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @UnsupportedAppUsage
     @Override
     public boolean setInstantAppCookie(@NonNull byte[] cookie) {
         try {
