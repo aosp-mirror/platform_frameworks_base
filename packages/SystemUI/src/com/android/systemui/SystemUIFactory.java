@@ -19,8 +19,8 @@ package com.android.systemui;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
-import android.annotation.Nullable;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -29,17 +29,16 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
 
-
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
@@ -143,9 +142,10 @@ public class SystemUIFactory {
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils,  ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
-            KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
+            FalsingManager falsingManager) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
+                dismissCallbackRegistry, falsingManager,
                 expansionCallback, UnlockMethodCache.getInstance(context),
                 KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
     }

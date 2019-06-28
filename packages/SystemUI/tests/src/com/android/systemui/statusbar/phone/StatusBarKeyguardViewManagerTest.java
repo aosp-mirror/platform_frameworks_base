@@ -39,8 +39,10 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 
@@ -93,7 +95,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mViewMediatorCallback, mLockPatternUtils);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController, mDismissCallbackRegistry,
-                mLockIconContainer, mNotificationContainer, mBypassController);
+                mLockIconContainer, mNotificationContainer, mBypassController,
+                new FalsingManagerFake());
         mStatusBarKeyguardViewManager.show(null);
     }
 
@@ -235,7 +238,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 KeyguardBypassController bypassController) {
             super.registerStatusBar(statusBar, container, notificationPanelView,
                     fingerprintUnlockController, dismissCallbackRegistry, lockIconContainer,
-                    notificationContainer, bypassController);
+                    notificationContainer, bypassController, falsingManager);
             mBouncer = StatusBarKeyguardViewManagerTest.this.mBouncer;
         }
     }

@@ -148,7 +148,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -696,6 +695,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRecents = getComponent(Recents.class);
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mFalsingManager = Dependency.get(FalsingManager.class);
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -771,7 +771,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         putComponent(DozeHost.class, mDozeServiceHost);
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
-        mFalsingManager = FalsingManagerFactory.getInstance(mContext);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -1234,7 +1233,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container), mStackScroller,
-                mKeyguardBypassController);
+                mKeyguardBypassController, mFalsingManager);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -2391,7 +2390,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
-        FalsingManagerFactory.getInstance(mContext).dump(pw);
+        Dependency.get(FalsingManager.class).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");

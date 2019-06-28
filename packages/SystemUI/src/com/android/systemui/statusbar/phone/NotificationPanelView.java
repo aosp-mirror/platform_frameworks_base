@@ -61,7 +61,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.FalsingManager;
@@ -377,11 +376,12 @@ public class NotificationPanelView extends PanelView implements
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
-            KeyguardBypassController bypassController) {
+            KeyguardBypassController bypassController,
+            FalsingManager falsingManager) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
+        mFalsingManager = falsingManager;
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeUpCoordinator = coordinator;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -606,7 +606,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void initBottomArea() {
-        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext(), mFalsingManager);
         mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);

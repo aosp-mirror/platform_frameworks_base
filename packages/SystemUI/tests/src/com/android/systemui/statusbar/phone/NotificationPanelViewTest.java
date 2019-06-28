@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -98,6 +99,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private PanelBar mPanelBar;
     @Mock
     private KeyguardAffordanceHelper mAffordanceHelper;
+    @Mock
+    private FalsingManager mFalsingManager;
     private NotificationPanelView mNotificationPanelView;
 
     @Before
@@ -191,7 +194,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                     new InjectionInflationController(
                             SystemUIFactory.getInstance().getRootComponent()),
                     coordinator, expansionHandler, mock(DynamicPrivacyController.class),
-                    bypassController);
+                    bypassController,
+                    mFalsingManager);
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

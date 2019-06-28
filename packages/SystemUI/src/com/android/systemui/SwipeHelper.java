@@ -34,7 +34,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -98,7 +97,8 @@ public class SwipeHelper implements Gefingerpoken {
 
     private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
-    public SwipeHelper(int swipeDirection, Callback callback, Context context) {
+    public SwipeHelper(
+            int swipeDirection, Callback callback, Context context, FalsingManager falsingManager) {
         mContext = context;
         mCallback = callback;
         mHandler = new Handler();
@@ -113,7 +113,7 @@ public class SwipeHelper implements Gefingerpoken {
         mDensityScale =  res.getDisplayMetrics().density;
         mFalsingThreshold = res.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
         mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
+        mFalsingManager = falsingManager;
         mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
     }
 
