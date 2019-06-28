@@ -123,6 +123,10 @@ public class TileServiceManager {
         return mStateManager.isActiveTile();
     }
 
+    public boolean isBooleanTile() {
+        return mStateManager.isBooleanTile();
+    }
+
     public void setShowingDialog(boolean dialog) {
         mShowingDialog = dialog;
     }

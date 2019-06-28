@@ -186,6 +186,8 @@ public interface QSTile {
             return toStringBuilder().toString();
         }
 
+        // Used in dumps to determine current state of a tile.
+        // This string may be used for CTS testing of tiles, so removing elements is discouraged.
         protected StringBuilder toStringBuilder() {
             final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
             sb.append(",icon=").append(icon);
