@@ -1402,7 +1402,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         boolean reparented = false;
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
             final Rect bounds = options.getLaunchBounds();
-            task.updateOverrideConfiguration(bounds);
+            task.setBounds(bounds);
 
             ActivityStack stack =
                     mRootActivityContainer.getLaunchStack(null, options, task, ON_TOP);

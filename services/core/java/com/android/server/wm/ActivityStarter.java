@@ -2533,7 +2533,7 @@ class ActivityStarter {
             mService.resizeStack(
                     stack.mStackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
         } else {
-            task.updateOverrideConfiguration(bounds);
+            task.setBounds(bounds);
         }
     }
 

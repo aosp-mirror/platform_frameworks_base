@@ -4410,7 +4410,13 @@ class ActivityStack extends ConfigurationContainer {
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
             final TaskRecord task = mTaskHistory.get(i);
             if (task.isResizeable()) {
-                task.updateOverrideConfiguration(taskBounds, tempTaskInsetBounds);
+                if (tempTaskInsetBounds != null && !tempTaskInsetBounds.isEmpty()) {
+                    task.setDisplayedBounds(taskBounds);
+                    task.setBounds(tempTaskInsetBounds);
+                } else {
+                    task.setDisplayedBounds(null);
+                    task.setBounds(taskBounds);
+                }
             }
         }
 
@@ -4816,7 +4822,7 @@ class ActivityStack extends ConfigurationContainer {
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
-            task.updateOverrideConfiguration(getRequestedOverrideBounds());
+            task.setBounds(getRequestedOverrideBounds());
         }
         task.createTask(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
