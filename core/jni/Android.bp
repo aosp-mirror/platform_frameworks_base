@@ -308,6 +308,7 @@ cc_library_shared {
                 "android_os_MessageQueue.cpp",
                 "android_os_Trace.cpp",
                 "android_util_AssetManager.cpp",
+                "android_util_FileObserver.cpp",
                 "android_util_StringBlock.cpp",
                 "android_util_XmlBlock.cpp",
             ],
