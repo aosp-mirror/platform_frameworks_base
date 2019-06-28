@@ -837,6 +837,7 @@ java_library {
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
+    installable: false,
     // Use UsedByApps annotation processor
     plugins: ["unsupportedappusage-annotation-processor"],
 }
@@ -1882,4 +1883,14 @@ aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: [":framework-defaults"],
     output: "framework-aidl-mappings.txt",
+}
+
+genrule {
+    name: "framework-annotation-proc-index",
+    srcs: [":framework-annotation-proc"],
+    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
+    out: ["unsupportedappusage_index.csv"],
+    dist: {
+        targets: ["droidcore"],
+    },
 }
