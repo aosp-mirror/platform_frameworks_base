@@ -54,6 +54,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
     private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
     private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 22;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -154,6 +155,10 @@ class TaskChangeNotificationController {
         l.onSizeCompatModeActivityChanged(m.arg1, (IBinder) m.obj);
     };
 
+    private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
+        l.onTaskDisplayChanged(m.arg1, m.arg2);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -232,6 +237,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_BACK_PRESSED_ON_TASK_ROOT:
                     forAllRemoteListeners(mNotifyBackPressedOnTaskRoot, msg);
+                    break;
+                case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
                     break;
             }
         }
@@ -475,6 +483,16 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_BACK_PRESSED_ON_TASK_ROOT,
                 taskInfo);
         forAllLocalListeners(mNotifyBackPressedOnTaskRoot, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that a task is reparented to another display.
+     */
+    void notifyTaskDisplayChanged(int taskId, int newDisplayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG,
+                taskId, newDisplayId);
+        forAllLocalListeners(mNotifyTaskStackChanged, msg);
         msg.sendToTarget();
     }
 }
