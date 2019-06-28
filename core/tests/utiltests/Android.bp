@@ -1,0 +1,38 @@
+//########################################################################
+// Build FrameworksUtilTests package
+//########################################################################
+
+android_test {
+    name: "FrameworksUtilTests",
+
+    // We only want this apk build for tests.
+
+    // Include all test java files.
+    srcs: ["src/**/*.java"] + ["src/android/util/IRemoteMemoryIntArray.aidl"],
+
+    jni_libs: [
+        "libmemoryintarraytest",
+        "libcutils",
+        "libc++",
+    ],
+
+    static_libs: [
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "mockito-target-minus-junit4",
+        "androidx.test.ext.junit",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+
+    platform_apis: true,
+
+    certificate: "platform",
+
+    test_suites: ["device-tests"],
+
+}
