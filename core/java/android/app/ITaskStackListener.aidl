@@ -169,4 +169,12 @@ oneway interface ITaskStackListener {
      * @param taskInfo info about the task which received the back press
      */
     void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Called when a task is reparented to a stack on a different display.
+     *
+     * @param taskId id of the task which was moved to a different display.
+     * @param newDisplayId id of the new display.
+     */
+    void onTaskDisplayChanged(int taskId, int newDisplayId);
 }

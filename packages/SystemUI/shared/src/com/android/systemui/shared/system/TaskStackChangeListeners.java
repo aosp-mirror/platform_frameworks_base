@@ -112,7 +112,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     @Override
     public void onPinnedActivityRestartAttempt(boolean clearedTask)
-            throws RemoteException{
+            throws RemoteException {
         mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
         mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, clearedTask ? 1 : 0, 0)
                 .sendToTarget();
@@ -154,7 +154,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
     public void onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo,
             int requestedDisplayId) throws RemoteException {
         mHandler.obtainMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED,
-                 requestedDisplayId, 0 /* unused */, taskInfo).sendToTarget();
+                requestedDisplayId, 0 /* unused */, taskInfo).sendToTarget();
     }
 
     @Override
@@ -201,6 +201,11 @@ public class TaskStackChangeListeners extends TaskStackListener {
                 activityToken).sendToTarget();
     }
 
+    @Override
+    public void onTaskDisplayChanged(int taskId, int newDisplayId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -220,6 +225,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
         private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
+        private static final int ON_TASK_DISPLAY_CHANGED = 19;
 
 
         public H(Looper looper) {
@@ -305,7 +311,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i)
-                                .onActivityLaunchOnSecondaryDisplayRerouted(info);
+                                    .onActivityLaunchOnSecondaryDisplayRerouted(info);
                         }
                         break;
                     }
@@ -353,6 +359,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onBackPressedOnTaskRoot(
                                     (RunningTaskInfo) msg.obj);
+                        }
+                        break;
+                    }
+                    case ON_TASK_DISPLAY_CHANGED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskDisplayChanged(msg.arg1, msg.arg2);
                         }
                         break;
                     }
