@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -169,6 +170,7 @@ public final class OverlayInfo implements Parcelable {
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
      * @hide
      */
+    @UnsupportedAppUsage
     public final @State int state;
 
     /**
