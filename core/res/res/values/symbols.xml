@@ -2242,7 +2242,6 @@
   <java-symbol type="id" name="resolver_list" />
   <java-symbol type="id" name="button_once" />
   <java-symbol type="id" name="button_always" />
-  <java-symbol type="id" name="button_app_settings" />
   <java-symbol type="integer" name="config_globalActionsKeyTimeout" />
   <java-symbol type="integer" name="config_screenshotChordKeyTimeout" />
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
@@ -2624,14 +2623,17 @@
   <java-symbol type="bool" name="config_use_voip_mode_for_ims" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
-  <java-symbol type="string" name="activity_resolver_app_settings" />
+  <java-symbol type="string" name="activity_resolver_set_always" />
+  <java-symbol type="string" name="activity_resolver_use_always" />
   <java-symbol type="string" name="whichApplicationNamed" />
   <java-symbol type="string" name="whichApplicationLabel" />
   <java-symbol type="string" name="whichViewApplication" />
   <java-symbol type="string" name="whichViewApplicationNamed" />
   <java-symbol type="string" name="whichViewApplicationLabel" />
-  <java-symbol type="string" name="whichGiveAccessToApplication" />
-  <java-symbol type="string" name="whichGiveAccessToApplicationNamed" />
+  <java-symbol type="string" name="whichOpenHostLinksWith" />
+  <java-symbol type="string" name="whichOpenHostLinksWithApp" />
+  <java-symbol type="string" name="whichOpenLinksWith" />
+  <java-symbol type="string" name="whichOpenLinksWithApp" />
   <java-symbol type="string" name="whichGiveAccessToApplicationLabel" />
   <java-symbol type="string" name="whichEditApplication" />
   <java-symbol type="string" name="whichEditApplicationNamed" />
