@@ -498,14 +498,14 @@ public class PackageParserTest {
 
     @Test
     public void testApexPackageInfoGeneration() throws Exception {
-        String apexPackageName = "com.android.tzdata.apex";
-        File apexFile = copyRawResourceToFile(apexPackageName,
+        String apexModuleName = "com.android.tzdata.apex";
+        File apexFile = copyRawResourceToFile(apexModuleName,
                 R.raw.com_android_tzdata);
         ApexInfo apexInfo = new ApexInfo();
         apexInfo.isActive = true;
         apexInfo.isFactory = false;
-        apexInfo.packageName = apexPackageName;
-        apexInfo.packagePath = apexFile.getPath();
+        apexInfo.moduleName = apexModuleName;
+        apexInfo.modulePath = apexFile.getPath();
         apexInfo.versionCode = 191000070;
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
         PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexInfo, flags);
