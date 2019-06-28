@@ -497,8 +497,7 @@ message SystemPropertiesProto {
         }
         optional Telephony telephony = 38;
 
-        optional string url_legal = 39;
-        optional string url_legal_android_privacy = 40;
+        reserved 39, 40; // Removed url_legal* props
 
         message Vendor {
             optional string build_date = 1;
