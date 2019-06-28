@@ -359,6 +359,33 @@ public final class AmbientLuxTest {
             }
     }
 
+    @Test
+    public void testLowLight_DefaultAmbient() throws Exception {
+        final float lowerBrightness = 10.0f;
+        final float upperBrightness = 50.0f;
+        setBrightnesses(lowerBrightness, upperBrightness);
+        setBiases(0.0f, 1.0f);
+
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        final float ambientColorTemperature = -1.0f;
+        setEstimatedColorTemperature(controller, ambientColorTemperature);
+        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+
+        for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
+            setEstimatedBrightnessAndUpdate(controller,
+                    mix(lowerBrightness, upperBrightness, t));
+            assertEquals(controller.mPendingAmbientColorTemperature, ambientColorTemperature,
+                        0.001);
+        }
+
+        setEstimatedBrightnessAndUpdate(controller, 0.0f);
+        assertEquals(controller.mPendingAmbientColorTemperature, ambientColorTemperature, 0.001);
+
+        setEstimatedBrightnessAndUpdate(controller, upperBrightness + 1.0f);
+        assertEquals(controller.mPendingAmbientColorTemperature, ambientColorTemperature, 0.001);
+    }
+
     void mockThrottler() {
         when(mResourcesSpy.getInteger(
                 R.integer.config_displayWhiteBalanceDecreaseDebounce)).thenReturn(0);
