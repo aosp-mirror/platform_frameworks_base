@@ -2899,10 +2899,10 @@ public class CarrierConfigManager {
 
     /**
      * Wi-Fi configs used in Carrier Wi-Fi application.
-     * TODO(b/132059890): Expose it in a future release as systemapi.
      *
      * @hide
      */
+    @SystemApi
     public static final class Wifi {
         /** Prefix of all Wifi.KEY_* constants. */
         public static final String KEY_PREFIX = "wifi.";
