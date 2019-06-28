@@ -108,8 +108,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         assertTrue(recentActivity.visible);
 
         // Simulate the animation is cancelled without changing the stack order.
-        recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, true /* runSychronously */,
-                false /* sendUserLeaveHint */);
+        recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
         assertFalse(recentActivity.visible);
     }
@@ -244,13 +243,12 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         anotherHomeActivity.moveFocusableActivityToTop("launchAnotherHome");
         // The current top activity is not the recents so the animation should be canceled.
-        verify(mService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
+        verify(mService.mWindowManager, times(1)).cancelRecentsAnimation(
                 eq(REORDER_KEEP_IN_PLACE), any() /* reason */);
 
         // The test uses mocked RecentsAnimationController so we have to invoke the callback
         // manually to simulate the flow.
-        recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, true /* runSychronously */,
-                false /* sendUserLeaveHint */);
+        recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // We should restore the launch-behind of the original target activity.
         assertFalse(targetActivity.mLaunchTaskBehind);
     }
@@ -287,7 +285,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         fullscreenStack.moveToFront("Activity start");
 
         // Ensure that the recents animation was canceled by cancelAnimationSynchronously().
-        verify(mService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
+        verify(mService.mWindowManager, times(1)).cancelRecentsAnimation(
                 eq(REORDER_KEEP_IN_PLACE), any());
 
         // Assume recents animation already started, set a state that cancel recents animation
@@ -332,7 +330,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         fullscreenStack.remove();
 
         // Ensure that the recents animation was NOT canceled
-        verify(mService.mWindowManager, times(0)).cancelRecentsAnimationSynchronously(
+        verify(mService.mWindowManager, times(0)).cancelRecentsAnimation(
                 eq(REORDER_KEEP_IN_PLACE), any());
         verify(mRecentsAnimationController, times(0)).setCancelOnNextTransitionStart();
     }

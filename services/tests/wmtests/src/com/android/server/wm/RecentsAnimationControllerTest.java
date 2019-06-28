@@ -176,7 +176,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         // Simulate the app transition finishing
         mController.mAppTransitionListener.onAppTransitionStartingLocked(0, 0, 0, 0);
-        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true, false);
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 
     @Test
@@ -208,7 +208,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         spyOn(mController.mRecentScreenshotAnimator.mAnimatable);
         mController.mRecentScreenshotAnimator.cancelAnimation();
         verify(mController.mRecentScreenshotAnimator.mAnimatable).onAnimationLeashLost(any());
-        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true, false);
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 
     @Test

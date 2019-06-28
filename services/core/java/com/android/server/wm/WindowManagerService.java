@@ -2607,50 +2607,39 @@ public class WindowManagerService extends IWindowManager.Stub
      * @return Whether the next recents animation can continue to start. Called from
      *         {@link RecentsAnimation#startRecentsActivity}.
      */
-    public boolean canStartRecentsAnimation() {
-        synchronized (mGlobalLock) {
-            // TODO(multi-display): currently only default display support recent activity
-            if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
-                return false;
-            }
-            return true;
+    boolean canStartRecentsAnimation() {
+        // TODO(multi-display): currently only default display support recent activity
+        if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
+            return false;
         }
+        return true;
     }
 
-    /**
-     * Cancels any running recents animation. The caller should NOT hold the WM lock while calling
-     * this method, as it will call back into AM and may cause a deadlock. Any locking will be done
-     * in the animation controller itself.
-     */
-    public void cancelRecentsAnimationSynchronously(
+    void cancelRecentsAnimation(
             @RecentsAnimationController.ReorderMode int reorderMode, String reason) {
         if (mRecentsAnimationController != null) {
             // This call will call through to cleanupAnimation() below after the animation is
             // canceled
-            mRecentsAnimationController.cancelAnimationSynchronously(reorderMode, reason);
+            mRecentsAnimationController.cancelAnimation(reorderMode, reason);
         }
     }
 
-    public void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
-        synchronized (mGlobalLock) {
-            if (mRecentsAnimationController != null) {
-                final RecentsAnimationController controller = mRecentsAnimationController;
-                mRecentsAnimationController = null;
-                controller.cleanupAnimation(reorderMode);
-                // TODO(mult-display): currently only default display support recents animation.
-                getDefaultDisplayContentLocked().mAppTransition.updateBooster();
-            }
+    void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
+        if (mRecentsAnimationController != null) {
+            final RecentsAnimationController controller = mRecentsAnimationController;
+            mRecentsAnimationController = null;
+            controller.cleanupAnimation(reorderMode);
+            // TODO(mult-display): currently only default display support recents animation.
+            getDefaultDisplayContentLocked().mAppTransition.updateBooster();
         }
     }
 
-    public void setAppFullscreen(IBinder token, boolean toOpaque) {
-        synchronized (mGlobalLock) {
-            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
-            if (atoken != null) {
-                atoken.setFillsParent(toOpaque);
-                setWindowOpaqueLocked(token, toOpaque);
-                mWindowPlacerLocked.requestTraversal();
-            }
+    void setAppFullscreen(IBinder token, boolean toOpaque) {
+        final AppWindowToken atoken = mRoot.getAppWindowToken(token);
+        if (atoken != null) {
+            atoken.setFillsParent(toOpaque);
+            setWindowOpaqueLocked(token, toOpaque);
+            mWindowPlacerLocked.requestTraversal();
         }
     }
 
