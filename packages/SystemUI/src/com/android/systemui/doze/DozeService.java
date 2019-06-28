@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 
@@ -59,7 +60,8 @@ public class DozeService extends DreamService
         }
         mPluginManager = Dependency.get(PluginManager.class);
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
-        mDozeMachine = new DozeFactory().assembleMachine(this);
+        mDozeMachine = new DozeFactory().assembleMachine(
+                this, Dependency.get(FalsingManager.class));
     }
 
     @Override
