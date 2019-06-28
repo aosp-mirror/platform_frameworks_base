@@ -84,7 +84,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
@@ -1599,7 +1599,7 @@ public class KeyguardViewMediator extends SystemUI {
                     Trace.beginSection("KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
-                    FalsingManagerFactory.getInstance(mContext).onSucccessfulUnlock();
+                    Dependency.get(FalsingManager.class).onSucccessfulUnlock();
                     Trace.endSection();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:
@@ -2071,10 +2071,11 @@ public class KeyguardViewMediator extends SystemUI {
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelView panelView,
             BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
-            View notificationContainer, KeyguardBypassController bypassController) {
+            View notificationContainer, KeyguardBypassController bypassController,
+            FalsingManager falsingManager) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
                 biometricUnlockController, mDismissCallbackRegistry, lockIconContainer,
-                notificationContainer, bypassController);
+                notificationContainer, bypassController, falsingManager);
         return mStatusBarKeyguardViewManager;
     }
 

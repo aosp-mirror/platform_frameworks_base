@@ -61,9 +61,9 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -877,7 +877,7 @@ public class CarStatusBar extends StatusBar implements
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }
 
-        FalsingManagerFactory.getInstance(mContext).dump(pw);
+        Dependency.get(FalsingManager.class).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");

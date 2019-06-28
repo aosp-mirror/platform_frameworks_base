@@ -86,7 +86,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -516,7 +515,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
             HeadsUpManagerPhone headsUpManager,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController,
+            FalsingManager falsingManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -531,6 +531,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mHeadsUpManager.addListener(mRoundnessManager);
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
         mKeyguardBypassController = keyguardBypassController;
+        mFalsingManager = falsingManager;
 
         mSectionsManager =
                 new NotificationSectionsManager(
@@ -555,10 +556,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollAdapter(this);
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, mNotificationCallback,
-                getContext(), mMenuEventListener);
+                getContext(), mMenuEventListener, mFalsingManager);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         initView(context);
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
         mShouldDrawNotificationBackground =
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         mFadeNotificationsOnDismiss =
