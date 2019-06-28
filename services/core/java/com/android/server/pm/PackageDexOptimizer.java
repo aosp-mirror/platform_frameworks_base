@@ -47,12 +47,10 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 
