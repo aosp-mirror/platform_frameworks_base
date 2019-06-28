@@ -490,4 +490,10 @@
     <!-- ThemePicker package name for overlaying icons. -->
     <string name="themepicker_overlayable_package" translatable="false">com.android.wallpaper</string>
 
+    <!-- Default rounded corner curve (a Bezier). Must match (the curved path in) rounded.xml.
+         Note that while rounded.xml includes the entire path (including the horizontal and vertical
+         corner edges), this pulls out just the curve.
+     -->
+    <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
+
 </resources>
