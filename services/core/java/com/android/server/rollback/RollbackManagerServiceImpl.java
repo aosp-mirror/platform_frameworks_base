@@ -325,7 +325,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<RollbackInfo> getRecentlyExecutedRollbacks() {
+    public ParceledListSlice<RollbackInfo> getRecentlyCommittedRollbacks() {
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
@@ -344,7 +344,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void commitRollback(int rollbackId, ParceledListSlice causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        enforceManageRollbacks("executeRollback");
+        enforceManageRollbacks("commitRollback");
 
         final int callingUid = Binder.getCallingUid();
         AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
@@ -690,8 +690,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     /**
      * Load rollback data from storage if it has not already been loaded.
-     * After calling this funciton, mAvailableRollbacks and
-     * mRecentlyExecutedRollbacks will be non-null.
+     * After calling this function, mRollbacks will be non-null.
      */
     private void ensureRollbackDataLoaded() {
         synchronized (mLock) {

@@ -24,7 +24,7 @@ import android.content.IntentSender;
 interface IRollbackManager {
 
     ParceledListSlice getAvailableRollbacks();
-    ParceledListSlice getRecentlyExecutedRollbacks();
+    ParceledListSlice getRecentlyCommittedRollbacks();
 
     void commitRollback(int rollbackId, in ParceledListSlice causePackages,
             String callerPackageName, in IntentSender statusReceiver);
