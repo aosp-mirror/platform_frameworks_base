@@ -69,7 +69,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         if (buffer != null) {
             final Surface surface = new Surface();
             surface.copyFrom(mSurfaceControl);
-            surface.attachAndQueueBuffer(buffer);
+            surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
             surface.release();
         }
         getPendingTransaction().show(mSurfaceControl);

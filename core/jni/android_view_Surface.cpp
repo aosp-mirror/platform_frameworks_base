@@ -75,6 +75,24 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
+class JNamedColorSpace {
+public:
+    // ColorSpace.Named.SRGB.ordinal() = 0;
+    static constexpr jint SRGB = 0;
+
+    // ColorSpace.Named.DISPLAY_P3.ordinal() = 7;
+    static constexpr jint DISPLAY_P3 = 7;
+};
+
+constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpace) {
+    switch (colorSpace) {
+        case JNamedColorSpace::DISPLAY_P3:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 // this is just a pointer we use to pass to inc/decStrong
@@ -425,11 +443,12 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
     return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
 }
 
-static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeObject,
-        jobject graphicBuffer) {
+static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv *env, jclass clazz, jlong nativeObject,
+        jobject graphicBuffer, jint colorSpaceId) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
     sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
-    int err = Surface::attachAndQueueBuffer(surface, bp);
+    int err = Surface::attachAndQueueBufferWithDataspace(surface, bp,
+            fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
 }
 
@@ -531,7 +550,8 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
-    {"nativeAttachAndQueueBuffer", "(JLandroid/graphics/GraphicBuffer;)I", (void*)nativeAttachAndQueueBuffer},
+    {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/graphics/GraphicBuffer;I)I",
+            (void*)nativeAttachAndQueueBufferWithColorSpace},
     {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
 
