@@ -63,6 +63,7 @@ import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
@@ -233,6 +234,7 @@ public class AppOpsServiceTest {
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
     }
 
+    @Ignore("Historical appops are disabled in Android Q")
     @Test
     public void testGetOpsForPackage() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
@@ -274,7 +276,7 @@ public class AppOpsServiceTest {
         assertThat(getLoggedOps()).isNull();
     }
 
-
+    @Ignore("Historical appops are disabled in Android Q")
     @Test
     public void testPackageRemovedHistoricalOps() throws InterruptedException {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
