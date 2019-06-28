@@ -114,7 +114,7 @@ public final class RollbackManager {
     })
     public @NonNull List<RollbackInfo> getRecentlyCommittedRollbacks() {
         try {
-            return mBinder.getRecentlyExecutedRollbacks().getList();
+            return mBinder.getRecentlyCommittedRollbacks().getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
