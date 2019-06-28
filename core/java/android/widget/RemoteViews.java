@@ -206,13 +206,13 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public ApplicationInfo mApplication;
 
     /**
      * The resource ID of the layout file. (Added to the parcel)
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private final int mLayoutId;
 
     /**
@@ -224,13 +224,13 @@ public class RemoteViews implements Parcelable, Filter {
      * An array of actions to perform on the view tree once it has been
      * inflated
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private ArrayList<Action> mActions;
 
     /**
      * Maps bitmaps to unique indicies to avoid Bitmap duplication.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private BitmapCache mBitmapCache;
 
     /**
@@ -252,7 +252,7 @@ public class RemoteViews implements Parcelable, Filter {
      * RemoteViews.
      */
     private RemoteViews mLandscape = null;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private RemoteViews mPortrait = null;
 
     @ApplyFlags
@@ -430,7 +430,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Do nothing
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         public int mergeBehavior() {
             return MERGE_REPLACE;
         }
@@ -466,7 +466,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Nothing to visit by default
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         int viewId;
     }
 
@@ -499,7 +499,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public void mergeRemoteViews(RemoteViews newRv) {
         if (newRv == null) return;
         // We first copy the new RemoteViews, as the process of merging modifies the way the actions
@@ -690,7 +690,7 @@ public class RemoteViews implements Parcelable, Filter {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         PendingIntent pendingIntentTemplate;
     }
 
@@ -1138,7 +1138,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static class BitmapCache {
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         ArrayList<Bitmap> mBitmaps;
         int mBitmapMemory = -1;
 
@@ -1190,9 +1190,9 @@ public class RemoteViews implements Parcelable, Filter {
 
     private class BitmapReflectionAction extends Action {
         int bitmapId;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         Bitmap bitmap;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         String methodName;
 
         BitmapReflectionAction(int viewId, String methodName, Bitmap bitmap) {
@@ -1258,10 +1258,10 @@ public class RemoteViews implements Parcelable, Filter {
         static final int COLOR_STATE_LIST = 15;
         static final int ICON = 16;
 
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         String methodName;
         int type;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         Object value;
 
         ReflectionAction(int viewId, String methodName, int type, Object value) {
@@ -1554,7 +1554,7 @@ public class RemoteViews implements Parcelable, Filter {
      * ViewGroup methods that are related to adding Views.
      */
     private class ViewGroupActionAdd extends Action {
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+        @UnsupportedAppUsage
         private RemoteViews mNestedViews;
         private int mIndex;
 
@@ -2469,7 +2469,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
      */
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public int estimateMemoryUsage() {
         return mBitmapCache.getBitmapMemory();
     }
@@ -2517,7 +2517,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public void addView(int viewId, RemoteViews nestedView, int index) {
         addAction(new ViewGroupActionAdd(viewId, nestedView, index));
     }
@@ -2994,7 +2994,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      * @deprecated this appears to have no users outside of UnsupportedAppUsage?
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
+    @Deprecated
     public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list, int viewTypeCount) {
         addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
     }
