@@ -470,6 +470,13 @@ message StatsdStatsReport {
     }
 
     optional EventQueueOverflow queue_overflow = 18;
+
+    message ActivationBroadcastGuardrail {
+        optional int32 uid = 1;
+        repeated int32 guardrail_met_sec = 2;
+    }
+
+    repeated ActivationBroadcastGuardrail activation_guardrail_stats = 19;
 }
 
 message AlertTriggerDetails {
