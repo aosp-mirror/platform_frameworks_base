@@ -581,6 +581,7 @@ Landroid/security/keystore/IKeystoreService;->ungrant(Ljava/lang/String;I)I
 Landroid/service/dreams/IDreamManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/dreams/IDreamManager;
 Landroid/service/dreams/IDreamManager;->getDreamComponents()[Landroid/content/ComponentName;
 Landroid/service/euicc/IEuiccService$Stub;-><init>()V
+Landroid/service/media/IMediaBrowserServiceCallbacks$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/media/IMediaBrowserServiceCallbacks;
 Landroid/service/notification/INotificationListener$Stub;-><init>()V
 Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/persistentdata/IPersistentDataBlockService;
 Landroid/service/vr/IVrManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/vr/IVrManager;
