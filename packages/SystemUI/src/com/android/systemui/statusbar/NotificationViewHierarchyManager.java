@@ -440,14 +440,14 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     private void beginUpdate() {
         if (mPerformingUpdate) {
-            throw new IllegalStateException("Re-entrant code during update.");
+            Log.wtf(TAG, "Re-entrant code during update", new Exception());
         }
         mPerformingUpdate = true;
     }
 
     private void endUpdate() {
         if (!mPerformingUpdate) {
-            throw new IllegalStateException("Manager state has become desynced.");
+            Log.wtf(TAG, "Manager state has become desynced", new Exception());
         }
         mPerformingUpdate = false;
     }
