@@ -2742,7 +2742,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mWindowManager.deferSurfaceLayout();
         try {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                mWindowManager.setDockedStackCreateState(
+                mWindowManager.setDockedStackCreateStateLocked(
                         activityOptions.getSplitScreenCreateMode(), null /* initialBounds */);
 
                 // Defer updating the stack in which recents is until the app transition is done, to

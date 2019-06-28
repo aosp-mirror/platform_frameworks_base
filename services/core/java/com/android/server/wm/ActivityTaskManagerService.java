@@ -1949,12 +1949,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                final boolean translucentChanged = r.changeWindowTranslucency(true);
-                if (translucentChanged) {
-                    mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                }
-                mWindowManager.setAppFullscreen(token, true);
-                return translucentChanged;
+                return r.setOccludesParent(true);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1977,13 +1972,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     ActivityRecord under = task.mActivities.get(index - 1);
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                final boolean translucentChanged = r.changeWindowTranslucency(false);
-                if (translucentChanged) {
-                    r.getActivityStack().convertActivityToTranslucent(r);
-                }
-                mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-                mWindowManager.setAppFullscreen(token, false);
-                return translucentChanged;
+                return r.setOccludesParent(false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2576,7 +2565,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + taskId + " to stack " + stackId);
                 }
                 if (stack.inSplitScreenPrimaryWindowingMode()) {
-                    mWindowManager.setDockedStackCreateState(
+                    mWindowManager.setDockedStackCreateStateLocked(
                             SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
                 }
                 task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
@@ -2695,7 +2684,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " non-standard task " + taskId + " to split-screen windowing mode");
                 }
 
-                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
+                mWindowManager.setDockedStackCreateStateLocked(createMode, initialBounds);
                 final int windowingMode = task.getWindowingMode();
                 final ActivityStack stack = task.getStack();
                 if (toTop) {

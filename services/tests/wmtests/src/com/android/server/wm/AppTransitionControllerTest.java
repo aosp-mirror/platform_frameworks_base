@@ -60,7 +60,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentOpening.setFillsParent(false);
+            translucentOpening.setOccludesParent(false);
             translucentOpening.setHidden(true);
             mDisplayContent.mOpeningApps.add(behind);
             mDisplayContent.mOpeningApps.add(translucentOpening);
@@ -78,7 +78,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final AppWindowToken translucentClosing = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentClosing.setFillsParent(false);
+            translucentClosing.setOccludesParent(false);
             mDisplayContent.mClosingApps.add(translucentClosing);
             assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
                     mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
@@ -94,7 +94,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentOpening.setFillsParent(false);
+            translucentOpening.setOccludesParent(false);
             translucentOpening.setHidden(true);
             mDisplayContent.mOpeningApps.add(behind);
             mDisplayContent.mOpeningApps.add(translucentOpening);
@@ -110,10 +110,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             final AppWindowToken opening = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-            opening.setFillsParent(false);
+            opening.setOccludesParent(false);
             final AppWindowToken closing = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-            closing.setFillsParent(false);
+            closing.setOccludesParent(false);
             Task task = opening.getTask();
             mDisplayContent.mOpeningApps.add(opening);
             mDisplayContent.mClosingApps.add(closing);

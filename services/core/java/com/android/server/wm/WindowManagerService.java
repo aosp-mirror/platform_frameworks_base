@@ -2599,7 +2599,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mRecentsAnimationController = controller;
     }
 
-    public RecentsAnimationController getRecentsAnimationController() {
+    RecentsAnimationController getRecentsAnimationController() {
         return mRecentsAnimationController;
     }
 
@@ -2634,36 +2634,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setAppFullscreen(IBinder token, boolean toOpaque) {
-        final AppWindowToken atoken = mRoot.getAppWindowToken(token);
-        if (atoken != null) {
-            atoken.setFillsParent(toOpaque);
-            setWindowOpaqueLocked(token, toOpaque);
-            mWindowPlacerLocked.requestTraversal();
-        }
-    }
-
-    public void setWindowOpaque(IBinder token, boolean isOpaque) {
-        synchronized (mGlobalLock) {
-            setWindowOpaqueLocked(token, isOpaque);
-        }
-    }
-
-    private void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
+    void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
         final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
         if (wtoken != null) {
-            final WindowState win = wtoken.findMainWindow();
-            if (win == null) {
-                return;
-            }
-            isOpaque = isOpaque & !PixelFormat.formatHasAlpha(win.getAttrs().format);
-            win.mWinAnimator.setOpaqueLocked(isOpaque);
-        }
-    }
-
-    public void setDockedStackCreateState(int mode, Rect bounds) {
-        synchronized (mGlobalLock) {
-            setDockedStackCreateStateLocked(mode, bounds);
+            wtoken.setMainWindowOpaque(isOpaque);
         }
     }
 
@@ -2672,14 +2646,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
-    public void checkSplitScreenMinimizedChanged(boolean animate) {
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            displayContent.getDockedDividerController().checkMinimizeChanged(animate);
-        }
+    void checkSplitScreenMinimizedChanged(boolean animate) {
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        displayContent.getDockedDividerController().checkMinimizeChanged(animate);
     }
 
-    public boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
+    boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
         final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
                 aspectRatio);

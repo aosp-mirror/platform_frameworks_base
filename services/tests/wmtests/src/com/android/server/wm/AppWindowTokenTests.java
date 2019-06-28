@@ -251,14 +251,14 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void testGetOrientation() {
         mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        mToken.setFillsParent(false);
-        // Can specify orientation if app doesn't fill parent.
+        mToken.setOccludesParent(false);
+        // Can specify orientation if app doesn't occludes parent.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mToken.getOrientation());
 
-        mToken.setFillsParent(true);
+        mToken.setOccludesParent(true);
         mToken.setHidden(true);
         mToken.sendingToBottom = true;
-        // Can not specify orientation if app isn't visible even though it fills parent.
+        // Can not specify orientation if app isn't visible even though it occludes parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, mToken.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE,

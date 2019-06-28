@@ -2492,7 +2492,7 @@ class ActivityStack extends ConfigurationContainer {
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
 
             if (waitingActivity != null) {
-                mWindowManager.setWindowOpaque(waitingActivity.appToken, false);
+                mWindowManager.setWindowOpaqueLocked(waitingActivity.appToken, false);
                 if (waitingActivity.attachedToProcess()) {
                     try {
                         waitingActivity.app.getThread().scheduleTranslucentConversionComplete(

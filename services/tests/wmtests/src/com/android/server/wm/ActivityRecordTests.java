@@ -188,7 +188,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(mActivity.isState(STARTED));
 
         mStack.mTranslucentActivityWaiting = null;
-        topActivity.changeWindowTranslucency(false);
+        topActivity.setOccludesParent(false);
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped behind non-opaque");
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(STARTED));
@@ -484,7 +484,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testShouldPauseWhenMakeClientVisible() {
         ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.changeWindowTranslucency(false);
+        topActivity.setOccludesParent(false);
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
         mActivity.makeClientVisible();
         assertEquals(STARTED, mActivity.getState());
