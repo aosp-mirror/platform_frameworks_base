@@ -285,6 +285,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SETTINGS_UI = "settings_ui";
 
     /**
+     * Namespace for window manager related features. The names to access the properties in this
+     * namespace should be defined in {@link WindowManager}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_WINDOW_MANAGER = "android:window_manager";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
@@ -300,6 +309,23 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     public static final String NAMESPACE_PRIVACY = "privacy";
+
+    /**
+     * Interface for accessing keys belonging to {@link #NAMESPACE_WINDOW_MANAGER}.
+     * @hide
+     */
+    @TestApi
+    public interface WindowManager {
+
+        /**
+         * Key for accessing the system gesture exclusion limit (an integer in dp).
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
+         * @hide
+         */
+        @TestApi
+        String KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP = "system_gesture_exclusion_limit_dp";
+    }
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
