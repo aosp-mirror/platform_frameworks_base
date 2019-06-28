@@ -32,6 +32,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -154,6 +155,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
@@ -175,6 +177,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -379,6 +382,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ANIMATION_DURATION_SCALE = 2;
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
+
+    private static final int MIN_GESTURE_EXCLUSION_LIMIT_DP = 200;
 
     final WindowTracing mWindowTracing;
 
@@ -838,6 +843,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
     boolean mWindowsChanged = false;
 
+    int mSystemGestureExclusionLimitDp;
+
     public interface WindowChangeListener {
         public void windowsChanged();
         public void focusChanged();
@@ -1131,6 +1138,21 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskPositioningController = new TaskPositioningController(
                 this, mInputManager, mActivityTaskManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
+
+        mSystemGestureExclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
+                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                new HandlerExecutor(mH), properties -> {
+                    synchronized (mGlobalLock) {
+                        final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
+                                properties.getInt(KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
+                        if (mSystemGestureExclusionLimitDp != exclusionLimitDp) {
+                            mSystemGestureExclusionLimitDp = exclusionLimitDp;
+                            mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
+                        }
+                    }
+                });
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
     }
