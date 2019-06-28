@@ -3918,10 +3918,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Caller wants the current split-screen primary stack to be the top stack after
                     // it goes fullscreen, so move it to the front.
                     stack.moveToFront("dismissSplitScreenMode");
-                } else if (mRootActivityContainer.isTopDisplayFocusedStack(stack)) {
+                } else {
                     // In this case the current split-screen primary stack shouldn't be the top
-                    // stack after it goes fullscreen, but it current has focus, so we move the
-                    // focus to the top-most split-screen secondary stack next to it.
+                    // stack after it goes fullscreen, so we move the focus to the top-most
+                    // split-screen secondary stack next to it.
                     final ActivityStack otherStack = stack.getDisplay().getTopStackInWindowingMode(
                             WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
                     if (otherStack != null) {

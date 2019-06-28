@@ -1302,17 +1302,17 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
 
+        getDisplay().positionChildAtBottom(this, reason);
+        if (task != null) {
+            insertTaskAtBottom(task);
+        }
+
         /**
          * The intent behind moving a primary split screen stack to the back is usually to hide
          * behind the home stack. Exit split screen in this case.
          */
         if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
-        }
-
-        getDisplay().positionChildAtBottom(this, reason);
-        if (task != null) {
-            insertTaskAtBottom(task);
         }
     }
 
