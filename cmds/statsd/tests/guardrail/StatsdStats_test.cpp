@@ -445,6 +445,47 @@ TEST(StatsdStatsTest, TestSystemServerCrash) {
     EXPECT_EQ(StatsdStats::kMaxSystemServerRestarts + 1, report.system_restart_sec(maxCount - 1));
 }
 
+TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit) {
+    StatsdStats stats;
+    int uid1 = 1;
+    int uid2 = 2;
+    stats.noteActivationBroadcastGuardrailHit(uid1, 10);
+    stats.noteActivationBroadcastGuardrailHit(uid1, 20);
+
+    // Test that we only keep 20 timestamps.
+    for (int i = 0; i < 100; i++) {
+        stats.noteActivationBroadcastGuardrailHit(uid2, i);
+    }
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
+
+    EXPECT_EQ(2, report.activation_guardrail_stats_size());
+    bool uid1Good = false;
+    bool uid2Good = false;
+    for (const auto& guardrailTimes : report.activation_guardrail_stats()) {
+        if (uid1 == guardrailTimes.uid()) {
+            uid1Good = true;
+            EXPECT_EQ(2, guardrailTimes.guardrail_met_sec_size());
+            EXPECT_EQ(10, guardrailTimes.guardrail_met_sec(0));
+            EXPECT_EQ(20, guardrailTimes.guardrail_met_sec(1));
+        } else if (uid2 == guardrailTimes.uid()) {
+            int maxCount = StatsdStats::kMaxTimestampCount;
+            uid2Good = true;
+            EXPECT_EQ(maxCount, guardrailTimes.guardrail_met_sec_size());
+            for (int i = 0; i < maxCount; i++) {
+                EXPECT_EQ(100 - maxCount + i, guardrailTimes.guardrail_met_sec(i));
+            }
+        } else {
+            FAIL() << "Unexpected uid.";
+        }
+    }
+    EXPECT_TRUE(uid1Good);
+    EXPECT_TRUE(uid2Good);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
