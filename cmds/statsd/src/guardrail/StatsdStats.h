@@ -445,6 +445,12 @@ public:
     void noteEventQueueOverflow(int64_t oldestEventTimestampNs);
 
     /**
+     * Reports that the activation broadcast guardrail was hit for this uid. Namely, the broadcast
+     * should have been sent, but instead was skipped due to hitting the guardrail.
+     */
+     void noteActivationBroadcastGuardrailHit(const int uid);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -532,6 +538,10 @@ private:
     // Maps metric ID to its stats. The size is capped by the number of metrics.
     std::map<int64_t, AtomMetricStats> mAtomMetricStats;
 
+    // Maps uids to times when the activation changed broadcast not sent due to hitting the
+    // guardrail. The size is capped by the number of configs, and up to 20 times per uid.
+    std::map<int, std::list<int32_t>> mActivationBroadcastGuardrailStats;
+
     struct LogLossStats {
         LogLossStats(int32_t sec, int32_t count, int32_t error, int32_t tag, int32_t uid,
                      int32_t pid)
@@ -588,6 +598,8 @@ private:
 
     void noteActiveStatusChanged(const ConfigKey& key, bool activate, int32_t timeSec);
 
+    void noteActivationBroadcastGuardrailHit(const int uid, int32_t timeSec);
+
     void addToIceBoxLocked(std::shared_ptr<ConfigStats>& stats);
 
     /**
@@ -607,6 +619,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
     FRIEND_TEST(StatsdStatsTest, TestPullAtomStats);
     FRIEND_TEST(StatsdStatsTest, TestAtomMetricsStats);
+    FRIEND_TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit);
 };
 
 }  // namespace statsd
