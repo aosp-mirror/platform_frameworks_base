@@ -8396,6 +8396,7 @@ public class PackageParser {
         PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,
                 Collections.emptySet(), state);
         pi.applicationInfo.sourceDir = apexFile.getPath();
+        pi.applicationInfo.publicSourceDir = apexFile.getPath();
         if (apexInfo.isFactory) {
             pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         } else {
