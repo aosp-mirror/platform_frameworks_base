@@ -88,6 +88,7 @@ import android.view.Display;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.server.compat.CompatConfig;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -288,6 +289,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runNoHomeScreen(pw);
                 case "wait-for-broadcast-idle":
                     return runWaitForBroadcastIdle(pw);
+                case "compat":
+                    return runCompat(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2865,6 +2868,50 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runCompat(PrintWriter pw) {
+        final CompatConfig config = CompatConfig.get();
+        String toggleValue = getNextArgRequired();
+        long changeId;
+        String changeIdString = getNextArgRequired();
+        try {
+            changeId = Long.parseLong(changeIdString);
+        } catch (NumberFormatException e) {
+            changeId = config.lookupChangeId(changeIdString);
+        }
+        if (changeId == -1) {
+            pw.println("Unknown or invalid change: '" + changeIdString + "'.");
+        }
+        String packageName = getNextArgRequired();
+        switch(toggleValue) {
+            case "enable":
+                if (!config.addOverride(changeId, packageName, true)) {
+                    pw.println("Warning! Change " + changeId + " is not known yet. Enabling it"
+                            + " could have no effect.");
+                }
+                pw.println("Enabled change " + changeId + " for " + packageName + ".");
+                return 0;
+            case "disable":
+                if (!config.addOverride(changeId, packageName, false)) {
+                    pw.println("Warning! Change " + changeId + " is not known yet. Disabling it"
+                            + " could have no effect.");
+                }
+                pw.println("Disabled change " + changeId + " for " + packageName + ".");
+                return 0;
+            case "reset":
+                if (config.removeOverride(changeId, packageName)) {
+                    pw.println("Reset change " + changeId + " for " + packageName
+                            + " to default value.");
+                } else {
+                    pw.println("No override exists for changeId " + changeId + ".");
+                }
+                return 0;
+            default:
+                pw.println("Invalid toggle value: '" + toggleValue + "'.");
+        }
+        return -1;
+    }
+
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3170,6 +3217,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      without restarting any processes.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
+            pw.println("  compat enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("      Toggles a change either by id or by name for <PACKAGE_NAME>.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }
