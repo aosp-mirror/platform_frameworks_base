@@ -54,6 +54,7 @@ import android.media.session.ISession;
 import android.media.session.ISession2TokensListener;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
@@ -1183,6 +1184,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         /**
+         * Dispaches media key events. This is called when the foreground activity didn't handled
+         * the incoming media key event.
+         * <p>
          * Handles the dispatching of the media button events to one of the
          * registered listeners, or if there was none, broadcast an
          * ACTION_MEDIA_BUTTON intent to the rest of the system.
@@ -1262,6 +1266,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        /**
+         * Dispatches media key events to session as system service. This is used only when the
+         * foreground activity has set
+         * {@link android.app.Activity#setMediaController(MediaController)} and a media key was
+         * pressed.
+         *
+         * @param packageName The caller's package name, obtained by Context#getPackageName()
+         * @param opPackageName The caller's op package name, obtained by Context#getOpPackageName()
+         * @param sessionToken token for the session that the controller is pointing to
+         * @param keyEvent media key event
+         * @see #dispatchVolumeKeyEvent
+         */
         @Override
         public boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
                 MediaSession.Token sessionToken, KeyEvent keyEvent) {
@@ -1272,9 +1288,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
                     if (record == null) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Failed to find session to dispatch key event.");
-                        }
+                        Log.w(TAG, "Failed to find session to dispatch key event.");
                         return false;
                     }
                     if (DEBUG) {
@@ -1452,9 +1466,12 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         /**
+         * Dispaches volume key events. This is called when the foreground activity didn't handled
+         * the incoming volume key event.
+         * <p>
          * Handles the dispatching of the volume button events to one of the
          * registered listeners. If there's a volume key long-press listener and
-         * there's no active global priority session, long-pressess will be sent to the
+         * there's no active global priority session, long-presses will be sent to the
          * long-press listener instead of adjusting volume.
          *
          * @param packageName The caller's package name, obtained by Context#getPackageName()
@@ -1471,6 +1488,7 @@ public class MediaSessionService extends SystemService implements Monitor {
          *            or {@link KeyEvent#KEYCODE_VOLUME_MUTE}.
          * @param stream stream type to adjust volume.
          * @param musicOnly true if both UI nor haptic feedback aren't needed when adjust volume.
+         * @see #dispatchVolumeKeyEventToSessionAsSystemService
          */
         @Override
         public void dispatchVolumeKeyEvent(String packageName, String opPackageName,
@@ -1597,6 +1615,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        /**
+         * Dispatches volume key events to session as system service. This is used only when the
+         * foreground activity has set
+         * {@link android.app.Activity#setMediaController(MediaController)} and a hardware volume
+         * key was pressed.
+         *
+         * @param packageName The caller's package name, obtained by Context#getPackageName()
+         * @param opPackageName The caller's op package name, obtained by Context#getOpPackageName()
+         * @param sessionToken token for the session that the controller is pointing to
+         * @param keyEvent volume key event
+         * @see #dispatchVolumeKeyEvent
+         */
         @Override
         public void dispatchVolumeKeyEventToSessionAsSystemService(String packageName,
                 String opPackageName, MediaSession.Token sessionToken, KeyEvent keyEvent) {
@@ -1607,9 +1637,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
                     if (record == null) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Failed to find session to dispatch key event.");
-                        }
+                        Log.w(TAG, "Failed to find session to dispatch key event, token="
+                                + sessionToken + ". Fallbacks to the default handling.");
+                        dispatchVolumeKeyEventLocked(packageName, opPackageName, pid, uid, true,
+                                keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                         return;
                     }
                     if (DEBUG) {
