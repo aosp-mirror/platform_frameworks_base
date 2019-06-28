@@ -243,6 +243,8 @@ def test_run_with_vm_cache_drop_and_post_launch_cleanup():
             debug=False)
 
     calls = [call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
+             call('bash -c "source {}; iorapd_readahead_enable"'.
+                    format(run.IORAP_COMMON_BASH_SCRIPT)),
              call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
              call(
                'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}" | '
@@ -262,6 +264,8 @@ def test_run_with_vm_cache_drop_and_post_launch_cleanup():
                         activity='MainActivity',
                         timestamp='123:123',
                         script_path=run.IORAP_COMMON_BASH_SCRIPT)),
+             call('bash -c "source {}; iorapd_readahead_disable"'.
+                    format(run.IORAP_COMMON_BASH_SCRIPT)),
              call('adb shell ps | grep "music" | awk \'{print $2;}\''),
              call('adb shell "kill 9999"')]
   mock_run_shell_command.assert_has_calls(calls)

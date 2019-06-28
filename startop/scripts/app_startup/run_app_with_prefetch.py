@@ -228,6 +228,9 @@ def run(readahead: str,
     # Drop all caches to get cold starts.
     adb_utils.vm_drop_cache()
 
+  if readahead != 'warm' and readahead != 'cold':
+    iorapd_utils.enable_iorapd_readahead()
+
   print_utils.debug_print('Running with timeout {}'.format(timeout))
 
   pre_launch_timestamp = adb_utils.logcat_save_timestamp()
@@ -272,12 +275,17 @@ def perform_post_launch_cleanup(readahead: str,
     A bool indicates whether the cleanup succeeds or not.
   """
   if readahead != 'warm' and readahead != 'cold':
-    return iorapd_utils.wait_for_iorapd_finish(package,
+    passed = iorapd_utils.wait_for_iorapd_finish(package,
                                                activity,
                                                timeout,
                                                debug,
                                                logcat_timestamp)
-    return passed
+
+    if not passed:
+      return passed
+
+    return iorapd_utils.disable_iorapd_readahead()
+
   # Don't need to do anything for warm or cold.
   return True
 
