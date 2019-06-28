@@ -67,7 +67,8 @@ interface INetworkStatsService {
     void forceUpdateIfaces(
          in Network[] defaultNetworks,
          in NetworkState[] networkStates,
-         in String activeIface);
+         in String activeIface,
+         in VpnInfo[] vpnInfos);
     /** Force update of statistics. */
     @UnsupportedAppUsage
     void forceUpdate();
