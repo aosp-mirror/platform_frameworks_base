@@ -1058,6 +1058,10 @@ public class RollbackTest {
 
             Uninstall.packages(TestApp.A);
             Install.single(TestApp.A1).commit();
+
+            // Block the RollbackManager to make extra sure it will not be
+            // able to enable the rollback in time.
+            rm.blockRollbackManager(TimeUnit.SECONDS.toMillis(1));
             Install.single(TestApp.A2).setEnableRollback().commit();
 
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);

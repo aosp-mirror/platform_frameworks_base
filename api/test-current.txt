@@ -795,6 +795,7 @@ package android.content.rollback {
   }
 
   public final class RollbackManager {
+    method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void blockRollbackManager(long);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
