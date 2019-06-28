@@ -272,6 +272,7 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.provider.DeviceConfig.Properties;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -356,6 +357,7 @@ import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -392,6 +394,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
@@ -861,6 +864,51 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
 
+    /**
+     * Depth of overlapping activity-start PSS deferral notes
+     */
+    private final AtomicInteger mActivityStartingNesting = new AtomicInteger(0);
+
+    private final ActivityMetricsLaunchObserver mActivityLaunchObserver =
+            new ActivityMetricsLaunchObserver() {
+        @Override
+        public void onActivityLaunched(byte[] activity, int temperature) {
+            // This is safe to force to the head of the queue because it relies only
+            // on refcounting to track begin/end of deferrals, not on actual
+            // message ordering.  We don't care *what* activity is being
+            // launched; only that we're doing so.
+            if (mPssDeferralTime > 0) {
+                final Message msg = mBgHandler.obtainMessage(DEFER_PSS_MSG);
+                mBgHandler.sendMessageAtFrontOfQueue(msg);
+            }
+        }
+
+        // The other observer methods are unused
+        @Override
+        public void onIntentStarted(Intent intent) {
+        }
+
+        @Override
+        public void onIntentFailed() {
+        }
+
+        @Override
+        public void onActivityLaunchCancelled(byte[] abortingActivity) {
+        }
+
+        @Override
+        public void onActivityLaunchFinished(byte[] finalActivity) {
+        }
+    };
+
+    /**
+     * How long we defer PSS gathering while activities are starting, in milliseconds.
+     * This is adjustable via DeviceConfig.  If it is zero or negative, no PSS deferral
+     * is done.
+     */
+    private volatile long mPssDeferralTime = 0;
+    private static final String ACTIVITY_START_PSS_DEFER_CONFIG = "activity_start_pss_defer";
+
     private boolean mBinderTransactionTrackingEnabled = false;
 
     /**
@@ -874,6 +922,20 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean mFullPssPending = false;
 
+    /**
+     * Observe DeviceConfig changes to the PSS calculation interval
+     */
+    private final DeviceConfig.OnPropertiesChangedListener mPssDelayConfigListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(Properties properties) {
+                    mPssDeferralTime = properties.getLong(ACTIVITY_START_PSS_DEFER_CONFIG, 0);
+                    if (DEBUG_PSS) {
+                        Slog.d(TAG_PSS, "Activity-start PSS delay now "
+                                + mPssDeferralTime + " ms");
+                    }
+                }
+            };
 
     /**
      * This is for verifying the UID report flow.
@@ -1838,6 +1900,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     static final int COLLECT_PSS_BG_MSG = 1;
+    static final int DEFER_PSS_MSG = 2;
+    static final int STOP_DEFERRING_PSS_MSG = 3;
 
     final Handler mBgHandler = new Handler(BackgroundThread.getHandler().getLooper()) {
         @Override
@@ -1945,6 +2009,30 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 } while (true);
             }
+
+            case DEFER_PSS_MSG: {
+                deferPssForActivityStart();
+            } break;
+
+            case STOP_DEFERRING_PSS_MSG: {
+                final int nesting = mActivityStartingNesting.decrementAndGet();
+                if (nesting <= 0) {
+                    if (DEBUG_PSS) {
+                        Slog.d(TAG_PSS, "PSS activity start deferral interval ended; now "
+                                + nesting);
+                    }
+                    if (nesting < 0) {
+                        Slog.wtf(TAG, "Activity start nesting undercount!");
+                        mActivityStartingNesting.incrementAndGet();
+                    }
+                } else {
+                    if (DEBUG_PSS) {
+                        Slog.d(TAG_PSS, "Still deferring PSS, nesting=" + nesting);
+                    }
+                }
+            }
+            break;
+
             }
         }
     };
@@ -3694,9 +3782,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<Integer> nativePids) {
         ArrayList<Integer> extraPids = null;
 
-        if (DEBUG_ANR) {
-            Slog.d(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
-        }
+        Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
 
         // Measure CPU usage as soon as we're called in order to get a realistic sampling
         // of the top users at the time of the request.
@@ -3718,8 +3804,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
 
                     extraPids.add(stats.pid);
-                } else if (DEBUG_ANR) {
-                    Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
+                } else {
+                    Slog.i(TAG, "Skipping next CPU consuming process, not a java proc: "
                             + stats.pid);
                 }
             }
@@ -3736,9 +3822,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         File tracesFile = createAnrDumpFile(tracesDir);
         if (tracesFile == null) {
             return null;
-        }
-        if (DEBUG_ANR) {
-            Slog.d(TAG, "Dumping to " + tracesFile.getAbsolutePath());
         }
 
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
@@ -3832,6 +3915,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static void dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
             ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
 
+        Slog.i(TAG, "Dumping to " + tracesFile);
+
         // We don't need any sort of inotify based monitoring when we're dumping traces via
         // tombstoned. Data is piped to an "intercept" FD installed in tombstoned so we're in full
         // control of all writes to the file in question.
@@ -3843,7 +3928,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (firstPids != null) {
             int num = firstPids.size();
             for (int i = 0; i < num; i++) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid " + firstPids.get(i));
+                Slog.i(TAG, "Collecting stacks for pid " + firstPids.get(i));
                 final long timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile,
                                                                 remainingTime);
 
@@ -3863,7 +3948,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Next collect the stacks of the native pids
         if (nativePids != null) {
             for (int pid : nativePids) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                Slog.i(TAG, "Collecting stacks for native pid " + pid);
                 final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
 
                 final long start = SystemClock.elapsedRealtime();
@@ -3887,7 +3972,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Lastly, dump stacks for all extra PIDs from the CPU tracker.
         if (extraPids != null) {
             for (int pid : extraPids) {
-                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
+                Slog.i(TAG, "Collecting stacks for extra pid " + pid);
 
                 final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
 
@@ -3903,6 +3988,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+        Slog.i(TAG, "Done dumping");
     }
 
     @Override
@@ -8845,6 +8931,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
 
+        final long pssDeferralMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ACTIVITY_START_PSS_DEFER_CONFIG, 0L);
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mPssDelayConfigListener);
+
         synchronized (this) {
             mDebugApp = mOrigDebugApp = debugApp;
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
@@ -8861,6 +8953,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
 
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
+            mPssDeferralTime = pssDeferralMs;
         }
     }
 
@@ -8923,6 +9016,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY, SystemClock.uptimeMillis());
 
         mAtmInternal.updateTopComponentForFactoryTest();
+        mAtmInternal.getLaunchObserverRegistry().registerLaunchObserver(mActivityLaunchObserver);
 
         watchDeviceProvisioning(mContext);
 
@@ -16146,13 +16240,43 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
         if (mPendingPssProcesses.size() == 0) {
-            mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+            final long deferral = (mPssDeferralTime > 0 && mActivityStartingNesting.get() > 0)
+                    ? mPssDeferralTime : 0;
+            if (DEBUG_PSS && deferral > 0) {
+                Slog.d(TAG_PSS, "requestPssLocked() deferring PSS request by "
+                        + deferral + " ms");
+            }
+            mBgHandler.sendEmptyMessageDelayed(COLLECT_PSS_BG_MSG, deferral);
         }
         if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of: " + proc);
         proc.pssProcState = procState;
         proc.pssStatType = ProcessStats.ADD_PSS_INTERNAL_SINGLE;
         mPendingPssProcesses.add(proc);
         return true;
+    }
+
+    /**
+     * Re-defer a posted PSS collection pass, if one exists.  Assumes deferral is
+     * currently active policy when called.
+     */
+    private void deferPssIfNeededLocked() {
+        if (mPendingPssProcesses.size() > 0) {
+            mBgHandler.removeMessages(COLLECT_PSS_BG_MSG);
+            mBgHandler.sendEmptyMessageDelayed(COLLECT_PSS_BG_MSG, mPssDeferralTime);
+        }
+    }
+
+    private void deferPssForActivityStart() {
+        synchronized (ActivityManagerService.this) {
+            if (mPssDeferralTime > 0) {
+                if (DEBUG_PSS) {
+                    Slog.d(TAG_PSS, "Deferring PSS collection for activity start");
+                }
+                deferPssIfNeededLocked();
+                mActivityStartingNesting.getAndIncrement();
+                mBgHandler.sendEmptyMessageDelayed(STOP_DEFERRING_PSS_MSG, mPssDeferralTime);
+            }
+        }
     }
 
     /**

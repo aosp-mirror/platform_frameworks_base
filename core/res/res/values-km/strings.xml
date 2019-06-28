@@ -572,8 +572,8 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"មិន​អាច​សម្គាល់មុខ​បាន​ទៀតទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ស្រដៀងគ្នា​ពេក សូមផ្លាស់ប្ដូរ​កាយវិការ​របស់អ្នក។"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ងាកក្បាល​របស់អ្នកតិចជាងមុន​បន្តិច។"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ងាកក្បាល​របស់អ្នកតិចជាងមុន​បន្តិច។"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"យកអ្វី​ដែលបាំង​មុខ​របស់អ្នកចេញ។"</string>
     <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"សម្អាតផ្នែកខាង​លើនៃ​អេក្រង់​របស់​អ្នក រួមទាំង​របារខ្មៅ"</string>

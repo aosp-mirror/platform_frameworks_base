@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"‏Wi‑Fi کے ذریعے ہنگامی کالز نہیں کر سکتے"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"الرٹس"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"کال آگے منتقل کرنا"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"کال فارورڈنگ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ہنگامی کال بیک وضع"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"موبائل ڈیٹا کی صورت حال"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏SMS پیغامات"</string>

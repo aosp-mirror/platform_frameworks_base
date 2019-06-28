@@ -31,6 +31,11 @@ public interface WakeLock {
     static final String REASON_WRAP = "wrap";
 
     /**
+     * Default wake-lock timeout, to avoid battery regressions.
+     */
+    long DEFAULT_MAX_TIMEOUT = 20000;
+
+    /**
      * @param why A tag that will be saved for sysui dumps.
      * @see android.os.PowerManager.WakeLock#acquire()
      **/
@@ -46,7 +51,14 @@ public interface WakeLock {
     Runnable wrap(Runnable r);
 
     static WakeLock createPartial(Context context, String tag) {
-        return wrap(createPartialInner(context, tag));
+        return createPartial(context, tag, DEFAULT_MAX_TIMEOUT);
+    }
+
+    /**
+     * Creates a {@link WakeLock} that has a default release timeout.
+     * @see android.os.PowerManager.WakeLock#acquire(long) */
+    static WakeLock createPartial(Context context, String tag, long maxTimeout) {
+        return wrap(createPartialInner(context, tag), maxTimeout);
     }
 
     @VisibleForTesting
@@ -66,7 +78,14 @@ public interface WakeLock {
         };
     }
 
-    static WakeLock wrap(final PowerManager.WakeLock inner) {
+    /**
+     * Create a {@link WakeLock} containing a {@link PowerManager.WakeLock}.
+     * @param inner To be wrapped.
+     * @param maxTimeout When to expire.
+     * @return The new wake lock.
+     */
+    @VisibleForTesting
+    static WakeLock wrap(final PowerManager.WakeLock inner, long maxTimeout) {
         return new WakeLock() {
             private final HashMap<String, Integer> mActiveClients = new HashMap<>();
 
@@ -74,7 +93,7 @@ public interface WakeLock {
             public void acquire(String why) {
                 mActiveClients.putIfAbsent(why, 0);
                 mActiveClients.put(why, mActiveClients.get(why) + 1);
-                inner.acquire();
+                inner.acquire(maxTimeout);
             }
 
             /** @see PowerManager.WakeLock#release() */

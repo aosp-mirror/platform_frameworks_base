@@ -42,7 +42,7 @@ public class WakeLockTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mInner = WakeLock.createPartialInner(mContext, WakeLockTest.class.getName());
-        mWakeLock = WakeLock.wrap(mInner);
+        mWakeLock = WakeLock.wrap(mInner, 20000);
     }
 
     @After
@@ -67,14 +67,6 @@ public class WakeLockTest extends SysuiTestCase {
         mWakeLock.acquire(WHY);
         mWakeLock.release(WHY);
         assertFalse(mInner.isHeld());
-    }
-
-    @Test
-    public void wakeLock_refCounted() {
-        mWakeLock.acquire(WHY);
-        mWakeLock.acquire(WHY);
-        mWakeLock.release(WHY);
-        assertTrue(mInner.isHeld());
     }
 
     @Test
