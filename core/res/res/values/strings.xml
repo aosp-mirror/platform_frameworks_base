@@ -3074,12 +3074,20 @@
     <string name="whichViewApplicationNamed">Open with %1$s</string>
     <!-- Label for a link to a intent resolver dialog to view something -->
     <string name="whichViewApplicationLabel">Open</string>
-    <!-- Title of intent resolver dialog when selecting a viewer application that opens URI
+    <!-- Title of intent resolver dialog when selecting a browser/application that opens specific URIs
          [CHAR LIMIT=128]. -->
-    <string name="whichGiveAccessToApplication">Give access to open <xliff:g id="host" example="mail.google.com">%1$s</xliff:g> links with</string>
+    <string name="whichOpenHostLinksWith">Open <xliff:g id="host" example="mail.google.com">%1$s</xliff:g> links with</string>
+    <!-- Title of intent resolver dialog when selecting a browser that opens URI
+         [CHAR LIMIT=128]. -->
+    <string name="whichOpenLinksWith">Open links with</string>
+    <!-- Title of intent resolver dialog when defaulting to a specific browser that opens URI
+         [CHAR LIMIT=128]. -->
+    <string name="whichOpenLinksWithApp">Open links with <xliff:g id="application" example="Chrome">%1$s</xliff:g></string>
+    <!-- Title of intent resolver dialog when defaulting to a specific browser that opens URI
+         [CHAR LIMIT=128]. -->
+    <string name="whichOpenHostLinksWithApp">Open <xliff:g id="host" example="mail.google.com">%1$s</xliff:g> links with <xliff:g id="application" example="Chrome">%2$s</xliff:g></string>
     <!-- Title of intent resolver dialog when selecting a viewer application that opens URI
          and a previously used application is known [CHAR LIMIT=128]. -->
-    <string name="whichGiveAccessToApplicationNamed">Give access to open <xliff:g id="host" example="mail.google.com">%1$s</xliff:g> links with <xliff:g id="application" example="Gmail">%2$s</xliff:g></string>
     <!-- Label for a link to an intent resolver dialog to open URI [CHAR LIMIT=18] -->
     <string name="whichGiveAccessToApplicationLabel">Give access</string>
     <!-- Title of intent resolver dialog when selecting an editor application to run. -->
@@ -4210,6 +4218,10 @@
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_always">Always</string>
+
+    <!-- Title for a button to choose the currently selected activity
+         as the default in the activity resolver. [CHAR LIMIT=50] -->
+    <string name="activity_resolver_set_always">Set to always open</string>
 
     <!-- Title for a button to choose the currently selected activity
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
