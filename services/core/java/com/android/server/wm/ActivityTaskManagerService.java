@@ -4750,18 +4750,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void applyUpdateVrModeLocked(ActivityRecord r) {
         // VR apps are expected to run in a main display. If an app is turning on VR for
-        // itself, but lives in a dynamic stack, then make sure that it is moved to the main
-        // fullscreen stack before enabling VR Mode.
-        // TODO: The goal of this code is to keep the VR app on the main display. When the
-        // stack implementation changes in the future, keep in mind that the use of the fullscreen
-        // stack is a means to move the activity to the main display and a moveActivityToDisplay()
-        // option would be a better choice here.
+        // itself, but isn't on the main display, then move it there before enabling VR Mode.
         if (r.requestedVrComponent != null && r.getDisplayId() != DEFAULT_DISPLAY) {
-            Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
-                    + " to main stack for VR");
-            final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().getOrCreateStack(
-                    WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
-            moveTaskToStack(r.getTaskRecord().taskId, stack.mStackId, true /* toTop */);
+            Slog.i(TAG, "Moving " + r.shortComponentName + " from display " + r.getDisplayId()
+                    + " to main display for VR");
+            mRootActivityContainer.moveStackToDisplay(
+                    r.getStackId(), DEFAULT_DISPLAY, true /* toTop */);
         }
         mH.post(() -> {
             if (!mVrController.onVrModeChanged(r)) {
