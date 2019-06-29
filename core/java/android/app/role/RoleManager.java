@@ -53,7 +53,8 @@ import java.util.function.Consumer;
  * the availability of roles. Instead, they should always query if the role is available using
  * {@link #isRoleAvailable(String)} before trying to do anything with it. Some predefined role names
  * are available as constants in this class, and a list of possibly available roles can be found in
- * the AndroidX Libraries.
+ * the <a href="{@docRoot}reference/androidx/core/role/package-summary.html">AndroidX Role
+ * library</a>.
  * <p>
  * There can be multiple applications qualifying for a role, but only a subset of them can become
  * role holders. To qualify for a role, an application must meet certain requirements, including

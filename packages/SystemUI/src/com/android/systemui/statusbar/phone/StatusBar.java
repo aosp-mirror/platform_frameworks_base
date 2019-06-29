@@ -373,6 +373,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     KeyguardBypassController mKeyguardBypassController;
     @Inject
     protected HeadsUpManagerPhone mHeadsUpManager;
+    @Nullable
+    @Inject
+    protected KeyguardLiftController mKeyguardLiftController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1918,19 +1921,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
     }
 
-    public void dispatchNotificationsPanelTouchEvent(MotionEvent ev) {
+    /**
+     * Called when another window is about to transfer it's input focus.
+     */
+    public void onInputFocusTransfer(boolean start) {
         if (!mCommandQueue.panelsEnabled()) {
             return;
         }
-        mNotificationPanel.dispatchTouchEvent(ev);
 
-        int action = ev.getAction();
-        if (action == MotionEvent.ACTION_DOWN) {
-            // Start ignoring all touch events coming to status bar window.
-            // TODO: handle case where ACTION_UP is not sent over the binder
-            mStatusBarWindowController.setNotTouchable(true);
-        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            mStatusBarWindowController.setNotTouchable(false);
+        if (start) {
+            mNotificationPanel.startWaitingForOpenPanelGesture();
+        } else {
+            mNotificationPanel.stopWaitingForOpenPanelGesture();
         }
     }
 

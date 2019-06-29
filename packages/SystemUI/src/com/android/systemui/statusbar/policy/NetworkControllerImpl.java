@@ -361,7 +361,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private MobileSignalController getDataController() {
-        int dataSubId = mSubDefaults.getDefaultDataSubId();
+        int dataSubId = mSubDefaults.getActiveDataSubId();
         if (!SubscriptionManager.isValidSubscriptionId(dataSubId)) {
             if (DEBUG) Log.e(TAG, "No data sim selected");
             return mDefaultSignalController;
@@ -1097,6 +1097,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         public int getDefaultDataSubId() {
             return SubscriptionManager.getDefaultDataSubscriptionId();
+        }
+
+        public int getActiveDataSubId() {
+            return SubscriptionManager.getActiveDataSubscriptionId();
         }
     }
 

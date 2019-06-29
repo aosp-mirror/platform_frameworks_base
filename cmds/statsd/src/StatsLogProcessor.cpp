@@ -269,6 +269,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         if (lastBroadcastTime != mLastActivationBroadcastTimes.end()) {
             if (currentTimestampNs - lastBroadcastTime->second <
                     StatsdStats::kMinActivationBroadcastPeriodNs) {
+                StatsdStats::getInstance().noteActivationBroadcastGuardrailHit(uid);
                 VLOG("StatsD would've sent an activation broadcast but the rate limit stopped us.");
                 return;
             }

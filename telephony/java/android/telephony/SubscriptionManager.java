@@ -2121,24 +2121,27 @@ public class SubscriptionManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public @NonNull int[] getActiveSubscriptionIdList() {
-        int[] subId = null;
+    public static @NonNull int[] getActiveSubscriptionIdList() {
+        return getActiveSubscriptionIdList(true);
+    }
 
+    /**
+     * @return a non-null list of subId's that are active.
+     *
+     * @hide
+     */
+    public static @NonNull int[] getActiveSubscriptionIdList(boolean visibleOnly) {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getActiveSubIdList(/*visibleOnly*/true);
+                int[] subId = iSub.getActiveSubIdList(visibleOnly);
+                if (subId != null) return subId;
             }
         } catch (RemoteException ex) {
             // ignore it
         }
 
-        if (subId == null) {
-            subId = new int[0];
-        }
-
-        return subId;
-
+        return new int[0];
     }
 
     /**

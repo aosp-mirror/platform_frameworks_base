@@ -25,6 +25,7 @@ import static com.android.server.wm.PinnedStackControllerProto.MOVEMENT_BOUNDS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.app.RemoteAction;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -45,6 +46,7 @@ import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
@@ -326,8 +328,8 @@ class PinnedStackController {
     boolean onTaskStackBoundsChanged(Rect targetBounds, Rect outBounds) {
         synchronized (mService.mGlobalLock) {
             final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-            if (mDisplayInfo.equals(displayInfo)) {
-                // We are already in the right orientation, ignore
+            if (isSameDimensionAndRotation(mDisplayInfo, displayInfo)) {
+                // No dimension/rotation change, ignore
                 outBounds.setEmpty();
                 return false;
             } else if (targetBounds.isEmpty()) {
@@ -425,6 +427,15 @@ class PinnedStackController {
             mActions.addAll(actions);
         }
         notifyActionsChanged(mActions);
+    }
+
+    private boolean isSameDimensionAndRotation(@NonNull DisplayInfo display1,
+            @NonNull DisplayInfo display2) {
+        Preconditions.checkNotNull(display1);
+        Preconditions.checkNotNull(display2);
+        return ((display1.rotation == display2.rotation)
+                && (display1.logicalWidth == display2.logicalWidth)
+                && (display1.logicalHeight == display2.logicalHeight));
     }
 
     /**

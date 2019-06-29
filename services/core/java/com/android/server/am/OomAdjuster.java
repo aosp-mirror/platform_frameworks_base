@@ -431,7 +431,7 @@ public final class OomAdjuster {
             for (int i = 0; i < N; i++) {
                 ProcessRecord app = mProcessList.mLruProcesses.get(i);
                 if (!app.killedByAm && app.thread != null && app.containsCycle == true) {
-                    if (computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, TOP_APP, true, now,
+                    if (computeOomAdjLocked(app, app.getCurRawAdj(), TOP_APP, true, now,
                             true)) {
                         retryCycles = true;
                     }
