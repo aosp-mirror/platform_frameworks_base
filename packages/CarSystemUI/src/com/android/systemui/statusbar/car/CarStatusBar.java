@@ -346,7 +346,7 @@ public class CarStatusBar extends StatusBar implements
 
         CarSystemUIFactory factory = SystemUIFactory.getInstance();
         mCarFacetButtonController = factory.getCarDependencyComponent()
-            .getCarFacetButtonController();
+                .getCarFacetButtonController();
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
 
@@ -918,6 +918,16 @@ public class CarStatusBar extends StatusBar implements
     private class TaskStackListenerImpl extends TaskStackChangeListener {
         @Override
         public void onTaskStackChanged() {
+            try {
+                mCarFacetButtonController.taskChanged(
+                        ActivityTaskManager.getService().getAllStackInfos());
+            } catch (Exception e) {
+                Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+            }
+        }
+
+        @Override
+        public void onTaskDisplayChanged(int taskId, int newDisplayId) {
             try {
                 mCarFacetButtonController.taskChanged(
                         ActivityTaskManager.getService().getAllStackInfos());

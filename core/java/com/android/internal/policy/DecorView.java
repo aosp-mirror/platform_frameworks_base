@@ -84,6 +84,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.ViewRootImpl;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -1150,8 +1151,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     navBarToRightEdge || navBarToLeftEdge, navBarToLeftEdge,
                     0 /* sideInset */, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds);
+            boolean oldDrawLegacy = mDrawLegacyNavigationBarBackground;
             mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
                     && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+            if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
+                ViewRootImpl vri = getViewRootImpl();
+                if (vri != null) {
+                    vri.requestInvalidateRootRenderNode();
+                }
+            }
 
             boolean statusBarNeedsRightInset = navBarToRightEdge
                     && mNavigationColorViewState.present;

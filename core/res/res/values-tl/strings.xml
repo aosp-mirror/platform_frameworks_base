@@ -1130,8 +1130,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Buksan gamit ang"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Buksan gamit ang %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Buksan"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Magbigay ng access para buksan ang mga link ng <xliff:g id="HOST">%1$s</xliff:g> sa"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Magbigay ng access para buksan ang mga link ng <xliff:g id="HOST">%1$s</xliff:g> sa <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Bigyan ng access"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"I-edit gamit ang"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"I-edit gamit ang %1$s"</string>
@@ -1583,6 +1589,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Palagi"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Isang beses lang"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Mga Setting"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Hindi sinusuportahan ng %1$s ang profile sa trabaho"</string>

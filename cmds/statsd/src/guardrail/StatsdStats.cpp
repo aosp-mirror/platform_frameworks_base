@@ -51,6 +51,7 @@ const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
 const int FIELD_ID_SYSTEM_SERVER_RESTART = 15;
 const int FIELD_ID_LOGGER_ERROR_STATS = 16;
 const int FIELD_ID_OVERFLOW = 18;
+const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL = 19;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
@@ -108,6 +109,9 @@ const int FIELD_ID_UID_MAP_CHANGES = 1;
 const int FIELD_ID_UID_MAP_BYTES_USED = 2;
 const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 3;
 const int FIELD_ID_UID_MAP_DELETED_APPS = 4;
+
+const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_UID = 1;
+const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_TIME = 2;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
         {android::util::BINDER_CALLS, {6000, 10000}},
@@ -234,6 +238,19 @@ void StatsdStats::noteActiveStatusChanged(const ConfigKey& key, bool activated, 
         vec.pop_front();
     }
     vec.push_back(timeSec);
+}
+
+void StatsdStats::noteActivationBroadcastGuardrailHit(const int uid) {
+    noteActivationBroadcastGuardrailHit(uid, getWallClockSec());
+}
+
+void StatsdStats::noteActivationBroadcastGuardrailHit(const int uid, const int32_t timeSec) {
+    lock_guard<std::mutex> lock(mLock);
+    auto& guardrailTimes = mActivationBroadcastGuardrailStats[uid];
+    if (guardrailTimes.size() == kMaxTimestampCount) {
+        guardrailTimes.pop_front();
+    }
+    guardrailTimes.push_back(timeSec);
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes) {
@@ -590,6 +607,7 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.unregisteredCount = 0;
     }
     mAtomMetricStats.clear();
+    mActivationBroadcastGuardrailStats.clear();
 }
 
 string buildTimeString(int64_t timeSec) {
@@ -758,6 +776,17 @@ void StatsdStats::dumpStats(int out) const {
 
     dprintf(out, "Event queue overflow: %d; MaxHistoryNs: %lld; MinHistoryNs: %lld\n",
             mOverflowCount, (long long)mMaxQueueHistoryNs, (long long)mMinQueueHistoryNs);
+
+    if (mActivationBroadcastGuardrailStats.size() > 0) {
+        dprintf(out, "********mActivationBroadcastGuardrail stats***********\n");
+        for (const auto& pair: mActivationBroadcastGuardrailStats) {
+            dprintf(out, "Uid %d: Times: ", pair.first);
+            for (const auto& guardrailHitTime : pair.second) {
+                dprintf(out, "%d ", guardrailHitTime);
+            }
+        }
+        dprintf(out, "\n");
+    }
 }
 
 void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* proto) {
@@ -957,6 +986,20 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     for (const auto& restart : mSystemServerRestartSec) {
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_SYSTEM_SERVER_RESTART | FIELD_COUNT_REPEATED,
                     restart);
+    }
+
+    for (const auto& pair: mActivationBroadcastGuardrailStats) {
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE |
+                                     FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL |
+                                     FIELD_COUNT_REPEATED);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_UID,
+                    (int32_t) pair.first);
+        for (const auto& guardrailHitTime : pair.second) {
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_TIME |
+                            FIELD_COUNT_REPEATED,
+                        guardrailHitTime);
+        }
+        proto.end(token);
     }
 
     output->clear();
