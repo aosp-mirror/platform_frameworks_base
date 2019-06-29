@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.lang.annotation.Retention;
@@ -67,7 +68,8 @@ import javax.inject.Named;
 public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChangedListener,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         UnlockMethodCache.OnUnlockMethodChangedListener,
-        NotificationWakeUpCoordinator.WakeUpListener, ViewTreeObserver.OnPreDrawListener {
+        NotificationWakeUpCoordinator.WakeUpListener, ViewTreeObserver.OnPreDrawListener,
+        OnHeadsUpChangedListener {
 
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
@@ -82,6 +84,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final KeyguardMonitor mKeyguardMonitor;
     private final KeyguardBypassController mBypassController;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
+    private final HeadsUpManagerPhone mHeadsUpManager;
 
     private int mLastState = 0;
     private boolean mForceUpdate;
@@ -94,7 +97,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mDocked;
     private int mIconColor;
     private float mDozeAmount;
-    private boolean mBouncerShowing;
+    private boolean mBouncerShowingScrimmed;
     private boolean mWakeAndUnlockRunning;
     private boolean mKeyguardShowing;
     private boolean mShowingLaunchAffordance;
@@ -155,7 +158,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             KeyguardBypassController bypassController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardMonitor keyguardMonitor,
-            @Nullable DockManager dockManager) {
+            @Nullable DockManager dockManager,
+            HeadsUpManagerPhone headsUpManager) {
         super(context, attrs);
         mContext = context;
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
@@ -167,6 +171,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mWakeUpCoordinator = wakeUpCoordinator;
         mKeyguardMonitor = keyguardMonitor;
         mDockManager = dockManager;
+        mHeadsUpManager = headsUpManager;
     }
 
     @Override
@@ -296,11 +301,13 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
-        if (mBypassController.getBypassEnabled()
-                && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                && !mWakeUpCoordinator.getNotificationsFullyHidden()
-                && !mBouncerShowing) {
-            invisible = true;
+        if (mBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
+            if (mHeadsUpManager.isHeadsUpGoingAway()
+                    || mHeadsUpManager.hasPinnedHeadsUp()
+                    || (mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                    && !mWakeUpCoordinator.getNotificationsFullyHidden())) {
+                invisible = true;
+            }
         }
         boolean wasInvisible = getVisibility() == INVISIBLE;
         if (invisible != wasInvisible) {
@@ -408,8 +415,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         }
     }
 
-    public void setBouncerShowing(boolean bouncerShowing) {
-        mBouncerShowing = bouncerShowing;
+    public void setBouncerShowingScrimmed(boolean bouncerShowing) {
+        mBouncerShowingScrimmed = bouncerShowing;
         if (mBypassController.getBypassEnabled()) {
             update();
         }

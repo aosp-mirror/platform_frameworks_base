@@ -168,6 +168,7 @@ public final class NotificationEntry {
     private boolean mHighPriority;
     private boolean mSensitive = true;
     private Runnable mOnSensitiveChangedListener;
+    private boolean mAutoHeadsUp;
 
     public NotificationEntry(StatusBarNotification n) {
         this(n, null);
@@ -589,11 +590,25 @@ public final class NotificationEntry {
         if (row != null) row.setHeadsUp(shouldHeadsUp);
     }
 
-
     public void setHeadsUpAnimatingAway(boolean animatingAway) {
         if (row != null) row.setHeadsUpAnimatingAway(animatingAway);
     }
 
+    /**
+     * Set that this notification was automatically heads upped. This happens for example when
+     * the user bypasses the lockscreen and media is playing.
+     */
+    public void setAutoHeadsUp(boolean autoHeadsUp) {
+        mAutoHeadsUp = autoHeadsUp;
+    }
+
+    /**
+     * @return if this notification was automatically heads upped. This happens for example when
+     *      * the user bypasses the lockscreen and media is playing.
+     */
+    public boolean isAutoHeadsUp() {
+        return mAutoHeadsUp;
+    }
 
     public boolean mustStayOnScreen() {
         return row != null && row.mustStayOnScreen();
