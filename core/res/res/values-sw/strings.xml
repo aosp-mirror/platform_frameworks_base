@@ -684,9 +684,9 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Kuzima baadhi ya vipengele vya kufunga skrini"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zuia matumizi ya baadhi ya vipengele vya kufunga skrini."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Nyumbani"</item>
+    <item msgid="8901098336658710359">"Ya nyumbani"</item>
     <item msgid="869923650527136615">"Simu ya mkononi"</item>
-    <item msgid="7897544654242874543">"Kazi"</item>
+    <item msgid="7897544654242874543">"Ya kazini"</item>
     <item msgid="1103601433382158155">"Pepesi ya Kazini"</item>
     <item msgid="1735177144948329370">"Pepesi ya Nyumbani"</item>
     <item msgid="603878674477207394">"Kurasa anwani"</item>
@@ -727,9 +727,9 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Maalum"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Nyumbani"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Kazi"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Ya kazini"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Peja"</string>
@@ -1131,8 +1131,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Fungua ukitumia"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Fungua ukitumia %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Fungua"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Ipe <xliff:g id="HOST">%1$s</xliff:g> ruhusa ya kufungua viungo kwa kutumia"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Ipe <xliff:g id="HOST">%1$s</xliff:g> ruhusa ya kufungua viungo kwa kutumia <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Idhinisha ufikiaji"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Badilisha kwa"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Badilisha kwa %1$s"</string>
@@ -1584,6 +1590,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Zindua Kivinjari?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kubali simu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Kila mara"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Mara moja tu"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Mipangilio"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s haitumii wasifu wa kazini"</string>

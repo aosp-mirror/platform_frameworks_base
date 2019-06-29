@@ -483,7 +483,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ऐप को वाई-फ़ाई नेटवर्क के बारे में जानकारी, जैसे WI-Fi चालू है या नहीं और कनेक्‍ट किए गए वाई-फ़ाई डिवाइस के नाम, देखने देता है."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाई-फ़ाई  से कनेक्‍ट और डिस्‍कनेक्‍ट करें"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ऐप्स  को वाई-फ़ाई  पहुंच बिंदुओं से कनेक्ट और डिसकनेक्ट करने और वाई-फ़ाई  नेटवर्क के लिए डिवाइस कॉन्फ़िगरेशन में परिवर्तन करने देता है."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाई-फ़ाई  मल्‍टीकास्‍ट प्राप्ति को अनुमति दें"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाई-फ़ाई मल्‍टीकास्‍ट पाने को अनुमति दें"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टैबलेट पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ऐप को मल्‍टीकास्‍ट पतों का उपयोग करके ना केवल आपके टीवी को, बल्‍कि वाई-फ़ाई पर मौजूद सभी डिवाइसों को पैकेट भेजने और प्राप्‍त करने देती है. इसमें गैर-मल्‍टीकास्‍ट मोड की अपेक्षा ज़्यादा पावर का उपयोग होता है."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
@@ -1131,8 +1131,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"इसमें खोलें"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s में खोलें"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"खोलें"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"इससे <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलने का एक्सेस दें"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> से <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलने का एक्सेस दें"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"एक्सेस दें"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"इसके ज़रिये बदलाव करें"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s की मदद से बदलाव करें"</string>
@@ -1584,6 +1590,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"सेटिंग"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s वर्क प्रोफ़ाइल का समर्थन नहीं करता"</string>
