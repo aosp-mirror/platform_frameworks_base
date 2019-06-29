@@ -272,10 +272,11 @@ public class StatusBarWindowView extends FrameLayout {
     /**
      * Called when the biometric authentication mode changes.
      * @param wakeAndUnlock If the type is {@link BiometricUnlockController#isWakeAndUnlock()}
+     * @param isUnlock If the type is {@link BiometricUnlockController#isBiometricUnlock()} ()
      */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
         if (mLockIcon != null) {
-            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
+            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock, isUnlock);
         }
     }
 

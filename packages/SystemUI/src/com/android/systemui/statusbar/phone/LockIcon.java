@@ -92,6 +92,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mPulsing;
     private boolean mDozing;
     private boolean mDocked;
+    private boolean mBlockUpdates;
     private int mIconColor;
     private float mDozeAmount;
     private boolean mBouncerShowing;
@@ -104,8 +105,22 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             new KeyguardMonitor.Callback() {
                 @Override
                 public void onKeyguardShowingChanged() {
+                    boolean force = false;
+                    boolean wasShowing = mKeyguardShowing;
                     mKeyguardShowing = mKeyguardMonitor.isShowing();
-                    update();
+                    if (!wasShowing && mKeyguardShowing && mBlockUpdates) {
+                        mBlockUpdates = false;
+                        force = true;
+                    }
+                    update(force);
+                }
+
+                @Override
+                public void onKeyguardFadingAwayChanged() {
+                    if (!mKeyguardMonitor.isKeyguardFadingAway() && mBlockUpdates) {
+                        mBlockUpdates = false;
+                        update(true /* force */);
+                    }
                 }
             };
     private final DockManager.DockEventListener mDockEventListener =
@@ -256,7 +271,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         mLastState = state;
 
-        if (lastState != state || mForceUpdate) {
+        boolean shouldUpdate = lastState != state || mForceUpdate;
+        if (mBlockUpdates && canBlockUpdates()) {
+            shouldUpdate = false;
+        }
+        if (shouldUpdate) {
             mForceUpdate = false;
             @LockAnimIndex final int lockAnimIndex = getAnimationIndexForTransition(lastState,
                     state, mPulsing, mDozing);
@@ -321,6 +340,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         updateClickability();
 
         return true;
+    }
+
+    private boolean canBlockUpdates() {
+        return mKeyguardShowing || mKeyguardMonitor.isKeyguardFadingAway();
     }
 
     private void updateClickability() {
@@ -529,10 +552,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     /**
      * We need to hide the lock whenever there's a fingerprint unlock, otherwise you'll see the
      * icon on top of the black front scrim.
+     * @param wakeAndUnlock are we wake and unlocking
+     * @param isUnlock are we currently unlocking
      */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
         if (wakeAndUnlock) {
             mWakeAndUnlockRunning = true;
+        }
+        if (isUnlock && mBypassController.getBypassEnabled() && canBlockUpdates()) {
+            // We don't want the icon to change while we are unlocking
+            mBlockUpdates = true;
         }
         update();
     }
