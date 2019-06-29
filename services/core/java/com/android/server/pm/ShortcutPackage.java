@@ -73,6 +73,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG_INTENT = "intent";
     private static final String TAG_EXTRAS = "extras";
     private static final String TAG_SHORTCUT = "shortcut";
+    private static final String TAG_SHARE_TARGET = "share-target";
     private static final String TAG_CATEGORIES = "categories";
     private static final String TAG_PERSON = "person";
 
@@ -1453,8 +1454,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     public void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
+        final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && mApiCallCount == 0) {
+        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
             return; // nothing to write.
         }
 
@@ -1468,6 +1470,12 @@ class ShortcutPackage extends ShortcutPackageItem {
         for (int j = 0; j < size; j++) {
             saveShortcut(out, mShortcuts.valueAt(j), forBackup,
                     getPackageInfo().isBackupAllowed());
+        }
+
+        if (!forBackup) {
+            for (int j = 0; j < shareTargetSize; j++) {
+                mShareTargets.get(j).saveToXml(out);
+            }
         }
 
         out.endTag(null, TAG_ROOT);
@@ -1626,6 +1634,9 @@ class ShortcutPackage extends ShortcutPackageItem {
 
                         // Don't use addShortcut(), we don't need to save the icon.
                         ret.mShortcuts.put(si.getId(), si);
+                        continue;
+                    case TAG_SHARE_TARGET:
+                        ret.mShareTargets.add(ShareTargetInfo.loadFromXml(parser));
                         continue;
                 }
             }
