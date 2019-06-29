@@ -2924,6 +2924,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (sVerbose) {
                 Slog.v(TAG, "Adding autofillable view with id " + id + " and state " + state);
             }
+            viewState.setCurrentValue(findValueLocked(id));
             mViewStates.put(id, viewState);
         }
         if ((state & ViewState.STATE_AUTOFILLED) != 0) {

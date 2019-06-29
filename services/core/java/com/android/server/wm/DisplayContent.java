@@ -2397,9 +2397,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " to its current displayId=" + mDisplayId);
         }
 
-        // Clean up all pending transitions when stack reparent to another display.
-        stack.forAllAppWindows(AppWindowToken::removeFromPendingTransition);
-
         prevDc.mTaskStackContainers.removeChild(stack);
         mTaskStackContainers.addStackToDisplay(stack, onTop);
     }

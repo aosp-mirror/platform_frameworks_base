@@ -239,9 +239,8 @@ public class PipMenuActivity extends Activity {
         });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);
-        mDismissButton.setOnClickListener((v) -> {
-            dismissPip();
-        });
+        mDismissButton.setOnClickListener(v -> dismissPip());
+        findViewById(R.id.expand_button).setOnClickListener(v -> expandPip());
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
