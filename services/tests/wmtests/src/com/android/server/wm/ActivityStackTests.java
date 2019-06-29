@@ -262,6 +262,35 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testFindTaskAlias() {
+        final String targetActivity = "target.activity";
+        final String aliasActivity = "alias.activity";
+        final ComponentName target = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
+                targetActivity);
+        final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
+                aliasActivity);
+        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        task.origActivity = alias;
+        task.realActivity = target;
+        new ActivityBuilder(mService).setComponent(target).setTask(task).setTargetActivity(
+                targetActivity).build();
+
+        // Using target activity to find task.
+        final ActivityRecord r1 = new ActivityBuilder(mService).setComponent(
+                target).setTargetActivity(targetActivity).build();
+        RootActivityContainer.FindTaskResult result = new RootActivityContainer.FindTaskResult();
+        mStack.findTaskLocked(r1, result);
+        assertThat(result.mRecord).isNotNull();
+
+        // Using alias activity to find task.
+        final ActivityRecord r2 = new ActivityBuilder(mService).setComponent(
+                alias).setTargetActivity(targetActivity).build();
+        result = new RootActivityContainer.FindTaskResult();
+        mStack.findTaskLocked(r2, result);
+        assertThat(result.mRecord).isNotNull();
+    }
+
+    @Test
     public void testMoveStackToBackIncludingParent() {
         final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
         final ActivityStack stack1 = createStackForShouldBeVisibleTest(display,

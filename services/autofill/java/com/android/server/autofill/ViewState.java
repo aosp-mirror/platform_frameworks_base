@@ -227,6 +227,7 @@ final class ViewState {
         if (mVirtualBounds != null) {
             builder.append(", virtualBounds:" ).append(mVirtualBounds);
         }
+        builder.append("]");
         return builder.toString();
     }
 

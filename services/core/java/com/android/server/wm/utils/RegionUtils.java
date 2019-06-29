@@ -18,8 +18,10 @@ package com.android.server.wm.utils;
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RegionIterator;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Utility methods to handle Regions.
@@ -40,6 +42,20 @@ public class RegionUtils {
         final int n = rects.size();
         for (int i = 0; i < n; i++) {
             outRegion.union(rects.get(i));
+        }
+    }
+
+    /**
+     * Applies actions on each rect contained within a {@code Region}.
+     *
+     * @param region the given region.
+     * @param rectConsumer the action holder.
+     */
+    public static void forEachRect(Region region, Consumer<Rect> rectConsumer) {
+        final RegionIterator it = new RegionIterator(region);
+        final Rect rect = new Rect();
+        while (it.next(rect)) {
+            rectConsumer.accept(rect);
         }
     }
 }

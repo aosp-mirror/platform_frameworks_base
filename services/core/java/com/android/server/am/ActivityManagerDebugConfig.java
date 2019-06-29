@@ -42,7 +42,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_ALL = false;
 
     // Available log categories in the activity manager package.
-    static final boolean DEBUG_ANR = true;  // STOPSHIP disable it (b/113252928)
+    static final boolean DEBUG_ANR = false;
     static final boolean DEBUG_BACKGROUND_CHECK = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
