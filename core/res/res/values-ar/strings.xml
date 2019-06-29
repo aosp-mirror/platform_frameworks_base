@@ -1210,8 +1210,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"فتح باستخدام"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏فتح باستخدام %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"فتح"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"منح إمكانية الوصول لفتح روابط <xliff:g id="HOST">%1$s</xliff:g> باستخدام"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"منح إمكانية الوصول لفتح روابط <xliff:g id="HOST">%1$s</xliff:g> باستخدام <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"منح إذن الوصول"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"تعديل باستخدام"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏تعديل باستخدام %1$s"</string>
@@ -1567,7 +1573,7 @@
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"اتصل بالمشرف للحصول على التفاصيل"</string>
     <string name="back_button_label" msgid="2300470004503343439">"رجوع"</string>
     <string name="next_button_label" msgid="1080555104677992408">"التالي"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"تخطي"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"التخطي"</string>
     <string name="no_matches" msgid="8129421908915840737">"ليس هناك أي مطابقات"</string>
     <string name="find_on_page" msgid="1946799233822820384">"بحث في الصفحة"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1675,6 +1681,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"مرة واحدة فقط"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"الإعدادات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"‏لا يدعم %1$s الملفات الشخصية للعمل"</string>

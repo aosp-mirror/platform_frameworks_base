@@ -1130,8 +1130,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"選擇開啟方式"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用 %1$s 開啟"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"開啟"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"授予存取權以透過以下應用程式開啟 <xliff:g id="HOST">%1$s</xliff:g> 連結："</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"授予存取權以透過<xliff:g id="APPLICATION">%2$s</xliff:g>開啟 <xliff:g id="HOST">%1$s</xliff:g> 連結"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"授予存取權"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"使用以下選擇器編輯："</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用 %1$s 編輯"</string>
@@ -1583,6 +1589,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要啟動「瀏覽器」嗎？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"接聽電話嗎？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"一律採用"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"只此一次"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"設定"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s 不支援公司檔案"</string>
