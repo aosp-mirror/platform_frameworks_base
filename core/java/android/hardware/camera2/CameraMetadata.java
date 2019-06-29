@@ -925,14 +925,14 @@ public abstract class CameraMetadata<TKey> {
      * case, when the application configures a RAW stream, the camera device will make sure
      * the active physical camera will remain active to ensure consistent RAW output
      * behavior, and not switch to other physical cameras.</p>
-     * <p>To maintain backward compatibility, the capture request and result metadata tags
-     * required for basic camera functionalities will be solely based on the
-     * logical camera capabiltity. Other request and result metadata tags, on the other
-     * hand, will be based on current active physical camera. For example, the physical
-     * cameras' sensor sensitivity and lens capability could be different from each other.
-     * So when the application manually controls sensor exposure time/gain, or does manual
-     * focus control, it must checks the current active physical camera's exposure, gain,
-     * and focus distance range.</p>
+     * <p>The capture request and result metadata tags required for backward compatible camera
+     * functionalities will be solely based on the logical camera capabiltity. On the other
+     * hand, the use of manual capture controls (sensor or post-processing) with a
+     * logical camera may result in unexpected behavior when the HAL decides to switch
+     * between physical cameras with different characteristics under the hood. For example,
+     * when the application manually sets exposure time and sensitivity while zooming in,
+     * the brightness of the camera images may suddenly change because HAL switches from one
+     * physical camera to the other.</p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
