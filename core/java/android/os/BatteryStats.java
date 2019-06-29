@@ -1554,7 +1554,10 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    public final static class HistoryItem implements Parcelable {
+    /**
+     * Battery history record.
+     */
+    public static final class HistoryItem {
         public HistoryItem next;
 
         // The time of this event in milliseconds, as per SystemClock.elapsedRealtime().
@@ -1789,14 +1792,8 @@ public abstract class BatteryStats implements Parcelable {
         public HistoryItem() {
         }
 
-        public HistoryItem(long time, Parcel src) {
-            this.time = time;
-            numReadInts = 2;
+        public HistoryItem(Parcel src) {
             readFromParcel(src);
-        }
-
-        public int describeContents() {
-            return 0;
         }
 
         public void writeToParcel(Parcel dest, int flags) {
@@ -1835,6 +1832,7 @@ public abstract class BatteryStats implements Parcelable {
 
         public void readFromParcel(Parcel src) {
             int start = src.dataPosition();
+            time = src.readLong();
             int bat = src.readInt();
             cmd = (byte)(bat&0xff);
             batteryLevel = (byte)((bat>>8)&0xff);
