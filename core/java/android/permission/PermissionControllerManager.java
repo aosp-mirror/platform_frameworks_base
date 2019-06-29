@@ -808,6 +808,9 @@ public final class PermissionControllerManager {
 
         @Override
         public void run() {
+            if (mBackupReader.getStatus() != AsyncTask.Status.PENDING) {
+                return;
+            }
             mBackupReader.execute();
 
             ParcelFileDescriptor remotePipe = mBackupReader.getRemotePipe();
@@ -919,6 +922,9 @@ public final class PermissionControllerManager {
 
         @Override
         public void run(@NonNull IPermissionController service) {
+            if (mBackupSender.getStatus() != AsyncTask.Status.PENDING) {
+                return;
+            }
             mBackupSender.execute(mBackup);
 
             ParcelFileDescriptor remotePipe = mBackupSender.getRemotePipe();
