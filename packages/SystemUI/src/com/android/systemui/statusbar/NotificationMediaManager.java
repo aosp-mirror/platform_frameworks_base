@@ -69,6 +69,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -91,6 +92,14 @@ public class NotificationMediaManager implements Dumpable {
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
     private final KeyguardBypassController mKeyguardBypassController;
+    private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
+    static {
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_NONE);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
+    }
+
 
     // Late binding
     private NotificationEntryManager mEntryManager;
@@ -205,6 +214,10 @@ public class NotificationMediaManager implements Dumpable {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mContext.getMainExecutor(),
                 mPropertiesChangedListener);
+    }
+
+    public static boolean isPlayingState(int state) {
+        return !PAUSED_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
