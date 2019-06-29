@@ -127,15 +127,15 @@ public class DozeSensors {
                         true /* touchscreen */),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
-                        Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
+                        Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                         mConfig.wakeScreenGestureAvailable() && alwaysOn,
                         DozeLog.REASON_SENSOR_WAKE_UP,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_LOCK_SCREEN),
-                        Settings.Secure.DOZE_WAKE_SCREEN_GESTURE,
-                        mConfig.wakeScreenGestureAvailable() && alwaysOn,
+                        Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+                        mConfig.wakeScreenGestureAvailable(),
                         DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
                         false /* reports touch coordinates */,
                         false /* touchscreen */, mConfig.getWakeLockScreenDebounce()),

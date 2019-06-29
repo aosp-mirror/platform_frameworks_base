@@ -190,6 +190,11 @@ public class UnlockMethodCache {
         public void onKeyguardVisibilityChanged(boolean showing) {
             update(false /* updateAlways */);
         }
+
+        @Override
+        public void onBiometricsCleared() {
+            update(false /* alwaysUpdate */);
+        }
     };
 
     public boolean isTrustManaged() {

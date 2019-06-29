@@ -45,10 +45,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.UserHandle;   // duped to avoid merge conflict
-import android.os.UserManager;  // out of order to avoid merge conflict
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -326,7 +325,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<RollbackInfo> getRecentlyExecutedRollbacks() {
+    public ParceledListSlice<RollbackInfo> getRecentlyCommittedRollbacks() {
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
@@ -345,7 +344,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void commitRollback(int rollbackId, ParceledListSlice causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        enforceManageRollbacks("executeRollback");
+        enforceManageRollbacks("commitRollback");
 
         final int callingUid = Binder.getCallingUid();
         AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
@@ -575,6 +574,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @Override
+    public void blockRollbackManager(long millis) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                "blockRollbackManager");
+        getHandler().post(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                // ignored.
+            }
+        });
+    }
+
     void onUnlockUser(int userId) {
         getHandler().post(() -> {
             final List<RollbackData> rollbacks;
@@ -677,8 +690,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     /**
      * Load rollback data from storage if it has not already been loaded.
-     * After calling this funciton, mAvailableRollbacks and
-     * mRecentlyExecutedRollbacks will be non-null.
+     * After calling this function, mRollbacks will be non-null.
      */
     private void ensureRollbackDataLoaded() {
         synchronized (mLock) {

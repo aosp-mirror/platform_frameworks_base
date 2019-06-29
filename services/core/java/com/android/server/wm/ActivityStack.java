@@ -1302,17 +1302,17 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
 
+        getDisplay().positionChildAtBottom(this, reason);
+        if (task != null) {
+            insertTaskAtBottom(task);
+        }
+
         /**
          * The intent behind moving a primary split screen stack to the back is usually to hide
          * behind the home stack. Exit split screen in this case.
          */
         if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
-        }
-
-        getDisplay().positionChildAtBottom(this, reason);
-        if (task != null) {
-            insertTaskAtBottom(task);
         }
     }
 
@@ -1388,13 +1388,12 @@ class ActivityStack extends ConfigurationContainer {
             }
 
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Comparing existing cls="
-                    + taskIntent.getComponent().flattenToShortString()
+                    + (task.realActivity != null ? task.realActivity.flattenToShortString() : "")
                     + "/aff=" + r.getTaskRecord().rootAffinity + " to new cls="
                     + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
             // TODO Refactor to remove duplications. Check if logic can be simplified.
-            if (taskIntent != null && taskIntent.getComponent() != null &&
-                    taskIntent.getComponent().compareTo(cls) == 0 &&
-                    Objects.equals(documentData, taskDocumentData)) {
+            if (task.realActivity != null && task.realActivity.compareTo(cls) == 0
+                    && Objects.equals(documentData, taskDocumentData)) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching class!");
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,

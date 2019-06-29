@@ -899,20 +899,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
         addOption("-Ximage-compiler-option");
         addOption("--compiler-filter=speed-profile");
     } else {
-        // Make sure there is a preloaded-classes file.
-        if (!hasFile("/system/etc/preloaded-classes")) {
-            ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
-                  strerror(errno));
-            return -1;
-        }
-        addOption("-Ximage-compiler-option");
-        addOption("--image-classes=/system/etc/preloaded-classes");
+        ALOGE("Missing boot-image.prof file, /system/etc/boot-image.prof not found: %s\n",
+              strerror(errno));
+        return -1;
+    }
 
-        // If there is a dirty-image-objects file, push it.
-        if (hasFile("/system/etc/dirty-image-objects")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
-        }
+
+    // If there is a dirty-image-objects file, push it.
+    if (hasFile("/system/etc/dirty-image-objects")) {
+        addOption("-Ximage-compiler-option");
+        addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
     }
 
     property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");

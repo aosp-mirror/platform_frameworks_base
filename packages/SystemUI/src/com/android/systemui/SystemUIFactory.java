@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -56,6 +57,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
+import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -66,6 +68,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
@@ -220,6 +223,18 @@ public class SystemUIFactory {
     @Nullable
     public String provideLeakReportEmail() {
         return null;
+    }
+
+    @Singleton
+    @Provides
+    @Nullable
+    public KeyguardLiftController provideKeyguardLiftController(Context context,
+            StatusBarStateController statusBarStateController,
+            AsyncSensorManager asyncSensorManager) {
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return null;
+        }
+        return new KeyguardLiftController(context, statusBarStateController, asyncSensorManager);
     }
 
     @Singleton

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
@@ -80,7 +81,8 @@ public class Surface implements Parcelable {
     private static native long nativeGetNextFrameNumber(long nativeObject);
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native int nativeForceScopedDisconnect(long nativeObject);
-    private static native int nativeAttachAndQueueBuffer(long nativeObject, GraphicBuffer buffer);
+    private static native int nativeAttachAndQueueBufferWithColorSpace(long nativeObject,
+            GraphicBuffer buffer, int colorSpaceId);
 
     private static native int nativeSetSharedBufferModeEnabled(long nativeObject, boolean enabled);
     private static native int nativeSetAutoRefreshEnabled(long nativeObject, boolean enabled);
@@ -699,18 +701,35 @@ public class Surface implements Parcelable {
     }
 
     /**
+     * Transfer ownership of buffer with a color space and present it on the Surface.
+     * The supported color spaces are SRGB and Display P3, other color spaces will be
+     * treated as SRGB.
+     * @hide
+     */
+    public void attachAndQueueBufferWithColorSpace(GraphicBuffer buffer, ColorSpace colorSpace) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            if (colorSpace == null) {
+                colorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+            }
+            int err = nativeAttachAndQueueBufferWithColorSpace(mNativeObject, buffer,
+                    colorSpace.getId());
+            if (err != 0) {
+                throw new RuntimeException(
+                        "Failed to attach and queue buffer to Surface (bad object?), "
+                        + "native error: " + err);
+            }
+        }
+    }
+
+    /**
+     * Deprecated, use attachAndQueueBufferWithColorSpace instead.
      * Transfer ownership of buffer and present it on the Surface.
+     * The color space of the buffer is treated as SRGB.
      * @hide
      */
     public void attachAndQueueBuffer(GraphicBuffer buffer) {
-        synchronized (mLock) {
-            checkNotReleasedLocked();
-            int err = nativeAttachAndQueueBuffer(mNativeObject, buffer);
-            if (err != 0) {
-                throw new RuntimeException(
-                        "Failed to attach and queue buffer to Surface (bad object?)");
-            }
-        }
+        attachAndQueueBufferWithColorSpace(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
     }
 
     /**
