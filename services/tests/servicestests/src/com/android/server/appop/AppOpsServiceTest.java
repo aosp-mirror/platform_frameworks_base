@@ -46,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -242,6 +243,7 @@ public class AppOpsServiceTest {
         assertThat(getLoggedOps()).isNull();
     }
 
+    @Ignore("Historical appops are disabled in Android Q")
     @Test
     public void testPackageRemovedHistoricalOps() throws InterruptedException {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, mMyPackageName, MODE_ALLOWED);
