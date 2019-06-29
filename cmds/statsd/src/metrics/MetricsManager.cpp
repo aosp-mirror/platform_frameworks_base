@@ -521,6 +521,10 @@ void MetricsManager::loadActiveConfig(const ActiveConfig& config, int64_t curren
             if (metric->getMetricId() == activeMetric.id()) {
                 VLOG("Setting active metric: %lld", (long long)metric->getMetricId());
                 metric->loadActiveMetric(activeMetric, currentTimeNs);
+                if (!mIsActive && metric->isActive()) {
+                    StatsdStats::getInstance().noteActiveStatusChanged(mConfigKey,
+                                                                       /*activate=*/ true);
+                }
                 mIsActive |= metric->isActive();
             }
         }

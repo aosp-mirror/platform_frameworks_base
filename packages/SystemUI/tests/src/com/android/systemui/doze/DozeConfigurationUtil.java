@@ -36,7 +36,7 @@ public class DozeConfigurationUtil {
         when(params.getPulseOnSigMotion()).thenReturn(false);
         when(params.getPickupVibrationThreshold()).thenReturn(0);
         when(params.getProxCheckBeforePulse()).thenReturn(true);
-        when(params.getPickupSubtypePerformsProxCheck(anyInt())).thenReturn(true);
+        when(params.getPickupPerformsProxCheck()).thenReturn(true);
         when(params.getPolicy()).thenReturn(mock(AlwaysOnDisplayPolicy.class));
         when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
 

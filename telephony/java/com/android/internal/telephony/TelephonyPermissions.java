@@ -605,15 +605,11 @@ public final class TelephonyPermissions {
      */
     private static boolean checkCarrierPrivilegeForAnySubId(Context context,
             Supplier<ITelephony> telephonySupplier, int uid) {
-        SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
-                Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int[] activeSubIds = sm.getActiveSubscriptionIdList();
-        if (activeSubIds != null) {
-            for (int activeSubId : activeSubIds) {
-                if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
-                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                    return true;
-                }
+        int[] activeSubIds = SubscriptionManager.getActiveSubscriptionIdList(/*visibleOnly*/ false);
+        for (int activeSubId : activeSubIds) {
+            if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
+                    == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                return true;
             }
         }
         return false;

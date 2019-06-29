@@ -303,6 +303,11 @@ public class CarrierTextController {
             }
         } else {
             subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+            if (subs == null) {
+                subs = new ArrayList<>();
+            } else {
+                filterMobileSubscriptionInSameGroup(subs);
+            }
         }
         return subs;
     }
