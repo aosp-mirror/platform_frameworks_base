@@ -221,7 +221,7 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сымсыз дисплей сертификаты"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi егжей-тегжейлі журналы"</string>
     <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi іздеуін шектеу"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік интернет әрқашан қосулы"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетеринг режиміндегі аппараттық жеделдету"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth құрылғыларын атаусыз көрсету"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>

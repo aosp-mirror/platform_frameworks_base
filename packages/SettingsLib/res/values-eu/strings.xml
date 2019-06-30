@@ -246,7 +246,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Idatzi DNS hornitzailearen ostalari-izena"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ezin izan da konektatu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautagailuan."</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
     <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko."</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Neurtu gabeko sarea"</string>
@@ -261,7 +261,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Onartu kokapen faltsuak"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantendu mugikorreko datuak beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sarez bizkor aldatu ahal izateko)"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantendu datu-konexioa beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sare batetik bestera bizkor aldatu ahal izateko)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>
@@ -462,7 +462,7 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Iraupena"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Galdetu beti"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"Desaktibatu arte"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"Zuk desaktibatu arte"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Oraintxe"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Gailu hau"</string>
 </resources>

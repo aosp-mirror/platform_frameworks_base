@@ -219,7 +219,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"অনুরূপ লোকেশন অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং চালু করুন"</string>
     <string name="wifi_scan_throttling" msgid="160014287416479843">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
@@ -262,7 +262,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট ইন্সপেকশন দেখা চালু করুন"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলব্ধ থাকলে ব্যবহার করুন"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলভ্য থাকলে ব্যবহার করুন"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা অনুলিপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ্লিকেশানগুলি ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"আপনি আগে যে সব কম্পিউটার USB ডিবাগিং এর অ্যাক্সেসের অনুমতি দিয়েছিলেন তা প্রত্যাহার করবেন?"</string>
