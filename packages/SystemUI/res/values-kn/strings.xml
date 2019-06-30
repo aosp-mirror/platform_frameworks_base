@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ನಿಮ್ಮ ಮುಖದ ದೃಢೀಕರಣಕ್ಕಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ಸೂರ್ಯೋದಯದ ತನಕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ಡಾರ್ಕ್ ಥೀಮ್"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ಡಾರ್ಕ್ ಥೀಮ್\nಬ್ಯಾಟರಿ ಸೇವರ್‌"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ಡಾರ್ಕ್ ಥೀಮ್"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ಡಾರ್ಕ್ ಥೀಮ್\nಬ್ಯಾಟರಿ ಸೇವರ್"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>

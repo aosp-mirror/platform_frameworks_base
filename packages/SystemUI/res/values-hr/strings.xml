@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Traženje lica"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Lice je autentificirano"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Potvrđeno"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Dodirnite Potvrdi za dovršetak"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Dodirnite senzor otiska prsta"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona otiska prsta"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Tražimo vas…"</string>
@@ -377,8 +378,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do izlaska sunca"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Uključuje se u <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tamna tema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tamna tema\nŠtednja baterije"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tamna tema"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tamna tema\nŠtednja baterije"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je omogućen"</string>
@@ -532,7 +533,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Postavke zvuka"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširivanje"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sažimanje"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automatski opisi medija"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automatski titlovi za medije"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Zatvorite opis"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Sloj titlova"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"omogući"</string>

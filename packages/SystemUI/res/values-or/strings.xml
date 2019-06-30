@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ଆପଣଙ୍କର ମୁହଁକୁ ପ୍ରମାଣ କରୁଛି"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ସୂର୍ଯ୍ୟୋଦୟ ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>ରେ ଅନ୍ ହେବ"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ଗାଢ଼ା ଥିମ୍"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ଗାଢ଼ା ଥିମ୍‍\nବ୍ୟାଟେରୀ ସେଭର୍"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ଗାଢ଼ ଥିମ୍"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ଗାଢ଼ ଥିମ୍\nବ୍ୟାଟେରୀ ସେଭର୍"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -399,8 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ନିମ୍ନରେ କମ୍‍ ଜରୁରୀ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for keyguard_unlock (6035822649218712063) -->
-    <skip />
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ଏହି ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ।"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ଏହି ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ଫୋନ୍‍ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
@@ -453,7 +453,7 @@
     <string name="battery_saver_notification_text" msgid="820318788126672692">"କାର୍ଯ୍ୟ ସମ୍ପାଦନ ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରନ୍ତୁ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅଫ୍‍ କରନ୍ତୁ"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"ରେକର୍ଡିଂ କିମ୍ବା କାଷ୍ଟିଂ ସମୟରେ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଯେ କୌଣସି ସମ୍ବେଦନଶୀଳ ସୂଚନା କ୍ୟାପଚର୍ କରିପାରିବ ଯାହା ଅଡ଼ିଓ, ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ ଏବଂ ମେସେଜ୍‌ଗୁଡ଼ିକ ପରି ସମ୍ବେଦନଶୀଳ ସୂଚନା ଆପଣଙ୍କର ଡିଭାଇସ୍‌ରେ ଚାଲିବ ବା ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ।"</string>
-    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ରେକର୍ଡିଂ କିମ୍ବା କାଷ୍ଟିଂ ସମୟରେ ସେବା ପ୍ରଦାନ କରୁଥିବା ଏହି ଫଙ୍କ୍‌ସନ୍ ଯେ କୌଣସି ସମ୍ବେଦନଶୀଳ ସୂଚନା କ୍ୟାପଚର୍ କରିପାରିବ ଯାହା ଅଡ଼ିଓ, ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ ଏବଂ ମେସେଜ୍‌ଗୁଡ଼ିକ ପରି ସମ୍ବେଦନଶୀଳ ସୂଚନା ଆପଣଙ୍କର ଡିଭାଇସ୍‌ରେ ଚାଲିବ ବା ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ।"</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ରେକର୍ଡିଂ କିମ୍ବା କାଷ୍ଟିଂ ସମୟରେ ଏହି ପ୍ରକାର୍ଯ୍ୟ ପ୍ରଦାନ କରୁଥିବା ସେବା ଅଡ଼ିଓ, ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ ଏବଂ ମେସେଜ୍‌ଗୁଡ଼ିକ ପରି ସମ୍ବେଦନଶୀଳ ସୂଚନା କ୍ୟାପଚର୍ କରିପାରିବ ଯାହା ଆପଣଙ୍କର ଡିଭାଇସ୍‌ରେ ଚାଲିବ ବା ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ।"</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"କାଷ୍ଟିଂ/ରେକର୍ଡିଂ ସମୟରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଦେଖାନ୍ତୁ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>

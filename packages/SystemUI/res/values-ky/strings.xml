@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Жүзүңүз изделүүдө"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Жүздүн аныктыгы текшерилди"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ырасталды"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Манжа изинин сенсорун басыңыз"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Манжа изинин сүрөтчөсү"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Жүзүңүз изделүүдө…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Күн чыкканга чейин"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Саат <xliff:g id="TIME">%s</xliff:g> күйөт"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> чейин"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Түнкү режим"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Түнкү режим\nБатареяны үнөмдөгүч"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Түнкү режим"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Түнкү режим\nБатареяны үнөмдөгүч"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC иштетилген"</string>
@@ -453,7 +454,7 @@
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Батареяны үнөмдөгүч режимин өчүрүү"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"Жаздырып же тышкы экранга чыгаруу учурунда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу ойноткон аудиоңуз, сырсөздөрүңүз, төлөө маалыматыңыз, сүрөттөрүңүз жана билдирүүлөрүңүз сыяктуу экранда көрсөтүлгөн купуя маалыматты жаздырып калышы мүмкүн."</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Жаздырып же тышкы экранга чыгаруу учурунда, бул функцияны аткарып жаткан колдонмо ойноткон аудиоңуз, сырсөздөрүңүз, төлөө маалыматыңыз, сүрөттөрүңүз жана билдирүүлөрүңүз сыяктуу экранда көрсөтүлгөн купуя маалыматты жаздырып калышы мүмкүн."</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Тышкы экранга чыгарууда/жаздырууда купуя маалыматты ачыкка чыгаруу"</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Тышкы экранга чыгарууда/жаздырууда купуя маалыматты ачыктоо"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Экинчи көрсөтүлбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Бардыгын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Башкаруу"</string>
@@ -529,7 +530,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Добуштун жөндөөлөрү"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жайып көрсөтүү"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жыйнап коюу"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Медиага автоматтык коштомо жазуу"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Автоматтык коштомо жазуулар"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Коштомо жазуулар кеңеши"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Коштомо жазуулардын үстүнө коюу"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"иштетүү"</string>
@@ -649,9 +650,9 @@
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Билдирмелерди өчүрүү"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Бул колдонмонун эскертмелери көрсөтүлө берсинби?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Үнсүз"</string>
-    <string name="notification_alert_title" msgid="8031196611815490340">"Шашылыш билдирме"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Шашылыш билдирүү"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Үн же дирилдөөсүз ой топтоого жардам берет."</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Үн чыгарып же дирилдеп көңүлүңүздү бурат."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Билдирүүдөн үн чыгат же дирилдейт."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Бул билдирмелерди өзгөртүүгө болбойт."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Бул билдирмелердин тобун бул жерде конфигурациялоого болбойт"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Прокси билдирмеси"</string>

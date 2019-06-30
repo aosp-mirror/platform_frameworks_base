@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Ідзе пошук твару"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Пацверджана"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Дакраніцеся да сканера адбіткаў пальцаў"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок адбіткаў пальцаў"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ідзе пошук вашага твару…"</string>
@@ -381,8 +382,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Да ўсходу сонца"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Уключыць у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Да <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Цёмная тэма"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Цёмная тэма\nЭканомія зараду"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Цёмная тэма"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Цёмная тэма\nЭканомія зараду"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC адключаны"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC уключаны"</string>
@@ -537,7 +538,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Налады гуку"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Разгарнуць"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Згарнуць"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Аўтаматычныя цітры"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Аўтаматычныя субцітры"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Падказка \"Схавайце цітры\""</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"уключыць"</string>
@@ -664,7 +665,7 @@
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Тут канфігурыраваць гэту групу апавяшчэнняў забаронена"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Праксіраванае апавяшчэнне"</string>
     <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Усе апавяшчэнні праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="see_more_title" msgid="5358726697042112726">"Разгарнуць"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Яшчэ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Гэта праграма выкарыстоўвае камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Гэта праграма выкарыстоўвае мікрафон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Гэта праграма паказваецца на экране паверх іншых праграм."</string>

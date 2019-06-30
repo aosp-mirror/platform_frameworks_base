@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Buscando a túa cara"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Autenticouse a cara"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmada"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toca Confirmar para completar o proceso"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca o sensor de impresión dixital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona de impresión dixital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Buscándote…"</string>
@@ -197,7 +198,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Cambio de rede do operador"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir os detalles da batería"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Carga da batería: <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %, durará <xliff:g id="TIME">%2$s</xliff:g> co uso que adoitas darlle"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> por cento, durará <xliff:g id="TIME">%2$s</xliff:g> co uso que adoitas darlle"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"A batería está cargando. Nivel: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración do sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacións"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Ata o amencer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Desde: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Ata: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema escuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema escuro\nAforro de batería"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tema escuro"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tema escuro\nAforro de batería"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"A opción NFC está activada"</string>

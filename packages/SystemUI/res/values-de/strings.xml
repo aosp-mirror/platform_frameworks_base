@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Nach deinem Gesicht wird gesucht"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bestätigt"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Berühre den Fingerabdrucksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerabdruck-Symbol"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Wir suchen nach dir…"</string>
@@ -199,7 +200,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
-    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Akku bei <xliff:g id="PERCENTAGE">%1$s</xliff:g> %, bei deinem Nutzungsmuster hast du noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="9033100930684311630">"Akku bei <xliff:g id="PERCENTAGE">%1$s</xliff:g> Prozent. Bei deinem Nutzungsmuster hast du noch Strom für etwa <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />
@@ -234,7 +235,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Der Flugmodus ist deaktiviert."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"lautlos"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"nur Wecker"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"nur Weckrufe"</string>
     <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"Nicht stören."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"\"Bitte nicht stören\" deaktiviert."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"\"Bitte nicht stören\" aktiviert"</string>
@@ -304,7 +305,7 @@
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Halte die Symbole gedrückt, um weitere Optionen zu sehen"</string>
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"Bitte nicht stören"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Nur wichtige Unterbrechungen"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Nur Wecker"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Nur Weckrufe"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Lautlos"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Geräte)"</string>
@@ -379,8 +380,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Dunkles Design"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Dunkles Design\nEnergiesparmodus"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Dunkles Design"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Dunkles Design\nEnergiesparmodus"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ist deaktiviert"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ist aktiviert"</string>
@@ -412,7 +413,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Lautlos. Damit werden auch Screenreader stummgeschaltet."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Lautlos"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Nur wichtige Unterbrechungen"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Nur Wecker"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Nur Weckrufe"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Laut-\nlos"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Nur\nwichtige"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Nur\nWecker"</string>
@@ -596,7 +597,7 @@
     <string name="enable_demo_mode" msgid="4844205668718636518">"Demomodus aktivieren"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Demomodus anzeigen"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="8536256753575881818">"Wecker"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Weckruf"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Arbeitsprofil"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Flugmodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Kachel hinzufügen"</string>
@@ -823,7 +824,7 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Einstellungen öffnen."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Schnelleinstellungen öffnen."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Schnelleinstellungen schließen."</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Wecker eingestellt."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Weckruf eingerichtet."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Angemeldet als <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Kein Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Details öffnen."</string>
