@@ -375,8 +375,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"일출까지"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>에"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"어두운 테마"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"어두운 테마\n절전 모드"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"어두운 테마"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"어두운 테마\n절전 모드"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 사용 중지됨"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 사용 설정됨"</string>
@@ -651,7 +651,7 @@
     <string name="notification_silence_title" msgid="5763240612242137433">"무음"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"주의를 끄는 알림"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"소리나 진동 없이 집중할 수 있도록 도와줍니다"</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"소리나 진동으로 주의를 끕니다"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"소리나 진동으로 알립니다."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"프록시를 통한 알림"</string>

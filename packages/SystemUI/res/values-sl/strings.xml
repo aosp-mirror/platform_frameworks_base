@@ -379,8 +379,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do sončnega vzhoda"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Vklop ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Temna tema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Temna tema\nVarčevanje energije"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Temna tema"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Temna tema\nVarčevanje z energijo akumul."</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Tehnologija NFC je onemogočena"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Tehnologija NFC je omogočena"</string>
@@ -650,14 +650,14 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimiraj"</string>
     <string name="inline_silent_button_silent" msgid="5315879183296940969">"Tiho"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Še naprej prikazuj brez zvoka"</string>
-    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Z zvočnim opozorilom"</string>
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Z opozorilom"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Še naprej opozarjaj"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Izklopi obvestila"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Tiho"</string>
-    <string name="notification_alert_title" msgid="8031196611815490340">"Z zvočnim opozorilom"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Z opozorilom"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Nemoteč prikaz brez zvoka ali vibriranja"</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Pritegnitev pozornosti z zvokom ali vibriranjem"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Pritegne vašo pozornost z zvokom ali vibriranjem"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Posredovano obvestilo"</string>
