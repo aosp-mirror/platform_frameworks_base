@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"S\'està cercant la teva cara"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Cara autenticada"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmat"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toca Confirma per completar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes digitals"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"S\'està cercant la teva cara…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Fins a l\'alba"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"S\'activarà a les <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Fins a les <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema fosc"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema fosc\nEstalvi de bateria"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tema fosc"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tema fosc\nEstalvi de bateria"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"L\'NFC està desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"L\'NFC està activada"</string>
@@ -451,8 +452,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactiva l\'estalvi de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Quan graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot capturar la informació sensible que es mostri a la pantalla o que reprodueixi el dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
-    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Quan graves o emets contingut, el servei que ofereix aquesta funció pot capturar informació sensible que es mostri a la pantalla o que reprodueixi el dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Quan graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot capturar la informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Quan graves o emets contingut, el servei que ofereix aquesta funció pot capturar informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Es mostra informació sensible durant l\'emissió o la gravació"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
@@ -529,7 +530,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Configuració del so"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Amplia"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Replega"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtítols automàtics"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtitula el contingut multimèdia automàticament"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Tanca el consell sobre subtítols"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Superposició de subtítols"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"activar"</string>

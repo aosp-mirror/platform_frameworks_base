@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Buscando tu rostro"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Se autenticó el rostro"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmado"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Presiona Confirmar para completarla"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Autenticando tu rostro…"</string>
@@ -215,7 +216,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación ignorada"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Pantalla de notificaciones"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla bloqueada"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueo"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Configuración"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Recientes"</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Pantalla bloqueada del perfil de trabajo"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hasta el amanecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"A la(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hasta <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema oscuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema oscuro\nAhorro de batería"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tema oscuro"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tema oscuro\nAhorro de batería"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La tecnología NFC está inhabilitada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La tecnología NFC está habilitada"</string>
@@ -827,7 +828,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar orden de configuración"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla bloqueada"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla de bloqueo"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expandir"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Cerrar"</string>

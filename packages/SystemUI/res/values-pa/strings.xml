@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਿਰਤ ਹੋਇਆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ਪੁਸ਼ਟੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ਪੂਰਾ ਕਰਨ ਲਈ ਪੁਸ਼ਟੀ ਕਰੋ \'ਤੇ ਟੈਪ ਕਰੋ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ਤੁਹਾਡੀ ਪਛਾਣ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ਤੱਕ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ਗੂੜ੍ਹਾ ਥੀਮ"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ਗੂੜ੍ਹਾ ਥੀਮ\nਬੈਟਰੀ ਸੇਵਰ"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ਗੂੜ੍ਹਾ ਥੀਮ"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ਗੂੜ੍ਹਾ ਥੀਮ\nਬੈਟਰੀ ਸੇਵਰ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
@@ -648,7 +649,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ਸੁਚੇਤ ਰਖੋ"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
-    <string name="notification_silence_title" msgid="5763240612242137433">"ਖਮੋਸ਼"</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"ਸ਼ਾਂਤ"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"ਸੁਚੇਤਨਾ"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"ਤੁਹਾਨੂੰ ਬਿਨਾਂ ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਦੇ ਫੋਕਸ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ।"</string>

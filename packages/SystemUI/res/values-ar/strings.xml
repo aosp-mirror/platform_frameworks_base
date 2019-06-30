@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"جارٍ البحث عن وجهك"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"تمّت مصادقة الوجه."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"تمّ التأكيد."</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"يمكنك النقر على \"تأكيد\" لإكمال المهمة."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"المس زر استشعار بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"جارٍ البحث عن وجهك…"</string>
@@ -383,8 +384,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"مظهر الألوان الداكنة"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"مظهر داكن\nتوفير شحن البطارية"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"مظهر داكن"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"مظهر داكن\nتوفير شحن البطارية"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
@@ -541,7 +542,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"إعدادات الصوت"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"توسيع"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"تصغير"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ترجمة تلقائية للوسائط"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"شرح تلقائي للوسائط"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"إغلاق نصيحة الشرح"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"تراكب الشرح"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"تفعيل"</string>
@@ -570,7 +571,7 @@
     <string name="stream_notification" msgid="2563720670905665031">"الإشعار"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"بلوتوث"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"تردد ثنائي متعدد النغمات"</string>
-    <string name="stream_accessibility" msgid="301136219144385106">"إمكانية الوصول"</string>
+    <string name="stream_accessibility" msgid="301136219144385106">"سهولة الاستخدام"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"المكالمات"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"استصدار رنين"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"اهتزاز"</string>
@@ -578,8 +579,8 @@
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"الهاتف في وضع الاهتزاز"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"تم كتم الهاتف."</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. انقر لإلغاء التجاهل."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات إمكانية الوصول."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. انقر لكتم الصوت."</string>
     <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"كتم الصوت"</string>

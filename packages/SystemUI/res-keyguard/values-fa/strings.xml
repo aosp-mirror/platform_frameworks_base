@@ -151,10 +151,7 @@
       <item quantity="one">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
       <item quantity="other">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
     </plurals>
-    <!-- no translation found for clock_title_default (6645600990069154049) -->
-    <skip />
-    <!-- no translation found for clock_title_bubble (1286365278681892114) -->
-    <skip />
-    <!-- no translation found for clock_title_analog (4047401488577315053) -->
-    <skip />
+    <string name="clock_title_default" msgid="6645600990069154049">"پیش‌فرض"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"حباب"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"آنالوگ"</string>
 </resources>

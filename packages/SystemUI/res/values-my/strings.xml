@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"သင့်မျက်နှာကို ရှာနေသည်"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"အတည်ပြုပြီးပြီ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်\' ကို တို့ပါ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"သင့်ကို ရှာဖွေနေသည်…"</string>
@@ -375,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"နေထွက်ချိန် အထိ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> တွင် ဖွင့်ရန်"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> အထိ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"မှောင်သည့် အပြင်အဆင်"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"မှောင်သည့် အပြင်အဆင်\nဘက်ထရီ အားထိန်း"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"မှောင်သည့် အပြင်အဆင်"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"မှောင်သည့် အပြင်အဆင်\nဘက်ထရီ အားထိန်း"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ကို ဖွင့်ထားသည်"</string>
@@ -451,7 +452,7 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ဘက်ထရီ အားထိန်းကို ဖွင့်ထားခြင်း"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ဘက်ထရီ အားထိန်းကို ပိတ်ရန်"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံ၊ စကားဝှက်၊ ငွေပေးချေမှုဆိုင်ရာ အချက်အလက်၊ ဓာတ်ပုံနှင့် မက်ဆေ့ဂျ်များကဲ့သို့ အရေးကြီးသည့် အချက်အလက်များအပါအဝင် သင့်မျက်နှာပြင်တွင် ပြသထားသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်မှန်သမျှကို ဖမ်းယူနိုင်ပါသည်။"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံ၊ စကားဝှက်၊ ငွေပေးချေမှုဆိုင်ရာ အချက်အလက်၊ ဓာတ်ပုံနှင့် မက်ဆေ့ဂျ်များကဲ့သို့ အရေးကြီးသည့် အချက်အလက်များအပါအဝင် ဖန်သားပြင်တွင် ပြသထားသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်မှန်သမျှကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် ဤလုပ်ဆောင်ချက်ကို ပေးအပ်သည့် ဝန်ဆောင်မှုသည် အသံ၊ စကားဝှက်၊ ငွေပေးချေမှုဆိုင်ရာ အချက်အလက်၊ ဓာတ်ပုံနှင့် မက်ဆေ့ဂျ်များကဲ့သို့ အရေးကြီးသည့် အချက်အလက်များအပါအဝင် သင့်မျက်နှာပြင်တွင် ပြသထားသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်မှန်သမျှကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"ကာစ်လုပ်နေစဉ်/အသံဖမ်းနေစဉ် အရေးကြီးသောအချက်အလက်များ ထုတ်ဖော်မိခြင်း"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"နောက်ထပ် မပြပါနှင့်"</string>
@@ -529,7 +530,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"အသံဆက်တင်များ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"တိုးချဲ့ရန်"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ခေါက်သိမ်းရန်..."</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"အလိုလို မီဒီယာ စာတန်းထိုးရန်"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"အလိုအလျောက် စာတန်းထိုးရန်"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"စာတန်းအကြံပြုချက်ကို ပိတ်ပါ"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"စာတန်းများ ထပ်ပိုးရန်"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ဖွင့်ရန်"</string>
