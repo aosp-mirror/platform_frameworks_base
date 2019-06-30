@@ -124,7 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"သင့်မျက်နှာကို ရှာနေသည်"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"အတည်ပြုပြီးပြီ"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်း ကို တို့ပါ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်\' ကို တို့ပါ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"သင့်ကို ရှာဖွေနေသည်…"</string>
@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"နေထွက်ချိန် အထိ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> တွင် ဖွင့်ရန်"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> အထိ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"မှောင်သည့် အပြင်အဆင်"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"မှောင်သည့် အပြင်အဆင်\nဘက်ထရီ အားထိန်း"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"မှောင်သည့် အပြင်အဆင်"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"မှောင်သည့် အပြင်အဆင်\nဘက်ထရီ အားထိန်း"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ကို ဖွင့်ထားသည်"</string>

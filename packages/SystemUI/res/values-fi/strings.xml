@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Auringonnousuun"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Käyttöön klo <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> saakka"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tumma teema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tumma teema\nVirransäästö"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tumma teema"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tumma teema\nVirransäästö"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC on poistettu käytöstä"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC on käytössä"</string>
@@ -652,7 +652,7 @@
     <string name="notification_silence_title" msgid="5763240612242137433">"Äänetön"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Hälyttää"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Keskittyminen on helpompaa ilman ääntä tai värinää."</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Kiinnittää huomion ilman ääntä tai värinää."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Kiinnittää huomion äänellä tai värinällä"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Välitetty ilmoitus"</string>
