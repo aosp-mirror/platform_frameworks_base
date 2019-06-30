@@ -150,11 +150,9 @@ final class HistoricalRegistry {
 
     /**
      * Whether history is enabled.
-     *
-     * <p>The feature is permanently disabled in Android Q
      */
     @GuardedBy("mInMemoryLock")
-    private final int mMode = AppOpsManager.HISTORICAL_MODE_DISABLED;
+    private int mMode = AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE;
 
     /**
      * This granularity has been chosen to allow clean delineation for intervals
@@ -453,7 +451,6 @@ final class HistoricalRegistry {
 
     void setHistoryParameters(@HistoricalMode int mode,
             long baseSnapshotInterval, long intervalCompressionMultiplier) {
-        /*
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 // NOTE: We allow this call if persistence is not initialized as
@@ -482,7 +479,6 @@ final class HistoricalRegistry {
                 }
             }
         }
-        */
     }
 
     void offsetHistory(long offsetMillis) {
