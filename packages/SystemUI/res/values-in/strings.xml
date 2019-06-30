@@ -72,7 +72,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Menyimpan screenshot..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Menyimpan screenshot..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Screenshot disimpan"</string>
-    <string name="screenshot_saved_text" msgid="7574667448002050363">"Tap untuk melihat screenshot"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Ketuk untuk melihat screenshot"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"Tidak dapat menyimpan screenshot"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Coba ambil screenshot lagi"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas"</string>
@@ -119,12 +119,12 @@
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Konfirmasi"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Coba lagi"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Area kosong. Tap untuk membatalkan autentikasi"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Area kosong. Ketuk untuk membatalkan autentikasi"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Coba lagi"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Mencari wajah Anda"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Wajah diautentikasi"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Dikonfirmasi"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tap Konfirmasi untuk menyelesaikan"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Ketuk Konfirmasi untuk menyelesaikan"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Sentuh sensor sidik jari"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon sidik jari"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Mencari wajah Anda…"</string>
@@ -298,7 +298,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Etalase Hidangan Penutup"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Tap lama ikon untuk opsi lainnya"</string>
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Sentuh lama ikon untuk opsi lainnya"</string>
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"Jangan Ganggu"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Hanya untuk prioritas"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Hanya alarm"</string>
@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Sampai pagi"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aktif pada <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hingga <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema Gelap"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema Gelap\nPenghemat baterai"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Tema gelap"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Tema gelap\nPenghemat baterai"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC dinonaktifkan"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC diaktifkan"</string>
@@ -399,7 +399,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"SEMUA suara dan getaran, termasuk dari alarm, musik, video, dan game akan diblokir."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Tap lagi untuk membuka"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Ketuk lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Geser ke atas untuk membuka"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Perangkat ini dikelola oleh organisasi"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Perangkat ini dikelola oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -537,13 +537,13 @@
     <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"nonaktifkan"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Ganti perangkat keluaran"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
-    <string name="screen_pinning_description" msgid="8909878447196419623">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Beranda untuk melepas pin."</string>
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Ringkasan untuk melepas pin."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Beranda untuk melepas pin."</string>
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Ini akan terus ditampilkan sampai Anda melepas pin. Geser ke atas &amp; tahan untuk melepas pin."</string>
-    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Beranda untuk melepas pin."</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali dan Ringkasan"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali dan Beranda"</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Ringkasan untuk melepas pin."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Ringkasan"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Beranda"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Layar dipasangi pin"</string>
@@ -566,11 +566,11 @@
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Nonaktifkan"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Ponsel mode getar"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"Ponsel dimatikan suaranya"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap untuk menyuarakan."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
-    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap untuk menyetel agar bergetar."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap untuk menonaktifkan."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ketuk untuk menyuarakan."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Ketuk untuk menyetel agar bergetar."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Ketuk untuk menonaktifkan."</string>
     <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"Tanpa suara"</string>
     <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"aktifkan"</string>
     <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"getar"</string>
@@ -805,8 +805,8 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Atas 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Atas 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Layar penuh di bawah"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tap dua kali untuk mengedit."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Tap dua kali untuk menambahkan."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Ketuk dua kali untuk mengedit."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Ketuk dua kali untuk menambahkan."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Pindahkan <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Hapus <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Tambahkan <xliff:g id="TILE_NAME">%1$s</xliff:g> ke posisi <xliff:g id="POSITION">%2$d</xliff:g>"</string>
@@ -873,7 +873,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Aplikasi Instan"</string>
     <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"Aplikasi dapat dibuka tanpa perlu diinstal."</string>
-    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikasi dapat dibuka tanpa perlu diinstal. Tap untuk mempelajari lebih lanjut."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikasi dapat dibuka tanpa perlu diinstal. Ketuk untuk mempelajari lebih lanjut."</string>
     <string name="app_info" msgid="6856026610594615344">"Info aplikasi"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Buka browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Data seluler"</string>
@@ -889,7 +889,7 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Simpan"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ganti"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikasi yang sedang berjalan di latar belakang"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tap untuk melihat detail penggunaan baterai dan data"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Ketuk untuk melihat detail penggunaan baterai dan data"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Nonaktifkan kuota?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"Anda tidak akan dapat mengakses data atau internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya akan tersedia melalui Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"Operator Seluler Anda"</string>
@@ -900,7 +900,7 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Izinkan <xliff:g id="APP">%1$s</xliff:g> menampilkan potongan dari aplikasi apa pun"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Izinkan"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Tolak"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"Tap untuk menjadwalkan Penghemat Baterai"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"Ketuk untuk menjadwalkan Penghemat Baterai"</string>
     <string name="auto_saver_text" msgid="2563289953551438248">"Aktifkan jika daya baterai kemungkinan akan habis"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Tidak, terima kasih"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Jadwal Penghemat Baterai diaktifkan"</string>
@@ -918,7 +918,7 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensor nonaktif"</string>
     <string name="device_services" msgid="1191212554435440592">"Layanan Perangkat"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Tanpa judul"</string>
-    <string name="restart_button_description" msgid="2035077840254950187">"Tap untuk memulai ulang aplikasi ini dan membuka layar penuh."</string>
+    <string name="restart_button_description" msgid="2035077840254950187">"Ketuk untuk memulai ulang aplikasi ini dan membuka layar penuh."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Buka <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Setelan untuk balon <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Izinkan balon dari <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

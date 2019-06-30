@@ -546,12 +546,12 @@ public class StackScrollAlgorithm {
                 ExpandableViewState topState =
                         topHeadsUpEntry == null ? null : topHeadsUpEntry.getViewState();
                 if (topState != null && !isTopEntry && (!mIsExpanded
-                        || unmodifiedEndLocation < topState.yTranslation + topState.height)) {
+                        || unmodifiedEndLocation > topState.yTranslation + topState.height)) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
                     childState.height = row.getIntrinsicHeight();
-                    childState.yTranslation = topState.yTranslation + topState.height
-                            - childState.height;
+                    childState.yTranslation = Math.min(topState.yTranslation + topState.height
+                            - childState.height, childState.yTranslation);
                 }
 
                 // heads up notification show and this row is the top entry of heads up

@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Күн чыкканга чейин"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Саат <xliff:g id="TIME">%s</xliff:g> күйөт"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> чейин"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Түнкү режим"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Түнкү режим\nБатареяны үнөмдөгүч"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Түнкү режим"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Түнкү режим\nБатареяны үнөмдөгүч"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC иштетилген"</string>
@@ -650,9 +650,9 @@
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Билдирмелерди өчүрүү"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Бул колдонмонун эскертмелери көрсөтүлө берсинби?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Үнсүз"</string>
-    <string name="notification_alert_title" msgid="8031196611815490340">"Шашылыш билдирме"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Шашылыш билдирүү"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Үн же дирилдөөсүз ой топтоого жардам берет."</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Үн чыгарып же дирилдеп көңүлүңүздү бурат."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Билдирүүдөн үн чыгат же дирилдейт."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Бул билдирмелерди өзгөртүүгө болбойт."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Бул билдирмелердин тобун бул жерде конфигурациялоого болбойт"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Прокси билдирмеси"</string>

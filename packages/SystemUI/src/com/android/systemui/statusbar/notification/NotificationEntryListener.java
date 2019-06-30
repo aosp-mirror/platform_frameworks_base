@@ -24,6 +24,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 
+import androidx.annotation.NonNull;
+
 /**
  * Listener interface for changes sent by NotificationEntryManager.
  */
@@ -45,7 +47,7 @@ public interface NotificationEntryListener {
     /**
      * Called when a new entry is created.
      */
-    default void onNotificationAdded(NotificationEntry entry) {
+    default void onNotificationAdded(@NonNull NotificationEntry entry) {
     }
 
     /**
@@ -61,7 +63,7 @@ public interface NotificationEntryListener {
     /**
      * Called when a notification was updated, after any filtering of notifications have occurred.
      */
-    default void onPostEntryUpdated(NotificationEntry entry) {
+    default void onPostEntryUpdated(@NonNull NotificationEntry entry) {
     }
 
     /**

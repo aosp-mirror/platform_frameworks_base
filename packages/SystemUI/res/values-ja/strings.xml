@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"日の出まで"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ダークテーマ"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ダークテーマ\nバッテリー セーバー"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ダークテーマ"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ダークテーマ\nバッテリー セーバー"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC は有効です"</string>

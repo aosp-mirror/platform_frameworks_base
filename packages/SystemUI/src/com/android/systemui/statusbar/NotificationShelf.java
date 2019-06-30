@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN_REVERSE;
 import static com.android.systemui.statusbar.phone.NotificationIconContainer.IconState.NO_VALUE;
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -48,7 +49,11 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * A notification shelf view that is placed inside the notification scroller. It manages the
@@ -63,6 +68,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             = SystemProperties.getBoolean("debug.icon_scroll_animations", true);
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
+    private final KeyguardBypassController mBypassController;
 
     private NotificationIconContainer mShelfIcons;
     private int[] mTmp = new int[2];
@@ -93,8 +99,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mCutoutHeight;
     private int mGapHeight;
 
-    public NotificationShelf(Context context, AttributeSet attrs) {
+    @Inject
+    public NotificationShelf(@Named(VIEW_CONTEXT) Context context,
+            AttributeSet attrs,
+            KeyguardBypassController keyguardBypassController) {
         super(context, attrs);
+        mBypassController = keyguardBypassController;
     }
 
     @Override
@@ -309,7 +319,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     colorTwoBefore = previousColor;
                     transitionAmount = inShelfAmount;
                 }
-                if (isLastChild) {
+                // We don't want to modify the color if the notification is hun'd
+                boolean canModifyColor = mAmbientState.isShadeExpanded()
+                        && !(mAmbientState.isOnKeyguard() && mBypassController.getBypassEnabled());
+                if (isLastChild && canModifyColor) {
                     if (colorOfViewBeforeLast == NO_COLOR) {
                         colorOfViewBeforeLast = ownColorUntinted;
                     }
