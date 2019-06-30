@@ -24,7 +24,6 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -119,12 +118,11 @@ public class NotificationAlertingManager {
         shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
         final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.key);
         if (wasAlerting) {
-            if (!shouldAlert) {
-                // We don't want this to be interrupting anymore, let's remove it
-                mHeadsUpManager.removeNotification(entry.key,
-                        false /* ignoreEarliestRemovalTime */);
-            } else {
+            if (shouldAlert) {
                 mHeadsUpManager.updateNotification(entry.key, alertAgain);
+            } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.key)) {
+                // We don't want this to be interrupting anymore, let's remove it
+                mHeadsUpManager.removeNotification(entry.key, false /* removeImmediately */);
             }
         } else if (shouldAlert && alertAgain) {
             // This notification was updated to be alerting, show it!

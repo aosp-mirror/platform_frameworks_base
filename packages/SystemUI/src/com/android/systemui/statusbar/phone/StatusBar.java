@@ -80,6 +80,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -193,6 +194,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -373,6 +375,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     KeyguardBypassController mKeyguardBypassController;
     @Inject
     protected HeadsUpManagerPhone mHeadsUpManager;
+    @Inject
+    BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Nullable
     @Inject
     protected KeyguardLiftController mKeyguardLiftController;
@@ -633,6 +637,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager = Dependency.get(NotificationGutsManager.class);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mBypassHeadsUpNotifier.setUp(mEntryManager);
         mNotificationInterruptionStateProvider =
                 Dependency.get(NotificationInterruptionStateProvider.class);
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
@@ -649,7 +654,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
             sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
-                    mKeyguardBypassController);
+                    mKeyguardBypassController, DozeParameters.getInstance(mContext));
         } else {
             Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
         }
@@ -1154,8 +1159,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void inflateShelf() {
         mNotificationShelf =
-                (NotificationShelf) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_shelf, mStackScroller, false);
+                (NotificationShelf) mInjectionInflater.injectable(
+                        LayoutInflater.from(mContext)).inflate(
+                                R.layout.status_bar_notification_shelf, mStackScroller, false);
         mNotificationShelf.setOnClickListener(mGoToLockedShadeListener);
     }
 
@@ -3576,7 +3582,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        mStatusBarWindow.setBouncerShowing(bouncerShowing);
+        mStatusBarWindow.setBouncerShowingScrimmed(isBouncerShowingScrimmed());
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3629,6 +3635,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
+            mBypassHeadsUpNotifier.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
         }
 
@@ -3653,6 +3660,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
+            mBypassHeadsUpNotifier.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mLaunchCameraWhenFinishedWaking) {
                 mNotificationPanel.launchCamera(false /* animate */, mLastCameraLaunchSource);

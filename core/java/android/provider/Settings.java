@@ -8276,6 +8276,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether or not media is shown automatically when bypassing as a heads up.
+         * @hide
+         */
+        public static final String SHOW_MEDIA_WHEN_BYPASSING =
+                "show_media_when_bypassing";
+
+        private static final Validator SHOW_MEDIA_WHEN_BYPASSING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether or not face unlock requires attention. This is a cached value, the source of
          * truth is obtained through the HAL.
          * @hide
@@ -8974,6 +8984,7 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
+            SHOW_MEDIA_WHEN_BYPASSING,
             FACE_UNLOCK_DISMISSES_KEYGUARD,
             FACE_UNLOCK_APP_ENABLED,
             FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
@@ -9150,6 +9161,7 @@ public final class Settings {
             VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
                     FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
+            VALIDATORS.put(SHOW_MEDIA_WHEN_BYPASSING, SHOW_MEDIA_WHEN_BYPASSING_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
