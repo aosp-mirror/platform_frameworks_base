@@ -246,7 +246,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"WLAN-Protokollierungsebene erhöhen, in WiFi Picker pro SSID RSSI anzeigen"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"WLAN-Protokollierungsebene erhöhen, pro SSID RSSI in WiFi Picker anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Kostenpflichtig"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Kostenlos"</string>
