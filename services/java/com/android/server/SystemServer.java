@@ -1893,6 +1893,10 @@ public final class SystemServer {
         mSystemServiceManager.startService(IncidentCompanionService.class);
         t.traceEnd();
 
+        if (safeMode) {
+            mActivityManagerService.enterSafeMode();
+        }
+
         // MMS service broker
         t.traceBegin("StartMmsService");
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
