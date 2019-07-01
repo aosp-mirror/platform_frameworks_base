@@ -21,14 +21,19 @@ import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoFo
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.fail;
+
 import android.Manifest;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -39,8 +44,7 @@ import com.android.cts.install.lib.TestApp;
 import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackUtils;
-
-import static org.junit.Assert.fail;
+import com.android.internal.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,9 +63,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class StagedRollbackTest {
 
-    private static final String TAG = "RollbackTest";
     private static final String NETWORK_STACK_CONNECTOR_CLASS =
             "android.net.INetworkStackConnector";
+
+    private static final String MODULE_META_DATA_PACKAGE = getModuleMetadataPackageName();
 
     /**
      * Adopts common shell permissions needed for rollback tests.
@@ -183,6 +188,21 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void installModuleMetadataPackage() throws Exception {
+        resetModuleMetadataPackage();
+        Context context = InstrumentationRegistry.getContext();
+        PackageInfo metadataPackageInfo = context.getPackageManager().getPackageInfo(
+                MODULE_META_DATA_PACKAGE, 0);
+        String metadataApkPath = metadataPackageInfo.applicationInfo.sourceDir;
+        assertThat(metadataApkPath).isNotNull();
+        assertThat(metadataApkPath).isNotEqualTo("");
+
+        runShellCommand("pm install "
+                + "-r --enable-rollback --staged --wait "
+                + metadataApkPath);
+    }
+
+    @Test
     public void assertNetworkStackRollbackAvailable() throws Exception {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
@@ -201,6 +221,20 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
+    }
+
+    @Test
+    public void assertModuleMetadataRollbackAvailable() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        MODULE_META_DATA_PACKAGE)).isNotNull();
+    }
+
+    @Test
+    public void assertModuleMetadataRollbackCommitted() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        MODULE_META_DATA_PACKAGE)).isNotNull();
     }
 
     private String getNetworkStackPackageName() {
@@ -244,5 +278,30 @@ public class StagedRollbackTest {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         InstallUtils.processUserData(TestApp.A);
         Uninstall.packages(TestApp.A);
+    }
+
+    @Nullable
+    private static String getModuleMetadataPackageName() {
+        String packageName = InstrumentationRegistry.getContext().getResources().getString(
+                R.string.config_defaultModuleMetadataProvider);
+        if (TextUtils.isEmpty(packageName)) {
+            return null;
+        }
+        return packageName;
+    }
+
+    private void resetModuleMetadataPackage() {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+
+        assertThat(MODULE_META_DATA_PACKAGE).isNotNull();
+        rm.expireRollbackForPackage(MODULE_META_DATA_PACKAGE);
+
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                MODULE_META_DATA_PACKAGE)).isNull();
+    }
+
+    private void runShellCommand(String cmd) {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .executeShellCommand(cmd);
     }
 }

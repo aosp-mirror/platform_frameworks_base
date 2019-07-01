@@ -34,6 +34,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedRollbackTest extends BaseHostJUnit4Test {
+    private static final int NATIVE_CRASHES_THRESHOLD = 5;
+
     /**
      * Runs the given phase of a test by calling into the device.
      * Throws an exception if the test phase fails.
@@ -82,6 +84,29 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         runPhase("testBadApkOnlyConfirmRollback");
+    }
+
+    @Test
+    public void testNativeWatchdogTriggersRollback() throws Exception {
+        //Stage install ModuleMetadata package - this simulates a Mainline module update
+        runPhase("installModuleMetadataPackage");
+
+        // Reboot device to activate staged package
+        getDevice().reboot();
+        getDevice().waitForDeviceAvailable();
+
+        runPhase("assertModuleMetadataRollbackAvailable");
+
+        // crash system_server enough times to trigger a rollback
+        crashProcess("system_server", NATIVE_CRASHES_THRESHOLD);
+
+        // Rollback should be committed automatically now
+        // Give time for rollback to be committed
+        assertTrue(getDevice().waitForDeviceNotAvailable(60000));
+        getDevice().waitForDeviceAvailable();
+
+        // verify rollback committed
+        runPhase("assertModuleMetadataRollbackCommitted");
     }
 
     /**
@@ -177,6 +202,20 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testPreviouslyAbandonedRollbacksCommitRollback");
         getDevice().reboot();
         runPhase("testPreviouslyAbandonedRollbacksCheckUserdataRollback");
+    }
+
+    private void crashProcess(String processName, int numberOfCrashes) throws Exception {
+        String pid = "";
+        String lastPid = "invalid";
+        for (int i = 0; i < numberOfCrashes; ++i) {
+            // This condition makes sure before we kill the process, the process is running AND
+            // the last crash was finished.
+            while ("".equals(pid) || lastPid.equals(pid)) {
+                pid = getDevice().executeShellCommand("pidof " + processName);
+            }
+            getDevice().executeShellCommand("kill " + pid);
+            lastPid = pid;
+        }
     }
 
     private String getNetworkStackPath() throws DeviceNotAvailableException {
