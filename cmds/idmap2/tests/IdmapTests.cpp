@@ -248,7 +248,7 @@ TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
   OverlayManifestInfo info{};
   info.target_package = "test.target";
   info.target_name = "TestResources";
-  info.resource_mapping = 0x7f030002;  // xml/overlays_different_packages
+  info.resource_mapping = 0x7f030001;  // xml/overlays_different_packages
   auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
                                                PolicyFlags::POLICY_PUBLIC,
                                                /* enforce_overlayable */ false);
@@ -272,7 +272,7 @@ TEST(IdmapTests, CreateIdmapDataInlineResources) {
   OverlayManifestInfo info{};
   info.target_package = "test.target";
   info.target_name = "TestResources";
-  info.resource_mapping = 0x7f030000;  // xml/overlays_inline
+  info.resource_mapping = 0x7f030002;  // xml/overlays_inline
   auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
                                                PolicyFlags::POLICY_PUBLIC,
                                                /* enforce_overlayable */ false);

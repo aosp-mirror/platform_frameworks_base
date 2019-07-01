@@ -88,8 +88,4 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   ASSERT_EQ(overlay_entries1[2].target_id, overlay_entries2[2].target_id);
 }
 
-TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
-  // TODO(135943783): Removed temporarily until libandroidfw idmap loading is fixed.
-}
-
 }  // namespace android::idmap2

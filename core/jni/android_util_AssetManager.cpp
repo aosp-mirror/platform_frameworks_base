@@ -750,9 +750,11 @@ static jlong NativeOpenXmlAsset(JNIEnv* env, jobject /*clazz*/, jlong ptr, jint 
   }
 
   // May be nullptr.
-  const DynamicRefTable* dynamic_ref_table = assetmanager->GetDynamicRefTableForCookie(cookie);
+  std::shared_ptr<const DynamicRefTable> dynamic_ref_table =
+      assetmanager->GetDynamicRefTableForCookie(cookie);
 
-  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(dynamic_ref_table);
+  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(
+      std::move(dynamic_ref_table));
   status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
   asset.reset();
 
@@ -785,9 +787,11 @@ static jlong NativeOpenXmlAssetFd(JNIEnv* env, jobject /*clazz*/, jlong ptr, int
   ApkAssetsCookie cookie = JavaCookieToApkAssetsCookie(jcookie);
 
   // May be nullptr.
-  const DynamicRefTable* dynamic_ref_table = assetmanager->GetDynamicRefTableForCookie(cookie);
+   std::shared_ptr<const DynamicRefTable> dynamic_ref_table =
+       assetmanager->GetDynamicRefTableForCookie(cookie);
 
-  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(dynamic_ref_table);
+  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(
+      std::move(dynamic_ref_table));
   status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
   asset.reset();
 

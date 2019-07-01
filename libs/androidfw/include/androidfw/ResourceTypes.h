@@ -492,7 +492,7 @@ class ResStringPool
 public:
     ResStringPool();
     ResStringPool(const void* data, size_t size, bool copyData=false);
-    ~ResStringPool();
+    virtual ~ResStringPool();
 
     void setToEmpty();
     status_t setTo(const void* data, size_t size, bool copyData=false);
@@ -506,10 +506,10 @@ public:
     inline const char16_t* stringAt(const ResStringPool_ref& ref, size_t* outLen) const {
         return stringAt(ref.index, outLen);
     }
-    const char16_t* stringAt(size_t idx, size_t* outLen) const;
+    virtual const char16_t* stringAt(size_t idx, size_t* outLen) const;
 
     // Note: returns null if the string pool is not UTF8.
-    const char* string8At(size_t idx, size_t* outLen) const;
+    virtual const char* string8At(size_t idx, size_t* outLen) const;
 
     // Return string whether the pool is UTF8 or UTF16.  Does not allow you
     // to distinguish null.
@@ -812,7 +812,7 @@ public:
      * The tree stores a clone of the specified DynamicRefTable, so any changes to the original
      * DynamicRefTable will not affect this tree after instantiation.
      **/
-    explicit ResXMLTree(const DynamicRefTable* dynamicRefTable);
+    explicit ResXMLTree(std::shared_ptr<const DynamicRefTable> dynamicRefTable);
     ResXMLTree();
     ~ResXMLTree();
 
@@ -827,7 +827,7 @@ private:
 
     status_t validateNode(const ResXMLTree_node* node) const;
 
-    std::unique_ptr<const DynamicRefTable> mDynamicRefTable;
+    std::shared_ptr<const DynamicRefTable> mDynamicRefTable;
 
     status_t                    mError;
     void*                       mOwnedData;
@@ -1584,6 +1584,50 @@ struct ResTable_map
     Res_value value;
 };
 
+
+// A ResTable_entry variant that either holds an unmanaged pointer to a constant ResTable_entry or
+// holds a ResTable_entry which is tied to the lifetime of the handle.
+class ResTable_entry_handle {
+ public:
+    ResTable_entry_handle() = default;
+
+    ResTable_entry_handle(const ResTable_entry_handle& handle) {
+      entry_ = handle.entry_;
+    }
+
+    ResTable_entry_handle(ResTable_entry_handle&& handle) noexcept {
+      entry_ = handle.entry_;
+    }
+
+    inline static ResTable_entry_handle managed(ResTable_entry* entry)  {
+      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry));
+    }
+
+    inline static ResTable_entry_handle unmanaged(const ResTable_entry* entry)  {
+      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, [](auto /*p */){}));
+    }
+
+    inline ResTable_entry_handle& operator=(const ResTable_entry_handle& handle) noexcept {
+      entry_ = handle.entry_;
+      return *this;
+    }
+
+    inline ResTable_entry_handle& operator=(ResTable_entry_handle&& handle) noexcept {
+      entry_ = handle.entry_;
+      return *this;
+    }
+
+    inline const ResTable_entry* operator*() & {
+      return entry_.get();
+    }
+
+ private:
+    explicit ResTable_entry_handle(std::shared_ptr<const ResTable_entry> entry)
+        : entry_(std::move(entry)) { }
+
+    std::shared_ptr<const ResTable_entry> entry_;
+};
+
 /**
  * A package-id to package name mapping for any shared libraries used
  * in this resource table. The package-id's encoded in this resource
@@ -1668,7 +1712,8 @@ struct ResTable_overlayable_policy_header
   uint32_t entry_count;
 };
 
-struct alignas(uint32_t) Idmap_header {
+#pragma pack(push, 1)
+struct Idmap_header {
   // Always 0x504D4449 ('IDMP')
   uint32_t magic;
 
@@ -1679,18 +1724,28 @@ struct alignas(uint32_t) Idmap_header {
 
   uint8_t target_path[256];
   uint8_t overlay_path[256];
+};
 
-  uint16_t target_package_id;
-  uint16_t type_count;
-} __attribute__((packed));
+struct Idmap_data_header {
+  uint8_t target_package_id;
+  uint8_t overlay_package_id;
+  uint32_t target_entry_count;
+  uint32_t overlay_entry_count;
+  uint32_t string_pool_index_offset;
+  uint32_t string_pool_length;
+};
 
-struct alignas(uint32_t) IdmapEntry_header {
-  uint16_t target_type_id;
-  uint16_t overlay_type_id;
-  uint16_t entry_count;
-  uint16_t entry_id_offset;
-  uint32_t entries[0];
-} __attribute__((packed));
+struct Idmap_target_entry {
+  uint32_t target_id;
+  uint8_t type;
+  uint32_t value;
+};
+
+struct Idmap_overlay_entry {
+  uint32_t overlay_id;
+  uint32_t target_id;
+};
+#pragma pack(pop)
 
 class AssetManager2;
 
@@ -1708,6 +1763,7 @@ class DynamicRefTable
 public:
     DynamicRefTable();
     DynamicRefTable(uint8_t packageId, bool appAsLib);
+    virtual ~DynamicRefTable() = default;
 
     // Loads an unmapped reference table from the package.
     status_t load(const ResTable_lib_header* const header);
@@ -1721,12 +1777,12 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
-    // Creates a new clone of the reference table
-    std::unique_ptr<DynamicRefTable> clone() const;
+    // Returns whether or not the value must be looked up.
+    bool requiresLookup(const Res_value* value) const;
 
     // Performs the actual conversion of build-time resource ID to run-time
     // resource ID.
-    status_t lookupResourceId(uint32_t* resId) const;
+    virtual status_t lookupResourceId(uint32_t* resId) const;
     status_t lookupResourceValue(Res_value* value) const;
 
     inline const KeyedVector<String16, uint8_t>& entries() const {

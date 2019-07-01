@@ -167,8 +167,9 @@ cc_test {
         },
     },
     data: [
-      "tests/data/**/*.apk",
-      "tests/data/**/*.arsc",
+        "tests/data/**/*.apk",
+        "tests/data/**/*.arsc",
+        "tests/data/**/*.idmap",
     ],
     test_suites: ["device-tests"],
 }

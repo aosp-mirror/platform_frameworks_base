@@ -19,7 +19,9 @@ set -e
 
 FRAMEWORK_RES_APK=${ANDROID_PRODUCT_OUT}/system/framework/framework-res.apk
 
+rm resources.arsc
 aapt2 compile --dir res -o compiled.flata
-aapt2 link -I $FRAMEWORK_RES_APK --manifest AndroidManifest.xml -o overlayable.apk compiled.flata \
-    --no-auto-version
+aapt2 link -I $FRAMEWORK_RES_APK --manifest AndroidManifest.xml -o loader.apk compiled.flata
+unzip loader.apk resources.arsc
+rm loader.apk
 rm compiled.flata

@@ -49,7 +49,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000004: 00000002  version\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000008: 76a20829  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: e3c188b6  overlay crc\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000000c: c054fb26  overlay crc\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000210:       7f  target package id\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000211:       7f  overlay package id\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000212: 00000004  target entry count\n"), std::string::npos);

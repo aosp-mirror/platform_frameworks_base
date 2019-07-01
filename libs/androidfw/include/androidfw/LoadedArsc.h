@@ -51,10 +51,6 @@ struct TypeSpec {
   // and under which configurations it varies.
   const ResTable_typeSpec* type_spec;
 
-  // Pointer to the mmapped data where the IDMAP mappings for this type
-  // exist. May be nullptr if no IDMAP exists.
-  const IdmapEntry_header* idmap_entries;
-
   // The number of types that follow this struct.
   // There is a type for each configuration that entries are defined for.
   size_t type_count;
@@ -135,8 +131,7 @@ class LoadedPackage {
     return iterator(this, resource_ids_.size() + 1, 0);
   }
 
-  static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk,
-                                                   const LoadedIdmap* loaded_idmap, bool system,
+  static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk, bool system,
                                                    bool load_as_shared_library,
                                                    bool load_as_custom_loader);
 
@@ -183,11 +178,6 @@ class LoadedPackage {
     return system_;
   }
 
-  // Returns true if this package is from an overlay ApkAssets.
-  inline bool IsOverlay() const {
-    return overlay_;
-  }
-
   // Returns true if this package is a custom loader and should behave like an overlay
   inline bool IsCustomLoader() const {
     return custom_loader_;
@@ -222,9 +212,6 @@ class LoadedPackage {
       const TypeSpecPtr& ptr = type_specs_[i];
       if (ptr != nullptr) {
         uint8_t type_id = ptr->type_spec->id;
-        if (ptr->idmap_entries != nullptr) {
-          type_id = ptr->idmap_entries->target_type_id;
-        }
         f(ptr.get(), type_id - 1);
       }
     }
@@ -265,7 +252,6 @@ class LoadedPackage {
   int type_id_offset_ = 0;
   bool dynamic_ = false;
   bool system_ = false;
-  bool overlay_ = false;
   bool custom_loader_ = false;
   bool defines_overlayable_ = false;
 
@@ -298,7 +284,7 @@ class LoadedArsc {
   // Returns the string pool where all string resource values
   // (Res_value::dataType == Res_value::TYPE_STRING) are indexed.
   inline const ResStringPool* GetStringPool() const {
-    return &global_string_pool_;
+    return global_string_pool_.get();
   }
 
   // Gets a pointer to the package with the specified package ID, or nullptr if no such package
@@ -319,12 +305,8 @@ class LoadedArsc {
   DISALLOW_COPY_AND_ASSIGN(LoadedArsc);
 
   LoadedArsc() = default;
-  bool LoadTable(
-      const Chunk& chunk,
-      const LoadedIdmap* loaded_idmap,
-      bool load_as_shared_library,
-      bool for_loader
-  );
+  bool LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap, bool load_as_shared_library,
+                 bool for_loader);
 
   static std::unique_ptr<const LoadedArsc> LoadData(std::unique_ptr<LoadedArsc>& loaded_arsc,
                                                     const char* data,
@@ -333,7 +315,7 @@ class LoadedArsc {
                                                     bool load_as_shared_library = false,
                                                     bool for_loader = false);
 
-  ResStringPool global_string_pool_;
+  std::unique_ptr<ResStringPool> global_string_pool_ = util::make_unique<ResStringPool>();
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;
   bool system_ = false;
 };

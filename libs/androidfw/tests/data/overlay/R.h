@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef TEST_DATA_SYSTEM_R_H_
-#define TEST_DATA_SYSTEM_R_H_
+#ifndef TESTS_DATA_OVERLAY_R_H_
+#define TESTS_DATA_OVERLAY_R_H_
 
 #include <cstdint>
 
+namespace com {
 namespace android {
+namespace overlay {
 
 struct R {
-  struct attr {
-    enum : uint32_t {
-      background = 0x01010000,  // default
-      foreground = 0x01010001,  // default
-    };
-  };
-
-  struct style {
-    enum : uint32_t {
-      Theme_One = 0x01020000,  // default
-    };
-  };
-
-  struct integer {
-    enum : uint32_t {
-      number = 0x01030000,  // sv
-    };
-  };
-
   struct string {
     enum : uint32_t {
-      no = 0x01040009,
-      yes = 0x01040013,
+      internal = 0x7f040000,
     };
   };
 };
 
+}  // namespace overlay
 }  // namespace android
+}  // namespace com
 
-#endif  // TEST_DATA_SYSTEM_R_H_
+#endif /* TESTS_DATA_OVERLAY_R_H_ */

@@ -718,15 +718,17 @@ TEST_F(AssetManager2Test, GetOverlayablesToString) {
 
   const auto map = assetmanager.GetOverlayableMapForPackage(0x7f);
   ASSERT_NE(nullptr, map);
-  ASSERT_EQ(2, map->size());
+  ASSERT_EQ(3, map->size());
   ASSERT_EQ(map->at("OverlayableResources1"), "overlay://theme");
   ASSERT_EQ(map->at("OverlayableResources2"), "overlay://com.android.overlayable");
+  ASSERT_EQ(map->at("OverlayableResources3"), "");
 
   std::string api;
   ASSERT_TRUE(assetmanager.GetOverlayablesToString("com.android.overlayable", &api));
   ASSERT_EQ(api.find("not_overlayable"), std::string::npos);
   ASSERT_NE(api.find("resource='com.android.overlayable:string/overlayable2' overlayable='OverlayableResources1' actor='overlay://theme' policy='0x0000000a'\n"),
             std::string::npos);
+
 }
 
 }  // namespace android
