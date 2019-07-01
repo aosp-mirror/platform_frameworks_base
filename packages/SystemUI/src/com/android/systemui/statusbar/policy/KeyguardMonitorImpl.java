@@ -141,14 +141,24 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
-        mKeyguardFadingAway = true;
+        setKeyguardFadingAway(true);
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
     }
 
+    private void setKeyguardFadingAway(boolean keyguardFadingAway) {
+        if (mKeyguardFadingAway != keyguardFadingAway) {
+            mKeyguardFadingAway = keyguardFadingAway;
+            ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).onKeyguardFadingAwayChanged();
+            }
+        }
+    }
+
     public void notifyKeyguardDoneFading() {
-        mKeyguardFadingAway = false;
         mKeyguardGoingAway = false;
+        setKeyguardFadingAway(false);
     }
 
     @Override
