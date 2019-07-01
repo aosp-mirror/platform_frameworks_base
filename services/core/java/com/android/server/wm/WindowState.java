@@ -2381,10 +2381,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void prepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         // We need to turn on screen regardless of visibility.
-        boolean hasTurnScreenOnFlag = (mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0;
+        final boolean hasTurnScreenOnFlag = (mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0
+                || (mAppToken != null && mAppToken.mActivityRecord.canTurnScreenOn());
 
         // The screen will turn on if the following conditions are met
-        // 1. The window has the flag FLAG_TURN_SCREEN_ON
+        // 1. The window has the flag FLAG_TURN_SCREEN_ON or ActivityRecord#canTurnScreenOn.
         // 2. The WMS allows theater mode.
         // 3. No AWT or the AWT allows the screen to be turned on. This should only be true once
         // per resume to prevent the screen getting getting turned on for each relayout. Set
@@ -2398,7 +2399,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             boolean allowTheaterMode = mWmService.mAllowTheaterModeWakeFromLayout
                     || Settings.Global.getInt(mWmService.mContext.getContentResolver(),
                             Settings.Global.THEATER_MODE_ON, 0) == 0;
-            boolean canTurnScreenOn = mAppToken == null || mAppToken.canTurnScreenOn();
+            boolean canTurnScreenOn = mAppToken == null || mAppToken.currentLaunchCanTurnScreenOn();
 
             if (allowTheaterMode && canTurnScreenOn && !mPowerManagerWrapper.isInteractive()) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
@@ -2409,7 +2410,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             if (mAppToken != null) {
-                mAppToken.setCanTurnScreenOn(false);
+                mAppToken.setCurrentLaunchCanTurnScreenOn(false);
             }
         }
 

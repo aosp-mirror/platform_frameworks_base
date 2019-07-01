@@ -302,43 +302,38 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testPrepareWindowToDisplayDuringRelayout() {
-        testPrepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        testPrepareWindowToDisplayDuringRelayout(true /*wasVisible*/);
-
-        // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON
-        // before calling prepareWindowToDisplayDuringRelayout for windows with flag in the same
-        // appWindowToken.
+        // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON before
+        // calling setCurrentLaunchCanTurnScreenOn for windows with flag in the same appWindowToken.
         final AppWindowToken appWindowToken = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState first = createWindow(null, TYPE_APPLICATION, appWindowToken, "first");
         final WindowState second = createWindow(null, TYPE_APPLICATION, appWindowToken, "second");
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(sPowerManagerWrapper);
-        first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
-        assertTrue(appWindowToken.canTurnScreenOn());
-
-        reset(sPowerManagerWrapper);
-        second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
-        assertFalse(appWindowToken.canTurnScreenOn());
+        testPrepareWindowToDisplayDuringRelayout(first, false /* expectedWakeupCalled */,
+                true /* expectedCurrentLaunchCanTurnScreenOn */);
+        testPrepareWindowToDisplayDuringRelayout(second, true /* expectedWakeupCalled */,
+                false /* expectedCurrentLaunchCanTurnScreenOn */);
 
         // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON
         // from the same appWindowToken. Only one should trigger the wakeup.
-        appWindowToken.setCanTurnScreenOn(true);
+        appWindowToken.setCurrentLaunchCanTurnScreenOn(true);
         first.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(sPowerManagerWrapper);
-        first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
-        assertFalse(appWindowToken.canTurnScreenOn());
+        testPrepareWindowToDisplayDuringRelayout(first, true /* expectedWakeupCalled */,
+                false /* expectedCurrentLaunchCanTurnScreenOn */);
+        testPrepareWindowToDisplayDuringRelayout(second, false /* expectedWakeupCalled */,
+                false /* expectedCurrentLaunchCanTurnScreenOn */);
 
-        reset(sPowerManagerWrapper);
-        second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
-        assertFalse(appWindowToken.canTurnScreenOn());
+        // Without window flags, the state of ActivityRecord.canTurnScreenOn should still be able to
+        // turn on the screen.
+        appWindowToken.setCurrentLaunchCanTurnScreenOn(true);
+        first.mAttrs.flags &= ~WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+        doReturn(true).when(appWindowToken.mActivityRecord).canTurnScreenOn();
+
+        testPrepareWindowToDisplayDuringRelayout(first, true /* expectedWakeupCalled */,
+                false /* expectedCurrentLaunchCanTurnScreenOn */);
 
         // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
         // appWindowToken. Both windows have the FLAG_TURNS_SCREEN_ON so both should call wakeup
@@ -358,6 +353,22 @@ public class WindowStateTests extends WindowTestsBase {
         reset(sPowerManagerWrapper);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
         verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
+            boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
+        reset(sPowerManagerWrapper);
+        appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
+
+        if (expectedWakeupCalled) {
+            verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        } else {
+            verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+        }
+        // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
+        // because the state will be consumed.
+        assertThat(appWindow.mAppToken.currentLaunchCanTurnScreenOn(),
+                is(expectedCurrentLaunchCanTurnScreenOn));
     }
 
     @Test
@@ -485,15 +496,6 @@ public class WindowStateTests extends WindowTestsBase {
 
         app.computeFrameLw();
         assertThat(app.getWmDisplayCutout().getDisplayCutout(), is(cutout.inset(7, 10, 5, 20)));
-    }
-
-    private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
-        reset(sPowerManagerWrapper);
-        final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
-        root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-
-        root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     @Test

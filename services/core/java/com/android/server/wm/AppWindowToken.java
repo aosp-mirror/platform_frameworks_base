@@ -258,9 +258,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ActivityRecord mActivityRecord;
 
     /**
-     * See {@link #canTurnScreenOn()}
+     * @see #currentLaunchCanTurnScreenOn()
      */
-    private boolean mCanTurnScreenOn = true;
+    private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /**
      * If we are running an animation, this determines the transition type. Must be one of
@@ -985,7 +985,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 + " " + this);
         mAppStopped = false;
         // Allow the window to turn the screen on once the app is resumed again.
-        setCanTurnScreenOn(true);
+        setCurrentLaunchCanTurnScreenOn(true);
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
         }
@@ -2403,21 +2403,25 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     /**
-     * Sets whether the current launch can turn the screen on. See {@link #canTurnScreenOn()}
+     * Sets whether the current launch can turn the screen on.
+     * @see #currentLaunchCanTurnScreenOn()
      */
-    void setCanTurnScreenOn(boolean canTurnScreenOn) {
-        mCanTurnScreenOn = canTurnScreenOn;
+    void setCurrentLaunchCanTurnScreenOn(boolean currentLaunchCanTurnScreenOn) {
+        mCurrentLaunchCanTurnScreenOn = currentLaunchCanTurnScreenOn;
     }
 
     /**
      * Indicates whether the current launch can turn the screen on. This is to prevent multiple
      * relayouts from turning the screen back on. The screen should only turn on at most
      * once per activity resume.
+     * <p>
+     * Note this flag is only meaningful when {@link WindowManager.LayoutParams#FLAG_TURN_SCREEN_ON}
+     * or {@link ActivityRecord#canTurnScreenOn} is set.
      *
-     * @return true if the screen can be turned on.
+     * @return {@code true} if the activity is ready to turn on the screen.
      */
-    boolean canTurnScreenOn() {
-        return mCanTurnScreenOn;
+    boolean currentLaunchCanTurnScreenOn() {
+        return mCurrentLaunchCanTurnScreenOn;
     }
 
     /**
