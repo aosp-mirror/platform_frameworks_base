@@ -176,7 +176,7 @@ public class BubbleView extends FrameLayout {
      * after animation if requested.
      */
     private void updateDotVisibility(boolean animate, Runnable after) {
-        boolean showDot = mBubble.showInShadeWhenBubble() && !mSuppressDot;
+        boolean showDot = mBubble.showBubbleDot() && !mSuppressDot;
 
         if (animate) {
             animateDot(showDot, after);

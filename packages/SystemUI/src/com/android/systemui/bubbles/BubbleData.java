@@ -188,6 +188,7 @@ public class BubbleData {
             setSelectedBubbleInternal(bubble);
         }
         bubble.setShowInShadeWhenBubble(!mExpanded || mSelectedBubble != bubble);
+        bubble.setShowBubbleDot(true);
         dispatchPendingChanges();
     }
 

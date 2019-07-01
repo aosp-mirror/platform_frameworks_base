@@ -69,6 +69,11 @@ class Bubble {
      */
     private boolean mShowInShadeWhenBubble = true;
 
+    /**
+     * Whether the bubble should show a dot for the notification indicating updated content.
+     */
+    private boolean mShowBubbleUpdateDot = true;
+
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
         return user.getIdentifier() + "|" + entry.notification.getPackageName();
@@ -225,6 +230,7 @@ class Bubble {
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
         setShowInShadeWhenBubble(false);
+        setShowBubbleDot(false);
     }
 
     /**
@@ -242,6 +248,27 @@ class Bubble {
      */
     void setShowInShadeWhenBubble(boolean showInShade) {
         mShowInShadeWhenBubble = showInShade;
+    }
+
+    /**
+     * Sets whether the bubble for this notification should show a dot indicating updated content.
+     */
+    void setShowBubbleDot(boolean showDot) {
+        mShowBubbleUpdateDot = showDot;
+    }
+
+    /**
+     * Whether the bubble for this notification should show a dot indicating updated content.
+     */
+    boolean showBubbleDot() {
+        return mShowBubbleUpdateDot && !mEntry.shouldSuppressNotificationDot();
+    }
+
+    /**
+     * Whether the flyout for the bubble should be shown.
+     */
+    boolean showFlyoutForBubble() {
+        return !mEntry.shouldSuppressPeek() && !mEntry.shouldSuppressNotificationList();
     }
 
     /**

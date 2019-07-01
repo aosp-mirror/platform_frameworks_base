@@ -17,9 +17,6 @@
 package com.android.systemui.bubbles;
 
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
@@ -212,12 +209,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
-                updateStackViewForZenConfig();
+                if (mStackView != null) {
+                    mStackView.updateDots();
+                }
             }
 
             @Override
             public void onConfigChanged(ZenModeConfig config) {
-                updateStackViewForZenConfig();
+                if (mStackView != null) {
+                    mStackView.updateDots();
+                }
             }
         });
 
@@ -263,8 +264,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
             }
-
-            updateStackViewForZenConfig();
         }
     }
 
@@ -449,6 +448,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         && userRemovedNotif;
                 if (bubbleExtended) {
                     bubble.setShowInShadeWhenBubble(false);
+                    bubble.setShowBubbleDot(false);
                     if (mStackView != null) {
                         mStackView.updateDotVisibility(entry.key);
                     }
@@ -583,34 +583,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
         }
     };
-
-    /**
-     * Updates the stack view's suppression flags from the latest config from the zen (do not
-     * disturb) controller.
-     */
-    private void updateStackViewForZenConfig() {
-        final ZenModeConfig zenModeConfig = mZenModeController.getConfig();
-
-        if (zenModeConfig == null || mStackView == null) {
-            return;
-        }
-
-        final int suppressedEffects = zenModeConfig.suppressedVisualEffects;
-        final boolean hideNotificationDotsSelected =
-                (suppressedEffects & SUPPRESSED_EFFECT_BADGE) != 0;
-        final boolean dontPopNotifsOnScreenSelected =
-                (suppressedEffects & SUPPRESSED_EFFECT_PEEK) != 0;
-        final boolean hideFromPullDownShadeSelected =
-                (suppressedEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
-
-        final boolean dndEnabled = mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF;
-
-        mStackView.setSuppressNewDot(
-                dndEnabled && hideNotificationDotsSelected);
-        mStackView.setSuppressFlyout(
-                dndEnabled && (dontPopNotifsOnScreenSelected
-                        || hideFromPullDownShadeSelected));
-    }
 
     /**
      * Lets any listeners know if bubble state has changed.
