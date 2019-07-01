@@ -20,12 +20,16 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -79,13 +83,19 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private ShadeController mShadeController;
 
+    private TestableLooper mTestableLooper;
+    private Handler mHandler;
     private NotificationViewHierarchyManager mViewHierarchyManager;
     private NotificationTestHelper mHelper;
+    private boolean mMadeReentrantCall = false;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        mTestableLooper = TestableLooper.get(this);
+        Assert.sMainLooper = mTestableLooper.getLooper();
+        mHandler = Handler.createAsync(mTestableLooper.getLooper());
+
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
                 mLockscreenUserManager);
@@ -98,7 +108,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
-                mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
+                mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
                 () -> mShadeController,
                 mock(KeyguardBypassController.class),
@@ -216,9 +226,60 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         verify(entry0.getRow(), times(1)).showAppOpsIcons(any());
     }
 
+    @Test
+    public void testReentrantCallsToOnDynamicPrivacyChangedPostForLater() {
+        // GIVEN a ListContainer that will make a re-entrant call to updateNotificationViews()
+        mMadeReentrantCall = false;
+        doAnswer((invocation) -> {
+            if (!mMadeReentrantCall) {
+                mMadeReentrantCall = true;
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+            return null;
+        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+
+        // WHEN we call updateNotificationViews()
+        mViewHierarchyManager.updateNotificationViews();
+
+        // THEN onNotificationViewUpdateFinished() is only called once
+        verify(mListContainer).onNotificationViewUpdateFinished();
+
+        // WHEN we drain the looper
+        mTestableLooper.processAllMessages();
+
+        // THEN updateNotificationViews() is called a second time (for the reentrant call)
+        verify(mListContainer, times(2)).onNotificationViewUpdateFinished();
+    }
+
+    @Test
+    public void testMultipleReentrantCallsToOnDynamicPrivacyChangedOnlyPostOnce() {
+        // GIVEN a ListContainer that will make many re-entrant calls to updateNotificationViews()
+        mMadeReentrantCall = false;
+        doAnswer((invocation) -> {
+            if (!mMadeReentrantCall) {
+                mMadeReentrantCall = true;
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+            return null;
+        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+
+        // WHEN we call updateNotificationViews() and drain the looper
+        mViewHierarchyManager.updateNotificationViews();
+        verify(mListContainer).onNotificationViewUpdateFinished();
+        clearInvocations(mListContainer);
+        mTestableLooper.processAllMessages();
+
+        // THEN updateNotificationViews() is called only one more time
+        verify(mListContainer).onNotificationViewUpdateFinished();
+    }
+
     private class FakeListContainer implements NotificationListContainer {
         final LinearLayout mLayout = new LinearLayout(mContext);
         final List<View> mRows = Lists.newArrayList();
+        private boolean mMakeReentrantCallDuringSetMaxDisplayedNotifications;
 
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {}
@@ -267,7 +328,11 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void setMaxDisplayedNotifications(int maxNotifications) {}
+        public void setMaxDisplayedNotifications(int maxNotifications) {
+            if (mMakeReentrantCallDuringSetMaxDisplayedNotifications) {
+                mViewHierarchyManager.onDynamicPrivacyChanged();
+            }
+        }
 
         @Override
         public ViewGroup getViewParentForNotification(NotificationEntry entry) {
@@ -302,5 +367,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
             return false;
         }
 
+        @Override
+        public void onNotificationViewUpdateFinished() { }
     }
 }
