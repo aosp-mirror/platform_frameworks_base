@@ -3837,7 +3837,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         updateDozing();
         updateScrimController();
-        mStatusBarWindow.onBiometricAuthModeChanged(mBiometricUnlockController.isWakeAndUnlock());
+        mStatusBarWindow.onBiometricAuthModeChanged(mBiometricUnlockController.isWakeAndUnlock(),
+                mBiometricUnlockController.isBiometricUnlock());
     }
 
     @VisibleForTesting

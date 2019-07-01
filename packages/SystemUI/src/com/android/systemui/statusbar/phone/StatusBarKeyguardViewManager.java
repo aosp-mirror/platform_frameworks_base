@@ -814,7 +814,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public boolean shouldSubtleWindowAnimationsForUnlock() {
         return mStatusBar.mKeyguardBypassController.getBypassEnabled()
-                && mStatusBar.mState == StatusBarState.KEYGUARD;
+                && mStatusBar.mState == StatusBarState.KEYGUARD && !mBouncer.isAnimatingAway();
     }
 
     public boolean isGoingToNotificationShade() {
