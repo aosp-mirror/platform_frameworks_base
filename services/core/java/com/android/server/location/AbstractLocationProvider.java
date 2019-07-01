@@ -142,6 +142,9 @@ public abstract class AbstractLocationProvider {
         return 0;
     }
 
-    /** Sends a custom command to this provider. */
+    /**
+     * Sends a custom command to this provider. Called with the original binder identity of the
+     * caller.
+     */
     public abstract void sendExtraCommand(String command, Bundle extras);
 }
