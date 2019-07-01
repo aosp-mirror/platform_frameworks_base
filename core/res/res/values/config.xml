@@ -4114,6 +4114,15 @@
         M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
 
+    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalXPath" translatable="false">
+        M22,16.41L20.59,15l-2.09,2.09L16.41,15L15,16.41l2.09,2.09L15,20.59L16.41,22l2.09-2.08L20.59,22L22,20.59l-2.08-2.09   L22,16.41z
+    </string>
+    <!-- config_signalCutout{Height,Width}Fraction define fraction of the 24x24 canvas that
+         should be cut out to display config_signalXPath.-->
+    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">11</item>
+    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">11</item>
+
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
      and a second time clipped to the fill level to indicate charge -->
     <bool name="config_batterymeterDualTone">false</bool>
