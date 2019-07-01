@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 /**
@@ -58,11 +59,13 @@ public class MediaRouter2Manager {
     final Handler mHandler;
 
     @GuardedBy("sLock")
-    final ArrayList<CallbackRecord> mCallbacks = new ArrayList<>();
+    final List<CallbackRecord> mCallbacks = new CopyOnWriteArrayList<>();
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     @NonNull
     List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
+    @NonNull
+    List<MediaRoute2Info> mRoutes = Collections.emptyList();
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
@@ -158,15 +161,26 @@ public class MediaRouter2Manager {
     }
 
     /**
-     * Selects media route for the specified application uid.
+     * Gets available routes for an application.
      *
-     * @param uid The uid of the application that should change it's media route.
-     * @param route The route to select
+     * @param packageName the package name of the application
      */
-    public void selectRoute(int uid, MediaRoute2Info route) {
+    @NonNull
+    public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
+        //TODO: filter irrelevant routes.
+        return Collections.unmodifiableList(mRoutes);
+    }
+
+    /**
+     * Selects media route for the specified package name.
+     *
+     * @param packageName the package name of the application that should change it's media route
+     * @param route the route to be selected
+     */
+    public void selectRoute(@NonNull String packageName, @NonNull MediaRoute2Info route) {
         if (mClient != null) {
             try {
-                mMediaRouterService.selectClientRoute2(mClient, uid, route);
+                mMediaRouterService.selectClientRoute2(mClient, packageName, route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -174,14 +188,14 @@ public class MediaRouter2Manager {
     }
 
     /**
-     * Unselects media route for the specified application uid.
+     * Unselects media route for the specified package name.
      *
-     * @param uid The uid of the application that should stop routing.
+     * @param packageName the package name of the application that should stop routing
      */
-    public void unselectRoute(int uid) {
+    public void unselectRoute(@NonNull String packageName) {
         if (mClient != null) {
             try {
-                mMediaRouterService.selectClientRoute2(mClient, uid, null);
+                mMediaRouterService.selectClientRoute2(mClient, packageName, null);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -260,31 +274,46 @@ public class MediaRouter2Manager {
         }
     }
 
+    void notifyRouteListChanged() {
+        for (CallbackRecord record: mCallbacks) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteListChanged(mRoutes));
+        }
+    }
+
     void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> providers) {
         if (providers == null) {
             Log.w(TAG, "Providers info is null.");
             return;
         }
 
+        ArrayList<MediaRoute2Info> routes = new ArrayList<>();
+
         for (MediaRoute2ProviderInfo provider : providers) {
             updateProvider(provider);
+            //TODO: Should we do this in updateProvider()?
+            routes.addAll(provider.getRoutes());
         }
         //TODO: Call notifyRouteRemoved for the routes of the removed providers.
 
-        //TODO: Filter invalid providers.
+        //TODO: Filter invalid providers and invalid routes.
         mProviders = providers;
+        mRoutes = routes;
+
+        //TODO: Call this when only the list is modified.
+        notifyRouteListChanged();
     }
 
-    void notifyRouteSelected(int uid, MediaRoute2Info route) {
+    void notifyRouteSelected(String packageName, MediaRoute2Info route) {
         for (CallbackRecord record : mCallbacks) {
-            record.mExecutor.execute(() -> record.mCallback.onRouteSelected(uid, route));
+            record.mExecutor.execute(() -> record.mCallback.onRouteSelected(packageName, route));
         }
     }
 
-    void notifyControlCategoriesChanged(int uid, List<String> categories) {
+    void notifyControlCategoriesChanged(String packageName, List<String> categories) {
         for (CallbackRecord record : mCallbacks) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onControlCategoriesChanged(uid, categories));
+                    () -> record.mCallback.onControlCategoriesChanged(packageName, categories));
         }
     }
 
@@ -309,17 +338,27 @@ public class MediaRouter2Manager {
 
         /**
          * Called when a route is selected for an application.
-         * @param uid uid of the application
-         * @param route selected route of the application.
+         *
+         * @param packageName the package name of the application
+         * @param route the selected route of the application.
+         *              It is null if the application has no selected route.
          */
-        public void onRouteSelected(int uid, @Nullable MediaRoute2Info route) {}
+        public void onRouteSelected(@NonNull String packageName, @Nullable MediaRoute2Info route) {}
 
         /**
          * Called when the control categories of an application is changed.
-         * @param uid the uid of the app that changed control categories
+         *
+         * @param packageName the package name of the app that changed control categories
          * @param categories the changed categories
          */
-        public void onControlCategoriesChanged(int uid, @NonNull List<String> categories) {}
+        public void onControlCategoriesChanged(@NonNull String packageName,
+                @NonNull List<String> categories) {}
+
+        /**
+         * Called when the list of routes are changed.
+         * A client may refresh available routes for each application.
+         */
+        public void onRouteListChanged(@NonNull List<MediaRoute2Info> routes) {}
     }
 
     final class CallbackRecord {
@@ -343,15 +382,15 @@ public class MediaRouter2Manager {
 
     class Client extends IMediaRouter2Manager.Stub {
         @Override
-        public void notifyRouteSelected(int uid, MediaRoute2Info route) {
+        public void notifyRouteSelected(String packageName, MediaRoute2Info route) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyRouteSelected,
-                    MediaRouter2Manager.this, uid, route));
+                    MediaRouter2Manager.this, packageName, route));
         }
 
         @Override
-        public void notifyControlCategoriesChanged(int uid, List<String> categories) {
+        public void notifyControlCategoriesChanged(String packageName, List<String> categories) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyControlCategoriesChanged,
-                    MediaRouter2Manager.this, uid, categories));
+                    MediaRouter2Manager.this, packageName, categories));
         }
 
         @Override

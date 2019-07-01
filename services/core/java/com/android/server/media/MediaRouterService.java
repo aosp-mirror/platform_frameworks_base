@@ -482,8 +482,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void selectClientRoute2(IMediaRouter2Manager manager,
-            int clientUid, MediaRoute2Info route) {
-        mService2.selectClientRoute2(manager, clientUid, route);
+            String packageName, MediaRoute2Info route) {
+        mService2.selectClientRoute2(manager, packageName, route);
     }
 
     // Binder call

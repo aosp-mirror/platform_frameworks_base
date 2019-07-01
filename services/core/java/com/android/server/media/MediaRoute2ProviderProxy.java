@@ -85,9 +85,16 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         mCallback = callback;
     }
 
-    public void setSelectedRoute(int uid, String routeId) {
+    public void selectRoute(String packageName, String routeId) {
         if (mConnectionReady) {
-            mActiveConnection.selectRoute(uid, routeId);
+            mActiveConnection.selectRoute(packageName, routeId);
+            updateBinding();
+        }
+    }
+
+    public void unselectRoute(String packageName, String routeId) {
+        if (mConnectionReady) {
+            mActiveConnection.unselectRotue(packageName, routeId);
             updateBinding();
         }
     }
@@ -235,17 +242,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
     }
 
-    private void onRouteSelected(Connection connection, int uid, String routeId) {
-        if (mActiveConnection != connection) {
-            return;
-        }
-
-        if (DEBUG) {
-            Slog.d(TAG, this + ": State changed ");
-        }
-        mHandler.post(mStateChanged);
-    }
-
     private void onProviderInfoUpdated(Connection connection, MediaRoute2ProviderInfo info) {
         if (mActiveConnection != connection) {
             return;
@@ -298,8 +294,8 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         public boolean register() {
             try {
                 mProvider.asBinder().linkToDeath(this, 0);
-                mProvider.registerClient(mClient);
-                mHandler.post((Runnable) () -> onConnectionReady(Connection.this));
+                mProvider.setClient(mClient);
+                mHandler.post(() -> onConnectionReady(Connection.this));
                 return true;
             } catch (RemoteException ex) {
                 binderDied();
@@ -312,23 +308,25 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             mClient.dispose();
         }
 
-        public void selectRoute(int uid, String id) {
-            if (mClient == null) {
-                return;
-            }
+        public void selectRoute(String packageName, String routeId) {
             try {
-                mProvider.selectRoute(mClient, uid, id);
+                mProvider.selectRoute(packageName, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
             }
         }
 
-        public void sendControlRequest(String id, Intent request) {
-            if (mClient == null) {
-                return;
-            }
+        public void unselectRotue(String packageName, String routeId) {
             try {
-                mProvider.notifyControlRequestSent(mClient, id, request);
+                mProvider.unselectRoute(packageName, routeId);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
+            }
+        }
+
+        public void sendControlRequest(String routeId, Intent request) {
+            try {
+                mProvider.notifyControlRequestSent(routeId, request);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to send control request.", ex);
             }
@@ -337,10 +335,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         @Override
         public void binderDied() {
             mHandler.post(() -> onConnectionDied(Connection.this));
-        }
-
-        void postRouteSelected(int uid, String routeId) {
-            mHandler.post(() -> onRouteSelected(Connection.this, uid, routeId));
         }
 
         void postProviderUpdated(MediaRoute2ProviderInfo info) {
@@ -357,14 +351,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
         public void dispose() {
             mConnectionRef.clear();
-        }
-
-        @Override
-        public void notifyRouteSelected(int uid, String routeId) throws RemoteException {
-            Connection connection = mConnectionRef.get();
-            if (connection != null) {
-                connection.postRouteSelected(uid, routeId);
-            }
         }
 
         @Override

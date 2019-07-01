@@ -52,6 +52,8 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final String mDescription;
     @Nullable
+    final String mClientPackageName;
+    @Nullable
     final Bundle mExtras;
 
     MediaRoute2Info(@NonNull Builder builder) {
@@ -59,6 +61,7 @@ public final class MediaRoute2Info implements Parcelable {
         mProviderId = builder.mProviderId;
         mName = builder.mName;
         mDescription = builder.mDescription;
+        mClientPackageName = builder.mClientPackageName;
         mExtras = builder.mExtras;
     }
 
@@ -67,6 +70,7 @@ public final class MediaRoute2Info implements Parcelable {
         mProviderId = in.readString();
         mName = in.readString();
         mDescription = in.readString();
+        mClientPackageName = in.readString();
         mExtras = in.readBundle();
     }
 
@@ -98,6 +102,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mProviderId, other.mProviderId)
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mDescription, other.mDescription)
+                && Objects.equals(mClientPackageName, other.mClientPackageName)
                 //TODO: This will be evaluated as false in most cases. Try not to.
                 && Objects.equals(mExtras, other.mExtras);
     }
@@ -131,6 +136,16 @@ public final class MediaRoute2Info implements Parcelable {
         return mDescription;
     }
 
+    /**
+     * Gets the package name of the client that uses the route.
+     * Returns null if no clients use this.
+     * @hide
+     */
+    @Nullable
+    public String getClientPackageName() {
+        return mClientPackageName;
+    }
+
     @Nullable
     public Bundle getExtras() {
         return mExtras;
@@ -147,6 +162,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mProviderId);
         dest.writeString(mName);
         dest.writeString(mDescription);
+        dest.writeString(mClientPackageName);
         dest.writeBundle(mExtras);
     }
 
@@ -170,6 +186,7 @@ public final class MediaRoute2Info implements Parcelable {
         String mProviderId;
         String mName;
         String mDescription;
+        String mClientPackageName;
         Bundle mExtras;
 
         public Builder(@NonNull String id, @NonNull String name) {
@@ -194,6 +211,7 @@ public final class MediaRoute2Info implements Parcelable {
             }
             setName(routeInfo.mName);
             mDescription = routeInfo.mDescription;
+            setClientPackageName(routeInfo.mClientPackageName);
             if (routeInfo.mExtras != null) {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
@@ -242,6 +260,15 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setDescription(@Nullable String description) {
             mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets the package name of the app using the route.
+         */
+        @NonNull
+        public Builder setClientPackageName(@Nullable String packageName) {
+            mClientPackageName = packageName;
             return this;
         }
 

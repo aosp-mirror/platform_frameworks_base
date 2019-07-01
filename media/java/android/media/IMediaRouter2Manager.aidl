@@ -23,7 +23,7 @@ import android.media.MediaRoute2Info;
  * {@hide}
  */
 oneway interface IMediaRouter2Manager {
-    void notifyRouteSelected(int uid, in MediaRoute2Info route);
-    void notifyControlCategoriesChanged(int uid, in List<String> categories);
+    void notifyRouteSelected(String packageName, in MediaRoute2Info route);
+    void notifyControlCategoriesChanged(String packageName, in List<String> categories);
     void notifyProviderInfosUpdated(in List<MediaRoute2ProviderInfo> providers);
 }

@@ -59,8 +59,26 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSelect(int uid, String routeId) {
-        updateProvider(uid, routeId);
+    public void onSelectRoute(String packageName, String routeId) {
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null) {
+            return;
+        }
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setClientPackageName(packageName)
+                .build());
+        publishRoutes();
+    }
+
+    @Override
+    public void onUnselectRoute(String packageName, String routeId) {
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null) {
+            return;
+        }
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setClientPackageName(null)
+                .build());
         publishRoutes();
     }
 
