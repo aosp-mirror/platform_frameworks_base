@@ -321,7 +321,9 @@ public class TaskStack extends WindowContainer<Task> implements
      */
     private void setAnimationFinalBounds(Rect sourceHintBounds, Rect destBounds,
             boolean toFullscreen) {
-        mBoundsAnimatingRequested = true;
+        if (mAnimationType == BoundsAnimationController.BOUNDS) {
+            mBoundsAnimatingRequested = true;
+        }
         mBoundsAnimatingToFullscreen = toFullscreen;
         if (destBounds != null) {
             mBoundsAnimationTarget.set(destBounds);
@@ -1586,8 +1588,10 @@ public class TaskStack extends WindowContainer<Task> implements
                 return false;
             }
 
-            mBoundsAnimatingRequested = false;
-            mBoundsAnimating = true;
+            if (animationType == BoundsAnimationController.BOUNDS) {
+                mBoundsAnimatingRequested = false;
+                mBoundsAnimating = true;
+            }
             mAnimationType = animationType;
 
             // If we are changing UI mode, as in the PiP to fullscreen
