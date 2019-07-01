@@ -19,8 +19,10 @@ package android.view.textclassifier;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
@@ -127,6 +129,7 @@ public final class SelectionEvent implements Parcelable {
     private String mWidgetType = TextClassifier.WIDGET_TYPE_UNKNOWN;
     private @InvocationMethod int mInvocationMethod;
     @Nullable private String mWidgetVersion;
+    private @UserIdInt int mUserId = UserHandle.USER_NULL;
     @Nullable private String mResultId;
     private long mEventTime;
     private long mDurationSinceSessionStart;
@@ -158,6 +161,7 @@ public final class SelectionEvent implements Parcelable {
         mEntityType = in.readString();
         mWidgetVersion = in.readInt() > 0 ? in.readString() : null;
         mPackageName = in.readString();
+        mUserId = in.readInt();
         mWidgetType = in.readString();
         mInvocationMethod = in.readInt();
         mResultId = in.readString();
@@ -184,6 +188,7 @@ public final class SelectionEvent implements Parcelable {
             dest.writeString(mWidgetVersion);
         }
         dest.writeString(mPackageName);
+        dest.writeInt(mUserId);
         dest.writeString(mWidgetType);
         dest.writeInt(mInvocationMethod);
         dest.writeString(mResultId);
@@ -401,6 +406,24 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
+     * Sets the id of this event's user.
+     * <p>
+     * Package-private for SystemTextClassifier's use.
+     */
+    void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
+    /**
+     * Returns the id of this event's user.
+     * @hide
+     */
+    @UserIdInt
+    public int getUserId() {
+        return mUserId;
+    }
+
+    /**
      * Returns the type of widget that was involved in triggering this event.
      */
     @WidgetType
@@ -426,6 +449,7 @@ public final class SelectionEvent implements Parcelable {
         mPackageName = context.getPackageName();
         mWidgetType = context.getWidgetType();
         mWidgetVersion = context.getWidgetVersion();
+        mUserId = context.getUserId();
     }
 
     /**
@@ -612,7 +636,7 @@ public final class SelectionEvent implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
-                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mResultId,
+                mWidgetVersion, mPackageName, mUserId, mWidgetType, mInvocationMethod, mResultId,
                 mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
                 mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
@@ -633,6 +657,7 @@ public final class SelectionEvent implements Parcelable {
                 && Objects.equals(mEntityType, other.mEntityType)
                 && Objects.equals(mWidgetVersion, other.mWidgetVersion)
                 && Objects.equals(mPackageName, other.mPackageName)
+                && mUserId == other.mUserId
                 && Objects.equals(mWidgetType, other.mWidgetType)
                 && mInvocationMethod == other.mInvocationMethod
                 && Objects.equals(mResultId, other.mResultId)
@@ -652,12 +677,12 @@ public final class SelectionEvent implements Parcelable {
         return String.format(Locale.US,
                 "SelectionEvent {absoluteStart=%d, absoluteEnd=%d, eventType=%d, entityType=%s, "
                         + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
-                        + "resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
+                        + "userId=%d, resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
                         + "durationSincePreviousEvent=%d, eventIndex=%d,"
                         + "sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d}",
                 mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
                 mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod,
-                mResultId, mEventTime, mDurationSinceSessionStart,
+                mUserId, mResultId, mEventTime, mDurationSinceSessionStart,
                 mDurationSincePreviousEvent, mEventIndex,
                 mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }

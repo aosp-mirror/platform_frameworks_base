@@ -21,10 +21,12 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.UserIdInt;
 import android.app.Person;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.SpannedString;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -316,6 +318,8 @@ public final class ConversationActions implements Parcelable {
         private final List<String> mHints;
         @Nullable
         private String mCallingPackageName;
+        @UserIdInt
+        private int mUserId = UserHandle.USER_NULL;
         @NonNull
         private Bundle mExtras;
 
@@ -340,6 +344,7 @@ public final class ConversationActions implements Parcelable {
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
             String callingPackageName = in.readString();
+            int userId = in.readInt();
             Bundle extras = in.readBundle();
             Request request = new Request(
                     conversation,
@@ -348,6 +353,7 @@ public final class ConversationActions implements Parcelable {
                     hints,
                     extras);
             request.setCallingPackageName(callingPackageName);
+            request.setUserId(userId);
             return request;
         }
 
@@ -358,6 +364,7 @@ public final class ConversationActions implements Parcelable {
             parcel.writeInt(mMaxSuggestions);
             parcel.writeStringList(mHints);
             parcel.writeString(mCallingPackageName);
+            parcel.writeInt(mUserId);
             parcel.writeBundle(mExtras);
         }
 
@@ -425,6 +432,24 @@ public final class ConversationActions implements Parcelable {
         @Nullable
         public String getCallingPackageName() {
             return mCallingPackageName;
+        }
+
+        /**
+         * Sets the id of the user that sent this request.
+         * <p>
+         * Package-private for SystemTextClassifier's use.
+         */
+        void setUserId(@UserIdInt int userId) {
+            mUserId = userId;
+        }
+
+        /**
+         * Returns the id of the user that sent this request.
+         * @hide
+         */
+        @UserIdInt
+        public int getUserId() {
+            return mUserId;
         }
 
         /**
