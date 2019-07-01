@@ -648,17 +648,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
                 PackageInstaller.SessionInfo session = installer.getSessionInfo(
                         data.stagedSessionId);
-                // TODO: What if session is null?
-                if (session != null) {
-                    if (session.isStagedSessionApplied()) {
-                        makeRollbackAvailable(data);
-                    } else if (session.isStagedSessionFailed()) {
-                        // TODO: Do we need to remove this from
-                        // mRollbacks, or is it okay to leave as
-                        // unavailable until the next reboot when it will go
-                        // away on its own?
-                        deleteRollback(data);
-                    }
+                if (session == null || session.isStagedSessionFailed()) {
+                    // TODO: Do we need to remove this from
+                    // mRollbacks, or is it okay to leave as
+                    // unavailable until the next reboot when it will go
+                    // away on its own?
+                    deleteRollback(data);
+                } else if (session.isStagedSessionApplied()) {
+                    makeRollbackAvailable(data);
                 }
             }
 
