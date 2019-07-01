@@ -60,7 +60,6 @@ import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
@@ -69,11 +68,10 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
-
-
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
+        .ADMIN_TYPE_DEVICE_OWNER;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
+        .ADMIN_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -219,11 +217,11 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
-import com.android.internal.util.StatLogger;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
@@ -5188,7 +5186,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void enforceCanManageCaCerts(ComponentName who, String callerPackage) {
         if (who == null) {
-            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
+            if (!isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(),
+                    DELEGATION_CERT_INSTALL)) {
                 mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
             }
         } else {
@@ -5364,7 +5363,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (UserHandle.getUserId(callerUid) != mOwners.getDeviceOwnerUserId()) {
                 throw new SecurityException("Caller not from device owner user");
             }
-            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
+            if (!isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(),
+                    DELEGATION_CERT_INSTALL)) {
                 throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid() +
                         "has no permission to generate keys.");
             }
@@ -5766,15 +5766,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @param scope the delegation scope to be checked.
      * @return {@code true} if the calling process is a delegate of {@code scope}.
      */
-    private boolean isCallerDelegate(String callerPackage, String scope) {
+    private boolean isCallerDelegate(String callerPackage, int callerUid, String scope) {
         Preconditions.checkNotNull(callerPackage, "callerPackage is null");
         if (!Arrays.asList(DELEGATIONS).contains(scope)) {
             throw new IllegalArgumentException("Unexpected delegation scope: " + scope);
         }
 
         // Retrieve the UID and user ID of the calling process.
-        final int callingUid = mInjector.binderGetCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        final int userId = UserHandle.getUserId(callerUid);
         synchronized (getLockObject()) {
             // Retrieve user policy data.
             final DevicePolicyData policy = getUserData(userId);
@@ -5787,7 +5786,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     final int uid = mInjector.getPackageManager()
                             .getPackageUidAsUser(callerPackage, userId);
                     // Return true if the caller is actually callerPackage.
-                    return uid == callingUid;
+                    return uid == callerUid;
                 } catch (NameNotFoundException e) {
                     // Ignore.
                 }
@@ -5818,7 +5817,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 getActiveAdminForCallerLocked(who, reqPolicy);
             }
         // If no ComponentName is given ensure calling process has scope delegation.
-        } else if (!isCallerDelegate(callerPackage, scope)) {
+        } else if (!isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(), scope)) {
             throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid()
                     + " is not a delegate of scope " + scope + ".");
         }
@@ -7783,6 +7782,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public ComponentName getProfileOwnerAsUser(int userHandle) {
+        enforceCrossUsersPermission(userHandle);
+
+        return getProfileOwner(userHandle);
+    }
+
+    @Override
     public ComponentName getProfileOwner(int userHandle) {
         if (!mHasFeature) {
             return null;
@@ -7823,6 +7829,68 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         return getApplicationLabel(profileOwner.getPackageName(), userHandle);
+    }
+
+    @Override
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
+        // If the caller is not a system app then it should only be able to check its own device
+        // identifier access.
+        int callingUid = mInjector.binderGetCallingUid();
+        int callingPid = mInjector.binderGetCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                && (callingUid != uid || callingPid != pid)) {
+            String message = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
+            Log.w(LOG_TAG, message);
+            throw new SecurityException(message);
+        }
+        // Verify that the specified packages matches the provided uid.
+        int userId = UserHandle.getUserId(uid);
+        try {
+            ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0, userId);
+            // Since this call goes directly to PackageManagerService a NameNotFoundException is not
+            // thrown but null data can be returned; if the appInfo for the specified package cannot
+            // be found then return false to prevent crashing the app.
+            if (appInfo == null) {
+                Log.w(LOG_TAG,
+                        String.format("appInfo could not be found for package %s", packageName));
+                return false;
+            } else if (uid != appInfo.uid) {
+                String message = String.format("Package %s (uid=%d) does not match provided uid %d",
+                        packageName, appInfo.uid, uid);
+                Log.w(LOG_TAG, message);
+                throw new SecurityException(message);
+            }
+        } catch (RemoteException e) {
+            // If an exception is caught obtaining the appInfo just return false to prevent crashing
+            // apps due to an internal error.
+            Log.e(LOG_TAG, "Exception caught obtaining appInfo for package " + packageName, e);
+            return false;
+        }
+        // A device or profile owner must also have the READ_PHONE_STATE permission to access device
+        // identifiers. If the package being checked does not have this permission then deny access.
+        if (mContext.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid, uid)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        // Allow access to the device owner or delegate cert installer.
+        ComponentName deviceOwner = getDeviceOwnerComponent(true);
+        if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
+                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+            return true;
+        }
+        // Allow access to the profile owner for the specified user, or delegate cert installer
+        ComponentName profileOwner = getProfileOwnerAsUser(userId);
+        if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
+                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+            return true;
+        }
+
+        Log.w(LOG_TAG, String.format("Package %s (uid=%d, pid=%d) cannot access Device IDs",
+                packageName, uid, pid));
+        return false;
     }
 
     /**
@@ -8266,7 +8334,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isCallerApplicationRestrictionsManagingPackage(String callerPackage) {
-        return isCallerDelegate(callerPackage, DELEGATION_APP_RESTRICTIONS);
+        return isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(),
+                DELEGATION_APP_RESTRICTIONS);
     }
 
     @Override
