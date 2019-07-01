@@ -50,5 +50,6 @@ public interface KeyguardMonitor extends CallbackController<Callback> {
 
     interface Callback {
         void onKeyguardShowingChanged();
+        default void onKeyguardFadingAwayChanged() {}
     }
 }
