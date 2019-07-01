@@ -176,7 +176,7 @@ public class BubbleData {
             trim();
         } else {
             // Updates an existing bubble
-            bubble.setEntry(entry);
+            bubble.updateEntry(entry);
             doUpdate(bubble);
         }
         if (shouldAutoExpand(entry)) {
@@ -187,6 +187,7 @@ public class BubbleData {
         } else if (mSelectedBubble == null) {
             setSelectedBubbleInternal(bubble);
         }
+        bubble.setShowInShadeWhenBubble(!mExpanded || mSelectedBubble != bubble);
         dispatchPendingChanges();
     }
 

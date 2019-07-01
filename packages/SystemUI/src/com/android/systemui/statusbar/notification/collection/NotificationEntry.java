@@ -154,14 +154,6 @@ public final class NotificationEntry {
     public boolean canBubble;
 
     /**
-     * Whether this notification should be shown in the shade when it is also displayed as a bubble.
-     *
-     * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
-     * expanded</p>
-     */
-    private boolean mShowInShadeWhenBubble = true;
-
-    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -219,23 +211,6 @@ public final class NotificationEntry {
 
     public boolean isBubble() {
         return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
-    }
-
-    /**
-     * Sets whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
-     */
-    public void setShowInShadeWhenBubble(boolean showInShade) {
-        mShowInShadeWhenBubble = showInShade;
-    }
-
-    /**
-     * Whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
-     */
-    public boolean showInShadeWhenBubble() {
-        // We always show it in the shade if non-clearable
-        return !isRowDismissed() && (!isClearable() || mShowInShadeWhenBubble);
     }
 
     /**
