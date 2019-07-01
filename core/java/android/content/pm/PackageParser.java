@@ -8391,7 +8391,7 @@ public class PackageParser {
     public static PackageInfo generatePackageInfoFromApex(ApexInfo apexInfo, int flags)
             throws PackageParserException {
         PackageParser pp = new PackageParser();
-        File apexFile = new File(apexInfo.packagePath);
+        File apexFile = new File(apexInfo.modulePath);
         final Package p = pp.parsePackage(apexFile, flags, false);
         PackageUserState state = new PackageUserState();
         PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,

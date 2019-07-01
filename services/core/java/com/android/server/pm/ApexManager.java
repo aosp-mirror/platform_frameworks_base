@@ -117,7 +117,7 @@ class ApexManager {
                 for (ApexInfo ai : allPkgs) {
                     // If the device is using flattened APEX, don't report any APEX
                     // packages since they won't be managed or updated by PackageManager.
-                    if ((new File(ai.packagePath)).isDirectory()) {
+                    if ((new File(ai.modulePath)).isDirectory()) {
                         break;
                     }
                     try {
@@ -131,7 +131,7 @@ class ApexManager {
                                         "Two active packages have the same name: "
                                                 + pkg.packageName);
                             }
-                            activePackagesSet.add(ai.packageName);
+                            activePackagesSet.add(pkg.packageName);
                         }
                         if (ai.isFactory) {
                             if (factoryPackagesSet.contains(pkg.packageName)) {
@@ -139,7 +139,7 @@ class ApexManager {
                                         "Two factory packages have the same name: "
                                                 + pkg.packageName);
                             }
-                            factoryPackagesSet.add(ai.packageName);
+                            factoryPackagesSet.add(pkg.packageName);
                         }
                     } catch (PackageParserException pe) {
                         throw new IllegalStateException("Unable to parse: " + ai, pe);

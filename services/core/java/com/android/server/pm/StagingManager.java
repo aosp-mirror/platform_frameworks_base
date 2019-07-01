@@ -170,7 +170,7 @@ public class StagingManager {
                         PackageManager.GET_META_DATA);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to parse APEX package " + newPackage.packagePath, e);
+                        "Failed to parse APEX package " + newPackage.modulePath, e);
             }
             final PackageInfo activePackage = mApexManager.getPackageInfo(pkg.packageName,
                     ApexManager.MATCH_ACTIVE_PACKAGE);
