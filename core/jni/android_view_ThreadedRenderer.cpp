@@ -30,6 +30,8 @@
 #include <gui/BufferQueue.h>
 #include <gui/Surface.h>
 
+#include "android_view_FrameMetricsObserver.h"
+
 #include <private/EGL/cache.h>
 
 #include <utils/RefBase.h>
@@ -39,10 +41,7 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
-#include "android_os_MessageQueue.h"
-
 #include <FrameInfo.h>
-#include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
 #include <Picture.h>
 #include <Properties.h>
@@ -58,13 +57,6 @@ namespace android {
 
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
-
-struct {
-    jfieldID frameMetrics;
-    jfieldID timingDataBuffer;
-    jfieldID messageQueue;
-    jmethodID callback;
-} gFrameMetricsObserverClassInfo;
 
 struct {
     jclass clazz;
@@ -132,142 +124,6 @@ private:
         }
     }
 };
-
-class ObserverProxy;
-
-class NotifyHandler : public MessageHandler {
-public:
-    NotifyHandler(JavaVM* vm, ObserverProxy* observer) : mVm(vm), mObserver(observer) {}
-
-    virtual void handleMessage(const Message& message);
-
-private:
-    JavaVM* const mVm;
-    ObserverProxy* const mObserver;
-};
-
-static jlongArray get_metrics_buffer(JNIEnv* env, jobject observer) {
-    jobject frameMetrics = env->GetObjectField(
-            observer, gFrameMetricsObserverClassInfo.frameMetrics);
-    LOG_ALWAYS_FATAL_IF(frameMetrics == nullptr, "unable to retrieve data sink object");
-    jobject buffer = env->GetObjectField(
-            frameMetrics, gFrameMetricsObserverClassInfo.timingDataBuffer);
-    LOG_ALWAYS_FATAL_IF(buffer == nullptr, "unable to retrieve data sink buffer");
-    return reinterpret_cast<jlongArray>(buffer);
-}
-
-/*
- * Implements JNI layer for hwui frame metrics reporting.
- */
-class ObserverProxy : public FrameMetricsObserver {
-public:
-    ObserverProxy(JavaVM *vm, jobject observer) : mVm(vm) {
-        JNIEnv* env = getenv(mVm);
-
-        mObserverWeak = env->NewWeakGlobalRef(observer);
-        LOG_ALWAYS_FATAL_IF(mObserverWeak == nullptr,
-                "unable to create frame stats observer reference");
-
-        jlongArray buffer = get_metrics_buffer(env, observer);
-        jsize bufferSize = env->GetArrayLength(reinterpret_cast<jarray>(buffer));
-        LOG_ALWAYS_FATAL_IF(bufferSize != kBufferSize,
-                "Mismatched Java/Native FrameMetrics data format.");
-
-        jobject messageQueueLocal = env->GetObjectField(
-                observer, gFrameMetricsObserverClassInfo.messageQueue);
-        mMessageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueLocal);
-        LOG_ALWAYS_FATAL_IF(mMessageQueue == nullptr, "message queue not available");
-
-        mMessageHandler = new NotifyHandler(mVm, this);
-        LOG_ALWAYS_FATAL_IF(mMessageHandler == nullptr,
-                "OOM: unable to allocate NotifyHandler");
-    }
-
-    ~ObserverProxy() {
-        JNIEnv* env = getenv(mVm);
-        env->DeleteWeakGlobalRef(mObserverWeak);
-    }
-
-    jweak getObserverReference() {
-        return mObserverWeak;
-    }
-
-    bool getNextBuffer(JNIEnv* env, jlongArray sink, int* dropCount) {
-        FrameMetricsNotification& elem = mRingBuffer[mNextInQueue];
-
-        if (elem.hasData.load()) {
-            env->SetLongArrayRegion(sink, 0, kBufferSize, elem.buffer);
-            *dropCount = elem.dropCount;
-            mNextInQueue = (mNextInQueue + 1) % kRingSize;
-            elem.hasData = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    virtual void notify(const int64_t* stats) {
-        FrameMetricsNotification& elem = mRingBuffer[mNextFree];
-
-        if (!elem.hasData.load()) {
-            memcpy(elem.buffer, stats, kBufferSize * sizeof(stats[0]));
-
-            elem.dropCount = mDroppedReports;
-            mDroppedReports = 0;
-
-            incStrong(nullptr);
-            mNextFree = (mNextFree + 1) % kRingSize;
-            elem.hasData = true;
-
-            mMessageQueue->getLooper()->sendMessage(mMessageHandler, mMessage);
-        } else {
-            mDroppedReports++;
-        }
-    }
-
-private:
-    static const int kBufferSize = static_cast<int>(FrameInfoIndex::NumIndexes);
-    static constexpr int kRingSize = 3;
-
-    class FrameMetricsNotification {
-    public:
-        FrameMetricsNotification() : hasData(false) {}
-
-        std::atomic_bool hasData;
-        int64_t buffer[kBufferSize];
-        int dropCount = 0;
-    };
-
-    JavaVM* const mVm;
-    jweak mObserverWeak;
-
-    sp<MessageQueue> mMessageQueue;
-    sp<NotifyHandler> mMessageHandler;
-    Message mMessage;
-
-    int mNextFree = 0;
-    int mNextInQueue = 0;
-    FrameMetricsNotification mRingBuffer[kRingSize];
-
-    int mDroppedReports = 0;
-};
-
-void NotifyHandler::handleMessage(const Message& message) {
-    JNIEnv* env = getenv(mVm);
-
-    jobject target = env->NewLocalRef(mObserver->getObserverReference());
-
-    if (target != nullptr) {
-        jlongArray javaBuffer = get_metrics_buffer(env, target);
-        int dropCount = 0;
-        while (mObserver->getNextBuffer(env, javaBuffer, &dropCount)) {
-            env->CallVoidMethod(target, gFrameMetricsObserverClassInfo.callback, dropCount);
-        }
-        env->DeleteLocalRef(target);
-    }
-
-    mObserver->decStrong(nullptr);
-}
 
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
@@ -734,7 +590,7 @@ static jlong android_view_ThreadedRenderer_addFrameMetricsObserver(JNIEnv* env,
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
-    FrameMetricsObserver* observer = new ObserverProxy(vm, fso);
+    FrameMetricsObserver* observer = new FrameMetricsObserverProxy(vm, fso);
     renderProxy->addFrameMetricsObserver(observer);
     return reinterpret_cast<jlong>(observer);
 }
@@ -853,17 +709,6 @@ static void attachRenderThreadToJvm(const char* name) {
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
     env->GetJavaVM(&mJvm);
     RenderThread::setOnStartHook(&attachRenderThreadToJvm);
-    jclass observerClass = FindClassOrDie(env, "android/view/FrameMetricsObserver");
-    gFrameMetricsObserverClassInfo.frameMetrics = GetFieldIDOrDie(
-            env, observerClass, "mFrameMetrics", "Landroid/view/FrameMetrics;");
-    gFrameMetricsObserverClassInfo.messageQueue = GetFieldIDOrDie(
-            env, observerClass, "mMessageQueue", "Landroid/os/MessageQueue;");
-    gFrameMetricsObserverClassInfo.callback = GetMethodIDOrDie(
-            env, observerClass, "notifyDataAvailable", "(I)V");
-
-    jclass metricsClass = FindClassOrDie(env, "android/view/FrameMetrics");
-    gFrameMetricsObserverClassInfo.timingDataBuffer = GetFieldIDOrDie(
-            env, metricsClass, "mTimingData", "[J");
 
     jclass hardwareRenderer = FindClassOrDie(env,
             "android/graphics/HardwareRenderer");
