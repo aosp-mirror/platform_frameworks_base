@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -27,7 +28,9 @@ import android.content.pm.ShortcutManager;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -278,12 +281,22 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
-        mController.addRemoteInput(mEntry, mToken);
+
+        // Disable suggestions on non-owner (secondary) user.
+        // SpellCheckerService of primary user runs on secondary as well which shows
+        // "Add to dictionary" dialog on the primary user. (See b/123232892)
+        // Note: this doesn't affect work-profile users on P or older versions.
+        if (UserHandle.myUserId() != ActivityManager.getCurrentUser()) {
+            mEditText.setInputType(
+                    mEditText.getInputType() | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        }
+
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.getText().length());
         mEditText.requestFocus();
+        mController.addRemoteInput(mEntry, mToken);
         updateSendButton();
     }
 
