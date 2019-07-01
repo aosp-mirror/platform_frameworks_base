@@ -395,10 +395,14 @@ class RemoteAnimationController implements DeathRecipient {
 
             // Restore z-layering, position and stack crop until client has a chance to modify it.
             t.setLayer(animationLeash, mRecord.mAppWindowToken.getPrefixOrderIndex());
-            t.setPosition(animationLeash, mPosition.x, mPosition.y);
-            mTmpRect.set(mStackBounds);
-            mTmpRect.offsetTo(0, 0);
-            t.setWindowCrop(animationLeash, mTmpRect);
+            if (mRecord.mStartBounds != null) {
+                t.setPosition(animationLeash, mRecord.mStartBounds.left, mRecord.mStartBounds.top);
+                t.setWindowCrop(animationLeash, mRecord.mStartBounds.width(),
+                        mRecord.mStartBounds.height());
+            } else {
+                t.setPosition(animationLeash, mPosition.x, mPosition.y);
+                t.setWindowCrop(animationLeash, mStackBounds.width(), mStackBounds.height());
+            }
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;
         }
