@@ -18,8 +18,10 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
 import com.android.internal.util.Preconditions;
@@ -35,6 +37,8 @@ public final class TextClassificationContext implements Parcelable {
     private final String mPackageName;
     private final String mWidgetType;
     @Nullable private final String mWidgetVersion;
+    @UserIdInt
+    private int mUserId = UserHandle.USER_NULL;
 
     private TextClassificationContext(
             String packageName,
@@ -51,6 +55,24 @@ public final class TextClassificationContext implements Parcelable {
     @NonNull
     public String getPackageName() {
         return mPackageName;
+    }
+
+    /**
+     * Sets the id of this context's user.
+     * <p>
+     * Package-private for SystemTextClassifier's use.
+     */
+    void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
+    /**
+     * Returns the id of this context's user.
+     * @hide
+     */
+    @UserIdInt
+    public int getUserId() {
+        return mUserId;
     }
 
     /**
@@ -75,8 +97,8 @@ public final class TextClassificationContext implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US, "TextClassificationContext{"
-                + "packageName=%s, widgetType=%s, widgetVersion=%s}",
-                mPackageName, mWidgetType, mWidgetVersion);
+                + "packageName=%s, widgetType=%s, widgetVersion=%s, userId=%d}",
+                mPackageName, mWidgetType, mWidgetVersion, mUserId);
     }
 
     /**
@@ -133,12 +155,14 @@ public final class TextClassificationContext implements Parcelable {
         parcel.writeString(mPackageName);
         parcel.writeString(mWidgetType);
         parcel.writeString(mWidgetVersion);
+        parcel.writeInt(mUserId);
     }
 
     private TextClassificationContext(Parcel in) {
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mWidgetVersion = in.readString();
+        mUserId = in.readInt();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =
