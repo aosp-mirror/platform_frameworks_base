@@ -1172,6 +1172,29 @@ public class HdmiControlService extends SystemService {
         return mCecController.getLocalDeviceList();
     }
 
+    /**
+     * Check if a logical address is conflict with the current device's. Reallocate the logical
+     * address of the current device if there is conflict.
+     *
+     * Android HDMI CEC 1.4 is handling logical address allocation in the framework side. This could
+     * introduce delay between the logical address allocation and notifying the driver that the
+     * address is occupied. Adding this check to avoid such case.
+     *
+     * @param logicalAddress logical address of the remote device that might have the same logical
+     * address as the current device.
+     */
+    protected void checkLogicalAddressConflictAndReallocate(int logicalAddress) {
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            if (device.getDeviceInfo().getLogicalAddress() == logicalAddress) {
+                HdmiLogger.debug("allocate logical address for " + device.getDeviceInfo());
+                ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
+                localDevices.add(device);
+                allocateLogicalAddress(localDevices, HdmiControlService.INITIATED_BY_HOTPLUG);
+                return;
+            }
+        }
+    }
+
     Object getServiceLock() {
         return mLock;
     }
