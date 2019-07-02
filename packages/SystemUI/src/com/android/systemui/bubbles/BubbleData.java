@@ -36,6 +36,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -179,7 +181,7 @@ public class BubbleData {
             bubble.updateEntry(entry);
             doUpdate(bubble);
         }
-        if (shouldAutoExpand(entry)) {
+        if (bubble.shouldAutoExpand()) {
             setSelectedBubbleInternal(bubble);
             if (!mExpanded) {
                 setExpandedInternal(true);
@@ -591,8 +593,17 @@ public class BubbleData {
         mListener = listener;
     }
 
-    boolean shouldAutoExpand(NotificationEntry entry) {
-        Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
-        return metadata != null && metadata.getAutoExpandBubble();
+    /**
+     * Description of current bubble data state.
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("selected: "); pw.println(mSelectedBubble != null
+                ? mSelectedBubble.getKey()
+                : "null");
+        pw.print("expanded: "); pw.println(mExpanded);
+        pw.print("count:    "); pw.println(mBubbles.size());
+        for (Bubble bubble : mBubbles) {
+            bubble.dump(fd, pw, args);
+        }
     }
 }

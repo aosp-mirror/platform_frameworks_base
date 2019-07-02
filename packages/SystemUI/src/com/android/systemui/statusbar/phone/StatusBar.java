@@ -80,7 +80,6 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -2384,6 +2383,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mGroupManager.dump(fd, pw, args);
         } else {
             pw.println("  mGroupManager: null");
+        }
+
+        if (mBubbleController != null) {
+            mBubbleController.dump(fd, pw, args);
         }
 
         if (mLightBarController != null) {

@@ -20,6 +20,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -39,6 +40,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 
@@ -293,6 +296,16 @@ class Bubble {
         }
     }
 
+    String getDesiredHeightString() {
+        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+        boolean useRes = data.getDesiredHeightResId() != 0;
+        if (useRes) {
+            return String.valueOf(data.getDesiredHeightResId());
+        } else {
+            return String.valueOf(data.getDesiredHeight());
+        }
+    }
+
     @Nullable
     PendingIntent getBubbleIntent(Context context) {
         Notification notif = mEntry.notification.getNotification();
@@ -404,9 +417,28 @@ class Bubble {
                 && mEntry.getBubbleMetadata().isNotificationSuppressed();
     }
 
+    boolean shouldAutoExpand() {
+        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
+        return metadata != null && metadata.getAutoExpandBubble();
+    }
+
     @Override
     public String toString() {
         return "Bubble{" + mKey + '}';
+    }
+
+    /**
+     * Description of current bubble state.
+     */
+    public void dump(
+            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.print("key: "); pw.println(mKey);
+        pw.print("  showInShade:   "); pw.println(showInShadeWhenBubble());
+        pw.print("  showDot:       "); pw.println(showBubbleDot());
+        pw.print("  showFlyout:    "); pw.println(showFlyoutForBubble());
+        pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
+        pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
+        pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
     }
 
     @Override

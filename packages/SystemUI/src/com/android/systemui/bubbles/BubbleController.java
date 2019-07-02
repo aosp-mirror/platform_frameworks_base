@@ -81,6 +81,8 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
@@ -651,6 +653,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @VisibleForTesting
     BubbleStackView getStackView() {
         return mStackView;
+    }
+
+    /**
+     * Description of current bubble state.
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("BubbleController state:");
+        mBubbleData.dump(fd, pw, args);
+        pw.println();
     }
 
     static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
