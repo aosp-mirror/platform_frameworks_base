@@ -98,7 +98,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothHidDeviceAppQosSettings> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothHidDeviceAppQosSettings> CREATOR =
             new Parcelable.Creator<BluetoothHidDeviceAppQosSettings>() {
 
                 @Override

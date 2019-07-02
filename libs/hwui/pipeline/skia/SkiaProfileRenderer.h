@@ -16,7 +16,7 @@
 
 #include "IProfileRenderer.h"
 
-#include "BakedOpRenderer.h"
+#include "SkCanvas.h"
 
 namespace android {
 namespace uirenderer {

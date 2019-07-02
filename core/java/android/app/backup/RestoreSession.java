@@ -16,17 +16,19 @@
 
 package android.app.backup;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.backup.RestoreObserver;
-import android.app.backup.RestoreSet;
-import android.app.backup.IRestoreObserver;
-import android.app.backup.IRestoreSession;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Interface for managing a restore session.
@@ -142,16 +144,15 @@ public class RestoreSession {
      *   the restore set that should be used.
      * @param observer If non-null, this binder points to an object that will receive
      *   progress callbacks during the restore operation.
-     * @param monitor If non-null, this binder points to an object that will receive
-     *   progress callbacks during the restore operation.
      * @param packages The set of packages for which to attempt a restore.  Regardless of
      *   the contents of the actual back-end dataset named by {@code token}, only
      *   applications mentioned in this list will have their data restored.
-     *
-     * @hide
+     * @param monitor If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation containing detailed information on any
+     *   failures or important decisions made by {@link BackupManager}.
      */
-    public int restoreSome(long token, RestoreObserver observer, BackupManagerMonitor monitor,
-            String[] packages) {
+    public int restorePackages(long token, @Nullable RestoreObserver observer,
+            @NonNull Set<String> packages, @Nullable BackupManagerMonitor monitor) {
         int err = -1;
         if (mObserver != null) {
             Log.d(TAG, "restoreAll() called during active restore");
@@ -162,7 +163,8 @@ public class RestoreSession {
                 ? null
                 : new BackupManagerMonitorWrapper(monitor);
         try {
-            err = mBinder.restoreSome(token, mObserver, monitorWrapper, packages);
+            err = mBinder.restorePackages(token, mObserver, packages.toArray(new String[] {}),
+                    monitorWrapper);
         } catch (RemoteException e) {
             Log.d(TAG, "Can't contact server to restore packages");
         }
@@ -185,9 +187,63 @@ public class RestoreSession {
      * @param packages The set of packages for which to attempt a restore.  Regardless of
      *   the contents of the actual back-end dataset named by {@code token}, only
      *   applications mentioned in this list will have their data restored.
-     *
-     * @hide
      */
+    public int restorePackages(long token, @Nullable RestoreObserver observer,
+            @NonNull Set<String> packages) {
+        return restorePackages(token, observer, packages, null);
+    }
+
+    /**
+     * Restore select packages from the given set onto the device, replacing the
+     * current data of any app contained in the set with the data previously
+     * backed up.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @return Zero on success, nonzero on error. The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
+     *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param monitor If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param packages The set of packages for which to attempt a restore.  Regardless of
+     *   the contents of the actual back-end dataset named by {@code token}, only
+     *   applications mentioned in this list will have their data restored.
+     *
+     * @deprecated use {@link RestoreSession#restorePackages(long, RestoreObserver,
+     *   BackupManagerMonitor, Set)} instead.
+     * @removed
+     */
+    @Deprecated
+    public int restoreSome(long token, RestoreObserver observer, BackupManagerMonitor monitor,
+            String[] packages) {
+        return restorePackages(token, observer, new HashSet<>(Arrays.asList(packages)), monitor);
+    }
+
+    /**
+     * Restore select packages from the given set onto the device, replacing the
+     * current data of any app contained in the set with the data previously
+     * backed up.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @return Zero on success, nonzero on error. The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
+     *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param packages The set of packages for which to attempt a restore.  Regardless of
+     *   the contents of the actual back-end dataset named by {@code token}, only
+     *   applications mentioned in this list will have their data restored.
+     *
+     * @deprecated use {@link RestoreSession#restorePackages(long, RestoreObserver, Set)}
+     *   instead.
+     * @removed
+     */
+    @Deprecated
     public int restoreSome(long token, RestoreObserver observer, String[] packages) {
         return restoreSome(token, observer, null, packages);
     }
@@ -198,6 +254,10 @@ public class RestoreSession {
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this package
      * in either source, a nonzero value will be returned.
+     *
+     * <p class="caution">Note: Unlike other restore operations, this method doesn't terminate the
+     * application after the restore. The application continues running to receive the
+     * {@link RestoreObserver} callbacks on the {@code observer} argument.
      *
      * @return Zero on success; nonzero on error.  The observer will only receive
      *   progress callbacks if this method returned zero.

@@ -24,6 +24,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
+
 import androidx.annotation.Keep;
 
 import com.android.settingslib.wifi.AccessPoint.Speed;
@@ -71,9 +72,13 @@ public class TestAccessPointBuilder {
     public AccessPoint build() {
         Bundle bundle = new Bundle();
 
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.networkId = mNetworkId;
-        wifiConfig.BSSID = mBssid;
+        WifiConfiguration wifiConfig = null;
+        // ephemeral networks don't have a WifiConfiguration object in AccessPoint representation.
+        if (mNetworkId != WifiConfiguration.INVALID_NETWORK_ID) {
+            wifiConfig = new WifiConfiguration();
+            wifiConfig.networkId = mNetworkId;
+            wifiConfig.BSSID = mBssid;
+        }
 
         bundle.putString(AccessPoint.KEY_SSID, ssid);
         bundle.putParcelable(AccessPoint.KEY_CONFIG, wifiConfig);

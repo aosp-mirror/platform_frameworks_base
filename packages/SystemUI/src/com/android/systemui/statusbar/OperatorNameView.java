@@ -15,10 +15,9 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.text.TextUtils;
@@ -31,8 +30,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;

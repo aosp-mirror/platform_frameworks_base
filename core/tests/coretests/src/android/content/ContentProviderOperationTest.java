@@ -16,22 +16,23 @@
 
 package android.content;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
+
+import androidx.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 @SmallTest
 public class ContentProviderOperationTest extends TestCase {

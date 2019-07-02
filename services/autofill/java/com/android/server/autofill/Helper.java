@@ -20,12 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
+import android.app.assist.AssistStructure.WindowNode;
 import android.content.ComponentName;
 import android.metrics.LogMaker;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
@@ -34,38 +36,28 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public final class Helper {
 
     private static final String TAG = "AutofillHelper";
 
+    // TODO(b/117779333): get rid of sDebug / sVerbose and always use the service variables instead
+
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill set log_level debug}.
+     * {@code cmd autofill set log_level debug} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
     public static boolean sDebug = false;
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill set log_level verbose}.
+     * {@code cmd autofill set log_level verbose} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
     public static boolean sVerbose = false;
-
-    /**
-     * Maximum number of partitions that can be allowed in a session.
-     *
-     * <p>Can be modified using {@code cmd autofill set max_partitions}.
-     */
-    static int sPartitionMaxCount = 10;
-
-    /**
-     * Maximum number of visible datasets in the dataset picker UI.
-     *
-     * <p>Can be modified using {@code cmd autofill set max_visible_datasets}.
-     */
-    public static int sVisibleDatasetsMaxCount = 3;
 
     /**
      * When non-null, overrides whether the UI should be shown on full-screen mode.
@@ -156,7 +148,7 @@ public final class Helper {
 
     private static ViewNode findViewNode(@NonNull AssistStructure structure,
             @NonNull ViewNodeFilter filter) {
-        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final ArrayDeque<ViewNode> nodesToProcess = new ArrayDeque<>();
         final int numWindowNodes = structure.getWindowNodeCount();
         for (int i = 0; i < numWindowNodes; i++) {
             nodesToProcess.add(structure.getWindowNodeAt(i).getRootViewNode());
@@ -212,6 +204,33 @@ public final class Helper {
             return 0;
         } else {
             return ((Number) value).intValue();
+        }
+    }
+
+    /**
+     * Gets the {@link AutofillId} of the autofillable nodes in the {@code structure}.
+     */
+    @NonNull
+    static ArrayList<AutofillId> getAutofillIds(@NonNull AssistStructure structure,
+            boolean autofillableOnly) {
+        final ArrayList<AutofillId> ids = new ArrayList<>();
+        final int size = structure.getWindowNodeCount();
+        for (int i = 0; i < size; i++) {
+            final WindowNode node = structure.getWindowNodeAt(i);
+            addAutofillableIds(node.getRootViewNode(), ids, autofillableOnly);
+        }
+        return ids;
+    }
+
+    private static void addAutofillableIds(@NonNull ViewNode node,
+            @NonNull ArrayList<AutofillId> ids, boolean autofillableOnly) {
+        if (!autofillableOnly || node.getAutofillType() != View.AUTOFILL_TYPE_NONE) {
+            ids.add(node.getAutofillId());
+        }
+        final int size = node.getChildCount();
+        for (int i = 0; i < size; i++) {
+            final ViewNode child = node.getChildAt(i);
+            addAutofillableIds(child, ids, autofillableOnly);
         }
     }
 

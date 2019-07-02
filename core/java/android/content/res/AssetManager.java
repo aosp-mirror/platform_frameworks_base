@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
@@ -47,6 +48,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -58,6 +60,7 @@ import java.util.HashMap;
 public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
+    private static final boolean FEATURE_FLAG_IDMAP2 = true;
 
     private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
 
@@ -195,13 +198,25 @@ public final class AssetManager implements AutoCloseable {
             return;
         }
 
-        // Make sure that all IDMAPs are up to date.
-        nativeVerifySystemIdmaps();
 
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
             apkAssets.add(ApkAssets.loadFromPath(FRAMEWORK_APK_PATH, true /*system*/));
-            loadStaticRuntimeOverlays(apkAssets);
+            if (FEATURE_FLAG_IDMAP2) {
+                final String[] systemIdmapPaths =
+                    nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
+                if (systemIdmapPaths != null) {
+                    for (String idmapPath : systemIdmapPaths) {
+                        apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
+                    }
+                } else {
+                    Log.w(TAG, "'idmap2 --scan' failed: no static=\"true\" overlays targeting "
+                            + "\"android\" will be loaded");
+                }
+            } else {
+                nativeVerifySystemIdmaps();
+                loadStaticRuntimeOverlays(apkAssets);
+            }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
             sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
@@ -333,6 +348,7 @@ public final class AssetManager implements AutoCloseable {
      * returns a 0-length array.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull ApkAssets[] getApkAssets() {
         synchronized (this) {
             if (mOpen) {
@@ -340,6 +356,22 @@ public final class AssetManager implements AutoCloseable {
             }
         }
         return sEmptyApkAssets;
+    }
+
+    /** @hide */
+    @TestApi
+    public @NonNull String[] getApkPaths() {
+        synchronized (this) {
+            if (mOpen) {
+                String[] paths = new String[mApkAssets.length];
+                final int count = mApkAssets.length;
+                for (int i = 0; i < count; i++) {
+                    paths[i] = mApkAssets[i].getAssetPath();
+                }
+                return paths;
+            }
+        }
+        return new String[0];
     }
 
     /**
@@ -718,6 +750,38 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    /**
+     * Enable resource resolution logging to track the steps taken to resolve the last resource
+     * entry retrieved. Stores the configuration and package names for each step.
+     *
+     * Default disabled.
+     *
+     * @param enabled Boolean indicating whether to enable or disable logging.
+     *
+     * @hide
+     */
+    public void setResourceResolutionLoggingEnabled(boolean enabled) {
+        synchronized (this) {
+            ensureValidLocked();
+            nativeSetResourceResolutionLoggingEnabled(mObject, enabled);
+        }
+    }
+
+    /**
+     * Retrieve the last resource resolution path logged.
+     *
+     * @return Formatted string containing last resource ID/name and steps taken to resolve final
+     * entry, including configuration and package names.
+     *
+     * @hide
+     */
+    public @Nullable String getLastResourceResolution() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetLastResourceResolution(mObject);
+        }
+    }
+
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
@@ -1005,6 +1069,14 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    int[] getAttributeResolutionStack(long themePtr, @AttrRes int defStyleAttr,
+            @StyleRes int defStyleRes, @StyleRes int xmlStyle) {
+        synchronized (this) {
+            return nativeAttributeResolutionStack(
+                    mObject, themePtr, xmlStyle, defStyleAttr, defStyleRes);
+        }
+    }
+
     @UnsupportedAppUsage
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
@@ -1060,6 +1132,17 @@ public final class AssetManager implements AutoCloseable {
             // the native implementation of AssetManager.
             ensureValidLocked();
             nativeThemeApplyStyle(mObject, themePtr, resId, force);
+        }
+    }
+
+    @UnsupportedAppUsage
+    void setThemeTo(long dstThemePtr, @NonNull AssetManager srcAssetManager, long srcThemePtr) {
+        synchronized (this) {
+            ensureValidLocked();
+            synchronized (srcAssetManager) {
+                srcAssetManager.ensureValidLocked();
+                nativeThemeCopy(mObject, dstThemePtr, srcAssetManager.mObject, srcThemePtr);
+            }
         }
     }
 
@@ -1197,12 +1280,19 @@ public final class AssetManager implements AutoCloseable {
      */
     @UnsupportedAppUsage
     public boolean isUpToDate() {
-        for (ApkAssets apkAssets : getApkAssets()) {
-            if (!apkAssets.isUpToDate()) {
+        synchronized (this) {
+            if (!mOpen) {
                 return false;
             }
+
+            for (ApkAssets apkAssets : mApkAssets) {
+                if (!apkAssets.isUpToDate()) {
+                    return false;
+                }
+            }
+
+            return true;
         }
-        return true;
     }
 
     /**
@@ -1277,6 +1367,18 @@ public final class AssetManager implements AutoCloseable {
         synchronized (this) {
             ensureValidLocked();
             return nativeGetAssignedPackageIdentifiers(mObject);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @GuardedBy("this")
+    public @Nullable Map<String, String> getOverlayableMap(String packageName) {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetOverlayableMap(mObject, packageName);
         }
     }
 
@@ -1358,8 +1460,12 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable String nativeGetResourceEntryName(long ptr, @AnyRes int resid);
     private static native @Nullable String[] nativeGetLocales(long ptr, boolean excludeSystem);
     private static native @Nullable Configuration[] nativeGetSizeConfigurations(long ptr);
+    private static native void nativeSetResourceResolutionLoggingEnabled(long ptr, boolean enabled);
+    private static native @Nullable String nativeGetLastResourceResolution(long ptr);
 
     // Style attribute retrieval native methods.
+    private static native int[] nativeAttributeResolutionStack(long ptr, long themePtr,
+            @StyleRes int xmlStyleRes, @AttrRes int defStyleAttr, @StyleRes int defStyleRes);
     private static native void nativeApplyStyle(long ptr, long themePtr, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes, long xmlParserPtr, @NonNull int[] inAttrs,
             long outValuesAddress, long outIndicesAddress);
@@ -1374,7 +1480,8 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeThemeDestroy(long themePtr);
     private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
             boolean force);
-    static native void nativeThemeCopy(long destThemePtr, long sourceThemePtr);
+    private static native void nativeThemeCopy(long dstAssetManagerPtr, long dstThemePtr,
+            long srcAssetManagerPtr, long srcThemePtr);
     static native void nativeThemeClear(long themePtr);
     private static native int nativeThemeGetAttributeValue(long ptr, long themePtr,
             @AttrRes int resId, @NonNull TypedValue outValue, boolean resolve);
@@ -1391,6 +1498,9 @@ public final class AssetManager implements AutoCloseable {
     private static native long nativeAssetGetRemainingLength(long assetPtr);
 
     private static native void nativeVerifySystemIdmaps();
+    private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
+    private static native @Nullable Map nativeGetOverlayableMap(long ptr,
+            @NonNull String packageName);
 
     // Global debug native methods.
     /**

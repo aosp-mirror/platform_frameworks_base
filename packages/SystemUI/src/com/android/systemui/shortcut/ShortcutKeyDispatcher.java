@@ -16,13 +16,9 @@
 
 package com.android.systemui.shortcut;
 
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-import static android.os.UserHandle.USER_CURRENT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 
-import static com.android.systemui.statusbar.phone.NavigationBarGestureHelper.DRAG_MODE_NONE;
-
-import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.util.Log;
@@ -34,13 +30,8 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
-
-import java.util.List;
 
 /**
  * Dispatches shortcut to System UI components
@@ -94,7 +85,7 @@ public class ShortcutKeyDispatcher extends SystemUI
             if (dockSide == WindowManager.DOCKED_INVALID) {
                 // Split the screen
                 Recents recents = getComponent(Recents.class);
-                recents.splitPrimaryTask(DRAG_MODE_NONE, (shortcutCode == SC_DOCK_LEFT)
+                recents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
                         ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
                         : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
             } else {

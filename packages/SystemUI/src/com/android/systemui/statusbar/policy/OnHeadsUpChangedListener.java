@@ -16,8 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * A listener to heads up changes
@@ -33,12 +32,12 @@ public interface OnHeadsUpChangedListener {
     /**
      * A notification was just pinned to the top.
      */
-    default void onHeadsUpPinned(ExpandableNotificationRow headsUp) {}
+    default void onHeadsUpPinned(NotificationEntry entry) {}
 
     /**
      * A notification was just unpinned from the top.
      */
-    default void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {}
+    default void onHeadsUpUnPinned(NotificationEntry entry) {}
 
     /**
      * A notification just became a heads up or turned back to its normal state.
@@ -46,5 +45,5 @@ public interface OnHeadsUpChangedListener {
      * @param entry     the entry of the changed notification
      * @param isHeadsUp whether the notification is now a headsUp notification
      */
-    default void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {}
+    default void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {}
 }

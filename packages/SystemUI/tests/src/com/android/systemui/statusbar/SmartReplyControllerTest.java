@@ -18,23 +18,29 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.Notification;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,97 +52,109 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SmartReplyControllerTest extends SysuiTestCase {
-    private static final String TEST_NOTIFICATION_KEY = "akey";
+    private static final String TEST_PACKAGE_NAME = "test";
+    private static final int TEST_UID = 0;
     private static final String TEST_CHOICE_TEXT = "A Reply";
     private static final int TEST_CHOICE_INDEX = 2;
     private static final int TEST_CHOICE_COUNT = 4;
+    private static final int TEST_ACTION_COUNT = 3;
 
     private Notification mNotification;
-    private NotificationData.Entry mEntry;
+    private NotificationEntry mEntry;
+    private SmartReplyController mSmartReplyController;
+    private NotificationRemoteInputManager mRemoteInputManager;
 
-    @Mock
-    private NotificationEntryManager mNotificationEntryManager;
-    @Mock
-    private IStatusBarService mIStatusBarService;
+    @Mock private NotificationPresenter mPresenter;
+    @Mock private RemoteInputController.Delegate mDelegate;
+    @Mock private NotificationRemoteInputManager.Callback mCallback;
+    @Mock private StatusBarNotification mSbn;
+    @Mock private NotificationEntryManager mNotificationEntryManager;
+    @Mock private IStatusBarService mIStatusBarService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
         mDependency.injectTestDependency(NotificationEntryManager.class,
                 mNotificationEntryManager);
-        mDependency.injectTestDependency(IStatusBarService.class, mIStatusBarService);
 
+        mSmartReplyController = new SmartReplyController(mNotificationEntryManager,
+                mIStatusBarService);
+        mDependency.injectTestDependency(SmartReplyController.class,
+                mSmartReplyController);
+
+        mRemoteInputManager = new NotificationRemoteInputManager(mContext,
+                mock(NotificationLockscreenUserManager.class), mSmartReplyController,
+                mNotificationEntryManager, () -> mock(ShadeController.class),
+                Handler.createAsync(Looper.myLooper()));
+        mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text").build();
-        StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getNotification()).thenReturn(mNotification);
-        when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        mEntry = new NotificationData.Entry(sbn);
+
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+                0, mNotification, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
+        mEntry = new NotificationEntry(mSbn);
     }
 
     @Test
     public void testSendSmartReply_updatesRemoteInput() {
-        StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        when(mNotificationEntryManager.rebuildNotificationWithRemoteInput(
-                argThat(entry -> entry.notification.getKey().equals(TEST_NOTIFICATION_KEY)),
-                eq(TEST_CHOICE_TEXT), eq(true))).thenReturn(sbn);
-
-        SmartReplyController controller = new SmartReplyController();
-        controller.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT);
+        mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
+                MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
 
         // Sending smart reply should make calls to NotificationEntryManager
         // to update the notification with reply and spinner.
-        verify(mNotificationEntryManager).rebuildNotificationWithRemoteInput(
-                argThat(entry -> entry.notification.getKey().equals(TEST_NOTIFICATION_KEY)),
-                eq(TEST_CHOICE_TEXT), eq(true));
         verify(mNotificationEntryManager).updateNotification(
-                argThat(sbn2 -> sbn2.getKey().equals(TEST_NOTIFICATION_KEY)), isNull());
+                argThat(sbn -> sbn.getKey().equals(mSbn.getKey())), isNull());
     }
 
     @Test
     public void testSendSmartReply_logsToStatusBar() throws RemoteException {
-        StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
-        when(mNotificationEntryManager.rebuildNotificationWithRemoteInput(
-                argThat(entry -> entry.notification.getKey().equals(TEST_NOTIFICATION_KEY)),
-                eq(TEST_CHOICE_TEXT), eq(true))).thenReturn(sbn);
-
-        SmartReplyController controller = new SmartReplyController();
-        controller.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT);
+        mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
+                MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
 
         // Check we log the result to the status bar service.
-        verify(mIStatusBarService).onNotificationSmartReplySent(TEST_NOTIFICATION_KEY,
-                TEST_CHOICE_INDEX);
+        verify(mIStatusBarService).onNotificationSmartReplySent(mSbn.getKey(),
+                TEST_CHOICE_INDEX, TEST_CHOICE_TEXT, MetricsEvent.LOCATION_UNKNOWN, false);
+    }
+
+
+    @Test
+    public void testSendSmartReply_logsToStatusBar_modifiedBeforeSending() throws RemoteException {
+        mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
+                MetricsEvent.LOCATION_UNKNOWN, true /* modifiedBeforeSending */);
+
+        // Check we log the result to the status bar service.
+        verify(mIStatusBarService).onNotificationSmartReplySent(mSbn.getKey(),
+                TEST_CHOICE_INDEX, TEST_CHOICE_TEXT, MetricsEvent.LOCATION_UNKNOWN, true);
     }
 
     @Test
-    public void testShowSmartReply_logsToStatusBar() throws RemoteException {
-        SmartReplyController controller = new SmartReplyController();
-        controller.smartRepliesAdded(mEntry, TEST_CHOICE_COUNT);
+    public void testShowSmartSuggestions_logsToStatusBar() throws RemoteException {
+        final boolean generatedByAsssistant = true;
+        final boolean editBeforeSending = true;
+        mSmartReplyController.smartSuggestionsAdded(mEntry, TEST_CHOICE_COUNT, TEST_ACTION_COUNT,
+                generatedByAsssistant, editBeforeSending);
 
         // Check we log the result to the status bar service.
-        verify(mIStatusBarService).onNotificationSmartRepliesAdded(TEST_NOTIFICATION_KEY,
-                TEST_CHOICE_COUNT);
+        verify(mIStatusBarService).onNotificationSmartSuggestionsAdded(mSbn.getKey(),
+                TEST_CHOICE_COUNT, TEST_ACTION_COUNT, generatedByAsssistant, editBeforeSending);
     }
 
     @Test
     public void testSendSmartReply_reportsSending() {
-        SmartReplyController controller = new SmartReplyController();
-        controller.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT);
+        mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
+                MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
 
-        assertTrue(controller.isSendingSmartReply(TEST_NOTIFICATION_KEY));
+        assertTrue(mSmartReplyController.isSendingSmartReply(mSbn.getKey()));
     }
 
     @Test
     public void testSendingSmartReply_afterRemove_shouldReturnFalse() {
-        SmartReplyController controller = new SmartReplyController();
-        controller.isSendingSmartReply(TEST_NOTIFICATION_KEY);
-        controller.stopSending(mEntry);
+        mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
+                MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
+        mSmartReplyController.stopSending(mEntry);
 
-        assertFalse(controller.isSendingSmartReply(TEST_NOTIFICATION_KEY));
+        assertFalse(mSmartReplyController.isSendingSmartReply(mSbn.getKey()));
     }
 }

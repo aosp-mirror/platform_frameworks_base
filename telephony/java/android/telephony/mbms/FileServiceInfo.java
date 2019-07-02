@@ -44,7 +44,7 @@ public final class FileServiceInfo extends ServiceInfo implements Parcelable {
         files = new ArrayList<>(newFiles);
     }
 
-    public static final Parcelable.Creator<FileServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FileServiceInfo> CREATOR =
             new Parcelable.Creator<FileServiceInfo>() {
         @Override
         public FileServiceInfo createFromParcel(Parcel source) {

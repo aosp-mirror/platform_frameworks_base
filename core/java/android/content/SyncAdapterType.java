@@ -241,7 +241,7 @@ public class SyncAdapterType implements Parcelable {
                 source.readString());
     }
 
-    public static final Creator<SyncAdapterType> CREATOR = new Creator<SyncAdapterType>() {
+    public static final @android.annotation.NonNull Creator<SyncAdapterType> CREATOR = new Creator<SyncAdapterType>() {
         public SyncAdapterType createFromParcel(Parcel source) {
             return new SyncAdapterType(source);
         }

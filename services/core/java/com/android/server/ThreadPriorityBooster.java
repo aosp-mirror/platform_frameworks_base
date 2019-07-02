@@ -26,6 +26,7 @@ import static android.os.Process.setThreadPriority;
 public class ThreadPriorityBooster {
 
     private static final boolean ENABLE_LOCK_GUARD = false;
+    private static final int PRIORITY_NOT_ADJUSTED = Integer.MAX_VALUE;
 
     private volatile int mBoostToPriority;
     private final int mLockGuardIndex;
@@ -42,13 +43,12 @@ public class ThreadPriorityBooster {
     }
 
     public void boost() {
-        final int tid = myTid();
-        final int prevPriority = getThreadPriority(tid);
         final PriorityState state = mThreadState.get();
         if (state.regionCounter == 0) {
-            state.prevPriority = prevPriority;
+            final int prevPriority = getThreadPriority(state.tid);
             if (prevPriority > mBoostToPriority) {
-                setThreadPriority(tid, mBoostToPriority);
+                setThreadPriority(state.tid, mBoostToPriority);
+                state.prevPriority = prevPriority;
             }
         }
         state.regionCounter++;
@@ -60,9 +60,9 @@ public class ThreadPriorityBooster {
     public void reset() {
         final PriorityState state = mThreadState.get();
         state.regionCounter--;
-        final int currentPriority = getThreadPriority(myTid());
-        if (state.regionCounter == 0 && state.prevPriority != currentPriority) {
-            setThreadPriority(myTid(), state.prevPriority);
+        if (state.regionCounter == 0 && state.prevPriority != PRIORITY_NOT_ADJUSTED) {
+            setThreadPriority(state.tid, state.prevPriority);
+            state.prevPriority = PRIORITY_NOT_ADJUSTED;
         }
     }
 
@@ -76,14 +76,16 @@ public class ThreadPriorityBooster {
         // variable immediately.
         mBoostToPriority = priority;
         final PriorityState state = mThreadState.get();
-        final int tid = myTid();
-        final int prevPriority = getThreadPriority(tid);
-        if (state.regionCounter != 0 && prevPriority != priority) {
-            setThreadPriority(tid, priority);
+        if (state.regionCounter != 0) {
+            final int prevPriority = getThreadPriority(state.tid);
+            if (prevPriority != priority) {
+                setThreadPriority(state.tid, priority);
+            }
         }
     }
 
     private static class PriorityState {
+        final int tid = myTid();
 
         /**
          * Acts as counter for number of synchronized region that needs to acquire 'this' as a lock
@@ -95,6 +97,6 @@ public class ThreadPriorityBooster {
         /**
          * The thread's previous priority before boosting.
          */
-        int prevPriority;
+        int prevPriority = PRIORITY_NOT_ADJUSTED;
     }
 }

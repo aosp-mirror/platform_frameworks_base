@@ -392,5 +392,23 @@ class PackageTests(unittest.TestCase):
         p = self._package("package @Rt(a.b.L_G_P) @RestrictTo(a.b.C) an.pref.int {")
         self.assertEquals('an.pref.int', p.name)
 
+class FilterTests(unittest.TestCase):
+    def test_filter_match_prefix(self):
+        self.assertTrue(apilint.match_filter(["a"], "a.B"))
+        self.assertTrue(apilint.match_filter(["a.B"], "a.B.C"))
+
+    def test_filter_dont_match_prefix(self):
+        self.assertFalse(apilint.match_filter(["c"], "a.B"))
+        self.assertFalse(apilint.match_filter(["a."], "a.B"))
+        self.assertFalse(apilint.match_filter(["a.B."], "a.B.C"))
+
+    def test_filter_match_exact(self):
+        self.assertTrue(apilint.match_filter(["a.B"], "a.B"))
+
+    def test_filter_dont_match_exact(self):
+        self.assertFalse(apilint.match_filter([""], "a.B"))
+        self.assertFalse(apilint.match_filter(["a.C"], "a.B"))
+        self.assertFalse(apilint.match_filter(["a.C"], "a.B"))
+        
 if __name__ == "__main__":
     unittest.main()

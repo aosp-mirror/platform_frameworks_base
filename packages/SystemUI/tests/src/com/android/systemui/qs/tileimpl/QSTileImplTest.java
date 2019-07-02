@@ -19,8 +19,10 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_POSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_BAR_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,6 +33,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static java.lang.Thread.sleep;
 
 import android.content.Intent;
 import android.metrics.LogMaker;
@@ -44,16 +48,19 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-
-import static java.lang.Thread.sleep;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -65,13 +72,20 @@ public class QSTileImplTest extends SysuiTestCase {
     private TileImpl mTile;
     private QSTileHost mHost;
     private MetricsLogger mMetricsLogger;
+    private StatusBarStateController mStatusBarStateController;
+
+    @Captor
+    private ArgumentCaptor<LogMaker> mLogCaptor;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
         String spec = "spec";
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
+        mStatusBarStateController =
+            mDependency.injectMockDependency(StatusBarStateController.class);
         mHost = mock(QSTileHost.class);
         when(mHost.indexOf(spec)).thenReturn(POSITION);
         when(mHost.getContext()).thenReturn(mContext.getBaseContext());
@@ -88,9 +102,27 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testClick_Metrics_Status_Bar_Status() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+        mTile.click();
+        verify(mMetricsLogger).write(mLogCaptor.capture());
+        assertEquals(StatusBarState.SHADE, mLogCaptor.getValue()
+                .getTaggedData(FIELD_STATUS_BAR_STATE));
+    }
+
+    @Test
     public void testSecondaryClick_Metrics() {
         mTile.secondaryClick();
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_SECONDARY_CLICK)));
+    }
+
+    @Test
+    public void testSecondaryClick_Metrics_Status_Bar_Status() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
+        mTile.secondaryClick();
+        verify(mMetricsLogger).write(mLogCaptor.capture());
+        assertEquals(StatusBarState.KEYGUARD, mLogCaptor.getValue()
+                .getTaggedData(FIELD_STATUS_BAR_STATE));
     }
 
     @Test
@@ -100,7 +132,27 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPopulate() {
+    public void testLongClick_Metrics_Status_Bar_Status() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
+        mTile.click();
+        verify(mMetricsLogger).write(mLogCaptor.capture());
+        assertEquals(StatusBarState.SHADE_LOCKED, mLogCaptor.getValue()
+                .getTaggedData(FIELD_STATUS_BAR_STATE));
+    }
+
+    @Test
+    public void testPopulateWithLockedScreen() {
+        LogMaker maker = mock(LogMaker.class);
+        when(maker.setSubtype(anyInt())).thenReturn(maker);
+        when(maker.addTaggedData(anyInt(), any())).thenReturn(maker);
+        mTile.getState().value = true;
+        mTile.populate(maker);
+        verify(maker).addTaggedData(eq(FIELD_QS_VALUE), eq(1));
+        verify(maker).addTaggedData(eq(FIELD_QS_POSITION), eq(POSITION));
+    }
+
+    @Test
+    public void testPopulateWithUnlockedScreen() {
         LogMaker maker = mock(LogMaker.class);
         when(maker.setSubtype(anyInt())).thenReturn(maker);
         when(maker.addTaggedData(anyInt(), any())).thenReturn(maker);

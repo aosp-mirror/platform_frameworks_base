@@ -106,9 +106,7 @@ public:
     Snapshot decodeNextFrame();
     Snapshot reset();
 
-    size_t byteSize() const {
-        return sizeof(this) + mBytesUsed;
-    }
+    size_t byteSize() const { return sizeof(*this) + mBytesUsed; }
 
 protected:
     virtual void onDraw(SkCanvas* canvas) override;

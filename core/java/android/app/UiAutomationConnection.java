@@ -18,7 +18,7 @@ package android.app;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
@@ -128,11 +128,28 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
         final long identity = Binder.clearCallingIdentity();
         try {
-            return InputManager.getInstance().injectInputEvent(event, mode);
+            return mWindowManager.injectInputAfterTransactionsApplied(event, mode);
+        } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return false;
     }
+
+    @Override
+    public void syncInputTransactions() {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+
+        try {
+            mWindowManager.syncInputTransactions();
+        } catch (RemoteException e) {
+        }
+    }
+
 
     @Override
     public boolean setRotation(int rotation) {
@@ -279,7 +296,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public void adoptShellPermissionIdentity(int uid) throws RemoteException {
+    public void adoptShellPermissionIdentity(int uid, @Nullable String[] permissions)
+            throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -287,7 +305,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mActivityManager.startDelegateShellPermissionIdentity(uid);
+            mActivityManager.startDelegateShellPermissionIdentity(uid, permissions);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -330,7 +348,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                     writeTo.flush();
                 }
             } catch (IOException ioe) {
-                throw new RuntimeException("Error while reading/writing ", ioe);
+                Log.w(TAG, "Error while reading/writing to streams");
             } finally {
                 IoUtils.closeQuietly(readFrom);
                 IoUtils.closeQuietly(writeTo);

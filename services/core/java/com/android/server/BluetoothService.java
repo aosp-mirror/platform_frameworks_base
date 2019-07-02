@@ -19,12 +19,22 @@ package com.android.server;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 
+import com.android.internal.os.RoSystemProperties;
+
 class BluetoothService extends SystemService {
     private BluetoothManagerService mBluetoothManagerService;
+    private boolean mInitialized = false;
 
     public BluetoothService(Context context) {
         super(context);
         mBluetoothManagerService = new BluetoothManagerService(context);
+    }
+
+    private void initialize() {
+        if (!mInitialized) {
+            mBluetoothManagerService.handleOnBootPhase();
+            mInitialized = true;
+        }
     }
 
     @Override
@@ -36,13 +46,15 @@ class BluetoothService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE,
                     mBluetoothManagerService);
-        } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-            mBluetoothManagerService.handleOnBootPhase();
+        } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY &&
+                !RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER) {
+            initialize();
         }
     }
 
     @Override
     public void onSwitchUser(int userHandle) {
+        initialize();
         mBluetoothManagerService.handleOnSwitchUser(userHandle);
     }
 

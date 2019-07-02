@@ -88,35 +88,39 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setOnKeyEventResult(boolean handled, int sequence) {}
 
-    public float getMagnificationScale() {
+    public float getMagnificationScale(int displayId) {
         return 0.0f;
     }
 
-    public float getMagnificationCenterX() {
+    public float getMagnificationCenterX(int displayId) {
         return 0.0f;
     }
 
-    public float getMagnificationCenterY() {
+    public float getMagnificationCenterY(int displayId) {
         return 0.0f;
     }
 
-    public Region getMagnificationRegion() {
+    public Region getMagnificationRegion(int displayId) {
         return null;
     }
 
-    public boolean resetMagnification(boolean animate) {
+    public boolean resetMagnification(int displayId, boolean animate) {
         return false;
     }
 
-    public boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
-            boolean animate) {
+    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
+            float centerY, boolean animate) {
         return false;
     }
 
-    public void setMagnificationCallbackEnabled(boolean enabled) {}
+    public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {}
 
     public boolean setSoftKeyboardShowMode(int showMode) {
         return false;
+    }
+
+    public int getSoftKeyboardShowMode() {
+        return 0;
     }
 
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {}

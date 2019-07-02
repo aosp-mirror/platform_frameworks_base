@@ -20,6 +20,7 @@ package android.app.admin;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
+import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
@@ -81,6 +82,7 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
+    int getPasswordComplexity();
     boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
@@ -133,8 +135,8 @@ interface IDevicePolicyManager {
     void reportPasswordChanged(int userId);
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
-    void reportFailedFingerprintAttempt(int userHandle);
-    void reportSuccessfulFingerprintAttempt(int userHandle);
+    void reportFailedBiometricAttempt(int userHandle);
+    void reportSuccessfulBiometricAttempt(int userHandle);
     void reportKeyguardDismissed(int userHandle);
     void reportKeyguardSecured(int userHandle);
 
@@ -310,8 +312,8 @@ interface IDevicePolicyManager {
 
     void setPermissionPolicy(in ComponentName admin, in String callerPackage, int policy);
     int  getPermissionPolicy(in ComponentName admin);
-    boolean setPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName,
-            String permission, int grantState);
+    void setPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName,
+            String permission, int grantState, in RemoteCallback resultReceiver);
     int getPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName, String permission);
     boolean isProvisioningAllowed(String action, String packageName);
     int checkProvisioningPreCondition(String action, String packageName);
@@ -353,6 +355,7 @@ interface IDevicePolicyManager {
     boolean isSecurityLoggingEnabled(in ComponentName admin);
     ParceledListSlice retrieveSecurityLogs(in ComponentName admin);
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin);
+    long forceNetworkLogs();
     long forceSecurityLogs();
 
     boolean isUninstallInQueue(String packageName);
@@ -366,12 +369,10 @@ interface IDevicePolicyManager {
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
-    boolean setMandatoryBackupTransport(in ComponentName admin, in ComponentName backupTransportComponent);
-    ComponentName getMandatoryBackupTransport();
 
-    void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
-    boolean isNetworkLoggingEnabled(in ComponentName admin);
-    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, long batchToken);
+    void setNetworkLoggingEnabled(in ComponentName admin, in String packageName, boolean enabled);
+    boolean isNetworkLoggingEnabled(in ComponentName admin, in String packageName);
+    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, in String packageName, long batchToken);
 
     boolean bindDeviceAdminServiceAsUser(in ComponentName admin,
         IApplicationThread caller, IBinder token, in Intent service,
@@ -417,4 +418,22 @@ interface IDevicePolicyManager {
     boolean isOverrideApnEnabled(in ComponentName admin);
 
     boolean isMeteredDataDisabledPackageForUser(in ComponentName admin, String packageName, int userId);
+
+    int setGlobalPrivateDns(in ComponentName admin, int mode, in String privateDnsHost);
+    int getGlobalPrivateDnsMode(in ComponentName admin);
+    String getGlobalPrivateDnsHost(in ComponentName admin);
+
+    void grantDeviceIdsAccessToProfileOwner(in ComponentName who, int userId);
+
+    void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
+
+    void setCrossProfileCalendarPackages(in ComponentName admin, in List<String> packageNames);
+    List<String> getCrossProfileCalendarPackages(in ComponentName admin);
+    boolean isPackageAllowedToAccessCalendarForUser(String packageName, int userHandle);
+    List<String> getCrossProfileCalendarPackagesForUser(int userHandle);
+
+    boolean isManagedKiosk();
+    boolean isUnattendedManagedKiosk();
+
+    boolean startViewCalendarEventInManagedProfile(String packageName, long eventId, long start, long end, boolean allDay, int flags);
 }

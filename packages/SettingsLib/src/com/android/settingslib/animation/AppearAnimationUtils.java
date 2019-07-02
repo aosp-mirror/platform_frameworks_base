@@ -19,15 +19,12 @@ package com.android.settingslib.animation;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.RenderNodeAnimator;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
-import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.R;
 
 /**

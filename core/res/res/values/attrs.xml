@@ -87,6 +87,12 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
+        <!-- Color of background imagery used for popup windows. -->
+        <attr name="colorPopupBackground" format="color" />
+        <!-- Color used for list divider. -->
+        <attr name="colorListDivider" format="color" />
+        <!-- Opacity used for list divider. -->
+        <attr name="opacityListDivider" format="color" />
 
         <!-- =========== -->
         <!-- Text styles -->
@@ -339,13 +345,12 @@
                   then in code manually set your window's background to
                   null so it will not be drawn.
              </ul> -->
-        <attr name="windowBackground" format="reference" />
+        <attr name="windowBackground" format="reference|color" />
         <!-- Drawable to draw selectively within the inset areas when the windowBackground
              has been set to null. This protects against seeing visual garbage in the
              surface when the app has not drawn any content into this area. One example is
-             when the user is resizing a window of an activity that has
-             {@link android.R.attr#resizeableActivity} set for multi-window mode. -->
-        <attr name="windowBackgroundFallback" format="reference" />
+             when the user is resizing a window of an activity in multi-window mode. -->
+        <attr name="windowBackgroundFallback" format="reference|color" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -759,6 +764,8 @@
         <attr name="contextPopupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
+        <!-- Magnifier style. -->
+        <attr name="magnifierStyle" format="reference" />
 
         <!-- Default style for the FragmentBreadCrumbs widget. This widget is deprecated
              starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
@@ -1139,6 +1146,15 @@
 
         <!-- Alpha value of the spot shadow projected by elevated views, between 0 and 1. -->
         <attr name="spotShadowAlpha" format="float" />
+
+        <!-- <p>Whether or not the force dark feature is allowed to be applied to this theme.
+             <p>Setting this to false will disable the auto-dark feature on everything this
+             theme is applied to along with anything drawn by any children of views using
+             this theme.
+             <p>Setting this to true will allow this view to be automatically made dark, however
+             a value of 'true' will not override any 'false' value in its parent chain nor will
+             it prevent any 'false' in any of its children. -->
+        <attr name="forceDarkAllowed" format="boolean" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -1477,7 +1493,7 @@
              used for, typically, account ID or password input.  It is expected that IMEs
              normally are able to input ASCII even without being told so (such IMEs
              already respect this flag in a sense), but there could be some cases they
-             aren't when, for instance, only non-ASCII input languagaes like Arabic,
+             aren't when, for instance, only non-ASCII input languages like Arabic,
              Greek, Hebrew, Russian are enabled in the IME.  Applications need to be
              aware that the flag is not a guarantee, and not all IMEs will respect it.
              However, it is strongly recommended for IME authors to respect this flag
@@ -1544,7 +1560,8 @@
         <flag name="email" value="0x02" />
         <!-- Match phone numbers. -->
         <flag name="phone" value="0x04" />
-        <!-- Match map addresses. -->
+        <!-- Match map addresses.
+             Deprecated: see {@link android.text.util.Linkify#MAP_ADDRESSES}. -->
         <flag name="map" value="0x08" />
         <!-- Match all patterns (equivalent to web|email|phone|map). -->
         <flag name="all" value="0x0f" />
@@ -1904,6 +1921,9 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
         <enum name="KEYCODE_ALL_APPS" value="284" />
         <enum name="KEYCODE_REFRESH" value="285" />
+        <enum name="KEYCODE_THUMBS_UP" value="286" />
+        <enum name="KEYCODE_THUMBS_DOWN" value="287" />
+        <enum name="KEYCODE_PROFILE_SWITCH" value="288" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2076,6 +2096,38 @@
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
         <attr name="navigationBarDividerColor" format="color" />
+
+        <!-- Sets whether the system should ensure that the status bar has enough
+             contrast when a fully transparent background is requested.
+
+             <p>If set to this value, the system will determine whether a scrim is necessary
+             to ensure that the status bar has enough contrast with the contents of
+             this app, and set an appropriate effective bar background color accordingly.
+
+             <p>When the status bar color has a non-zero alpha value, the value of this
+             attribute has no effect.
+
+             <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
+             this attribute is ignored.
+
+             @see android.view.Window#setStatusBarContrastEnforced -->
+        <attr name="enforceStatusBarContrast" format="boolean" />
+
+        <!-- Sets whether the system should ensure that the navigation bar has enough
+             contrast when a fully transparent background is requested.
+
+             <p>If set to this value, the system will determine whether a scrim is necessary
+             to ensure that the navigation bar has enough contrast with the contents of
+             this app, and set an appropriate effective bar background color accordingly.
+
+             <p>When the navigation bar color has a non-zero alpha value, the value of this
+             attribute has no effect.
+
+             <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
+             this attribute is ignored.
+
+             @see android.view.Window#setNavigationBarContrastEnforced -->
+        <attr name="enforceNavigationBarContrast" format="boolean" />
 
         <!-- The duration, in milliseconds, of the window background fade duration
              when transitioning into or away from an Activity when called with an
@@ -2334,6 +2386,12 @@
     <!-- ============================= -->
     <eat-comment />
 
+    <!-- Removed View attributes without a specified format (b/131100106) -->
+    <attr name="__removed3" />
+    <attr name="__removed4" />
+    <attr name="__removed5" />
+    <attr name="__removed6" />
+
     <!-- Attributes that can be used with {@link android.view.View} or
          any of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that are processed by the view's parent. -->
@@ -2412,6 +2470,8 @@
         </attr>
 
         <attr name="__removed3" />
+        <attr name="__removed4" />
+        <attr name="__removed5" />
 
         <!-- Describes the content of a view so that a autofill service can fill in the appropriate
              data. Multiple hints can be combined in a comma separated list or an array of strings
@@ -2436,6 +2496,8 @@
                  and its children (if any) will not be traversed. -->
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
+
+        <attr name="__removed6" />
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
@@ -3113,6 +3175,14 @@
              the alpha channel of the outlineAmbientShadowColor (typically opaque), and the
              {@link android.R.attr#ambientShadowAlpha} theme attribute. -->
         <attr name="outlineAmbientShadowColor" format="color" />
+
+        <!-- <p>Whether or not the force dark feature is allowed to be applied to this View.
+             <p>Setting this to false will disable the auto-dark feature on this View draws
+             including any descendants.
+             <p>Setting this to true will allow this view to be automatically made dark, however
+             a value of 'true' will not override any 'false' value in its parent chain nor will
+             it prevent any 'false' in any of its children. -->
+        <attr name="forceDarkAllowed" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3161,7 +3231,7 @@
              enabled by a ViewGroup for all its children in specific situations (for
              instance during a scrolling.) This property lets you persist the cache
              in memory after its initial usage. Persisting the cache consumes more
-             memory but may prevent frequent garbage collection is the cache is created
+             memory but may prevent frequent garbage collection if the cache is created
              over and over again. By default the persistence is set to scrolling.
              Deprecated: The view drawing cache was largely made obsolete with the introduction of
              hardware-accelerated rendering in API 11. -->
@@ -3419,10 +3489,16 @@
              constructor or 0. Arrays.hashCode(new Object[] {locale, mode, extraValue,
              isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead. -->
         <attr name="subtypeId" format="integer"/>
-        <!-- Set to true if this subtype is ASCII capable. If the subtype is ASCII
+        <!-- Set to {@code true} if this subtype is ASCII capable. If the subtype is ASCII
              capable, it should guarantee that the user can input ASCII characters with
              this subtype. This is important because many password fields only allow
-             ASCII-characters. -->
+             ASCII-characters.
+
+             <p>Note: In order to avoid some known system issues on
+             {@link android.os.Build.VERSION_CODES#P} and prior OSes, you may want to include
+             {@code "AsciiCapable"} in
+             {@link android.R.styleable#InputMethod_Subtype_imeSubtypeExtraValue} when you specify
+             {@code true} to this attribute.-->
         <attr name="isAsciiCapable" format="boolean" />
         <!-- The BCP-47 Language Tag of the subtype.  This replaces
         {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->
@@ -3562,6 +3638,22 @@
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
              android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="notificationTimeout" format="integer" />
+        <!-- A recommended timeout in milliseconds used in
+             {@link android.view.accessibility.AccessibilityManager#getRecommendedTimeoutMillis(int, int)
+             android.view.accessibility.AccessibilityManager.getRecommendedTimeoutMillis(int, int)}
+             to return a suitable value for UIs that do not include interactive controls.
+             This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="nonInteractiveUiTimeout" format="integer" />
+        <!-- A recommended timeout in milliseconds used in
+             {@link android.view.accessibility.AccessibilityManager#getRecommendedTimeoutMillis(int, int)
+             android.view.accessibility.AccessibilityManager.getRecommendedTimeoutMillis(int, int)}
+             to return a suitable value for interactive controls.
+             This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="interactiveUiTimeout" format="integer" />
         <!-- Additional flags as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}.
              This setting can be changed at runtime by calling
@@ -3590,12 +3682,19 @@
             <flag name="flagRequestAccessibilityButton" value="0x00000100" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_FINGERPRINT_GESTURES}. -->
             <flag name="flagRequestFingerprintGestures" value="0x00000200" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK}. -->
+            <flag name="flagRequestShortcutWarningDialogSpokenFeedback" value="0x00000400" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
-             active window content. This setting cannot be changed at runtime. -->
+             active window content. This setting cannot be changed at runtime.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+             </p>
+         -->
         <attr name="canRetrieveWindowContent" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to request touch
              exploration mode in which touched items are spoken aloud and the UI can be
@@ -4277,14 +4376,18 @@
         <attr name="indeterminate" format="boolean" />
         <!-- Restricts to ONLY indeterminate mode (state-keeping progress mode will not work). -->
         <attr name="indeterminateOnly" format="boolean" />
-        <!-- Drawable used for the indeterminate mode. -->
+        <!-- Drawable used for the indeterminate mode. One that implements Animatable offers more
+             control over the animation.-->
         <attr name="indeterminateDrawable" format="reference" />
         <!-- Drawable used for the progress mode. -->
         <attr name="progressDrawable" format="reference" />
-        <!-- Duration of the indeterminate animation. -->
+        <!-- Duration of the indeterminate animation. Only affects the indeterminate animation
+             if the indeterminate Drawable does not implement
+             android.graphics.drawable.Animatable. -->
         <attr name="indeterminateDuration" format="integer" min="1" />
-        <!-- Defines how the indeterminate mode should behave when the progress
-        reaches max. -->
+        <!-- Defines how the indeterminate mode should behave when the progress reaches max. Only
+             affects the indeterminate animation if the indeterminate Drawable does not implement
+             android.graphics.drawable.Animatable. -->
         <attr name="indeterminateBehavior">
             <!-- Progress starts over from 0. -->
             <enum name="repeat" value="1" />
@@ -4295,6 +4398,9 @@
         <attr name="maxWidth" />
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" />
+        <!-- Sets the acceleration curve for the indeterminate animation. Defaults to a linear
+             interpolation. Only affects the indeterminate animation if the indeterminate Drawable
+             does not implement android.graphics.drawable.Animatable.-->
         <attr name="interpolator" format="reference" />
         <!-- Timeout between frames of animation in milliseconds.
              {@deprecated Not used by the framework}. -->
@@ -4535,6 +4641,11 @@
         <attr name="typeface" />
         <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
+        <!-- Specifies the {@link android.os.LocaleList} for the text.
+             May be a string value, which is a comma-separated language tag list, such as "ja-JP,zh-CN".
+             When not specified or an empty string is given, it will fallback to the default one.
+             {@see android.os.LocaleList#forLanguageTags(String)} -->
+        <attr name="textLocale" format="string" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
         <!-- Color of the hint text. -->
@@ -4565,6 +4676,8 @@
         <attr name="letterSpacing" format="float" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" format="string" />
+        <!-- Font variation settings. -->
+        <attr name="fontVariationSettings" format="string"/>
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -4621,9 +4734,16 @@
         <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
         <!-- Weight for the font used in the TextView. -->
-        <attr name="textFontWeight" />
+        <attr name="textFontWeight" format="integer"/>
         <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
+        <!-- Specifies the {@link android.os.LocaleList} for the text in this TextView.
+             If not given, the system default will be used.
+             May be a string value, which is a comma-separated language tag list, such as "ja-JP,zh-CN".
+             When not specified or an empty string is given, it will fallback to the default one.
+             {@see android.os.LocaleList#forLanguageTags(String)}
+             {@see android.text.TextView#setTextLocales(android.os.LocaleList)} -->
+        <attr name="textLocale" format="string" />
         <!-- Text color for links. -->
         <attr name="textColorLink" />
         <!-- Makes the cursor visible (the default) or invisible. -->
@@ -4913,6 +5033,8 @@
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" />
+        <!-- Font variation settings. -->
+        <attr name="fontVariationSettings" />
         <!-- Break strategy (control over paragraph layout). -->
         <attr name="breakStrategy">
             <!-- Line breaking uses simple strategy. -->
@@ -5456,7 +5578,7 @@
         <attr name="solidColor" format="color|reference" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="selectionDivider" format="reference" />
-        <!-- @hide The height of the selection divider. -->
+        <!-- The height of the selection divider. -->
         <attr name="selectionDividerHeight" format="dimension" />
         <!-- @hide The distance between the two selection dividers. -->
         <attr name="selectionDividersDistance" format="dimension" />
@@ -5730,17 +5852,13 @@
         <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
              default value is src_in, which treats the drawable as an alpha mask. -->
         <attr name="tintMode" />
-        <!-- Left optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Left optical inset. -->
         <attr name="opticalInsetLeft" />
-        <!-- Top optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Top optical inset. -->
         <attr name="opticalInsetTop" />
-        <!-- Right optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Right optical inset. -->
         <attr name="opticalInsetRight" />
-        <!-- Bottom optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Bottom optical inset. -->
         <attr name="opticalInsetBottom" />
     </declare-styleable>
 
@@ -6239,17 +6357,13 @@
         <!-- The opacity of the whole vector drawable, as a value between 0
              (completely transparent) and 1 (completely opaque). -->
         <attr name="alpha" />
-        <!-- Left optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Left optical inset. -->
         <attr name="opticalInsetLeft" format="dimension" />
-        <!-- Top optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Top optical inset. -->
         <attr name="opticalInsetTop" format="dimension" />
-        <!-- Right optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Right optical inset. -->
         <attr name="opticalInsetRight" format="dimension" />
-        <!-- Bottom optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Bottom optical inset. -->
         <attr name="opticalInsetBottom" format="dimension" />
     </declare-styleable>
 
@@ -6401,6 +6515,9 @@
         <!-- Special option for window animations: show the wallpaper behind when running this
              animation. -->
         <attr name="showWallpaper" format="boolean" />
+        <!-- Special option for window animations: whether window should have rounded corners.
+             @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
+        <attr name="hasRoundedCorners" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -7561,103 +7678,143 @@
     <declare-styleable name="VoiceInteractionSession">
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="KeyboardView">
-        <!-- Default KeyboardView style. -->
+        <!-- Default KeyboardView style.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardViewStyle" format="reference" />
 
         <!-- Image for the key. This image needs to be a StateListDrawable, with the following
              possible states: normal, pressed, checkable, checkable+pressed, checkable+checked,
-             checkable+checked+pressed. -->
+             checkable+checked+pressed.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyBackground" format="reference" />
 
-        <!-- Size of the text for character keys. -->
+        <!-- Size of the text for character keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyTextSize" format="dimension" />
 
-        <!-- Size of the text for custom keys with some text and no icon. -->
+        <!-- Size of the text for custom keys with some text and no icon.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="labelTextSize" format="dimension" />
 
-        <!-- Color to use for the label in a key. -->
+        <!-- Color to use for the label in a key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyTextColor" format="color" />
 
-        <!-- Layout resource for key press feedback.-->
+        <!-- Layout resource for key press feedback.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewLayout" format="reference" />
 
-        <!-- Vertical offset of the key press feedback from the key. -->
+        <!-- Vertical offset of the key press feedback from the key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewOffset" format="dimension" />
 
-        <!-- Height of the key press feedback popup. -->
+        <!-- Height of the key press feedback popup.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyPreviewHeight" format="dimension" />
 
-        <!-- Amount to offset the touch Y coordinate by, for bias correction. -->
+        <!-- Amount to offset the touch Y coordinate by, for bias correction.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="verticalCorrection" format="dimension" />
 
-        <!-- Layout resource for popup keyboards. -->
+        <!-- Layout resource for popup keyboards.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupLayout" format="reference" />
 
+        <!-- {@deprecated Copy this definition into your own application project.} -->
         <attr name="shadowColor" />
+        <!-- {@deprecated Copy this definition into your own application project.} -->
         <attr name="shadowRadius" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="KeyboardViewPreviewState">
         <!-- State for {@link android.inputmethodservice.KeyboardView KeyboardView}
-                key preview background. -->
+                key preview background.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="state_long_pressable" format="boolean" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard">
-        <!-- Default width of a key, in pixels or percentage of display width. -->
+        <!-- Default width of a key, in pixels or percentage of display width.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyWidth" format="dimension|fraction" />
-        <!-- Default height of a key, in pixels or percentage of display width. -->
+        <!-- Default height of a key, in pixels or percentage of display width.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyHeight" format="dimension|fraction" />
-        <!-- Default horizontal gap between keys. -->
+        <!-- Default horizontal gap between keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="horizontalGap" format="dimension|fraction" />
-        <!-- Default vertical gap between rows of keys. -->
+        <!-- Default vertical gap between rows of keys.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="verticalGap" format="dimension|fraction" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard_Row">
-        <!-- Row edge flags. -->
+        <!-- Row edge flags.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="rowEdgeFlags">
-            <!-- Row is anchored to the top of the keyboard. -->
+            <!-- Row is anchored to the top of the keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
             <flag name="top" value="4" />
-            <!-- Row is anchored to the bottom of the keyboard. -->
+            <!-- Row is anchored to the bottom of the keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
             <flag name="bottom" value="8" />
         </attr>
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the row will be skipped. -->
+             requested keyboard mode, the row will be skipped.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardMode" format="reference" />
     </declare-styleable>
 
+    <!-- {@deprecated Copy this definition into your own application project.} -->
     <declare-styleable name="Keyboard_Key">
-        <!-- The unicode value or comma-separated values that this key outputs. -->
+        <!-- The unicode value or comma-separated values that this key outputs.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="codes" format="integer|string" />
-        <!-- The XML keyboard layout of any popup keyboard. -->
+        <!-- The XML keyboard layout of any popup keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupKeyboard" format="reference" />
-        <!-- The characters to display in the popup keyboard. -->
+        <!-- The characters to display in the popup keyboard.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="popupCharacters" format="string" />
-        <!-- Key edge flags. -->
+        <!-- Key edge flags.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyEdgeFlags">
-            <!-- Key is anchored to the left of the keyboard. -->
+            <!-- Key is anchored to the left of the keyboard.
+                 {@deprecated Copy this definition into your own application project.} -->
             <flag name="left" value="1" />
-            <!-- Key is anchored to the right of the keyboard. -->
+            <!-- Key is anchored to the right of the keyboard.
+                 {@deprecated Copy this definition into your own application project.} -->
             <flag name="right" value="2" />
         </attr>
-        <!-- Whether this is a modifier key such as Alt or Shift. -->
+        <!-- Whether this is a modifier key such as Alt or Shift.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isModifier" format="boolean" />
-        <!-- Whether this is a toggle key. -->
+        <!-- Whether this is a toggle key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isSticky" format="boolean" />
-        <!-- Whether long-pressing on this key will make it repeat. -->
+        <!-- Whether long-pressing on this key will make it repeat.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="isRepeatable" format="boolean" />
-        <!-- The icon to show in the popup preview. -->
+        <!-- The icon to show in the popup preview.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="iconPreview" format="reference" />
-        <!-- The string of characters to output when this key is pressed. -->
+        <!-- The string of characters to output when this key is pressed.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyOutputText" format="string" />
-        <!-- The label to display on the key. -->
+        <!-- The label to display on the key.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyLabel" format="string" />
-        <!-- The icon to display on the key instead of the label. -->
+        <!-- The icon to display on the key instead of the label.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyIcon" format="reference" />
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the key will be skipped. -->
+             requested keyboard mode, the key will be skipped.
+             {@deprecated Copy this definition into your own application project.} -->
         <attr name="keyboardMode" />
     </declare-styleable>
 
@@ -7868,8 +8025,18 @@
         <attr name="showMetadataInPreview" format="boolean" />
 
         <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
-            @hide -->
+             This feature requires the android.permission.AMBIENT_WALLPAPER permission.
+             @hide @SystemApi -->
         <attr name="supportsAmbientMode" format="boolean" />
+
+        <!-- Uri that specifies a settings Slice for this wallpaper. -->
+        <attr name="settingsSliceUri" format="string"/>
+
+        <!-- Indicates that this wallpaper service can support multiple engines to render on each
+             surface independently. An example use case is a multi-display set-up where the
+             wallpaper service can render surfaces to each of the connected displays. Corresponds to
+             {@link android.app.WallpaperInfo#supportsMultipleDisplays()} -->
+        <attr name="supportsMultipleDisplays" format="boolean" />
 
     </declare-styleable>
 
@@ -7968,7 +8135,7 @@
 
     <!-- Use <code>autofill-service</code> as the root tag of the XML resource that describes a
          {@link android.service.autofill.AutofillService}, which is referenced from its
-         {@link android.service.autofill#SERVICE_META_DATA} meta-data entry.
+         {@link android.service.autofill.AutofillService#SERVICE_META_DATA} meta-data entry.
     -->
     <declare-styleable name="AutofillService">
         <!-- Fully qualified class name of an activity that allows the user to modify
@@ -7991,6 +8158,23 @@
              android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
         -->
         <attr name="maxLongVersionCode" format="string" />
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Content Capture attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>content-capture-service</code> as the root tag of the XML resource that describes
+         a {@link android.service.contentcapture.ContentCaptureService}, which is referenced from
+         its {@link android.service.contentcapture.ContentCaptureService#SERVICE_META_DATA}
+         meta-data entry.
+         @hide @SystemApi
+    -->
+    <declare-styleable name="ContentCaptureService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -8070,7 +8254,7 @@
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
         <!-- The user restriction for this preference. -->
-        <attr name="userRestriction"/>
+        <attr name="userRestriction" format="string"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -8728,6 +8912,7 @@
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
         <attr name="layout_hasNestedScrollIndicator" format="boolean" />
+        <attr name="layout_maxHeight" format="dimension"/>
     </declare-styleable>
 
     <!-- @hide -->
@@ -8822,6 +9007,10 @@
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar
                    color. -->
         <attr name="navigationBarColor"/>
+        <!-- @hide From Window.enforceStatusBarContrast -->
+        <attr name="enforceStatusBarContrast"/>
+        <!-- @hide From Window.enforceNavigationBarContrast -->
+        <attr name="enforceNavigationBarContrast"/>
     </declare-styleable>
 
     <declare-styleable name="Shortcut">
@@ -8858,7 +9047,7 @@
         <attr name="fontWeight" format="integer" />
         <!-- The index of the font in the ttc (TrueType Collection) font file. If the font file
          referenced is not in the ttc format, this attribute needs not be specified.
-         {@see android.graphics.Typeface#Builder.setTtcIndex(int)}.
+         {@link android.graphics.Typeface.Builder#setTtcIndex(int)}.
          The default value is 0. More details about the TrueType Collection font format can be found
          here: https://en.wikipedia.org/wiki/TrueType#TrueType_Collection. -->
         <attr name="ttcIndex" format="integer" />
@@ -8923,4 +9112,16 @@
     </declare-styleable>
 
     <attr name="lockPatternStyle" format="reference" />
+
+    <declare-styleable name="Magnifier">
+        <attr name="magnifierWidth" format="dimension" />
+        <attr name="magnifierHeight" format="dimension" />
+        <attr name="magnifierZoom" format="float" />
+        <attr name="magnifierElevation" format="dimension" />
+        <attr name="magnifierVerticalOffset" format="dimension" />
+        <attr name="magnifierHorizontalOffset" format="dimension" />
+        <attr name="magnifierColorOverlay" format="color" />
+    </declare-styleable>
+
+    <attr name="autoSizePresetSizes" />
 </resources>

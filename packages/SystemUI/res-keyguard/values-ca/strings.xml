@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Toca per escriure la contrasenya"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Escriu la contrasenya per desbloquejar"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Escriu el PIN per desbloquejar"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Introdueix el PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Introdueix el patró"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Introdueix la contrasenya"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"El codi PIN no és correcte."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"La targeta no és vàlida."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Bateria carregada"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"S\'està carregant"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"S\'està carregant ràpidament"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"S\'està carregant lentament"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Completament carregada"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant sense fils"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant ràpidament"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant lentament"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Connecta el carregador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Prem Menú per desbloquejar."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"La xarxa està bloquejada"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"La targeta SIM està bloquejada pel PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"S\'està desbloquejant la targeta SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Zona del PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Contrasenya del dispositiu"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Zona del PIN de la SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Zona del PUK de la SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"S\'ha definit la pròxima alarma per a l\'hora següent: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"S\'ha produït un error i no es pot desactivar l\'eSIM."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Retorn"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"He oblidat el patró"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"El patró no és correcte"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"La contrasenya no és correcta"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Patró incorrecte"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Contrasenya incorrecta"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"El PIN no és correcte"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Torna-ho a provar d\'aquí a <xliff:g id="NUMBER">%d</xliff:g> segons.</item>
@@ -136,13 +141,41 @@
       <item quantity="other">Fa <xliff:g id="NUMBER_1">%d</xliff:g> hores que no es desbloqueja el dispositiu. Confirma la contrasenya.</item>
       <item quantity="one">Fa <xliff:g id="NUMBER_0">%d</xliff:g> hora que no es desbloqueja el dispositiu. Confirma la contrasenya.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"No s\'ha reconegut"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Introdueix el PIN de la SIM. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
-      <item quantity="one">Introdueix el PIN de la SIM. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"No s\'ha reconegut"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"No s\'ha reconegut"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Introdueix el PIN de la SIM. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
+      <item quantity="one">Introdueix el PIN de la SIM. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Són les"</annotation>\n"^1 i\n^2</item>
+      <item quantity="one">"<annotation name="color">"És la"</annotation>\n"^1 i\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"i dotze"</item>
+    <item msgid="7389464214252023751">"Una"</item>
+    <item msgid="8803180377002008046">"Dues"</item>
+    <item msgid="8614897059944644719">"Tres"</item>
+    <item msgid="2293058674782619556">"Quatre"</item>
+    <item msgid="4815402358455041664">"Cinc"</item>
+    <item msgid="3325754778509665687">"Sis"</item>
+    <item msgid="5805551341866280575">"Set"</item>
+    <item msgid="203334816668238610">"Vuit"</item>
+    <item msgid="4828052671464488923">"Nou"</item>
+    <item msgid="2233497913571137419">"Deu"</item>
+    <item msgid="5621554266768657830">"i onze"</item>
+  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

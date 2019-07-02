@@ -28,12 +28,18 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Parolni kiritish uchun bosing"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Qulfni ochish uchun parolni kiriting"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Qulfni ochish uchun PIN kodni kiriting"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN kodni kiriting"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Grafik kalitni chizing"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Parolni kiriting"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kodi xato."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM karta yaroqsiz."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Batareya quvvati to‘ldi"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Quvvatlash"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Tezkor quvvat olmoqda"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Sekin quvvat olmoqda"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for keyguard_charged (3316115607283493413) -->
+    <skip />
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz quvvat olmoqda"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sekin quvvat olmoqda"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Quvvatlash moslamasini ulang."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Qulfdan chiqarish uchun Menyu tugmasini bosing."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Tarmoq qulflangan"</string>
@@ -48,6 +54,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM karta PUK kod bilan qulflangan."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM karta qulfi ochilmoqda…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN kod maydoni"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Qurilma paroli"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM karta PIN kodi maydoni"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM karta PUK kodi maydoni"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Signal <xliff:g id="ALARM">%1$s</xliff:g> da chalinadi."</string>
@@ -57,8 +64,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Xatolik tufayli eSIM faolsizlantirilmadi."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter tugmasi"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Grafik kalit esimdan chiqdi"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Grafik kalit xato"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Parol xato"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Grafik kalit xato"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Parol xato"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN kod xato"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> soniyadan keyin qaytadan urining.</item>
@@ -111,7 +118,7 @@
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM kartani qulfdan chiqarib bo‘lmadi!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Kod qabul qilindi!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Aloqa yo‘q."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Matn kiritish usulini o‘zgartirish"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Matn kiritish usulini almashtirish"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Parvoz rejimi"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Qurilma o‘chirib yoqilgandan keyin grafik kalit talab qilinadi"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Qurilma o‘chirib yoqilgandan keyin PIN kod talab qilinadi"</string>
@@ -136,8 +143,9 @@
       <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
       <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Parolni yana bir marta kiriting.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Barmoq izi aniqlanmadi"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Aniqlanmadi"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Aniqlanmadi"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM PIN kodini kiriting, sizda <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish bor.</item>
       <item quantity="one">SIM PIN kodini kiriting, qurilmani qulfdan chiqarish uchun sizda <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish bor.</item>
     </plurals>
@@ -145,4 +153,84 @@
       <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
       <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Soat"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Soat"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Oʻn ikki"</item>
+    <item msgid="7389464214252023751">"Bir"</item>
+    <item msgid="8803180377002008046">"Ikki"</item>
+    <item msgid="8614897059944644719">"Uch"</item>
+    <item msgid="2293058674782619556">"Toʻrt"</item>
+    <item msgid="4815402358455041664">"Besh"</item>
+    <item msgid="3325754778509665687">"Olti"</item>
+    <item msgid="5805551341866280575">"Yetti"</item>
+    <item msgid="203334816668238610">"Sakkiz"</item>
+    <item msgid="4828052671464488923">"Toʻqqiz"</item>
+    <item msgid="2233497913571137419">"Oʻn"</item>
+    <item msgid="5621554266768657830">"Oʻn bir"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Soat"</item>
+    <item msgid="8837126587669001578">"Nol bir"</item>
+    <item msgid="4294343372940455660">"Nol ikki"</item>
+    <item msgid="7129166637707421536">"Nol uch"</item>
+    <item msgid="7579404865008788673">"Nol toʻrt"</item>
+    <item msgid="3873924689207380586">"Nol besh"</item>
+    <item msgid="4849565597850069377">"Nol olti"</item>
+    <item msgid="4404219424523572364">"Nol yetti"</item>
+    <item msgid="8740481214764087329">"Nol sakkiz"</item>
+    <item msgid="1713216865806811237">"Nol toʻqqiz"</item>
+    <item msgid="3508406095411245038">"Oʻn"</item>
+    <item msgid="7161996337755311711">"Oʻn bir"</item>
+    <item msgid="4044549963329624197">"Oʻn ikki"</item>
+    <item msgid="333373157917379088">"Oʻn uch"</item>
+    <item msgid="2631202907124819385">"Oʻn toʻrt"</item>
+    <item msgid="6472396076858033453">"Oʻn besh"</item>
+    <item msgid="8656981856181581643">"Oʻn olti"</item>
+    <item msgid="7289026608562030619">"Oʻn yetti"</item>
+    <item msgid="3881477602692646573">"Oʻn sakkiz"</item>
+    <item msgid="3358129827772984226">"Oʻn toʻqqiz"</item>
+    <item msgid="3308575407402865807">"Yigirma"</item>
+    <item msgid="5346560955382229629">"Yigirma\nbir"</item>
+    <item msgid="226750304761473436">"Yigirma\nikki"</item>
+    <item msgid="616811325336838734">"Yigirma\nuch"</item>
+    <item msgid="616346116869053440">"Yigirma\ntoʻrt"</item>
+    <item msgid="4642996410384042830">"Yigirma\nbesh"</item>
+    <item msgid="7506092849993571465">"Yigirma\nolti"</item>
+    <item msgid="1915078191101042031">"Yigirma\nyetti"</item>
+    <item msgid="4292378641900520252">"Yigirma\nsakkiz"</item>
+    <item msgid="5339513901773103696">"Yigirma\ntoʻqqiz"</item>
+    <item msgid="3574673250891657607">"Oʻttiz"</item>
+    <item msgid="5796923836589110940">"Oʻttiz\nbir"</item>
+    <item msgid="5859323597571702052">"Oʻttiz\nikki"</item>
+    <item msgid="5133326723148876507">"Oʻttiz\nuch"</item>
+    <item msgid="2693999494655663096">"Oʻttiz\ntoʻrt"</item>
+    <item msgid="3316754944962836197">"Oʻttiz\nbesh"</item>
+    <item msgid="816891008836796723">"Oʻttiz\nolti"</item>
+    <item msgid="9158890488666520078">"Oʻttiz\nyetti"</item>
+    <item msgid="1894769703213894011">"Oʻttiz\nsakkiz"</item>
+    <item msgid="5638820345598572399">"Oʻttiz\ntoʻqqiz"</item>
+    <item msgid="8838304023017895439">"Qirq"</item>
+    <item msgid="1834742948932559597">"Qirq\nbir"</item>
+    <item msgid="6573707308847773944">"Qirq\nikki"</item>
+    <item msgid="2450149950652678001">"Qirq\nuch"</item>
+    <item msgid="2874667401318178036">"Qirq\ntoʻrt"</item>
+    <item msgid="3391101532763048862">"Qirq\nbesh"</item>
+    <item msgid="1671489330863254362">"Qirq\nolti"</item>
+    <item msgid="5916017359554531038">"Qirq\nyetti"</item>
+    <item msgid="8205413177993059967">"Qirq\nsakkiz"</item>
+    <item msgid="6607867415142171302">"Qirq\ntoʻqqiz"</item>
+    <item msgid="8358850748472089162">"Ellik"</item>
+    <item msgid="3551313125255080234">"Ellik\nbir"</item>
+    <item msgid="1559678130725716542">"Ellik\nikki"</item>
+    <item msgid="431441994725492377">"Ellik\nuch"</item>
+    <item msgid="6345774640539623024">"Ellik\ntoʻrt"</item>
+    <item msgid="8018192990793931120">"Ellik\nbesh"</item>
+    <item msgid="6187650843754604534">"Ellik\nolti"</item>
+    <item msgid="8727240174015993259">"Ellik\nyetti"</item>
+    <item msgid="848339003778952950">"Ellik\nsakkiz"</item>
+    <item msgid="5798985802835423618">"Ellik\ntoʻqqiz"</item>
+  </string-array>
 </resources>

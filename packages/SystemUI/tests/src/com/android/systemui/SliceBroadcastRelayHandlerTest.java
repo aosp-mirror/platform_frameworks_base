@@ -95,6 +95,22 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUnregisterWithoutRegister() {
+        Uri testUri = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority("something")
+                .path("test")
+                .build();
+        SliceBroadcastRelayHandler relayHandler = new SliceBroadcastRelayHandler();
+        relayHandler.mContext = spy(mContext);
+
+        Intent intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
+        intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
+        relayHandler.handleIntent(intent);
+        // No crash
+    }
+
+    @Test
     public void testRelay() {
         Receiver.sReceiver = mock(BroadcastReceiver.class);
         Uri testUri = new Uri.Builder()

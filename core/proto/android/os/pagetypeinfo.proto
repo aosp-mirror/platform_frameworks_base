@@ -17,7 +17,7 @@ syntax = "proto2";
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.os;
 
@@ -49,8 +49,11 @@ message PageTypeInfoProto {
 
         optional int32 node = 1;
 
+        // Memory zone.
         optional string zone = 2;
 
+        // Migration type (Unmovable, Reclaimable, Movable, Reserve, CMA, and
+        // Isolate).
         optional string type = 3;
 
         // order level starts from 0 for 4KB to page_block_order defined above, e.g. 10 for 4096KB
@@ -64,6 +67,7 @@ message PageTypeInfoProto {
 
         optional int32 node = 1;
 
+        // Memory zone.
         optional string zone = 2;
 
         optional int32 unmovable = 3;

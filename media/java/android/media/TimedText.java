@@ -364,6 +364,16 @@ public final class TimedText
     }
 
     /**
+     * @param text the characters in the timed text.
+     * @param bounds the rectangle area or region for rendering the timed text.
+     * {@hide}
+     */
+    public TimedText(String text, Rect bounds) {
+        mTextChars = text;
+        mTextBounds = bounds;
+    }
+
+    /**
      * Get the characters in the timed text.
      *
      * @return the characters as a String object in the TimedText. Applications

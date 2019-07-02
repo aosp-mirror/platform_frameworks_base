@@ -28,6 +28,10 @@ import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
 
+import android.service.procstats.ProcessStatsStateProto;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
+
 /**
  * Class to accumulate PSS data.
  */
@@ -46,18 +50,17 @@ public class PssTable extends SparseMappingTable.Table {
     public void mergeStats(PssTable that) {
         final int N = that.getKeyCount();
         for (int i=0; i<N; i++) {
-            final int key = that.getKeyAt(i);
-            final int state = SparseMappingTable.getIdFromKey(key);
-            mergeStats(state, (int)that.getValue(key, PSS_SAMPLE_COUNT),
-                    that.getValue(key, PSS_MINIMUM),
-                    that.getValue(key, PSS_AVERAGE),
-                    that.getValue(key, PSS_MAXIMUM),
-                    that.getValue(key, PSS_USS_MINIMUM),
-                    that.getValue(key, PSS_USS_AVERAGE),
-                    that.getValue(key, PSS_USS_MAXIMUM),
-                    that.getValue(key, PSS_RSS_MINIMUM),
-                    that.getValue(key, PSS_RSS_AVERAGE),
-                    that.getValue(key, PSS_RSS_MAXIMUM));
+            final int thatKey = that.getKeyAt(i);
+            final int state = SparseMappingTable.getIdFromKey(thatKey);
+
+            final int key = getOrAddKey((byte)state, PSS_COUNT);
+            final long[] stats = getArrayForKey(key);
+            final int statsIndex = SparseMappingTable.getIndexFromKey(key);
+
+            final long[] thatStats = that.getArrayForKey(thatKey);
+            final int thatStatsIndex = SparseMappingTable.getIndexFromKey(thatKey);
+
+            mergeStats(stats, statsIndex, thatStats, thatStatsIndex);
         }
     }
 
@@ -68,64 +71,100 @@ public class PssTable extends SparseMappingTable.Table {
     public void mergeStats(int state, int inCount, long minPss, long avgPss, long maxPss,
             long minUss, long avgUss, long maxUss, long minRss, long avgRss, long maxRss) {
         final int key = getOrAddKey((byte)state, PSS_COUNT);
-        final long count = getValue(key, PSS_SAMPLE_COUNT);
+        final long[] stats = getArrayForKey(key);
+        final int statsIndex = SparseMappingTable.getIndexFromKey(key);
+        mergeStats(stats, statsIndex, inCount, minPss, avgPss, maxPss, minUss, avgUss, maxUss,
+                minRss, avgRss, maxRss);
+    }
+
+    public static void mergeStats(final long[] stats, final int statsIndex,
+            final long[] thatStats, int thatStatsIndex) {
+        mergeStats(stats, statsIndex, (int)thatStats[thatStatsIndex + PSS_SAMPLE_COUNT],
+                thatStats[thatStatsIndex + PSS_MINIMUM],
+                thatStats[thatStatsIndex + PSS_AVERAGE],
+                thatStats[thatStatsIndex + PSS_MAXIMUM],
+                thatStats[thatStatsIndex + PSS_USS_MINIMUM],
+                thatStats[thatStatsIndex + PSS_USS_AVERAGE],
+                thatStats[thatStatsIndex + PSS_USS_MAXIMUM],
+                thatStats[thatStatsIndex + PSS_RSS_MINIMUM],
+                thatStats[thatStatsIndex + PSS_RSS_AVERAGE],
+                thatStats[thatStatsIndex + PSS_RSS_MAXIMUM]);
+    }
+
+    public static void mergeStats(final long[] stats, final int statsIndex, final int inCount,
+            final long minPss, final long avgPss, final long maxPss,
+            final long minUss, final long avgUss, final long maxUss,
+            final long minRss, final long avgRss, final long maxRss) {
+        final long count = stats[statsIndex + PSS_SAMPLE_COUNT];
         if (count == 0) {
-            setValue(key, PSS_SAMPLE_COUNT, inCount);
-            setValue(key, PSS_MINIMUM, minPss);
-            setValue(key, PSS_AVERAGE, avgPss);
-            setValue(key, PSS_MAXIMUM, maxPss);
-            setValue(key, PSS_USS_MINIMUM, minUss);
-            setValue(key, PSS_USS_AVERAGE, avgUss);
-            setValue(key, PSS_USS_MAXIMUM, maxUss);
-            setValue(key, PSS_RSS_MINIMUM, minRss);
-            setValue(key, PSS_RSS_AVERAGE, avgRss);
-            setValue(key, PSS_RSS_MAXIMUM, maxRss);
+            stats[statsIndex + PSS_SAMPLE_COUNT] = inCount;
+            stats[statsIndex + PSS_MINIMUM] = minPss;
+            stats[statsIndex + PSS_AVERAGE] = avgPss;
+            stats[statsIndex + PSS_MAXIMUM] = maxPss;
+            stats[statsIndex + PSS_USS_MINIMUM] = minUss;
+            stats[statsIndex + PSS_USS_AVERAGE] = avgUss;
+            stats[statsIndex + PSS_USS_MAXIMUM] = maxUss;
+            stats[statsIndex + PSS_RSS_MINIMUM] = minRss;
+            stats[statsIndex + PSS_RSS_AVERAGE] = avgRss;
+            stats[statsIndex + PSS_RSS_MAXIMUM] = maxRss;
         } else {
-            setValue(key, PSS_SAMPLE_COUNT, count + inCount);
+            stats[statsIndex + PSS_SAMPLE_COUNT] = count + inCount;
 
-            long val;
-
-            val = getValue(key, PSS_MINIMUM);
-            if (val > minPss) {
-                setValue(key, PSS_MINIMUM, minPss);
+            if (stats[statsIndex + PSS_MINIMUM] > minPss) {
+                stats[statsIndex + PSS_MINIMUM] = minPss;
             }
 
-            val = getValue(key, PSS_AVERAGE);
-            setValue(key, PSS_AVERAGE,
-                    (long)(((val*(double)count)+(avgPss*(double)inCount)) / (count+inCount)));
+            stats[statsIndex + PSS_AVERAGE] = (long)(((stats[statsIndex + PSS_AVERAGE]
+                    * (double)count) + (avgPss * (double)inCount)) / (count + inCount));
 
-            val = getValue(key, PSS_MAXIMUM);
-            if (val < maxPss) {
-                setValue(key, PSS_MAXIMUM, maxPss);
+            if (stats[statsIndex + PSS_MAXIMUM] < maxPss) {
+                stats[statsIndex + PSS_MAXIMUM] = maxPss;
             }
 
-            val = getValue(key, PSS_USS_MINIMUM);
-            if (val > minUss) {
-                setValue(key, PSS_USS_MINIMUM, minUss);
+            if (stats[statsIndex + PSS_USS_MINIMUM] > minUss) {
+                stats[statsIndex + PSS_USS_MINIMUM] = minUss;
             }
 
-            val = getValue(key, PSS_USS_AVERAGE);
-            setValue(key, PSS_USS_AVERAGE,
-                    (long)(((val*(double)count)+(avgUss*(double)inCount)) / (count+inCount)));
+            stats[statsIndex + PSS_USS_AVERAGE] = (long)(((stats[statsIndex + PSS_USS_AVERAGE]
+                    * (double)count) + (avgUss * (double)inCount)) / (count + inCount));
 
-            val = getValue(key, PSS_USS_MAXIMUM);
-            if (val < maxUss) {
-                setValue(key, PSS_USS_MAXIMUM, maxUss);
+            if (stats[statsIndex + PSS_USS_MAXIMUM] < maxUss) {
+                stats[statsIndex + PSS_USS_MAXIMUM] = maxUss;
             }
 
-            val = getValue(key, PSS_RSS_MINIMUM);
-            if (val > minUss) {
-                setValue(key, PSS_RSS_MINIMUM, minUss);
+            if (stats[statsIndex + PSS_RSS_MINIMUM] > minRss) {
+                stats[statsIndex + PSS_RSS_MINIMUM] = minRss;
             }
 
-            val = getValue(key, PSS_RSS_AVERAGE);
-            setValue(key, PSS_RSS_AVERAGE,
-                    (long)(((val*(double)count)+(avgUss*(double)inCount)) / (count+inCount)));
+            stats[statsIndex + PSS_RSS_AVERAGE] = (long)(((stats[statsIndex + PSS_RSS_AVERAGE]
+                    * (double)count) + (avgRss * (double)inCount)) / (count + inCount));
 
-            val = getValue(key, PSS_RSS_MAXIMUM);
-            if (val < maxUss) {
-                setValue(key, PSS_RSS_MAXIMUM, maxUss);
+            if (stats[statsIndex + PSS_RSS_MAXIMUM] < maxRss) {
+                stats[statsIndex + PSS_RSS_MAXIMUM] = maxRss;
             }
         }
+    }
+
+    public void writeStatsToProtoForKey(ProtoOutputStream proto, int key) {
+        final long[] stats = getArrayForKey(key);
+        final int statsIndex = SparseMappingTable.getIndexFromKey(key);
+        writeStatsToProto(proto, stats, statsIndex);
+    }
+
+    public static void writeStatsToProto(ProtoOutputStream proto, final long[] stats,
+            final int statsIndex) {
+        proto.write(ProcessStatsStateProto.SAMPLE_SIZE, stats[statsIndex + PSS_SAMPLE_COUNT]);
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.PSS,
+                stats[statsIndex + PSS_MINIMUM],
+                stats[statsIndex + PSS_AVERAGE],
+                stats[statsIndex + PSS_MAXIMUM]);
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.USS,
+                stats[statsIndex + PSS_USS_MINIMUM],
+                stats[statsIndex + PSS_USS_AVERAGE],
+                stats[statsIndex + PSS_USS_MAXIMUM]);
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
+                stats[statsIndex + PSS_RSS_MINIMUM],
+                stats[statsIndex + PSS_RSS_AVERAGE],
+                stats[statsIndex + PSS_RSS_MAXIMUM]);
     }
 }

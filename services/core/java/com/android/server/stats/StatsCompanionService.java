@@ -15,10 +15,32 @@
  */
 package com.android.server.stats;
 
+import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
+import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
+import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.os.Process.getPidsForCommands;
+import static android.os.Process.getUidForPid;
+import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
+import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
+
+import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readProcessSystemIonHeapSizesFromDebugfs;
+import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readSystemIonHeapSizeFromDebugfs;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.app.AlarmManager.OnAlarmListener;
+import android.app.AppOpsManager;
+import android.app.AppOpsManager.HistoricalOps;
+import android.app.AppOpsManager.HistoricalOpsRequest;
+import android.app.AppOpsManager.HistoricalPackageOps;
+import android.app.AppOpsManager.HistoricalUidOps;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -29,23 +51,39 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
+import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.CoolingDevice;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
+import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
+import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -55,37 +93,80 @@ import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.DiskInfo;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
+import android.provider.Settings;
+import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.procstats.IProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.BatterySipper;
+import com.android.internal.os.BatteryStatsHelper;
+import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
-import com.android.internal.os.KernelUidCpuTimeReader;
-import com.android.internal.os.KernelUidCpuClusterTimeReader;
-import com.android.internal.os.KernelUidCpuActiveTimeReader;
-import com.android.internal.os.KernelUidCpuFreqTimeReader;
+import com.android.internal.os.KernelCpuThreadReader;
+import com.android.internal.os.KernelCpuThreadReaderDiff;
+import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
+import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
+import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemServiceManager;
+import com.android.server.am.MemoryStatUtil.IonAllocations;
+import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.role.RoleManagerInternal;
+import com.android.server.storage.DiskStatsFileLogger;
+import com.android.server.storage.DiskStatsLoggingService;
+
+import libcore.io.IoUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -107,9 +188,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     static final String TAG = "StatsCompanionService";
     static final boolean DEBUG = false;
+    /**
+     * Hard coded field ids of frameworks/base/cmds/statsd/src/uid_data.proto
+     * to be used in ProtoOutputStream.
+     */
+    private static final int APPLICATION_INFO_FIELD_ID = 1;
+    private static final int UID_FIELD_ID = 1;
+    private static final int VERSION_FIELD_ID = 2;
+    private static final int VERSION_STRING_FIELD_ID = 3;
+    private static final int PACKAGE_NAME_FIELD_ID = 4;
+    private static final int INSTALLER_FIELD_ID = 5;
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
+    public static final int CODE_ACTIVE_CONFIGS_BROADCAST = 1;
     /**
      * The last report time is provided with each intent registered to
      * StatsManager#setFetchReportsOperation. This allows easy de-duping in the receiver if
@@ -120,6 +212,45 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      */
     public static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
     public static final int DEATH_THRESHOLD = 10;
+    /**
+     * Which native processes to snapshot memory for.
+     *
+     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
+     * /system/bin/statsd for the stats daemon.
+     */
+    private static final String[] MEMORY_INTERESTING_NATIVE_PROCESSES = new String[]{
+            "/system/bin/statsd",  // Stats daemon.
+            "/system/bin/surfaceflinger",
+            "/system/bin/apexd",  // APEX daemon.
+            "/system/bin/audioserver",
+            "/system/bin/cameraserver",
+            "/system/bin/drmserver",
+            "/system/bin/healthd",
+            "/system/bin/incidentd",
+            "/system/bin/installd",
+            "/system/bin/lmkd",  // Low memory killer daemon.
+            "/system/bin/logd",
+            "media.codec",
+            "media.extractor",
+            "media.metrics",
+            "/system/bin/mediadrmserver",
+            "/system/bin/mediaserver",
+            "/system/bin/performanced",
+            "/system/bin/tombstoned",
+            "/system/bin/traced",  // Perfetto.
+            "/system/bin/traced_probes",  // Perfetto.
+            "webview_zygote",
+            "zygote",
+            "zygote64",
+    };
+
+    private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
+
+    static final class CompanionHandler extends Handler {
+        CompanionHandler(Looper looper) {
+            super(looper);
+        }
+    }
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
@@ -128,9 +259,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static IStatsManager sStatsd;
     private static final Object sStatsdLock = new Object();
 
-    private final PendingIntent mAnomalyAlarmIntent;
-    private final PendingIntent mPullingAlarmIntent;
-    private final PendingIntent mPeriodicAlarmIntent;
+    private final OnAlarmListener mAnomalyAlarmListener = new AnomalyAlarmListener();
+    private final OnAlarmListener mPullingAlarmListener = new PullingAlarmListener();
+    private final OnAlarmListener mPeriodicAlarmListener = new PeriodicAlarmListener();
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
     private final ShutdownEventReceiver mShutdownEventReceiver;
@@ -138,26 +269,40 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
     private IWifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
-    private final StatFs mStatFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-    private final StatFs mStatFsSystem =
-            new StatFs(Environment.getRootDirectory().getAbsolutePath());
-    private final StatFs mStatFsTemp =
-            new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
     @GuardedBy("sStatsdLock")
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
     @GuardedBy("sStatsdLock")
     private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
+    private final CompanionHandler mHandler;
 
-    private KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
+    // Disables throttler on CPU time readers.
+    private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
+            new KernelCpuUidUserSysTimeReader(false);
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
-    private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
-            new KernelUidCpuFreqTimeReader();
-    private KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader =
-            new KernelUidCpuActiveTimeReader();
-    private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
-            new KernelUidCpuClusterTimeReader();
+    private KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
+            new KernelCpuUidFreqTimeReader(false);
+    private KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
+            new KernelCpuUidActiveTimeReader(false);
+    private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
+            new KernelCpuUidClusterTimeReader(false);
+    private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
+            new StoragedUidIoStatsReader();
+    @Nullable
+    private final KernelCpuThreadReaderDiff mKernelCpuThreadReader;
+
+    private long mDebugElapsedClockPreviousValue = 0;
+    private long mDebugElapsedClockPullCount = 0;
+    private long mDebugFailingElapsedClockPreviousValue = 0;
+    private long mDebugFailingElapsedClockPullCount = 0;
+    private BatteryStatsHelper mBatteryStatsHelper = null;
+    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
+    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
 
     private static IThermalService sThermalService;
+    private File mBaseDir =
+            new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
+    @GuardedBy("this")
+    ProcessCpuTracker mProcessCpuTracker = null;
 
     public StatsCompanionService(Context context) {
         super();
@@ -165,13 +310,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mNetworkStatsService = INetworkStatsService.Stub.asInterface(
               ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-
-        mAnomalyAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(mContext, AnomalyAlarmReceiver.class), 0);
-        mPullingAlarmIntent = PendingIntent.getBroadcast(
-                mContext, 0, new Intent(mContext, PullingAlarmReceiver.class), 0);
-        mPeriodicAlarmIntent = PendingIntent.getBroadcast(
-                mContext, 0, new Intent(mContext, PeriodicAlarmReceiver.class), 0);
+        mBaseDir.mkdirs();
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -205,12 +344,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     numSpeedSteps);
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
-        // use default throttling in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        mKernelUidCpuFreqTimeReader.setThrottleInterval(0);
-        long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
-        mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
-        mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
 
         // Enable push notifications of throttling from vendor thermal
         // management subsystem via thermalservice.
@@ -229,6 +362,19 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         } else {
             Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
         }
+
+        // Default NetworkRequest should cover all transport types.
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
+
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        mHandler = new CompanionHandler(handlerThread.getLooper());
+
+        mKernelCpuThreadReader =
+                KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
     }
 
     @Override
@@ -245,35 +391,55 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     @Override
-    public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
-                                        long subscriptionId, long subscriptionRuleId,
-                                        String[] cookies,
-                                        StatsDimensionsValue dimensionsValue) {
+    public void sendActiveConfigsChangedBroadcast(IBinder intentSenderBinder, long[] configIds) {
         enforceCallingPermission();
         IntentSender intentSender = new IntentSender(intentSenderBinder);
-        Intent intent = new Intent()
-                .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
-                .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configKey)
-                .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
-                .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
-                .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+        Intent intent = new Intent();
+        intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
+        try {
+            intentSender.sendIntent(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
+            if (DEBUG) {
+                Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
+            }
+        } catch (IntentSender.SendIntentException e) {
+            Slog.w(TAG, "Unable to send active configs changed broadcast using IntentSender");
+        }
+    }
+
+    @Override
+    public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
+            long subscriptionId, long subscriptionRuleId, String[] cookies,
+            StatsDimensionsValue dimensionsValue) {
+        enforceCallingPermission();
+        IntentSender intentSender = new IntentSender(intentSenderBinder);
+        Intent intent =
+                new Intent()
+                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
+                        .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configKey)
+                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
+                        .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
+                        .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
 
         ArrayList<String> cookieList = new ArrayList<>(cookies.length);
-        for (String cookie : cookies) { cookieList.add(cookie); }
+        for (String cookie : cookies) {
+            cookieList.add(cookie);
+        }
         intent.putStringArrayListExtra(
                 StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
 
         if (DEBUG) {
-            Slog.d(TAG, String.format(
-                    "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
-                    configUid, configKey, subscriptionId, subscriptionRuleId,
-                    Arrays.toString(cookies), dimensionsValue));
+            Slog.d(TAG,
+                    String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
+                            configUid, configKey, subscriptionId, subscriptionRuleId,
+                            Arrays.toString(cookies),
+                            dimensionsValue));
         }
         try {
             intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
         } catch (IntentSender.SendIntentException e) {
-            Slog.w(TAG, "Unable to send using IntentSender from uid " + configUid
-                    + "; presumably it had been cancelled.");
+            Slog.w(TAG,
+                    "Unable to send using IntentSender from uid " + configUid
+                            + "; presumably it had been cancelled.");
         }
     }
 
@@ -303,27 +469,71 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.d(TAG, "Iterating over " + users.size() + " profiles.");
         }
 
-        List<Integer> uids = new ArrayList<>();
-        List<Long> versions = new ArrayList<>();
-        List<String> apps = new ArrayList<>();
-
-        // Add in all the apps for every user/profile.
-        for (UserInfo profile : users) {
-            List<PackageInfo> pi =
-                pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES, profile.id);
-            for (int j = 0; j < pi.size(); j++) {
-                if (pi.get(j).applicationInfo != null) {
-                    uids.add(pi.get(j).applicationInfo.uid);
-                    versions.add(pi.get(j).getLongVersionCode());
-                    apps.add(pi.get(j).packageName);
+        ParcelFileDescriptor[] fds;
+        try {
+            fds = ParcelFileDescriptor.createPipe();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to create a pipe to send uid map data.", e);
+            return;
+        }
+        sStatsd.informAllUidData(fds[0]);
+        try {
+            fds[0].close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to close the read side of the pipe.", e);
+        }
+        final ParcelFileDescriptor writeFd = fds[1];
+        BackgroundThread.getHandler().post(() -> {
+            FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(writeFd);
+            try {
+                ProtoOutputStream output = new ProtoOutputStream(fout);
+                int numRecords = 0;
+                // Add in all the apps for every user/profile.
+                for (UserInfo profile : users) {
+                    List<PackageInfo> pi =
+                            pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES,
+                                    profile.id);
+                    for (int j = 0; j < pi.size(); j++) {
+                        if (pi.get(j).applicationInfo != null) {
+                            String installer;
+                            try {
+                                installer = pm.getInstallerPackageName(pi.get(j).packageName);
+                            } catch (IllegalArgumentException e) {
+                                installer = "";
+                            }
+                            long applicationInfoToken =
+                                    output.start(ProtoStream.FIELD_TYPE_MESSAGE
+                                            | ProtoStream.FIELD_COUNT_REPEATED
+                                                    | APPLICATION_INFO_FIELD_ID);
+                            output.write(ProtoStream.FIELD_TYPE_INT32
+                                    | ProtoStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
+                                            pi.get(j).applicationInfo.uid);
+                            output.write(ProtoStream.FIELD_TYPE_INT64
+                                    | ProtoStream.FIELD_COUNT_SINGLE
+                                            | VERSION_FIELD_ID, pi.get(j).getLongVersionCode());
+                            output.write(ProtoStream.FIELD_TYPE_STRING
+                                    | ProtoStream.FIELD_COUNT_SINGLE | VERSION_STRING_FIELD_ID,
+                                            pi.get(j).versionName);
+                            output.write(ProtoStream.FIELD_TYPE_STRING
+                                    | ProtoStream.FIELD_COUNT_SINGLE
+                                            | PACKAGE_NAME_FIELD_ID, pi.get(j).packageName);
+                            output.write(ProtoStream.FIELD_TYPE_STRING
+                                    | ProtoStream.FIELD_COUNT_SINGLE
+                                            | INSTALLER_FIELD_ID,
+                                                    installer == null ? "" : installer);
+                            numRecords++;
+                            output.end(applicationInfoToken);
+                        }
+                    }
                 }
+                output.flush();
+                if (DEBUG) {
+                    Slog.d(TAG, "Sent data for " + numRecords + " apps");
+                }
+            } finally {
+                IoUtils.closeQuietly(fout);
             }
-        }
-        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
-                String[apps.size()]));
-        if (DEBUG) {
-            Slog.d(TAG, "Sent data for " + uids.size() + " apps");
-        }
+        });
     }
 
     private final static class AppUpdateReceiver extends BroadcastReceiver {
@@ -362,7 +572,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         int uid = b.getInt(Intent.EXTRA_UID);
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
-                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
+                        String installer;
+                        try {
+                            installer = pm.getInstallerPackageName(app);
+                        } catch (IllegalArgumentException e) {
+                            installer = "";
+                        }
+                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode(), pi.versionName,
+                                installer == null ? "" : installer);
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);
@@ -371,9 +588,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class AnomalyAlarmReceiver extends BroadcastReceiver {
+    public final static class AnomalyAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onAlarm() {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred at time "
                     + System.currentTimeMillis() + "ms.");
             synchronized (sStatsdLock) {
@@ -392,11 +609,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PullingAlarmReceiver extends BroadcastReceiver {
+    public final static class PullingAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG)
+        public void onAlarm() {
+            if (DEBUG) {
                 Slog.d(TAG, "Time to poll something.");
+            }
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of pulling alarm firing.");
@@ -412,11 +630,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PeriodicAlarmReceiver extends BroadcastReceiver {
+    public final static class PeriodicAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG)
+        public void onAlarm() {
+            if (DEBUG) {
                 Slog.d(TAG, "Time to trigger periodic alarm.");
+            }
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of periodic alarm firing.");
@@ -452,7 +671,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     return;
                 }
                 try {
-                  sStatsd.informDeviceShutdown();
+                    sStatsd.informDeviceShutdown();
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of a shutdown event.", e);
                 }
@@ -468,9 +687,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         try {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
-            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
-            // AlarmManager will automatically cancel any previous mAnomalyAlarmIntent alarm.
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, mAnomalyAlarmIntent);
+            // AlarmManager will automatically cancel any previous mAnomalyAlarmListener alarm.
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".anomaly",
+                    mAnomalyAlarmListener, mHandler);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -482,7 +701,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (DEBUG) Slog.d(TAG, "Cancelling anomaly alarm");
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            mAlarmManager.cancel(mAnomalyAlarmIntent);
+            mAlarmManager.cancel(mAnomalyAlarmListener);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -491,14 +710,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override // Binder call
     public void setAlarmForSubscriberTriggering(long timestampMs) {
         enforceCallingPermission();
-        if (DEBUG)
-            Slog.d(TAG, "Setting periodic alarm in about " +
-                    (timestampMs - SystemClock.elapsedRealtime()));
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "Setting periodic alarm in about " + (timestampMs
+                            - SystemClock.elapsedRealtime()));
+        }
         final long callingToken = Binder.clearCallingIdentity();
         try {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, mPeriodicAlarmIntent);
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".periodic",
+                    mPeriodicAlarmListener, mHandler);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -507,11 +729,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override // Binder call
     public void cancelAlarmForSubscriberTriggering() {
         enforceCallingPermission();
-        if (DEBUG)
+        if (DEBUG) {
             Slog.d(TAG, "Cancelling periodic alarm");
+        }
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            mAlarmManager.cancel(mPeriodicAlarmIntent);
+            mAlarmManager.cancel(mPeriodicAlarmListener);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -519,41 +742,45 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setPullingAlarm(long nextPullTimeMs) {
-      enforceCallingPermission();
-      if (DEBUG)
-        Slog.d(TAG,
-            "Setting pulling alarm in about " + (nextPullTimeMs - SystemClock.elapsedRealtime()));
-      final long callingToken = Binder.clearCallingIdentity();
-      try {
-        // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
-        // only fire when it awakens.
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, mPullingAlarmIntent);
-      } finally {
-        Binder.restoreCallingIdentity(callingToken);
-      }
+        enforceCallingPermission();
+        if (DEBUG) {
+            Slog.d(TAG, "Setting pulling alarm in about "
+                    + (nextPullTimeMs - SystemClock.elapsedRealtime()));
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+            // only fire when it awakens.
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, TAG + ".pull",
+                    mPullingAlarmListener, mHandler);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     @Override // Binder call
     public void cancelPullingAlarm() {
-      enforceCallingPermission();
-      if (DEBUG)
-        Slog.d(TAG, "Cancelling pulling alarm");
-      final long callingToken = Binder.clearCallingIdentity();
-      try {
-        mAlarmManager.cancel(mPullingAlarmIntent);
-      } finally {
-        Binder.restoreCallingIdentity(callingToken);
-      }
+        enforceCallingPermission();
+        if (DEBUG) {
+            Slog.d(TAG, "Cancelling pulling alarm");
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            mAlarmManager.cancel(mPullingAlarmListener);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     private void addNetworkStats(
             int tag, List<StatsLogEventWrapper> ret, NetworkStats stats, boolean withFGBG) {
         int size = stats.size();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         NetworkStats.Entry entry = new NetworkStats.Entry(); // For recycling
         for (int j = 0; j < size; j++) {
             stats.getValues(j, entry);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tag, withFGBG ? 6 : 5);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tag, elapsedNanos, wallClockNanos);
             e.writeInt(entry.uid);
             if (withFGBG) {
                 e.writeInt(entry.set);
@@ -629,14 +856,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return null;
     }
 
-    private void pullKernelWakelock(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullKernelWakelock(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         final KernelWakelockStats wakelockStats =
                 mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
             String name = ent.getKey();
             KernelWakelockStats.Entry kws = ent.getValue();
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 4);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeString(name);
             e.writeInt(kws.mCount);
             e.writeInt(kws.mVersion);
@@ -645,7 +873,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullWifiBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullWifiBytesTransfer(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         try {
             // TODO: Consider caching the following call to get BatteryStatsInternal.
@@ -668,7 +898,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullWifiBytesTransferByFgBg(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullWifiBytesTransferByFgBg(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         try {
             BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -690,7 +922,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullMobileBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullMobileBytesTransfer(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         try {
             BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -712,12 +946,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullBluetoothBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+    private void pullBluetoothBytesTransfer(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
         if (info.getUidTraffic() != null) {
             for (UidTraffic traffic : info.getUidTraffic()) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
                 e.writeInt(traffic.getUid());
                 e.writeLong(traffic.getRxBytes());
                 e.writeLong(traffic.getTxBytes());
@@ -726,7 +962,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullMobileBytesTransferByFgBg(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullMobileBytesTransferByFgBg(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         try {
             BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -748,13 +986,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullCpuTimePerFreq(int tagId, List<StatsLogEventWrapper> pulledData) {
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+    private void pullCpuTimePerFreq(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
             long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
             if (clusterTimeMs != null) {
                 for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                            wallClockNanos);
                     e.writeInt(cluster);
                     e.writeInt(speed);
                     e.writeLong(clusterTimeMs[speed]);
@@ -764,10 +1004,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullKernelUidCpuTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        mKernelUidCpuTimeReader.readAbsolute((uid, userTimeUs, systemTimeUs) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+    private void pullKernelUidCpuTime(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mCpuUidUserSysTimeReader.readAbsolute((uid, timesUs) -> {
+            long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
             e.writeLong(userTimeUs);
             e.writeLong(systemTimeUs);
@@ -775,12 +1017,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullKernelUidCpuFreqTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        mKernelUidCpuFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
+    private void pullKernelUidCpuFreqTime(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
             for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                if(cpuFreqTimeMs[freqIndex] != 0) {
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                if (cpuFreqTimeMs[freqIndex] != 0) {
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                            wallClockNanos);
                     e.writeInt(uid);
                     e.writeInt(freqIndex);
                     e.writeLong(cpuFreqTimeMs[freqIndex]);
@@ -790,11 +1034,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullKernelUidCpuClusterTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        mKernelUidCpuClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
+    private void pullKernelUidCpuClusterTime(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mCpuUidClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
             for (int i = 0; i < cpuClusterTimesMs.length; i++) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
                 e.writeInt(uid);
                 e.writeInt(i);
                 e.writeLong(cpuClusterTimesMs[i]);
@@ -803,28 +1049,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullKernelUidCpuActiveTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        mKernelUidCpuActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2);
+    private void pullKernelUidCpuActiveTime(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mCpuUidActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(uid);
-            e.writeLong((long)cpuActiveTimesMs);
+            e.writeLong((long) cpuActiveTimesMs);
             pulledData.add(e);
         });
     }
 
-    private void pullWifiActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullWifiActivityInfo(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mWifiManager == null) {
-            mWifiManager =
-                    IWifiManager.Stub.asInterface(ServiceManager.getService(Context.WIFI_SERVICE));
+        synchronized (this) {
+            if (mWifiManager == null) {
+                mWifiManager =
+                        IWifiManager.Stub.asInterface(
+                                ServiceManager.getService(Context.WIFI_SERVICE));
+            }
         }
         if (mWifiManager != null) {
             try {
                 SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
                 mWifiManager.requestActivityInfo(wifiReceiver);
                 final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 6);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
                 e.writeLong(wifiInfo.getTimeStamp());
                 e.writeInt(wifiInfo.getStackState());
                 e.writeLong(wifiInfo.getControllerTxTimeMillis());
@@ -833,23 +1086,29 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 e.writeLong(wifiInfo.getControllerEnergyUsed());
                 pulledData.add(e);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Pulling wifiManager for wifi controller activity energy info has error", e);
+                Slog.e(TAG,
+                        "Pulling wifiManager for wifi controller activity energy info has error",
+                        e);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
     }
 
-    private void pullModemActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullModemActivityInfo(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mTelephony == null) {
-            mTelephony = TelephonyManager.from(mContext);
+        synchronized (this) {
+            if (mTelephony == null) {
+                mTelephony = TelephonyManager.from(mContext);
+            }
         }
         if (mTelephony != null) {
             SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
             mTelephony.requestModemActivityInfo(modemReceiver);
             final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 10);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeLong(modemInfo.getTimestamp());
             e.writeLong(modemInfo.getSleepTimeMillis());
             e.writeLong(modemInfo.getIdleTimeMillis());
@@ -864,9 +1123,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullBluetoothActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 6);
+    private void pullBluetoothActivityInfo(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(info.getTimeStamp());
         e.writeInt(info.getBluetoothStackState());
         e.writeLong(info.getControllerTxTimeMillis());
@@ -876,10 +1137,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private synchronized BluetoothActivityEnergyInfo pullBluetoothData() {
+    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
-            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver("bluetooth");
+            SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
+                    "bluetooth");
             adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
             return awaitControllerInfo(bluetoothReceiver);
         } else {
@@ -888,42 +1150,1110 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private void pullSystemElapsedRealtime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 1);
+    private void pullSystemElapsedRealtime(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(SystemClock.elapsedRealtime());
         pulledData.add(e);
     }
 
-    private void pullDiskSpace(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 3);
-        e.writeLong(mStatFsData.getAvailableBytes());
-        e.writeLong(mStatFsSystem.getAvailableBytes());
-        e.writeLong(mStatFsTemp.getAvailableBytes());
-        pulledData.add(e);
-    }
-
-    private void pullSystemUpTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 1);
+    private void pullSystemUpTime(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(SystemClock.uptimeMillis());
         pulledData.add(e);
     }
 
-    private void pullProcessMemoryState(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullProcessMemoryState(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
         List<ProcessMemoryState> processMemoryStates =
-                LocalServices.getService(ActivityManagerInternal.class)
-                        .getMemoryStateForProcesses();
-        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+                LocalServices.getService(
+                        ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState processMemoryState : processMemoryStates) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 8 /* fields */);
+            final MemoryStat memoryStat = readMemoryStatFromFilesystem(processMemoryState.uid,
+                    processMemoryState.pid);
+            if (memoryStat == null) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(processMemoryState.uid);
             e.writeString(processMemoryState.processName);
             e.writeInt(processMemoryState.oomScore);
-            e.writeLong(processMemoryState.pgfault);
-            e.writeLong(processMemoryState.pgmajfault);
-            e.writeLong(processMemoryState.rssInBytes);
-            e.writeLong(processMemoryState.cacheInBytes);
-            e.writeLong(processMemoryState.swapInBytes);
+            e.writeLong(memoryStat.pgfault);
+            e.writeLong(memoryStat.pgmajfault);
+            e.writeLong(memoryStat.rssInBytes);
+            e.writeLong(memoryStat.cacheInBytes);
+            e.writeLong(memoryStat.swapInBytes);
+            e.writeLong(0);  // unused
+            e.writeLong(memoryStat.startTimeNanos);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
             pulledData.add(e);
+        }
+    }
+
+    private void pullNativeProcessMemoryState(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        final List<String> processNames = Arrays.asList(MEMORY_INTERESTING_NATIVE_PROCESSES);
+        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
+        for (int i = 0; i < pids.length; i++) {
+            int pid = pids[i];
+            MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
+            if (memoryStat == null) {
+                continue;
+            }
+            int uid = getUidForPid(pid);
+            String processName = readCmdlineFromProcfs(pid);
+            // Sometimes we get here processName that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (!processNames.contains(processName)) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(uid);
+            e.writeString(processName);
+            e.writeLong(memoryStat.pgfault);
+            e.writeLong(memoryStat.pgmajfault);
+            e.writeLong(memoryStat.rssInBytes);
+            e.writeLong(0);  // unused
+            e.writeLong(memoryStat.startTimeNanos);
+            e.writeLong(memoryStat.swapInBytes);
+            e.writeInt(anonAndSwapInKilobytes(memoryStat));
+            pulledData.add(e);
+        }
+    }
+
+    private static int anonAndSwapInKilobytes(MemoryStat memoryStat) {
+        return (int) ((memoryStat.anonRssInBytes + memoryStat.swapInBytes) / 1024);
+    }
+
+    private void pullProcessMemoryHighWaterMark(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(
+                        ActivityManagerInternal.class).getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            final long rssHighWaterMarkInBytes =
+                    readRssHighWaterMarkFromProcfs(managedProcess.pid);
+            if (rssHighWaterMarkInBytes == 0) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(managedProcess.uid);
+            e.writeString(managedProcess.processName);
+            e.writeLong(rssHighWaterMarkInBytes);
+            pulledData.add(e);
+        }
+        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
+        for (int i = 0; i < pids.length; i++) {
+            final int pid = pids[i];
+            final int uid = getUidForPid(pid);
+            final String processName = readCmdlineFromProcfs(pid);
+            final long rssHighWaterMarkInBytes = readRssHighWaterMarkFromProcfs(pid);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(uid);
+            e.writeString(processName);
+            e.writeLong(rssHighWaterMarkInBytes);
+            pulledData.add(e);
+        }
+        // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
+        SystemProperties.set("sys.rss_hwm_reset.on", "1");
+    }
+
+    private void pullSystemIonHeapSize(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        final long systemIonHeapSizeInBytes = readSystemIonHeapSizeFromDebugfs();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(systemIonHeapSizeInBytes);
+        pulledData.add(e);
+    }
+
+    private void pullProcessSystemIonHeapSize(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<IonAllocations> result = readProcessSystemIonHeapSizesFromDebugfs();
+        for (IonAllocations allocations : result) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(getUidForPid(allocations.pid));
+            e.writeString(readCmdlineFromProcfs(allocations.pid));
+            e.writeInt((int) (allocations.totalSizeInBytes / 1024));
+            e.writeInt(allocations.count);
+            e.writeInt((int) (allocations.maxSizeInBytes / 1024));
+            pulledData.add(e);
+        }
+    }
+
+    private void pullBinderCallsStats(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            throw new IllegalStateException("binderStats is null");
+        }
+
+        List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
+        binderStats.reset();
+        for (ExportedCallStat callStat : callStats) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(callStat.workSourceUid);
+            e.writeString(callStat.className);
+            e.writeString(callStat.methodName);
+            e.writeLong(callStat.callCount);
+            e.writeLong(callStat.exceptionCount);
+            e.writeLong(callStat.latencyMicros);
+            e.writeLong(callStat.maxLatencyMicros);
+            e.writeLong(callStat.cpuTimeMicros);
+            e.writeLong(callStat.maxCpuTimeMicros);
+            e.writeLong(callStat.maxReplySizeBytes);
+            e.writeLong(callStat.maxRequestSizeBytes);
+            e.writeLong(callStat.recordedCallCount);
+            e.writeInt(callStat.screenInteractive ? 1 : 0);
+            e.writeInt(callStat.callingUid);
+            pulledData.add(e);
+        }
+    }
+
+    private void pullBinderCallsStatsExceptions(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            throw new IllegalStateException("binderStats is null");
+        }
+
+        ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
+        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
+        // can reset the exception stats.
+        for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeString(entry.getKey());
+            e.writeInt(entry.getValue());
+            pulledData.add(e);
+        }
+    }
+
+    private void pullLooperStats(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats == null) {
+            throw new IllegalStateException("looperStats null");
+        }
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        looperStats.reset();
+        for (LooperStats.ExportedEntry entry : entries) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(entry.workSourceUid);
+            e.writeString(entry.handlerClassName);
+            e.writeString(entry.threadName);
+            e.writeString(entry.messageName);
+            e.writeLong(entry.messageCount);
+            e.writeLong(entry.exceptionCount);
+            e.writeLong(entry.recordedMessageCount);
+            e.writeLong(entry.totalLatencyMicros);
+            e.writeLong(entry.cpuUsageMicros);
+            e.writeBoolean(entry.isInteractive);
+            e.writeLong(entry.maxCpuUsageMicros);
+            e.writeLong(entry.maxLatencyMicros);
+            e.writeLong(entry.recordedDelayMessageCount);
+            e.writeLong(entry.delayMillis);
+            e.writeLong(entry.maxDelayMillis);
+            pulledData.add(e);
+        }
+    }
+
+    private void pullDiskStats(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        // Run a quick-and-dirty performance test: write 512 bytes
+        byte[] junk = new byte[512];
+        for (int i = 0; i < junk.length; i++) junk[i] = (byte) i;  // Write nonzero bytes
+
+        File tmp = new File(Environment.getDataDirectory(), "system/statsdperftest.tmp");
+        FileOutputStream fos = null;
+        IOException error = null;
+
+        long before = SystemClock.elapsedRealtime();
+        try {
+            fos = new FileOutputStream(tmp);
+            fos.write(junk);
+        } catch (IOException e) {
+            error = e;
+        } finally {
+            try {
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                // Do nothing.
+            }
+        }
+
+        long latency = SystemClock.elapsedRealtime() - before;
+        if (tmp.exists()) tmp.delete();
+
+        if (error != null) {
+            Slog.e(TAG, "Error performing diskstats latency test");
+            latency = -1;
+        }
+        // File based encryption.
+        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+
+        //Recent disk write speed. Binder call to storaged.
+        int writeSpeed = -1;
+        try {
+            IBinder binder = ServiceManager.getService("storaged");
+            if (binder == null) {
+                Slog.e(TAG, "storaged not found");
+            }
+            IStoraged storaged = IStoraged.Stub.asInterface(binder);
+            writeSpeed = storaged.getRecentPerf();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "storaged not found");
+        }
+
+        // Add info pulledData.
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(latency);
+        e.writeBoolean(fileBased);
+        e.writeInt(writeSpeed);
+        pulledData.add(e);
+    }
+
+    private void pullDirectoryUsage(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+        StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__DATA);
+        e.writeLong(statFsData.getAvailableBytes());
+        e.writeLong(statFsData.getTotalBytes());
+        pulledData.add(e);
+
+        e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE);
+        e.writeLong(statFsCache.getAvailableBytes());
+        e.writeLong(statFsCache.getTotalBytes());
+        pulledData.add(e);
+
+        e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM);
+        e.writeLong(statFsSystem.getAvailableBytes());
+        e.writeLong(statFsSystem.getTotalBytes());
+        pulledData.add(e);
+    }
+
+    private void pullAppSize(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cache_time = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
+            JSONArray pkg_names = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
+            JSONArray app_sizes = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
+            JSONArray app_data_sizes = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
+            JSONArray app_cache_sizes = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
+            // Sanity check: Ensure all 4 lists have the same length.
+            int length = pkg_names.length();
+            if (app_sizes.length() != length || app_data_sizes.length() != length
+                    || app_cache_sizes.length() != length) {
+                Slog.e(TAG, "formatting error in diskstats cache file!");
+                return;
+            }
+            for (int i = 0; i < length; i++) {
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeString(pkg_names.getString(i));
+                e.writeLong(app_sizes.optLong(i, -1L));
+                e.writeLong(app_data_sizes.optLong(i, -1L));
+                e.writeLong(app_cache_sizes.optLong(i, -1L));
+                e.writeLong(cache_time);
+                pulledData.add(e);
+            }
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
+    private void pullCategorySize(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cacheTime = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
+
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.PHOTOS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.VIDEOS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__AUDIO);
+            e.writeLong(json.optLong(DiskStatsFileLogger.AUDIO_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.DOWNLOADS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM);
+            e.writeLong(json.optLong(DiskStatsFileLogger.SYSTEM_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__OTHER);
+            e.writeLong(json.optLong(DiskStatsFileLogger.MISC_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
+    private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
+            long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final PackageManager pm = mContext.getPackageManager();
+        FingerprintManager fingerprintManager = null;
+        FaceManager faceManager = null;
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            fingerprintManager = mContext.getSystemService(
+                    FingerprintManager.class);
+        }
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            faceManager = mContext.getSystemService(FaceManager.class);
+        }
+
+        if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
+            return;
+        }
+        if (modality == BiometricsProtoEnums.MODALITY_FACE && faceManager == null) {
+            return;
+        }
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        for (UserInfo user : userManager.getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+            int numEnrolled = 0;
+            if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
+                numEnrolled = fingerprintManager.getEnrolledFingerprints(userId).size();
+            } else if (modality == BiometricsProtoEnums.MODALITY_FACE) {
+                numEnrolled = faceManager.getEnrolledFaces(userId).size();
+            } else {
+                return;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(userId);
+            e.writeInt(numEnrolled);
+            pulledData.add(e);
+        }
+        Binder.restoreCallingIdentity(token);
+    }
+
+    // read high watermark for section
+    private long readProcStatsHighWaterMark(int section) {
+        try {
+            File[] files = mBaseDir.listFiles((d, name) -> {
+                return name.toLowerCase().startsWith(String.valueOf(section) + '_');
+            });
+            if (files == null || files.length == 0) {
+                return 0;
+            }
+            if (files.length > 1) {
+                Log.e(TAG, "Only 1 file expected for high water mark. Found " + files.length);
+            }
+            return Long.valueOf(files[0].getName().split("_")[1]);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Failed to get procstats high watermark file.", e);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Failed to parse file name.", e);
+        }
+        return 0;
+    }
+
+    private IProcessStats mProcessStats =
+            IProcessStats.Stub.asInterface(ServiceManager.getService(ProcessStats.SERVICE_NAME));
+
+    private void pullProcessStats(int section, int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        synchronized (this) {
+            try {
+                long lastHighWaterMark = readProcStatsHighWaterMark(section);
+                List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+                long highWaterMark = mProcessStats.getCommittedStats(
+                        lastHighWaterMark, section, true, statsFiles);
+                if (statsFiles.size() != 1) {
+                    return;
+                }
+                InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
+                        statsFiles.get(0));
+                int[] len = new int[1];
+                byte[] stats = readFully(stream, len);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
+                e.writeStorage(Arrays.copyOf(stats, len[0]));
+                pulledData.add(e);
+                new File(mBaseDir.getAbsolutePath() + "/" + section + "_"
+                        + lastHighWaterMark).delete();
+                new File(
+                        mBaseDir.getAbsolutePath() + "/" + section + "_"
+                                + highWaterMark).createNewFile();
+            } catch (IOException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            }
+        }
+    }
+
+    static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
+        int pos = 0;
+        final int initialAvail = stream.available();
+        byte[] data = new byte[initialAvail > 0 ? (initialAvail + 1) : 16384];
+        while (true) {
+            int amt = stream.read(data, pos, data.length - pos);
+            if (DEBUG) {
+                Slog.i(TAG, "Read " + amt + " bytes at " + pos + " of avail " + data.length);
+            }
+            if (amt < 0) {
+                if (DEBUG) {
+                    Slog.i(TAG, "**** FINISHED READING: pos=" + pos + " len=" + data.length);
+                }
+                outLen[0] = pos;
+                return data;
+            }
+            pos += amt;
+            if (pos >= data.length) {
+                byte[] newData = new byte[pos + 16384];
+                if (DEBUG) {
+                    Slog.i(TAG, "Copying " + pos + " bytes to new array len " + newData.length);
+                }
+                System.arraycopy(data, 0, newData, 0, pos);
+                data = newData;
+            }
+        }
+    }
+
+    private void pullPowerProfile(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        checkNotNull(powerProfile);
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                wallClockNanos);
+        ProtoOutputStream proto = new ProtoOutputStream();
+        powerProfile.writeToProto(proto);
+        proto.flush();
+        e.writeStorage(proto.getBytes());
+        pulledData.add(e);
+    }
+
+    private void pullBuildInformation(int tagId,
+            long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeString(Build.FINGERPRINT);
+        e.writeString(Build.BRAND);
+        e.writeString(Build.PRODUCT);
+        e.writeString(Build.DEVICE);
+        e.writeString(Build.VERSION.RELEASE);
+        e.writeString(Build.ID);
+        e.writeString(Build.VERSION.INCREMENTAL);
+        e.writeString(Build.TYPE);
+        e.writeString(Build.TAGS);
+        pulledData.add(e);
+    }
+
+    private BatteryStatsHelper getBatteryStatsHelper() {
+        if (mBatteryStatsHelper == null) {
+            final long callingToken = Binder.clearCallingIdentity();
+            try {
+                // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
+                mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
+            } finally {
+                Binder.restoreCallingIdentity(callingToken);
+            }
+            mBatteryStatsHelper.create((Bundle) null);
+        }
+        long currentTime = SystemClock.elapsedRealtime();
+        if (currentTime - mBatteryStatsHelperTimestampMs >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
+            // Load BatteryStats and do all the calculations.
+            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.USER_ALL);
+            // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
+            mBatteryStatsHelper.clearStats();
+            mBatteryStatsHelperTimestampMs = currentTime;
+        }
+        return mBatteryStatsHelper;
+    }
+
+    private long milliAmpHrsToNanoAmpSecs(double mAh) {
+        final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
+        return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
+    }
+
+    private void pullDeviceCalculatedPowerUse(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower()));
+        pulledData.add(e);
+    }
+
+    private void pullDeviceCalculatedPowerBlameUid(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return;
+        }
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType != bs.drainType.APP) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(bs.uidObj.getUid());
+            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
+            pulledData.add(e);
+        }
+    }
+
+    private void pullDeviceCalculatedPowerBlameOther(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
+        if (sippers == null) {
+            return;
+        }
+        for (BatterySipper bs : sippers) {
+            if (bs.drainType == bs.drainType.APP) {
+                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
+            }
+            if (bs.drainType == bs.drainType.USER) {
+                continue; // This is not supported. We purposefully calculate over USER_ALL.
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(bs.drainType.ordinal());
+            e.writeLong(milliAmpHrsToNanoAmpSecs(bs.totalPowerMah));
+            pulledData.add(e);
+        }
+    }
+
+    private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
+                fgBytesWrite, bgCharsRead, bgCharsWrite, bgBytesRead, bgBytesWrite,
+                fgFsync, bgFsync) -> {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                    wallClockNanos);
+            e.writeInt(uid);
+            e.writeLong(fgCharsRead);
+            e.writeLong(fgCharsWrite);
+            e.writeLong(fgBytesRead);
+            e.writeLong(fgBytesWrite);
+            e.writeLong(bgCharsRead);
+            e.writeLong(bgCharsWrite);
+            e.writeLong(bgBytesRead);
+            e.writeLong(bgBytesWrite);
+            e.writeLong(fgFsync);
+            e.writeLong(bgFsync);
+            pulledData.add(e);
+        });
+    }
+
+    private void pullProcessCpuTime(int tagId, long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        synchronized (this) {
+            if (mProcessCpuTracker == null) {
+                mProcessCpuTracker = new ProcessCpuTracker(false);
+                mProcessCpuTracker.init();
+            }
+            mProcessCpuTracker.update();
+            for (int i = 0; i < mProcessCpuTracker.countStats(); i++) {
+                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
+                e.writeInt(st.uid);
+                e.writeString(st.name);
+                e.writeLong(st.base_utime);
+                e.writeLong(st.base_stime);
+                pulledData.add(e);
+            }
+        }
+    }
+
+    private void pullCpuTimePerThreadFreq(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        if (this.mKernelCpuThreadReader == null) {
+            throw new IllegalStateException("mKernelCpuThreadReader is null");
+        }
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
+                this.mKernelCpuThreadReader.getProcessCpuUsageDiffed();
+        if (processCpuUsages == null) {
+            throw new IllegalStateException("processCpuUsages is null");
+        }
+        int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
+        if (cpuFrequencies.length > CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES) {
+            String message = "Expected maximum " + CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES
+                    + " frequencies, but got " + cpuFrequencies.length;
+            Slog.w(TAG, message);
+            throw new IllegalStateException(message);
+        }
+        for (int i = 0; i < processCpuUsages.size(); i++) {
+            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
+            ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
+                    processCpuUsage.threadCpuUsages;
+            for (int j = 0; j < threadCpuUsages.size(); j++) {
+                KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage = threadCpuUsages.get(j);
+                if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
+                    String message = "Unexpected number of usage times,"
+                            + " expected " + cpuFrequencies.length
+                            + " but got " + threadCpuUsage.usageTimesMillis.length;
+                    Slog.w(TAG, message);
+                    throw new IllegalStateException(message);
+                }
+
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(processCpuUsage.uid);
+                e.writeInt(processCpuUsage.processId);
+                e.writeInt(threadCpuUsage.threadId);
+                e.writeString(processCpuUsage.processName);
+                e.writeString(threadCpuUsage.threadName);
+                for (int k = 0; k < CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES; k++) {
+                    if (k < cpuFrequencies.length) {
+                        e.writeInt(cpuFrequencies[k]);
+                        e.writeInt(threadCpuUsage.usageTimesMillis[k]);
+                    } else {
+                        // If we have no more frequencies to write, we still must write empty data.
+                        // We know that this data is empty (and not just zero) because all
+                        // frequencies are expected to be greater than zero
+                        e.writeInt(0);
+                        e.writeInt(0);
+                    }
+                }
+                pulledData.add(e);
+            }
+        }
+    }
+
+    private void pullTemperature(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<Temperature> temperatures = sThermalService.getCurrentTemperatures();
+            for (Temperature temp : temperatures) {
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(temp.getType());
+                e.writeString(temp.getName());
+                e.writeInt((int) (temp.getValue() * 10));
+                e.writeInt(temp.getStatus());
+                pulledData.add(e);
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    private void pullCoolingDevices(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<CoolingDevice> devices = sThermalService.getCurrentCoolingDevices();
+            for (CoolingDevice device : devices) {
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(device.getType());
+                e.writeString(device.getName());
+                e.writeInt((int) (device.getValue()));
+                pulledData.add(e);
+            }
+        } catch (RemoteException e) {
+            // Should not happen.
+            Slog.e(TAG, "Disconnected from thermal service. Cannot pull temperatures.");
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    private void pullDebugElapsedClock(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+        final long clockDiffMillis = mDebugElapsedClockPreviousValue == 0
+                ? 0 : elapsedMillis - mDebugElapsedClockPreviousValue;
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(mDebugElapsedClockPullCount);
+        e.writeLong(elapsedMillis);
+        // Log it twice to be able to test multi-value aggregation from ValueMetric.
+        e.writeLong(elapsedMillis);
+        e.writeLong(clockDiffMillis);
+        e.writeInt(1 /* always set */);
+        pulledData.add(e);
+
+        if (mDebugElapsedClockPullCount % 2 == 1) {
+            StatsLogEventWrapper e2 = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e2.writeLong(mDebugElapsedClockPullCount);
+            e2.writeLong(elapsedMillis);
+            // Log it twice to be able to test multi-value aggregation from ValueMetric.
+            e2.writeLong(elapsedMillis);
+            e2.writeLong(clockDiffMillis);
+            e2.writeInt(2 /* set on odd pulls */);
+            pulledData.add(e2);
+        }
+
+        mDebugElapsedClockPullCount++;
+        mDebugElapsedClockPreviousValue = elapsedMillis;
+    }
+
+    private void pullDebugFailingElapsedClock(int tagId,
+            long elapsedNanos, final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        final long elapsedMillis = SystemClock.elapsedRealtime();
+        // Fails every 5 buckets.
+        if (mDebugFailingElapsedClockPullCount++ % 5 == 0) {
+            mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+            throw new RuntimeException("Failing debug elapsed clock");
+        }
+
+        e.writeLong(mDebugFailingElapsedClockPullCount);
+        e.writeLong(elapsedMillis);
+        // Log it twice to be able to test multi-value aggregation from ValueMetric.
+        e.writeLong(elapsedMillis);
+        e.writeLong(mDebugFailingElapsedClockPreviousValue == 0
+                ? 0 : elapsedMillis - mDebugFailingElapsedClockPreviousValue);
+        mDebugFailingElapsedClockPreviousValue = elapsedMillis;
+        pulledData.add(e);
+    }
+
+    private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                UserHandle user = users.get(userNum).getUserHandle();
+
+                List<PackageInfo> pkgs = pm.getInstalledPackagesAsUser(
+                        PackageManager.GET_PERMISSIONS, user.getIdentifier());
+
+                int numPkgs = pkgs.size();
+                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                    PackageInfo pkg = pkgs.get(pkgNum);
+
+                    if (pkg.requestedPermissions == null) {
+                        continue;
+                    }
+
+                    int numPerms = pkg.requestedPermissions.length;
+                    for (int permNum  = 0; permNum < numPerms; permNum++) {
+                        String permName = pkg.requestedPermissions[permNum];
+
+                        PermissionInfo permissionInfo;
+                        int permissionFlags = 0;
+                        try {
+                            permissionInfo = pm.getPermissionInfo(permName, 0);
+                            permissionFlags =
+                                pm.getPermissionFlags(permName, pkg.packageName, user);
+
+                        } catch (PackageManager.NameNotFoundException ignored) {
+                            continue;
+                        }
+
+                        if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
+                            continue;
+                        }
+
+                        StatsLogEventWrapper e = new StatsLogEventWrapper(
+                                StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos, wallClockNanos);
+
+                        e.writeString(permName);
+                        e.writeInt(pkg.applicationInfo.uid);
+                        e.writeString(pkg.packageName);
+                        e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
+                                & REQUESTED_PERMISSION_GRANTED) != 0);
+                        e.writeInt(permissionFlags);
+
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not read permissions", t);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void pullAppOps(long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+
+            CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
+            HistoricalOpsRequest histOpsRequest =
+                    new HistoricalOpsRequest.Builder(
+                            Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli(),
+                            Long.MAX_VALUE).build();
+            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+
+            HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS);
+
+            StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.APP_OPS, elapsedNanos,
+                    wallClockNanos);
+
+            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
+                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
+                final int uid = uidOps.getUid();
+                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
+                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
+                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
+                        final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
+                        e.writeInt(uid);
+                        e.writeString(packageOps.getPackageName());
+                        e.writeInt(op.getOpCode());
+                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not read appops", t);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+
+    /**
+     * Add a RoleHolder atom for each package that holds a role.
+     *
+     * @param elapsedNanos the time since boot
+     * @param wallClockNanos the time on the clock
+     * @param pulledData the data sink to write to
+     */
+    private void pullRoleHolders(long elapsedNanos, final long wallClockNanos,
+            @NonNull List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
+
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(
+                        userId);
+
+                int numRoles = roles.size();
+                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
+                    String roleName = roles.keyAt(roleNum);
+                    ArraySet<String> holders = roles.valueAt(roleNum);
+
+                    int numHolders = holders.size();
+                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
+                        String holderName = holders.valueAt(holderNum);
+
+                        PackageInfo pkg;
+                        try {
+                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Log.w(TAG, "Role holder " + holderName + " not found");
+                            return;
+                        }
+
+                        StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.ROLE_HOLDER,
+                                elapsedNanos, wallClockNanos);
+                        e.writeInt(pkg.applicationInfo.uid);
+                        e.writeString(holderName);
+                        e.writeString(roleName);
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    private void pullTimeZoneDataInfo(int tagId,
+            long elapsedNanos, long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
+        String tzDbVersion = "Unknown";
+        try {
+            tzDbVersion = android.icu.util.TimeZone.getTZDataVersion();
+        } catch (Exception e) {
+            Log.e(TAG, "Getting tzdb version failed: ", e);
+        }
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeString(tzDbVersion);
+        pulledData.add(e);
+    }
+
+    private void pullExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        StorageManager storageManager = mContext.getSystemService(StorageManager.class);
+        if (storageManager != null) {
+            List<VolumeInfo> volumes = storageManager.getVolumes();
+            for (VolumeInfo vol : volumes) {
+                final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
+                final DiskInfo diskInfo = vol.getDisk();
+                if (diskInfo != null) {
+                    if (envState.equals(Environment.MEDIA_MOUNTED)) {
+                        // Get the type of the volume, if it is adoptable or portable.
+                        int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
+                        if (vol.getType() == TYPE_PUBLIC) {
+                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
+                        } else if (vol.getType() == TYPE_PRIVATE) {
+                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
+                        }
+                        // Get the type of external storage inserted in the device (sd cards,
+                        // usb, etc)
+                        int externalStorageType;
+                        if (diskInfo.isSd()) {
+                            externalStorageType = StorageEnums.SD_CARD;
+                        } else if (diskInfo.isUsb()) {
+                            externalStorageType = StorageEnums.USB;
+                        } else {
+                            externalStorageType = StorageEnums.OTHER;
+                        }
+                        StatsLogEventWrapper e =
+                                new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                        e.writeInt(externalStorageType);
+                        e.writeInt(volumeType);
+                        e.writeLong(diskInfo.size);
+                        pulledData.add(e);
+                    }
+                }
+            }
+        }
+    }
+
+    private void pullAppsOnExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        PackageManager pm = mContext.getPackageManager();
+        StorageManager storage = mContext.getSystemService(StorageManager.class);
+        List<ApplicationInfo> apps = pm.getInstalledApplications(/* flags = */ 0);
+        for (ApplicationInfo appInfo : apps) {
+            UUID storageUuid = appInfo.storageUuid;
+            if (storageUuid != null) {
+                VolumeInfo volumeInfo = storage.findVolumeByUuid(appInfo.storageUuid.toString());
+                if (volumeInfo != null) {
+                    DiskInfo diskInfo = volumeInfo.getDisk();
+                    if (diskInfo != null) {
+                        int externalStorageType = -1;
+                        if (diskInfo.isSd()) {
+                            externalStorageType = StorageEnums.SD_CARD;
+                        } else if (diskInfo.isUsb()) {
+                            externalStorageType = StorageEnums.USB;
+                        } else if (appInfo.isExternal()) {
+                            externalStorageType = StorageEnums.OTHER;
+                        }
+                        // App is installed on external storage.
+                        if (externalStorageType != -1) {
+                            StatsLogEventWrapper e =
+                                    new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                            e.writeInt(externalStorageType);
+                            e.writeString(appInfo.packageName);
+                            pulledData.add(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void pullFaceSettings(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
+                        0, userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, 0,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED, 1,
+                        userId) != 0);
+
+                pulledData.add(e);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
         }
     }
 
@@ -933,80 +2263,218 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override // Binder call
     public StatsLogEventWrapper[] pullData(int tagId) {
         enforceCallingPermission();
-        if (DEBUG)
+        if (DEBUG) {
             Slog.d(TAG, "Pulling " + tagId);
+        }
         List<StatsLogEventWrapper> ret = new ArrayList<>();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        long wallClockNanos = SystemClock.currentTimeMicro() * 1000L;
         switch (tagId) {
             case StatsLog.WIFI_BYTES_TRANSFER: {
-                pullWifiBytesTransfer(tagId, ret);
+                pullWifiBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.MOBILE_BYTES_TRANSFER: {
-                pullMobileBytesTransfer(tagId, ret);
+                pullMobileBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
-                pullWifiBytesTransferByFgBg(tagId, ret);
+                pullWifiBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
-                pullMobileBytesTransferByFgBg(tagId, ret);
+                pullMobileBytesTransferByFgBg(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BLUETOOTH_BYTES_TRANSFER: {
-                pullBluetoothBytesTransfer(tagId, ret);
+                pullBluetoothBytesTransfer(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.KERNEL_WAKELOCK: {
-                pullKernelWakelock(tagId, ret);
+                pullKernelWakelock(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.CPU_TIME_PER_FREQ: {
-                pullCpuTimePerFreq(tagId, ret);
+                pullCpuTimePerFreq(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.CPU_TIME_PER_UID: {
-                pullKernelUidCpuTime(tagId, ret);
+                pullKernelUidCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.CPU_TIME_PER_UID_FREQ: {
-                pullKernelUidCpuFreqTime(tagId, ret);
+                pullKernelUidCpuFreqTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.CPU_CLUSTER_TIME: {
-                pullKernelUidCpuClusterTime(tagId, ret);
+                pullKernelUidCpuClusterTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.CPU_ACTIVE_TIME: {
-                pullKernelUidCpuActiveTime(tagId, ret);
+                pullKernelUidCpuActiveTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.WIFI_ACTIVITY_INFO: {
-                pullWifiActivityInfo(tagId, ret);
+                pullWifiActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.MODEM_ACTIVITY_INFO: {
-                pullModemActivityInfo(tagId, ret);
+                pullModemActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BLUETOOTH_ACTIVITY_INFO: {
-                pullBluetoothActivityInfo(tagId, ret);
+                pullBluetoothActivityInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.SYSTEM_UPTIME: {
-                pullSystemUpTime(tagId, ret);
+                pullSystemUpTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.SYSTEM_ELAPSED_REALTIME: {
-                pullSystemElapsedRealtime(tagId, ret);
-                break;
-            }
-            case StatsLog.DISK_SPACE: {
-                pullDiskSpace(tagId, ret);
+                pullSystemElapsedRealtime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.PROCESS_MEMORY_STATE: {
-                pullProcessMemoryState(tagId, ret);
+                pullProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NATIVE_PROCESS_MEMORY_STATE: {
+                pullNativeProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
+                pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.SYSTEM_ION_HEAP_SIZE: {
+                pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE: {
+                pullProcessSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.BINDER_CALLS: {
+                pullBinderCallsStats(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.BINDER_CALLS_EXCEPTIONS: {
+                pullBinderCallsStatsExceptions(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.LOOPER_STATS: {
+                pullLooperStats(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DISK_STATS: {
+                pullDiskStats(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DIRECTORY_USAGE: {
+                pullDirectoryUsage(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.APP_SIZE: {
+                pullAppSize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.CATEGORY_SIZE: {
+                pullCategorySize(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NUM_FINGERPRINTS_ENROLLED: {
+                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FINGERPRINT, tagId,
+                        elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NUM_FACES_ENROLLED: {
+                pullNumBiometricsEnrolled(BiometricsProtoEnums.MODALITY_FACE, tagId, elapsedNanos,
+                        wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROC_STATS: {
+                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROC_STATS_PKG_PROC: {
+                pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
+                        wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DISK_IO: {
+                pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.POWER_PROFILE: {
+                pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.BUILD_INFORMATION: {
+                pullBuildInformation(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_CPU_TIME: {
+                pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
+                pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_USE: {
+                pullDeviceCalculatedPowerUse(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID: {
+                pullDeviceCalculatedPowerBlameUid(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER: {
+                pullDeviceCalculatedPowerBlameOther(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.TEMPERATURE: {
+                pullTemperature(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.COOLING_DEVICE: {
+                pullCoolingDevices(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEBUG_ELAPSED_CLOCK: {
+                pullDebugElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK: {
+                pullDebugFailingElapsedClock(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.ROLE_HOLDER: {
+                pullRoleHolders(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DANGEROUS_PERMISSION_STATE: {
+                pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.TIME_ZONE_DATA_INFO: {
+                pullTimeZoneDataInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.EXTERNAL_STORAGE_INFO: {
+                pullExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO: {
+                pullAppsOnExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.FACE_SETTINGS: {
+                pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.APP_OPS: {
+                pullAppOps(elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
@@ -1019,13 +2487,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override // Binder call
     public void statsdReady() {
         enforceCallingPermission();
-        if (DEBUG) Slog.d(TAG, "learned that statsdReady");
+        if (DEBUG) {
+            Slog.d(TAG, "learned that statsdReady");
+        }
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
-        mContext.sendBroadcastAsUser(
-                new Intent(StatsManager.ACTION_STATSD_STARTED)
+        mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED)
                         .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
-                UserHandle.SYSTEM,
-                android.Manifest.permission.DUMP);
+                UserHandle.SYSTEM, android.Manifest.permission.DUMP);
     }
 
     @Override
@@ -1070,7 +2538,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         public void onStart() {
             mStatsCompanionService = new StatsCompanionService(getContext());
             try {
-                publishBinderService(Context.STATS_COMPANION_SERVICE, mStatsCompanionService);
+                publishBinderService(Context.STATS_COMPANION_SERVICE,
+                        mStatsCompanionService);
                 if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to publishBinderService", e);
@@ -1095,18 +2564,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     /**
-     * Tells statsd that statscompanion is ready. If the binder call returns, link to statsd.
+     * Tells statsd that statscompanion is ready. If the binder call returns, link to
+     * statsd.
      */
     private void sayHiToStatsd() {
         synchronized (sStatsdLock) {
             if (sStatsd != null) {
                 Slog.e(TAG, "Trying to fetch statsd, but it was already fetched",
-                        new IllegalStateException("sStatsd is not null when being fetched"));
+                        new IllegalStateException(
+                                "sStatsd is not null when being fetched"));
                 return;
             }
             sStatsd = fetchStatsdService();
             if (sStatsd == null) {
-                Slog.i(TAG, "Could not yet find statsd to tell it that StatsCompanion is alive.");
+                Slog.i(TAG,
+                        "Could not yet find statsd to tell it that StatsCompanion is "
+                                + "alive.");
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
@@ -1124,10 +2597,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_PACKAGE_ADDED);
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
-                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter, null,
+                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter,
+                        null,
                         null);
 
-                // Setup receiver for user initialize (which happens once for a new user) and
+                // Setup receiver for user initialize (which happens once for a new user)
+                // and
                 // if a user is removed.
                 filter = new IntentFilter(Intent.ACTION_USER_INITIALIZE);
                 filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -1141,7 +2616,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         mShutdownEventReceiver, UserHandle.ALL, filter, null, null);
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    // Pull the latest state of UID->app name, version mapping when statsd starts.
+                    // Pull the latest state of UID->app name, version mapping when
+                    // statsd starts.
                     informAllUidsLocked(mContext);
                 } finally {
                     restoreCallingIdentity(token);
@@ -1188,6 +2664,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    @GuardedBy("StatsCompanionService.sStatsdLock")
     private void forgetEverythingLocked() {
         sStatsd = null;
         mContext.unregisterReceiver(mAppUpdateReceiver);
@@ -1195,6 +2672,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mContext.unregisterReceiver(mShutdownEventReceiver);
         cancelAnomalyAlarm();
         cancelPullingAlarm();
+
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats != null) {
+            binderStats.reset();
+        }
+
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats != null) {
+            looperStats.reset();
+        }
     }
 
     @Override
@@ -1202,7 +2690,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
 
         synchronized (sStatsdLock) {
-            writer.println("Number of configuration files deleted: " + mDeletedFiles.size());
+            writer.println(
+                    "Number of configuration files deleted: " + mDeletedFiles.size());
             if (mDeletedFiles.size() > 0) {
                 writer.println("  timestamp, deleted file name");
             }
@@ -1210,19 +2699,33 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     SystemClock.currentThreadTimeMillis() - SystemClock.elapsedRealtime();
             for (Long elapsedMillis : mDeletedFiles.keySet()) {
                 long deletionMillis = lastBootMillis + elapsedMillis;
-                writer.println("  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
+                writer.println(
+                        "  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
             }
         }
     }
 
     // Thermal event received from vendor thermal management subsystem
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
-        @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
-            StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
-                    isThrottling ?
-                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__START :
-                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__STOP,
-                    temp.getValue());
+        @Override
+        public void notifyThrottling(Temperature temp) {
+            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
+                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
+        }
+    }
+
+    private static final class ConnectivityStatsCallback extends
+            ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
 }

@@ -20,7 +20,7 @@ package com.android.server;
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Dump from StatLogger.
 message StatLoggerProto {
@@ -29,7 +29,7 @@ message StatLoggerProto {
     message Event {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 eventId = 1;
+        optional int32 event_id = 1;
         // Labels are hard-coded in Android framework code.
         optional string label = 2;
         optional int32 count = 3;

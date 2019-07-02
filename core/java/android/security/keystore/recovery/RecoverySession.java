@@ -77,36 +77,6 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    @NonNull public byte[] start(
-            @NonNull byte[] verifierPublicKey,
-            @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge,
-            @NonNull List<KeyChainProtectionParams> secrets)
-            throws CertificateException, InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    @NonNull public byte[] start(
-            @NonNull CertPath verifierCertPath,
-            @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge,
-            @NonNull List<KeyChainProtectionParams> secrets)
-            throws CertificateException, InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Starts a recovery session and returns a blob with proof of recovery secret possession.
      * The method generates a symmetric key for a session, which trusted remote device can use to
      * return recovery key.
@@ -158,20 +128,6 @@ public class RecoverySession implements AutoCloseable {
             }
             throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #recoverKeyChainSnapshot(byte[], List)} instead.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Map<String, byte[]> recoverKeys(
-            @NonNull byte[] recoveryKeyBlob,
-            @NonNull List<WrappedApplicationKey> applicationKeys)
-            throws SessionExpiredException, DecryptionFailedException,
-            InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -235,7 +191,7 @@ public class RecoverySession implements AutoCloseable {
      *
      * @hide
      */
-    String getSessionId() {
+    @NonNull String getSessionId() {
         return mSessionId;
     }
 

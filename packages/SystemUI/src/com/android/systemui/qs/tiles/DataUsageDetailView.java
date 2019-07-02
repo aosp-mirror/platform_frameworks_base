@@ -16,8 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.annotation.ColorInt;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
@@ -66,7 +66,7 @@ public class DataUsageDetailView extends LinearLayout {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;
-        @ColorInt int usageColor = 0;
+        ColorStateList usageColorState = null;
         final String top;
         String bottom = null;
         if (info.usageLevel < info.warningLevel || info.limitLevel <= 0) {
@@ -91,18 +91,18 @@ public class DataUsageDetailView extends LinearLayout {
                     formatBytes(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                     formatBytes(info.limitLevel));
-            usageColor = Utils.getDefaultColor(mContext, android.R.attr.colorError);
+            usageColorState = Utils.getColorError(mContext);
         }
 
-        if (usageColor == 0) {
-            usageColor = Utils.getColorAccent(mContext);
+        if (usageColorState == null) {
+            usageColorState = Utils.getColorAccent(mContext);
         }
 
         final TextView title = findViewById(android.R.id.title);
         title.setText(titleId);
         final TextView usage = findViewById(R.id.usage_text);
         usage.setText(formatBytes(bytes));
-        usage.setTextColor(usageColor);
+        usage.setTextColor(usageColorState);
         final DataUsageGraph graph = findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
         final TextView carrier = findViewById(R.id.usage_carrier_text);

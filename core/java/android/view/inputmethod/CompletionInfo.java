@@ -153,7 +153,7 @@ public final class CompletionInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<CompletionInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<CompletionInfo> CREATOR
             = new Parcelable.Creator<CompletionInfo>() {
         public CompletionInfo createFromParcel(Parcel source) {
             return new CompletionInfo(source);

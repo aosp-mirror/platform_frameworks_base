@@ -39,7 +39,7 @@ public interface NotificationSwipeActionHelper {
     /**
      * Call this to snap a notification to provided {@code targetLeft}.
      */
-    public void snap(View animView, float velocity, float targetLeft);
+    public void snapOpen(View animView, int targetLeft, float velocity);
 
     /**
      * Call this to snooze a notification based on the provided {@link SnoozeOption}.

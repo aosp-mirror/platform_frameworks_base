@@ -107,6 +107,55 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
   EXPECT_THAT(output, Not(HasSubstr("com_foo$two")));
 }
 
+TEST(JavaClassGeneratorTest, StyleableAttributesWithDifferentPackageName) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .SetPackageId("app", 0x7f)
+          .AddValue("app:attr/foo", ResourceId(0x7f010000),
+                    test::AttributeBuilder().Build())
+          .AddValue("app:attr/bar", ResourceId(0x7f010001),
+                    test::AttributeBuilder().Build())
+          .AddValue("android:attr/baz", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .AddValue("app:styleable/MyStyleable", ResourceId(0x7f030000),
+                    test::StyleableBuilder()
+                        .AddItem("app:attr/foo", ResourceId(0x7f010000))
+                        .AddItem("attr/bar", ResourceId(0x7f010001))
+                        .AddItem("android:attr/baz", ResourceId(0x01010000))
+                        .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"custom"})
+          .SetCompilationPackage("custom")
+          .Build();
+  JavaClassGenerator generator(context.get(), table.get(), {});
+
+  std::string output;
+  StringOutputStream out(&output);
+  EXPECT_TRUE(generator.Generate("app", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, Not(HasSubstr("public static final int baz=0x01010000;")));
+  EXPECT_THAT(output, HasSubstr("public static final int foo=0x7f010000;"));
+  EXPECT_THAT(output, HasSubstr("public static final int bar=0x7f010001;"));
+
+  EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_android_baz=0;"));
+  EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_foo=1;"));
+  EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_bar=2;"));
+
+  EXPECT_THAT(output, HasSubstr("@link #MyStyleable_android_baz android:baz"));
+  EXPECT_THAT(output, HasSubstr("@link #MyStyleable_foo app:foo"));
+  EXPECT_THAT(output, HasSubstr("@link #MyStyleable_bar app:bar"));
+
+  EXPECT_THAT(output, HasSubstr("@link android.R.attr#baz"));
+  EXPECT_THAT(output, HasSubstr("@link app.R.attr#foo"));
+  EXPECT_THAT(output, HasSubstr("@link app.R.attr#bar"));
+}
+
 TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
@@ -317,6 +366,46 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
   ASSERT_TRUE(generator.Generate("android", &out));
   out.Flush();
 
+  EXPECT_THAT(output, HasSubstr("#Container_one android:one"));
+  EXPECT_THAT(output, HasSubstr("@see #Container_one"));
+  EXPECT_THAT(output, HasSubstr("attr name android:one"));
+  EXPECT_THAT(output, HasSubstr("attr description"));
+  EXPECT_THAT(output, HasSubstr(attr.GetComment()));
+  EXPECT_THAT(output, HasSubstr(styleable.GetComment()));
+}
+
+TEST(JavaClassGeneratorTest, CommentsForStyleableHiddenAttributesAreNotPresent) {
+  Attribute attr;
+  attr.SetComment(StringPiece("This is an attribute @hide"));
+
+  Styleable styleable;
+  styleable.entries.push_back(Reference(test::ParseNameOrDie("android:attr/one")));
+  styleable.SetComment(StringPiece("This is a styleable"));
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:attr/one", util::make_unique<Attribute>(attr))
+          .AddValue("android:styleable/Container",
+                    std::unique_ptr<Styleable>(styleable.Clone(nullptr)))
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"android"})
+          .Build();
+  JavaClassGeneratorOptions options;
+  options.use_final = false;
+  JavaClassGenerator generator(context.get(), table.get(), options);
+
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, Not(HasSubstr("#Container_one android:one")));
+  EXPECT_THAT(output, Not(HasSubstr("@see #Container_one")));
   EXPECT_THAT(output, HasSubstr("attr name android:one"));
   EXPECT_THAT(output, HasSubstr("attr description"));
   EXPECT_THAT(output, HasSubstr(attr.GetComment()));
@@ -436,6 +525,24 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
   EXPECT_THAT(output, HasSubstr("void onResourcesLoaded"));
   EXPECT_THAT(output, HasSubstr("com.foo.R.onResourcesLoaded"));
   EXPECT_THAT(output, HasSubstr("com.boo.R.onResourcesLoaded"));
+}
+
+TEST(JavaClassGeneratorTest, OnlyGenerateRText) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:attr/foo", ResourceId(0x01010000), util::make_unique<Attribute>())
+          .AddValue("android:styleable/hey.dude", ResourceId(0x01020000),
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/foo", ResourceId(0x01010000))
+                        .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x01).SetCompilationPackage("android").Build();
+  JavaClassGenerator generator(context.get(), table.get(), {});
+
+  ASSERT_TRUE(generator.Generate("android", nullptr));
 }
 
 }  // namespace aapt

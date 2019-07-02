@@ -26,7 +26,6 @@ import android.util.Log;
 
 import com.android.settingslib.R;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -39,7 +38,6 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     // HID Device Profile is always preferred.
     private static final int PREFERRED_VALUE = -1;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
     static final String NAME = "HID DEVICE";
@@ -47,14 +45,12 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     private BluetoothHidDevice mService;
     private boolean mIsProfileReady;
 
-    HidDeviceProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    HidDeviceProfile(Context context,CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        adapter.getProfileProxy(context, new HidDeviceServiceListener(),
-                BluetoothProfile.HID_DEVICE);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new HidDeviceServiceListener(), BluetoothProfile.HID_DEVICE);
     }
 
     // These callbacks run on the main thread.
@@ -62,7 +58,6 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected :-), profile:" + profile);
             mService = (BluetoothHidDevice) proxy;
             // We just bound to the service, so refresh the UI for any connected HID devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -71,7 +66,7 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HidProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 Log.d(TAG, "Connection status changed: " + device);
                 device.onProfileStateChanged(HidDeviceProfile.this,
@@ -82,7 +77,6 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mIsProfileReady = false;
         }
     }
@@ -171,13 +165,13 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
             case BluetoothProfile.STATE_CONNECTED:
                 return R.string.bluetooth_hid_profile_summary_connected;
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     @Override
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_misc_hid;
+        return com.android.internal.R.drawable.ic_bt_misc_hid;
     }
 
     protected void finalize() {

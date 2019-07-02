@@ -18,10 +18,7 @@ package android.widget.listview;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.ListView;
 
 import com.android.frameworks.coretests.R;

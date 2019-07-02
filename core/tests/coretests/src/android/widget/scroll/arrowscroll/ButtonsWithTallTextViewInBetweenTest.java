@@ -16,16 +16,16 @@
 
 package android.widget.scroll.arrowscroll;
 
-import android.widget.scroll.ButtonsWithTallTextViewInBetween;
-
 import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.scroll.ButtonsWithTallTextViewInBetween;
+
+import androidx.test.filters.MediumTest;
 
 public class ButtonsWithTallTextViewInBetweenTest
         extends ActivityInstrumentationTestCase<ButtonsWithTallTextViewInBetween> {

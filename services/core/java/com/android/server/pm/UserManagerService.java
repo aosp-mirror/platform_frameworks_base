@@ -31,7 +31,7 @@ import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -72,9 +72,9 @@ import android.os.UserManager.EnforcingUser;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.Log;
@@ -82,7 +82,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -101,6 +100,7 @@ import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -175,6 +175,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
+    private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
+            "lastRequestQuietModeEnabledCall";
     private static final String ATTR_KEY = "key";
     private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
@@ -269,6 +271,16 @@ public class UserManagerService extends IUserManager.Stub {
 
         /** Elapsed realtime since boot when the user was unlocked. */
         long unlockRealtime;
+
+        private long mLastRequestQuietModeEnabledMillis;
+
+        void setLastRequestQuietModeEnabledMillis(long millis) {
+            mLastRequestQuietModeEnabledMillis = millis;
+        }
+
+        long getLastRequestQuietModeEnabledMillis() {
+            return mLastRequestQuietModeEnabledMillis;
+        }
 
         void clearSeedAccountData() {
             seedAccountName = null;
@@ -391,8 +403,8 @@ public class UserManagerService extends IUserManager.Stub {
             final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT);
             final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
             // Call setQuietModeEnabled on bg thread to avoid ANR
-            BackgroundThread.getHandler()
-                    .post(() -> setQuietModeEnabled(userHandle, false, target));
+            BackgroundThread.getHandler().post(() ->
+                    setQuietModeEnabled(userHandle, false, target, /* callingPackage */ null));
         }
     };
 
@@ -686,6 +698,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /** Assume permissions already checked and caller's identity cleared */
+    @GuardedBy("mUsersLock")
     private List<UserInfo> getProfilesLU(int userId, boolean enabledOnly, boolean fullInfo) {
         IntArray profileIds = getProfileIdsLU(userId, enabledOnly);
         ArrayList<UserInfo> users = new ArrayList<>(profileIds.size());
@@ -708,6 +721,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      *  Assume permissions already checked and caller's identity cleared
      */
+    @GuardedBy("mUsersLock")
     private IntArray getProfileIdsLU(int userId, boolean enabledOnly) {
         UserInfo user = getUserInfoLU(userId);
         IntArray result = new IntArray(mUsers.size());
@@ -786,6 +800,7 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService.getProfileParentId(userHandle);
     }
 
+    @GuardedBy("mUsersLock")
     private UserInfo getProfileParentLU(int userHandle) {
         UserInfo profile = getUserInfoLU(userHandle);
         if (profile == null) {
@@ -833,21 +848,24 @@ public class UserManagerService extends IUserManager.Stub {
         ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), target != null);
         final long identity = Binder.clearCallingIdentity();
         try {
+            boolean result = false;
             if (enableQuietMode) {
-                setQuietModeEnabled(userHandle, true /* enableQuietMode */, target);
-                return true;
+                setQuietModeEnabled(
+                        userHandle, true /* enableQuietMode */, target, callingPackage);
+                result = true;
             } else {
                 boolean needToShowConfirmCredential =
                         mLockPatternUtils.isSecure(userHandle)
                                 && !StorageManager.isUserKeyUnlocked(userHandle);
                 if (needToShowConfirmCredential) {
                     showConfirmCredentialToDisableQuietMode(userHandle, target);
-                    return false;
                 } else {
-                    setQuietModeEnabled(userHandle, false /* enableQuietMode */, target);
-                    return true;
+                    setQuietModeEnabled(
+                            userHandle, false /* enableQuietMode */, target, callingPackage);
+                    result = true;
                 }
             }
+            return result;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -893,8 +911,8 @@ public class UserManagerService extends IUserManager.Stub {
                 + "default launcher nor has MANAGE_USERS/MODIFY_QUIET_MODE permission");
     }
 
-    private void setQuietModeEnabled(
-            int userHandle, boolean enableQuietMode, IntentSender target) {
+    private void setQuietModeEnabled(int userHandle, boolean enableQuietMode,
+            IntentSender target, @Nullable String callingPackage) {
         final UserInfo profile, parent;
         final UserData profileUserData;
         synchronized (mUsersLock) {
@@ -926,12 +944,35 @@ public class UserManagerService extends IUserManager.Stub {
                 ActivityManager.getService().startUserInBackgroundWithListener(
                         userHandle, callback);
             }
+            logQuietModeEnabled(userHandle, enableQuietMode, callingPackage);
         } catch (RemoteException e) {
             // Should not happen, same process.
             e.rethrowAsRuntimeException();
         }
         broadcastProfileAvailabilityChanges(profile.getUserHandle(), parent.getUserHandle(),
                 enableQuietMode);
+    }
+
+    private void logQuietModeEnabled(int userHandle, boolean enableQuietMode,
+            @Nullable String callingPackage) {
+        UserData userData;
+        synchronized (mUsersLock) {
+            userData = getUserDataLU(userHandle);
+        }
+        if (userData == null) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final long period = (userData.getLastRequestQuietModeEnabledMillis() != 0L
+                ? now - userData.getLastRequestQuietModeEnabledMillis()
+                : now - userData.info.creationTime);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.REQUEST_QUIET_MODE_ENABLED)
+                .setStrings(callingPackage)
+                .setBoolean(enableQuietMode)
+                .setTimePeriod(period)
+                .write();
+        userData.setLastRequestQuietModeEnabledMillis(now);
     }
 
     @Override
@@ -1068,14 +1109,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public int getManagedProfileBadge(@UserIdInt int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
-                throw new SecurityException(
-                        "You need MANAGE_USERS permission to: check if specified user a " +
-                        "managed profile outside your profile group");
-            }
-        }
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getManagedProfileBadge");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null ? userInfo.profileBadge : 0;
@@ -1084,14 +1118,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isManagedProfile(int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
-                throw new SecurityException(
-                        "You need MANAGE_USERS permission to: check if specified user a " +
-                        "managed profile outside your profile group");
-            }
-        }
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isManagedProfile");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isManagedProfile();
@@ -1114,6 +1141,19 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isUserRunning(int userId) {
         checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserRunning");
         return mLocalService.isUserRunning(userId);
+    }
+
+    @Override
+    public String getUserName() {
+        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
+                    + "permissions to: get user name");
+        }
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mUsersLock) {
+            UserInfo userInfo = userWithName(getUserInfoLU(userId));
+            return userInfo == null ? "" : userInfo.name;
+        }
     }
 
     @Override
@@ -1208,6 +1248,7 @@ public class UserManagerService extends IUserManager.Stub {
     /*
      * Should be locked on mUsers before calling this.
      */
+    @GuardedBy("mUsersLock")
     private UserInfo getUserInfoLU(int userId) {
         final UserData userData = mUsers.get(userId);
         // If it is partial and not in the process of being removed, return as unknown user.
@@ -1218,6 +1259,7 @@ public class UserManagerService extends IUserManager.Stub {
         return userData != null ? userData.info : null;
     }
 
+    @GuardedBy("mUsersLock")
     private UserData getUserDataLU(int userId) {
         final UserData userData = mUsers.get(userId);
         // If it is partial and not in the process of being removed, return as unknown user.
@@ -1270,7 +1312,12 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (changed) {
-            sendUserInfoChangedBroadcast(userId);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                sendUserInfoChangedBroadcast(userId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -1295,6 +1342,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public ParcelFileDescriptor getUserIcon(int targetUserId) {
+        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
+                    + "permissions to: get user icon");
+        }
         String iconPath;
         synchronized (mPackagesLock) {
             UserInfo targetUserInfo = getUserInfoNoChecks(targetUserId);
@@ -1720,6 +1771,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     // Package private for the inner class.
+    @GuardedBy("mRestrictionsLock")
     void applyUserRestrictionsLR(int userId) {
         updateUserRestrictionsInternalLR(null, userId);
     }
@@ -1800,6 +1852,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy("mUsersLock")
     private int getAliveUsersExcludingGuestsCountLU() {
         int aliveUserCount = 0;
         final int totalUserCount = mUsers.size();
@@ -1909,15 +1962,23 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * @return whether the calling UID is system UID or root's UID or the calling app has the
-     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
-     * {@link android.Manifest.permission#CREATE_USERS CREATE_USERS}.
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or the provided permission.
      */
-    private static final boolean hasManageOrCreateUsersPermission() {
+    private static final boolean hasManageUsersOrPermission(String alternativePermission) {
         final int callingUid = Binder.getCallingUid();
         return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID
                 || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid)
-                || hasPermissionGranted(android.Manifest.permission.CREATE_USERS, callingUid);
+                || hasPermissionGranted(alternativePermission, callingUid);
+    }
+
+    /**
+     * @return whether the calling UID is system UID or root's UID or the calling app has the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
+     * {@link android.Manifest.permission#CREATE_USERS CREATE_USERS}.
+     */
+    private static final boolean hasManageOrCreateUsersPermission() {
+        return hasManageUsersOrPermission(android.Manifest.permission.CREATE_USERS);
     }
 
     /**
@@ -1973,6 +2034,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void readUserListLP() {
         if (!mUserListFile.exists()) {
             fallbackToSingleUserLP();
@@ -2070,6 +2132,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      * @param oldGlobalUserRestrictions Pre-O global device policy restrictions.
      */
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions) {
         final int originalVersion = mUserVersion;
         int userVersion = mUserVersion;
@@ -2150,6 +2213,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
     private void fallbackToSingleUserLP() {
         int flags = UserInfo.FLAG_INITIALIZED;
         // In split system user mode, the admin and primary flags are assigned to the first human
@@ -2306,6 +2370,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
         }
 
+        if (userData.getLastRequestQuietModeEnabledMillis() != 0L) {
+            serializer.startTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
+            serializer.text(String.valueOf(userData.getLastRequestQuietModeEnabledMillis()));
+            serializer.endTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
+        }
+
         serializer.endTag(null, TAG_USER);
 
         serializer.endDocument();
@@ -2319,6 +2389,7 @@ public class UserManagerService extends IUserManager.Stub {
      *   <user id="2"></user>
      * </users>
      */
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void writeUserListLP() {
         if (DBG) {
             debug("writeUserList");
@@ -2399,6 +2470,7 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
+        long lastRequestQuietModeEnabledTimestamp = 0L;
         String lastLoggedInFingerprint = null;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         int profileBadge = 0;
@@ -2485,6 +2557,11 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
                     seedAccountOptions = PersistableBundle.restoreFromXml(parser);
                     persistSeedData = true;
+                } else if (TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        lastRequestQuietModeEnabledTimestamp = Long.parseLong(parser.getText());
+                    }
                 }
             }
         }
@@ -2509,6 +2586,7 @@ public class UserManagerService extends IUserManager.Stub {
         userData.seedAccountType = seedAccountType;
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
+        userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
 
         synchronized (mRestrictionsLock) {
             if (baseRestrictions != null) {
@@ -2629,10 +2707,12 @@ public class UserManagerService extends IUserManager.Stub {
                 if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
                     // If we're not adding a guest/demo user or a managed profile and the limit has
                     // been reached, cannot add a user.
+                    Log.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
                     return null;
                 }
                 // If we're adding a guest and there already exists one, bail.
                 if (isGuest && findCurrentGuestUser() != null) {
+                    Log.e(LOG_TAG, "Cannot add guest user. Guest user already exists.");
                     return null;
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
@@ -2875,13 +2955,26 @@ public class UserManagerService extends IUserManager.Stub {
             final UserData userData;
             int currentUser = ActivityManager.getCurrentUser();
             if (currentUser == userHandle) {
-                Log.w(LOG_TAG, "Current user cannot be removed");
+                Log.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
             synchronized (mPackagesLock) {
                 synchronized (mUsersLock) {
                     userData = mUsers.get(userHandle);
-                    if (userHandle == 0 || userData == null || mRemovingUserIds.get(userHandle)) {
+                    if (userHandle == UserHandle.USER_SYSTEM) {
+                        Log.e(LOG_TAG, "System user cannot be removed.");
+                        return false;
+                    }
+
+                    if (userData == null) {
+                        Log.e(LOG_TAG, String.format(
+                                "Cannot remove user %d, invalid user id provided.", userHandle));
+                        return false;
+                    }
+
+                    if (mRemovingUserIds.get(userHandle)) {
+                        Log.e(LOG_TAG, String.format(
+                                "User %d is already scheduled for removal.", userHandle));
                         return false;
                     }
 
@@ -2900,7 +2993,7 @@ public class UserManagerService extends IUserManager.Stub {
             try {
                 mAppOpsService.removeUser(userHandle);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
             }
 
             if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
@@ -2924,6 +3017,7 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                         });
             } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Failed to stop user during removal.", e);
                 return false;
             }
             return res == ActivityManager.USER_OP_SUCCESS;
@@ -2968,9 +3062,9 @@ public class UserManagerService extends IUserManager.Stub {
                             new Thread() {
                                 @Override
                                 public void run() {
-                                    // Clean up any ActivityManager state
-                                    LocalServices.getService(ActivityManagerInternal.class)
-                                            .onUserRemoved(userHandle);
+                                    // Clean up any ActivityTaskManager state
+                                    LocalServices.getService(ActivityTaskManagerInternal.class)
+                                            .onUserStopped(userHandle);
                                     removeUserState(userHandle);
                                 }
                             }.start();
@@ -3278,15 +3372,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getUserSerialNumber(int userHandle) {
         synchronized (mUsersLock) {
-            if (!exists(userHandle)) return -1;
-            return getUserInfoLU(userHandle).serialNumber;
+            final UserInfo userInfo = getUserInfoLU(userHandle);
+            return userInfo != null ? userInfo.serialNumber : -1;
         }
     }
 
     @Override
     public boolean isUserNameSet(int userHandle) {
         synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userHandle);
+            final UserInfo userInfo = getUserInfoLU(userHandle);
             return userInfo != null && userInfo.name != null;
         }
     }
@@ -3558,6 +3652,8 @@ public class UserManagerService extends IUserManager.Stub {
             switch(cmd) {
                 case "list":
                     return runList(pw);
+                default:
+                    return shell.handleDefaultCommands(cmd);
             }
         } catch (RemoteException e) {
             pw.println("Remote exception: " + e);
@@ -4060,6 +4156,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy("mUsersLock")
     @VisibleForTesting
     int getFreeProfileBadgeLU(int parentUserId) {
         int maxManagedProfiles = getMaxManagedProfiles();

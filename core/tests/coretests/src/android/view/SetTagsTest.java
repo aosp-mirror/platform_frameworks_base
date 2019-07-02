@@ -16,11 +16,12 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-import android.test.suitebuilder.annotation.MediumTest;
-
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.Button;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises {@link android.view.View}'s tags property.

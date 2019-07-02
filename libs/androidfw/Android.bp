@@ -59,8 +59,6 @@ cc_library {
         "ZipFileRO.cpp",
         "ZipUtils.cpp",
     ],
-    // Allow implicit fallthroughs in Locale.cpp and ResourceTypes.cpp until they are fixed.
-    cflags: ["-Wno-implicit-fallthrough"],
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
     target: {
@@ -142,6 +140,7 @@ cc_test {
         "tests/Config_test.cpp",
         "tests/ConfigDescription_test.cpp",
         "tests/ConfigLocale_test.cpp",
+        "tests/DynamicRefTable_test.cpp",
         "tests/Idmap_test.cpp",
         "tests/LoadedArsc_test.cpp",
         "tests/Locale_test.cpp",
@@ -168,6 +167,7 @@ cc_test {
         },
     },
     data: ["tests/data/**/*.apk"],
+    test_suites: ["device-tests"],
 }
 
 cc_benchmark {

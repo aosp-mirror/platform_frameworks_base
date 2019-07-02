@@ -31,7 +31,7 @@
         android:paddingStart="48dp"
         android:paddingTop="43dp"
         android:text="@string/screen_pinning_title"
-        android:textColor="@color/screen_pinning_primary_text"
+        android:textColor="@android:color/white"
         android:textSize="24sp" />
 
     <TextView
@@ -43,7 +43,7 @@
         android:paddingStart="48dp"
         android:paddingTop="12.6dp"
         android:text="@string/screen_pinning_description"
-        android:textColor="@color/screen_pinning_primary_text"
+        android:textColor="@android:color/white"
         android:textSize="16sp" />
 
     <Button

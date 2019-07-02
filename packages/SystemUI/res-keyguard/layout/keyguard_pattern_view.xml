@@ -48,11 +48,6 @@
             android:clipChildren="false"
             android:clipToPadding="false">
 
-            <include layout="@layout/keyguard_message_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-               />
-
             <com.android.internal.widget.LockPatternView
                 android:id="@+id/lockPatternView"
                 android:layout_width="match_parent"

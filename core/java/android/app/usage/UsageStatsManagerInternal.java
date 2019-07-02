@@ -20,6 +20,7 @@ import android.annotation.UserIdInt;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.os.UserHandle;
 
 import java.util.List;
 import java.util.Set;
@@ -37,9 +38,14 @@ public abstract class UsageStatsManagerInternal {
      * @param component The component for which this event occurred.
      * @param userId The user id to which the component belongs to.
      * @param eventType The event that occurred. Valid values can be found at
-     * {@link UsageEvents}
+     *                  {@link UsageEvents}
+     * @param instanceId For activity, hashCode of ActivityRecord's appToken.
+     *                   For non-activity, it is not used.
+     * @param taskRoot For activity, the name of the package at the root of the task
+     *                 For non-activity, it is not used.
      */
-    public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType);
+    public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType,
+            int instanceId, ComponentName taskRoot);
 
     /**
      * Reports an event to the UsageStatsManager.
@@ -93,6 +99,12 @@ public abstract class UsageStatsManagerInternal {
      * Prepares the UsageStatsService for shutdown.
      */
     public abstract void prepareShutdown();
+
+    /**
+     * When the device power button is long pressed for 3.5 seconds, prepareForPossibleShutdown()
+     * is called.
+     */
+    public abstract void prepareForPossibleShutdown();
 
     /**
      * Returns true if the app has not been used for a certain amount of time. How much time?
@@ -245,12 +257,14 @@ public abstract class UsageStatsManagerInternal {
             int numDeferredJobs, long timeSinceLastJobRun);
 
     /**
-     * Report a sync is scheduled by a foreground app.
+     * Report a sync that was scheduled.
      *
      * @param packageName name of the package that owns the sync adapter.
      * @param userId which user the app is associated with
+     * @param exempted is sync app standby exempted
      */
-    public abstract void reportExemptedSyncScheduled(String packageName, @UserIdInt int userId);
+    public abstract void reportSyncScheduled(String packageName, @UserIdInt int userId,
+                                             boolean exempted);
 
     /**
      * Report a sync that was scheduled by a foreground app is about to be executed.
@@ -259,4 +273,35 @@ public abstract class UsageStatsManagerInternal {
      * @param userId which user the app is associated with
      */
     public abstract void reportExemptedSyncStart(String packageName, @UserIdInt int userId);
+
+    /**
+     * Returns an object describing the app usage limit for the given package which was set via
+     * {@link UsageStatsManager#registerAppUsageLimitObserver}.
+     * If there are multiple limits that apply to the package, the one with the smallest
+     * time remaining will be returned.
+     *
+     * @param packageName name of the package whose app usage limit will be returned
+     * @param user the user associated with the limit
+     * @return an {@link AppUsageLimitData} object describing the app time limit containing
+     * the given package, with the smallest time remaining.
+     */
+    public abstract AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user);
+
+    /** A class which is used to share the usage limit data for an app or a group of apps. */
+    public static class AppUsageLimitData {
+        private final long mTotalUsageLimit;
+        private final long mUsageRemaining;
+
+        public AppUsageLimitData(long totalUsageLimit, long usageRemaining) {
+            this.mTotalUsageLimit = totalUsageLimit;
+            this.mUsageRemaining = usageRemaining;
+        }
+
+        public long getTotalUsageLimit() {
+            return mTotalUsageLimit;
+        }
+        public long getUsageRemaining() {
+            return mUsageRemaining;
+        }
+    }
 }

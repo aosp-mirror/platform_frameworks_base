@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.Nullable;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -23,7 +24,9 @@ import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 
 /**
  * Display manager local system service interface.
@@ -60,6 +63,14 @@ public abstract class DisplayManagerInternal {
      * Returns true if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
+
+    /**
+     * Take a screenshot of the specified display and return a buffer.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
@@ -116,7 +127,7 @@ public abstract class DisplayManagerInternal {
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
      */
-    public abstract void performTraversal(SurfaceControl.Transaction t);
+    public abstract void performTraversal(Transaction t);
 
     /**
      * Tells the display manager about properties of the display that depend on the windows on it.
@@ -160,19 +171,20 @@ public abstract class DisplayManagerInternal {
     public abstract void setDisplayOffsets(int displayId, int x, int y);
 
     /**
+     * Disables scaling for a display.
+     *
+     * @param displayId The logical display id to disable scaling for.
+     * @param disableScaling {@code true} to disable scaling,
+     * {@code false} to use the default scaling behavior of the logical display.
+     */
+    public abstract void setDisplayScalingDisabled(int displayId, boolean disableScaling);
+
+    /**
      * Provide a list of UIDs that are present on the display and are allowed to access it.
      *
      * @param displayAccessUIDs Mapping displayId -> int array of UIDs.
      */
     public abstract void setDisplayAccessUIDs(SparseArray<IntArray> displayAccessUIDs);
-
-    /**
-     * Check if specified UID's content is present on display and should be granted access to it.
-     *
-     * @param uid UID to be checked.
-     * @param displayId id of the display where presence of the content is checked.
-     * */
-    public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
 
     /**
      * Persist brightness slider events and ambient brightness stats.
@@ -183,6 +195,44 @@ public abstract class DisplayManagerInternal {
      * Notifies the display manager that resource overlays have changed.
      */
     public abstract void onOverlayChanged();
+
+    /**
+     * Get the attributes available for display color sampling.
+     * @param displayId id of the display to collect the sample from.
+     *
+     * @return The attributes the display supports, or null if sampling is not supported.
+     */
+    @Nullable
+    public abstract DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributes(
+            int displayId);
+
+    /**
+     * Enable or disable the collection of color samples.
+     *
+     * @param displayId id of the display to collect the sample from.
+     * @param componentMask a bitmask of the color channels to collect samples for, or zero for all
+     *                      available.
+     * @param maxFrames maintain a ringbuffer of the last maxFrames.
+     * @param enable True to enable, False to disable.
+     *
+     * @return True if sampling was enabled, false if failure.
+     */
+    public abstract boolean setDisplayedContentSamplingEnabled(
+            int displayId, boolean enable, int componentMask, int maxFrames);
+
+    /**
+     * Accesses the color histogram statistics of displayed frames on devices that support sampling.
+     *
+     * @param displayId id of the display to collect the sample from
+     * @param maxFrames limit the statistics to the last maxFrames number of frames.
+     * @param timestamp discard statistics that were collected prior to timestamp, where timestamp
+     *                  is given as CLOCK_MONOTONIC.
+     * @return The statistics representing a histogram of the color distribution of the frames
+     *         displayed on-screen, or null if sampling is not supported.
+    */
+    @Nullable
+    public abstract DisplayedContentSample getDisplayedContentSample(
+            int displayId, long maxFrames, long timestamp);
 
     /**
      * Describes the requested power state of the display.
@@ -225,7 +275,8 @@ public abstract class DisplayManagerInternal {
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
-        // If true, scales the brightness to half of desired.
+        // If true, scales the brightness to a fraction of desired (as defined by
+        // screenLowPowerBrightnessFactor).
         public boolean lowPowerMode;
 
         // The factor to adjust the screen brightness in low power mode in the range
@@ -372,6 +423,6 @@ public abstract class DisplayManagerInternal {
      * update the position of its surfaces as part of the same transaction.
      */
     public interface DisplayTransactionListener {
-        void onDisplayTransaction();
+        void onDisplayTransaction(Transaction t);
     }
 }

@@ -29,13 +29,11 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.qs.QSHost;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.util.Arrays;

@@ -471,7 +471,7 @@ public class Network implements Parcelable {
         dest.writeInt(netId);
     }
 
-    public static final Creator<Network> CREATOR =
+    public static final @android.annotation.NonNull Creator<Network> CREATOR =
         new Creator<Network>() {
             public Network createFromParcel(Parcel in) {
                 int netId = in.readInt();

@@ -16,28 +16,14 @@
 
 package android.text;
 
-import static android.text.TextDirectionHeuristics.LTR;
-
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
-
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
 import android.graphics.Typeface;
-import android.text.Layout;
+import android.icu.text.UnicodeSet;
+import android.icu.text.UnicodeSetIterator;
 import android.text.style.TextAppearanceSpan;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class TextPerfUtils {
@@ -46,8 +32,17 @@ public class TextPerfUtils {
 
     private Random mRandom = new Random(0);
 
-    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final int ALPHABET_LENGTH = ALPHABET.length();
+    private static final String[] ALPHABET;
+    private static final int ALPHABET_LENGTH;
+    static {
+        String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        ALPHABET_LENGTH = alphabets.length();
+        ALPHABET = new String[ALPHABET_LENGTH];
+        for (int i = 0; i < ALPHABET_LENGTH; ++i) {
+            ALPHABET[i] = Character.toString(alphabets.charAt(i));
+        }
+    }
+
 
     private static final ColorStateList TEXT_COLOR = ColorStateList.valueOf(0x00000000);
     private static final String[] FAMILIES = { "sans-serif", "serif", "monospace" };
@@ -55,30 +50,64 @@ public class TextPerfUtils {
             Typeface.NORMAL, Typeface.BOLD, Typeface.ITALIC, Typeface.BOLD_ITALIC
     };
 
-    private final char[] mBuffer = new char[PARA_LENGTH];
-
     public void resetRandom(long seed) {
         mRandom = new Random(seed);
     }
 
+    private static String[] UnicodeSetToArray(String setStr) {
+        final UnicodeSet set = new UnicodeSet(setStr);
+        final UnicodeSetIterator iterator = new UnicodeSetIterator(set);
+        final ArrayList<String> out = new ArrayList<>(set.size());
+        while (iterator.next()) {
+          out.add(iterator.getString());
+        }
+        return out.toArray(new String[out.size()]);
+    }
+
+    public CharSequence nextRandomParagraph(int wordLen, boolean applyRandomStyle, String setStr) {
+        return nextRandomParagraph(wordLen, PARA_LENGTH, applyRandomStyle,
+                UnicodeSetToArray(setStr));
+    }
+
     public CharSequence nextRandomParagraph(int wordLen, boolean applyRandomStyle) {
-        for (int i = 0; i < PARA_LENGTH; i++) {
+        return nextRandomParagraph(wordLen, PARA_LENGTH, applyRandomStyle, ALPHABET);
+    }
+
+    public CharSequence nextRandomParagraph(int wordLen, int paraLength) {
+        return nextRandomParagraph(wordLen, paraLength, false /* no style */, ALPHABET);
+    }
+
+    public CharSequence nextRandomParagraph(int wordLen, int paraLength, boolean applyRandomStyle,
+            String[] charSet) {
+        ArrayList<Character> chars = new ArrayList<>();
+        ArrayList<Integer> wordOffsets = new ArrayList<>();
+        for (int i = 0; i < paraLength; i++) {
             if (i % (wordLen + 1) == wordLen) {
-                mBuffer[i] = ' ';
+                chars.add(' ');
+                wordOffsets.add(chars.size());
             } else {
-                mBuffer[i] = ALPHABET.charAt(mRandom.nextInt(ALPHABET_LENGTH));
+                final String str = charSet[mRandom.nextInt(charSet.length)];
+                for (int j = 0; j < str.length(); ++j) {
+                    chars.add(str.charAt(j));
+                }
             }
         }
+        wordOffsets.add(chars.size());
 
-        CharSequence cs = CharBuffer.wrap(mBuffer);
+        char[] buffer = new char[chars.size()];
+        for (int i = 0; i < buffer.length; ++i) {
+            buffer[i] = chars.get(i);
+        }
+        CharSequence cs = CharBuffer.wrap(buffer);
         if (!applyRandomStyle) {
             return cs;
         }
 
         SpannableStringBuilder ssb = new SpannableStringBuilder(cs);
-        for (int i = 0; i < ssb.length(); i += wordLen + 1) {
-            final int spanStart = i;
-            final int spanEnd = (i + wordLen) > ssb.length() ? ssb.length() : i + wordLen;
+        int prevWordStart = 0;
+        for (int i = 0; i < wordOffsets.size(); i++) {
+            final int spanStart = prevWordStart;
+            final int spanEnd = wordOffsets.get(i);
 
             final TextAppearanceSpan span = new TextAppearanceSpan(
                   FAMILIES[mRandom.nextInt(FAMILIES.length)],
@@ -87,6 +116,7 @@ public class TextPerfUtils {
                   TEXT_COLOR, TEXT_COLOR);
 
             ssb.setSpan(span, spanStart, spanEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            prevWordStart = spanEnd;
         }
         return ssb;
     }

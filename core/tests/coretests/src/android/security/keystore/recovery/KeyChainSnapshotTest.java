@@ -20,15 +20,17 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.collect.Lists;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-// TODO(b/73862682): Add tests for RecoveryCertPath
+import java.security.cert.CertPath;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class KeyChainSnapshotTest {
@@ -43,35 +45,42 @@ public class KeyChainSnapshotTest {
     private static final int USER_SECRET_TYPE = KeyChainProtectionParams.TYPE_LOCKSCREEN;
     private static final String KEY_ALIAS = "steph";
     private static final byte[] KEY_MATERIAL = new byte[] { 3, 5, 7, 9, 1 };
+    private static final byte[] KEY_METADATA = new byte[] { 5, 3, 11, 13 };
+    private static final CertPath CERT_PATH = TestData.getThmCertPath();
 
     @Test
-    public void build_setsCounterId() {
+    public void build_setsCounterId() throws Exception {
         assertEquals(COUNTER_ID, createKeyChainSnapshot().getCounterId());
     }
 
     @Test
-    public void build_setsSnapshotVersion() {
+    public void build_setsSnapshotVersion() throws Exception {
         assertEquals(SNAPSHOT_VERSION, createKeyChainSnapshot().getSnapshotVersion());
     }
 
     @Test
-    public void build_setsMaxAttempts() {
+    public void build_setsMaxAttempts() throws Exception {
         assertEquals(MAX_ATTEMPTS, createKeyChainSnapshot().getMaxAttempts());
     }
 
     @Test
-    public void build_setsServerParams() {
+    public void build_setsServerParams() throws Exception {
         assertArrayEquals(SERVER_PARAMS, createKeyChainSnapshot().getServerParams());
     }
 
     @Test
-    public void build_setsRecoveryKeyBlob() {
+    public void build_setsRecoveryKeyBlob() throws Exception {
         assertArrayEquals(RECOVERY_KEY_BLOB,
                 createKeyChainSnapshot().getEncryptedRecoveryKeyBlob());
     }
 
     @Test
-    public void build_setsKeyChainProtectionParams() {
+    public void build_setsCertPath() throws Exception {
+        assertEquals(CERT_PATH, createKeyChainSnapshot().getTrustedHardwareCertPath());
+    }
+
+    @Test
+    public void build_setsKeyChainProtectionParams() throws Exception {
         KeyChainSnapshot snapshot = createKeyChainSnapshot();
 
         assertEquals(1, snapshot.getKeyChainProtectionParams().size());
@@ -85,52 +94,60 @@ public class KeyChainSnapshotTest {
     }
 
     @Test
-    public void build_setsWrappedApplicationKeys() {
+    public void build_setsWrappedApplicationKeys() throws Exception {
         KeyChainSnapshot snapshot = createKeyChainSnapshot();
 
         assertEquals(1, snapshot.getWrappedApplicationKeys().size());
         WrappedApplicationKey wrappedApplicationKey = snapshot.getWrappedApplicationKeys().get(0);
         assertEquals(KEY_ALIAS, wrappedApplicationKey.getAlias());
         assertArrayEquals(KEY_MATERIAL, wrappedApplicationKey.getEncryptedKeyMaterial());
+        assertArrayEquals(KEY_METADATA, wrappedApplicationKey.getMetadata());
     }
 
     @Test
-    public void writeToParcel_writesCounterId() {
+    public void writeToParcel_writesCounterId() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertEquals(COUNTER_ID, snapshot.getCounterId());
     }
 
     @Test
-    public void writeToParcel_writesSnapshotVersion() {
+    public void writeToParcel_writesSnapshotVersion() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertEquals(SNAPSHOT_VERSION, snapshot.getSnapshotVersion());
     }
 
     @Test
-    public void writeToParcel_writesMaxAttempts() {
+    public void writeToParcel_writesMaxAttempts() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertEquals(MAX_ATTEMPTS, snapshot.getMaxAttempts());
     }
 
     @Test
-    public void writeToParcel_writesServerParams() {
+    public void writeToParcel_writesServerParams() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertArrayEquals(SERVER_PARAMS, snapshot.getServerParams());
     }
 
     @Test
-    public void writeToParcel_writesKeyRecoveryBlob() {
+    public void writeToParcel_writesKeyRecoveryBlob() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertArrayEquals(RECOVERY_KEY_BLOB, snapshot.getEncryptedRecoveryKeyBlob());
     }
 
     @Test
-    public void writeToParcel_writesKeyChainProtectionParams() {
+    public void writeToParcel_writesCertPath() throws Exception {
+        KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
+
+        assertEquals(CERT_PATH, snapshot.getTrustedHardwareCertPath());
+    }
+
+    @Test
+    public void writeToParcel_writesKeyChainProtectionParams() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertEquals(1, snapshot.getKeyChainProtectionParams().size());
@@ -144,16 +161,17 @@ public class KeyChainSnapshotTest {
     }
 
     @Test
-    public void writeToParcel_writesWrappedApplicationKeys() {
+    public void writeToParcel_writesWrappedApplicationKeys() throws Exception {
         KeyChainSnapshot snapshot = writeToThenReadFromParcel(createKeyChainSnapshot());
 
         assertEquals(1, snapshot.getWrappedApplicationKeys().size());
         WrappedApplicationKey wrappedApplicationKey = snapshot.getWrappedApplicationKeys().get(0);
         assertEquals(KEY_ALIAS, wrappedApplicationKey.getAlias());
         assertArrayEquals(KEY_MATERIAL, wrappedApplicationKey.getEncryptedKeyMaterial());
+        assertArrayEquals(KEY_METADATA, wrappedApplicationKey.getMetadata());
     }
 
-    private static KeyChainSnapshot createKeyChainSnapshot() {
+    private static KeyChainSnapshot createKeyChainSnapshot() throws Exception {
         return new KeyChainSnapshot.Builder()
                 .setCounterId(COUNTER_ID)
                 .setSnapshotVersion(SNAPSHOT_VERSION)
@@ -162,6 +180,7 @@ public class KeyChainSnapshotTest {
                 .setEncryptedRecoveryKeyBlob(RECOVERY_KEY_BLOB)
                 .setKeyChainProtectionParams(Lists.newArrayList(createKeyChainProtectionParams()))
                 .setWrappedApplicationKeys(Lists.newArrayList(createWrappedApplicationKey()))
+                .setTrustedHardwareCertPath(CERT_PATH)
                 .build();
     }
 
@@ -181,6 +200,7 @@ public class KeyChainSnapshotTest {
         return new WrappedApplicationKey.Builder()
                 .setAlias(KEY_ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
+                .setMetadata(KEY_METADATA)
                 .build();
     }
 

@@ -18,10 +18,11 @@
 #define _BOOTANIMATION_BOOT_PARAMETERS_H_
 
 #include <list>
+#include <string>
 #include <vector>
 
-#include <base/json/json_value_converter.h>
 #include <boot_action/boot_action.h>  // libandroidthings native API.
+#include <boot_parameters.pb.h>
 
 namespace android {
 
@@ -32,39 +33,39 @@ public:
     // to clear the parameters for next boot.
     BootParameters();
 
-    // Returns true if volume/brightness were explicitly set on reboot.
-    bool hasVolume() const { return mVolume >= 0; }
-    bool hasBrightness() const { return mBrightness >= 0; }
-
-    // Returns volume/brightness in [0,1], or -1 if unset.
-    float getVolume() const { return mVolume; }
-    float getBrightness() const { return mBrightness; }
+    // Returns whether or not this is a silent boot.
+    bool isSilentBoot() const { return mIsSilentBoot; }
 
     // Returns the additional boot parameters that were set on reboot.
     const std::vector<ABootActionParameter>& getParameters() const { return mParameters; }
 
-private:
-    // Raw boot saved_parameters loaded from .json.
-    struct SavedBootParameters {
-        int brightness;
-        int volume;
-        std::vector<std::unique_ptr<std::string>> param_names;
-        std::vector<std::unique_ptr<std::string>> param_values;
+    // Exposed for testing. Sets the parameters to the serialized proto.
+    void parseBootParameters(const std::string &contents);
 
-        SavedBootParameters();
-        static void RegisterJSONConverter(
-                ::base::JSONValueConverter<SavedBootParameters>* converter);
-    };
+    // For devices that OTA from N to O.
+    // Exposed for testing. Sets the parameters to the raw JSON.
+    void parseLegacyBootParameters(const std::string &contents);
 
+    // Exposed for testing. Loads the contents from |nextBootFile| and replaces
+    // |lastBootFile| with |nextBootFile|.
+    static bool swapAndLoadBootConfigContents(const char *lastBootFile, const char *nextBootFile,
+                                              std::string *contents);
+
+  private:
     void loadParameters();
 
-    float mVolume = -1.f;
-    float mBrightness = -1.f;
+    // Replaces the legacy JSON blob with the updated version, allowing the
+    // framework to read it.
+    void storeParameters();
+
+    void loadStateFromProto();
+
+    bool mIsSilentBoot = false;
+
     std::vector<ABootActionParameter> mParameters;
 
-    // ABootActionParameter is just a raw pointer so we need to keep the
-    // original strings around to avoid losing them.
-    SavedBootParameters mRawParameters;
+    // Store the proto because mParameters makes a shallow copy.
+    android::things::proto::BootParameters mProto;
 };
 
 }  // namespace android

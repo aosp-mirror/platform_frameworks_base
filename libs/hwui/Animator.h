@@ -16,6 +16,8 @@
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
+#include "CanvasProperty.h"
+
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
@@ -31,8 +33,6 @@ namespace uirenderer {
 
 class AnimationContext;
 class BaseRenderNodeAnimator;
-class CanvasPropertyPrimitive;
-class CanvasPropertyPaint;
 class Interpolator;
 class RenderNode;
 class RenderProperties;

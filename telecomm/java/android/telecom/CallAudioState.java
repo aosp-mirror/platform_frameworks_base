@@ -239,7 +239,7 @@ public final class CallAudioState implements Parcelable {
     /**
      * Responsible for creating AudioState objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<CallAudioState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CallAudioState> CREATOR =
             new Parcelable.Creator<CallAudioState> () {
 
         @Override

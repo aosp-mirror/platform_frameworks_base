@@ -22,23 +22,26 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Work profile on/off */
 public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_workmode_disable);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.stat_sys_managed_profile_status);
 
     private final ManagedProfileController mProfileController;
 
-    public WorkModeTile(QSHost host) {
+    @Inject
+    public WorkModeTile(QSHost host, ManagedProfileController managedProfileController) {
         super(host);
-        mProfileController = Dependency.get(ManagedProfileController.class);
+        mProfileController = managedProfileController;
+        mProfileController.observe(getLifecycle(), this);
     }
 
     @Override
@@ -48,11 +51,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
-        if (listening) {
-            mProfileController.addCallback(this);
-        } else {
-            mProfileController.removeCallback(this);
-        }
     }
 
     @Override
@@ -78,6 +76,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     @Override
     public void onManagedProfileRemoved() {
         mHost.removeTile(getTileSpec());
+        mHost.unmarkTileAsAutoAdded(getTileSpec());
     }
 
     @Override

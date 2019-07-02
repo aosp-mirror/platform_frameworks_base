@@ -24,7 +24,8 @@ import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
 import android.content.pm.PackageBackwardCompatibility.RemoveUnnecessaryAndroidTestBaseLibrary;
 import android.os.Build;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Assume;
 import org.junit.Test;

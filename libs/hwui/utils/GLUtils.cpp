@@ -59,5 +59,22 @@ bool GLUtils::dumpGLErrors() {
 #endif
 }
 
-};  // namespace uirenderer
-};  // namespace android
+const char* GLUtils::getGLFramebufferError() {
+    switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
+        case GL_FRAMEBUFFER_COMPLETE:
+            return "GL_FRAMEBUFFER_COMPLETE";
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            return "GL_FRAMEBUFFER_UNSUPPORTED";
+        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+            return "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
+        default:
+            return "Unknown error";
+    }
+}
+
+}  // namespace uirenderer
+}  // namespace android

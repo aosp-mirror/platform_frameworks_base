@@ -16,16 +16,16 @@
 
 package android.preference;
 
-import com.android.internal.util.XmlUtils;
+import android.content.Context;
+import android.content.Intent;
+import android.util.AttributeSet;
 
-import java.io.IOException;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.AttributeSet;
+import java.io.IOException;
 
 /**
  * The {@link PreferenceInflater} is used to inflate preference hierarchies from
@@ -34,7 +34,14 @@ import android.util.AttributeSet;
  * Do not construct this directly, instead use
  * {@link Context#getSystemService(String)} with
  * {@link Context#PREFERENCE_INFLATER_SERVICE}.
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 class PreferenceInflater extends GenericInflater<Preference, PreferenceGroup> {
     private static final String TAG = "PreferenceInflater";
     private static final String INTENT_TAG_NAME = "intent";

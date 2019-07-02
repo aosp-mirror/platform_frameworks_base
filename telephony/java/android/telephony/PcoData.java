@@ -69,7 +69,7 @@ public class PcoData implements Parcelable {
      *
      * @hide
      */
-    public static final Parcelable.Creator<PcoData> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<PcoData> CREATOR = new Parcelable.Creator() {
         public PcoData createFromParcel(Parcel in) {
             return new PcoData(in);
         }

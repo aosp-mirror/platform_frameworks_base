@@ -59,12 +59,15 @@ class AssetManager : public AAssetManager {
 public:
     static const char* RESOURCES_FILENAME;
     static const char* IDMAP_BIN;
-    static const char* OVERLAY_DIR;
+    static const char* VENDOR_OVERLAY_DIR;
     static const char* PRODUCT_OVERLAY_DIR;
+    static const char* PRODUCT_SERVICES_OVERLAY_DIR;
+    static const char* ODM_OVERLAY_DIR;
+    static const char* OEM_OVERLAY_DIR;
     /*
      * If OVERLAY_THEME_DIR_PROPERTY is set, search for runtime resource overlay
-     * APKs in OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to
-     * OVERLAY_DIR.
+     * APKs in VENDOR_OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in
+     * addition to VENDOR_OVERLAY_DIR.
      */
     static const char* OVERLAY_THEME_DIR_PROPERTY;
     static const char* TARGET_PACKAGE_NAME;

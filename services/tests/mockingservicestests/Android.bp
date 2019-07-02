@@ -19,22 +19,26 @@ android_test {
 
     static_libs: [
         "services.core",
-        "services.devicepolicy",
-        "frameworks-base-testutils",
+        "services.net",
         "androidx.test.runner",
         "mockito-target-extended-minus-junit4",
-        "ShortcutManagerTestUtils",
-        "compatibility-device-util",
+        "platform-test-annotations",
         "truth-prebuilt",
     ],
 
-    libs: ["android.test.mock"],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
 
     jni_libs: [
         "libdexmakerjvmtiagent",
+        "libpsi",
         "libstaticjvmtiagent",
     ],
 
+    certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],
 

@@ -111,7 +111,7 @@ public class LinkQualityInfo implements Parcelable {
     /**
      * @hide
      */
-    public static final Creator<LinkQualityInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<LinkQualityInfo> CREATOR =
             new Creator<LinkQualityInfo>() {
                 public LinkQualityInfo createFromParcel(Parcel in) {
                     int objectType = in.readInt();

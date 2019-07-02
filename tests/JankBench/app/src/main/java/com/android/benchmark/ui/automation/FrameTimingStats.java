@@ -16,7 +16,7 @@
 
 package com.android.benchmark.ui.automation;
 
-import android.support.annotation.IntDef;
+import androidx.annotation.IntDef;
 
 import java.io.DataInput;
 import java.io.DataInputStream;

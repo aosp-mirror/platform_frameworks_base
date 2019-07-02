@@ -16,8 +16,12 @@
 
 package android.os;
 
+import android.os.CoolingDevice;
 import android.os.IThermalEventListener;
+import android.os.IThermalStatusListener;
 import android.os.Temperature;
+
+import java.util.List;
 
 /**
  * {@hide}
@@ -28,24 +32,75 @@ interface IThermalService {
       * @param listener the IThermalEventListener to be notified.
       * {@hide}
       */
-    void registerThermalEventListener(in IThermalEventListener listener);
+    boolean registerThermalEventListener(in IThermalEventListener listener);
+
+    /**
+      * Register a listener for thermal events on given temperature type.
+      * @param listener the IThermalEventListener to be notified.
+      * @param type the temperature type IThermalEventListener to be notified.
+      * @return true if registered successfully.
+      * {@hide}
+      */
+    boolean registerThermalEventListenerWithType(in IThermalEventListener listener, in int type);
+
     /**
       * Unregister a previously-registered listener for thermal events.
       * @param listener the IThermalEventListener to no longer be notified.
+      * @return true if unregistered successfully.
       * {@hide}
       */
-    void unregisterThermalEventListener(in IThermalEventListener listener);
+    boolean unregisterThermalEventListener(in IThermalEventListener listener);
+
     /**
-      * Send a thermal throttling start/stop notification to all listeners.
-      * @param temperature the temperature at which the event was generated.
+      * Get current temperature with its throttling status.
+      * @return list of {@link android.os.Temperature}.
       * {@hide}
       */
-    oneway void notifyThrottling(
-        in boolean isThrottling, in Temperature temperature);
+    List<Temperature> getCurrentTemperatures();
+
     /**
-      * Return whether system performance is currently thermal throttling.
-      * @return true if thermal throttling is currently in effect
+      * Get current temperature with its throttling status on given temperature type.
+      * @param type the temperature type to query.
+      * @return list of {@link android.os.Temperature}.
       * {@hide}
       */
-    boolean isThrottling();
+    List<Temperature> getCurrentTemperaturesWithType(in int type);
+
+    /**
+      * Register a listener for thermal status change.
+      * @param listener the {@link android.os.IThermalStatusListener} to be notified.
+      * @return true if registered successfully.
+      * {@hide}
+      */
+    boolean registerThermalStatusListener(in IThermalStatusListener listener);
+
+    /**
+      * Unregister a previously-registered listener for thermal status.
+      * @param listener the {@link android.os.IThermalStatusListener} to no longer be notified.
+      * @return true if unregistered successfully.
+      * {@hide}
+      */
+    boolean unregisterThermalStatusListener(in IThermalStatusListener listener);
+
+    /**
+      * Get current thermal status.
+      * @return status defined in {@link android.os.Temperature}.
+      * {@hide}
+      */
+    int getCurrentThermalStatus();
+
+    /**
+      * Get current cooling devices.
+      * @return list of {@link android.os.CoolingDevice}.
+      * {@hide}
+      */
+    List<CoolingDevice> getCurrentCoolingDevices();
+
+    /**
+      * Get current cooling devices on given type.
+      * @param type the cooling device type to query.
+      * @return list of {@link android.os.CoolingDevice}.
+      * {@hide}
+      */
+    List<CoolingDevice> getCurrentCoolingDevicesWithType(in int type);
 }

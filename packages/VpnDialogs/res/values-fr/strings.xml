@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Demande de connexion"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> souhaite configurer une connexion VPN qui permet de surveiller le trafic réseau. N\'acceptez que si vous faites confiance à la source. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; s\'affiche en haut de votre écran lorsqu\'une connexion VPN est active."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> souhaite configurer une connexion VPN qui lui permet de surveiller le trafic réseau. N\'acceptez que si vous faites confiance à la source. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; s\'affiche en haut de votre écran lorsqu\'une connexion VPN est active."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN connecté"</string>
     <string name="session" msgid="6470628549473641030">"Session :"</string>
     <string name="duration" msgid="3584782459928719435">"Durée :"</string>

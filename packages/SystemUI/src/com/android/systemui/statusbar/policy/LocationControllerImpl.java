@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.Utils.updateLocationEnabled;
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -29,18 +30,25 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+
 import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.util.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * A controller to manage changes of location related states and update the views accordingly.
  */
+@Singleton
 public class LocationControllerImpl extends BroadcastReceiver implements LocationController {
 
     private static final int[] mHighPowerRequestAppOpArray
@@ -57,7 +65,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
             new ArrayList<LocationChangeCallback>();
     private final H mHandler = new H();
 
-    public LocationControllerImpl(Context context, Looper bgLooper) {
+    @Inject
+    public LocationControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
         mContext = context;
 
         // Register to listen for changes in location settings.

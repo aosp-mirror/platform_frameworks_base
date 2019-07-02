@@ -16,10 +16,10 @@
 
 package android.widget.layout.table;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercise table layout with cells using a horizontal gravity.

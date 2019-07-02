@@ -79,6 +79,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_ROTATE_SCREEN = 6;
 
+    /*
+     * Time between we get a face acquired signal until we start with the unlock animation
+     */
+    public static final int ACTION_FACE_WAKE_AND_UNLOCK = 6;
+
     private static final String[] NAMES = new String[] {
             "expand panel",
             "toggle recents",
@@ -86,7 +91,8 @@ public class LatencyTracker {
             "check credential",
             "check credential unlocked",
             "turn on screen",
-            "rotate the screen"};
+            "rotate the screen",
+            "face wake-and-unlock" };
 
     private static LatencyTracker sLatencyTracker;
 
@@ -95,7 +101,7 @@ public class LatencyTracker {
 
     public static LatencyTracker getInstance(Context context) {
         if (sLatencyTracker == null) {
-            sLatencyTracker = new LatencyTracker(context);
+            sLatencyTracker = new LatencyTracker(context.getApplicationContext());
         }
         return sLatencyTracker;
     }

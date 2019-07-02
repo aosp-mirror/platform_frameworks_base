@@ -20,11 +20,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,9 +59,8 @@ public class ViewRootImplTest {
         mViewRootImpl.getAttachInfo().getStableInsets().set(-10, -20, -30 , -40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(new Rect()));
-        assertThat(new Rect(insets.getStableInsetLeft(), insets.getStableInsetTop(),
-                insets.getStableInsetRight(), insets.getStableInsetBottom()), equalTo(new Rect()));
+        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.NONE));
+        assertThat(insets.getStableInsets(), equalTo(Insets.NONE));
     }
 
     @Test
@@ -68,10 +69,8 @@ public class ViewRootImplTest {
         mViewRootImpl.getAttachInfo().getStableInsets().set(10, -20, 30 , -40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(new Rect(0, 20, 0, 40)));
-        assertThat(new Rect(insets.getStableInsetLeft(), insets.getStableInsetTop(),
-                insets.getStableInsetRight(), insets.getStableInsetBottom()),
-                equalTo(new Rect(10, 0, 30, 0)));
+        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.of(0, 20, 0, 40)));
+        assertThat(insets.getStableInsets(), equalTo(Insets.of(10, 0, 30, 0)));
     }
 
     @Test
@@ -80,10 +79,8 @@ public class ViewRootImplTest {
         mViewRootImpl.getAttachInfo().getStableInsets().set(10, 20, 30 , 40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(new Rect(10, 20, 30, 40)));
-        assertThat(new Rect(insets.getStableInsetLeft(), insets.getStableInsetTop(),
-                insets.getStableInsetRight(), insets.getStableInsetBottom()),
-                equalTo(new Rect(10, 20, 30, 40)));
+        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.of(10, 20, 30, 40)));
+        assertThat(insets.getStableInsets(), equalTo(Insets.of(10, 20, 30, 40)));
     }
 
     private static class ViewRootImplAccessor {

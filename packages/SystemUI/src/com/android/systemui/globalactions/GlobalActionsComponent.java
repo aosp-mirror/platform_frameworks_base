@@ -45,7 +45,7 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
                 .withCallback(this::onExtensionCallback)
                 .build();
         mPlugin = mExtension.get();
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallbacks(this);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
     }
 
     private void onExtensionCallback(GlobalActions newPlugin) {

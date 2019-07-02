@@ -21,12 +21,17 @@ import android.app.job.JobParameters;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.SystemProperties;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IntPair;
+import com.android.server.IoThread;
 import com.android.server.content.SyncManager.ActiveSyncContext;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 
@@ -68,10 +73,11 @@ public class SyncLogger {
      */
     public static synchronized SyncLogger getInstance() {
         if (sInstance == null) {
+            final String flag = SystemProperties.get("debug.synclog");
             final boolean enable =
-                    Build.IS_DEBUGGABLE
-                    || "1".equals(SystemProperties.get("debug.synclog"))
-                    || Log.isLoggable(TAG, Log.VERBOSE);
+                    (Build.IS_DEBUGGABLE
+                    || "1".equals(flag)
+                    || Log.isLoggable(TAG, Log.VERBOSE)) && !"0".equals(flag);
             if (enable) {
                 sInstance = new RotatingFileLogger();
             } else {
@@ -145,8 +151,11 @@ public class SyncLogger {
 
         private static final boolean DO_LOGCAT = Log.isLoggable(TAG, Log.DEBUG);
 
+        private final MyHandler mHandler;
+
         RotatingFileLogger() {
             mLogPath = new File(Environment.getDataSystemDirectory(), "syncmanager-log");
+            mHandler = new MyHandler(IoThread.get().getLooper());
         }
 
         @Override
@@ -166,8 +175,12 @@ public class SyncLogger {
             if (message == null) {
                 return;
             }
+            final long now = System.currentTimeMillis();
+            mHandler.log(now, message);
+        }
+
+        void logInner(long now, Object[] message) {
             synchronized (mLock) {
-                final long now = System.currentTimeMillis();
                 openLogLocked(now);
                 if (mLogWriter == null) {
                     return; // Couldn't open log file?
@@ -275,10 +288,33 @@ public class SyncLogger {
             } catch (IOException e) {
             }
         }
+
+        private class MyHandler extends Handler {
+            public static final int MSG_LOG_ID = 1;
+
+            MyHandler(Looper looper) {
+                super(looper);
+            }
+
+            public void log(long now, Object[] message) {
+                obtainMessage(MSG_LOG_ID, IntPair.first(now), IntPair.second(now), message)
+                        .sendToTarget();
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_LOG_ID: {
+                        logInner(IntPair.of(msg.arg1, msg.arg2), (Object[]) msg.obj);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     static String logSafe(Account account) {
-        return account == null ? "[null]" : "***/" + account.type;
+        return account == null ? "[null]" : account.toSafeString();
     }
 
     static String logSafe(EndPoint endPoint) {

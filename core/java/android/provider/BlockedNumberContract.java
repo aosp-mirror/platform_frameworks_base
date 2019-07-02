@@ -156,6 +156,8 @@ public class BlockedNumberContract {
     /** A content:// style uri to the authority for the blocked number provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
+    private static final String LOG_TAG = BlockedNumberContract.class.getSimpleName();
+
     /**
      * Constants to interact with the blocked numbers list.
      */
@@ -326,7 +328,10 @@ public class BlockedNumberContract {
         try {
             final Bundle res = context.getContentResolver().call(
                     AUTHORITY_URI, METHOD_IS_BLOCKED, phoneNumber, null);
-            return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+            boolean isBlocked = res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+            Log.d(LOG_TAG, "isBlocked: phoneNumber=%s, isBlocked=%b", Log.piiHandle(phoneNumber),
+                    isBlocked);
+            return isBlocked;
         } catch (NullPointerException | IllegalArgumentException ex) {
             // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
             // either of these happen.
@@ -354,6 +359,7 @@ public class BlockedNumberContract {
      */
     @WorkerThread
     public static int unblock(Context context, String phoneNumber) {
+        Log.d(LOG_TAG, "unblock: phoneNumber=%s", Log.piiHandle(phoneNumber));
         final Bundle res = context.getContentResolver().call(
                 AUTHORITY_URI, METHOD_UNBLOCK, phoneNumber, null);
         return res.getInt(RES_NUM_ROWS_DELETED, 0);
@@ -445,6 +451,7 @@ public class BlockedNumberContract {
          */
         public static void notifyEmergencyContact(Context context) {
             try {
+                Log.i(LOG_TAG, "notifyEmergencyContact; caller=%s", context.getOpPackageName());
                 context.getContentResolver().call(
                         AUTHORITY_URI, METHOD_NOTIFY_EMERGENCY_CONTACT, null, null);
             } catch (NullPointerException | IllegalArgumentException ex) {
@@ -459,6 +466,8 @@ public class BlockedNumberContract {
          * contacted recently at all, calling this method is a no-op.
          */
         public static void endBlockSuppression(Context context) {
+            String caller = context.getOpPackageName();
+            Log.i(LOG_TAG, "endBlockSuppression: caller=%s", caller);
             context.getContentResolver().call(
                     AUTHORITY_URI, METHOD_END_BLOCK_SUPPRESSION, null, null);
         }
@@ -480,10 +489,14 @@ public class BlockedNumberContract {
         public static int shouldSystemBlockNumber(Context context, String phoneNumber,
                 Bundle extras) {
             try {
+                String caller = context.getOpPackageName();
                 final Bundle res = context.getContentResolver().call(
                         AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
-                return res != null ? res.getInt(RES_BLOCK_STATUS, STATUS_NOT_BLOCKED) :
+                int blockResult = res != null ? res.getInt(RES_BLOCK_STATUS, STATUS_NOT_BLOCKED) :
                         BlockedNumberContract.STATUS_NOT_BLOCKED;
+                Log.d(LOG_TAG, "shouldSystemBlockNumber: number=%s, caller=%s, result=%s",
+                        Log.piiHandle(phoneNumber), caller, blockStatusToString(blockResult));
+                return blockResult;
             } catch (NullPointerException | IllegalArgumentException ex) {
                 // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
                 // either of these happen.
@@ -498,8 +511,12 @@ public class BlockedNumberContract {
         public static BlockSuppressionStatus getBlockSuppressionStatus(Context context) {
             final Bundle res = context.getContentResolver().call(
                     AUTHORITY_URI, METHOD_GET_BLOCK_SUPPRESSION_STATUS, null, null);
-            return new BlockSuppressionStatus(res.getBoolean(RES_IS_BLOCKING_SUPPRESSED, false),
+            BlockSuppressionStatus blockSuppressionStatus = new BlockSuppressionStatus(
+                    res.getBoolean(RES_IS_BLOCKING_SUPPRESSED, false),
                     res.getLong(RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP, 0));
+            Log.d(LOG_TAG, "getBlockSuppressionStatus: caller=%s, status=%s",
+                    context.getOpPackageName(), blockSuppressionStatus);
+            return blockSuppressionStatus;
         }
 
         /**
@@ -606,6 +623,12 @@ public class BlockedNumberContract {
             public BlockSuppressionStatus(boolean isSuppressed, long untilTimestampMillis) {
                 this.isSuppressed = isSuppressed;
                 this.untilTimestampMillis = untilTimestampMillis;
+            }
+
+            @Override
+            public String toString() {
+                return "[BlockSuppressionStatus; isSuppressed=" + isSuppressed + ", until="
+                        + untilTimestampMillis + "]";
             }
         }
     }

@@ -16,8 +16,11 @@
 
 package com.android.server.wm.utils;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.view.Surface;
+
 
 /**
  * Utility methods to handle insets represented as rects.
@@ -61,5 +64,31 @@ public class InsetUtils {
         inOutInsets.top += insetsToAdd.top;
         inOutInsets.right += insetsToAdd.right;
         inOutInsets.bottom += insetsToAdd.bottom;
+    }
+
+    /**
+     * Calculates the insets from the {@code outerFrame} to the {@code innerFrame}.
+     *
+     * Note that if a side of the outer frame is not actually on the outside, the inset for that
+     * side will be clamped to zero.
+     *
+     * @param outerFrame the reference frame from which the insets are calculated
+     * @param innerFrame the inset frame, to which the insets are calculated,
+     *                   or null to clear the insets.
+     * @param outInsets is set to the result of the inset calculation.
+     */
+    public static void insetsBetweenFrames(@NonNull Rect outerFrame, @Nullable Rect innerFrame,
+            @NonNull Rect outInsets) {
+        if (innerFrame == null) {
+            outInsets.setEmpty();
+            return;
+        }
+        final int w = outerFrame.width();
+        final int h = outerFrame.height();
+        outInsets.set(
+                Math.min(w, Math.max(0, innerFrame.left - outerFrame.left)),
+                Math.min(h, Math.max(0, innerFrame.top - outerFrame.top)),
+                Math.min(w, Math.max(0, outerFrame.right - innerFrame.right)),
+                Math.min(h, Math.max(0, outerFrame.bottom - innerFrame.bottom)));
     }
 }

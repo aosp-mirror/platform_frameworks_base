@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -23,10 +24,10 @@ import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.MacAddress;
+import android.net.NetworkSpecifier;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,6 +42,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -48,13 +51,18 @@ import java.util.HashMap;
 /**
  * A class representing a configured Wi-Fi network, including the
  * security configuration.
+ *
+ * @deprecated Use {@link WifiNetworkSpecifier.Builder} to create {@link NetworkSpecifier} and
+ * {@link WifiNetworkSuggestion.Builder} to create {@link WifiNetworkSuggestion}. This will become a
+ * system use only object in the future.
  */
+@Deprecated
 public class WifiConfiguration implements Parcelable {
     private static final String TAG = "WifiConfiguration";
     /**
      * Current Version of the Backup Serializer.
     */
-    private static final int BACKUP_VERSION = 2;
+    private static final int BACKUP_VERSION = 3;
     /** {@hide} */
     public static final String ssidVarName = "ssid";
     /** {@hide} */
@@ -126,10 +134,38 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int FT_EAP = 7;
 
+        /**
+         * Simultaneous Authentication of Equals
+         */
+        public static final int SAE = 8;
+
+        /**
+         * Opportunististic Wireless Encryption
+         */
+        public static final int OWE = 9;
+
+        /**
+         * SUITE_B_192 192 bit level
+         */
+        public static final int SUITE_B_192 = 10;
+
+        /**
+         * WPA pre-shared key with stronger SHA256-based algorithms.
+         * @hide
+         */
+        public static final int WPA_PSK_SHA256 = 11;
+
+        /**
+         * WPA using EAP authentication with stronger SHA256-based algorithms.
+         * @hide
+         */
+        public static final int WPA_EAP_SHA256 = 12;
+
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP",
-                "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP" };
+                "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP",
+                "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256" };
     }
 
     /**
@@ -143,7 +179,7 @@ public class WifiConfiguration implements Parcelable {
          * is discouraged. WPA-2 (RSN) should be used instead. */
         @Deprecated
         public static final int WPA = 0;
-        /** WPA2/IEEE 802.11i */
+        /** RSN WPA2/WPA3/IEEE 802.11i */
         public static final int RSN = 1;
         /** HS2.0 r2 OSEN
          * @hide
@@ -191,10 +227,14 @@ public class WifiConfiguration implements Parcelable {
         public static final int TKIP = 1;
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 2;
+        /**
+         * AES in Galois/Counter Mode
+         */
+        public static final int GCMP_256 = 3;
 
         public static final String varName = "pairwise";
 
-        public static final String[] strings = { "NONE", "TKIP", "CCMP" };
+        public static final String[] strings = { "NONE", "TKIP", "CCMP", "GCMP_256" };
     }
 
     /**
@@ -204,6 +244,7 @@ public class WifiConfiguration implements Parcelable {
      * TKIP = Temporal Key Integrity Protocol [IEEE 802.11i/D7.0]
      * WEP104 = WEP (Wired Equivalent Privacy) with 104-bit key
      * WEP40 = WEP (Wired Equivalent Privacy) with 40-bit key (original 802.11)
+     * GCMP_256 = AES in Galois/Counter Mode
      * </pre>
      */
     public static class GroupCipher {
@@ -227,12 +268,64 @@ public class WifiConfiguration implements Parcelable {
          * @hide
          */
         public static final int GTK_NOT_USED = 4;
+        /**
+         * AES in Galois/Counter Mode
+         */
+        public static final int GCMP_256 = 5;
 
         public static final String varName = "group";
 
         public static final String[] strings =
                 { /* deprecated */ "WEP40", /* deprecated */ "WEP104",
-                        "TKIP", "CCMP", "GTK_NOT_USED" };
+                        "TKIP", "CCMP", "GTK_NOT_USED", "GCMP_256" };
+    }
+
+    /**
+     * Recognized group management ciphers.
+     * <pre>
+     * BIP_CMAC_256 = Cipher-based Message Authentication Code 256 bits
+     * BIP_GMAC_128 = Galois Message Authentication Code 128 bits
+     * BIP_GMAC_256 = Galois Message Authentication Code 256 bits
+     * </pre>
+     */
+    public static class GroupMgmtCipher {
+        private GroupMgmtCipher() { }
+
+        /** CMAC-256 = Cipher-based Message Authentication Code */
+        public static final int BIP_CMAC_256 = 0;
+
+        /** GMAC-128 = Galois Message Authentication Code */
+        public static final int BIP_GMAC_128 = 1;
+
+        /** GMAC-256 = Galois Message Authentication Code */
+        public static final int BIP_GMAC_256 = 2;
+
+        private static final String varName = "groupMgmt";
+
+        private static final String[] strings = { "BIP_CMAC_256",
+                "BIP_GMAC_128", "BIP_GMAC_256"};
+    }
+
+    /**
+     * Recognized suiteB ciphers.
+     * <pre>
+     * ECDHE_ECDSA
+     * ECDHE_RSA
+     * </pre>
+     * @hide
+     */
+    public static class SuiteBCipher {
+        private SuiteBCipher() { }
+
+        /** Diffie-Hellman with Elliptic Curve_ECDSA signature */
+        public static final int ECDHE_ECDSA = 0;
+
+        /** Diffie-Hellman with_RSA signature */
+        public static final int ECDHE_RSA = 1;
+
+        private static final String varName = "SuiteB";
+
+        private static final String[] strings = { "ECDHE_ECDSA", "ECDHE_RSA" };
     }
 
     /** Possible status of a network configuration. */
@@ -247,6 +340,90 @@ public class WifiConfiguration implements Parcelable {
         public static final int ENABLED = 2;
 
         public static final String[] strings = { "current", "disabled", "enabled" };
+    }
+
+    /**
+     * Security types we support.
+     */
+    /** @hide */
+    public static final int SECURITY_TYPE_OPEN = 0;
+    /** @hide */
+    public static final int SECURITY_TYPE_WEP = 1;
+    /** @hide */
+    public static final int SECURITY_TYPE_PSK = 2;
+    /** @hide */
+    public static final int SECURITY_TYPE_EAP = 3;
+    /** @hide */
+    public static final int SECURITY_TYPE_SAE = 4;
+    /** @hide */
+    public static final int SECURITY_TYPE_EAP_SUITE_B = 5;
+    /** @hide */
+    public static final int SECURITY_TYPE_OWE = 6;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SECURITY_TYPE_" }, value = {
+            SECURITY_TYPE_OPEN,
+            SECURITY_TYPE_WEP,
+            SECURITY_TYPE_PSK,
+            SECURITY_TYPE_EAP,
+            SECURITY_TYPE_SAE,
+            SECURITY_TYPE_EAP_SUITE_B,
+            SECURITY_TYPE_OWE
+    })
+    public @interface SecurityType {}
+
+    /**
+     * @hide
+     * Set security params (sets the various bitsets exposed in WifiConfiguration).
+     *
+     * @param securityType One of the security types from {@link SecurityType}.
+     */
+    public void setSecurityParams(@SecurityType int securityType) {
+        // Clear all the bitsets.
+        allowedKeyManagement.clear();
+        allowedProtocols.clear();
+        allowedAuthAlgorithms.clear();
+        allowedPairwiseCiphers.clear();
+        allowedGroupCiphers.clear();
+        allowedGroupManagementCiphers.clear();
+        allowedSuiteBCiphers.clear();
+
+        switch (securityType) {
+            case SECURITY_TYPE_OPEN:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                break;
+            case SECURITY_TYPE_WEP:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                break;
+            case SECURITY_TYPE_PSK:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                break;
+            case SECURITY_TYPE_EAP:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                break;
+            case SECURITY_TYPE_SAE:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
+                requirePMF = true;
+                break;
+            case SECURITY_TYPE_EAP_SUITE_B:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
+                allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
+                // Note: allowedSuiteBCiphers bitset will be set by the service once the
+                // certificates are attached to this profile
+                requirePMF = true;
+                break;
+            case SECURITY_TYPE_OWE:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
+                requirePMF = true;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown security type " + securityType);
+        }
     }
 
     /** @hide */
@@ -384,31 +561,49 @@ public class WifiConfiguration implements Parcelable {
      * See {@link KeyMgmt} for descriptions of the values.
      * Defaults to WPA-PSK WPA-EAP.
      */
+    @NonNull
     public BitSet allowedKeyManagement;
     /**
      * The set of security protocols supported by this configuration.
      * See {@link Protocol} for descriptions of the values.
      * Defaults to WPA RSN.
      */
+    @NonNull
     public BitSet allowedProtocols;
     /**
      * The set of authentication protocols supported by this configuration.
      * See {@link AuthAlgorithm} for descriptions of the values.
      * Defaults to automatic selection.
      */
+    @NonNull
     public BitSet allowedAuthAlgorithms;
     /**
      * The set of pairwise ciphers for WPA supported by this configuration.
      * See {@link PairwiseCipher} for descriptions of the values.
      * Defaults to CCMP TKIP.
      */
+    @NonNull
     public BitSet allowedPairwiseCiphers;
     /**
      * The set of group ciphers supported by this configuration.
      * See {@link GroupCipher} for descriptions of the values.
      * Defaults to CCMP TKIP WEP104 WEP40.
      */
+    @NonNull
     public BitSet allowedGroupCiphers;
+    /**
+     * The set of group management ciphers supported by this configuration.
+     * See {@link GroupMgmtCipher} for descriptions of the values.
+     */
+    @NonNull
+    public BitSet allowedGroupManagementCiphers;
+    /**
+     * The set of SuiteB ciphers supported by this configuration.
+     * To be used for WPA3-Enterprise mode.
+     * See {@link SuiteBCipher} for descriptions of the values.
+     */
+    @NonNull
+    public BitSet allowedSuiteBCiphers;
     /**
      * The enterprise configuration details specifying the EAP method,
      * certificates and other settings associated with the EAP.
@@ -620,6 +815,12 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * This Wifi configuration is expected for OSU(Online Sign Up) of Passpoint Release 2.
+     * @hide
+     */
+    public boolean osu;
+
+    /**
      * @hide
      * Last time the system was connected to this configuration.
      */
@@ -672,6 +873,25 @@ public class WifiConfiguration implements Parcelable {
     public boolean isEphemeral() {
       return ephemeral;
     }
+
+    /**
+     * Indicate whther the network is trusted or not. Networks are considered trusted
+     * if the user explicitly allowed this network connection.
+     * @hide
+     */
+    public boolean trusted;
+
+    /**
+     * This Wifi configuration is created from a {@link WifiNetworkSuggestion}
+     * @hide
+     */
+    public boolean fromWifiNetworkSuggestion;
+
+    /**
+     * This Wifi configuration is created from a {@link WifiNetworkSpecifier}
+     * @hide
+     */
+    public boolean fromWifiNetworkSpecifier;
 
     /**
      * Indicates if the creator of this configuration has expressed that it
@@ -734,7 +954,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isOpenNetwork() {
         final int cardinality = allowedKeyManagement.cardinality();
         final boolean hasNoKeyMgmt = cardinality == 0
-                || (cardinality == 1 && allowedKeyManagement.get(KeyMgmt.NONE));
+                || (cardinality == 1 && (allowedKeyManagement.get(KeyMgmt.NONE)
+                || allowedKeyManagement.get(KeyMgmt.OWE)));
 
         boolean hasNoWepKeys = true;
         if (wepKeys != null) {
@@ -786,6 +1007,23 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Use factory MAC when connecting to this network
+     */
+    public static final int RANDOMIZATION_NONE = 0;
+    /**
+     * @hide
+     * Generate a randomized MAC once and reuse it for all connections to this network
+     */
+    public static final int RANDOMIZATION_PERSISTENT = 1;
+
+    /**
+     * @hide
+     * Level of MAC randomization for this network
+     */
+    public int macRandomizationSetting = RANDOMIZATION_PERSISTENT;
+
+    /**
+     * @hide
      * Randomized MAC address to use with this particular network
      */
     @NonNull
@@ -824,9 +1062,13 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * @hide
      * Returns MAC address set to be the local randomized MAC address.
-     * Does not guarantee that the returned address is valid for use.
+     * Depending on user preference, the device may or may not use the returned MAC address for
+     * connections to this network.
+     * <p>
+     * Information is restricted to Device Owner, Profile Owner, and Carrier apps
+     * (which will only obtain addresses for configurations which they create). Other callers
+     * will receive a default "02:00:00:00:00:00" MAC address.
      */
     public @NonNull MacAddress getRandomizedMacAddress() {
         return mRandomizedMacAddress;
@@ -952,9 +1194,13 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int DISABLED_BY_WRONG_PASSWORD = 13;
         /**
+         * This network is disabled because service is not subscribed
+         */
+        public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 14;
+        /**
          * This Maximum disable reason value
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 14;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 15;
 
         /**
          * Quality network selection disable reason String (for debug purpose)
@@ -973,7 +1219,8 @@ public class WifiConfiguration implements Parcelable {
                 "NETWORK_SELECTION_DISABLED_NO_INTERNET_PERMANENT",
                 "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER",
                 "NETWORK_SELECTION_DISABLED_BY_USER_SWITCH",
-                "NETWORK_SELECTION_DISABLED_BY_WRONG_PASSWORD"
+                "NETWORK_SELECTION_DISABLED_BY_WRONG_PASSWORD",
+                "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_SUBSCRIPTION"
         };
 
         /**
@@ -1522,6 +1769,8 @@ public class WifiConfiguration implements Parcelable {
         allowedAuthAlgorithms = new BitSet();
         allowedPairwiseCiphers = new BitSet();
         allowedGroupCiphers = new BitSet();
+        allowedGroupManagementCiphers = new BitSet();
+        allowedSuiteBCiphers = new BitSet();
         wepKeys = new String[4];
         for (int i = 0; i < wepKeys.length; i++) {
             wepKeys[i] = null;
@@ -1530,6 +1779,10 @@ public class WifiConfiguration implements Parcelable {
         selfAdded = false;
         didSelfAdd = false;
         ephemeral = false;
+        osu = false;
+        trusted = true; // Networks are considered trusted by default.
+        fromWifiNetworkSuggestion = false;
+        fromWifiNetworkSpecifier = false;
         meteredHint = false;
         meteredOverride = METERED_OVERRIDE_NONE;
         useExternalScores = false;
@@ -1575,7 +1828,8 @@ public class WifiConfiguration implements Parcelable {
     @UnsupportedAppUsage
     public boolean isEnterprise() {
         return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
-                || allowedKeyManagement.get(KeyMgmt.IEEE8021X))
+                || allowedKeyManagement.get(KeyMgmt.IEEE8021X)
+                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192))
                 && enterpriseConfig != null
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
@@ -1593,6 +1847,7 @@ public class WifiConfiguration implements Parcelable {
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN)
                 .append(" PRIO: ").append(this.priority)
                 .append(" HIDDEN: ").append(this.hiddenSSID)
+                .append(" PMF: ").append(this.requirePMF)
                 .append('\n');
 
 
@@ -1637,15 +1892,22 @@ public class WifiConfiguration implements Parcelable {
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
+        if (this.osu) sbuf.append(" osu");
+        if (this.trusted) sbuf.append(" trusted");
+        if (this.fromWifiNetworkSuggestion) sbuf.append(" fromWifiNetworkSuggestion");
+        if (this.fromWifiNetworkSpecifier) sbuf.append(" fromWifiNetworkSpecifier");
         if (this.meteredHint) sbuf.append(" meteredHint");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-            || this.ephemeral || this.meteredHint || this.useExternalScores) {
+                || this.ephemeral || this.trusted || this.fromWifiNetworkSuggestion
+                || this.fromWifiNetworkSpecifier || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
         }
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
             sbuf.append(" meteredOverride ").append(meteredOverride).append("\n");
         }
+        sbuf.append(" macRandomizationSetting: ").append(macRandomizationSetting).append("\n");
+        sbuf.append(" mRandomizedMacAddress: ").append(mRandomizedMacAddress).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -1704,10 +1966,35 @@ public class WifiConfiguration implements Parcelable {
                 }
             }
         }
-        sbuf.append('\n').append(" PSK: ");
+        sbuf.append('\n');
+        sbuf.append(" GroupMgmtCiphers:");
+        for (int gmc = 0; gmc < this.allowedGroupManagementCiphers.size(); gmc++) {
+            if (this.allowedGroupManagementCiphers.get(gmc)) {
+                sbuf.append(" ");
+                if (gmc < GroupMgmtCipher.strings.length) {
+                    sbuf.append(GroupMgmtCipher.strings[gmc]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n');
+        sbuf.append(" SuiteBCiphers:");
+        for (int sbc = 0; sbc < this.allowedSuiteBCiphers.size(); sbc++) {
+            if (this.allowedSuiteBCiphers.get(sbc)) {
+                sbuf.append(" ");
+                if (sbc < SuiteBCipher.strings.length) {
+                    sbuf.append(SuiteBCipher.strings[sbc]);
+                } else {
+                    sbuf.append("??");
+                }
+            }
+        }
+        sbuf.append('\n').append(" PSK/SAE: ");
         if (this.preSharedKey != null) {
             sbuf.append('*');
         }
+
         sbuf.append("\nEnterprise config:\n");
         sbuf.append(enterpriseConfig);
 
@@ -1733,6 +2020,7 @@ public class WifiConfiguration implements Parcelable {
         if (creatorName != null) sbuf.append(" cname=" + creatorName);
         if (lastUpdateUid != 0) sbuf.append(" luid=" + lastUpdateUid);
         if (lastUpdateName != null) sbuf.append(" lname=" + lastUpdateName);
+        if (updateIdentifier != null) sbuf.append(" updateIdentifier=" + updateIdentifier);
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
@@ -1800,7 +2088,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public String getKeyIdForCredentials(WifiConfiguration current) {
-        String keyMgmt = null;
+        String keyMgmt = "";
 
         try {
             // Get current config details for fields that are not initialized
@@ -1809,13 +2097,16 @@ public class WifiConfiguration implements Parcelable {
                 allowedKeyManagement = current.allowedKeyManagement;
             }
             if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
-                keyMgmt = KeyMgmt.strings[KeyMgmt.WPA_EAP];
+                keyMgmt += KeyMgmt.strings[KeyMgmt.WPA_EAP];
             }
             if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
-                keyMgmt = KeyMgmt.strings[KeyMgmt.OSEN];
+                keyMgmt += KeyMgmt.strings[KeyMgmt.OSEN];
             }
             if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
                 keyMgmt += KeyMgmt.strings[KeyMgmt.IEEE8021X];
+            }
+            if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+                keyMgmt += KeyMgmt.strings[KeyMgmt.SUITE_B_192];
             }
 
             if (TextUtils.isEmpty(keyMgmt)) {
@@ -1870,6 +2161,12 @@ public class WifiConfiguration implements Parcelable {
             return KeyMgmt.WPA_EAP;
         } else if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
             return KeyMgmt.IEEE8021X;
+        } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
+            return KeyMgmt.SAE;
+        } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
+            return KeyMgmt.OWE;
+        } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            return KeyMgmt.SUITE_B_192;
         }
         return KeyMgmt.NONE;
     }
@@ -1894,20 +2191,35 @@ public class WifiConfiguration implements Parcelable {
                 key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
             }
         } else {
-            if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
-            } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
-                    allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
-            } else if (wepKeys[0] != null) {
-                key = SSID + "WEP";
-            } else {
-                key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
-            }
+            key = getSsidAndSecurityTypeString();
             if (!shared) {
                 key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
             }
             mCachedConfigKey = key;
+        }
+        return key;
+    }
+
+    /** @hide
+     *  return the SSID + security type in String format.
+     */
+    public String getSsidAndSecurityTypeString() {
+        String key;
+        if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                || allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        } else if (wepKeys[0] != null) {
+            key = SSID + "WEP";
+        } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.OWE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.SAE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.SUITE_B_192];
+        } else {
+            key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
         }
         return key;
     }
@@ -2069,6 +2381,8 @@ public class WifiConfiguration implements Parcelable {
             allowedAuthAlgorithms  = (BitSet) source.allowedAuthAlgorithms.clone();
             allowedPairwiseCiphers = (BitSet) source.allowedPairwiseCiphers.clone();
             allowedGroupCiphers    = (BitSet) source.allowedGroupCiphers.clone();
+            allowedGroupManagementCiphers = (BitSet) source.allowedGroupManagementCiphers.clone();
+            allowedSuiteBCiphers    = (BitSet) source.allowedSuiteBCiphers.clone();
             enterpriseConfig = new WifiEnterpriseConfig(source.enterpriseConfig);
 
             defaultGwMacAddress = source.defaultGwMacAddress;
@@ -2085,6 +2399,10 @@ public class WifiConfiguration implements Parcelable {
             validatedInternetAccess = source.validatedInternetAccess;
             isLegacyPasspointConfig = source.isLegacyPasspointConfig;
             ephemeral = source.ephemeral;
+            osu = source.osu;
+            trusted = source.trusted;
+            fromWifiNetworkSuggestion = source.fromWifiNetworkSuggestion;
+            fromWifiNetworkSpecifier = source.fromWifiNetworkSpecifier;
             meteredHint = source.meteredHint;
             meteredOverride = source.meteredOverride;
             useExternalScores = source.useExternalScores;
@@ -2110,6 +2428,9 @@ public class WifiConfiguration implements Parcelable {
             shared = source.shared;
             recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
             mRandomizedMacAddress = source.mRandomizedMacAddress;
+            macRandomizationSetting = source.macRandomizationSetting;
+            requirePMF = source.requirePMF;
+            updateIdentifier = source.updateIdentifier;
         }
     }
 
@@ -2145,6 +2466,8 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedAuthAlgorithms);
         writeBitSet(dest, allowedPairwiseCiphers);
         writeBitSet(dest, allowedGroupCiphers);
+        writeBitSet(dest, allowedGroupManagementCiphers);
+        writeBitSet(dest, allowedSuiteBCiphers);
 
         dest.writeParcelable(enterpriseConfig, flags);
 
@@ -2156,6 +2479,9 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(validatedInternetAccess ? 1 : 0);
         dest.writeInt(isLegacyPasspointConfig ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
+        dest.writeInt(trusted ? 1 : 0);
+        dest.writeInt(fromWifiNetworkSuggestion ? 1 : 0);
+        dest.writeInt(fromWifiNetworkSpecifier ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
         dest.writeInt(meteredOverride);
         dest.writeInt(useExternalScores ? 1 : 0);
@@ -2174,11 +2500,13 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(mPasspointManagementObjectTree);
         dest.writeInt(recentFailure.getAssociationStatus());
         dest.writeParcelable(mRandomizedMacAddress, flags);
+        dest.writeInt(macRandomizationSetting);
+        dest.writeInt(osu ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiConfiguration> CREATOR =
         new Creator<WifiConfiguration>() {
             public WifiConfiguration createFromParcel(Parcel in) {
                 WifiConfiguration config = new WifiConfiguration();
@@ -2212,6 +2540,8 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedAuthAlgorithms  = readBitSet(in);
                 config.allowedPairwiseCiphers = readBitSet(in);
                 config.allowedGroupCiphers    = readBitSet(in);
+                config.allowedGroupManagementCiphers = readBitSet(in);
+                config.allowedSuiteBCiphers   = readBitSet(in);
 
                 config.enterpriseConfig = in.readParcelable(null);
                 config.setIpConfiguration(in.readParcelable(null));
@@ -2222,6 +2552,9 @@ public class WifiConfiguration implements Parcelable {
                 config.validatedInternetAccess = in.readInt() != 0;
                 config.isLegacyPasspointConfig = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
+                config.trusted = in.readInt() != 0;
+                config.fromWifiNetworkSuggestion =  in.readInt() != 0;
+                config.fromWifiNetworkSpecifier =  in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
                 config.meteredOverride = in.readInt();
                 config.useExternalScores = in.readInt() != 0;
@@ -2240,6 +2573,8 @@ public class WifiConfiguration implements Parcelable {
                 config.mPasspointManagementObjectTree = in.readString();
                 config.recentFailure.setAssociationStatus(in.readInt());
                 config.mRandomizedMacAddress = in.readParcelable(null);
+                config.macRandomizationSetting = in.readInt();
+                config.osu = in.readInt() != 0;
                 return config;
             }
 
@@ -2262,6 +2597,7 @@ public class WifiConfiguration implements Parcelable {
         out.writeInt(apChannel);
         BackupUtils.writeString(out, preSharedKey);
         out.writeInt(getAuthType());
+        out.writeBoolean(hiddenSSID);
         return baos.toByteArray();
     }
 
@@ -2284,6 +2620,9 @@ public class WifiConfiguration implements Parcelable {
         config.apChannel = in.readInt();
         config.preSharedKey = BackupUtils.readString(in);
         config.allowedKeyManagement.set(in.readInt());
+        if (version >= 3) {
+            config.hiddenSSID = in.readBoolean();
+        }
         return config;
     }
 }

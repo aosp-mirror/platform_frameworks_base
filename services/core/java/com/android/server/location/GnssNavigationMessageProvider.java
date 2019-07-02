@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.location;
 
+import android.content.Context;
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.os.Handler;
@@ -39,17 +40,17 @@ public abstract class GnssNavigationMessageProvider
     private final GnssNavigationMessageProviderNative mNative;
     private boolean mCollectionStarted;
 
-    protected GnssNavigationMessageProvider(Handler handler) {
-        this(handler, new GnssNavigationMessageProviderNative());
+    protected GnssNavigationMessageProvider(Context context, Handler handler) {
+        this(context, handler, new GnssNavigationMessageProviderNative());
     }
 
     @VisibleForTesting
-    GnssNavigationMessageProvider(Handler handler, GnssNavigationMessageProviderNative aNative) {
-        super(handler, TAG);
+    GnssNavigationMessageProvider(Context context, Handler handler,
+            GnssNavigationMessageProviderNative aNative) {
+        super(context, handler, TAG);
         mNative = aNative;
     }
 
-    // TODO(b/37460011): Use this with death recovery logic.
     void resumeIfStarted() {
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
@@ -84,17 +85,13 @@ public abstract class GnssNavigationMessageProvider
     }
 
     public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
-        ListenerOperation<IGnssNavigationMessageListener> operation =
-                new ListenerOperation<IGnssNavigationMessageListener>() {
-                    @Override
-                    public void execute(IGnssNavigationMessageListener listener)
-                            throws RemoteException {
-                        listener.onGnssNavigationMessageReceived(event);
-                    }
-                };
-        foreach(operation);
+        foreach((IGnssNavigationMessageListener listener, CallerIdentity callerIdentity) -> {
+                    listener.onGnssNavigationMessageReceived(event);
+                }
+        );
     }
 
+    /** Handle GNSS capabilities update from the GNSS HAL implementation */
     public void onCapabilitiesUpdated(boolean isGnssNavigationMessageSupported) {
         setSupported(isGnssNavigationMessageSupported);
         updateResult();
@@ -138,7 +135,8 @@ public abstract class GnssNavigationMessageProvider
         }
 
         @Override
-        public void execute(IGnssNavigationMessageListener listener) throws RemoteException {
+        public void execute(IGnssNavigationMessageListener listener,
+                CallerIdentity callerIdentity) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

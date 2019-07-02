@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -24,12 +23,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Region;
-import android.view.Display;
-import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 class StrictModeFlash {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "StrictModeFlash" : TAG_WM;
@@ -46,7 +42,7 @@ class StrictModeFlash {
         try {
             ctrl = dc.makeOverlay()
                     .setName("StrictModeFlash")
-                    .setSize(1, 1)
+                    .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
             ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
@@ -122,7 +118,7 @@ class StrictModeFlash {
         }
         mLastDW = dw;
         mLastDH = dh;
-        mSurfaceControl.setSize(dw, dh);
+        mSurfaceControl.setBufferSize(dw, dh);
         mDrawNeeded = true;
     }
 

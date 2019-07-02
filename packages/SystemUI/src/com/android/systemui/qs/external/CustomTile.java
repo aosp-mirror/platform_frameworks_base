@@ -15,6 +15,9 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -31,23 +34,21 @@ import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-import com.android.internal.logging.MetricsLogger;
+
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.QSTileHost;
-import java.util.Objects;
+import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import java.util.Objects;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
@@ -68,9 +69,9 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final TileServiceManager mServiceManager;
     private final int mUser;
     private android.graphics.drawable.Icon mDefaultIcon;
+    private CharSequence mDefaultLabel;
 
     private boolean mListening;
-    private boolean mBound;
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
 
@@ -79,7 +80,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile();
-        setTileIcon();
+        updateDefaultTileAndIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
@@ -91,13 +92,14 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return CUSTOM_STALE_TIMEOUT + DateUtils.MINUTE_IN_MILLIS * mHost.indexOf(getTileSpec());
     }
 
-    private void setTileIcon() {
+    private void updateDefaultTileAndIcon() {
         try {
             PackageManager pm = mContext.getPackageManager();
             int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE | PackageManager.MATCH_DIRECT_BOOT_AWARE;
             if (isSystemApp(pm)) {
                 flags |= PackageManager.MATCH_DISABLED_COMPONENTS;
             }
+
             ServiceInfo info = pm.getServiceInfo(mComponent, flags);
             int icon = info.icon != 0 ? info.icon
                     : info.applicationInfo.icon;
@@ -109,12 +111,16 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             if (updateIcon) {
                 mTile.setIcon(mDefaultIcon);
             }
-            // Update the label if there is no label.
-            if (mTile.getLabel() == null) {
-                mTile.setLabel(info.loadLabel(pm));
+            // Update the label if there is no label or it is the default label.
+            boolean updateLabel = mTile.getLabel() == null
+                    || TextUtils.equals(mTile.getLabel(), mDefaultLabel);
+            mDefaultLabel = info.loadLabel(pm);
+            if (updateLabel) {
+                mTile.setLabel(mDefaultLabel);
             }
-        } catch (Exception e) {
+        } catch (PackageManager.NameNotFoundException e) {
             mDefaultIcon = null;
+            mDefaultLabel = null;
         }
     }
 
@@ -148,7 +154,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public void onTileChanged(ComponentName tile) {
-        setTileIcon();
+        updateDefaultTileAndIcon();
     }
 
     @Override
@@ -170,12 +176,14 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     public Tile getQsTile() {
+        updateDefaultTileAndIcon();
         return mTile;
     }
 
     public void updateState(Tile tile) {
         mTile.setIcon(tile.getIcon());
         mTile.setLabel(tile.getLabel());
+        mTile.setSubtitle(tile.getSubtitle());
         mTile.setContentDescription(tile.getContentDescription());
         mTile.setState(tile.getState());
     }
@@ -199,7 +207,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mListening = listening;
         try {
             if (listening) {
-                setTileIcon();
+                updateDefaultTileAndIcon();
                 refreshState();
                 if (!mServiceManager.isActiveTile()) {
                     mServiceManager.setBindRequested(true);
@@ -315,6 +323,14 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             return null;
         };
         state.label = mTile.getLabel();
+
+        CharSequence subtitle = mTile.getSubtitle();
+        if (subtitle != null && subtitle.length() > 0) {
+            state.secondaryLabel = subtitle;
+        } else {
+            state.secondaryLabel = null;
+        }
+
         if (mTile.getContentDescription() != null) {
             state.contentDescription = mTile.getContentDescription();
         } else {

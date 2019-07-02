@@ -18,7 +18,7 @@
 
 #include <android/os/IncidentReportArgs.h>
 
-#include <cutils/log.h>
+#include <log/log.h>
 
 namespace android {
 namespace os {
@@ -26,7 +26,7 @@ namespace os {
 IncidentReportArgs::IncidentReportArgs()
     :mSections(),
      mAll(false),
-     mDest(-1)
+     mPrivacyPolicy(-1)
 {
 }
 
@@ -34,7 +34,9 @@ IncidentReportArgs::IncidentReportArgs(const IncidentReportArgs& that)
     :mSections(that.mSections),
      mHeaders(that.mHeaders),
      mAll(that.mAll),
-     mDest(that.mDest)
+     mPrivacyPolicy(that.mPrivacyPolicy),
+     mReceiverPkg(that.mReceiverPkg),
+     mReceiverCls(that.mReceiverCls)
 {
 }
 
@@ -76,7 +78,17 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
         }
     }
 
-    err = out->writeInt32(mDest);
+    err = out->writeInt32(mPrivacyPolicy);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    err = out->writeString16(String16(mReceiverPkg.c_str()));
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    err = out->writeString16(String16(mReceiverCls.c_str()));
     if (err != NO_ERROR) {
         return err;
     }
@@ -127,12 +139,15 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
         }
     }
 
-    int32_t dest;
-    err = in->readInt32(&dest);
+    int32_t privacyPolicy;
+    err = in->readInt32(&privacyPolicy);
     if (err != NO_ERROR) {
         return err;
     }
-    mDest = dest;
+    mPrivacyPolicy = privacyPolicy;
+
+    mReceiverPkg = String8(in->readString16()).string();
+    mReceiverCls = String8(in->readString16()).string();
 
     return OK;
 }
@@ -147,9 +162,9 @@ IncidentReportArgs::setAll(bool all)
 }
 
 void
-IncidentReportArgs::setDest(int dest)
+IncidentReportArgs::setPrivacyPolicy(int privacyPolicy)
 {
-    mDest = dest;
+    mPrivacyPolicy = privacyPolicy;
 }
 
 void
@@ -161,55 +176,50 @@ IncidentReportArgs::addSection(int section)
 }
 
 void
-IncidentReportArgs::addHeader(const IncidentHeaderProto& headerProto)
+IncidentReportArgs::setReceiverPkg(const string& pkg)
 {
-    vector<uint8_t> header;
-    auto serialized = headerProto.SerializeAsString();
-    if (serialized.empty()) return;
-    for (auto it = serialized.begin(); it != serialized.end(); it++) {
-        header.push_back((uint8_t)*it);
-    }
-    mHeaders.push_back(header);
+    mReceiverPkg = pkg;
+}
+
+void
+IncidentReportArgs::setReceiverCls(const string& cls)
+{
+    mReceiverCls = cls;
+}
+
+void
+IncidentReportArgs::addHeader(const vector<uint8_t>& headerProto)
+{
+    mHeaders.push_back(headerProto);
 }
 
 bool
-IncidentReportArgs::containsSection(int section) const
+IncidentReportArgs::containsSection(int section, bool specific) const
 {
-     return mAll || mSections.find(section) != mSections.end();
+    if (specific) {
+        return mSections.find(section) != mSections.end();
+    } else {
+        return mAll || mSections.find(section) != mSections.end();
+    }
 }
 
 void
 IncidentReportArgs::merge(const IncidentReportArgs& that)
 {
-    if (mAll) {
-        return;
-    } else if (that.mAll) {
-        mAll = true;
-        mSections.clear();
-    } else {
-        for (set<int>::const_iterator it=that.mSections.begin();
-                it!=that.mSections.end(); it++) {
-            mSections.insert(*it);
+    for (const vector<uint8_t>& header: that.mHeaders) {
+        mHeaders.push_back(header);
+    }
+    if (!mAll) {
+        if (that.mAll) {
+            mAll = true;
+            mSections.clear();
+        } else {
+            for (set<int>::const_iterator it=that.mSections.begin();
+                    it!=that.mSections.end(); it++) {
+                mSections.insert(*it);
+            }
         }
     }
-}
-
-// stub
-void
-IncidentReportArgs::setPrivacyPolicy(int)
-{
-}
-
-// stub
-void
-IncidentReportArgs::setReceiverPkg(const string&)
-{
-}
-
-// stub
-void
-IncidentReportArgs::setReceiverCls(const string&)
-{
 }
 
 }

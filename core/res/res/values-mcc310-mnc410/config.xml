@@ -48,4 +48,8 @@
         <item>"#8"</item>
         <item>"#9"</item>
     </string-array>
+
+    <!-- Enable 5 bar signal strength icon -->
+    <bool name="config_inflateSignalStrength">true</bool>
+
 </resources>

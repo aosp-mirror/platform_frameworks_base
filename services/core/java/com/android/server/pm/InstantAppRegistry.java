@@ -133,6 +133,7 @@ class InstantAppRegistry {
         mCookiePersistence = new CookiePersistence(BackgroundThread.getHandler().getLooper());
     }
 
+    @GuardedBy("mService.mPackages")
     public byte[] getInstantAppCookieLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         // Only installed packages can get their own cookie
@@ -156,6 +157,7 @@ class InstantAppRegistry {
         return null;
     }
 
+    @GuardedBy("mService.mPackages")
     public boolean setInstantAppCookieLPw(@NonNull String packageName,
             @Nullable byte[] cookie, @UserIdInt int userId) {
         if (cookie != null && cookie.length > 0) {
@@ -248,6 +250,7 @@ class InstantAppRegistry {
 
     }
 
+    @GuardedBy("mService.mPackages")
     public @Nullable List<InstantAppInfo> getInstantAppsLPr(@UserIdInt int userId) {
         List<InstantAppInfo> installedApps = getInstalledInstantApplicationsLPr(userId);
         List<InstantAppInfo> uninstalledApps = getUninstalledInstantApplicationsLPr(userId);
@@ -260,6 +263,7 @@ class InstantAppRegistry {
         return uninstalledApps;
     }
 
+    @GuardedBy("mService.mPackages")
     public void onPackageInstalledLPw(@NonNull PackageParser.Package pkg, @NonNull int[] userIds) {
         PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
@@ -330,6 +334,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     public void onPackageUninstalledLPw(@NonNull PackageParser.Package pkg,
             @NonNull int[] userIds) {
         PackageSetting ps = (PackageSetting) pkg.mExtras;
@@ -355,6 +360,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     public void onUserRemovedLPw(int userId) {
         if (mUninstalledInstantApps != null) {
             mUninstalledInstantApps.remove(userId);
@@ -393,6 +399,7 @@ class InstantAppRegistry {
         return instantGrantList.get(instantAppId);
     }
 
+    @GuardedBy("mService.mPackages")
     public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
             int targetAppId, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
@@ -427,6 +434,7 @@ class InstantAppRegistry {
         instantGrantList.put(instantAppId, true /*granted*/);
     }
 
+    @GuardedBy("mService.mPackages")
     public void addInstantAppLPw(@UserIdInt int userId, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
             mInstalledInstantAppUids = new SparseArray<>();
@@ -439,6 +447,7 @@ class InstantAppRegistry {
         instantAppList.put(instantAppId, true /*installed*/);
     }
 
+    @GuardedBy("mService.mPackages")
     private void removeInstantAppLPw(@UserIdInt int userId, int instantAppId) {
         // remove from the installed list
         if (mInstalledInstantAppUids == null) {
@@ -464,6 +473,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     private void removeAppLPw(@UserIdInt int userId, int targetAppId) {
         // remove from the installed list
         if (mInstantGrants == null) {
@@ -476,6 +486,7 @@ class InstantAppRegistry {
         targetAppList.delete(targetAppId);
     }
 
+    @GuardedBy("mService.mPackages")
     private void addUninstalledInstantAppLPw(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
         InstantAppInfo uninstalledApp = createInstantAppInfoForPackage(
@@ -530,11 +541,13 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     boolean hasInstantApplicationMetadataLPr(String packageName, int userId) {
         return hasUninstalledInstantAppStateLPr(packageName, userId)
                 || hasInstantAppMetadataLPr(packageName, userId);
     }
 
+    @GuardedBy("mService.mPackages")
     public void deleteInstantApplicationMetadataLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) ->
@@ -551,6 +564,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     private void removeUninstalledInstantAppStateLPw(
             @NonNull Predicate<UninstalledInstantAppState> criteria, @UserIdInt int userId) {
         if (mUninstalledInstantApps == null) {
@@ -578,6 +592,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     private boolean hasUninstalledInstantAppStateLPr(String packageName, @UserIdInt int userId) {
         if (mUninstalledInstantApps == null) {
             return false;
@@ -796,6 +811,7 @@ class InstantAppRegistry {
         return false;
     }
 
+    @GuardedBy("mService.mPackages")
     private @Nullable List<InstantAppInfo> getInstalledInstantApplicationsLPr(
             @UserIdInt int userId) {
         List<InstantAppInfo> result = null;
@@ -850,6 +866,7 @@ class InstantAppRegistry {
         }
     }
 
+    @GuardedBy("mService.mPackages")
     private @Nullable List<InstantAppInfo> getUninstalledInstantApplicationsLPr(
             @UserIdInt int userId) {
         List<UninstalledInstantAppState> uninstalledAppStates =
@@ -922,6 +939,7 @@ class InstantAppRegistry {
         return uninstalledAppState.mInstantAppInfo;
     }
 
+    @GuardedBy("mService.mPackages")
     private @Nullable List<UninstalledInstantAppState> getUninstalledInstantAppStatesLPr(
             @UserIdInt int userId) {
         List<UninstalledInstantAppState> uninstalledAppStates = null;
@@ -1157,15 +1175,13 @@ class InstantAppRegistry {
     private final class CookiePersistence extends Handler {
         private static final long PERSIST_COOKIE_DELAY_MILLIS = 1000L; /* one second */
 
-        // In case you wonder why we stash the cookies aside, we use
-        // the user id for the message id and the package for the payload.
-        // Handler allows removing messages by id and tag where the
-        // tag is compared using ==. So to allow cancelling the
-        // pending persistence for an app under a given user we use
-        // the fact that package are cached by the system so the ==
-        // comparison would match and we end up with a way to cancel
-        // persisting the cookie for a user and package.
-        private final SparseArray<ArrayMap<PackageParser.Package, SomeArgs>> mPendingPersistCookies
+        // The cookies are cached per package name per user-id in this sparse
+        // array. The caching is so that pending persistence can be canceled within
+        // a short interval. To ensure we still return pending persist cookies
+        // for a package that uninstalled and reinstalled while the persistence
+        // was still pending, we use the package name as a key for
+        // mPendingPersistCookies, since that stays stable across reinstalls.
+        private final SparseArray<ArrayMap<String, SomeArgs>> mPendingPersistCookies
                 = new SparseArray<>();
 
         public CookiePersistence(Looper looper) {
@@ -1195,10 +1211,10 @@ class InstantAppRegistry {
 
         public @Nullable byte[] getPendingPersistCookieLPr(@NonNull PackageParser.Package pkg,
                 @UserIdInt int userId) {
-            ArrayMap<PackageParser.Package, SomeArgs> pendingWorkForUser =
+            ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
             if (pendingWorkForUser != null) {
-                SomeArgs state = pendingWorkForUser.get(pkg);
+                SomeArgs state = pendingWorkForUser.get(pkg.packageName);
                 if (state != null) {
                     return (byte[]) state.arg1;
                 }
@@ -1218,7 +1234,7 @@ class InstantAppRegistry {
         private void addPendingPersistCookieLPw(@UserIdInt int userId,
                 @NonNull PackageParser.Package pkg, @NonNull byte[] cookie,
                 @NonNull File cookieFile) {
-            ArrayMap<PackageParser.Package, SomeArgs> pendingWorkForUser =
+            ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
             if (pendingWorkForUser == null) {
                 pendingWorkForUser = new ArrayMap<>();
@@ -1227,16 +1243,16 @@ class InstantAppRegistry {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = cookie;
             args.arg2 = cookieFile;
-            pendingWorkForUser.put(pkg, args);
+            pendingWorkForUser.put(pkg.packageName, args);
         }
 
         private SomeArgs removePendingPersistCookieLPr(@NonNull PackageParser.Package pkg,
                 @UserIdInt int userId) {
-            ArrayMap<PackageParser.Package, SomeArgs> pendingWorkForUser =
+            ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
             SomeArgs state = null;
             if (pendingWorkForUser != null) {
-                state = pendingWorkForUser.remove(pkg);
+                state = pendingWorkForUser.remove(pkg.packageName);
                 if (pendingWorkForUser.isEmpty()) {
                     mPendingPersistCookies.remove(userId);
                 }

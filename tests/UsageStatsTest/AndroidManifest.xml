@@ -11,6 +11,7 @@
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.OBSERVE_APP_USAGE" />
+    <uses-permission android:name="android.permission.SUSPEND_APPS" />
 
     <application android:label="Usage Access Test">
         <activity android:name=".UsageStatsActivity"

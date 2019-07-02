@@ -23,13 +23,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.provider.Settings;
-import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.android.internal.telephony.IccCardConstants;

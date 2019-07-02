@@ -59,7 +59,10 @@ public class SliceBroadcastRelayHandler extends SystemUI {
         } else if (SliceBroadcastRelay.ACTION_UNREGISTER.equals(intent.getAction())) {
             Uri uri = intent.getParcelableExtra(SliceBroadcastRelay.EXTRA_URI);
             if (DEBUG) Log.d(TAG, "Unregister " + uri);
-            getAndRemoveRelay(uri).unregister(mContext);
+            BroadcastRelay relay = getAndRemoveRelay(uri);
+            if (relay != null) {
+                relay.unregister(mContext);
+            }
         }
     }
 

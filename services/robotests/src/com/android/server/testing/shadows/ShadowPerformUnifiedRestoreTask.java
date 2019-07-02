@@ -21,7 +21,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.content.pm.PackageInfo;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.transport.TransportClient;
@@ -47,15 +47,15 @@ public class ShadowPerformUnifiedRestoreTask {
         sLastShadow = null;
     }
 
-    private BackupManagerService mBackupManagerService;
+    private UserBackupManagerService mBackupManagerService;
     @Nullable private PackageInfo mPackage;
     private boolean mIsFullSystemRestore;
     @Nullable private String[] mFilterSet;
     private OnTaskFinishedListener mListener;
 
     @Implementation
-    public void __constructor__(
-            BackupManagerService backupManagerService,
+    protected void __constructor__(
+            UserBackupManagerService backupManagerService,
             TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
@@ -74,7 +74,7 @@ public class ShadowPerformUnifiedRestoreTask {
     }
 
     @Implementation
-    public void execute() {
+    protected void execute() {
         mBackupManagerService.setRestoreInProgress(false);
         mListener.onFinished("ShadowPerformUnifiedRestoreTask.execute()");
     }

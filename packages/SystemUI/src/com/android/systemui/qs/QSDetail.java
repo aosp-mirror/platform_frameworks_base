@@ -323,7 +323,9 @@ public class QSDetail extends LinearLayout {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    handleShowingDetail(detail, x, y, false /* toggleQs */);
+                    if (isAttachedToWindow()) {
+                        handleShowingDetail(detail, x, y, false /* toggleQs */);
+                    }
                 }
             });
         }

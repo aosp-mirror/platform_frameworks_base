@@ -23,9 +23,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.Suppress;
 
 import java.io.File;
 import java.io.FileOutputStream;

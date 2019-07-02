@@ -16,11 +16,22 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.WaitResult.launchStateToString;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
@@ -48,14 +59,16 @@ import android.content.pm.UserInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
+import android.os.RemoteCallback.OnResultListener;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
@@ -65,6 +78,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
@@ -89,6 +103,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -96,21 +112,15 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.INVALID_DISPLAY;
-
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
+    private static final int USER_OPERATION_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
+    final IActivityTaskManager mTaskInterface;
 
     // Internal service impl -- must perform security checks before touching.
     final ActivityManagerService mInternal;
@@ -143,6 +153,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     ActivityManagerShellCommand(ActivityManagerService service, boolean dumping) {
         mInterface = service;
+        mTaskInterface = service.mActivityTaskManager;
         mInternal = service;
         mPm = AppGlobals.getPackageManager();
         mDumping = dumping;
@@ -368,6 +379,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
         });
     }
 
+    private class ProgressWaiter extends IProgressListener.Stub {
+        private final CountDownLatch mFinishedLatch = new CountDownLatch(1);
+
+        @Override
+        public void onStarted(int id, Bundle extras) {}
+
+        @Override
+        public void onProgress(int id, int progress, Bundle extras) {}
+
+        @Override
+        public void onFinished(int id, Bundle extras) {
+            mFinishedLatch.countDown();
+        }
+
+        public boolean waitForFinish(long timeoutMillis) {
+            try {
+                return mFinishedLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                System.err.println("Thread interrupted unexpectedly.");
+                return false;
+            }
+        }
+    }
+
     int runStartActivity(PrintWriter pw) throws RemoteException {
         Intent intent;
         try {
@@ -393,8 +428,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (intent.getComponent() != null) {
                     packageName = intent.getComponent().getPackageName();
                 } else {
+                    // queryIntentActivities does not convert user id, so we convert it here first
+                    int userIdForQuery = mInternal.mUserController.handleIncomingUser(
+                            Binder.getCallingPid(), Binder.getCallingUid(), mUserId, false,
+                            ALLOW_NON_FULL, "ActivityManagerShellCommand", null);
                     List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
-                            mUserId).getList();
+                            userIdForQuery).getList();
                     if (activities == null || activities.size() <= 0) {
                         getErrPrintWriter().println("Error: Intent does not match any activities: "
                                 + intent);
@@ -471,12 +510,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
-                result = mInterface.startActivityAndWait(null, null, intent, mimeType,
+                result = mInternal.startActivityAndWait(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
-                res = mInterface.startActivityAsUser(null, null, intent, mimeType,
+                res = mInternal.startActivityAsUser(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
@@ -555,6 +594,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     result.who = intent.getComponent();
                 }
                 pw.println("Status: " + (result.timeout ? "timeout" : "ok"));
+                pw.println("LaunchState: " + launchStateToString(result.launchState));
                 if (result.who != null) {
                     pw.println("Activity: " + result.who.flattenToShortString());
                 }
@@ -567,7 +607,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             mRepeat--;
             if (mRepeat > 0) {
-                mInterface.unhandledBack();
+                mTaskInterface.unhandledBack();
             }
         } while (mRepeat > 0);
         return 0;
@@ -726,7 +766,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        ;
         if (!mInterface.stopBinderTrackingAndDump(fd)) {
             err.println("STOP TRACE FAILED.");
             return -1;
@@ -869,7 +908,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         String process = getNextArgRequired();
-        String heapFile = getNextArgRequired();
+        String heapFile = getNextArg();
+        if (heapFile == null) {
+            final Time t = new Time();
+            t.set(System.currentTimeMillis());
+            heapFile = "/data/local/tmp/heapdump-" + t.format("%Y%m%d-%H%M%S") + ".prof";
+        }
+        pw.println("File: " + heapFile);
+        pw.flush();
 
         File file = new File(heapFile);
         file.delete();
@@ -878,10 +924,28 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd)) {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final RemoteCallback finishCallback = new RemoteCallback(new OnResultListener() {
+            @Override
+            public void onResult(Bundle result) {
+                latch.countDown();
+            }
+        }, null);
+
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd,
+                finishCallback)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
+        pw.println("Waiting for dump to finish...");
+        pw.flush();
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            err.println("Caught InterruptedException");
+        }
+
         return 0;
     }
 
@@ -1640,8 +1704,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
-        if (!userManager.canSwitchUsers()) {
-            getErrPrintWriter().println("Error: disallowed switching user");
+        final int userSwitchable = userManager.getUserSwitchability();
+        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
+            getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
         String user = getNextArgRequired();
@@ -1657,8 +1722,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runStartUser(PrintWriter pw) throws RemoteException {
-        String user = getNextArgRequired();
-        boolean success = mInterface.startUserInBackground(Integer.parseInt(user));
+        boolean wait = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                getErrPrintWriter().println("Error: unknown option: " + opt);
+                return -1;
+            }
+        }
+        int userId = Integer.parseInt(getNextArgRequired());
+
+        final ProgressWaiter waiter = wait ? new ProgressWaiter() : null;
+        boolean success = mInterface.startUserInBackgroundWithListener(userId, waiter);
+        if (wait && success) {
+            success = waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
+        }
+
         if (success) {
             pw.println("Success: user started");
         } else {
@@ -1776,7 +1857,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runTrackAssociations(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "registerUidObserver()");
+                "runTrackAssociations()");
         synchronized (mInternal) {
             if (!mInternal.mTrackingAssociations) {
                 mInternal.mTrackingAssociations = true;
@@ -1790,7 +1871,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runUntrackAssociations(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "registerUidObserver()");
+                "runUntrackAssociations()");
         synchronized (mInternal) {
             if (mInternal.mTrackingAssociations) {
                 mInternal.mTrackingAssociations = false;
@@ -1990,19 +2071,20 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     private void writeDeviceConfig(ProtoOutputStream protoOutputStream, long fieldId,
-            PrintWriter pw, Configuration config, DisplayManager dm) {
-        Point stableSize = dm.getStableDisplaySize();
+            PrintWriter pw, Configuration config, DisplayMetrics displayMetrics) {
         long token = -1;
         if (protoOutputStream != null) {
             token = protoOutputStream.start(fieldId);
-            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX, stableSize.x);
-            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX, stableSize.y);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX,
+                    displayMetrics.widthPixels);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX,
+                    displayMetrics.heightPixels);
             protoOutputStream.write(DeviceConfigurationProto.STABLE_DENSITY_DPI,
                     DisplayMetrics.DENSITY_DEVICE_STABLE);
         }
         if (pw != null) {
-            pw.print("stable-width-px: "); pw.println(stableSize.x);
-            pw.print("stable-height-px: "); pw.println(stableSize.y);
+            pw.print("stable-width-px: "); pw.println(displayMetrics.widthPixels);
+            pw.print("stable-height-px: "); pw.println(displayMetrics.heightPixels);
             pw.print("stable-density-dpi: "); pw.println(DisplayMetrics.DENSITY_DEVICE_STABLE);
         }
 
@@ -2025,7 +2107,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.print("has-secure-screen-lock: "); pw.println(kgm.isDeviceSecure());
         }
 
-        ConfigurationInfo configInfo = mInternal.getDeviceConfigurationInfo();
+        ConfigurationInfo configInfo = null;
+        try {
+            configInfo = mTaskInterface.getDeviceConfigurationInfo();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
             if (protoOutputStream != null) {
                 protoOutputStream.write(DeviceConfigurationProto.OPENGL_VERSION,
@@ -2091,11 +2178,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runGetConfig(PrintWriter pw) throws RemoteException {
         int days = -1;
+        int displayId = Display.DEFAULT_DISPLAY;
         boolean asProto = false;
         boolean inclDevice = false;
 
         String opt;
-        while ((opt=getNextOption()) != null) {
+        while ((opt = getNextOption()) != null) {
             if (opt.equals("--days")) {
                 days = Integer.parseInt(getNextArgRequired());
                 if (days <= 0) {
@@ -2105,6 +2193,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 asProto = true;
             } else if (opt.equals("--device")) {
                 inclDevice = true;
+            } else if (opt.equals("--display")) {
+                displayId = Integer.parseInt(getNextArgRequired());
+                if (displayId < 0) {
+                    throw new IllegalArgumentException("--display must be a non-negative integer");
+                }
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -2118,7 +2211,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         DisplayManager dm = mInternal.mContext.getSystemService(DisplayManager.class);
-        Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        Display display = dm.getDisplay(displayId);
+
+        if (display == null) {
+            getErrPrintWriter().println("Error: Display does not exist: " + displayId);
+            return -1;
+        }
+
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
 
@@ -2126,15 +2225,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             final ProtoOutputStream proto = new ProtoOutputStream(getOutFileDescriptor());
             config.writeResConfigToProto(proto, GlobalConfigurationProto.RESOURCES, metrics);
             if (inclDevice) {
-                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, dm);
+                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, metrics);
             }
             proto.flush();
-
         } else {
             pw.println("config: " + Configuration.resourceQualifierString(config, metrics));
             pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
             if (inclDevice) {
-                writeDeviceConfig(null, -1, pw, config, dm);
+                writeDeviceConfig(null, -1, pw, config, metrics);
             }
 
             if (days >= 0) {
@@ -2155,7 +2253,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runSuppressResizeConfigChanges(PrintWriter pw) throws RemoteException {
         boolean suppress = Boolean.valueOf(getNextArgRequired());
-        mInterface.suppressResizeConfigChanges(suppress);
+        mTaskInterface.suppressResizeConfigChanges(suppress);
         return 0;
     }
 
@@ -2362,8 +2460,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStack(PrintWriter pw) throws RemoteException {
         String op = getNextArgRequired();
         switch (op) {
-            case "start":
-                return runStackStart(pw);
             case "move-task":
                 return runStackMoveTask(pw);
             case "resize":
@@ -2422,32 +2518,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         int stackId = Integer.parseInt(stackIdStr);
         String displayIdStr = getNextArgRequired();
         int displayId = Integer.parseInt(displayIdStr);
-        mInterface.moveStackToDisplay(stackId, displayId);
-        return 0;
-    }
-
-    int runStackStart(PrintWriter pw) throws RemoteException {
-        String displayIdStr = getNextArgRequired();
-        int displayId = Integer.parseInt(displayIdStr);
-        Intent intent;
-        try {
-            intent = makeIntent(UserHandle.USER_CURRENT);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-
-        final int stackId = mInterface.createStackOnDisplay(displayId);
-        if (stackId != INVALID_STACK_ID) {
-            // TODO: Need proper support if this is used by test...
-//            container.startActivity(intent);
-//            ActivityOptions options = ActivityOptions.makeBasic();
-//            options.setLaunchDisplayId(displayId);
-//            options.setLaunchStackId(stackId);
-//            mInterface.startAct
-//            mInterface.startActivityAsUser(null, null, intent, mimeType,
-//                    null, null, 0, mStartFlags, profilerInfo,
-//                    options != null ? options.toBundle() : null, mUserId);
-        }
+        mTaskInterface.moveStackToDisplay(stackId, displayId);
         return 0;
     }
 
@@ -2467,7 +2538,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        mInterface.moveTaskToStack(taskId, stackId, toTop);
+        mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
         return 0;
     }
 
@@ -2501,7 +2572,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate)
             throws RemoteException {
         try {
-            mInterface.resizeStack(stackId, bounds, false, false, animate, -1);
+            mTaskInterface.resizeStack(stackId, bounds, false, false, animate, -1);
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
         }
@@ -2515,7 +2586,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: invalid input bounds");
             return -1;
         }
-        mInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
+        mTaskInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
         return 0;
     }
 
@@ -2535,12 +2606,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String positionStr = getNextArgRequired();
         int position = Integer.parseInt(positionStr);
 
-        mInterface.positionTaskInStack(taskId, stackId, position);
+        mTaskInterface.positionTaskInStack(taskId, stackId, position);
         return 0;
     }
 
     int runStackList(PrintWriter pw) throws RemoteException {
-        List<ActivityManager.StackInfo> stacks = mInterface.getAllStackInfos();
+        List<ActivityManager.StackInfo> stacks = mTaskInterface.getAllStackInfos();
         for (ActivityManager.StackInfo info : stacks) {
             pw.println(info);
         }
@@ -2550,7 +2621,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStackInfo(PrintWriter pw) throws RemoteException {
         int windowingMode = Integer.parseInt(getNextArgRequired());
         int activityType = Integer.parseInt(getNextArgRequired());
-        ActivityManager.StackInfo info = mInterface.getStackInfo(windowingMode, activityType);
+        ActivityManager.StackInfo info = mTaskInterface.getStackInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }
@@ -2558,7 +2629,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStackRemove(PrintWriter pw) throws RemoteException {
         String stackIdStr = getNextArgRequired();
         int stackId = Integer.parseInt(stackIdStr);
-        mInterface.removeStack(stackId);
+        mTaskInterface.removeStack(stackId);
         return 0;
     }
 
@@ -2570,7 +2641,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
+        if (!mTaskInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
             getErrPrintWriter().println("Didn't move top activity to pinned stack.");
             return -1;
         }
@@ -2616,12 +2687,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskLock(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         if (taskIdStr.equals("stop")) {
-            mInterface.stopSystemLockTaskMode();
+            mTaskInterface.stopSystemLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
-            mInterface.startSystemLockTaskMode(taskId);
+            mTaskInterface.startSystemLockTaskMode(taskId);
         }
-        pw.println("Activity manager is " + (mInterface.isInLockTaskMode() ? "" : "not ") +
+        pw.println("Activity manager is " + (mTaskInterface.isInLockTaskMode() ? "" : "not ") +
                 "in lockTaskMode");
         return 0;
     }
@@ -2631,7 +2702,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final int taskId = Integer.parseInt(taskIdStr);
         final String resizeableStr = getNextArgRequired();
         final int resizeableMode = Integer.parseInt(resizeableStr);
-        mInterface.setTaskResizeable(taskId, resizeableMode);
+        mTaskInterface.setTaskResizeable(taskId, resizeableMode);
         return 0;
     }
 
@@ -2650,7 +2721,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     void taskResize(int taskId, Rect bounds, int delay_ms, boolean pretendUserResize)
             throws RemoteException {
         final int resizeMode = pretendUserResize ? RESIZE_MODE_USER : RESIZE_MODE_SYSTEM;
-        mInterface.resizeTask(taskId, bounds, resizeMode);
+        mTaskInterface.resizeTask(taskId, bounds, resizeMode);
         try {
             Thread.sleep(delay_ms);
         } catch (InterruptedException e) {
@@ -2722,14 +2793,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskFocus(PrintWriter pw) throws RemoteException {
         final int taskId = Integer.parseInt(getNextArgRequired());
         pw.println("Setting focus to task " + taskId);
-        mInterface.setFocusedTask(taskId);
+        mTaskInterface.setFocusedTask(taskId);
         return 0;
     }
 
     int runWrite(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerUidObserver()");
-        mInternal.getRecentTasks().flush();
+        mInternal.mAtmInternal.flushRecentTasks();
         pw.println("All tasks persisted.");
         return 0;
     }
@@ -2754,7 +2825,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsMultiWindow(mInternal.mContext));
+        pw.println(ActivityTaskManager.supportsMultiWindow(mInternal.mContext));
         return 0;
     }
 
@@ -2763,7 +2834,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsSplitScreenMultiWindow(mInternal.mContext));
+        pw.println(ActivityTaskManager.supportsSplitScreenMultiWindow(mInternal.mContext));
         return 0;
     }
 
@@ -2830,7 +2901,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
             pw.println("    provider [COMP_SPEC]: provider client-side state");
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
+            pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
+            pw.println("    lmk: stats on low memory killer");
+            pw.println("    lru: raw LRU process list");
+            pw.println("    binder-proxies: stats on binder objects and IPCs");
             pw.println("    settings: currently applied config settings");
             pw.println("    service [COMP_SPEC]: service client-side state");
             pw.println("    package [PACKAGE_NAME]: all state related to given package");
@@ -2874,6 +2949,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          specified then run as the current user.");
             pw.println("      --windowingMode <WINDOWING_MODE>: The windowing mode to launch the activity into.");
             pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
+            pw.println("      --display <DISPLAY_ID>: The display to launch the activity into.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
@@ -2893,6 +2969,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current] [--no-hidden-api-checks]");
+            pw.println("          [--no-isolated-storage]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
             pw.println("      form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there");
@@ -2911,6 +2988,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
             pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
+            pw.println("      --no-isolated-storage: don't use isolated storage sandbox and ");
+            pw.println("          mount full external storage");
             pw.println("      --no-window-animation: turn off window animations while running.");
             pw.println("      --abi <ABI>: Launch the instrumented process with the selected ABI.");
             pw.println("          This assumes that the process supports the selected ABI.");
@@ -2997,9 +3076,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      execution of that user if it is currently stopped.");
             pw.println("  get-current-user");
             pw.println("      Returns id of the current foreground user.");
-            pw.println("  start-user <USER_ID>");
+            pw.println("  start-user [-w] <USER_ID>");
             pw.println("      Start USER_ID in background if it is currently stopped;");
-            pw.println("      use switch-user if you want to start the user in foreground");
+            pw.println("      use switch-user if you want to start the user in foreground.");
+            pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
             pw.println("  unlock-user <USER_ID> [TOKEN_HEX]");
             pw.println("      Attempt to unlock the given user using the given authorization token.");
             pw.println("  stop-user [-w] [-f] <USER_ID>");
@@ -3019,11 +3099,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Gets the process state of an app given its <UID>.");
             pw.println("  attach-agent <PROCESS> <FILE>");
             pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
-            pw.println("  get-config [--days N] [--device] [--proto]");
+            pw.println("  get-config [--days N] [--device] [--proto] [--display <DISPLAY_ID>]");
             pw.println("      Retrieve the configuration and any recent configurations of the device.");
             pw.println("      --days: also return last N days of configurations that have been seen.");
             pw.println("      --device: also output global device configuration info.");
             pw.println("      --proto: return result as a proto; does not include --days info.");
+            pw.println("      --display: Specify for which display to run the command; if not ");
+            pw.println("          specified then run for the default display.");
             pw.println("  supports-multiwindow");
             pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  supports-split-screen-multi-window");
@@ -3045,8 +3127,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("       move-stack <STACK_ID> <DISPLAY_ID>");
             pw.println("           Move <STACK_ID> from its current display to <DISPLAY_ID>.");
             pw.println("  stack [COMMAND] [...]: sub-commands for operating on activity stacks.");
-            pw.println("       start <DISPLAY_ID> <INTENT>");
-            pw.println("           Start a new activity on <DISPLAY_ID> using <INTENT>");
             pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");

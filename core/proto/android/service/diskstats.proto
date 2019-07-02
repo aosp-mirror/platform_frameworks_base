@@ -17,7 +17,7 @@
 syntax = "proto2";
 package android.service.diskstats;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "DiskStatsServiceProto";
@@ -37,7 +37,7 @@ message DiskStatsServiceDumpProto {
     }
     // Whether the latency test resulted in an error
     optional bool has_test_error = 1;
-    // If the test errored, error message is contained here, it is just IOException.
+    // If the test encountered an IOException, the error message is logged here.
     optional string error_message = 2;
     // 512B write latency in milliseconds, if the test was successful
     optional int32 write_512b_latency_millis = 3;

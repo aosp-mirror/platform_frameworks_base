@@ -118,7 +118,7 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
         protected Void doInBackground(Void... params) {
             try (InputStream in = new FileInputStream(mFile);
                     OutputStream out = new FileOutputStream(mDestination.getFileDescriptor())) {
-                FileUtils.copy(in, out, null, mCancellationSignal);
+                FileUtils.copy(in, out, mCancellationSignal, null, null);
             } catch (OperationCanceledException e) {
                 // Ignored; already handled below
             } catch (IOException e) {

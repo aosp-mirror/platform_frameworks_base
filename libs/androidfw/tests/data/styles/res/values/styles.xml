@@ -79,4 +79,14 @@
         <item name="attr_three">3</item>
     </style>
 
+    <public type="style" name="StyleSeven" id="0x7f020006" />
+    <style name="StyleSeven" >
+        <item name="android:versionCode">3</item>
+        <item name="android:label">"string"</item>
+        <item name="android:icon">?attr/attr_one</item>
+        <item name="android:tag">@string/string_one</item>
+        <item name="android:id">@null</item>
+        <item name="android:theme">@empty</item>
+    </style>
+
 </resources>

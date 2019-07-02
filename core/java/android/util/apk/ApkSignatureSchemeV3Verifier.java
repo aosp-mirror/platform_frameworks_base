@@ -117,7 +117,7 @@ public class ApkSignatureSchemeV3Verifier {
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v3.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static VerifiedSigner plsCertsNoVerifyOnlyCerts(String apkFile)
+    public static VerifiedSigner unsafeGetCertsWithoutVerification(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
         return verify(apkFile, false);
     }
@@ -534,11 +534,11 @@ public class ApkSignatureSchemeV3Verifier {
                    NoSuchAlgorithmException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
             SignatureInfo signatureInfo = findSignature(apk);
-            return ApkSigningBlockUtils.generateApkVerity(apkPath, bufferFactory, signatureInfo);
+            return VerityBuilder.generateApkVerity(apkPath, bufferFactory, signatureInfo);
         }
     }
 
-    static byte[] generateFsverityRootHash(String apkPath)
+    static byte[] generateApkVerityRootHash(String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException,
                    SignatureNotFoundException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
@@ -547,7 +547,7 @@ public class ApkSignatureSchemeV3Verifier {
             if (vSigner.verityRootHash == null) {
                 return null;
             }
-            return ApkVerityBuilder.generateFsverityRootHash(
+            return VerityBuilder.generateApkVerityRootHash(
                     apk, ByteBuffer.wrap(vSigner.verityRootHash), signatureInfo);
         }
     }

@@ -5,22 +5,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 import android.os.Looper;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.NtpTrustedTime;
 
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
-import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,12 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Unit tests for {@link NtpTimeHelper}.
  */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 27
-)
-@SystemLoaderPackages({"com.android.server.location"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class NtpTimeHelperTest {
 
@@ -81,7 +74,7 @@ public class NtpTimeHelperTest {
         doReturn(true).when(mMockNtpTrustedTime).forceRefresh();
         doReturn(1L).when(mMockNtpTrustedTime).getCacheAge();
         doReturn(MOCK_NTP_TIME).when(mMockNtpTrustedTime).getCachedNtpTime();
-        ShadowSystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
+        SystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
 
         waitForTasksToBePostedOnHandlerAndRunThem();
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();

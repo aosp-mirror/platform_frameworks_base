@@ -6,7 +6,7 @@ android_test {
     certificate: "platform",
     libs: ["android.test.base"],
     static_libs: [
-        "compatibility-device-util",
-        "android-support-test",
+        "compatibility-device-util-axt",
+        "androidx.test.rules",
     ],
 }

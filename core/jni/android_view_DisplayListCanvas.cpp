@@ -117,18 +117,8 @@ static void android_view_DisplayListCanvas_resetDisplayListCanvas(jlong canvasPt
     canvas->resetRecording(width, height, renderNode);
 }
 
-static jint android_view_DisplayListCanvas_getMaxTextureWidth() {
-    if (!Caches::hasInstance()) {
-        android::uirenderer::renderthread::RenderProxy::staticFence();
-    }
-    return Caches::getInstance().maxTextureSize;
-}
-
-static jint android_view_DisplayListCanvas_getMaxTextureHeight() {
-    if (!Caches::hasInstance()) {
-        android::uirenderer::renderthread::RenderProxy::staticFence();
-    }
-    return Caches::getInstance().maxTextureSize;
+static jint android_view_DisplayListCanvas_getMaxTextureSize() {
+    return android::uirenderer::renderthread::RenderProxy::maxTextureSize();
 }
 
 static void android_view_DisplayListCanvas_insertReorderBarrier(jlong canvasPtr,
@@ -178,11 +168,16 @@ static void android_view_DisplayListCanvas_drawCircleProps(jlong canvasPtr,
     canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
+static void android_view_DisplayListCanvas_drawWebViewFunctor(jlong canvasPtr, jint functor) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->drawWebViewFunctor(functor);
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/DisplayListCanvas";
+const char* const kClassPathName = "android/graphics/RecordingCanvas";
 
 static JNINativeMethod gMethods[] = {
 
@@ -194,14 +189,15 @@ static JNINativeMethod gMethods[] = {
     // ------------ @CriticalNative --------------
     { "nCreateDisplayListCanvas", "(JII)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
     { "nResetDisplayListCanvas",  "(JJII)V",    (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
-    { "nGetMaximumTextureWidth",  "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
-    { "nGetMaximumTextureHeight", "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
+    { "nGetMaximumTextureWidth",  "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
+    { "nGetMaximumTextureHeight", "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
     { "nInsertReorderBarrier",    "(JZ)V",      (void*) android_view_DisplayListCanvas_insertReorderBarrier },
     { "nFinishRecording",         "(J)J",       (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",          "(JJ)V",      (void*) android_view_DisplayListCanvas_drawRenderNode },
     { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },
     { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },
     { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
+    { "nDrawWebViewFunctor",      "(JI)V",      (void*) android_view_DisplayListCanvas_drawWebViewFunctor },
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {

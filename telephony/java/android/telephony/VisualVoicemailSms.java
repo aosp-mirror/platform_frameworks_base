@@ -116,7 +116,7 @@ public final class VisualVoicemailSms implements Parcelable {
     }
 
 
-    public static final Creator<VisualVoicemailSms> CREATOR =
+    public static final @android.annotation.NonNull Creator<VisualVoicemailSms> CREATOR =
             new Creator<VisualVoicemailSms>() {
                 @Override
                 public VisualVoicemailSms createFromParcel(Parcel in) {

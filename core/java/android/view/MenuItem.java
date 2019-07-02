@@ -18,11 +18,13 @@ package android.view;
 
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.BlendMode;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -268,8 +270,30 @@ public interface MenuItem {
      * @attr ref android.R.styleable#MenuItem_iconTintMode
      * @see #setIconTintList(ColorStateList)
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     * @see Drawable#setTintBlendMode(BlendMode)
      */
-    public default MenuItem setIconTintMode(@Nullable PorterDuff.Mode tintMode) { return this; }
+    default @NonNull MenuItem setIconTintMode(@Nullable PorterDuff.Mode tintMode) {
+        return this;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setIconTintList(ColorStateList)} to this item's icon. The default mode is
+     * {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#MenuItem_iconTintMode
+     * @see #setIconTintList(ColorStateList)
+     */
+    default @NonNull MenuItem setIconTintBlendMode(@Nullable BlendMode blendMode) {
+        PorterDuff.Mode mode = BlendMode.blendModeToPorterDuffMode(blendMode);
+        if (mode != null) {
+            return setIconTintMode(mode);
+        } else {
+            return this;
+        }
+    }
 
     /**
      * Returns the blending mode used to apply the tint to this item's icon, if specified.
@@ -277,9 +301,29 @@ public interface MenuItem {
      * @return the blending mode used to apply the tint to this item's icon
      * @attr ref android.R.styleable#MenuItem_iconTintMode
      * @see #setIconTintMode(PorterDuff.Mode)
+     * @see #setIconTintBlendMode(BlendMode)
+     *
      */
     @Nullable
     public default PorterDuff.Mode getIconTintMode() { return null; }
+
+    /**
+     * Returns the blending mode used to apply the tint to this item's icon, if specified.
+     *
+     * @return the blending mode used to apply the tint to this item's icon
+     * @attr ref android.R.styleable#MenuItem_iconTintMode
+     * @see #setIconTintBlendMode(BlendMode)
+     *
+     */
+    @Nullable
+    default BlendMode getIconTintBlendMode() {
+        PorterDuff.Mode mode = getIconTintMode();
+        if (mode != null) {
+            return BlendMode.fromValue(mode.nativeInt);
+        } else {
+            return null;
+        }
+    }
     
     /**
      * Change the Intent associated with this item.  By default there is no

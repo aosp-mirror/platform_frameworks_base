@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -45,6 +46,7 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -88,10 +90,25 @@ public class ScrollView extends FrameLayout {
     private final Rect mTempRect = new Rect();
     @UnsupportedAppUsage
     private OverScroller mScroller;
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowTop;
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowBottom;
+    /**
+     * Tracks the state of the top edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
+     */
+    @NonNull
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768600)
+    private EdgeEffect mEdgeGlowTop = new EdgeEffect(getContext());
+
+    /**
+     * Tracks the state of the bottom edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
+     */
+    @NonNull
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769386)
+    private EdgeEffect mEdgeGlowBottom = new EdgeEffect(getContext());
 
     /**
      * Position of the last motion event.
@@ -110,7 +127,7 @@ public class ScrollView extends FrameLayout {
      * layout is dirty. This prevents the scroll from being wrong if the child has not been
      * laid out before requesting focus.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769715)
     private View mChildToScrollTo = null;
 
     /**
@@ -140,13 +157,13 @@ public class ScrollView extends FrameLayout {
     private boolean mSmoothScrollingEnabled = true;
 
     private int mTouchSlop;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124051125)
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.P, trackingBug = 124050903)
     private int mOverscrollDistance;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.P, trackingBug = 124050903)
     private int mOverflingDistance;
 
     private float mVerticalScrollFactor;
@@ -200,6 +217,8 @@ public class ScrollView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.ScrollView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.ScrollView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         setFillViewport(a.getBoolean(R.styleable.ScrollView_fillViewport, false));
 
@@ -243,6 +262,74 @@ public class ScrollView extends FrameLayout {
         }
 
         return 1.0f;
+    }
+
+    /**
+     * Sets the edge effect color for both top and bottom edge effects.
+     *
+     * @param color The color for the edge effects.
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setEdgeEffectColor(@ColorInt int color) {
+        setTopEdgeEffectColor(color);
+        setBottomEdgeEffectColor(color);
+    }
+
+    /**
+     * Sets the bottom edge effect color.
+     *
+     * @param color The color for the bottom edge effect.
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setBottomEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowBottom.setColor(color);
+    }
+
+    /**
+     * Sets the top edge effect color.
+     *
+     * @param color The color for the top edge effect.
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     * @see #getBottomEdgeEffectColor()
+     */
+    public void setTopEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowTop.setColor(color);
+    }
+
+    /**
+     * Returns the top edge effect color.
+     *
+     * @return The top edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getBottomEdgeEffectColor()
+     */
+    @ColorInt
+    public int getTopEdgeEffectColor() {
+        return mEdgeGlowTop.getColor();
+    }
+
+    /**
+     * Returns the bottom edge effect color.
+     *
+     * @return The bottom edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setTopEdgeEffectColor(int)
+     * @see #setBottomEdgeEffectColor(int)
+     * @see #getTopEdgeEffectColor()
+     */
+    @ColorInt
+    public int getBottomEdgeEffectColor() {
+        return mEdgeGlowBottom.getColor();
     }
 
     /**
@@ -324,6 +411,7 @@ public class ScrollView extends FrameLayout {
      *
      * @attr ref android.R.styleable#ScrollView_fillViewport
      */
+    @InspectableProperty
     public boolean isFillViewport() {
         return mFillViewport;
     }
@@ -622,6 +710,10 @@ public class ScrollView extends FrameLayout {
         return mIsBeingDragged;
     }
 
+    private boolean shouldDisplayEdgeEffects() {
+        return getOverScrollMode() != OVER_SCROLL_NEVER;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         initVelocityTrackerIfNotExists();
@@ -730,7 +822,7 @@ public class ScrollView extends FrameLayout {
                                 mEdgeGlowTop.onRelease();
                             }
                         }
-                        if (mEdgeGlowTop != null
+                        if (shouldDisplayEdgeEffects()
                                 && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
                             postInvalidateOnAnimation();
                         }
@@ -1382,16 +1474,20 @@ public class ScrollView extends FrameLayout {
      *
      * @param child the View to scroll to
      */
-    private void scrollToChild(View child) {
-        child.getDrawingRect(mTempRect);
+    public void scrollToDescendant(@NonNull View child) {
+        if (!mIsLayoutDirty) {
+            child.getDrawingRect(mTempRect);
 
-        /* Offset from child's local coordinates to ScrollView coordinates */
-        offsetDescendantRectToMyCoords(child, mTempRect);
+            /* Offset from child's local coordinates to ScrollView coordinates */
+            offsetDescendantRectToMyCoords(child, mTempRect);
 
-        int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
+            int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
 
-        if (scrollDelta != 0) {
-            scrollBy(0, scrollDelta);
+            if (scrollDelta != 0) {
+                scrollBy(0, scrollDelta);
+            }
+        } else {
+            mChildToScrollTo = child;
         }
     }
 
@@ -1486,7 +1582,7 @@ public class ScrollView extends FrameLayout {
     public void requestChildFocus(View child, View focused) {
         if (focused != null && focused.getRevealOnFocusHint()) {
             if (!mIsLayoutDirty) {
-                scrollToChild(focused);
+                scrollToDescendant(focused);
             } else {
                 // The child may not be laid out yet, we can't compute the scroll yet
                 mChildToScrollTo = focused;
@@ -1567,7 +1663,7 @@ public class ScrollView extends FrameLayout {
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
-            scrollToChild(mChildToScrollTo);
+            scrollToDescendant(mChildToScrollTo);
         }
         mChildToScrollTo = null;
 
@@ -1664,7 +1760,7 @@ public class ScrollView extends FrameLayout {
 
         recycleVelocityTracker();
 
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             mEdgeGlowTop.onRelease();
             mEdgeGlowBottom.onRelease();
         }
@@ -1691,21 +1787,6 @@ public class ScrollView extends FrameLayout {
                 super.scrollTo(x, y);
             }
         }
-    }
-
-    @Override
-    public void setOverScrollMode(int mode) {
-        if (mode != OVER_SCROLL_NEVER) {
-            if (mEdgeGlowTop == null) {
-                Context context = getContext();
-                mEdgeGlowTop = new EdgeEffect(context);
-                mEdgeGlowBottom = new EdgeEffect(context);
-            }
-        } else {
-            mEdgeGlowTop = null;
-            mEdgeGlowBottom = null;
-        }
-        super.setOverScrollMode(mode);
     }
 
     @Override
@@ -1752,7 +1833,7 @@ public class ScrollView extends FrameLayout {
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        if (mEdgeGlowTop != null) {
+        if (shouldDisplayEdgeEffects()) {
             final int scrollY = mScrollY;
             final boolean clipToPadding = getClipToPadding();
             if (!mEdgeGlowTop.isFinished()) {
@@ -1897,7 +1978,7 @@ public class ScrollView extends FrameLayout {
                     + " scrollPosition=" + scrollPosition + "}";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

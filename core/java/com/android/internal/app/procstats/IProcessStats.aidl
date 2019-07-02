@@ -24,4 +24,14 @@ interface IProcessStats {
     byte[] getCurrentStats(out List<ParcelFileDescriptor> historic);
     ParcelFileDescriptor getStatsOverTime(long minTime);
     int getCurrentMemoryState();
+
+    /**
+     * Get stats committed after highWaterMarkMs
+     * @param highWaterMarkMs Report stats committed after this time.
+     * @param section Integer mask to indicate which sections to include in the stats.
+     * @param doAggregate Whether to aggregate the stats or keep them separated.
+     * @param List of Files of individual commits in protobuf binary or one that is merged from them.
+     */
+     long getCommittedStats(long highWaterMarkMs, int section, boolean doAggregate,
+        out List<ParcelFileDescriptor> committedStats);
 }

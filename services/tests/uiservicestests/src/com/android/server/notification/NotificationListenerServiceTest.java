@@ -16,47 +16,68 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.app.Notification.EXTRA_SMALL_ICON;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.server.UiServiceTestCase;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.test.runner.AndroidJUnit4;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationListenerServiceTest extends UiServiceTestCase {
 
-    private String[] mKeys = new String[] { "key", "key1", "key2", "key3"};
+    int targetSdk = 0;
+
+    @Before
+    public void setUp() {
+        targetSdk = mContext.getApplicationInfo().targetSdkVersion;
+    }
+
+    @After
+    public void tearDown() {
+        mContext.getApplicationInfo().targetSdkVersion = targetSdk;
+    }
 
     @Test
     public void testGetActiveNotifications_notNull() throws Exception {
@@ -72,7 +93,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRanking() throws Exception {
+    public void testRanking() {
         TestListenerService service = new TestListenerService();
         service.applyUpdateLocked(generateUpdate());
         for (int i = 0; i < mKeys.length; i++) {
@@ -91,44 +112,157 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getShowBadge(i), ranking.canShowBadge());
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
             assertEquals(getHidden(i), ranking.isSuspended());
+            assertEquals(lastAudiblyAlerted(i), ranking.getLastAudiblyAlertedMillis());
+            assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
+            assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
+            assertEquals(canBubble(i), ranking.canBubble());
         }
     }
 
-    private NotificationRankingUpdate generateUpdate() {
-        List<String> interceptedKeys = new ArrayList<>();
-        Bundle visibilityOverrides = new Bundle();
-        Bundle overrideGroupKeys = new Bundle();
-        Bundle suppressedVisualEffects = new Bundle();
-        Bundle explanation = new Bundle();
-        Bundle channels = new Bundle();
-        Bundle overridePeople = new Bundle();
-        Bundle snoozeCriteria = new Bundle();
-        Bundle showBadge = new Bundle();
-        int[] importance = new int[mKeys.length];
-        Bundle userSentiment = new Bundle();
-        Bundle mHidden = new Bundle();
+    // Tests parceling of NotificationRankingUpdate, and by extension, RankingMap and Ranking.
+    @Test
+    public void testRankingUpdate_parcel() {
+        NotificationRankingUpdate nru = generateUpdate();
+        Parcel parcel = Parcel.obtain();
+        nru.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        NotificationRankingUpdate nru1 = NotificationRankingUpdate.CREATOR.createFromParcel(parcel);
+        assertEquals(nru, nru1);
+    }
 
+    // Tests parceling of RankingMap and RankingMap.equals
+    @Test
+    public void testRankingMap_parcel() {
+        RankingMap rmap = generateUpdate().getRankingMap();
+        Parcel parcel = Parcel.obtain();
+        rmap.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        RankingMap rmap1 = RankingMap.CREATOR.createFromParcel(parcel);
+
+        detailedAssertEquals(rmap, rmap1);
+        assertEquals(rmap, rmap1);
+    }
+
+    // Tests parceling of Ranking and Ranking.equals
+    @Test
+    public void testRanking_parcel() {
+        Ranking ranking = generateUpdate().getRankingMap().getRawRankingObject(mKeys[0]);
+        Parcel parcel = Parcel.obtain();
+        ranking.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Ranking ranking1 = new Ranking(parcel);
+        detailedAssertEquals("rankings differ: ", ranking, ranking1);
+        assertEquals(ranking, ranking1);
+    }
+
+    // Tests NotificationRankingUpdate.equals(), and by extension, RankingMap and Ranking.
+    @Test
+    public void testRankingUpdate_equals() {
+        NotificationRankingUpdate nru = generateUpdate();
+        NotificationRankingUpdate nru2 = generateUpdate();
+        detailedAssertEquals(nru, nru2);
+        assertEquals(nru, nru2);
+        Ranking tweak = nru2.getRankingMap().getRawRankingObject(mKeys[0]);
+        tweak.populate(
+                tweak.getKey(),
+                tweak.getRank(),
+                !tweak.matchesInterruptionFilter(), // note the inversion here!
+                tweak.getVisibilityOverride(),
+                tweak.getSuppressedVisualEffects(),
+                tweak.getImportance(),
+                tweak.getImportanceExplanation(),
+                tweak.getOverrideGroupKey(),
+                tweak.getChannel(),
+                (ArrayList) tweak.getAdditionalPeople(),
+                (ArrayList) tweak.getSnoozeCriteria(),
+                tweak.canShowBadge(),
+                tweak.getUserSentiment(),
+                tweak.isSuspended(),
+                tweak.getLastAudiblyAlertedMillis(),
+                tweak.isNoisy(),
+                (ArrayList) tweak.getSmartActions(),
+                (ArrayList) tweak.getSmartReplies(),
+                tweak.canBubble()
+        );
+        assertNotEquals(nru, nru2);
+    }
+
+    @Test
+    public void testLegacyIcons_preM() {
+        TestListenerService service = new TestListenerService();
+        service.attachBaseContext(mContext);
+        service.targetSdk = Build.VERSION_CODES.LOLLIPOP_MR1;
+
+        Bitmap largeIcon = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
+
+        Notification n = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(android.R.drawable.star_on)
+                .setLargeIcon(Icon.createWithBitmap(largeIcon))
+                .setContentTitle("test")
+                .build();
+
+        service.createLegacyIconExtras(n);
+
+        assertEquals(android.R.drawable.star_on, n.extras.getInt(EXTRA_SMALL_ICON));
+        assertEquals(android.R.drawable.star_on, n.icon);
+        assertNotNull(n.largeIcon);
+        assertNotNull(n.extras.getParcelable(Notification.EXTRA_LARGE_ICON));
+    }
+
+    @Test
+    public void testLegacyIcons_mPlus() {
+        TestListenerService service = new TestListenerService();
+        service.attachBaseContext(mContext);
+        service.targetSdk = Build.VERSION_CODES.M;
+
+        Bitmap largeIcon = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
+
+        Notification n = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(android.R.drawable.star_on)
+                .setLargeIcon(Icon.createWithBitmap(largeIcon))
+                .setContentTitle("test")
+                .build();
+
+        service.createLegacyIconExtras(n);
+
+        assertEquals(0, n.extras.getInt(EXTRA_SMALL_ICON));
+        assertNull(n.largeIcon);
+    }
+
+
+    // Test data
+
+    private String[] mKeys = new String[] { "key", "key1", "key2", "key3", "key4"};
+
+    private NotificationRankingUpdate generateUpdate() {
+        Ranking[] rankings = new Ranking[mKeys.length];
         for (int i = 0; i < mKeys.length; i++) {
-            String key = mKeys[i];
-            visibilityOverrides.putInt(key, getVisibilityOverride(i));
-            overrideGroupKeys.putString(key, getOverrideGroupKey(key));
-            if (isIntercepted(i)) {
-                interceptedKeys.add(key);
-            }
-            suppressedVisualEffects.putInt(key, getSuppressedVisualEffects(i));
-            importance[i] = getImportance(i);
-            explanation.putString(key, getExplanation(key));
-            channels.putParcelable(key, getChannel(key, i));
-            overridePeople.putStringArrayList(key, getPeople(key, i));
-            snoozeCriteria.putParcelableArrayList(key, getSnoozeCriteria(key, i));
-            showBadge.putBoolean(key, getShowBadge(i));
-            userSentiment.putInt(key, getUserSentiment(i));
-            mHidden.putBoolean(key, getHidden(i));
+            final String key = mKeys[i];
+            Ranking ranking = new Ranking();
+            ranking.populate(
+                    key,
+                    i,
+                    !isIntercepted(i),
+                    getVisibilityOverride(i),
+                    getSuppressedVisualEffects(i),
+                    getImportance(i),
+                    getExplanation(key),
+                    getOverrideGroupKey(key),
+                    getChannel(key, i),
+                    getPeople(key, i),
+                    getSnoozeCriteria(key, i),
+                    getShowBadge(i),
+                    getUserSentiment(i),
+                    getHidden(i),
+                    lastAudiblyAlerted(i),
+                    getNoisy(i),
+                    getSmartActions(key, i),
+                    getSmartReplies(key, i),
+                    canBubble(i)
+            );
+            rankings[i] = ranking;
         }
-        NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
-                interceptedKeys.toArray(new String[0]), visibilityOverrides,
-                suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden);
+        NotificationRankingUpdate update = new NotificationRankingUpdate(rankings);
         return update;
     }
 
@@ -180,6 +314,14 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return index % 2 == 0;
     }
 
+    private long lastAudiblyAlerted(int index) {
+        return index * 2000;
+    }
+
+    private boolean getNoisy(int index) {
+        return index < 1;
+    }
+
     private ArrayList<String> getPeople(String key, int index) {
         ArrayList<String> people = new ArrayList<>();
         for (int i = 0; i < index; i++) {
@@ -196,8 +338,81 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return snooze;
     }
 
+    private ArrayList<Notification.Action> getSmartActions(String key, int index) {
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        for (int i = 0; i < index; i++) {
+            PendingIntent intent = PendingIntent.getBroadcast(
+                    getContext(),
+                    index /*requestCode*/,
+                    new Intent("ACTION_" + key),
+                    0 /*flags*/);
+            actions.add(new Notification.Action.Builder(null /*icon*/, key, intent).build());
+        }
+        return actions;
+    }
+
+    private ArrayList<CharSequence> getSmartReplies(String key, int index) {
+        ArrayList<CharSequence> choices = new ArrayList<>();
+        for (int i = 0; i < index; i++) {
+            choices.add("choice_" + key + "_" + i);
+        }
+        return choices;
+    }
+
+    private boolean canBubble(int index) {
+        return index % 4 == 0;
+    }
+
+    private void assertActionsEqual(
+            List<Notification.Action> expecteds, List<Notification.Action> actuals) {
+        assertEquals(expecteds.size(), actuals.size());
+        for (int i = 0; i < expecteds.size(); i++) {
+            Notification.Action expected = expecteds.get(i);
+            Notification.Action actual = actuals.get(i);
+            assertEquals(expected.title, actual.title);
+        }
+    }
+
+    private void detailedAssertEquals(NotificationRankingUpdate a, NotificationRankingUpdate b) {
+        assertEquals(a.getRankingMap(), b.getRankingMap());
+    }
+
+    private void detailedAssertEquals(String comment, Ranking a, Ranking b) {
+        assertEquals(comment, a.getKey(), b.getKey());
+        assertEquals(comment, a.getRank(), b.getRank());
+        assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
+        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
+        assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
+        assertEquals(comment, a.getImportance(), b.getImportance());
+        assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
+        assertEquals(comment, a.getOverrideGroupKey(), b.getOverrideGroupKey());
+        assertEquals(comment, a.getChannel(), b.getChannel());
+        assertEquals(comment, a.getAdditionalPeople(), b.getAdditionalPeople());
+        assertEquals(comment, a.getSnoozeCriteria(), b.getSnoozeCriteria());
+        assertEquals(comment, a.canShowBadge(), b.canShowBadge());
+        assertEquals(comment, a.getUserSentiment(), b.getUserSentiment());
+        assertEquals(comment, a.isSuspended(), b.isSuspended());
+        assertEquals(comment, a.getLastAudiblyAlertedMillis(), b.getLastAudiblyAlertedMillis());
+        assertEquals(comment, a.isNoisy(), b.isNoisy());
+        assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
+        assertEquals(comment, a.canBubble(), b.canBubble());
+        assertActionsEqual(a.getSmartActions(), b.getSmartActions());
+    }
+
+    private void detailedAssertEquals(RankingMap a, RankingMap b) {
+        Ranking arank = new Ranking();
+        Ranking brank = new Ranking();
+        assertArrayEquals(a.getOrderedKeys(), b.getOrderedKeys());
+        for (String key : a.getOrderedKeys()) {
+            a.getRanking(key, arank);
+            b.getRanking(key, brank);
+            detailedAssertEquals("ranking for key <" + key + ">", arank, brank);
+        }
+    }
+
     public static class TestListenerService extends NotificationListenerService {
         private final IBinder binder = new LocalBinder();
+        public int targetSdk = 0;
 
         public TestListenerService() {
             mWrapper = mock(NotificationListenerWrapper.class);
@@ -218,6 +433,20 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             TestListenerService getService() {
                 return TestListenerService.this;
             }
+        }
+
+        @Override
+        protected void attachBaseContext(Context base) {
+            super.attachBaseContext(base);
+        }
+
+        @Override
+        public ApplicationInfo getApplicationInfo() {
+            ApplicationInfo info = super.getApplicationInfo();
+            if (targetSdk != 0) {
+                info.targetSdkVersion = targetSdk;
+            }
+            return info;
         }
     }
 }

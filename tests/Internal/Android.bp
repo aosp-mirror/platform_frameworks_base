@@ -8,8 +8,9 @@ android_test {
     libs: ["android.test.runner"],
     static_libs: [
         "junit",
-        "android-support-test",
+        "androidx.test.rules",
         "mockito-target-minus-junit4",
+        "truth-prebuilt",
     ],
     java_resource_dirs: ["res"],
     certificate: "platform",

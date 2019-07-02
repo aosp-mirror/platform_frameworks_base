@@ -18,7 +18,7 @@ package android.net.wifi.aware;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import android.support.test.filters.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +27,7 @@ import org.junit.rules.ErrorCollector;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Unit test harness for TlvBufferUtils class.
@@ -66,6 +67,24 @@ public class TlvBufferUtilsTest {
         collector.checkThat("tlv01-valid",
                 TlvBufferUtils.isValid(tlv01.getArray(), 0, 1),
                 equalTo(true));
+    }
+
+    /**
+     * Validate that re-using a TLV by any of the reallocation method resets it completely.
+     */
+    @Test
+    public void testTlvReuse() {
+        TlvBufferUtils.TlvConstructor tlv = new TlvBufferUtils.TlvConstructor(1, 1);
+
+        tlv.allocate(10);
+        tlv.putByte(0, (byte) 2);
+        tlv.putByte(1, (byte) 104);
+
+        collector.checkThat("initial", tlv.getArray(), equalTo(new byte[]{0, 1, 2, 1, 1, 104}));
+
+        tlv.allocate(8);
+        tlv.putByte(5, (byte) 7);
+        collector.checkThat("re-alloc", tlv.getArray(), equalTo(new byte[]{5, 1, 7}));
     }
 
     /**
@@ -121,6 +140,23 @@ public class TlvBufferUtilsTest {
         List<byte[]> data = new TlvBufferUtils.TlvIterable(0, 1, invalidTlv01).toList();
     }
 
+    /**
+     * Validate the API which places raw bytes into the TLV (without a TL structure).
+     */
+    @Test
+    public void testRawPuts() {
+        TlvBufferUtils.TlvConstructor tlv = new TlvBufferUtils.TlvConstructor(1, 1);
+
+        tlv.allocate(10);
+        tlv.putByte(0, (byte) 2);
+        tlv.putRawByte((byte) 55);
+        tlv.putByte(1, (byte) 104);
+        tlv.putRawByteArray(new byte[]{66, 77});
+
+        collector.checkThat("data", tlv.getArray(),
+                equalTo(new byte[]{0, 1, 2, 55, 1, 1, 104, 66, 77}));
+    }
+
     @Test
     public void testTlvIterate() {
         final String ascii = "ABC";
@@ -163,6 +199,7 @@ public class TlvBufferUtilsTest {
         tlv02.putByte(0, (byte) 2);
         tlv02.putString(0, ascii);
         tlv02.putString(0, nonAscii);
+        tlv02.putByteArray(0, new byte[]{5, 4, 3, 2, 1});
 
         TlvBufferUtils.TlvIterable tlv02It = new TlvBufferUtils.TlvIterable(0, 2, tlv02.getArray());
         count = 0;
@@ -181,6 +218,11 @@ public class TlvBufferUtilsTest {
                         equalTo(nonAscii.getBytes().length));
                 collector.checkThat("tlv02-correct-iteration-DATA",
                         tlv.getString().equals(nonAscii), equalTo(true));
+            } else if (count == 3) {
+                collector.checkThat("tlv02-correct-iteration-mLength", tlv.length,
+                        equalTo(5));
+                collector.checkThat("tlv02-correct-iteration-DATA", tlv.getRawData(),
+                        equalTo(new byte[]{5, 4, 3, 2, 1}));
             } else {
                 collector.checkThat("Invalid number of iterations in loop - tlv02", true,
                         equalTo(false));
@@ -188,7 +230,7 @@ public class TlvBufferUtilsTest {
             ++count;
         }
         collector.checkThat("Invalid number of iterations outside loop - tlv02", count,
-                equalTo(3));
+                equalTo(4));
 
         collector.checkThat("tlv22-valid",
                 TlvBufferUtils.isValid(tlv22.getArray(), 2, 2),

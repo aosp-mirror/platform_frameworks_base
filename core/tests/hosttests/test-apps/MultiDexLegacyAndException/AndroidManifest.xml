@@ -30,7 +30,7 @@
                      android:targetPackage="com.android.multidexlegacyandexception"
                      android:label="Test for MultiDexLegacyAndException" />
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.multidexlegacyandexception"
                      android:label="Test for MultiDexLegacyAndException" />
 </manifest>

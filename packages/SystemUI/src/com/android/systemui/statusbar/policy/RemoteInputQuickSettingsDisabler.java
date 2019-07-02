@@ -21,15 +21,18 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Let {@link RemoteInputView} to control the visibility of QuickSetting.
  */
+@Singleton
 public class RemoteInputQuickSettingsDisabler
         implements ConfigurationController.ConfigurationListener {
 
@@ -39,11 +42,13 @@ public class RemoteInputQuickSettingsDisabler
     private int mLastOrientation;
     @VisibleForTesting CommandQueue mCommandQueue;
 
-    public RemoteInputQuickSettingsDisabler(Context context) {
+    @Inject
+    public RemoteInputQuickSettingsDisabler(Context context,
+            ConfigurationController configController) {
         mContext = context;
         mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
         mLastOrientation = mContext.getResources().getConfiguration().orientation;
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configController.addCallback(this);
     }
 
     public int adjustDisableFlags(int state) {
@@ -77,6 +82,6 @@ public class RemoteInputQuickSettingsDisabler
      * to modify the disable flags according to the status of mRemoteInputActive and misLandscape.
      */
     private void recomputeDisableFlags() {
-        mCommandQueue.recomputeDisableFlags(true);
+        mCommandQueue.recomputeDisableFlags(mContext.getDisplayId(), true);
     }
 }

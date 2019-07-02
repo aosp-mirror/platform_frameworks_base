@@ -48,4 +48,65 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
          !(has_type_separator && out_type->empty());
 }
 
+bool ToResourceName(const StringPoolRef& type_string_ref,
+                    const StringPoolRef& entry_string_ref,
+                    const StringPiece& package_name,
+                    AssetManager2::ResourceName* out_name) {
+  out_name->package = package_name.data();
+  out_name->package_len = package_name.size();
+
+  out_name->type = type_string_ref.string8(&out_name->type_len);
+  out_name->type16 = nullptr;
+  if (out_name->type == nullptr) {
+    out_name->type16 = type_string_ref.string16(&out_name->type_len);
+    if (out_name->type16 == nullptr) {
+      return false;
+    }
+  }
+
+  out_name->entry = entry_string_ref.string8(&out_name->entry_len);
+  out_name->entry16 = nullptr;
+  if (out_name->entry == nullptr) {
+    out_name->entry16 = entry_string_ref.string16(&out_name->entry_len);
+    if (out_name->entry16 == nullptr) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+std::string ToFormattedResourceString(AssetManager2::ResourceName* resource_name) {
+  std::string result;
+  if (resource_name->package != nullptr) {
+    result.append(resource_name->package, resource_name->package_len);
+  }
+
+  if (resource_name->type != nullptr || resource_name->type16 != nullptr) {
+    if (!result.empty()) {
+      result += ":";
+    }
+
+    if (resource_name->type != nullptr) {
+      result.append(resource_name->type, resource_name->type_len);
+    } else {
+      result += util::Utf16ToUtf8(StringPiece16(resource_name->type16, resource_name->type_len));
+    }
+  }
+
+  if (resource_name->entry != nullptr || resource_name->entry16 != nullptr) {
+    if (!result.empty()) {
+      result += "/";
+    }
+
+    if (resource_name->entry != nullptr) {
+      result.append(resource_name->entry, resource_name->entry_len);
+    } else {
+      result += util::Utf16ToUtf8(StringPiece16(resource_name->entry16, resource_name->entry_len));
+    }
+  }
+
+  return result;
+}
+
 }  // namespace android

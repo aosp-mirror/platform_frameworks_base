@@ -44,12 +44,12 @@ namespace statsd {
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
 const int FIELD_ID_EVENT_METRICS = 4;
+const int FIELD_ID_IS_ACTIVE = 14;
 // for EventMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for EventMetricData
 const int FIELD_ID_ELAPSED_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_ATOMS = 2;
-const int FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS = 3;
 
 EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
                                          const int conditionIndex,
@@ -77,6 +77,7 @@ EventMetricProducer::~EventMetricProducer() {
 
 void EventMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     mProto->clear();
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
 }
 
 void EventMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
@@ -89,12 +90,12 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
     std::unique_ptr<std::vector<uint8_t>> buffer(new std::vector<uint8_t>(bufferSize));
 
     size_t pos = 0;
-    auto it = protoOutput.data();
-    while (it.readBuffer() != NULL) {
-        size_t toRead = it.currentToRead();
-        std::memcpy(&((*buffer)[pos]), it.readBuffer(), toRead);
+    sp<android::util::ProtoReader> reader = protoOutput.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((*buffer)[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        it.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     return buffer;
@@ -106,12 +107,15 @@ void EventMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 
 void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             const bool erase_data,
+                                             const DumpLatency dumpLatency,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
     if (mProto->size() <= 0) {
         return;
     }
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ",
@@ -121,13 +125,15 @@ void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
                        reinterpret_cast<char*>(buffer.get()->data()), buffer.get()->size());
 
-    mProto->clear();
+    if (erase_data) {
+        mProto->clear();
+    }
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 void EventMetricProducer::onMatchedLogEventInternalLocked(
@@ -140,20 +146,9 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
 
     uint64_t wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
-    const bool truncateTimestamp =
-            android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.find(event.GetTagId()) ==
-            android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.end();
-    if (truncateTimestamp) {
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
-            (long long)truncateTimestampNsToFiveMinutes(event.GetElapsedTimestampNs()));
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
-            (long long)truncateTimestampNsToFiveMinutes(getWallClockNs()));
-    } else {
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
-            (long long)event.GetElapsedTimestampNs());
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
-            (long long)getWallClockNs());
-    }
+    const int64_t elapsedTimeNs = truncateTimestampIfNecessary(
+            event.GetTagId(), event.GetElapsedTimestampNs());
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS, (long long) elapsedTimeNs);
 
     uint64_t eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
     event.ToProto(*mProto);

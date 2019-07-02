@@ -27,15 +27,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontFamily;
+import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
-import android.net.Uri;
+import android.graphics.fonts.SystemFonts;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
-import android.util.ArrayMap;
 import android.util.Base64;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -48,18 +50,12 @@ import dalvik.annotation.optimization.CriticalNative;
 
 import libcore.util.NativeAllocationRegistry;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,8 +73,9 @@ public class Typeface {
 
     private static String TAG = "Typeface";
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-            Typeface.class.getClassLoader(), nativeGetReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+            Typeface.class.getClassLoader(), nativeGetReleaseFunc());
 
     /** The default NORMAL typeface object */
     public static final Typeface DEFAULT;
@@ -95,7 +92,13 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
-    @UnsupportedAppUsage
+    /**
+     * The default {@link Typeface}s for different text styles.
+     * Call {@link #defaultFromStyle(int)} to get the default typeface for the given text style.
+     * It shouldn't be changed for app wide typeface settings. Please use theme and font XML for
+     * the same purpose.
+     */
+    @UnsupportedAppUsage(trackingBug = 123769446)
     static Typeface[] sDefaults;
 
     /**
@@ -122,9 +125,23 @@ public class Typeface {
     private static final Object sDynamicCacheLock = new Object();
 
     static Typeface sDefaultTypeface;
-    @UnsupportedAppUsage
+
+    // Following two fields are not used but left for hiddenapi private list
+    /**
+     * sSystemFontMap is read only and unmodifiable.
+     * Use public API {@link #create(String, int)} to get the typeface for given familyName.
+     */
+    @UnsupportedAppUsage(trackingBug = 123769347)
     static final Map<String, Typeface> sSystemFontMap;
-    static final Map<String, FontFamily[]> sSystemFallbackMap;
+
+    // We cannot support sSystemFallbackMap since we will migrate to public FontFamily API.
+    /**
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
+     */
+    @UnsupportedAppUsage(trackingBug = 123768928)
+    @Deprecated
+    static final Map<String, android.graphics.FontFamily[]> sSystemFallbackMap =
+            Collections.emptyMap();
 
     /**
      * @hide
@@ -147,13 +164,7 @@ public class Typeface {
     @UnsupportedAppUsage
     private @Style int mStyle = 0;
 
-    /**
-     * A maximum value for the weight value.
-     * @hide
-     */
-    public static final int MAX_WEIGHT = 1000;
-
-    private @IntRange(from = 0, to = MAX_WEIGHT) int mWeight = 0;
+    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) int mWeight = 0;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
@@ -168,7 +179,12 @@ public class Typeface {
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
-    @UnsupportedAppUsage
+    /**
+     * Please use font in xml and also your application global theme to change the default Typeface.
+     * android:textViewStyle and its attribute android:textAppearance can be used in order to change
+     * typeface and other text related properties.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
         nativeSetDefault(t.native_instance);
@@ -192,38 +208,6 @@ public class Typeface {
     /** Returns true if getStyle() has the ITALIC bit set. */
     public final boolean isItalic() {
         return (mStyle & ITALIC) != 0;
-    }
-
-    /**
-     * @hide
-     * Used by Resources to load a font resource of type font file.
-     */
-    @Nullable
-    public static Typeface createFromResources(AssetManager mgr, String path, int cookie) {
-        synchronized (sDynamicCacheLock) {
-            final String key = Builder.createAssetUid(
-                    mgr, path, 0 /* ttcIndex */, null /* axes */,
-                    RESOLVE_BY_FONT_TABLE /* weight */, RESOLVE_BY_FONT_TABLE /* italic */,
-                    DEFAULT_FAMILY);
-            Typeface typeface = sDynamicTypefaceCache.get(key);
-            if (typeface != null) return typeface;
-
-            FontFamily fontFamily = new FontFamily();
-            // TODO: introduce ttc index and variation settings to resource type font.
-            if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */,
-                    0 /* ttcIndex */, RESOLVE_BY_FONT_TABLE /* weight */,
-                    RESOLVE_BY_FONT_TABLE /* italic */, null /* axes */)) {
-                if (!fontFamily.freeze()) {
-                    return null;
-                }
-                FontFamily[] families = {fontFamily};
-                typeface = createFromFamiliesWithDefault(families, DEFAULT_FAMILY,
-                        RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
-                sDynamicTypefaceCache.put(key, typeface);
-                return typeface;
-            }
-        }
-        return null;
     }
 
     /**
@@ -262,21 +246,53 @@ public class Typeface {
         // family is FontFamilyFilesResourceEntry
         final FontFamilyFilesResourceEntry filesEntry = (FontFamilyFilesResourceEntry) entry;
 
-        FontFamily fontFamily = new FontFamily();
-        for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
-            if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
-                    0 /* resourceCookie */, false /* isAsset */, fontFile.getTtcIndex(),
-                    fontFile.getWeight(), fontFile.getItalic(),
-                    FontVariationAxis.fromFontVariationSettings(fontFile.getVariationSettings()))) {
-                return null;
+        try {
+            FontFamily.Builder familyBuilder = null;
+            for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
+                final Font.Builder fontBuilder = new Font.Builder(mgr, fontFile.getFileName(),
+                        false /* isAsset */, 0 /* cookie */)
+                        .setTtcIndex(fontFile.getTtcIndex())
+                        .setFontVariationSettings(fontFile.getVariationSettings());
+                if (fontFile.getWeight() != Typeface.RESOLVE_BY_FONT_TABLE) {
+                    fontBuilder.setWeight(fontFile.getWeight());
+                }
+                if (fontFile.getItalic() != Typeface.RESOLVE_BY_FONT_TABLE) {
+                    fontBuilder.setSlant(fontFile.getItalic() == FontFileResourceEntry.ITALIC
+                            ?  FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT);
+                }
+
+                if (familyBuilder == null) {
+                    familyBuilder = new FontFamily.Builder(fontBuilder.build());
+                } else {
+                    familyBuilder.addFont(fontBuilder.build());
+                }
             }
-        }
-        if (!fontFamily.freeze()) {
+            if (familyBuilder == null) {
+                return Typeface.DEFAULT;
+            }
+            final FontFamily family = familyBuilder.build();
+            final FontStyle normal = new FontStyle(FontStyle.FONT_WEIGHT_NORMAL,
+                    FontStyle.FONT_SLANT_UPRIGHT);
+            Font bestFont = family.getFont(0);
+            int bestScore = normal.getMatchScore(bestFont.getStyle());
+            for (int i = 1; i < family.getSize(); ++i) {
+                final Font candidate = family.getFont(i);
+                final int score = normal.getMatchScore(candidate.getStyle());
+                if (score < bestScore) {
+                    bestFont = candidate;
+                    bestScore = score;
+                }
+            }
+            typeface = new Typeface.CustomFallbackBuilder(family)
+                    .setStyle(bestFont.getStyle())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            // To be a compatible behavior with API28 or before, catch IllegalArgumentExcetpion
+            // thrown by native code and returns null.
             return null;
+        } catch (IOException e) {
+            typeface = Typeface.DEFAULT;
         }
-        FontFamily[] familyChain = { fontFamily };
-        typeface = createFromFamiliesWithDefault(familyChain, DEFAULT_FAMILY,
-                RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
         synchronized (sDynamicCacheLock) {
             final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
                     null /* axes */, RESOLVE_BY_FONT_TABLE /* weight */,
@@ -343,15 +359,11 @@ public class Typeface {
         /** @hide */
         public static final int BOLD_WEIGHT = 700;
 
-        private int mTtcIndex;
-        private FontVariationAxis[] mAxes;
+        // Kept for generating asset cache key.
+        private final AssetManager mAssetManager;
+        private final String mPath;
 
-        private AssetManager mAssetManager;
-        private String mPath;
-        private FileDescriptor mFd;
-
-        private FontsContract.FontInfo[] mFonts;
-        private Map<Uri, ByteBuffer> mFontBuffers;
+        private final @Nullable Font.Builder mFontBuilder;
 
         private String mFallbackFamilyName;
 
@@ -364,7 +376,9 @@ public class Typeface {
          * @param path The file object refers to the font file.
          */
         public Builder(@NonNull File path) {
-            mPath = path.getAbsolutePath();
+            mFontBuilder = new Font.Builder(path);
+            mAssetManager = null;
+            mPath = null;
         }
 
         /**
@@ -376,7 +390,18 @@ public class Typeface {
          * @param fd The file descriptor. The passed fd must be mmap-able.
          */
         public Builder(@NonNull FileDescriptor fd) {
-            mFd = fd;
+            Font.Builder builder;
+            try {
+                builder = new Font.Builder(ParcelFileDescriptor.dup(fd));
+            } catch (IOException e) {
+                // We cannot tell the error to developer at this moment since we cannot change the
+                // public API signature. Instead, silently fallbacks to system fallback in the build
+                // method as the same as other error cases.
+                builder = null;
+            }
+            mFontBuilder = builder;
+            mAssetManager = null;
+            mPath = null;
         }
 
         /**
@@ -385,7 +410,9 @@ public class Typeface {
          * @param path The full path to the font file.
          */
         public Builder(@NonNull String path) {
-            mPath = path;
+            mFontBuilder = new Font.Builder(new File(path));
+            mAssetManager = null;
+            mPath = null;
         }
 
         /**
@@ -395,27 +422,22 @@ public class Typeface {
          * @param path The file name of the font data in the asset directory
          */
         public Builder(@NonNull AssetManager assetManager, @NonNull String path) {
-            mAssetManager = Preconditions.checkNotNull(assetManager);
-            mPath = Preconditions.checkStringNotEmpty(path);
+            this(assetManager, path, true /* is asset */, 0 /* cookie */);
         }
 
         /**
-         * Constracts a builder from an array of FontsContract.FontInfo.
+         * Constructs a builder from an asset manager and a file path in an asset directory.
          *
-         * Since {@link FontsContract.FontInfo} holds information about TTC indices and
-         * variation settings, there is no need to call {@link #setTtcIndex} or
-         * {@link #setFontVariationSettings}. Similary, {@link FontsContract.FontInfo} holds
-         * weight and italic information, so {@link #setWeight} and {@link #setItalic} are used
-         * for style matching during font selection.
-         *
-         * @param fonts The array of {@link FontsContract.FontInfo}
-         * @param buffers The mapping from URI to buffers to be used during building.
+         * @param assetManager The application's asset manager
+         * @param path The file name of the font data in the asset directory
+         * @param cookie a cookie for the asset
          * @hide
          */
-        public Builder(@NonNull FontsContract.FontInfo[] fonts,
-                @NonNull Map<Uri, ByteBuffer> buffers) {
-            mFonts = fonts;
-            mFontBuffers = buffers;
+        public Builder(@NonNull AssetManager assetManager, @NonNull String path, boolean isAsset,
+                int cookie) {
+            mFontBuilder = new Font.Builder(assetManager, path, isAsset, cookie);
+            mAssetManager = assetManager;
+            mPath = path;
         }
 
         /**
@@ -427,6 +449,7 @@ public class Typeface {
          */
         public Builder setWeight(@IntRange(from = 1, to = 1000) int weight) {
             mWeight = weight;
+            mFontBuilder.setWeight(weight);
             return this;
         }
 
@@ -438,7 +461,8 @@ public class Typeface {
          * @param italic {@code true} if the font is italic. Otherwise {@code false}.
          */
         public Builder setItalic(boolean italic) {
-            mItalic = italic ? STYLE_ITALIC : STYLE_NORMAL;
+            mItalic = italic ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT;
+            mFontBuilder.setSlant(mItalic);
             return this;
         }
 
@@ -450,11 +474,7 @@ public class Typeface {
          *                 collection, do not call this method or specify 0.
          */
         public Builder setTtcIndex(@IntRange(from = 0) int ttcIndex) {
-            if (mFonts != null) {
-                throw new IllegalArgumentException(
-                        "TTC index can not be specified for FontResult source.");
-            }
-            mTtcIndex = ttcIndex;
+            mFontBuilder.setTtcIndex(ttcIndex);
             return this;
         }
 
@@ -466,14 +486,7 @@ public class Typeface {
          *                                  format.
          */
         public Builder setFontVariationSettings(@Nullable String variationSettings) {
-            if (mFonts != null) {
-                throw new IllegalArgumentException(
-                        "Font variation settings can not be specified for FontResult source.");
-            }
-            if (mAxes != null) {
-                throw new IllegalStateException("Font variation settings are already set.");
-            }
-            mAxes = FontVariationAxis.fromFontVariationSettings(variationSettings);
+            mFontBuilder.setFontVariationSettings(variationSettings);
             return this;
         }
 
@@ -483,14 +496,7 @@ public class Typeface {
          * @param axes An array of font variation axis tag-value pairs.
          */
         public Builder setFontVariationSettings(@Nullable FontVariationAxis[] axes) {
-            if (mFonts != null) {
-                throw new IllegalArgumentException(
-                        "Font variation settings can not be specified for FontResult source.");
-            }
-            if (mAxes != null) {
-                throw new IllegalStateException("Font variation settings are already set.");
-            }
-            mAxes = axes;
+            mFontBuilder.setFontVariationSettings(axes);
             return this;
         }
 
@@ -566,11 +572,7 @@ public class Typeface {
                 return null;
             }
 
-            Typeface base =  sSystemFontMap.get(mFallbackFamilyName);
-            if (base == null) {
-                base = sDefaultTypeface;
-            }
-
+            final Typeface base =  getSystemDefaultTypeface(mFallbackFamilyName);
             if (mWeight == RESOLVE_BY_FONT_TABLE && mItalic == RESOLVE_BY_FONT_TABLE) {
                 return base;
             }
@@ -587,91 +589,209 @@ public class Typeface {
          * @return Newly created Typeface. May return null if some parameters are invalid.
          */
         public Typeface build() {
-            if (mFd != null) {  // Builder is created with file descriptor.
-                try (FileInputStream fis = new FileInputStream(mFd)) {
-                    FileChannel channel = fis.getChannel();
-                    long size = channel.size();
-                    ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
-
-                    final FontFamily fontFamily = new FontFamily();
-                    if (!fontFamily.addFontFromBuffer(buffer, mTtcIndex, mAxes, mWeight, mItalic)) {
-                        fontFamily.abortCreation();
-                        return resolveFallbackTypeface();
-                    }
-                    if (!fontFamily.freeze()) {
-                        return resolveFallbackTypeface();
-                    }
-                    FontFamily[] families = { fontFamily };
-                    return createFromFamiliesWithDefault(families, mFallbackFamilyName, mWeight,
-                            mItalic);
-                } catch (IOException e) {
-                    return resolveFallbackTypeface();
-                }
-            } else if (mAssetManager != null) {  // Builder is created with asset manager.
-                final String key = createAssetUid(
-                        mAssetManager, mPath, mTtcIndex, mAxes, mWeight, mItalic,
-                        mFallbackFamilyName);
-                synchronized (sDynamicCacheLock) {
-                    Typeface typeface = sDynamicTypefaceCache.get(key);
-                    if (typeface != null) return typeface;
-                    final FontFamily fontFamily = new FontFamily();
-                    if (!fontFamily.addFontFromAssetManager(mAssetManager, mPath, mTtcIndex,
-                            true /* isAsset */, mTtcIndex, mWeight, mItalic, mAxes)) {
-                        fontFamily.abortCreation();
-                        return resolveFallbackTypeface();
-                    }
-                    if (!fontFamily.freeze()) {
-                        return resolveFallbackTypeface();
-                    }
-                    FontFamily[] families = { fontFamily };
-                    typeface = createFromFamiliesWithDefault(families, mFallbackFamilyName,
-                            mWeight, mItalic);
-                    sDynamicTypefaceCache.put(key, typeface);
-                    return typeface;
-                }
-            } else if (mPath != null) {  // Builder is created with file path.
-                final FontFamily fontFamily = new FontFamily();
-                if (!fontFamily.addFont(mPath, mTtcIndex, mAxes, mWeight, mItalic)) {
-                    fontFamily.abortCreation();
-                    return resolveFallbackTypeface();
-                }
-                if (!fontFamily.freeze()) {
-                    return resolveFallbackTypeface();
-                }
-                FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families, mFallbackFamilyName, mWeight,
-                        mItalic);
-            } else if (mFonts != null) {
-                final FontFamily fontFamily = new FontFamily();
-                boolean atLeastOneFont = false;
-                for (FontsContract.FontInfo font : mFonts) {
-                    final ByteBuffer fontBuffer = mFontBuffers.get(font.getUri());
-                    if (fontBuffer == null) {
-                        continue;  // skip
-                    }
-                    final boolean success = fontFamily.addFontFromBuffer(fontBuffer,
-                            font.getTtcIndex(), font.getAxes(), font.getWeight(),
-                            font.isItalic() ? STYLE_ITALIC : STYLE_NORMAL);
-                    if (!success) {
-                        fontFamily.abortCreation();
-                        return null;
-                    }
-                    atLeastOneFont = true;
-                }
-                if (!atLeastOneFont) {
-                    // No fonts are avaialble. No need to create new Typeface and returns fallback
-                    // Typeface instead.
-                    fontFamily.abortCreation();
-                    return null;
-                }
-                fontFamily.freeze();
-                FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families, mFallbackFamilyName, mWeight,
-                        mItalic);
+            if (mFontBuilder == null) {
+                return resolveFallbackTypeface();
             }
+            try {
+                final Font font = mFontBuilder.build();
+                final String key = mAssetManager == null ? null : createAssetUid(
+                        mAssetManager, mPath, font.getTtcIndex(), font.getAxes(),
+                        mWeight, mItalic,
+                        mFallbackFamilyName == null ? DEFAULT_FAMILY : mFallbackFamilyName);
+                if (key != null) {
+                    // Dynamic cache lookup is only for assets.
+                    synchronized (sDynamicCacheLock) {
+                        final Typeface typeface = sDynamicTypefaceCache.get(key);
+                        if (typeface != null) {
+                            return typeface;
+                        }
+                    }
+                }
+                final FontFamily family = new FontFamily.Builder(font).build();
+                final int weight = mWeight == RESOLVE_BY_FONT_TABLE
+                        ? font.getStyle().getWeight() : mWeight;
+                final int slant = mItalic == RESOLVE_BY_FONT_TABLE
+                        ? font.getStyle().getSlant() : mItalic;
+                final CustomFallbackBuilder builder = new CustomFallbackBuilder(family)
+                        .setStyle(new FontStyle(weight, slant));
+                if (mFallbackFamilyName != null) {
+                    builder.setSystemFallback(mFallbackFamilyName);
+                }
+                final Typeface typeface = builder.build();
+                if (key != null) {
+                    synchronized (sDynamicCacheLock) {
+                        sDynamicTypefaceCache.put(key, typeface);
+                    }
+                }
+                return typeface;
+            } catch (IOException | IllegalArgumentException e) {
+                return resolveFallbackTypeface();
+            }
+        }
+    }
 
-            // Must not reach here.
-            throw new IllegalArgumentException("No source was set.");
+    /**
+     * A builder class for creating new Typeface instance.
+     *
+     * There are two font fallback mechanisms, custom font fallback and system font fallback.
+     * The custom font fallback is a simple ordered list. The text renderer tries to see if it can
+     * render a character with the first font and if that font does not support the character, try
+     * next one and so on. It will keep trying until end of the custom fallback chain. The maximum
+     * length of the custom fallback chain is 64.
+     * The system font fallback is a system pre-defined fallback chain. The system fallback is
+     * processed only when no matching font is found in the custom font fallback.
+     *
+     * <p>
+     * Examples,
+     * 1) Create Typeface from single ttf file.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("your_font_file.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family).build();
+     * </code>
+     * </pre>
+     *
+     * 2) Create Typeface from multiple font files and select bold style by default.
+     * <pre>
+     * <code>
+     * Font regularFont = new Font.Builder("regular.ttf").build();
+     * Font boldFont = new Font.Builder("bold.ttf").build();
+     * FontFamily family = new FontFamily.Builder(regularFont)
+     *     .addFont(boldFont).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .setWeight(Font.FONT_WEIGHT_BOLD)  // Set bold style as the default style.
+     *                                        // If the font family doesn't have bold style font,
+     *                                        // system will select the closest font.
+     *     .build();
+     * </code>
+     * </pre>
+     *
+     * 3) Create Typeface from single ttf file and if that font does not have glyph for the
+     * characters, use "serif" font family instead.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("your_font_file.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .setSystemFallback("serif")  // Set serif font family as the fallback.
+     *     .build();
+     * </code>
+     * </pre>
+     * 4) Create Typeface from single ttf file and set another ttf file for the fallback.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("English.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     *
+     * Font fallbackFont = new Font.Builder("Arabic.ttf").build();
+     * FontFamily fallbackFamily = new FontFamily.Builder(fallbackFont).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .addCustomFallback(fallbackFamily)  // Specify fallback family.
+     *     .setSystemFallback("serif")  // Set serif font family as the fallback.
+     *     .build();
+     * </code>
+     * </pre>
+     * </p>
+     */
+    public static final class CustomFallbackBuilder {
+        private static final int MAX_CUSTOM_FALLBACK = 64;
+        private final ArrayList<FontFamily> mFamilies = new ArrayList<>();
+        private String mFallbackName = null;
+        private @Nullable FontStyle mStyle;
+
+        /**
+         * Returns the maximum capacity of custom fallback families.
+         *
+         * This includes the the first font family passed to the constructor.
+         * It is guaranteed that the value will be greater than or equal to 64.
+         *
+         * @return the maximum number of font families for the custom fallback
+         */
+        public static @IntRange(from = 64) int getMaxCustomFallbackCount() {
+            return MAX_CUSTOM_FALLBACK;
+        }
+
+        /**
+         * Constructs a builder with a font family.
+         *
+         * @param family a family object
+         */
+        public CustomFallbackBuilder(@NonNull FontFamily family) {
+            Preconditions.checkNotNull(family);
+            mFamilies.add(family);
+        }
+
+        /**
+         * Sets a system fallback by name.
+         *
+         * You can specify generic font familiy names or OEM specific family names. If the system
+         * don't have a specified fallback, the default fallback is used instead.
+         * For more information about generic font families, see <a
+         * href="https://www.w3.org/TR/css-fonts-4/#generic-font-families">CSS specification</a>
+         *
+         * For more information about fallback, see class description.
+         *
+         * @param familyName a family name to be used for fallback if the provided fonts can not be
+         *                   used
+         */
+        public @NonNull CustomFallbackBuilder setSystemFallback(@NonNull String familyName) {
+            Preconditions.checkNotNull(familyName);
+            mFallbackName = familyName;
+            return this;
+        }
+
+        /**
+         * Sets a font style of the Typeface.
+         *
+         * If the font family doesn't have a font of given style, system will select the closest
+         * font from font family. For example, if a font family has fonts of 300 weight and 700
+         * weight then setWeight(400) is called, system will select the font of 300 weight.
+         *
+         * @param style a font style
+         */
+        public @NonNull CustomFallbackBuilder setStyle(@NonNull FontStyle style) {
+            mStyle = style;
+            return this;
+        }
+
+        /**
+         * Append a font family to the end of the custom font fallback.
+         *
+         * You can set up to 64 custom fallback families including the first font family you passed
+         * to the constructor.
+         * For more information about fallback, see class description.
+         *
+         * @param family a fallback family
+         * @throws IllegalArgumentException if you give more than 64 custom fallback families
+         */
+        public @NonNull CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
+            Preconditions.checkNotNull(family);
+            Preconditions.checkArgument(mFamilies.size() < getMaxCustomFallbackCount(),
+                    "Custom fallback limit exceeded(" + getMaxCustomFallbackCount() + ")");
+            mFamilies.add(family);
+            return this;
+        }
+
+        /**
+         * Create the Typeface based on the configured values.
+         *
+         * @return the Typeface object
+         */
+        public @NonNull Typeface build() {
+            final int userFallbackSize = mFamilies.size();
+            final FontFamily[] fallback = SystemFonts.getSystemFallback(mFallbackName);
+            final long[] ptrArray = new long[fallback.length + userFallbackSize];
+            for (int i = 0; i < userFallbackSize; ++i) {
+                ptrArray[i] = mFamilies.get(i).getNativePtr();
+            }
+            for (int i = 0; i < fallback.length; ++i) {
+                ptrArray[i + userFallbackSize] = fallback[i].getNativePtr();
+            }
+            final int weight = mStyle == null ? 400 : mStyle.getWeight();
+            final int italic =
+                    (mStyle == null || mStyle.getSlant() == FontStyle.FONT_SLANT_UPRIGHT) ?  0 : 1;
+            return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
         }
     }
 
@@ -687,7 +807,7 @@ public class Typeface {
      * @return The best matching typeface.
      */
     public static Typeface create(String familyName, @Style int style) {
-        return create(sSystemFontMap.get(familyName), style);
+        return create(getSystemDefaultTypeface(familyName), style);
     }
 
     /**
@@ -804,8 +924,7 @@ public class Typeface {
             }
 
             typeface = new Typeface(
-                    nativeCreateFromTypefaceWithExactStyle(
-                            base.native_instance, weight, italic));
+                    nativeCreateFromTypefaceWithExactStyle(base.native_instance, weight, italic));
             innerCache.put(key, typeface);
         }
         return typeface;
@@ -814,8 +933,8 @@ public class Typeface {
     /** @hide */
     public static Typeface createFromTypefaceWithVariation(@Nullable Typeface family,
             @NonNull List<FontVariationAxis> axes) {
-        final long ni = family == null ? 0 : family.native_instance;
-        return new Typeface(nativeCreateFromTypefaceWithVariation(ni, axes));
+        final Typeface base = family == null ? Typeface.DEFAULT : family;
+        return new Typeface(nativeCreateFromTypefaceWithVariation(base.native_instance, axes));
     }
 
     /**
@@ -897,9 +1016,11 @@ public class Typeface {
      * Create a new typeface from an array of font families.
      *
      * @param families array of font families
+     * @deprecated
      */
-    @UnsupportedAppUsage
-    private static Typeface createFromFamilies(FontFamily[] families) {
+    @Deprecated
+    @UnsupportedAppUsage(trackingBug = 123768928)
+    private static Typeface createFromFamilies(android.graphics.FontFamily[] families) {
         long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
@@ -909,11 +1030,28 @@ public class Typeface {
     }
 
     /**
-     * This method is used by supportlib-v27.
-     * TODO: Remove private API use in supportlib: http://b/72665240
+     * Create a new typeface from an array of android.graphics.fonts.FontFamily.
+     *
+     * @param families array of font families
      */
-    private static Typeface createFromFamiliesWithDefault(FontFamily[] families, int weight,
-                int italic) {
+    private static Typeface createFromFamilies(@Nullable FontFamily[] families) {
+        final long[] ptrArray = new long[families.length];
+        for (int i = 0; i < families.length; ++i) {
+            ptrArray[i] = families[i].getNativePtr();
+        }
+        return new Typeface(nativeCreateFromArray(ptrArray,
+                  RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    }
+
+    /**
+     * This method is used by supportlib-v27.
+     *
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
+     */
+    @UnsupportedAppUsage(trackingBug = 123768395)
+    @Deprecated
+    private static Typeface createFromFamiliesWithDefault(
+            android.graphics.FontFamily[] families, int weight, int italic) {
         return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);
     }
 
@@ -929,20 +1067,20 @@ public class Typeface {
      *               the first family's font is used. If the first family has multiple fonts, the
      *               closest to the regular weight and upright font is used.
      * @param families array of font families
+     *
+     * @deprecated Use {@link android.graphics.fonts.FontFamily} instead.
      */
-    @UnsupportedAppUsage
-    private static Typeface createFromFamiliesWithDefault(FontFamily[] families,
+    @UnsupportedAppUsage(trackingBug = 123768928)
+    @Deprecated
+    private static Typeface createFromFamiliesWithDefault(android.graphics.FontFamily[] families,
                 String fallbackName, int weight, int italic) {
-        FontFamily[] fallback = sSystemFallbackMap.get(fallbackName);
-        if (fallback == null) {
-            fallback = sSystemFallbackMap.get(DEFAULT_FAMILY);
-        }
+        android.graphics.fonts.FontFamily[] fallback = SystemFonts.getSystemFallback(fallbackName);
         long[] ptrArray = new long[families.length + fallback.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
         }
         for (int i = 0; i < fallback.length; i++) {
-            ptrArray[i + families.length] = fallback[i].mNativePtr;
+            ptrArray[i + families.length] = fallback[i].getNativePtr();
         }
         return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
     }
@@ -960,193 +1098,54 @@ public class Typeface {
         mWeight = nativeGetWeight(ni);
     }
 
-    private static @Nullable ByteBuffer mmap(String fullPath) {
-        try (FileInputStream file = new FileInputStream(fullPath)) {
-            final FileChannel fileChannel = file.getChannel();
-            final long fontSize = fileChannel.size();
-            return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
-        } catch (IOException e) {
-            Log.e(TAG, "Error mapping font file " + fullPath);
-            return null;
-        }
+    private static Typeface getSystemDefaultTypeface(@NonNull String familyName) {
+        Typeface tf = sSystemFontMap.get(familyName);
+        return tf == null ? Typeface.DEFAULT : tf;
     }
 
-    private static @Nullable FontFamily createFontFamily(
-            String familyName, List<FontConfig.Font> fonts, String[] languageTags, int variant,
-            Map<String, ByteBuffer> cache, String fontDir) {
-        final FontFamily family = new FontFamily(languageTags, variant);
-        for (int i = 0; i < fonts.size(); i++) {
-            final FontConfig.Font font = fonts.get(i);
-            final String fullPath = fontDir + font.getFontName();
-            ByteBuffer buffer = cache.get(fullPath);
-            if (buffer == null) {
-                if (cache.containsKey(fullPath)) {
-                    continue;  // Already failed to mmap. Skip it.
-                }
-                buffer = mmap(fullPath);
-                cache.put(fullPath, buffer);
-                if (buffer == null) {
-                    continue;
-                }
-            }
-            if (!family.addFontFromBuffer(buffer, font.getTtcIndex(), font.getAxes(),
-                    font.getWeight(), font.isItalic() ? STYLE_ITALIC : STYLE_NORMAL)) {
-                Log.e(TAG, "Error creating font " + fullPath + "#" + font.getTtcIndex());
-            }
-        }
-        if (!family.freeze()) {
-            Log.e(TAG, "Unable to load Family: " + familyName + " : "
-                    + Arrays.toString(languageTags));
-            return null;
-        }
-        return family;
-    }
-
-    private static void pushFamilyToFallback(FontConfig.Family xmlFamily,
-            ArrayMap<String, ArrayList<FontFamily>> fallbackMap,
-            Map<String, ByteBuffer> cache,
-            String fontDir) {
-
-        final String[] languageTags = xmlFamily.getLanguages();
-        final int variant = xmlFamily.getVariant();
-
-        final ArrayList<FontConfig.Font> defaultFonts = new ArrayList<>();
-        final ArrayMap<String, ArrayList<FontConfig.Font>> specificFallbackFonts = new ArrayMap<>();
-
-        // Collect default fallback and specific fallback fonts.
-        for (final FontConfig.Font font : xmlFamily.getFonts()) {
-            final String fallbackName = font.getFallbackFor();
-            if (fallbackName == null) {
-                defaultFonts.add(font);
-            } else {
-                ArrayList<FontConfig.Font> fallback = specificFallbackFonts.get(fallbackName);
-                if (fallback == null) {
-                    fallback = new ArrayList<>();
-                    specificFallbackFonts.put(fallbackName, fallback);
-                }
-                fallback.add(font);
-            }
-        }
-
-        final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                xmlFamily.getName(), defaultFonts, languageTags, variant, cache, fontDir);
-
-        // Insert family into fallback map.
-        for (int i = 0; i < fallbackMap.size(); i++) {
-            final ArrayList<FontConfig.Font> fallback =
-                    specificFallbackFonts.get(fallbackMap.keyAt(i));
-            if (fallback == null) {
-                if (defaultFamily != null) {
-                    fallbackMap.valueAt(i).add(defaultFamily);
-                }
-            } else {
-                final FontFamily family = createFontFamily(
-                        xmlFamily.getName(), fallback, languageTags, variant, cache, fontDir);
-                if (family != null) {
-                    fallbackMap.valueAt(i).add(family);
-                } else if (defaultFamily != null) {
-                    fallbackMap.valueAt(i).add(defaultFamily);
-                } else {
-                    // There is no valid for for default fallback. Ignore.
-                }
-            }
-        }
-    }
-
-    /**
-     * Build the system fallback from xml file.
-     *
-     * @param xmlPath A full path string to the fonts.xml file.
-     * @param fontDir A full path string to the system font directory. This must end with
-     *                slash('/').
-     * @param fontMap An output system font map. Caller must pass empty map.
-     * @param fallbackMap An output system fallback map. Caller must pass empty map.
-     * @hide
-     */
+    /** @hide */
     @VisibleForTesting
-    public static void buildSystemFallback(String xmlPath, String fontDir,
-            ArrayMap<String, Typeface> fontMap, ArrayMap<String, FontFamily[]> fallbackMap) {
-        try {
-            final FileInputStream fontsIn = new FileInputStream(xmlPath);
-            final FontConfig fontConfig = FontListParser.parse(fontsIn);
+    public static void initSystemDefaultTypefaces(Map<String, Typeface> systemFontMap,
+            Map<String, FontFamily[]> fallbacks,
+            FontConfig.Alias[] aliases) {
+        for (Map.Entry<String, FontFamily[]> entry : fallbacks.entrySet()) {
+            systemFontMap.put(entry.getKey(), createFromFamilies(entry.getValue()));
+        }
 
-            final HashMap<String, ByteBuffer> bufferCache = new HashMap<String, ByteBuffer>();
-            final FontConfig.Family[] xmlFamilies = fontConfig.getFamilies();
-
-            final ArrayMap<String, ArrayList<FontFamily>> fallbackListMap = new ArrayMap<>();
-            // First traverse families which have a 'name' attribute to create fallback map.
-            for (final FontConfig.Family xmlFamily : xmlFamilies) {
-                final String familyName = xmlFamily.getName();
-                if (familyName == null) {
-                    continue;
-                }
-                final FontFamily family = createFontFamily(
-                        xmlFamily.getName(), Arrays.asList(xmlFamily.getFonts()),
-                        xmlFamily.getLanguages(), xmlFamily.getVariant(), bufferCache, fontDir);
-                if (family == null) {
-                    continue;
-                }
-                final ArrayList<FontFamily> fallback = new ArrayList<>();
-                fallback.add(family);
-                fallbackListMap.put(familyName, fallback);
+        for (FontConfig.Alias alias : aliases) {
+            if (systemFontMap.containsKey(alias.getName())) {
+                continue; // If alias and named family are conflict, use named family.
             }
-
-            // Then, add fallback fonts to the each fallback map.
-            for (int i = 0; i < xmlFamilies.length; i++) {
-                final FontConfig.Family xmlFamily = xmlFamilies[i];
-                // The first family (usually the sans-serif family) is always placed immediately
-                // after the primary family in the fallback.
-                if (i == 0 || xmlFamily.getName() == null) {
-                    pushFamilyToFallback(xmlFamily, fallbackListMap, bufferCache, fontDir);
-                }
+            final Typeface base = systemFontMap.get(alias.getToName());
+            if (base == null) {
+                // The missing target is a valid thing, some configuration don't have font files,
+                // e.g. wear devices. Just skip this alias.
+                continue;
             }
+            final int weight = alias.getWeight();
+            final Typeface newFace = weight == 400 ? base :
+                    new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
+            systemFontMap.put(alias.getName(), newFace);
+        }
+    }
 
-            // Build the font map and fallback map.
-            for (int i = 0; i < fallbackListMap.size(); i++) {
-                final String fallbackName = fallbackListMap.keyAt(i);
-                final List<FontFamily> familyList = fallbackListMap.valueAt(i);
-                final FontFamily[] families = familyList.toArray(new FontFamily[familyList.size()]);
-
-                fallbackMap.put(fallbackName, families);
-                final long[] ptrArray = new long[families.length];
-                for (int j = 0; j < families.length; j++) {
-                    ptrArray[j] = families[j].mNativePtr;
-                }
-                fontMap.put(fallbackName, new Typeface(nativeCreateFromArray(
-                        ptrArray, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE)));
-            }
-
-            // Insert alias to font maps.
-            for (final FontConfig.Alias alias : fontConfig.getAliases()) {
-                Typeface base = fontMap.get(alias.getToName());
-                Typeface newFace = base;
-                int weight = alias.getWeight();
-                if (weight != 400) {
-                    newFace = new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
-                }
-                fontMap.put(alias.getName(), newFace);
-            }
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Didn't create default family (most likely, non-Minikin build)", e);
-            // TODO: normal in non-Minikin case, remove or make error when Minikin-only
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Error opening " + xmlPath, e);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading " + xmlPath, e);
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML parse exception for " + xmlPath, e);
+    private static void registerGenericFamilyNative(@NonNull String familyName,
+            @Nullable Typeface typeface) {
+        if (typeface != null) {
+            nativeRegisterGenericFamily(familyName, typeface.native_instance);
         }
     }
 
     static {
-        final ArrayMap<String, Typeface> systemFontMap = new ArrayMap<>();
-        final ArrayMap<String, FontFamily[]> systemFallbackMap = new ArrayMap<>();
-        buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/", systemFontMap,
-                systemFallbackMap);
+        final HashMap<String, Typeface> systemFontMap = new HashMap<>();
+        initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
+                SystemFonts.getAliases());
         sSystemFontMap = Collections.unmodifiableMap(systemFontMap);
-        sSystemFallbackMap = Collections.unmodifiableMap(systemFallbackMap);
 
-        setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+        // We can't assume DEFAULT_FAMILY available on Roboletric.
+        if (sSystemFontMap.containsKey(DEFAULT_FAMILY)) {
+            setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+        }
 
         // Set up defaults and typefaces exposed in public API
         DEFAULT         = create((String) null, 0);
@@ -1162,6 +1161,15 @@ public class Typeface {
             create((String) null, Typeface.BOLD_ITALIC),
         };
 
+        // A list of generic families to be registered in native.
+        // https://www.w3.org/TR/css-fonts-4/#generic-font-families
+        String[] genericFamilies = {
+            "serif", "sans-serif", "cursive", "fantasy", "monospace", "system-ui"
+        };
+
+        for (String genericFamily : genericFamilies) {
+            registerGenericFamilyNative(genericFamily, systemFontMap.get(genericFamily));
+        }
     }
 
     @Override
@@ -1224,4 +1232,6 @@ public class Typeface {
 
     @CriticalNative
     private static native long nativeGetReleaseFunc();
+
+    private static native void nativeRegisterGenericFamily(String str, long nativePtr);
 }

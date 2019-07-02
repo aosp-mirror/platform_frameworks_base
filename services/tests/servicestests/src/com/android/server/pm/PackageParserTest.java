@@ -15,7 +15,12 @@
  */
 package com.android.server.pm;
 
-import static org.junit.Assert.*;
+import static android.content.res.Resources.ID_NULL;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -272,6 +277,7 @@ public class PackageParserTest {
         assertEquals(a.mRestrictedAccountType, b.mRestrictedAccountType);
         assertEquals(a.mRequiredAccountType, b.mRequiredAccountType);
         assertEquals(a.mOverlayTarget, b.mOverlayTarget);
+        assertEquals(a.mOverlayTargetName, b.mOverlayTargetName);
         assertEquals(a.mOverlayCategory, b.mOverlayCategory);
         assertEquals(a.mOverlayPriority, b.mOverlayPriority);
         assertEquals(a.mOverlayIsStatic, b.mOverlayIsStatic);
@@ -449,8 +455,8 @@ public class PackageParserTest {
         pkg.splitPrivateFlags = new int[] { 100 };
         pkg.applicationInfo = new ApplicationInfo();
 
-        pkg.permissions.add(new PackageParser.Permission(pkg));
-        pkg.permissionGroups.add(new PackageParser.PermissionGroup(pkg));
+        pkg.permissions.add(new PackageParser.Permission(pkg, (String) null));
+        pkg.permissionGroups.add(new PackageParser.PermissionGroup(pkg, ID_NULL, ID_NULL, ID_NULL));
 
         final PackageParser.ParseComponentArgs dummy = new PackageParser.ParseComponentArgs(
                 pkg, new String[1], 0, 0, 0, 0, 0, 0, null, 0, 0, 0);
@@ -461,6 +467,7 @@ public class PackageParserTest {
         pkg.services.add(new PackageParser.Service(dummy, new ServiceInfo()));
         pkg.instrumentation.add(new PackageParser.Instrumentation(dummy, new InstrumentationInfo()));
         pkg.requestedPermissions.add("foo7");
+        pkg.implicitPermissions.add("foo25");
 
         pkg.protectedBroadcasts = new ArrayList<>();
         pkg.protectedBroadcasts.add("foo8");
@@ -509,7 +516,6 @@ public class PackageParserTest {
                         new Signature[] { new Signature(new byte[16]) },
                         2,
                         new ArraySet<>(),
-                        null,
                         null);
         pkg.mExtras = new Bundle();
         pkg.mRestrictedAccountType = "foo19";
@@ -540,6 +546,7 @@ public class PackageParserTest {
 
         pkg.mOverlayCategory = "foo24";
         pkg.mOverlayIsStatic = true;
+        pkg.mOverlayTargetName = "foo26";
 
         pkg.baseHardwareAccelerated = true;
         pkg.coreApp = true;

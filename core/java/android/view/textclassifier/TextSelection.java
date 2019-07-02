@@ -20,13 +20,16 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannedString;
 import android.util.ArrayMap;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.view.textclassifier.TextClassifier.Utils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
@@ -41,13 +44,16 @@ public final class TextSelection implements Parcelable {
     private final int mEndIndex;
     private final EntityConfidence mEntityConfidence;
     @Nullable private final String mId;
+    private final Bundle mExtras;
 
     private TextSelection(
-            int startIndex, int endIndex, Map<String, Float> entityConfidence, String id) {
+            int startIndex, int endIndex, Map<String, Float> entityConfidence, String id,
+            Bundle extras) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence(entityConfidence);
         mId = id;
+        mExtras = extras;
     }
 
     /**
@@ -103,6 +109,16 @@ public final class TextSelection implements Parcelable {
         return mId;
     }
 
+    /**
+     * Returns the extended data.
+     *
+     * <p><b>NOTE: </b>Do not modify this bundle.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -120,6 +136,8 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
         @Nullable private String mId;
+        @Nullable
+        private Bundle mExtras;
 
         /**
          * Creates a builder used to build {@link TextSelection} objects.
@@ -160,12 +178,24 @@ public final class TextSelection implements Parcelable {
         }
 
         /**
+         * Sets the extended data.
+         *
+         * @return this builder
+         */
+        @NonNull
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds and returns {@link TextSelection} object.
          */
         @NonNull
         public TextSelection build() {
             return new TextSelection(
-                    mStartIndex, mEndIndex, mEntityConfidence, mId);
+                    mStartIndex, mEndIndex, mEntityConfidence, mId,
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 
@@ -179,18 +209,22 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         @Nullable private final LocaleList mDefaultLocales;
         private final boolean mDarkLaunchAllowed;
+        private final Bundle mExtras;
+        @Nullable private String mCallingPackageName;
 
         private Request(
                 CharSequence text,
                 int startIndex,
                 int endIndex,
                 LocaleList defaultLocales,
-                boolean darkLaunchAllowed) {
+                boolean darkLaunchAllowed,
+                Bundle extras) {
             mText = text;
             mStartIndex = startIndex;
             mEndIndex = endIndex;
             mDefaultLocales = defaultLocales;
             mDarkLaunchAllowed = darkLaunchAllowed;
+            mExtras = extras;
         }
 
         /**
@@ -238,6 +272,36 @@ public final class TextSelection implements Parcelable {
         }
 
         /**
+         * Sets the name of the package that is sending this request.
+         * <p>
+         * Package-private for SystemTextClassifier's use.
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
+        }
+
+        /**
+         * Returns the name of the package that sent this request.
+         * This returns {@code null} if no calling package name is set.
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
+        }
+
+        /**
+         * Returns the extended data.
+         *
+         * <p><b>NOTE: </b>Do not modify this bundle.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        /**
          * A builder for building TextSelection requests.
          */
         public static final class Builder {
@@ -248,6 +312,7 @@ public final class TextSelection implements Parcelable {
 
             @Nullable private LocaleList mDefaultLocales;
             private boolean mDarkLaunchAllowed;
+            private Bundle mExtras;
 
             /**
              * @param text text providing context for the selected text (which is specified by the
@@ -296,12 +361,24 @@ public final class TextSelection implements Parcelable {
             }
 
             /**
+             * Sets the extended data.
+             *
+             * @return this builder
+             */
+            @NonNull
+            public Builder setExtras(@Nullable Bundle extras) {
+                mExtras = extras;
+                return this;
+            }
+
+            /**
              * Builds and returns the request object.
              */
             @NonNull
             public Request build() {
-                return new Request(mText, mStartIndex, mEndIndex,
-                        mDefaultLocales, mDarkLaunchAllowed);
+                return new Request(new SpannedString(mText), mStartIndex, mEndIndex,
+                        mDefaultLocales, mDarkLaunchAllowed,
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
 
@@ -312,20 +389,33 @@ public final class TextSelection implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mText.toString());
+            dest.writeCharSequence(mText);
             dest.writeInt(mStartIndex);
             dest.writeInt(mEndIndex);
-            dest.writeInt(mDefaultLocales != null ? 1 : 0);
-            if (mDefaultLocales != null) {
-                mDefaultLocales.writeToParcel(dest, flags);
-            }
+            dest.writeParcelable(mDefaultLocales, flags);
+            dest.writeString(mCallingPackageName);
+            dest.writeBundle(mExtras);
         }
 
-        public static final Parcelable.Creator<Request> CREATOR =
+        private static Request readFromParcel(Parcel in) {
+            final CharSequence text = in.readCharSequence();
+            final int startIndex = in.readInt();
+            final int endIndex = in.readInt();
+            final LocaleList defaultLocales = in.readParcelable(null);
+            final String callingPackageName = in.readString();
+            final Bundle extras = in.readBundle();
+
+            final Request request = new Request(text, startIndex, endIndex, defaultLocales,
+                    /* darkLaunchAllowed= */ false, extras);
+            request.setCallingPackageName(callingPackageName);
+            return request;
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<Request> CREATOR =
                 new Parcelable.Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {
-                        return new Request(in);
+                        return readFromParcel(in);
                     }
 
                     @Override
@@ -333,14 +423,6 @@ public final class TextSelection implements Parcelable {
                         return new Request[size];
                     }
                 };
-
-        private Request(Parcel in) {
-            mText = in.readString();
-            mStartIndex = in.readInt();
-            mEndIndex = in.readInt();
-            mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
-            mDarkLaunchAllowed = false;
-        }
     }
 
     @Override
@@ -354,9 +436,10 @@ public final class TextSelection implements Parcelable {
         dest.writeInt(mEndIndex);
         mEntityConfidence.writeToParcel(dest, flags);
         dest.writeString(mId);
+        dest.writeBundle(mExtras);
     }
 
-    public static final Parcelable.Creator<TextSelection> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextSelection> CREATOR =
             new Parcelable.Creator<TextSelection>() {
                 @Override
                 public TextSelection createFromParcel(Parcel in) {
@@ -374,57 +457,6 @@ public final class TextSelection implements Parcelable {
         mEndIndex = in.readInt();
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
-    }
-
-
-    // TODO: Remove once apps can build against the latest sdk.
-    /**
-     * Optional input parameters for generating TextSelection.
-     * @hide
-     */
-    public static final class Options {
-
-        @Nullable private final TextClassificationSessionId mSessionId;
-        @Nullable private final Request mRequest;
-        @Nullable private LocaleList mDefaultLocales;
-        private boolean mDarkLaunchAllowed;
-
-        public Options() {
-            this(null, null);
-        }
-
-        private Options(
-                @Nullable TextClassificationSessionId sessionId, @Nullable Request request) {
-            mSessionId = sessionId;
-            mRequest = request;
-        }
-
-        /** Helper to create Options from a Request. */
-        public static Options from(TextClassificationSessionId sessionId, Request request) {
-            final Options options = new Options(sessionId, request);
-            options.setDefaultLocales(request.getDefaultLocales());
-            return options;
-        }
-
-        /** @param defaultLocales ordered list of locale preferences. */
-        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
-            mDefaultLocales = defaultLocales;
-            return this;
-        }
-
-        @Nullable
-        public LocaleList getDefaultLocales() {
-            return mDefaultLocales;
-        }
-
-        @Nullable
-        public Request getRequest() {
-            return mRequest;
-        }
-
-        @Nullable
-        public TextClassificationSessionId getSessionId() {
-            return mSessionId;
-        }
+        mExtras = in.readBundle();
     }
 }

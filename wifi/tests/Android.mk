@@ -45,7 +45,7 @@ LOCAL_JACK_COVERAGE_INCLUDE_FILTER := $(jacoco_include)
 LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := $(jacoco_exclude)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
+    androidx.test.rules \
     core-test-rules \
     guava \
     mockito-target-minus-junit4 \

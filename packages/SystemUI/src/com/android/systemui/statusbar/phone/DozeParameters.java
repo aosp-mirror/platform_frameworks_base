@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -26,7 +27,6 @@ import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -40,6 +40,8 @@ public class DozeParameters implements TunerService.Tunable {
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
     public static final boolean FORCE_NO_BLANKING =
             SystemProperties.getBoolean("debug.force_no_blanking", false);
+    public static final boolean FORCE_BLANKING =
+            SystemProperties.getBoolean("debug.force_blanking", false);
 
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
     private static DozeParameters sInstance;
@@ -156,8 +158,10 @@ public class DozeParameters implements TunerService.Tunable {
      * @return duration in millis.
      */
     public long getWallpaperAodDuration() {
-        return shouldControlScreenOff() ? DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY
-                : mAlwaysOnPolicy.wallpaperVisibilityDuration;
+        if (shouldControlScreenOff()) {
+            return DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY;
+        }
+        return mAlwaysOnPolicy.wallpaperVisibilityDuration;
     }
 
     /**
@@ -183,7 +187,7 @@ public class DozeParameters implements TunerService.Tunable {
      * @return {@code true} if screen needs to be completely black before a power transition.
      */
     public boolean getDisplayNeedsBlanking() {
-        return !FORCE_NO_BLANKING && mContext.getResources().getBoolean(
+        return FORCE_BLANKING || !FORCE_NO_BLANKING && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_displayBlanksAfterDoze);
     }
 

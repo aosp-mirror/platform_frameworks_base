@@ -19,8 +19,8 @@ package android.os.storage;
 import android.os.ParcelFileDescriptor;
 import android.os.ProxyFileDescriptorCallback;
 import android.system.ErrnoException;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 
@@ -135,57 +135,18 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
     }
 
     /**
-     * Tests that we can not force unmount when a file is currently open on the OBB.
-     */
-    @LargeTest
-    public void testUnmount_DontForce() throws Exception {
-        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
-        String obbFilePath = file.getAbsolutePath();
-
-        MountingObbThread mountingThread = new MountingObbThread(obbFilePath,
-                OBB_FILE_1_CONTENTS_1);
-
-        try {
-            mountingThread.start();
-
-            long waitTime = 0;
-            while (!mountingThread.isFileOpenOnObb()) {
-                synchronized (mountingThread) {
-                    Log.i(LOG_TAG, "Waiting for file to be opened on OBB...");
-                    mountingThread.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                    if (waitTime > MAX_WAIT_TIME) {
-                        fail("Timed out waiting for file file to be opened on OBB!");
-                    }
-                }
-            }
-
-            unmountObb(obbFilePath, DONT_FORCE);
-
-            // verify still mounted
-            assertTrue("mounted path should not be null!", obbFilePath != null);
-            assertTrue("mounted path should still be mounted!", mSm.isObbMounted(obbFilePath));
-
-            // close the opened file
-            mountingThread.doStop();
-
-            // try unmounting again (should succeed this time)
-            unmountObb(obbFilePath, DONT_FORCE);
-            assertFalse("mounted path should no longer be mounted!",
-                    mSm.isObbMounted(obbFilePath));
-        } catch (InterruptedException e) {
-            fail("Timed out waiting for file on OBB to be opened...");
-        }
-    }
-
-    /**
      * Tests mounting a single OBB that isn't signed.
      */
     @LargeTest
     public void testMountUnsignedObb() throws Exception {
         final File file = createObbFile(OBB_FILE_2_UNSIGNED, R.raw.obb_file2_nosign);
         String filePath = file.getAbsolutePath();
-        mountObb(filePath, OBB_FILE_2_UNSIGNED, OnObbStateChangeListener.ERROR_INTERNAL);
+        try {
+            mountObb(filePath, OBB_FILE_2_UNSIGNED, OnObbStateChangeListener.ERROR_INTERNAL);
+            fail("mountObb should've failed with an exception");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
     }
 
     /**

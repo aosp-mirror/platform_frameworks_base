@@ -23,7 +23,8 @@ interface IVibratorService
 {
     boolean hasVibrator();
     boolean hasAmplitudeControl();
-    void vibrate(int uid, String opPkg, in VibrationEffect effect, int usageHint, IBinder token);
+    void vibrate(int uid, String opPkg, in VibrationEffect effect, int usageHint, String reason,
+            IBinder token);
     void cancelVibrate(IBinder token);
 }
 

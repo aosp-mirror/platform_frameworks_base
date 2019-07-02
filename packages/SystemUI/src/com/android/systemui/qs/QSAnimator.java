@@ -169,6 +169,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         mAllViews.add((View) tileLayout);
         int height = mQs.getView() != null ? mQs.getView().getMeasuredHeight() : 0;
+        int width = mQs.getView() != null ? mQs.getView().getMeasuredWidth() : 0;
         int heightDiff = height - mQs.getHeader().getBottom()
                 + mQs.getHeader().getPaddingBottom();
         firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
@@ -181,7 +182,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
             final View tileIcon = tileView.getIcon().getIconView();
             View view = mQs.getView();
-            if (count < mNumQuickTiles && mAllowFancy) {
+
+            // This case: less tiles to animate in small displays.
+            if (count < mQuickQsPanel.getTileLayout().getNumVisibleTiles() && mAllowFancy) {
                 // Quick tiles.
                 QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
                 if (quickTileView == null) continue;
@@ -192,18 +195,30 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
                 lastXDiff = loc1[0] - lastX;
-                // Move the quick tile right from its location to the new one.
-                translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
-                translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
-                // Counteract the parent translation on the tile. So we have a static base to
-                // animate the label position off from.
-                //firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
+                if (count < tileLayout.getNumVisibleTiles()) {
+                    // Move the quick tile right from its location to the new one.
+                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
+                    translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
-                // Move the real tile from the quick tile position to its final
-                // location.
-                translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+                    // Counteract the parent translation on the tile. So we have a static base to
+                    // animate the label position off from.
+                    //firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
+
+                    // Move the real tile from the quick tile position to its final
+                    // location.
+                    translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
+                    translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+
+                } else { // These tiles disappear when expanding
+                    firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
+                    translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
+
+                    // xDiff is negative here and this makes it "more" negative
+                    final int translationX = mQsPanel.isLayoutRtl() ? xDiff - width : xDiff + width;
+                    translationXBuilder.addFloat(quickTileView, "translationX", 0,
+                            translationX);
+                }
 
                 mQuickQsViews.add(tileView.getIconWithBackground());
                 mAllViews.add(tileView.getIcon());
@@ -250,11 +265,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // Fade in the tiles/labels as we reach the final position.
             mFirstPageDelayedAnimator = new TouchAnimator.Builder()
                     .setStartDelay(EXPANDED_TILE_DELAY)
-                    .addFloat(mQsPanel.getPageIndicator(), "alpha", 0, 1)
                     .addFloat(tileLayout, "alpha", 0, 1)
                     .addFloat(mQsPanel.getDivider(), "alpha", 0, 1)
                     .addFloat(mQsPanel.getFooter().getView(), "alpha", 0, 1).build();
-            mAllViews.add(mQsPanel.getPageIndicator());
             mAllViews.add(mQsPanel.getDivider());
             mAllViews.add(mQsPanel.getFooter().getView());
             float px = 0;
@@ -272,7 +285,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
         mNonfirstPageAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
-                .addFloat(mQsPanel.getPageIndicator(), "alpha", 0, 1)
                 .addFloat(mQsPanel.getDivider(), "alpha", 0, 1)
                 .setListener(mNonFirstPageListener)
                 .setEndDelay(.5f)

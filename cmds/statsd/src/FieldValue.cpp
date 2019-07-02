@@ -18,6 +18,8 @@
 #include "Log.h"
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
+#include "math.h"
+#include "statslog.h"
 
 namespace android {
 namespace os {
@@ -121,6 +123,24 @@ bool isAttributionUidField(const FieldValue& value) {
     return false;
 }
 
+int32_t getUidIfExists(const FieldValue& value) {
+    bool isUid = false;
+    // the field is uid field if the field is the uid field in attribution node or marked as
+    // is_uid in atoms.proto
+    if (isAttributionUidField(value)) {
+        isUid = true;
+    } else {
+        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(value.mField.getTag());
+        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
+            int uidField = it->second;  // uidField is the field number in proto
+            isUid = value.mField.getDepth() == 0 && value.mField.getPosAtDepth(0) == uidField &&
+                    value.mValue.getType() == INT;
+        }
+    }
+
+    return isUid ? value.mValue.int_value : -1;
+}
+
 bool isAttributionUidField(const Field& field, const Value& value) {
     int f = field.getField() & 0xff007f;
     if (f == 0x10001 && value.getType() == INT) {
@@ -141,8 +161,14 @@ Value::Value(const Value& from) {
         case FLOAT:
             float_value = from.float_value;
             break;
+        case DOUBLE:
+            double_value = from.double_value;
+            break;
         case STRING:
             str_value = from.str_value;
+            break;
+        case STORAGE:
+            storage_value = from.storage_value;
             break;
         default:
             break;
@@ -157,10 +183,33 @@ std::string Value::toString() const {
             return std::to_string(long_value) + "[L]";
         case FLOAT:
             return std::to_string(float_value) + "[F]";
+        case DOUBLE:
+            return std::to_string(double_value) + "[D]";
         case STRING:
             return str_value + "[S]";
+        case STORAGE:
+            return "bytes of size " + std::to_string(storage_value.size()) + "[ST]";
         default:
             return "[UNKNOWN]";
+    }
+}
+
+bool Value::isZero() const {
+    switch (type) {
+        case INT:
+            return int_value == 0;
+        case LONG:
+            return long_value == 0;
+        case FLOAT:
+            return fabs(float_value) <= std::numeric_limits<float>::epsilon();
+        case DOUBLE:
+            return fabs(double_value) <= std::numeric_limits<double>::epsilon();
+        case STRING:
+            return str_value.size() == 0;
+        case STORAGE:
+            return storage_value.size() == 0;
+        default:
+            return false;
     }
 }
 
@@ -174,8 +223,12 @@ bool Value::operator==(const Value& that) const {
             return long_value == that.long_value;
         case FLOAT:
             return float_value == that.float_value;
+        case DOUBLE:
+            return double_value == that.double_value;
         case STRING:
             return str_value == that.str_value;
+        case STORAGE:
+            return storage_value == that.storage_value;
         default:
             return false;
     }
@@ -190,8 +243,12 @@ bool Value::operator!=(const Value& that) const {
             return long_value != that.long_value;
         case FLOAT:
             return float_value != that.float_value;
+        case DOUBLE:
+            return double_value != that.double_value;
         case STRING:
             return str_value != that.str_value;
+        case STORAGE:
+            return storage_value != that.storage_value;
         default:
             return false;
     }
@@ -207,10 +264,166 @@ bool Value::operator<(const Value& that) const {
             return long_value < that.long_value;
         case FLOAT:
             return float_value < that.float_value;
+        case DOUBLE:
+            return double_value < that.double_value;
         case STRING:
             return str_value < that.str_value;
+        case STORAGE:
+            return storage_value < that.storage_value;
         default:
             return false;
+    }
+}
+
+bool Value::operator>(const Value& that) const {
+    if (type != that.getType()) return type > that.getType();
+
+    switch (type) {
+        case INT:
+            return int_value > that.int_value;
+        case LONG:
+            return long_value > that.long_value;
+        case FLOAT:
+            return float_value > that.float_value;
+        case DOUBLE:
+            return double_value > that.double_value;
+        case STRING:
+            return str_value > that.str_value;
+        case STORAGE:
+            return storage_value > that.storage_value;
+        default:
+            return false;
+    }
+}
+
+bool Value::operator>=(const Value& that) const {
+    if (type != that.getType()) return type >= that.getType();
+
+    switch (type) {
+        case INT:
+            return int_value >= that.int_value;
+        case LONG:
+            return long_value >= that.long_value;
+        case FLOAT:
+            return float_value >= that.float_value;
+        case DOUBLE:
+            return double_value >= that.double_value;
+        case STRING:
+            return str_value >= that.str_value;
+        case STORAGE:
+            return storage_value >= that.storage_value;
+        default:
+            return false;
+    }
+}
+
+Value Value::operator-(const Value& that) const {
+    Value v;
+    if (type != that.type) {
+        ALOGE("Can't operate on different value types, %d, %d", type, that.type);
+        return v;
+    }
+    if (type == STRING) {
+        ALOGE("Can't operate on string value type");
+        return v;
+    }
+
+    if (type == STORAGE) {
+        ALOGE("Can't operate on storage value type");
+        return v;
+    }
+
+    switch (type) {
+        case INT:
+            v.setInt(int_value - that.int_value);
+            break;
+        case LONG:
+            v.setLong(long_value - that.long_value);
+            break;
+        case FLOAT:
+            v.setFloat(float_value - that.float_value);
+            break;
+        case DOUBLE:
+            v.setDouble(double_value - that.double_value);
+            break;
+        default:
+            break;
+    }
+    return v;
+}
+
+Value& Value::operator=(const Value& that) {
+    type = that.type;
+    switch (type) {
+        case INT:
+            int_value = that.int_value;
+            break;
+        case LONG:
+            long_value = that.long_value;
+            break;
+        case FLOAT:
+            float_value = that.float_value;
+            break;
+        case DOUBLE:
+            double_value = that.double_value;
+            break;
+        case STRING:
+            str_value = that.str_value;
+            break;
+        case STORAGE:
+            storage_value = that.storage_value;
+            break;
+        default:
+            break;
+    }
+    return *this;
+}
+
+Value& Value::operator+=(const Value& that) {
+    if (type != that.type) {
+        ALOGE("Can't operate on different value types, %d, %d", type, that.type);
+        return *this;
+    }
+    if (type == STRING) {
+        ALOGE("Can't operate on string value type");
+        return *this;
+    }
+    if (type == STORAGE) {
+        ALOGE("Can't operate on storage value type");
+        return *this;
+    }
+
+    switch (type) {
+        case INT:
+            int_value += that.int_value;
+            break;
+        case LONG:
+            long_value += that.long_value;
+            break;
+        case FLOAT:
+            float_value += that.float_value;
+            break;
+        case DOUBLE:
+            double_value += that.double_value;
+            break;
+        default:
+            break;
+    }
+    return *this;
+}
+
+double Value::getDouble() const {
+    switch (type) {
+        case INT:
+            return int_value;
+        case LONG:
+            return long_value;
+        case FLOAT:
+            return float_value;
+        case DOUBLE:
+            return double_value;
+        default:
+            return 0;
     }
 }
 

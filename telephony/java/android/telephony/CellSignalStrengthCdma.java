@@ -461,7 +461,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthCdma> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthCdma> CREATOR =
             new Parcelable.Creator<CellSignalStrengthCdma>() {
         @Override
         public CellSignalStrengthCdma createFromParcel(Parcel in) {

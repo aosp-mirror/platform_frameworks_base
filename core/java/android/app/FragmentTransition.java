@@ -1013,6 +1013,11 @@ class FragmentTransition {
                     replaceTargets(sharedElementTransition, sharedElementsIn, null);
                 }
             }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                transition.removeListener(this);
+            }
         });
     }
 

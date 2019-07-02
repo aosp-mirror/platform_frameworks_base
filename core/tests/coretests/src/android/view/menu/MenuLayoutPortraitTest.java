@@ -16,10 +16,10 @@
 
 package android.view.menu;
 
-import android.content.pm.ActivityInfo;
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase;
 import android.util.KeyUtils;
+
+import androidx.test.filters.LargeTest;
 
 @LargeTest
 public class MenuLayoutPortraitTest extends ActivityInstrumentationTestCase<MenuLayoutPortrait> {

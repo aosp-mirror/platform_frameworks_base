@@ -22,8 +22,6 @@ using namespace android;
 using namespace android::uirenderer;
 
 TEST(RenderProperties, layerValidity) {
-    DeviceInfo::initialize();
-
     const int maxTextureSize = DeviceInfo::get()->maxTextureSize();
     ASSERT_LE(2048, maxTextureSize);
     ASSERT_GT(100000, maxTextureSize);

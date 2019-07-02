@@ -57,11 +57,7 @@ import java.util.List;
  * {@link WifiAwareSession#subscribe(SubscribeConfig, DiscoverySessionCallback, Handler)}.
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
- * to set-up a Aware connection with a peer. Refer to
- * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)},
- * {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)},
- * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])}, and
- * {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)}.
+ * to set-up a Aware connection with a peer. Refer to {@link WifiAwareNetworkSpecifier.Builder}.
  * </ul>
  * <p>
  *     Aware may not be usable when Wi-Fi is disabled (and other conditions). To validate that
@@ -110,10 +106,7 @@ import java.util.List;
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])},
- *        {@link WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)},
- *        {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}, or
- *        {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
+ *        {@link WifiAwareNetworkSpecifier.Builder}.
  *    </ul>
  */
 @SystemService(Context.WIFI_AWARE_SERVICE)
@@ -145,8 +138,6 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
-     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
      * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
      * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
@@ -156,8 +147,6 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see DiscoverySession#createNetworkSpecifierOpen(PeerHandle)
-     * @see DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)
      * @see WifiAwareSession#createNetworkSpecifierOpen(int, byte[])
      * @see WifiAwareSession#createNetworkSpecifierPassphrase(int, byte[], String)
      */
@@ -240,7 +229,7 @@ public class WifiAwareManager {
      * <p>
      * This version of the API attaches a listener to receive the MAC address of the Aware interface
      * on startup and whenever it is updated (it is randomized at regular intervals for privacy).
-     * The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to execute this attach request. Otherwise, use the
      * {@link #attach(AttachCallback, Handler)} version. Note that aside from permission
      * requirements this listener will wake up the host at regular intervals causing higher power
@@ -415,6 +404,11 @@ public class WifiAwareManager {
                     + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
         }
 
+        if (!WifiAwareUtils.isLegacyVersion(mContext, Build.VERSION_CODES.Q)) {
+            throw new UnsupportedOperationException(
+                    "API deprecated - use WifiAwareNetworkSpecifier.Builder");
+        }
+
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                 && role != WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
             throw new IllegalArgumentException(
@@ -439,6 +433,8 @@ public class WifiAwareManager {
                 null, // peerMac (not used in this method)
                 pmk,
                 passphrase,
+                0, // no port info for deprecated IB APIs
+                -1, // no transport info for deprecated IB APIs
                 Process.myUid());
     }
 
@@ -478,6 +474,8 @@ public class WifiAwareManager {
                 peer,
                 pmk,
                 passphrase,
+                0, // no port info for OOB APIs
+                -1, // no transport protocol info for OOB APIs
                 Process.myUid());
     }
 

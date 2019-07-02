@@ -30,6 +30,7 @@ namespace aapt {
 
 struct SplitConstraints {
   std::set<android::ConfigDescription> configs;
+  std::string name;
 };
 
 struct TableSplitterOptions {

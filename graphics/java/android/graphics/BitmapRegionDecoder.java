@@ -195,7 +195,9 @@ public final class BitmapRegionDecoder {
                     || rect.top >= getHeight())
                 throw new IllegalArgumentException("rectangle is outside the image");
             return nativeDecodeRegion(mNativeBitmapRegionDecoder, rect.left, rect.top,
-                    rect.right - rect.left, rect.bottom - rect.top, options);
+                    rect.right - rect.left, rect.bottom - rect.top, options,
+                    BitmapFactory.Options.nativeInBitmap(options),
+                    BitmapFactory.Options.nativeColorSpace(options));
         }
     }
 
@@ -265,7 +267,8 @@ public final class BitmapRegionDecoder {
 
     private static native Bitmap nativeDecodeRegion(long lbm,
             int start_x, int start_y, int width, int height,
-            BitmapFactory.Options options);
+            BitmapFactory.Options options, long inBitmapHandle,
+            long colorSpaceHandle);
     private static native int nativeGetWidth(long lbm);
     private static native int nativeGetHeight(long lbm);
     private static native void nativeClean(long lbm);

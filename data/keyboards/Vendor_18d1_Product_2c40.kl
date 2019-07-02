@@ -20,12 +20,8 @@ key 307 BUTTON_X
 key 308 BUTTON_Y
 key 310 BUTTON_L1
 key 311 BUTTON_R1
-key 316 BUTTON_MODE
 key 317 BUTTON_THUMBL
 key 318 BUTTON_THUMBR
-
-key 158 BACK
-key 172 HOME
 
 axis 0x00 X
 axis 0x01 Y
@@ -40,3 +36,14 @@ led 0x00 CONTROLLER_1
 led 0x01 CONTROLLER_2
 led 0x02 CONTROLLER_3
 led 0x03 CONTROLLER_4
+
+# The next 2 buttons do not follow Linux standard because this behaviour was specified by the UX
+# Left arrow to the immediate left of the power button
+key 158 BACK
+# Circle to the immediate right of the power button
+key 172 HOME
+
+
+# Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+# Power button
+key 316 BUTTON_MODE

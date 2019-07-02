@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -82,7 +83,10 @@ public class HarmfulAppWarningActivity extends AlertActivity implements
         final View view = getLayoutInflater().inflate(R.layout.harmful_app_warning_dialog,
                 null /*root*/);
         ((TextView) view.findViewById(R.id.app_name_text))
-                .setText(applicationInfo.loadSafeLabel(getPackageManager()));
+                .setText(applicationInfo.loadSafeLabel(getPackageManager(),
+                        PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                        PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE
+                                | PackageItemInfo.SAFE_LABEL_FLAG_TRIM));
         ((TextView) view.findViewById(R.id.message))
                 .setText(mHarmfulAppWarning);
         return view;

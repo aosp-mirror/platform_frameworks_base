@@ -78,7 +78,7 @@ public class ImportanceExtractorTest extends UiServiceTestCase {
     //
 
     @Test
-    public void testAppPreferenceChannelNone() throws Exception {
+    public void testAppPreferenceChannelNone() {
         ImportanceExtractor extractor = new ImportanceExtractor();
         extractor.setConfig(mConfig);
 
@@ -92,12 +92,12 @@ public class ImportanceExtractorTest extends UiServiceTestCase {
 
         extractor.process(r);
 
-        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, r.getUserImportance());
+        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, r.getImportance());
         assertEquals(notificationImportance, r.getImportance());
     }
 
     @Test
-    public void testAppPreferenceChannelPreference() throws Exception {
+    public void testAppPreferenceChannelPreference() {
         ImportanceExtractor extractor = new ImportanceExtractor();
         extractor.setConfig(mConfig);
 
@@ -110,6 +110,6 @@ public class ImportanceExtractorTest extends UiServiceTestCase {
 
         extractor.process(r);
 
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_HIGH);
+        assertEquals(r.getImportance(), NotificationManager.IMPORTANCE_HIGH);
     }
 }

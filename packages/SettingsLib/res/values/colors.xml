@@ -18,4 +18,25 @@
     <color name="disabled_text_color">#66000000</color> <!-- 38% black -->
 
     <color name="usage_graph_dots">@*android:color/tertiary_device_default_settings</color>
+    <color name="list_divider_color">#64000000</color>
+
+    <color name="bt_color_icon_1">#b4a50e0e</color> <!-- 72% Material Red 900 -->
+    <color name="bt_color_icon_2">#b40d652d</color> <!-- 72% Material Green 900 -->
+    <color name="bt_color_icon_3">#b4e37400</color> <!-- 72% Material Yellow 900 -->
+    <color name="bt_color_icon_4">#b4b06000</color> <!-- 72% Material Orange 900 -->
+    <color name="bt_color_icon_5">#b49c166b</color> <!-- 72% Material Pink 900 -->
+    <color name="bt_color_icon_6">#b4681da8</color> <!-- 72% Material Purple 900 -->
+    <color name="bt_color_icon_7">#b4007b83</color> <!-- 72% Material Cyan 900 -->
+
+    <color name="bt_color_bg_1">#fad2cf</color> <!-- Material Red 100 -->
+    <color name="bt_color_bg_2">#ceead6</color> <!-- Material Green 100 -->
+    <color name="bt_color_bg_3">#feefc3</color> <!-- Material Yellow 100 -->
+    <color name="bt_color_bg_4">#fedfc8</color> <!-- Material Orange 100 -->
+    <color name="bt_color_bg_5">#fdcfe8</color> <!-- Material Pink 100 -->
+    <color name="bt_color_bg_6">#e9d2fd</color> <!-- Material Purple 100 -->
+    <color name="bt_color_bg_7">#cbf0f8</color> <!-- Material Cyan 100 -->
+
+
+    <color name="dark_mode_icon_color_single_tone">#99000000</color>
+    <color name="light_mode_icon_color_single_tone">#ffffff</color>
 </resources>

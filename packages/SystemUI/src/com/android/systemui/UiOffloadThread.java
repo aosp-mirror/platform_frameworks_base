@@ -20,13 +20,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Thread that offloads work from the UI thread but that is still perceptible to the user, so the
  * priority is the same as the main thread.
  */
+@Singleton
 public class UiOffloadThread {
 
     private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
+
+    @Inject
+    public UiOffloadThread() {
+    }
 
     public Future<?> submit(Runnable runnable) {
         return mExecutorService.submit(runnable);

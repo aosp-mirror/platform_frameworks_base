@@ -196,8 +196,7 @@ static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(buffer->getWidth(), buffer->getHeight(),
                                      convertPixelFormat(buffer->getPixelFormat()),
-                                     kPremul_SkAlphaType,
-                                     GraphicsJNI::defaultColorSpace()),
+                                     kPremul_SkAlphaType),
                    bytesCount);
 
     if (buffer->getWidth() > 0 && buffer->getHeight() > 0) {

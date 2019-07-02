@@ -35,23 +35,6 @@ SkBitmap createSkBitmap(int width, int height) {
     return bitmap;
 }
 
-/**
- * 1x1 bitmaps must not be optimized into solid color shaders, since HWUI can't
- * compose/render color shaders
- */
-TEST(SkiaBehavior, CreateBitmapShader1x1) {
-    SkBitmap origBitmap = createSkBitmap(1, 1);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(origBitmap, kNever_SkCopyPixelsMode);
-    sk_sp<SkShader> s =
-            image->makeShader(SkShader::kClamp_TileMode, SkShader::kRepeat_TileMode, nullptr);
-
-    SkBitmap bitmap;
-    SkShader::TileMode xy[2];
-    ASSERT_TRUE(s->isABitmap(&bitmap, nullptr, xy))
-            << "1x1 bitmap shader must query as bitmap shader";
-    EXPECT_EQ(origBitmap.pixelRef(), bitmap.pixelRef());
-}
-
 TEST(SkiaBehavior, genIds) {
     SkBitmap bitmap = createSkBitmap(100, 100);
     uint32_t genId = bitmap.getGenerationID();

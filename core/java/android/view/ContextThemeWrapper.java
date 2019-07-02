@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 
 /**
  * A context wrapper that allows you to modify or replace the theme of the
@@ -31,7 +33,7 @@ import android.content.res.Resources;
 public class ContextThemeWrapper extends ContextWrapper {
     @UnsupportedAppUsage
     private int mThemeResource;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768723)
     private Resources.Theme mTheme;
     @UnsupportedAppUsage
     private LayoutInflater mInflater;
@@ -144,6 +146,15 @@ public class ContextThemeWrapper extends ContextWrapper {
             mThemeResource = resid;
             initializeTheme();
         }
+    }
+
+    /**
+     * Set the configure the current theme. If null is provided then the default Theme is returned
+     * on the next call to {@link #getTheme()}
+     * @param theme Theme to consume in the wrapper, a value of null resets the theme to the default
+     */
+    public void setTheme(@Nullable Resources.Theme theme) {
+        mTheme = theme;
     }
 
     /** @hide */

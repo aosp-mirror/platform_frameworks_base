@@ -16,14 +16,15 @@
 
 package android.service.textclassifier;
 
-import android.service.textclassifier.ITextClassificationCallback;
-import android.service.textclassifier.ITextLinksCallback;
-import android.service.textclassifier.ITextSelectionCallback;
+import android.service.textclassifier.ITextClassifierCallback;
+import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationSessionId;
+import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextLinks;
+import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextSelection;
 
 /**
@@ -36,21 +37,26 @@ oneway interface ITextClassifierService {
     void onSuggestSelection(
             in TextClassificationSessionId sessionId,
             in TextSelection.Request request,
-            in ITextSelectionCallback callback);
+            in ITextClassifierCallback callback);
 
     void onClassifyText(
             in TextClassificationSessionId sessionId,
             in TextClassification.Request request,
-            in ITextClassificationCallback callback);
+            in ITextClassifierCallback callback);
 
     void onGenerateLinks(
             in TextClassificationSessionId sessionId,
             in TextLinks.Request request,
-            in ITextLinksCallback callback);
+            in ITextClassifierCallback callback);
 
+    // TODO: Remove
     void onSelectionEvent(
             in TextClassificationSessionId sessionId,
             in SelectionEvent event);
+
+    void onTextClassifierEvent(
+            in TextClassificationSessionId sessionId,
+            in TextClassifierEvent event);
 
     void onCreateTextClassificationSession(
             in TextClassificationContext context,
@@ -58,4 +64,14 @@ oneway interface ITextClassifierService {
 
     void onDestroyTextClassificationSession(
             in TextClassificationSessionId sessionId);
+
+    void onDetectLanguage(
+            in TextClassificationSessionId sessionId,
+            in TextLanguage.Request request,
+            in ITextClassifierCallback callback);
+
+    void onSuggestConversationActions(
+            in TextClassificationSessionId sessionId,
+            in ConversationActions.Request request,
+            in ITextClassifierCallback callback);
 }

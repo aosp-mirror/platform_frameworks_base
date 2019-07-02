@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -38,7 +39,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconMana
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;

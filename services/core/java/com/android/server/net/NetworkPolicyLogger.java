@@ -46,9 +46,9 @@ public class NetworkPolicyLogger {
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final int MAX_LOG_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 20 : 50;
+            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
     private static final int MAX_NETWORK_BLOCKED_LOG_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 50 : 100;
+            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
 
     private static final int EVENT_TYPE_GENERIC = 0;
     private static final int EVENT_NETWORK_BLOCKED = 1;
@@ -64,6 +64,7 @@ public class NetworkPolicyLogger {
     private static final int EVENT_UID_FIREWALL_RULE_CHANGED = 11;
     private static final int EVENT_FIREWALL_CHAIN_ENABLED = 12;
     private static final int EVENT_UPDATE_METERED_RESTRICTED_PKGS = 13;
+    private static final int EVENT_APP_IDLE_WL_CHANGED = 14;
 
     static final int NTWK_BLOCKED_POWER = 0;
     static final int NTWK_ALLOWED_NON_METERED = 1;
@@ -142,6 +143,13 @@ public class NetworkPolicyLogger {
         synchronized (mLock) {
             if (LOGD) Slog.d(TAG, getAppIdleChangedLog(uid, idle));
             mEventsBuffer.appIdleStateChanged(uid, idle);
+        }
+    }
+
+    void appIdleWlChanged(int uid, boolean isWhitelisted) {
+        synchronized (mLock) {
+            if (LOGD) Slog.d(TAG, getAppIdleWlChangedLog(uid, isWhitelisted));
+            mEventsBuffer.appIdleWlChanged(uid, isWhitelisted);
         }
     }
 
@@ -257,6 +265,10 @@ public class NetworkPolicyLogger {
 
     private static String getAppIdleChangedLog(int uid, boolean idle) {
         return "App idle state of uid " + uid + ": " + idle;
+    }
+
+    private static String getAppIdleWlChangedLog(int uid, boolean isWhitelisted) {
+        return "App idle whitelist state of uid " + uid + ": " + isWhitelisted;
     }
 
     private static String getParoleStateChanged(boolean paroleOn) {
@@ -409,6 +421,17 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
+        public void appIdleWlChanged(int uid, boolean isWhitelisted) {
+            final Data data = getNextSlot();
+            if (data == null) return;
+
+            data.reset();
+            data.type = EVENT_APP_IDLE_WL_CHANGED;
+            data.ifield1 = uid;
+            data.bfield1 = isWhitelisted;
+            data.timeStamp = System.currentTimeMillis();
+        }
+
         public void paroleStateChanged(boolean paroleOn) {
             final Data data = getNextSlot();
             if (data == null) return;
@@ -487,6 +510,8 @@ public class NetworkPolicyLogger {
                     return getDeviceIdleModeEnabled(data.bfield1);
                 case EVENT_APP_IDLE_STATE_CHANGED:
                     return getAppIdleChangedLog(data.ifield1, data.bfield1);
+                case EVENT_APP_IDLE_WL_CHANGED:
+                    return getAppIdleWlChangedLog(data.ifield1, data.bfield1);
                 case EVENT_PAROLE_STATE_CHANGED:
                     return getParoleStateChanged(data.bfield1);
                 case EVENT_TEMP_POWER_SAVE_WL_CHANGED:

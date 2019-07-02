@@ -97,7 +97,7 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      * {@link BluetoothDevice#createL2capChannel(int)}
      */
     @Deprecated
-    public static final Parcelable.Creator<BluetoothHealthAppConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothHealthAppConfiguration> CREATOR =
             new Parcelable.Creator<BluetoothHealthAppConfiguration>() {
                 @Override
                 public BluetoothHealthAppConfiguration createFromParcel(Parcel in) {

@@ -26,27 +26,27 @@ import java.util.Objects;
  */
 public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> {
 
-    private int mUid;
+    private int mUserId;
     private String mPkg;
     private long mLastNotified;
 
     public NotifyingApp() {}
 
     protected NotifyingApp(Parcel in) {
-        mUid = in.readInt();
+        mUserId = in.readInt();
         mPkg = in.readString();
         mLastNotified = in.readLong();
     }
 
-    public int getUid() {
-        return mUid;
+    public int getUserId() {
+        return mUserId;
     }
 
     /**
-     * Sets the uid of the package that sent the notification. Returns self.
+     * Sets the userid of the package that sent the notification. Returns self.
      */
-    public NotifyingApp setUid(int mUid) {
-        this.mUid = mUid;
+    public NotifyingApp setUserId(int mUserId) {
+        this.mUserId = mUserId;
         return this;
     }
 
@@ -74,7 +74,7 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
         return this;
     }
 
-    public static final Creator<NotifyingApp> CREATOR = new Creator<NotifyingApp>() {
+    public static final @NonNull Creator<NotifyingApp> CREATOR = new Creator<NotifyingApp>() {
         @Override
         public NotifyingApp createFromParcel(Parcel in) {
             return new NotifyingApp(in);
@@ -93,7 +93,7 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mUid);
+        dest.writeInt(mUserId);
         dest.writeString(mPkg);
         dest.writeLong(mLastNotified);
     }
@@ -103,14 +103,14 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotifyingApp that = (NotifyingApp) o;
-        return getUid() == that.getUid()
+        return getUserId() == that.getUserId()
                 && getLastNotified() == that.getLastNotified()
                 && Objects.equals(mPkg, that.mPkg);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUid(), mPkg, getLastNotified());
+        return Objects.hash(getUserId(), mPkg, getLastNotified());
     }
 
     /**
@@ -119,10 +119,10 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
     @Override
     public int compareTo(NotifyingApp o) {
         if (getLastNotified() == o.getLastNotified()) {
-            if (getUid() == o.getUid()) {
+            if (getUserId() == o.getUserId()) {
                 return getPackage().compareTo(o.getPackage());
             }
-            return Integer.compare(getUid(), o.getUid());
+            return Integer.compare(getUserId(), o.getUserId());
         }
 
         return -Long.compare(getLastNotified(), o.getLastNotified());
@@ -131,7 +131,7 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
     @Override
     public String toString() {
         return "NotifyingApp{"
-                + "mUid=" + mUid
+                + "mUserId=" + mUserId
                 + ", mPkg='" + mPkg + '\''
                 + ", mLastNotified=" + mLastNotified
                 + '}';

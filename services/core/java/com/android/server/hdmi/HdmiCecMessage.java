@@ -16,9 +16,12 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
+
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A class to encapsulate HDMI-CEC message used for the devices connected via
@@ -42,6 +45,27 @@ public final class HdmiCecMessage {
         mDestination = destination;
         mOpcode = opcode & 0xFF;
         mParams = Arrays.copyOf(params, params.length);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object message) {
+        if (message instanceof HdmiCecMessage) {
+            HdmiCecMessage that = (HdmiCecMessage) message;
+            return this.mSource == that.getSource() &&
+                this.mDestination == that.getDestination() &&
+                this.mOpcode == that.getOpcode() &&
+                Arrays.equals(this.mParams, that.getParams());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            mSource,
+            mDestination,
+            mOpcode,
+            Arrays.hashCode(mParams));
     }
 
     /**
@@ -88,12 +112,11 @@ public final class HdmiCecMessage {
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
-        s.append(String.format("<%s> src: %d, dst: %d",
-                opcodeToString(mOpcode), mSource, mDestination));
+        s.append(String.format("<%s> %X%X:%02X",
+                opcodeToString(mOpcode), mSource, mDestination, mOpcode));
         if (mParams.length > 0) {
-            s.append(", params:");
             for (byte data : mParams) {
-                s.append(String.format(" %02X", data));
+                s.append(String.format(":%02X", data));
             }
         }
         return s.toString();
@@ -110,7 +133,7 @@ public final class HdmiCecMessage {
             case Constants.MESSAGE_TUNER_STEP_DECREMENT:
                 return "Tuner Step Decrement";
             case Constants.MESSAGE_TUNER_DEVICE_STATUS:
-                return "Tuner Device Staus";
+                return "Tuner Device Status";
             case Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS:
                 return "Give Tuner Device Status";
             case Constants.MESSAGE_RECORD_ON:
@@ -184,7 +207,7 @@ public final class HdmiCecMessage {
             case Constants.MESSAGE_DEVICE_VENDOR_ID:
                 return "Device Vendor Id";
             case Constants.MESSAGE_VENDOR_COMMAND:
-                return "Vendor Commandn";
+                return "Vendor Command";
             case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN:
                 return "Vendor Remote Button Down";
             case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_UP:
@@ -192,7 +215,7 @@ public final class HdmiCecMessage {
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
                 return "Give Device Vendor Id";
             case Constants.MESSAGE_MENU_REQUEST:
-                return "Menu REquest";
+                return "Menu Request";
             case Constants.MESSAGE_MENU_STATUS:
                 return "Menu Status";
             case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
@@ -224,7 +247,7 @@ public final class HdmiCecMessage {
             case Constants.MESSAGE_SET_EXTERNAL_TIMER:
                 return "Set External Timer";
             case Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR:
-                return "Repot Short Audio Descriptor";
+                return "Report Short Audio Descriptor";
             case Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR:
                 return "Request Short Audio Descriptor";
             case Constants.MESSAGE_INITIATE_ARC:

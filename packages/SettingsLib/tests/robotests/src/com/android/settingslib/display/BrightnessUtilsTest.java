@@ -17,14 +17,14 @@
 package com.android.settingslib.display;
 
 import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
-import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class BrightnessUtilsTest {
 
     private static final int MIN = 1;

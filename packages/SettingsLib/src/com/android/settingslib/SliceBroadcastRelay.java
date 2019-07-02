@@ -23,6 +23,10 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Process;
 import android.os.UserHandle;
+import android.util.ArraySet;
+import android.util.Log;
+
+import java.util.Set;
 
 /**
  * Utility class that allows Settings to use SystemUI to relay broadcasts related to pinned slices.
@@ -38,12 +42,22 @@ public class SliceBroadcastRelay {
     public static final String EXTRA_URI = "uri";
     public static final String EXTRA_RECEIVER = "receiver";
     public static final String EXTRA_FILTER = "filter";
+    private static final String TAG = "SliceBroadcastRelay";
 
-    public static void registerReceiver(Context context, Uri registerKey,
+    private static final Set<Uri> sRegisteredUris = new ArraySet<>();
+
+    /**
+     * Associate intent filter/sliceUri with corresponding receiver.
+     */
+    public static void registerReceiver(Context context, Uri sliceUri,
             Class<? extends BroadcastReceiver> receiver, IntentFilter filter) {
+
+        Log.d(TAG, "Registering Uri for broadcast relay: " + sliceUri);
+        sRegisteredUris.add(sliceUri);
+
         Intent registerBroadcast = new Intent(ACTION_REGISTER);
         registerBroadcast.setPackage(SYSTEMUI_PACKAGE);
-        registerBroadcast.putExtra(EXTRA_URI, ContentProvider.maybeAddUserId(registerKey,
+        registerBroadcast.putExtra(EXTRA_URI, ContentProvider.maybeAddUserId(sliceUri,
                 Process.myUserHandle().getIdentifier()));
         registerBroadcast.putExtra(EXTRA_RECEIVER,
                 new ComponentName(context.getPackageName(), receiver.getName()));
@@ -52,12 +66,21 @@ public class SliceBroadcastRelay {
         context.sendBroadcastAsUser(registerBroadcast, UserHandle.SYSTEM);
     }
 
-    public static void unregisterReceivers(Context context, Uri registerKey) {
-        Intent registerBroadcast = new Intent(ACTION_UNREGISTER);
+    /**
+     * Unregisters all receivers for a given slice uri.
+     */
+
+    public static void unregisterReceivers(Context context, Uri sliceUri) {
+        if (!sRegisteredUris.contains(sliceUri)) {
+            return;
+        }
+        Log.d(TAG, "Unregistering uri broadcast relay: " + sliceUri);
+        final Intent registerBroadcast = new Intent(ACTION_UNREGISTER);
         registerBroadcast.setPackage(SYSTEMUI_PACKAGE);
-        registerBroadcast.putExtra(EXTRA_URI, ContentProvider.maybeAddUserId(registerKey,
+        registerBroadcast.putExtra(EXTRA_URI, ContentProvider.maybeAddUserId(sliceUri,
                 Process.myUserHandle().getIdentifier()));
 
         context.sendBroadcastAsUser(registerBroadcast, UserHandle.SYSTEM);
+        sRegisteredUris.remove(sliceUri);
     }
 }

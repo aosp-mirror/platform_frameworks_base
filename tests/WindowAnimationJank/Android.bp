@@ -17,7 +17,7 @@ android_test {
     srcs: ["src/**/*.java"],
     static_libs: [
         "ub-uiautomator",
-        "ub-janktesthelper",
+        "androidx.test.janktesthelper",
         "junit",
     ],
     libs: ["android.test.base.stubs"],

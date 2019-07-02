@@ -129,7 +129,7 @@ public final class PublishConfig implements Parcelable {
         dest.writeInt(mEnableRanging ? 1 : 0);
     }
 
-    public static final Creator<PublishConfig> CREATOR = new Creator<PublishConfig>() {
+    public static final @android.annotation.NonNull Creator<PublishConfig> CREATOR = new Creator<PublishConfig>() {
         @Override
         public PublishConfig[] newArray(int size) {
             return new PublishConfig[size];
@@ -172,8 +172,9 @@ public final class PublishConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType, mTtlSec,
-                mEnableTerminateNotification, mEnableRanging);
+        return Objects.hash(Arrays.hashCode(mServiceName), Arrays.hashCode(mServiceSpecificInfo),
+                Arrays.hashCode(mMatchFilter), mPublishType, mTtlSec, mEnableTerminateNotification,
+                mEnableRanging);
     }
 
     /**

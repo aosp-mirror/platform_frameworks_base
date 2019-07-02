@@ -51,6 +51,10 @@ public final class CategoryKey {
     public static final String CATEGORY_GESTURES = "com.android.settings.category.ia.gestures";
     public static final String CATEGORY_NIGHT_DISPLAY =
             "com.android.settings.category.ia.night_display";
+    public static final String CATEGORY_PRIVACY =
+            "com.android.settings.category.ia.privacy";
+    public static final String CATEGORY_ENTERPRISE_PRIVACY =
+            "com.android.settings.category.ia.enterprise_privacy";
     public static final String CATEGORY_ABOUT_LEGAL =
             "com.android.settings.category.ia.about_legal";
     public static final String CATEGORY_MY_DEVICE_INFO =

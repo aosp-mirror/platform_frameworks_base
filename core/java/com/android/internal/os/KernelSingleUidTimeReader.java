@@ -16,7 +16,6 @@
 package com.android.internal.os;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.internal.os.KernelUidCpuFreqTimeReader.UID_TIMES_PROC_FILE;
 
 import android.annotation.NonNull;
 import android.util.Slog;
@@ -34,11 +33,12 @@ import java.util.Arrays;
 
 @VisibleForTesting(visibility = PACKAGE)
 public class KernelSingleUidTimeReader {
-    private final String TAG = KernelUidCpuFreqTimeReader.class.getName();
-    private final boolean DBG = false;
+    private static final String TAG = KernelSingleUidTimeReader.class.getName();
+    private static final boolean DBG = false;
 
-    private final String PROC_FILE_DIR = "/proc/uid/";
-    private final String PROC_FILE_NAME = "/time_in_state";
+    private static final String PROC_FILE_DIR = "/proc/uid/";
+    private static final String PROC_FILE_NAME = "/time_in_state";
+    private static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
 
     @VisibleForTesting
     public static final int TOTAL_READ_ERROR_COUNT = 5;

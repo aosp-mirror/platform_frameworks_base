@@ -32,6 +32,8 @@ public interface TransformationMethod
      * Beware that the returned text must be exactly the same length as
      * the source text, and that if the source text is Editable, the returned
      * text must mirror it dynamically instead of doing a one-time copy.
+     * The method should not return {@code null} unless {@code source}
+     * is {@code null}.
      */
     public CharSequence getTransformation(CharSequence source, View view);
 

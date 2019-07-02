@@ -26,7 +26,7 @@ import android.os.Parcelable;
  * {@hide}
  */
 public final class BulkCursorDescriptor implements Parcelable {
-    public static final Parcelable.Creator<BulkCursorDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BulkCursorDescriptor> CREATOR =
             new Parcelable.Creator<BulkCursorDescriptor>() {
         @Override
         public BulkCursorDescriptor createFromParcel(Parcel in) {

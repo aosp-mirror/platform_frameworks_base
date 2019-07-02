@@ -15,10 +15,9 @@
  */
 
 syntax = "proto2";
-option java_package = "android.content";
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.content;
 
@@ -28,5 +27,6 @@ message LocaleProto {
     optional string language = 1;
     optional string country = 2;
     optional string variant = 3;
+    optional string script = 4;
 }
 

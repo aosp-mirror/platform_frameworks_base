@@ -69,7 +69,7 @@ class CircularDisplayMask {
         try {
             ctrl = dc.makeOverlay()
                     .setName("CircularDisplayMask")
-                    .setSize(mScreenSize.x, mScreenSize.y) // not a typo
+                    .setBufferSize(mScreenSize.x, mScreenSize.y) // not a typo
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 

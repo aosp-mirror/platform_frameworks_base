@@ -19,7 +19,6 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.os.LooperProto;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
@@ -73,6 +72,7 @@ public final class Looper {
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
     @UnsupportedAppUsage
     private static Looper sMainLooper;  // guarded by Looper.class
+    private static Observer sObserver;
 
     @UnsupportedAppUsage
     final MessageQueue mQueue;
@@ -136,6 +136,15 @@ public final class Looper {
     }
 
     /**
+     * Set the transaction observer for all Loopers in this process.
+     *
+     * @hide
+     */
+    public static void setObserver(@Nullable Observer observer) {
+        sObserver = observer;
+    }
+
+    /**
      * Run the message queue in this thread. Be sure to call
      * {@link #quit()} to end the loop.
      */
@@ -174,6 +183,8 @@ public final class Looper {
                 logging.println(">>>>> Dispatching to " + msg.target + " " +
                         msg.callback + ": " + msg.what);
             }
+            // Make sure the observer won't change while processing a transaction.
+            final Observer observer = sObserver;
 
             final long traceTag = me.mTraceTag;
             long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
@@ -194,10 +205,24 @@ public final class Looper {
 
             final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
             final long dispatchEnd;
+            Object token = null;
+            if (observer != null) {
+                token = observer.messageDispatchStarting();
+            }
+            long origWorkSource = ThreadLocalWorkSource.setUid(msg.workSourceUid);
             try {
                 msg.target.dispatchMessage(msg);
+                if (observer != null) {
+                    observer.messageDispatched(token, msg);
+                }
                 dispatchEnd = needEndTime ? SystemClock.uptimeMillis() : 0;
+            } catch (Exception exception) {
+                if (observer != null) {
+                    observer.dispatchingThrewException(token, msg, exception);
+                }
+                throw exception;
             } finally {
+                ThreadLocalWorkSource.restore(origWorkSource);
                 if (traceTag != 0) {
                     Trace.traceEnd(traceTag);
                 }
@@ -402,5 +427,40 @@ public final class Looper {
     public String toString() {
         return "Looper (" + mThread.getName() + ", tid " + mThread.getId()
                 + ") {" + Integer.toHexString(System.identityHashCode(this)) + "}";
+    }
+
+    /** {@hide} */
+    public interface Observer {
+        /**
+         * Called right before a message is dispatched.
+         *
+         * <p> The token type is not specified to allow the implementation to specify its own type.
+         *
+         * @return a token used for collecting telemetry when dispatching a single message.
+         *         The token token must be passed back exactly once to either
+         *         {@link Observer#messageDispatched} or {@link Observer#dispatchingThrewException}
+         *         and must not be reused again.
+         *
+         */
+        Object messageDispatchStarting();
+
+        /**
+         * Called when a message was processed by a Handler.
+         *
+         * @param token Token obtained by previously calling
+         *              {@link Observer#messageDispatchStarting} on the same Observer instance.
+         * @param msg The message that was dispatched.
+         */
+        void messageDispatched(Object token, Message msg);
+
+        /**
+         * Called when an exception was thrown while processing a message.
+         *
+         * @param token Token obtained by previously calling
+         *              {@link Observer#messageDispatchStarting} on the same Observer instance.
+         * @param msg The message that was dispatched and caused an exception.
+         * @param exception The exception that was thrown.
+         */
+        void dispatchingThrewException(Object token, Message msg, Exception exception);
     }
 }

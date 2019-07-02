@@ -21,17 +21,14 @@
     </style>
 
     <style name="Theme.SelectPrinterActivity"
-           parent="android:style/Theme.DeviceDefault.Light.DarkActionBar">
+           parent="android:style/Theme.DeviceDefault.Light">
         <item name="android:textAppearanceListItemSecondary">@style/ListItemSecondary</item>
     </style>
 
-    <style name="Theme.PrintActivity" parent="@android:style/Theme.DeviceDefault">
+    <style name="Theme.PrintActivity" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
 </resources>

@@ -16,7 +16,7 @@
 
 package android.os.health;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -32,6 +32,7 @@ import java.util.Map;
  *
  * @hide
  */
+@TestApi
 public class HealthStatsWriter {
     private final HealthKeys.Constants mConstants;
 
@@ -60,7 +61,6 @@ public class HealthStatsWriter {
      * short name of the java class that the Constants object was initalized
      * with.
      */
-    @UnsupportedAppUsage
     public HealthStatsWriter(HealthKeys.Constants constants) {
         mConstants = constants;
 
@@ -91,7 +91,6 @@ public class HealthStatsWriter {
     /**
      * Add a timer for the given key.
      */
-    @UnsupportedAppUsage
     public void addTimer(int timerId, int count, long time) {
         final int index = mConstants.getIndex(HealthKeys.TYPE_TIMER, timerId);
 
@@ -103,7 +102,6 @@ public class HealthStatsWriter {
     /**
      * Add a measurement for the given key.
      */
-    @UnsupportedAppUsage
     public void addMeasurement(int measurementId, long value) {
         final int index = mConstants.getIndex(HealthKeys.TYPE_MEASUREMENT, measurementId);
 
@@ -118,7 +116,6 @@ public class HealthStatsWriter {
      *
      * The value field should not be null.
      */
-    @UnsupportedAppUsage
     public void addStats(int key, String name, HealthStatsWriter value) {
         final int index = mConstants.getIndex(HealthKeys.TYPE_STATS, key);
 
@@ -134,7 +131,6 @@ public class HealthStatsWriter {
      *
      * The value field should not be null.
      */
-    @UnsupportedAppUsage
     public void addTimers(int key, String name, TimerStat value) {
         final int index = mConstants.getIndex(HealthKeys.TYPE_TIMERS, key);
 
@@ -148,7 +144,6 @@ public class HealthStatsWriter {
     /**
      * Add a measurement for the given key and string name.
      */
-    @UnsupportedAppUsage
     public void addMeasurements(int key, String name, long value) {
         final int index = mConstants.getIndex(HealthKeys.TYPE_MEASUREMENTS, key);
 
@@ -167,7 +162,6 @@ public class HealthStatsWriter {
      * not parcelable and we don't flatten all the business about the
      * HealthKeys.Constants, only the values that were actually supplied)
      */
-    @UnsupportedAppUsage
     public void flattenToParcel(Parcel out) {
         int[] keys;
 

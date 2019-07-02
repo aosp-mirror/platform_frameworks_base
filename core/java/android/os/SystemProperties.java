@@ -26,9 +26,14 @@ import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import libcore.util.HexEncoding;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -101,6 +106,7 @@ public class SystemProperties {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static String get(@NonNull String key) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
@@ -168,6 +174,7 @@ public class SystemProperties {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static boolean getBoolean(@NonNull String key, boolean def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
@@ -214,13 +221,18 @@ public class SystemProperties {
                 return;
             }
             ArrayList<Runnable> callbacks = new ArrayList<Runnable>(sChangeCallbacks);
-            for (int i=0; i<callbacks.size(); i++) {
-                try {
-                    callbacks.get(i).run();
-                } catch (Throwable t) {
-                    Log.wtf(TAG, "Exception in SystemProperties change callback", t);
-                    // Ignore and try to go on.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < callbacks.size(); i++) {
+                    try {
+                        callbacks.get(i).run();
+                    } catch (Throwable t) {
+                        Log.wtf(TAG, "Exception in SystemProperties change callback", t);
+                        // Ignore and try to go on.
+                    }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -232,6 +244,27 @@ public class SystemProperties {
     @UnsupportedAppUsage
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
+    }
+
+    /**
+     * Return a {@code SHA-1} digest of the given keys and their values as a
+     * hex-encoded string. The ordering of the incoming keys doesn't change the
+     * digest result.
+     *
+     * @hide
+     */
+    public static @NonNull String digestOf(@NonNull String... keys) {
+        Arrays.sort(keys);
+        try {
+            final MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            for (String key : keys) {
+                final String item = key + "=" + get(key) + "\n";
+                digest.update(item.getBytes(StandardCharsets.UTF_8));
+            }
+            return HexEncoding.encodeToString(digest.digest()).toLowerCase();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @UnsupportedAppUsage

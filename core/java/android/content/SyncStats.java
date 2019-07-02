@@ -166,7 +166,7 @@ public class SyncStats implements Parcelable {
         dest.writeLong(numSkippedEntries);
     }
 
-    public static final Creator<SyncStats> CREATOR = new Creator<SyncStats>() {
+    public static final @android.annotation.NonNull Creator<SyncStats> CREATOR = new Creator<SyncStats>() {
         public SyncStats createFromParcel(Parcel in) {
             return new SyncStats(in);
         }

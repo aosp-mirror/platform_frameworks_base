@@ -16,6 +16,10 @@
 
 package android.provider;
 
+import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.Assert.assertThat;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -26,17 +30,22 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Unit test for SettingsProvider. */
 public class SettingsProviderTest extends AndroidTestCase {
+
     @MediumTest
     public void testNameValueCache() {
         ContentResolver r = getContext().getContentResolver();
@@ -378,5 +387,111 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertTrue(ssaid2.length() == 16);
 
         assertTrue(ssaid.equals(ssaid2));
+    }
+
+    @MediumTest
+    public void testCall_putAndGetConfig() {
+        ContentResolver r = getContext().getContentResolver();
+        String name = "key1";
+        String value = "value1";
+        String newValue = "value2";
+        Bundle args = new Bundle();
+        args.putString(Settings.NameValueTable.VALUE, value);
+
+        try {
+            // value is empty
+            Bundle results =
+                    r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            assertNull(results.get(Settings.NameValueTable.VALUE));
+
+            // save value
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            assertNull(results);
+
+            // value is no longer empty
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            assertEquals(value, results.get(Settings.NameValueTable.VALUE));
+
+            // save new value
+            args.putString(Settings.NameValueTable.VALUE, newValue);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+
+            // new value is returned
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            assertEquals(newValue, results.get(Settings.NameValueTable.VALUE));
+        } finally {
+            // clean up
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+        }
+    }
+
+    @MediumTest
+    public void testCall_deleteConfig() {
+        ContentResolver r = getContext().getContentResolver();
+        String name = "key1";
+        String value = "value1";
+        Bundle args = new Bundle();
+        args.putString(Settings.NameValueTable.VALUE, value);
+
+        try {
+            // save value
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+
+            // get value
+            Bundle results =
+                    r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            assertEquals(value, results.get(Settings.NameValueTable.VALUE));
+
+            // delete value
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name,
+                    null);
+
+            // value is empty now
+            results = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, name, null);
+            assertNull(results.get(Settings.NameValueTable.VALUE));
+        } finally {
+            // clean up
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+        }
+    }
+
+    @MediumTest
+    public void testCall_listConfig() {
+        ContentResolver r = getContext().getContentResolver();
+        String prefix = "foo";
+        String newPrefix = "bar";
+        String name = prefix + "/" + "key1";
+        String newName = newPrefix + "/" + "key1";
+        String value = "value1";
+        String newValue = "value2";
+        Bundle args = new Bundle();
+        args.putString(Settings.NameValueTable.VALUE, value);
+
+        try {
+            // save both values
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, name, args);
+            args.putString(Settings.NameValueTable.VALUE, newValue);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, newName, args);
+
+            // list all values
+            Bundle result = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG,
+                    null, null);
+            Map<String, String> keyValueMap =
+                    (HashMap) result.getSerializable(Settings.NameValueTable.VALUE);
+            assertThat(keyValueMap.size(), greaterThanOrEqualTo(2));
+            assertEquals(value, keyValueMap.get(name));
+            assertEquals(newValue, keyValueMap.get(newName));
+
+            // list values for prefix
+            args.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
+            result = r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_LIST_CONFIG, null, args);
+            keyValueMap = (HashMap) result.getSerializable(Settings.NameValueTable.VALUE);
+            assertThat(keyValueMap, aMapWithSize(1));
+            assertEquals(value, keyValueMap.get(name));
+        } finally {
+            // clean up
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, name, null);
+            r.call(DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, newName, null);
+        }
     }
 }

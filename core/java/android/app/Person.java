@@ -22,6 +22,8 @@ import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Provides an immutable reference to an entity that appears repeatedly on different surfaces of the
  * platform. For example, this could represent the sender of a message.
@@ -118,6 +120,26 @@ public final class Person implements Parcelable {
             return "name:" + mName;
         }
         return "";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Person) {
+            final Person other = (Person) obj;
+            return Objects.equals(mName, other.mName)
+                    && (mIcon == null ? other.mIcon == null :
+                    (other.mIcon != null && mIcon.sameAs(other.mIcon)))
+                    && Objects.equals(mUri, other.mUri)
+                    && Objects.equals(mKey, other.mKey)
+                    && mIsBot == other.mIsBot
+                    && mIsImportant == other.mIsImportant;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mName, mIcon, mUri, mKey, mIsBot, mIsImportant);
     }
 
     @Override
@@ -256,7 +278,7 @@ public final class Person implements Parcelable {
         }
     }
 
-    public static final Creator<Person> CREATOR = new Creator<Person>() {
+    public static final @android.annotation.NonNull Creator<Person> CREATOR = new Creator<Person>() {
         @Override
         public Person createFromParcel(Parcel in) {
             return new Person(in);

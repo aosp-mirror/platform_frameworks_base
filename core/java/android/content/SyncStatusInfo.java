@@ -401,7 +401,7 @@ public class SyncStatusInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
+    public static final @android.annotation.NonNull Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
         public SyncStatusInfo createFromParcel(Parcel in) {
             return new SyncStatusInfo(in);
         }

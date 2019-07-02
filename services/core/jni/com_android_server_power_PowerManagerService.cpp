@@ -32,6 +32,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <binder/IServiceManager.h>
+#include <gui/SurfaceComposerClient.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <hidl/ServiceManagement.h>
@@ -147,6 +148,8 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
             processPowerHalReturn(ret, "powerHint");
         }
     }
+
+    SurfaceComposerClient::notifyPowerHint(static_cast<int32_t>(hintId));
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
@@ -295,6 +298,12 @@ static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint feature
     }
 }
 
+static bool nativeForceSuspend(JNIEnv* /* env */, jclass /* clazz */) {
+    bool retval = false;
+    getSuspendControl()->forceSuspend(&retval);
+    return retval;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -303,6 +312,8 @@ static const JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeInit },
     { "nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeAcquireSuspendBlocker },
+    { "nativeForceSuspend", "()Z",
+            (void*) nativeForceSuspend },
     { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeReleaseSuspendBlocker },
     { "nativeSetInteractive", "(Z)V",

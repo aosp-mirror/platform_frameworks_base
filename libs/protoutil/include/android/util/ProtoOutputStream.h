@@ -17,9 +17,11 @@
 #ifndef ANDROID_UTIL_PROTOOUTPUT_STREAM_H
 #define ANDROID_UTIL_PROTOOUTPUT_STREAM_H
 
-#include <android/util/EncodedBuffer.h>
-
+#include <cstdint>
 #include <string>
+#include <vector>
+
+#include <android/util/EncodedBuffer.h>
 
 namespace android {
 namespace util {
@@ -104,7 +106,7 @@ public:
     /**
      * Starts a sub-message write session.
      * Returns a token of this write session.
-     * Must call end(token) when finish write this sub-message.
+     * Must call end(token) exactly once when finish write this sub-message.
      */
     uint64_t start(uint64_t fieldId);
     void end(uint64_t token);
@@ -120,8 +122,10 @@ public:
      * it is not able to write to ProtoOutputStream any more since the data is compact.
      */
     size_t size(); // Get the size of the serialized protobuf.
-    EncodedBuffer::iterator data(); // Get the reader apis of the data.
+    sp<ProtoReader> data(); // Get the reader apis of the data.
     bool flush(int fd); // Flush data directly to a file descriptor.
+    bool serializeToString(std::string* out); // Serializes the proto to a string.
+    bool serializeToVector(std::vector<uint8_t>* out); // Serializes the proto to a vector<uint8_t>.
 
     /**
      * Clears the ProtoOutputStream so the buffer can be reused instead of deallocation/allocation again.
@@ -134,7 +138,7 @@ public:
     void writeRawByte(uint8_t byte);
 
 private:
-    EncodedBuffer mBuffer;
+    sp<EncodedBuffer> mBuffer;
     size_t mCopyBegin;
     bool mCompact;
     uint32_t mDepth;
@@ -143,16 +147,16 @@ private:
 
     inline void writeDoubleImpl(uint32_t id, double val);
     inline void writeFloatImpl(uint32_t id, float val);
-    inline void writeInt64Impl(uint32_t id, long long val);
-    inline void writeInt32Impl(uint32_t id, int val);
+    inline void writeInt64Impl(uint32_t id, int64_t val);
+    inline void writeInt32Impl(uint32_t id, int32_t val);
     inline void writeUint64Impl(uint32_t id, uint64_t val);
     inline void writeUint32Impl(uint32_t id, uint32_t val);
     inline void writeFixed64Impl(uint32_t id, uint64_t val);
     inline void writeFixed32Impl(uint32_t id, uint32_t val);
-    inline void writeSFixed64Impl(uint32_t id, long long val);
-    inline void writeSFixed32Impl(uint32_t id, int val);
-    inline void writeZigzagInt64Impl(uint32_t id, long long val);
-    inline void writeZigzagInt32Impl(uint32_t id, int val);
+    inline void writeSFixed64Impl(uint32_t id, int64_t val);
+    inline void writeSFixed32Impl(uint32_t id, int32_t val);
+    inline void writeZigzagInt64Impl(uint32_t id, int64_t val);
+    inline void writeZigzagInt32Impl(uint32_t id, int32_t val);
     inline void writeEnumImpl(uint32_t id, int val);
     inline void writeBoolImpl(uint32_t id, bool val);
     inline void writeUtf8StringImpl(uint32_t id, const char* val, size_t size);
@@ -161,6 +165,9 @@ private:
     bool compact();
     size_t editEncodedSize(size_t rawSize);
     bool compactSize(size_t rawSize);
+
+    template<typename T>
+    bool internalWrite(uint64_t fieldId, T val, const char* typeName);
 };
 
 }

@@ -19,11 +19,12 @@ package com.android.internal.widget;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
 import android.text.Layout;
 import android.view.View.MeasureSpec;
 import android.widget.TextView;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Assert;
 import org.junit.Before;

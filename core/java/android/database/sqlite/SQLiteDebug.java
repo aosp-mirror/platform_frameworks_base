@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import android.annotation.TestApi;
 import android.os.Build;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Printer;
@@ -34,35 +35,53 @@ public final class SQLiteDebug {
     private static native void nativeGetPagerStats(PagerStats stats);
 
     /**
-     * Controls the printing of informational SQL log messages.
+     * Inner class to avoid getting the value frozen in zygote.
      *
-     * Enable using "adb shell setprop log.tag.SQLiteLog VERBOSE".
+     * {@hide}
      */
-    public static final boolean DEBUG_SQL_LOG =
-            Log.isLoggable("SQLiteLog", Log.VERBOSE);
+    public static final class NoPreloadHolder {
+        /**
+         * Controls the printing of informational SQL log messages.
+         *
+         * Enable using "adb shell setprop log.tag.SQLiteLog VERBOSE".
+         */
+        public static final boolean DEBUG_SQL_LOG =
+                Log.isLoggable("SQLiteLog", Log.VERBOSE);
 
-    /**
-     * Controls the printing of SQL statements as they are executed.
-     *
-     * Enable using "adb shell setprop log.tag.SQLiteStatements VERBOSE".
-     */
-    public static final boolean DEBUG_SQL_STATEMENTS =
-            Log.isLoggable("SQLiteStatements", Log.VERBOSE);
+        /**
+         * Controls the printing of SQL statements as they are executed.
+         *
+         * Enable using "adb shell setprop log.tag.SQLiteStatements VERBOSE".
+         */
+        public static final boolean DEBUG_SQL_STATEMENTS =
+                Log.isLoggable("SQLiteStatements", Log.VERBOSE);
 
-    /**
-     * Controls the printing of wall-clock time taken to execute SQL statements
-     * as they are executed.
-     *
-     * Enable using "adb shell setprop log.tag.SQLiteTime VERBOSE".
-     */
-    public static final boolean DEBUG_SQL_TIME =
-            Log.isLoggable("SQLiteTime", Log.VERBOSE);
+        /**
+         * Controls the printing of wall-clock time taken to execute SQL statements
+         * as they are executed.
+         *
+         * Enable using "adb shell setprop log.tag.SQLiteTime VERBOSE".
+         */
+        public static final boolean DEBUG_SQL_TIME =
+                Log.isLoggable("SQLiteTime", Log.VERBOSE);
 
-    /**
-     * True to enable database performance testing instrumentation.
-     * @hide
-     */
-    public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
+
+        /**
+         * True to enable database performance testing instrumentation.
+         */
+        public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
+
+        private static final String SLOW_QUERY_THRESHOLD_PROP = "db.log.slow_query_threshold";
+
+        private static final String SLOW_QUERY_THRESHOLD_UID_PROP =
+                SLOW_QUERY_THRESHOLD_PROP + "." + Process.myUid();
+
+        /**
+         * Whether to add detailed information to slow query log.
+         */
+        public static final boolean DEBUG_LOG_DETAILED = Build.IS_DEBUGGABLE
+                && SystemProperties.getBoolean("db.log.detailed", false);
+    }
 
     private SQLiteDebug() {
     }
@@ -75,14 +94,20 @@ public final class SQLiteDebug {
      * be considered slow.  If the value does not exist or is negative, then no queries will
      * be considered slow.
      *
+     * To enable it for a specific UID, "db.log.slow_query_threshold.UID" could also be used.
+     *
      * This value can be changed dynamically while the system is running.
      * For example, "adb shell setprop db.log.slow_query_threshold 200" will
      * log all queries that take 200ms or longer to run.
      * @hide
      */
-    public static final boolean shouldLogSlowQuery(long elapsedTimeMillis) {
-        int slowQueryMillis = SystemProperties.getInt("db.log.slow_query_threshold", -1);
-        return slowQueryMillis >= 0 && elapsedTimeMillis >= slowQueryMillis;
+    public static boolean shouldLogSlowQuery(long elapsedTimeMillis) {
+        final int slowQueryMillis = Math.min(
+                SystemProperties.getInt(NoPreloadHolder.SLOW_QUERY_THRESHOLD_PROP,
+                        Integer.MAX_VALUE),
+                SystemProperties.getInt(NoPreloadHolder.SLOW_QUERY_THRESHOLD_UID_PROP,
+                        Integer.MAX_VALUE));
+        return elapsedTimeMillis >= slowQueryMillis;
     }
 
     /**
@@ -163,6 +188,11 @@ public final class SQLiteDebug {
      * @param args Command-line arguments supplied to dumpsys dbinfo
      */
     public static void dump(Printer printer, String[] args) {
+        dump(printer, args, false);
+    }
+
+    /** @hide */
+    public static void dump(Printer printer, String[] args, boolean isSystem) {
         boolean verbose = false;
         for (String arg : args) {
             if (arg.equals("-v")) {
@@ -170,6 +200,6 @@ public final class SQLiteDebug {
             }
         }
 
-        SQLiteDatabase.dumpAll(printer, verbose);
+        SQLiteDatabase.dumpAll(printer, verbose, isSystem);
     }
 }

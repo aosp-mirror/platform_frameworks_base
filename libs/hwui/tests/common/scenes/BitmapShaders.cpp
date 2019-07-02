@@ -44,8 +44,7 @@ public:
                 });
 
         SkPaint paint;
-        sk_sp<SkColorFilter> colorFilter;
-        sk_sp<SkImage> image = hwuiBitmap->makeImage(&colorFilter);
+        sk_sp<SkImage> image = hwuiBitmap->makeImage();
         sk_sp<SkShader> repeatShader =
                 image->makeShader(SkShader::TileMode::kRepeat_TileMode,
                                   SkShader::TileMode::kRepeat_TileMode, nullptr);

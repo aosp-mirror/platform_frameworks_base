@@ -310,7 +310,7 @@ public class DnsSdTxtRecord implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<DnsSdTxtRecord> CREATOR =
+    public static final @android.annotation.NonNull Creator<DnsSdTxtRecord> CREATOR =
         new Creator<DnsSdTxtRecord>() {
             public DnsSdTxtRecord createFromParcel(Parcel in) {
                 DnsSdTxtRecord info = new DnsSdTxtRecord();

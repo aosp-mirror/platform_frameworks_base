@@ -167,7 +167,7 @@ public final class DhcpResults implements Parcelable {
     /**
      * Implement the Parcelable interface
      */
-    public static final Creator<DhcpResults> CREATOR =
+    public static final @android.annotation.NonNull Creator<DhcpResults> CREATOR =
         new Creator<DhcpResults>() {
             public DhcpResults createFromParcel(Parcel in) {
                 return readFromParcel(in);

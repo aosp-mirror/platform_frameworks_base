@@ -196,7 +196,7 @@ public class WindowId implements Parcelable {
         out.writeStrongBinder(mToken.asBinder());
     }
 
-    public static final Parcelable.Creator<WindowId> CREATOR = new Parcelable.Creator<WindowId>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<WindowId> CREATOR = new Parcelable.Creator<WindowId>() {
         @Override
         public WindowId createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();

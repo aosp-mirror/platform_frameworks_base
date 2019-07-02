@@ -78,7 +78,7 @@ public final class MediaProjectionInfo implements Parcelable {
         UserHandle.writeToParcel(mUserHandle, out);
     }
 
-    public static final Parcelable.Creator<MediaProjectionInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaProjectionInfo> CREATOR =
             new Parcelable.Creator<MediaProjectionInfo>() {
         @Override
         public MediaProjectionInfo createFromParcel(Parcel in) {

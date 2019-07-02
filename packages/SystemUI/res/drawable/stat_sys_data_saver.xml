@@ -18,26 +18,5 @@
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:insetLeft="2.5dp"
-    android:insetRight="2.5dp" >
-    <vector
-        android:width="18dp"
-        android:height="18dp"
-        android:viewportWidth="19.0"
-        android:viewportHeight="19.0">
-        <group
-            android:translateX="1.0"
-            android:translateY="1.0">
-            <path
-                android:pathData="M11.5,8.5c0,0.41 -0.34,0.74 -0.74,0.74L9.24,9.24v1.5c0,0.41 -0.34,0.74 -0.74,0.74s-0.74,-0.34 -0.74,-0.74v-1.5h-1.5c-0.41,0 -0.74,-0.34 -0.74,-0.74s0.34,-0.74 0.74,-0.74h1.5v-1.5c0,-0.41 0.34,-0.74 0.74,-0.74s0.74,0.34 0.74,0.74v1.5h1.5c0.42,-0.01 0.76,0.33 0.76,0.74z"
-                android:fillColor="#FFF"/>
-            <path
-                android:pathData="M13.23,12.05l0.99,0.57c0.19,0.12 0.25,0.38 0.12,0.55A7.452,7.452 0,0 1,7.5 15.9c-3.29,-0.44 -5.96,-3.08 -6.41,-6.38 -0.57,-4.17 2.33,-7.8 6.23,-8.42 0.23,-0.04 0.44,0.15 0.44,0.37v1.15c0,0.18 -0.14,0.33 -0.31,0.37 -2.7,0.52 -4.71,2.96 -4.55,5.83 0.16,2.86 2.57,5.21 5.43,5.29 1.77,0.06 3.38,-0.72 4.44,-1.97 0.11,-0.14 0.31,-0.18 0.46,-0.09z"
-                android:fillColor="#FFF" />
-            <path
-                android:pathData="M14.11,8.5c0,0.62 -0.11,1.22 -0.29,1.78 -0.06,0.17 0.01,0.35 0.16,0.45l1,0.57c0.19,0.12 0.46,0.03 0.54,-0.18 0.3,-0.82 0.47,-1.7 0.47,-2.62 0,-3.73 -2.73,-6.82 -6.31,-7.39a0.377,0.377 0,0 0,-0.44 0.37v1.15c0,0.18 0.14,0.33 0.31,0.36 2.59,0.51 4.56,2.78 4.56,5.51z"
-                android:fillAlpha="0.3"
-                android:fillColor="#FFF" />
-
-        </group>
-    </vector>
-</inset>
+    android:insetRight="2.5dp"
+    android:drawable="@drawable/ic_data_saver" />

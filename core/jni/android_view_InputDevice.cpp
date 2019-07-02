@@ -37,13 +37,13 @@ static struct {
 } gInputDeviceClassInfo;
 
 jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& deviceInfo) {
-    ScopedLocalRef<jstring> nameObj(env, env->NewStringUTF(deviceInfo.getDisplayName().string()));
+    ScopedLocalRef<jstring> nameObj(env, env->NewStringUTF(deviceInfo.getDisplayName().c_str()));
     if (!nameObj.get()) {
         return NULL;
     }
 
     ScopedLocalRef<jstring> descriptorObj(env,
-            env->NewStringUTF(deviceInfo.getIdentifier().descriptor.string()));
+            env->NewStringUTF(deviceInfo.getIdentifier().descriptor.c_str()));
     if (!descriptorObj.get()) {
         return NULL;
     }
@@ -68,9 +68,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                 deviceInfo.getKeyboardType(), kcmObj.get(), deviceInfo.hasVibrator(),
                 hasMic, deviceInfo.hasButtonUnderPad()));
 
-    const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
-    for (size_t i = 0; i < ranges.size(); i++) {
-        const InputDeviceInfo::MotionRange& range = ranges.itemAt(i);
+    const std::vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
+    for (const InputDeviceInfo::MotionRange& range: ranges) {
         env->CallVoidMethod(inputDeviceObj.get(), gInputDeviceClassInfo.addMotionRange, range.axis,
                 range.source, range.min, range.max, range.flat, range.fuzz, range.resolution);
         if (env->ExceptionCheck()) {

@@ -35,37 +35,28 @@
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
+    <color name="qs_customize_background">@color/GM2_grey_50</color>
+    <color name="qs_customize_decoration">@color/GM2_grey_100</color>
+
+    <!-- The color of the background in the separated list of the Global Actions menu -->
+    <color name="global_actions_separated_background">#F5F5F5</color>
+
+    <!-- The color of the background in the grid of the Global Actions menu -->
+    <color name="global_actions_grid_background">#F1F3F4</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_text">@color/GM2_grey_700</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_alert_text">@color/GM2_red_700</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
 
-    <!-- The disabled recents task bar background color. -->
-    <color name="recents_task_bar_disabled_background_color">#ff676767</color>
-    <!-- The default recents task bar background color. -->
-    <color name="recents_task_bar_default_background_color">#ffe6e6e6</color>
-    <!-- The default recents task view background color. -->
-    <color name="recents_task_view_default_background_color">#fff3f3f3</color>
-    <!-- The recents task bar light text color to be drawn on top of dark backgrounds. -->
-    <color name="recents_task_bar_light_text_color">#ffeeeeee</color>
-    <!-- The recents task bar dark text color to be drawn on top of light backgrounds. -->
-    <color name="recents_task_bar_dark_text_color">#cc000000</color>
-    <!-- The recents task bar light dismiss icon color to be drawn on top of dark backgrounds. -->
-    <color name="recents_task_bar_light_icon_color">#ccffffff</color>
-    <!-- The recents task bar dark dismiss icon color to be drawn on top of light backgrounds. -->
-    <color name="recents_task_bar_dark_icon_color">#99000000</color>
-    <!-- The lock to task button background color. -->
-    <color name="recents_task_view_lock_to_app_button_background_color">#ffe6e6e6</color>
-    <!-- The lock to task button foreground color. -->
-    <color name="recents_task_view_lock_to_app_button_color">#ff666666</color>
-    <!-- The background color for the freeform workspace. -->
-    <color name="recents_freeform_workspace_bg_color">#33FFFFFF</color>
-
-    <!-- The background color for clear all button on light backgrounds if not transparent. -->
-    <color name="recents_clear_all_button_bg_light_color">#CCFFFFFF</color>
-    <!-- The background color for clear all button on dark backgrounds if not transparent. -->
-    <color name="recents_clear_all_button_bg_dark_color">#CC000000</color>
-
     <color name="keyguard_affordance">#ffffffff</color>
+
+    <!-- Shadows under the clock, date and other keyguard text fields -->
+    <color name="keyguard_shadow_color">#B2000000</color>
 
     <!-- The color of the legacy notification background -->
     <color name="notification_legacy_background_color">#ff1a1a1a</color>
@@ -83,7 +74,7 @@
     <color name="notification_divider_color">#FF616161</color>
 
     <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">#ffeeeeee</color>
+    <color name="notification_shade_background_color">@color/GM2_grey_200</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>
@@ -92,10 +83,31 @@
     <color name="notification_ripple_tinted_color">#30ffffff</color>
 
     <!-- The color of the gear shown behind a notification -->
-    <color name="notification_gear_color">#ff757575</color>
+    <color name="notification_gear_color">@color/GM2_grey_700</color>
+
+    <!-- The color of the text inside a notification -->
+    <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_light</color>
 
     <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">#f8f9fa</color>
+    <color name="notification_guts_bg_color">@color/GM2_grey_50</color>
+
+    <color name="notification_guts_link_icon_tint">@color/GM2_grey_700</color>
+    <color name="notification_guts_sub_text_color">@color/GM2_grey_700</color>
+    <color name="notification_guts_header_text_color">@color/GM2_grey_900</color>
+    <color name="notification_silence_color">#FF32c1de</color>
+    <color name="notification_alert_color">#FFF87B2B</color>
+    <color name="notification_guts_info_button_color">@color/GM2_blue_700</color>
+    <color name="notification_guts_priority_button_content_color">@color/GM2_grey_700</color>
+    <color name="notification_guts_priority_button_content_color_selected">@color/GM2_blue_700</color>
+    <color name="notification_guts_priority_button_bg_fill_color">@color/transparent</color>
+    <color name="notification_guts_priority_button_bg_fill_color_selected">#FFFFFF</color>
+    <color name="notification_guts_priority_button_bg_stroke_color">@color/GM2_grey_300</color>
+    <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_blue_600</color>
+
+    <color name="notification_section_header_label_color">@color/GM2_grey_900</color>
+    <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
+    <!-- The divider view for the notification channel editor half-shelf -->
+    <color name="notification_channel_dialog_separator">@color/GM2_grey_200</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
@@ -107,23 +119,20 @@
     <!-- The shadow color for light navigation bar icons. -->
     <color name="nav_key_button_shadow_color">#30000000</color>
 
-    <!-- Shadow color for the first pixels around the fake shadow for recents. -->
-    <color name="fake_shadow_start_color">#44000000</color>
-
-    <!-- Shadow color for the furthest pixels around the fake shadow for recents. -->
-    <color name="fake_shadow_end_color">#03000000</color>
-
     <color name="screen_pinning_request_window_bg">#80000000</color>
 
     <color name="segmented_buttons_background">#14FFFFFF</color><!-- 8% white -->
 
-    <color name="dark_mode_icon_color_single_tone">#99000000</color>
     <color name="dark_mode_icon_color_dual_tone_background">#3d000000</color>
     <color name="dark_mode_icon_color_dual_tone_fill">#7a000000</color>
 
-    <color name="light_mode_icon_color_single_tone">#ffffff</color>
     <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
     <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
+
+    <color name="dark_mode_qs_icon_color_single_tone">#B3000000</color><!-- 70% black -->
+    <color name="dark_mode_qs_icon_color_dual_tone_background">#3d000000</color>
+    <!-- Chosen so fill over background matches single tone -->
+    <color name="dark_mode_qs_icon_color_dual_tone_fill">#99000000</color>
 
     <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
@@ -144,7 +153,6 @@
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_keyword_color">#d9000000</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
 
@@ -152,19 +160,45 @@
 
     <color name="zen_introduction">#ffffffff</color>
 
-    <color name="smart_reply_button_text">#5F6368</color>
+    <color name="smart_reply_button_text">@color/GM2_grey_700</color>
     <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
     <color name="smart_reply_button_background">#ffffffff</color>
     <color name="smart_reply_button_stroke">#ffdadce0</color>
 
-    <!-- Fingerprint dialog colors -->
-    <color name="fingerprint_dialog_bg_color">#ffffffff</color> <!-- 100% white -->
-    <color name="fingerprint_dialog_text_dark_color">#dd000000</color> <!-- 87% black -->
-    <color name="fingerprint_dialog_text_light_color">#89000000</color> <!-- 54% black -->
-    <color name="fingerprint_dialog_dim_color">#80000000</color> <!-- 50% black -->
-    <color name="fingerprint_dialog_error_color">#fff44336</color> <!-- red -->
-    <color name="fingerprint_dialog_fingerprint_color">#ff008577</color> <!-- teal -->
+    <!-- Biometric dialog colors -->
+    <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
+    <color name="biometric_dialog_gray">#ff757575</color>
+    <color name="biometric_dialog_accent">#ff008577</color>                 <!-- dark teal -->
+    <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>
+
+    <!-- Color for the Assistant invocation lights -->
+    <color name="default_invocation_lights_color">#ffffffff</color>         <!-- white -->
+
+    <!-- GM2 colors -->
+    <color name="GM2_grey_50">#F8F9FA</color>
+    <color name="GM2_grey_100">#F1F3F4</color>
+    <color name="GM2_grey_200">#E8EAED</color>
+    <color name="GM2_grey_300">#DADCE0</color>
+    <color name="GM2_grey_400">#BDC1C6</color>
+    <color name="GM2_grey_500">#9AA0A6</color>
+    <color name="GM2_grey_600">#80868B</color>
+    <color name="GM2_grey_650">#70757A</color>
+    <color name="GM2_grey_700">#5F6368</color>
+    <color name="GM2_grey_800">#3C4043</color>
+    <color name="GM2_grey_900">#202124</color>
+
+    <color name="GM2_red_300">#F28B82</color>
+    <color name="GM2_red_500">#B71C1C</color>
+    <color name="GM2_red_700">#C5221F</color>
+
+    <color name="GM2_blue_200">#AECBFA</color>
+    <color name="GM2_blue_300">#8AB4F8</color>
+    <color name="GM2_blue_600">#1A73E8</color>
+    <color name="GM2_blue_700">#1967D2</color>
+
+    <color name="GM2_yellow_500">#FFFBBC04</color>
+    <color name="GM2_green_500">#FF34A853</color>
 </resources>

@@ -13,30 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.provider;
+
+import static android.provider.FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND;
+import static android.provider.FontsContract.Columns.RESULT_CODE_FONT_UNAVAILABLE;
+import static android.provider.FontsContract.Columns.RESULT_CODE_MALFORMED_QUERY;
+import static android.provider.FontsContract.Columns.RESULT_CODE_OK;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import static android.provider.FontsContract.Columns.RESULT_CODE_OK;
-import static android.provider.FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND;
-import static android.provider.FontsContract.Columns.RESULT_CODE_FONT_UNAVAILABLE;
-import static android.provider.FontsContract.Columns.RESULT_CODE_MALFORMED_QUERY;
-
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.Signature;
 import android.database.MatrixCursor;
 import android.graphics.fonts.FontVariationAxis;
 import android.provider.FontsContract.FontInfo;
-import android.support.test.filters.SmallTest;
 import android.test.ProviderTestCase2;
 import android.util.Base64;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;

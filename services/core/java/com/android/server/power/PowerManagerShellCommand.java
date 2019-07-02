@@ -41,6 +41,8 @@ class PowerManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch(cmd) {
+                case "set-adaptive-power-saver-enabled":
+                    return runSetAdaptiveEnabled();
                 case "set-mode":
                     return runSetMode();
                 default:
@@ -52,6 +54,11 @@ class PowerManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private int runSetAdaptiveEnabled() throws RemoteException {
+        mInterface.setAdaptivePowerSaveEnabled(Boolean.parseBoolean(getNextArgRequired()));
+        return 0;
+    }
+
     private int runSetMode() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         int mode = -1;
@@ -61,7 +68,7 @@ class PowerManagerShellCommand extends ShellCommand {
             pw.println("Error: " + ex.toString());
             return -1;
         }
-        mInterface.setPowerSaveMode(mode == LOW_POWER_MODE_ON);
+        mInterface.setPowerSaveModeEnabled(mode == LOW_POWER_MODE_ON);
         return 0;
     }
 
@@ -72,6 +79,8 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
+        pw.println("  set-adaptive-power-saver-enabled [true|false]");
+        pw.println("    enables or disables adaptive power saver.");
         pw.println("  set-mode MODE");
         pw.println("    sets the power mode of the device to MODE.");
         pw.println("    1 turns low power mode on and 0 turns low power mode off.");

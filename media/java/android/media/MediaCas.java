@@ -18,8 +18,12 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.cas.V1_0.*;
+import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
+import android.hardware.cas.V1_0.ICas;
+import android.hardware.cas.V1_0.IMediaCasService;
+import android.hardware.cas.V1_1.ICasListener;
 import android.media.MediaCasException.*;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IHwBinder;
@@ -95,23 +99,35 @@ import java.util.ArrayList;
 public final class MediaCas implements AutoCloseable {
     private static final String TAG = "MediaCas";
     private ICas mICas;
+    private android.hardware.cas.V1_1.ICas mICasV11;
     private EventListener mListener;
     private HandlerThread mHandlerThread;
     private EventHandler mEventHandler;
 
-    private static final Singleton<IMediaCasService> gDefault =
-            new Singleton<IMediaCasService>() {
+    private static final Singleton<IMediaCasService> sService = new Singleton<IMediaCasService>() {
         @Override
         protected IMediaCasService create() {
             try {
-                return IMediaCasService.getService();
-            } catch (RemoteException e) {}
+                Log.d(TAG, "Tried to get cas@1.1 service");
+                android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                        android.hardware.cas.V1_1.IMediaCasService.getService(true /*wait*/);
+                if (serviceV11 != null) {
+                    return serviceV11;
+                }
+            } catch (Exception eV1_1) {
+                try {
+                    Log.d(TAG, "Tried to get cas@1.0 service");
+                    return IMediaCasService.getService(true /*wait*/);
+                } catch (Exception eV1_0) {
+                    Log.d(TAG, "Failed to get cas@1.0 service");
+                }
+            }
             return null;
         }
     };
 
     static IMediaCasService getService() {
-        return gDefault.get();
+        return sService.get();
     }
 
     private void validateInternalStates() {
@@ -122,12 +138,16 @@ public final class MediaCas implements AutoCloseable {
 
     private void cleanupAndRethrowIllegalState() {
         mICas = null;
+        mICasV11 = null;
         throw new IllegalStateException();
     }
 
-    private class EventHandler extends Handler
-    {
+    private class EventHandler extends Handler {
+
         private static final int MSG_CAS_EVENT = 0;
+        private static final int MSG_CAS_SESSION_EVENT = 1;
+        private static final String SESSION_KEY = "sessionId";
+        private static final String DATA_KEY = "data";
 
         public EventHandler(Looper looper) {
             super(looper);
@@ -138,6 +158,12 @@ public final class MediaCas implements AutoCloseable {
             if (msg.what == MSG_CAS_EVENT) {
                 mListener.onEvent(MediaCas.this, msg.arg1, msg.arg2,
                         toBytes((ArrayList<Byte>) msg.obj));
+            } else if (msg.what == MSG_CAS_SESSION_EVENT) {
+                Bundle bundle = msg.getData();
+                ArrayList<Byte> sessionId = toByteArray(bundle.getByteArray(SESSION_KEY));
+                mListener.onSessionEvent(MediaCas.this,
+                        createFromSessionId(sessionId), msg.arg1, msg.arg2,
+                        bundle.getByteArray(DATA_KEY));
             }
         }
     }
@@ -149,8 +175,21 @@ public final class MediaCas implements AutoCloseable {
             mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_EVENT, event, arg, data));
         }
+        @Override
+        public void onSessionEvent(@NonNull ArrayList<Byte> sessionId,
+                int event, int arg, @Nullable ArrayList<Byte> data)
+                throws RemoteException {
+            Message msg = mEventHandler.obtainMessage();
+            msg.what = EventHandler.MSG_CAS_SESSION_EVENT;
+            msg.arg1 = event;
+            msg.arg2 = arg;
+            Bundle bundle = new Bundle();
+            bundle.putByteArray(EventHandler.SESSION_KEY, toBytes(sessionId));
+            bundle.putByteArray(EventHandler.DATA_KEY, toBytes(data));
+            msg.setData(bundle);
+            mEventHandler.sendMessage(msg);
+        }
     };
-
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
      *
@@ -222,6 +261,20 @@ public final class MediaCas implements AutoCloseable {
         }
 
         /**
+         * Query if an object equal current Session object.
+         *
+         * @param obj an object to compare to current Session object.
+         *
+         * @return Whether input object equal current Session object.
+         */
+        public boolean equals(Object obj) {
+            if (obj instanceof Session) {
+                return mSessionId.equals(((Session) obj).mSessionId);
+            }
+            return false;
+        }
+
+        /**
          * Set the private data for a session.
          *
          * @param data byte array of the private data.
@@ -279,6 +332,35 @@ public final class MediaCas implements AutoCloseable {
          */
         public void processEcm(@NonNull byte[] data) throws MediaCasException {
             processEcm(data, 0, data.length);
+        }
+
+        /**
+         * Send a session event to a CA system. The format of the event is
+         * scheme-specific and is opaque to the framework.
+         *
+         * @param event an integer denoting a scheme-specific event to be sent.
+         * @param arg a scheme-specific integer argument for the event.
+         * @param data a byte array containing scheme-specific data for the event.
+         *
+         * @throws IllegalStateException if the MediaCas instance is not valid.
+         * @throws MediaCasException for CAS-specific errors.
+         * @throws MediaCasStateException for CAS-specific state exceptions.
+         */
+        public void sendSessionEvent(int event, int arg, @Nullable byte[] data)
+                throws MediaCasException {
+            validateInternalStates();
+
+            if (mICasV11 == null) {
+                Log.d(TAG, "Send Session Event isn't supported by cas@1.0 interface");
+                throw new UnsupportedCasException("Send Session Event is not supported");
+            }
+
+            try {
+                MediaCasException.throwExceptionIfNeeded(
+                        mICasV11.sendSessionEvent(mSessionId, event, arg, toByteArray(data)));
+            } catch (RemoteException e) {
+                cleanupAndRethrowIllegalState();
+            }
         }
 
         /**
@@ -362,7 +444,16 @@ public final class MediaCas implements AutoCloseable {
      */
     public MediaCas(int CA_system_id) throws UnsupportedCasException {
         try {
-            mICas = getService().createPlugin(CA_system_id, mBinder);
+            IMediaCasService service = getService();
+            android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                    android.hardware.cas.V1_1.IMediaCasService.castFrom(service);
+            if (serviceV11 == null) {
+                Log.d(TAG, "Used cas@1_0 interface to create plugin");
+                mICas = service.createPlugin(CA_system_id, mBinder);
+            } else {
+                Log.d(TAG, "Used cas@1.1 interface to create plugin");
+                mICas = mICasV11 = serviceV11.createPluginExt(CA_system_id, mBinder);
+            }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create plugin: " + e);
             mICas = null;
@@ -388,13 +479,28 @@ public final class MediaCas implements AutoCloseable {
         /**
          * Notify the listener of a scheme-specific event from the CA system.
          *
-         * @param MediaCas the MediaCas object to receive this event.
+         * @param mediaCas the MediaCas object to receive this event.
          * @param event an integer whose meaning is scheme-specific.
          * @param arg an integer whose meaning is scheme-specific.
          * @param data a byte array of data whose format and meaning are
          * scheme-specific.
          */
-        void onEvent(MediaCas MediaCas, int event, int arg, @Nullable byte[] data);
+        void onEvent(@NonNull MediaCas mediaCas, int event, int arg, @Nullable byte[] data);
+
+        /**
+         * Notify the listener of a scheme-specific session event from CA system.
+         *
+         * @param mediaCas the MediaCas object to receive this event.
+         * @param session session object which the event is for.
+         * @param event an integer whose meaning is scheme-specific.
+         * @param arg an integer whose meaning is scheme-specific.
+         * @param data a byte array of data whose format and meaning are
+         * scheme-specific.
+         */
+        default void onSessionEvent(@NonNull MediaCas mediaCas, @NonNull Session session,
+                int event, int arg, @Nullable byte[] data) {
+            Log.d(TAG, "Received MediaCas Session event");
+        }
     }
 
     /**
@@ -448,7 +554,7 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    private class OpenSessionCallback implements ICas.openSessionCallback {
+    private class OpenSessionCallback implements android.hardware.cas.V1_1.ICas.openSessionCallback{
         public Session mSession;
         public int mStatus;
         @Override
@@ -543,7 +649,7 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    /**
+   /**
      * Initiate a provisioning operation for a CA system.
      *
      * @param provisionString string containing information needed for the

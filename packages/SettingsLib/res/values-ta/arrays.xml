@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"ஸ்கேன் செய்கிறது…"</item>
+    <item msgid="8934131797783724664">"தேடுகிறது..."</item>
     <item msgid="8513729475867537913">"இணைக்கிறது..."</item>
     <item msgid="515055375277271756">"அங்கீகரிக்கிறது..."</item>
     <item msgid="1943354004029184381">"IP முகவரியைப் பெறுகிறது…"</item>
@@ -36,7 +36,7 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"ஸ்கேன் செய்கிறது…"</item>
+    <item msgid="8878186979715711006">"தேடுகிறது..."</item>
     <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> இல் இணைக்கிறது…"</item>
     <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> உடன் அங்கீகரிக்கிறது…"</item>
     <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> இலிருந்து IP முகவரியைப் பெறுகிறது…"</item>
@@ -57,6 +57,11 @@
     <item msgid="505558545611516707">"HDCP சரிபார்ப்பை எப்போதும் பயன்படுத்தாதே"</item>
     <item msgid="3878793616631049349">"DRM உள்ளடக்கத்திற்கு மட்டும் HDCP சோதனையைப் பயன்படுத்து"</item>
     <item msgid="45075631231212732">"HDCP சரிபார்ப்பை எப்போதும் பயன்படுத்து"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"முடக்கப்பட்டது"</item>
+    <item msgid="1969681323976948639">"இயக்கப்பட்டு வடிகட்டப்பட்டது"</item>
+    <item msgid="8719029132154020716">"இயக்கப்பட்டது"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (இயல்பு)"</item>
@@ -138,6 +143,12 @@
     <item msgid="4681409244565426925">"இணைப்புத் தரத்திற்காக மேம்படுத்தியது"</item>
     <item msgid="364670732877872677">"சிறந்த முறை (அடாப்டிவ் பிட் வீதம்)"</item>
   </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", செயலில் உள்ளது"</item>
+    <item msgid="8962366465966010158">", செயலில் உள்ளது (மீடியா)"</item>
+    <item msgid="4046665544396189228">", செயலில் உள்ளது (மொபைல்)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ஆஃப்"</item>
     <item msgid="1593289376502312923">"64K"</item>
@@ -174,30 +185,30 @@
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"அனிமேஷனை முடக்கு"</item>
-    <item msgid="6624864048416710414">"அனிமேஷன் அளவு .5x"</item>
-    <item msgid="2219332261255416635">"அனிமேஷன் அளவு 1x"</item>
-    <item msgid="3544428804137048509">"அனிமேஷன் அளவு 1.5x"</item>
-    <item msgid="3110710404225974514">"அனிமேஷன் அளவு 2x"</item>
-    <item msgid="4402738611528318731">"அனிமேஷன் அளவு 5x"</item>
-    <item msgid="6189539267968330656">"அனிமேஷன் அளவு 10x"</item>
+    <item msgid="6624864048416710414">"அனிமேஷன் வேகம் .5x"</item>
+    <item msgid="2219332261255416635">"அனிமேஷன் வேகம் 1x"</item>
+    <item msgid="3544428804137048509">"அனிமேஷன் வேகம் 1.5x"</item>
+    <item msgid="3110710404225974514">"அனிமேஷன் வேகம் 2x"</item>
+    <item msgid="4402738611528318731">"அனிமேஷன் வேகம் 5x"</item>
+    <item msgid="6189539267968330656">"அனிமேஷன் வேகம் 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"அனிமேஷனை முடக்கு"</item>
-    <item msgid="3375781541913316411">"அனிமேஷன் அளவு .5x"</item>
-    <item msgid="1991041427801869945">"அனிமேஷன் அளவு 1x"</item>
-    <item msgid="4012689927622382874">"அனிமேஷன் அளவு 1.5x"</item>
-    <item msgid="3289156759925947169">"அனிமேஷன் அளவு 2x"</item>
-    <item msgid="7705857441213621835">"அனிமேஷன் அளவு 5x"</item>
-    <item msgid="6660750935954853365">"அனிமேஷன் அளவு 10x"</item>
+    <item msgid="3375781541913316411">"அனிமேஷன் வேகம் .5x"</item>
+    <item msgid="1991041427801869945">"அனிமேஷன் வேகம் 1x"</item>
+    <item msgid="4012689927622382874">"அனிமேஷன் வேகம் 1.5x"</item>
+    <item msgid="3289156759925947169">"அனிமேஷன் வேகம் 2x"</item>
+    <item msgid="7705857441213621835">"அனிமேஷன் வேகம் 5x"</item>
+    <item msgid="6660750935954853365">"அனிமேஷன் வேகம் 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"அனிமேஷனை முடக்கு"</item>
-    <item msgid="1138649021950863198">"அனிமேஷன் அளவு .5x"</item>
-    <item msgid="4394388961370833040">"அனிமேஷன் அளவு 1x"</item>
-    <item msgid="8125427921655194973">"அனிமேஷன் அளவு 1.5x"</item>
-    <item msgid="3334024790739189573">"அனிமேஷன் அளவு 2x"</item>
-    <item msgid="3170120558236848008">"அனிமேஷன் அளவு 5x"</item>
-    <item msgid="1069584980746680398">"அனிமேஷன் அளவு 10x"</item>
+    <item msgid="1138649021950863198">"அனிமேஷன் வேகம் .5x"</item>
+    <item msgid="4394388961370833040">"அனிமேஷன் வேகம் 1x"</item>
+    <item msgid="8125427921655194973">"அனிமேஷன் வேகம் 1.5x"</item>
+    <item msgid="3334024790739189573">"அனிமேஷன் வேகம் 2x"</item>
+    <item msgid="3170120558236848008">"அனிமேஷன் வேகம் 5x"</item>
+    <item msgid="1069584980746680398">"அனிமேஷன் வேகம் 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"ஏதுமில்லை"</item>

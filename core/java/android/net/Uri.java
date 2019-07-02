@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Environment;
@@ -380,9 +381,10 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * returned as {@code tel:xxx-xxx-xxxx} and {@code http://example.com/path/to/item/} is
      * returned as {@code http://example.com/...}.
      * @return the common forms PII redacted string of this URI
+     * @hide
      */
-    @NonNull
-    public String toSafeString() {
+    @SystemApi
+    public @NonNull String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
         if (scheme != null) {
@@ -1801,7 +1803,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     /**
      * Reads Uris from Parcels.
      */
-    public static final Parcelable.Creator<Uri> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Uri> CREATOR
             = new Parcelable.Creator<Uri>() {
         public Uri createFromParcel(Parcel in) {
             int type = in.readInt();

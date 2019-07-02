@@ -38,12 +38,12 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -231,9 +231,9 @@ public class DozeMachineTest extends SysuiTestCase {
     public void testPulseReason_getMatchesRequest() {
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE);
-        mMachine.requestPulse(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP);
+        mMachine.requestPulse(DozeLog.REASON_SENSOR_DOUBLE_TAP);
 
-        assertEquals(DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP, mMachine.getPulseReason());
+        assertEquals(DozeLog.REASON_SENSOR_DOUBLE_TAP, mMachine.getPulseReason());
     }
 
     @Test

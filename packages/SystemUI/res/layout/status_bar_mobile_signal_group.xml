@@ -58,6 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical"
+            android:paddingStart="2.5dp"
             android:paddingEnd="1dp"
             android:visibility="gone" />
         <Space

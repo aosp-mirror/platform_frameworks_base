@@ -41,97 +41,50 @@ class ActivityManagerDebugConfig {
     // Enable all debug log categories.
     static final boolean DEBUG_ALL = false;
 
-    // Enable all debug log categories for activities.
-    static final boolean DEBUG_ALL_ACTIVITIES = DEBUG_ALL || false;
-
     // Available log categories in the activity manager package.
-    static final boolean DEBUG_ADD_REMOVE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_ANR = false;
-    static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_BACKGROUND_CHECK = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST_BACKGROUND = DEBUG_BROADCAST || false;
     static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_CLEANUP = DEBUG_ALL || false;
-    static final boolean DEBUG_CONFIGURATION = DEBUG_ALL || false;
-    static final boolean DEBUG_CONTAINERS = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_FOCUS = false;
-    static final boolean DEBUG_IDLE = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
-    static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
+    static final boolean DEBUG_BROADCAST_DEFERRAL = DEBUG_BROADCAST || false;
+    static final boolean DEBUG_COMPACTION = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
     static final boolean DEBUG_NETWORK = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ_REASON = DEBUG_ALL || false;
-    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean DEBUG_PROCESS_OBSERVERS = DEBUG_ALL || false;
     static final boolean DEBUG_PROCESSES = DEBUG_ALL || false;
     static final boolean DEBUG_PROVIDER = DEBUG_ALL || false;
     static final boolean DEBUG_PSS = DEBUG_ALL || false;
-    static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
-    static final boolean DEBUG_RECENTS_TRIM_TASKS = DEBUG_RECENTS || false;
-    static final boolean DEBUG_RELEASE = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_RESULTS = DEBUG_ALL || false;
-    static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_FOREGROUND_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
-    static final boolean DEBUG_STACK = DEBUG_ALL || false;
-    static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_SWITCH = DEBUG_ALL || false;
-    static final boolean DEBUG_TASKS = DEBUG_ALL || false;
-    static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
     static final boolean DEBUG_UID_OBSERVERS = DEBUG_ALL || false;
-    static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
-    static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
-    static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
     static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || false;
     static final boolean DEBUG_PERMISSIONS_REVIEW = DEBUG_ALL || false;
     static final boolean DEBUG_WHITELISTS = DEBUG_ALL || false;
-    static final boolean DEBUG_METRICS = DEBUG_ALL || false;
 
-    static final String POSTFIX_ADD_REMOVE = (APPEND_CATEGORY_NAME) ? "_AddRemove" : "";
-    static final String POSTFIX_APP = (APPEND_CATEGORY_NAME) ? "_App" : "";
     static final String POSTFIX_BACKUP = (APPEND_CATEGORY_NAME) ? "_Backup" : "";
     static final String POSTFIX_BROADCAST = (APPEND_CATEGORY_NAME) ? "_Broadcast" : "";
     static final String POSTFIX_CLEANUP = (APPEND_CATEGORY_NAME) ? "_Cleanup" : "";
-    static final String POSTFIX_CONFIGURATION = (APPEND_CATEGORY_NAME) ? "_Configuration" : "";
-    static final String POSTFIX_CONTAINERS = (APPEND_CATEGORY_NAME) ? "_Containers" : "";
-    static final String POSTFIX_FOCUS = (APPEND_CATEGORY_NAME) ? "_Focus" : "";
-    static final String POSTFIX_IDLE = (APPEND_CATEGORY_NAME) ? "_Idle" : "";
-    static final String POSTFIX_IMMERSIVE = (APPEND_CATEGORY_NAME) ? "_Immersive" : "";
-    static final String POSTFIX_LOCKTASK = (APPEND_CATEGORY_NAME) ? "_LockTask" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
     static final String POSTFIX_NETWORK = "_Network";
     static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
-    static final String POSTFIX_PAUSE = (APPEND_CATEGORY_NAME) ? "_Pause" : "";
     static final String POSTFIX_POWER = (APPEND_CATEGORY_NAME) ? "_Power" : "";
     static final String POSTFIX_PROCESS_OBSERVERS = (APPEND_CATEGORY_NAME)
             ? "_ProcessObservers" : "";
     static final String POSTFIX_PROCESSES = (APPEND_CATEGORY_NAME) ? "_Processes" : "";
     static final String POSTFIX_PROVIDER = (APPEND_CATEGORY_NAME) ? "_Provider" : "";
     static final String POSTFIX_PSS = (APPEND_CATEGORY_NAME) ? "_Pss" : "";
-    static final String POSTFIX_RECENTS = (APPEND_CATEGORY_NAME) ? "_Recents" : "";
-    static final String POSTFIX_RELEASE = (APPEND_CATEGORY_NAME) ? "_Release" : "";
-    static final String POSTFIX_RESULTS = (APPEND_CATEGORY_NAME) ? "_Results" : "";
-    static final String POSTFIX_SAVED_STATE = (APPEND_CATEGORY_NAME) ? "_SavedState" : "";
     static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =
             (APPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";
-    static final String POSTFIX_STACK = (APPEND_CATEGORY_NAME) ? "_Stack" : "";
-    static final String POSTFIX_STATES = (APPEND_CATEGORY_NAME) ? "_States" : "";
-    static final String POSTFIX_SWITCH = (APPEND_CATEGORY_NAME) ? "_Switch" : "";
-    static final String POSTFIX_TASKS = (APPEND_CATEGORY_NAME) ? "_Tasks" : "";
-    static final String POSTFIX_TRANSITION = (APPEND_CATEGORY_NAME) ? "_Transition" : "";
     static final String POSTFIX_UID_OBSERVERS = (APPEND_CATEGORY_NAME)
             ? "_UidObservers" : "";
-    static final String POSTFIX_URI_PERMISSION = (APPEND_CATEGORY_NAME) ? "_UriPermission" : "";
-    static final String POSTFIX_USER_LEAVING = (APPEND_CATEGORY_NAME) ? "_UserLeaving" : "";
-    static final String POSTFIX_VISIBILITY = (APPEND_CATEGORY_NAME) ? "_Visibility" : "";
-
 }

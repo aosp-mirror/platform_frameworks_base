@@ -15,15 +15,16 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.statusbar.policy.NetworkControllerImpl.TAG;
+
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.util.Log;
+
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
-
-import static com.android.systemui.statusbar.policy.NetworkControllerImpl.TAG;
 
 
 /**

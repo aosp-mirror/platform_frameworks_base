@@ -30,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.UserAvatarView;

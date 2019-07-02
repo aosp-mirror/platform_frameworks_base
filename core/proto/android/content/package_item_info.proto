@@ -15,10 +15,9 @@
  */
 
 syntax = "proto2";
-option java_package = "android.content.pm";
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.content.pm;
 
@@ -72,20 +71,43 @@ message ApplicationInfoProto {
         optional int32 requires_smallest_width_dp = 3;
         optional int32 compatible_width_limit_dp = 4;
         optional int32 largest_width_limit_dp = 5;
+        // String retrieved from the seinfo tag found in selinux policy. This value
+        // can be set through the mac_permissions.xml policy construct. This value
+        // is used for setting an SELinux security context on the process as well as
+        // its data directory.
         optional string seinfo = 6;
+        // The seinfo tag generated per-user. This value may change based upon the
+        // user's configuration. For example, when an instant app is installed for a
+        // user. It is an error if this field is ever null when trying to
+        // start a new process.
         optional string seinfo_user = 7;
+        // Full path to the device-protected directory assigned to the package for
+        // its persistent data.
         optional string device_protected_data_dir = 8;
+        // Full path to the credential-protected directory assigned to the package
+        // for its persistent data.
         optional string credential_protected_data_dir = 9;
+        // Paths to all shared libraries this application is linked against. This
+        // field is only set if the  PackageManager.GET_SHARED_LIBRARY_FILES} flag
+        // was used when retrieving the structure.
         repeated string shared_library_files = 10;
         optional string manage_space_activity_name = 11;
         optional int32 description_res = 12;
         optional int32 ui_options = 13;
         optional bool supports_rtl = 14;
         oneof full_backup_content {
+            // An optional attribute that indicates the app supports automatic backup
+            // of app data. 0 is the default and means the app's entire data folder +
+            // managed external storage will be backed up; Any negative value
+            // indicates the app does not support full-data backup, though it may
+            // still want to participate via the traditional key/value backup API; A
+            // positive number specifies an xml resource in which the application has
+            // defined its backup include/exclude criteria. The data in this field is
+            // of the format "@xml/<number>".
             string content = 15;
             bool is_full_backup = 16;
         }
-        optional int32 networkSecurity_config_res = 17;
+        optional int32 network_security_config_res = 17;
         optional int32 category = 18;
     }
     optional Detail detail = 17;

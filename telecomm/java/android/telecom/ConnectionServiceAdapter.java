@@ -316,12 +316,21 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     /**
      * Retrieves a list of remote connection services usable to place calls.
      */
-    void queryRemoteConnectionServices(RemoteServiceCallback callback) {
+    void queryRemoteConnectionServices(RemoteServiceCallback callback, String callingPackage) {
         // Only supported when there is only one adapter.
         if (mAdapters.size() == 1) {
             try {
-                mAdapters.iterator().next().queryRemoteConnectionServices(callback,
+                mAdapters.iterator().next().queryRemoteConnectionServices(callback, callingPackage,
                         Log.getExternalSession());
+            } catch (RemoteException e) {
+                Log.e(this, e, "Exception trying to query for remote CSs");
+            }
+        } else {
+            try {
+                // This is not an error condition, so just pass back an empty list.
+                // This happens when querying from a remote connection service, not the connection
+                // manager itself.
+                callback.onResult(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
             } catch (RemoteException e) {
                 Log.e(this, e, "Exception trying to query for remote CSs");
             }

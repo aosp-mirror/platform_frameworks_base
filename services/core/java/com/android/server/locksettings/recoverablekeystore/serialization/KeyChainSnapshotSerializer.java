@@ -24,25 +24,24 @@ import static com.android.server.locksettings.recoverablekeystore.serialization.
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_ALIAS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEYS;
-
-import static com.android.server.locksettings.recoverablekeystore.serialization
-        .KeyChainSnapshotSchema.TAG_BACKEND_PUBLIC_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_COUNTER_ID;
-import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_RECOVERY_KEY_MATERIAL;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_CHAIN_PROTECTION_PARAMS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_CHAIN_PROTECTION_PARAMS_LIST;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_CHAIN_SNAPSHOT;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_DERIVATION_PARAMS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_MATERIAL;
+import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_METADATA;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_LOCK_SCREEN_UI_TYPE;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_MAX_ATTEMPTS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_MEMORY_DIFFICULTY;
+import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_RECOVERY_KEY_MATERIAL;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_SALT;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_SERVER_PARAMS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_SNAPSHOT_VERSION;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_TRUSTED_HARDWARE_CERT_PATH;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_USER_SECRET_TYPE;
 
+import android.annotation.Nullable;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
@@ -103,6 +102,7 @@ public class KeyChainSnapshotSerializer {
             XmlSerializer xmlSerializer, WrappedApplicationKey applicationKey) throws IOException {
         writePropertyTag(xmlSerializer, TAG_ALIAS, applicationKey.getAlias());
         writePropertyTag(xmlSerializer, TAG_KEY_MATERIAL, applicationKey.getEncryptedKeyMaterial());
+        writePropertyTag(xmlSerializer, TAG_KEY_METADATA, applicationKey.getMetadata());
     }
 
     private static void writeKeyChainProtectionParams(
@@ -181,8 +181,11 @@ public class KeyChainSnapshotSerializer {
     }
 
     private static void writePropertyTag(
-            XmlSerializer xmlSerializer, String propertyName, byte[] propertyValue)
+            XmlSerializer xmlSerializer, String propertyName, @Nullable byte[] propertyValue)
             throws IOException {
+        if (propertyValue == null) {
+            return;
+        }
         xmlSerializer.startTag(NAMESPACE, propertyName);
         xmlSerializer.text(Base64.encodeToString(propertyValue, /*flags=*/ Base64.DEFAULT));
         xmlSerializer.endTag(NAMESPACE, propertyName);

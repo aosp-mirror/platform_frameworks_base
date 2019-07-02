@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -307,13 +308,14 @@ public class WallpaperManager {
          * @param callback Listener
          * @param handler Thread to call it from. Main thread if null.
          * @param userId Owner of the wallpaper or UserHandle.USER_ALL
+         * @param displayId Caller comes from which display
          */
         public void addOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
-                @Nullable Handler handler, int userId) {
+                @Nullable Handler handler, int userId, int displayId) {
             synchronized (this) {
                 if (!mColorCallbackRegistered) {
                     try {
-                        mService.registerWallpaperColorsCallback(this, userId);
+                        mService.registerWallpaperColorsCallback(this, userId, displayId);
                         mColorCallbackRegistered = true;
                     } catch (RemoteException e) {
                         // Failed, service is gone
@@ -329,16 +331,17 @@ public class WallpaperManager {
          *
          * @param callback listener
          * @param userId Owner of the wallpaper or UserHandle.USER_ALL
+         * @param displayId Which display is interested
          */
         public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
-                int userId) {
+                int userId, int displayId) {
             synchronized (this) {
                 mColorListeners.removeIf(pair -> pair.first == callback);
 
                 if (mColorListeners.size() == 0 && mColorCallbackRegistered) {
                     mColorCallbackRegistered = false;
                     try {
-                        mService.unregisterWallpaperColorsCallback(this, userId);
+                        mService.unregisterWallpaperColorsCallback(this, userId, displayId);
                     } catch (RemoteException e) {
                         // Failed, service is gone
                         Log.w(TAG, "Can't unregister color updates", e);
@@ -370,14 +373,14 @@ public class WallpaperManager {
             }
         }
 
-        WallpaperColors getWallpaperColors(int which, int userId) {
+        WallpaperColors getWallpaperColors(int which, int userId, int displayId) {
             if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
                 throw new IllegalArgumentException(
                         "Must request colors for exactly one kind of wallpaper");
             }
 
             try {
-                return mService.getWallpaperColors(which, userId);
+                return mService.getWallpaperColors(which, userId, displayId);
             } catch (RemoteException e) {
                 // Can't get colors, connection lost.
             }
@@ -894,7 +897,7 @@ public class WallpaperManager {
     @UnsupportedAppUsage
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
             @NonNull Handler handler, int userId) {
-        sGlobals.addOnColorsChangedListener(listener, handler, userId);
+        sGlobals.addOnColorsChangedListener(listener, handler, userId, mContext.getDisplayId());
     }
 
     /**
@@ -913,7 +916,7 @@ public class WallpaperManager {
      */
     public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
             int userId) {
-        sGlobals.removeOnColorsChangedListener(callback, userId);
+        sGlobals.removeOnColorsChangedListener(callback, userId, mContext.getDisplayId());
     }
 
     /**
@@ -947,7 +950,7 @@ public class WallpaperManager {
      */
     @UnsupportedAppUsage
     public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
-        return sGlobals.getWallpaperColors(which, userId);
+        return sGlobals.getWallpaperColors(which, userId, mContext.getDisplayId());
     }
 
     /**
@@ -1004,17 +1007,29 @@ public class WallpaperManager {
     }
 
     /**
-     * If the current wallpaper is a live wallpaper component, return the
-     * information about that wallpaper.  Otherwise, if it is a static image,
-     * simply return null.
+     * Returns the information about the wallpaper if the current wallpaper is
+     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
+     * this returns null.
      */
     public WallpaperInfo getWallpaperInfo() {
+        return getWallpaperInfo(mContext.getUserId());
+    }
+
+    /**
+     * Returns the information about the wallpaper if the current wallpaper is
+     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
+     * this returns null.
+     *
+     * @param userId Owner of the wallpaper.
+     * @hide
+     */
+    public WallpaperInfo getWallpaperInfo(int userId) {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                return sGlobals.mService.getWallpaperInfo(mContext.getUserId());
+                return sGlobals.mService.getWallpaperInfo(userId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1473,7 +1488,7 @@ public class WallpaperManager {
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            return sGlobals.mService.getWidthHint();
+            return sGlobals.mService.getWidthHint(mContext.getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1499,7 +1514,7 @@ public class WallpaperManager {
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            return sGlobals.mService.getHeightHint();
+            return sGlobals.mService.getHeightHint(mContext.getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1560,7 +1575,7 @@ public class WallpaperManager {
                 throw new RuntimeException(new DeadSystemException());
             } else {
                 sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getDisplayId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1585,7 +1600,8 @@ public class WallpaperManager {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName());
+                sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName(),
+                        mContext.getDisplayId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1651,6 +1667,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
     public boolean setWallpaperComponent(ComponentName name) {

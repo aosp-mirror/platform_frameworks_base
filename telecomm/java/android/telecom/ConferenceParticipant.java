@@ -19,6 +19,7 @@ package android.telecom;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -69,24 +70,34 @@ public class ConferenceParticipant implements Parcelable {
     private long mConnectElapsedTime;
 
     /**
+     * The direction of the call;
+     * {@link Call.Details#DIRECTION_INCOMING} for incoming calls, or
+     * {@link Call.Details#DIRECTION_OUTGOING} for outgoing calls.
+     */
+    private int mCallDirection;
+
+    /**
      * Creates an instance of {@code ConferenceParticipant}.
      *
      * @param handle      The conference participant's handle (e.g., phone number).
      * @param displayName The display name for the participant.
      * @param endpoint    The enpoint Uri which uniquely identifies this conference participant.
      * @param state       The state of the participant in the conference.
+     * @param callDirection The direction of the call (incoming/outgoing).
      */
-    public ConferenceParticipant(Uri handle, String displayName, Uri endpoint, int state) {
+    public ConferenceParticipant(Uri handle, String displayName, Uri endpoint, int state,
+            int callDirection) {
         mHandle = handle;
         mDisplayName = displayName;
         mEndpoint = endpoint;
         mState = state;
+        mCallDirection = callDirection;
     }
 
     /**
      * Responsible for creating {@code ConferenceParticipant} objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<ConferenceParticipant> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ConferenceParticipant> CREATOR =
             new Parcelable.Creator<ConferenceParticipant>() {
 
                 @Override
@@ -96,7 +107,16 @@ public class ConferenceParticipant implements Parcelable {
                     String displayName = source.readString();
                     Uri endpoint = source.readParcelable(classLoader);
                     int state = source.readInt();
-                    return new ConferenceParticipant(handle, displayName, endpoint, state);
+                    long connectTime = source.readLong();
+                    long elapsedRealTime = source.readLong();
+                    int callDirection = source.readInt();
+                    ConferenceParticipant participant =
+                            new ConferenceParticipant(handle, displayName, endpoint, state,
+                                    callDirection);
+                    participant.setConnectTime(connectTime);
+                    participant.setConnectElapsedTime(elapsedRealTime);
+                    participant.setCallDirection(callDirection);
+                    return participant;
                 }
 
                 @Override
@@ -170,6 +190,9 @@ public class ConferenceParticipant implements Parcelable {
         dest.writeString(mDisplayName);
         dest.writeParcelable(mEndpoint, 0);
         dest.writeInt(mState);
+        dest.writeLong(mConnectTime);
+        dest.writeLong(mConnectElapsedTime);
+        dest.writeInt(mCallDirection);
     }
 
     /**
@@ -192,6 +215,8 @@ public class ConferenceParticipant implements Parcelable {
         sb.append(getConnectTime());
         sb.append(" ConnectElapsedTime: ");
         sb.append(getConnectElapsedTime());
+        sb.append(" Direction: ");
+        sb.append(getCallDirection() == Call.Details.DIRECTION_INCOMING ? "Incoming" : "Outgoing");
         sb.append("]");
         return sb.toString();
     }
@@ -239,7 +264,7 @@ public class ConferenceParticipant implements Parcelable {
     }
 
     /**
-     * The connect elpased time of the participant to the conference.
+     * The connect elapsed time of the participant to the conference.
      */
     public long getConnectElapsedTime() {
         return mConnectElapsedTime;
@@ -247,5 +272,77 @@ public class ConferenceParticipant implements Parcelable {
 
     public void setConnectElapsedTime(long connectElapsedTime) {
         mConnectElapsedTime = connectElapsedTime;
+    }
+
+    /**
+     * @return The direction of the call (incoming/outgoing).
+     */
+    public @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
+    }
+
+    /**
+     * Sets the direction of the call.
+     * @param callDirection Whether the call is incoming or outgoing.
+     */
+    public void setCallDirection(@Call.Details.CallDirection int callDirection) {
+        mCallDirection = callDirection;
+    }
+
+    /**
+     * Attempts to build a tel: style URI from a conference participant.
+     * Conference event package data contains SIP URIs, so we try to extract the phone number and
+     * format into a typical tel: style URI.
+     *
+     * @param address The conference participant's address.
+     * @param countryIso The country ISO of the current subscription; used when formatting the
+     *                   participant phone number to E.164 format.
+     * @return The participant's address URI.
+     * @hide
+     */
+    @VisibleForTesting
+    public static Uri getParticipantAddress(Uri address, String countryIso) {
+        if (address == null) {
+            return address;
+        }
+        // Even if address is already in tel: format, still parse it and rebuild.
+        // This is to recognize tel URIs such as:
+        // tel:6505551212;phone-context=ims.mnc012.mcc034.3gppnetwork.org
+
+        // Conference event package participants are identified using SIP URIs (see RFC3261).
+        // A valid SIP uri has the format: sip:user:password@host:port;uri-parameters?headers
+        // Per RFC3261, the "user" can be a telephone number.
+        // For example: sip:1650555121;phone-context=blah.com@host.com
+        // In this case, the phone number is in the user field of the URI, and the parameters can be
+        // ignored.
+        //
+        // A SIP URI can also specify a phone number in a format similar to:
+        // sip:+1-212-555-1212@something.com;user=phone
+        // In this case, the phone number is again in user field and the parameters can be ignored.
+        // We can get the user field in these instances by splitting the string on the @, ;, or :
+        // and looking at the first found item.
+        String number = address.getSchemeSpecificPart();
+        if (TextUtils.isEmpty(number)) {
+            return address;
+        }
+
+        String numberParts[] = number.split("[@;:]");
+        if (numberParts.length == 0) {
+            return address;
+        }
+        number = numberParts[0];
+
+        // Attempt to format the number in E.164 format and use that as part of the TEL URI.
+        // RFC2806 recommends to format telephone numbers using E.164 since it is independent of
+        // how the dialing of said numbers takes place.
+        // If conversion to E.164 fails, the returned value is null.  In that case, fallback to the
+        // number which was in the CEP data.
+        String formattedNumber = null;
+        if (!TextUtils.isEmpty(countryIso)) {
+            formattedNumber = PhoneNumberUtils.formatNumberToE164(number, countryIso);
+        }
+
+        return Uri.fromParts(PhoneAccount.SCHEME_TEL,
+                formattedNumber != null ? formattedNumber : number, null);
     }
 }

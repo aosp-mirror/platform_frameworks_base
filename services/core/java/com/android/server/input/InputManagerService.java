@@ -17,26 +17,6 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
-import android.os.LocaleList;
-import android.os.ShellCallback;
-import android.util.Log;
-import android.view.Display;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.SomeArgs;
-import com.android.internal.R;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.XmlUtils;
-import com.android.server.DisplayThread;
-import com.android.server.LocalServices;
-import com.android.server.Watchdog;
-import com.android.server.policy.WindowManagerPolicy;
-
-import org.xmlpull.v1.XmlPullParser;
-
-import android.Manifest;
-import android.app.IInputForwarder;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,8 +30,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
@@ -61,10 +41,10 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
-import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
 import android.os.Binder;
@@ -72,6 +52,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -81,28 +62,49 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.Xml;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
+import android.view.IInputMonitorHost;
 import android.view.IWindow;
+import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputMonitor;
+import android.view.InputWindowHandle;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
+import com.android.internal.R;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.SomeArgs;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
+import com.android.server.DisplayThread;
+import com.android.server.LocalServices;
+import com.android.server.Watchdog;
+import com.android.server.policy.WindowManagerPolicy;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -113,9 +115,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import libcore.io.IoUtils;
-import libcore.io.Streams;
-
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
@@ -125,6 +124,7 @@ public class InputManagerService extends IInputManager.Stub
     static final boolean DEBUG = false;
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+    private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
 
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
@@ -138,6 +138,9 @@ public class InputManagerService extends IInputManager.Stub
 
     private final Context mContext;
     private final InputManagerHandler mHandler;
+
+    // Context cache used for loading pointer resources.
+    private Context mDisplayContext;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -188,13 +191,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
     private static native void nativeStart(long ptr);
-    private static native void nativeSetVirtualDisplayViewports(long ptr,
+    private static native void nativeSetDisplayViewports(long ptr,
             DisplayViewport[] viewports);
-    private static native void nativeSetDisplayViewport(long ptr, int viewportType,
-            int displayId, int rotation,
-            int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
-            int physicalLeft, int physicalTop, int physicalRight, int physicalBottom,
-            int deviceWidth, int deviceHeight, String uniqueId);
 
     private static native int nativeGetScanCodeState(long ptr,
             int deviceId, int sourceMask, int scanCode);
@@ -205,20 +203,23 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
-            InputWindowHandle inputWindowHandle, boolean monitor);
+            int displayId);
+    private static native void nativeRegisterInputMonitor(long ptr, InputChannel inputChannel,
+            int displayId, boolean isGestureMonitor);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
+    private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
-    private static native int nativeInjectInputEvent(long ptr, InputEvent event, int displayId,
+    private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
-    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
+    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles,
+            int displayId);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
     private static native void nativeSetFocusedApplication(long ptr,
-            InputApplicationHandle application);
-    private static native boolean nativeTransferTouchFocus(long ptr,
-            InputChannel fromChannel, InputChannel toChannel);
+            int displayId, InputApplicationHandle application);
+    private static native void nativeSetFocusedDisplay(long ptr, int displayId);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
     private static native void nativeSetInteractive(long ptr, boolean interactive);
@@ -237,6 +238,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
     private static native void nativeSetPointerCapture(long ptr, boolean detached);
+    private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -291,11 +293,6 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Switch code: Camera lens cover. When set the lens is covered. */
     public static final int SW_CAMERA_LENS_COVER = 0x09;
-
-    // Viewport constants defined in InputReader.h.
-    public static final int VIEWPORT_DEFAULT = 1;
-    public static final int VIEWPORT_EXTERNAL = 2;
-    public static final int VIEWPORT_VIRTUAL = 3;
 
     public static final int SW_LID_BIT = 1 << SW_LID;
     public static final int SW_TABLET_MODE_BIT = 1 << SW_TABLET_MODE;
@@ -362,7 +359,7 @@ public class InputManagerService extends IInputManager.Stub
         updateAccessibilityLargePointerFromSettings();
     }
 
-    // TODO(BT) Pass in paramter for bluetooth system
+    // TODO(BT) Pass in parameter for bluetooth system
     public void systemRunning() {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
@@ -413,31 +410,8 @@ public class InputManagerService extends IInputManager.Stub
         nativeReloadDeviceAliases(mPtr);
     }
 
-    private void setDisplayViewportsInternal(DisplayViewport defaultViewport,
-            DisplayViewport externalTouchViewport,
-            List<DisplayViewport> virtualTouchViewports) {
-        if (defaultViewport.valid) {
-            setDisplayViewport(VIEWPORT_DEFAULT, defaultViewport);
-        }
-
-        if (externalTouchViewport.valid) {
-            setDisplayViewport(VIEWPORT_EXTERNAL, externalTouchViewport);
-        } else if (defaultViewport.valid) {
-            setDisplayViewport(VIEWPORT_EXTERNAL, defaultViewport);
-        }
-
-        nativeSetVirtualDisplayViewports(mPtr,
-                virtualTouchViewports.toArray(new DisplayViewport[0]));
-    }
-
-    private void setDisplayViewport(int viewportType, DisplayViewport viewport) {
-        nativeSetDisplayViewport(mPtr, viewportType,
-                viewport.displayId, viewport.orientation,
-                viewport.logicalFrame.left, viewport.logicalFrame.top,
-                viewport.logicalFrame.right, viewport.logicalFrame.bottom,
-                viewport.physicalFrame.left, viewport.physicalFrame.top,
-                viewport.physicalFrame.right, viewport.physicalFrame.bottom,
-                viewport.deviceWidth, viewport.deviceHeight, viewport.uniqueId);
+    private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
+        nativeSetDisplayViewports(mPtr, viewports.toArray(new DisplayViewport[0]));
     }
 
     /**
@@ -507,17 +481,59 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Creates an input channel that will receive all input from the input dispatcher.
      * @param inputChannelName The input channel name.
+     * @param displayId Target display id.
      * @return The input channel.
      */
-    public InputChannel monitorInput(String inputChannelName) {
+    public InputChannel monitorInput(String inputChannelName, int displayId) {
         if (inputChannelName == null) {
             throw new IllegalArgumentException("inputChannelName must not be null.");
         }
 
+        if (displayId < Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("displayId must >= 0.");
+        }
+
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        nativeRegisterInputChannel(mPtr, inputChannels[0], null, true);
+        // Give the output channel a token just for identity purposes.
+        inputChannels[0].setToken(new Binder());
+        nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, false /*isGestureMonitor*/);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
+    }
+
+    /**
+     * Creates an input monitor that will receive pointer events for the purposes of system-wide
+     * gesture interpretation.
+     *
+     * @param inputChannelName The input channel name.
+     * @param displayId Target display id.
+     * @return The input channel.
+     */
+    @Override // Binder call
+    public InputMonitor monitorGestureInput(String inputChannelName, int displayId) {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "monitorInputRegion()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+
+        Objects.requireNonNull(inputChannelName, "inputChannelName must not be null.");
+
+        if (displayId < Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("displayId must >= 0.");
+        }
+
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+            InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
+            inputChannels[0].setToken(host.asBinder());
+            nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId,
+                    true /*isGestureMonitor*/);
+            return new InputMonitor(inputChannelName, inputChannels[1], host);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**
@@ -526,13 +542,17 @@ public class InputManagerService extends IInputManager.Stub
      * @param inputWindowHandle The handle of the input window associated with the
      * input channel, or null if none.
      */
-    public void registerInputChannel(InputChannel inputChannel,
-            InputWindowHandle inputWindowHandle) {
+    public void registerInputChannel(InputChannel inputChannel, IBinder token) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
 
-        nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, false);
+        if (token == null) {
+            token = new Binder();
+        }
+        inputChannel.setToken(token);
+
+        nativeRegisterInputChannel(mPtr, inputChannel, Display.INVALID_DISPLAY);
     }
 
     /**
@@ -592,10 +612,10 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
-        return injectInputEventInternal(event, Display.DEFAULT_DISPLAY, mode);
+        return injectInputEventInternal(event, mode);
     }
 
-    private boolean injectInputEventInternal(InputEvent event, int displayId, int mode) {
+    private boolean injectInputEventInternal(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -610,7 +630,7 @@ public class InputManagerService extends IInputManager.Stub
         final long ident = Binder.clearCallingIdentity();
         final int result;
         try {
-            result = nativeInjectInputEvent(mPtr, event, displayId, pid, uid, mode,
+            result = nativeInjectInputEvent(mPtr, event, pid, uid, mode,
                     INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1466,21 +1486,17 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    public void setInputWindows(InputWindowHandle[] windowHandles,
-            InputWindowHandle focusedWindowHandle) {
-        final IWindow newFocusedWindow =
-            focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
-        if (mFocusedWindow != newFocusedWindow) {
-            mFocusedWindow = newFocusedWindow;
-            if (mFocusedWindowHasCapture) {
-                setPointerCapture(false);
-            }
-        }
-        nativeSetInputWindows(mPtr, windowHandles);
+    public void setFocusedApplication(int displayId, InputApplicationHandle application) {
+        nativeSetFocusedApplication(mPtr, displayId, application);
     }
 
-    public void setFocusedApplication(InputApplicationHandle application) {
-        nativeSetFocusedApplication(mPtr, application);
+    public void setFocusedDisplay(int displayId) {
+        nativeSetFocusedDisplay(mPtr, displayId);
+    }
+
+    /** Clean up input window handles of the given display. */
+    public void onDisplayRemoved(int displayId) {
+        nativeSetInputWindows(mPtr, null /* windowHandles */, displayId);
     }
 
     @Override
@@ -1495,16 +1511,18 @@ public class InputManagerService extends IInputManager.Stub
             return;
         }
         setPointerCapture(enabled);
-        try {
-            mFocusedWindow.dispatchPointerCaptureChanged(enabled);
-        } catch (RemoteException ex) {
-            /* ignore */
-        }
     }
 
     private void setPointerCapture(boolean enabled) {
-        mFocusedWindowHasCapture = enabled;
-        nativeSetPointerCapture(mPtr, enabled);
+        if (mFocusedWindowHasCapture != enabled) {
+            mFocusedWindowHasCapture = enabled;
+            try {
+                mFocusedWindow.dispatchPointerCaptureChanged(enabled);
+            } catch (RemoteException ex) {
+                /* ignore */
+            }
+            nativeSetPointerCapture(mPtr, enabled);
+        }
     }
 
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
@@ -1513,29 +1531,6 @@ public class InputManagerService extends IInputManager.Stub
 
     public void setSystemUiVisibility(int visibility) {
         nativeSetSystemUiVisibility(mPtr, visibility);
-    }
-
-    /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannel The channel of a window that currently has touch focus.
-     * @param toChannel The channel of the window that should receive touch focus in
-     * place of the first.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
-     */
-    public boolean transferTouchFocus(InputChannel fromChannel, InputChannel toChannel) {
-        if (fromChannel == null) {
-            throw new IllegalArgumentException("fromChannel must not be null.");
-        }
-        if (toChannel == null) {
-            throw new IllegalArgumentException("toChannel must not be null.");
-        }
-        return nativeTransferTouchFocus(mPtr, fromChannel, toChannel);
     }
 
     @Override // Binder call
@@ -1736,29 +1731,6 @@ public class InputManagerService extends IInputManager.Stub
         nativeMonitor(mPtr);
     }
 
-    // Binder call
-    @Override
-    public IInputForwarder createInputForwarder(int displayId) throws RemoteException {
-        if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
-                "createInputForwarder()")) {
-            throw new SecurityException("Requires INJECT_EVENTS permission");
-        }
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-        final Display display = displayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalArgumentException(
-                    "Can't create input forwarder for non-existent displayId: " + displayId);
-        }
-        final int callingUid = Binder.getCallingUid();
-        final int displayOwnerUid = display.getOwnerUid();
-        if (callingUid != displayOwnerUid) {
-            throw new SecurityException(
-                    "Only owner of the display can forward input events to it.");
-        }
-
-        return new InputForwarder(displayId);
-    }
-
     // Native callback.
     private void notifyConfigurationChanged(long whenNanos) {
         mWindowManagerCallbacks.notifyConfigurationChanged();
@@ -1810,15 +1782,28 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
-        mWindowManagerCallbacks.notifyInputChannelBroken(inputWindowHandle);
+    private void notifyInputChannelBroken(IBinder token) {
+        mWindowManagerCallbacks.notifyInputChannelBroken(token);
+    }
+
+    // Native callback
+    private void notifyFocusChanged(IBinder oldToken, IBinder newToken) {
+        if (mFocusedWindow != null) {
+            if (mFocusedWindow.asBinder() == newToken) {
+                Slog.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow="
+                        + mFocusedWindow);
+                return;
+            }
+            setPointerCapture(false);
+        }
+
+        mFocusedWindow = IWindow.Stub.asInterface(newToken);
     }
 
     // Native callback.
-    private long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle, String reason) {
+    private long notifyANR(IBinder token, String reason) {
         return mWindowManagerCallbacks.notifyANR(
-                inputApplicationHandle, inputWindowHandle, reason);
+                token, reason);
     }
 
     // Native callback.
@@ -1843,20 +1828,19 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+    private int interceptMotionBeforeQueueingNonInteractive(int displayId,
+            long whenNanos, int policyFlags) {
         return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
-                whenNanos, policyFlags);
+                displayId, whenNanos, policyFlags);
     }
 
     // Native callback.
-    private long interceptKeyBeforeDispatching(InputWindowHandle focus,
-            KeyEvent event, int policyFlags) {
+    private long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
     // Native callback.
-    private KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
-            KeyEvent event, int policyFlags) {
+    private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
 
@@ -1867,17 +1851,20 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    private void onPointerDownOutsideFocus(IBinder touchedToken) {
+        mWindowManagerCallbacks.onPointerDownOutsideFocus(touchedToken);
+    }
+
+    // Native callback.
     private int getVirtualKeyQuietTimeMillis() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);
     }
 
     // Native callback.
-    private String[] getExcludedDeviceNames() {
-        ArrayList<String> names = new ArrayList<String>();
-
+    private static String[] getExcludedDeviceNames() {
+        List<String> names = new ArrayList<>();
         // Read partner-provided list of excluded input devices
-        XmlPullParser parser = null;
         // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
         final File[] baseDirs = {
             Environment.getRootDirectory(),
@@ -1885,33 +1872,62 @@ public class InputManagerService extends IInputManager.Stub
         };
         for (File baseDir: baseDirs) {
             File confFile = new File(baseDir, EXCLUDED_DEVICES_PATH);
-            FileReader confreader = null;
             try {
-                confreader = new FileReader(confFile);
-                parser = Xml.newPullParser();
-                parser.setInput(confreader);
-                XmlUtils.beginDocument(parser, "devices");
-
-                while (true) {
-                    XmlUtils.nextElement(parser);
-                    if (!"device".equals(parser.getName())) {
-                        break;
-                    }
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name != null) {
-                        names.add(name);
-                    }
-                }
+                InputStream stream = new FileInputStream(confFile);
+                names.addAll(ConfigurationProcessor.processExcludedDeviceNames(stream));
             } catch (FileNotFoundException e) {
                 // It's ok if the file does not exist.
             } catch (Exception e) {
-                Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
-            } finally {
-                try { if (confreader != null) confreader.close(); } catch (IOException e) { }
+                Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
             }
         }
+        return names.toArray(new String[0]);
+    }
 
-        return names.toArray(new String[names.size()]);
+    /**
+     * Flatten a list of pairs into a list, with value positioned directly next to the key
+     * @return Flattened list
+     */
+    private static <T> List<T> flatten(@NonNull List<Pair<T, T>> pairs) {
+        List<T> list = new ArrayList<>(pairs.size() * 2);
+        for (Pair<T, T> pair : pairs) {
+            list.add(pair.first);
+            list.add(pair.second);
+        }
+        return list;
+    }
+
+    /**
+     * Ports are highly platform-specific, so only allow these to be specified in the vendor
+     * directory.
+     */
+    // Native callback
+    private static String[] getInputPortAssociations() {
+        File baseDir = Environment.getVendorDirectory();
+        File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+
+        try {
+            InputStream stream = new FileInputStream(confFile);
+            List<Pair<String, String>> associations =
+                    ConfigurationProcessor.processInputPortAssociations(stream);
+            List<String> associationList = flatten(associations);
+            return associationList.toArray(new String[0]);
+        } catch (FileNotFoundException e) {
+            // Most of the time, file will not exist, which is expected.
+        } catch (Exception e) {
+            Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
+        }
+        return new String[0];
+    }
+
+    /**
+     * Gets if an input device could dispatch to the given display".
+     * @param deviceId The input device id.
+     * @param displayId The specific display id.
+     * @return True if the device could dispatch to the given display, false otherwise.
+     */
+    public boolean canDispatchToDisplay(int deviceId, int displayId) {
+        return nativeCanDispatchToDisplay(mPtr, deviceId, displayId);
     }
 
     // Native callback.
@@ -1950,8 +1966,30 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private PointerIcon getPointerIcon() {
-        return PointerIcon.getDefaultIcon(mContext);
+    private PointerIcon getPointerIcon(int displayId) {
+        return PointerIcon.getDefaultIcon(getContextForDisplay(displayId));
+    }
+
+    private Context getContextForDisplay(int displayId) {
+        if (mDisplayContext != null && mDisplayContext.getDisplay().getDisplayId() == displayId) {
+            return mDisplayContext;
+        }
+
+        if (mContext.getDisplay().getDisplayId() == displayId) {
+            mDisplayContext = mContext;
+            return mDisplayContext;
+        }
+
+        // Create and cache context for non-default display.
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(displayId);
+        mDisplayContext = mContext.createDisplayContext(display);
+        return mDisplayContext;
+    }
+
+    // Native callback.
+    private int getPointerDisplayId() {
+        return mWindowManagerCallbacks.getPointerDisplayId();
     }
 
     // Native callback.
@@ -2006,22 +2044,37 @@ public class InputManagerService extends IInputManager.Stub
 
         public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
 
-        public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle);
+        public void notifyInputChannelBroken(IBinder token);
 
-        public long notifyANR(InputApplicationHandle inputApplicationHandle,
-                InputWindowHandle inputWindowHandle, String reason);
+        public long notifyANR(IBinder token, String reason);
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
-        public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
+        /**
+         * Provides an opportunity for the window manager policy to intercept early motion event
+         * processing when the device is in a non-interactive state since these events are normally
+         * dropped.
+         */
+        int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
+                int policyFlags);
 
-        public long interceptKeyBeforeDispatching(InputWindowHandle focus,
+        public long interceptKeyBeforeDispatching(IBinder token,
                 KeyEvent event, int policyFlags);
 
-        public KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
+        public KeyEvent dispatchUnhandledKey(IBinder token,
                 KeyEvent event, int policyFlags);
 
         public int getPointerLayer();
+
+        public int getPointerDisplayId();
+
+        /**
+         * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
+         * occurred on a window that did not have focus.
+         *
+         * @param touchedToken The token for the window that received the input event.
+         */
+        void onPointerDownOutsideFocus(IBinder touchedToken);
     }
 
     /**
@@ -2086,11 +2139,33 @@ public class InputManagerService extends IInputManager.Stub
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    nativeInjectInputEvent(mPtr, event, Display.DEFAULT_DISPLAY, 0, 0,
+                    nativeInjectInputEvent(mPtr, event, 0, 0,
                             InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
+        }
+    }
+
+    /**
+     * Interface for the system to handle request from InputMonitors.
+     */
+    private final class InputMonitorHost extends IInputMonitorHost.Stub {
+        private final InputChannel mInputChannel;
+
+        InputMonitorHost(InputChannel channel) {
+            mInputChannel = channel;
+        }
+
+        @Override
+        public void pilferPointers() {
+            nativePilferPointers(mPtr, asBinder());
+        }
+
+        @Override
+        public void dispose() {
+            nativeUnregisterInputChannel(mPtr, mInputChannel);
+            mInputChannel.dispose();
         }
     }
 
@@ -2207,16 +2282,13 @@ public class InputManagerService extends IInputManager.Stub
 
     private final class LocalService extends InputManagerInternal {
         @Override
-        public void setDisplayViewports(DisplayViewport defaultViewport,
-                DisplayViewport externalTouchViewport,
-                List<DisplayViewport> virtualTouchViewports) {
-            setDisplayViewportsInternal(defaultViewport, externalTouchViewport,
-                    virtualTouchViewports);
+        public void setDisplayViewports(List<DisplayViewport> viewports) {
+            setDisplayViewportsInternal(viewports);
         }
 
         @Override
-        public boolean injectInputEvent(InputEvent event, int displayId, int mode) {
-            return injectInputEventInternal(event, displayId, mode);
+        public boolean injectInputEvent(InputEvent event, int mode) {
+            return injectInputEventInternal(event, mode);
         }
 
         @Override

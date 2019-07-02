@@ -1,0 +1,23 @@
+java_library {
+    name: "SettingsLib-search",
+    host_supported: true,
+    srcs: ["src/**/*.java"],
+}
+
+java_plugin {
+    name: "SettingsLib-annotation-processor",
+    processor_class: "com.android.settingslib.search.IndexableProcessor",
+    static_libs: [
+        "javapoet-prebuilt-jar",
+        "SettingsLib-search",
+    ],
+    srcs: ["processor-src/**/*.java"],
+    java_resource_dirs: ["resources"],
+}
+
+// NOTE: Keep this module in sync with ./common.mk
+java_defaults {
+    name: "SettingsLib-search-defaults",
+    plugins: ["SettingsLib-annotation-processor"],
+    static_libs: ["SettingsLib-search"],
+}

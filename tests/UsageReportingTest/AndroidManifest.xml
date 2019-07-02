@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Note: Add android:sharedUserId="android.uid.system" to the root element to simulate the system UID
+  caller case.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.tests.usagereporter"
+    >
+
+    <application android:label="@string/reporter_app">
+        <activity android:name="UsageReporterActivity"
+                  android:label="UsageReporter">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>

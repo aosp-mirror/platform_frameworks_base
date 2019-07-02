@@ -422,6 +422,13 @@ a similar way.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
     </style>
 
+    <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
+    <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
+        <item name="windowCloseOnTouchOutside">false</item>
+    </style>
+
     <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Material.SearchBar">
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>

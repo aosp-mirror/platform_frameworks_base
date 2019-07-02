@@ -48,10 +48,10 @@
     <string name="keyguard_enter_your_pin">Enter your PIN</string>
 
     <!-- Instructions telling the user to enter their pattern to unlock the keyguard [CHAR LIMIT=30] -->
-    <string name="keyguard_enter_your_pattern">Enter your Pattern</string>
+    <string name="keyguard_enter_your_pattern">Enter your pattern</string>
 
     <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=30] -->
-    <string name="keyguard_enter_your_password">Enter your Password</string>
+    <string name="keyguard_enter_your_password">Enter your password</string>
 
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
@@ -62,10 +62,10 @@
 
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
-    <string name="keyguard_charged">Charged</string>
+    <string name="keyguard_charged">Fully charged</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's wirelessly charging. [CHAR LIMIT=50]  -->
-    <string name="keyguard_plugged_in_wireless"><xliff:g id="percentage" example="20%">%s</xliff:g> • Wirelessly Charging</string>
+    <string name="keyguard_plugged_in_wireless"><xliff:g id="percentage" example="20%">%s</xliff:g> • Charging wirelessly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, say that it's charging.  -->
@@ -112,6 +112,8 @@
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
     <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Composes together the carrier name and the SIM card locked message. Example: CarrierName (SIM LOCKED) -->
+    <string name="keyguard_carrier_name_with_sim_locked_template" translatable="false"><xliff:g id="carrier">%s</xliff:g> (<xliff:g id="message">%s</xliff:g>)</string>
 
     <!-- Time format strings for fall-back clock widget -->
     <string name="keyguard_widget_12_hours_format" translatable="false">h:mm</string>
@@ -149,9 +151,9 @@
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
     <!-- Message shown when user enters wrong pattern -->
-    <string name="kg_wrong_pattern">Wrong Pattern</string>
+    <string name="kg_wrong_pattern">Wrong pattern</string>
     <!-- Message shown when user enters wrong password -->
-    <string name="kg_wrong_password">Wrong Password</string>
+    <string name="kg_wrong_password">Wrong password</string>
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
@@ -384,7 +386,10 @@
     </plurals>
 
     <!-- Fingerprint hint message when finger was not recognized.-->
-    <string name="fingerprint_not_recognized">Not recognized</string>
+    <string name="kg_fingerprint_not_recognized">Not recognized</string>
+
+    <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
+    <string name="kg_face_not_recognized">Not recognized</string>
 
     <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
     <plurals name="kg_password_default_pin_message">
@@ -401,5 +406,15 @@ number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. 
         <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="
 number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
     </plurals>
+
+    <!-- Title for default clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_default" translatable="false">Default</string>
+    <!-- Title for Bubble clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_bubble" translatable="false">Bubble</string>
+    <!-- Title for Stretch clock face that will appear in the picker app next to a preview image of
+         the clock face. [CHAR LIMIT=8] -->
+    <string name="clock_title_analog" translatable="false">Analog</string>
 
 </resources>

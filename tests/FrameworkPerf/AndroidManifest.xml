@@ -13,7 +13,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="SchedulerService">
+        <service android:name="SchedulerService"
+                 android:foregroundServiceType="dataSync|mediaPlayback|phoneCall|location|connectedDevice">
         </service>
         <service android:name="TestService" android:process=":test">
         </service>
@@ -22,7 +23,6 @@
         <receiver android:name="Receiver" android:exported="true">
         </receiver>
     </application>
-
     <instrumentation android:name="android.test.InstrumentationTestRunner"
         android:targetPackage="com.android.frameworkperf"
         android:label="Framework Perf Runner"

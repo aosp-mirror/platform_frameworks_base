@@ -1,0 +1,26 @@
+{
+  "presubmit": [
+    {
+      "name": "RollbackTest"
+    },
+    {
+      "name": "StagedRollbackTest"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.rollback"
+        }
+      ]
+    }
+  ],
+  "imports": [
+    {
+      "path": "cts/tests/rollback"
+    },
+    {
+      "path": "cts/hostsidetests/rollback"
+    }
+  ]
+}

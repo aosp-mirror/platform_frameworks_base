@@ -95,20 +95,6 @@ enum DebugLevel {
 #define PROPERTY_PROFILE_VISUALIZE_BARS "visual_bars"
 
 /**
- * Used to enable/disable non-rectangular clipping debugging.
- *
- * The accepted values are:
- * "highlight", drawing commands clipped by the stencil will
- *              be colored differently
- * "region", renders the clipping region on screen whenever
- *           the stencil is set
- * "hide", don't show the clip
- *
- * The default value is "hide".
- */
-#define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_non_rect_clip"
-
-/**
  * Turn on to draw dirty regions every other frame.
  *
  * Possible values:
@@ -116,19 +102,6 @@ enum DebugLevel {
  * "false", to disable dirty regions debugging
  */
 #define PROPERTY_DEBUG_SHOW_DIRTY_REGIONS "debug.hwui.show_dirty_regions"
-
-/**
- * Disables draw operation deferral if set to "true", forcing draw
- * commands to be issued to OpenGL in order, and processed in sequence
- * with state-manipulation canvas commands.
- */
-#define PROPERTY_DISABLE_DRAW_DEFER "debug.hwui.disable_draw_defer"
-
-/**
- * Used to disable draw operation reordering when deferring draw operations
- * Has no effect if PROPERTY_DISABLE_DRAW_DEFER is set to "true"
- */
-#define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
 
 /**
  * Setting this property will enable or disable the dropping of frames with
@@ -171,6 +144,11 @@ enum DebugLevel {
 #define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
 
 /**
+ * Allows to record Skia drawing commands with systrace.
+ */
+#define PROPERTY_SKIA_ATRACE_ENABLED "debug.hwui.skia_atrace_enabled"
+
+/**
  * Defines how many frames in a sequence to capture.
  */
 #define PROPERTY_CAPTURE_SKP_FRAMES "debug.hwui.capture_skp_frames"
@@ -185,6 +163,8 @@ enum DebugLevel {
  */
 #define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
 
+#define PROPERTY_RENDERAHEAD "debug.hwui.render_ahead"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -198,9 +178,7 @@ enum class ProfileType { None, Console, Bars };
 
 enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
-enum class StencilClipDebug { Hide, ShowHighlight, ShowRegion };
-
-enum class RenderPipelineType { OpenGL = 0, SkiaGL, SkiaVulkan, NotInitialized = 128 };
+enum class RenderPipelineType { SkiaGL, SkiaVulkan, NotInitialized = 128 };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -211,8 +189,6 @@ class Properties {
 public:
     static bool load();
 
-    static bool drawDeferDisabled;
-    static bool drawReorderDisabled;
     static bool debugLayersUpdates;
     static bool debugOverdraw;
     static bool showDirtyRegions;
@@ -226,7 +202,6 @@ public:
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;
-    static StencilClipDebug debugStencilClip;
 
     // Override the value for a subset of properties in this class
     static void overrideProperty(const char* name, const char* value);
@@ -239,8 +214,8 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
+    ANDROID_API static RenderPipelineType peekRenderPipelineType();
     ANDROID_API static RenderPipelineType getRenderPipelineType();
-    static bool isSkiaEnabled();
 
     ANDROID_API static bool enableHighContrastText;
 
@@ -273,13 +248,15 @@ public:
 
     ANDROID_API static int contextPriority;
 
+    static int defaultRenderAhead;
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
     static RenderPipelineType sRenderPipelineType;
 };  // class Caches
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_PROPERTIES_H

@@ -16,17 +16,36 @@
 
 package android.app.admin;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
+import com.android.internal.widget.LockPatternUtils.CredentialType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A class that represents the metrics of a password that are used to decide whether or not a
- * password meets the requirements.
+ * A class that represents the metrics of a credential that are used to decide whether or not a
+ * credential meets the requirements. If the credential is a pattern, only quality matters.
  *
  * {@hide}
  */
@@ -45,6 +64,10 @@ public class PasswordMetrics implements Parcelable {
     public int nonLetter = 0;
 
     public PasswordMetrics() {}
+
+    public PasswordMetrics(int quality) {
+        this.quality = quality;
+    }
 
     public PasswordMetrics(int quality, int length) {
         this.quality = quality;
@@ -73,6 +96,101 @@ public class PasswordMetrics implements Parcelable {
         nonLetter = in.readInt();
     }
 
+    /** Returns the min quality allowed by {@code complexityLevel}. */
+    public static int complexityLevelToMinQuality(@PasswordComplexity int complexityLevel) {
+        // this would be the quality of the first metrics since mMetrics is sorted in ascending
+        // order of quality
+        return PasswordComplexityBucket
+                .complexityLevelToBucket(complexityLevel).mMetrics[0].quality;
+    }
+
+    /**
+     * Returns a merged minimum {@link PasswordMetrics} requirements that a new password must meet
+     * to fulfil {@code requestedQuality}, {@code requiresNumeric} and {@code
+     * requiresLettersOrSymbols}, which are derived from {@link DevicePolicyManager} requirements,
+     * and {@code complexityLevel}.
+     *
+     * <p>Note that we are taking {@code userEnteredPasswordQuality} into account because there are
+     * more than one set of metrics to meet the minimum complexity requirement and inspecting what
+     * the user has entered can help determine whether the alphabetic or alphanumeric set of metrics
+     * should be used. For example, suppose minimum complexity requires either ALPHABETIC(8+), or
+     * ALPHANUMERIC(6+). If the user has entered "a", the length requirement displayed on the UI
+     * would be 8. Then the user appends "1" to make it "a1". We now know the user is entering
+     * an alphanumeric password so we would update the min complexity required min length to 6.
+     */
+    public static PasswordMetrics getMinimumMetrics(@PasswordComplexity int complexityLevel,
+            int userEnteredPasswordQuality, int requestedQuality, boolean requiresNumeric,
+            boolean requiresLettersOrSymbols) {
+        int targetQuality = Math.max(
+                userEnteredPasswordQuality,
+                getActualRequiredQuality(
+                        requestedQuality, requiresNumeric, requiresLettersOrSymbols));
+        return getTargetQualityMetrics(complexityLevel, targetQuality);
+    }
+
+    /**
+     * Returns the {@link PasswordMetrics} at {@code complexityLevel} which the metrics quality
+     * is the same as {@code targetQuality}.
+     *
+     * <p>If {@code complexityLevel} does not allow {@code targetQuality}, returns the metrics
+     * with the min quality at {@code complexityLevel}.
+     */
+    // TODO(bernardchau): update tests to test getMinimumMetrics and change this to be private
+    @VisibleForTesting
+    public static PasswordMetrics getTargetQualityMetrics(
+            @PasswordComplexity int complexityLevel, int targetQuality) {
+        PasswordComplexityBucket targetBucket =
+                PasswordComplexityBucket.complexityLevelToBucket(complexityLevel);
+        for (PasswordMetrics metrics : targetBucket.mMetrics) {
+            if (targetQuality == metrics.quality) {
+                return metrics;
+            }
+        }
+        // none of the metrics at complexityLevel has targetQuality, return metrics with min quality
+        // see test case testGetMinimumMetrics_actualRequiredQualityStricter for an example, where
+        // min complexity allows at least NUMERIC_COMPLEX, user has not entered anything yet, and
+        // requested quality is NUMERIC
+        return targetBucket.mMetrics[0];
+    }
+
+    /**
+     * Finds out the actual quality requirement based on whether quality is {@link
+     * DevicePolicyManager#PASSWORD_QUALITY_COMPLEX} and whether digits, letters or symbols are
+     * required.
+     */
+    @VisibleForTesting
+    // TODO(bernardchau): update tests to test getMinimumMetrics and change this to be private
+    public static int getActualRequiredQuality(
+            int requestedQuality, boolean requiresNumeric, boolean requiresLettersOrSymbols) {
+        if (requestedQuality != PASSWORD_QUALITY_COMPLEX) {
+            return requestedQuality;
+        }
+
+        // find out actual password quality from complex requirements
+        if (requiresNumeric && requiresLettersOrSymbols) {
+            return PASSWORD_QUALITY_ALPHANUMERIC;
+        }
+        if (requiresLettersOrSymbols) {
+            return PASSWORD_QUALITY_ALPHABETIC;
+        }
+        if (requiresNumeric) {
+            // cannot specify numeric complex using complex quality so this must be numeric
+            return PASSWORD_QUALITY_NUMERIC;
+        }
+
+        // reaching here means dpm sets quality to complex without specifying any requirements
+        return PASSWORD_QUALITY_UNSPECIFIED;
+    }
+
+    /**
+     * Returns {@code complexityLevel} or {@link DevicePolicyManager#PASSWORD_COMPLEXITY_NONE}
+     * if {@code complexityLevel} is not valid.
+     */
+    @PasswordComplexity
+    public static int sanitizeComplexityLevel(@PasswordComplexity int complexityLevel) {
+        return PasswordComplexityBucket.complexityLevelToBucket(complexityLevel).mComplexityLevel;
+    }
+
     public boolean isDefault() {
         return quality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
                 && length == 0 && letters == 0 && upperCase == 0 && lowerCase == 0
@@ -96,7 +214,7 @@ public class PasswordMetrics implements Parcelable {
         dest.writeInt(nonLetter);
     }
 
-    public static final Parcelable.Creator<PasswordMetrics> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PasswordMetrics> CREATOR
             = new Parcelable.Creator<PasswordMetrics>() {
         public PasswordMetrics createFromParcel(Parcel in) {
             return new PasswordMetrics(in);
@@ -107,7 +225,29 @@ public class PasswordMetrics implements Parcelable {
         }
     };
 
-    public static PasswordMetrics computeForPassword(@NonNull String password) {
+    /**
+     * Returnsthe {@code PasswordMetrics} for a given credential.
+     *
+     * If the credential is a pin or a password, equivalent to {@link #computeForPassword(byte[])}.
+     * {@code credential} cannot be null when {@code type} is
+     * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
+     */
+    public static PasswordMetrics computeForCredential(
+            @CredentialType int type, byte[] credential) {
+        if (type == CREDENTIAL_TYPE_PASSWORD) {
+            Preconditions.checkNotNull(credential, "credential cannot be null");
+            return PasswordMetrics.computeForPassword(credential);
+        } else if (type == CREDENTIAL_TYPE_PATTERN)  {
+            return new PasswordMetrics(PASSWORD_QUALITY_SOMETHING);
+        } else /* if (type == CREDENTIAL_TYPE_NONE) */ {
+            return new PasswordMetrics(PASSWORD_QUALITY_UNSPECIFIED);
+        }
+    }
+
+    /**
+     * Returns the {@code PasswordMetrics} for a given password
+     */
+    public static PasswordMetrics computeForPassword(@NonNull byte[] password) {
         // Analyse the characters used
         int letters = 0;
         int upperCase = 0;
@@ -115,9 +255,9 @@ public class PasswordMetrics implements Parcelable {
         int numeric = 0;
         int symbols = 0;
         int nonLetter = 0;
-        final int length = password.length();
-        for (int i = 0; i < length; i++) {
-            switch (categoryChar(password.charAt(i))) {
+        final int length = password.length;
+        for (byte b : password) {
+            switch (categoryChar((char) b)) {
                 case CHAR_LOWER_CASE:
                     letters++;
                     lowerCase++;
@@ -173,7 +313,16 @@ public class PasswordMetrics implements Parcelable {
                 && this.nonLetter == o.nonLetter;
     }
 
-    /*
+    private boolean satisfiesBucket(PasswordMetrics... bucket) {
+        for (PasswordMetrics metrics : bucket) {
+            if (this.quality == metrics.quality) {
+                return this.length >= metrics.length;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the maximum length of a sequential characters. A sequence is defined as
      * monotonically increasing characters with a constant interval or the same character repeated.
      *
@@ -187,19 +336,19 @@ public class PasswordMetrics implements Parcelable {
      * maxLengthSequence(";;;;") == 4 (anything that repeats)
      * maxLengthSequence(":;<=>") == 1  (ordered, but not composed of alphas or digits)
      *
-     * @param string the pass
+     * @param bytes the pass
      * @return the number of sequential letters or digits
      */
-    public static int maxLengthSequence(@NonNull String string) {
-        if (string.length() == 0) return 0;
-        char previousChar = string.charAt(0);
+    public static int maxLengthSequence(@NonNull byte[] bytes) {
+        if (bytes.length == 0) return 0;
+        char previousChar = (char) bytes[0];
         @CharacterCatagory int category = categoryChar(previousChar); //current sequence category
         int diff = 0; //difference between two consecutive characters
         boolean hasDiff = false; //if we are currently targeting a sequence
         int maxLength = 0; //maximum length of a sequence already found
         int startSequence = 0; //where the current sequence started
-        for (int current = 1; current < string.length(); current++) {
-            char currentChar = string.charAt(current);
+        for (int current = 1; current < bytes.length; current++) {
+            char currentChar = (char) bytes[current];
             @CharacterCatagory int categoryCurrent = categoryChar(currentChar);
             int currentDiff = (int) currentChar - (int) previousChar;
             if (categoryCurrent != category || Math.abs(currentDiff) > maxDiffCategory(category)) {
@@ -218,7 +367,7 @@ public class PasswordMetrics implements Parcelable {
             }
             previousChar = currentChar;
         }
-        maxLength = Math.max(maxLength, string.length() - startSequence);
+        maxLength = Math.max(maxLength, bytes.length - startSequence);
         return maxLength;
     }
 
@@ -252,6 +401,111 @@ public class PasswordMetrics implements Parcelable {
                 return 10;
             default:
                 return 0;
+        }
+    }
+
+    /** Determines the {@link PasswordComplexity} of this {@link PasswordMetrics}. */
+    @PasswordComplexity
+    public int determineComplexity() {
+        for (PasswordComplexityBucket bucket : PasswordComplexityBucket.BUCKETS) {
+            if (satisfiesBucket(bucket.mMetrics)) {
+                return bucket.mComplexityLevel;
+            }
+        }
+        return PASSWORD_COMPLEXITY_NONE;
+    }
+
+    /**
+     * Requirements in terms of {@link PasswordMetrics} for each {@link PasswordComplexity}.
+     */
+    private static class PasswordComplexityBucket {
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_HIGH} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket HIGH =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_HIGH,
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX, /* length= */
+                                8),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC, /* length= */ 6),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, /* length= */
+                                6));
+
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_MEDIUM} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket MEDIUM =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_MEDIUM,
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX, /* length= */
+                                4),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC, /* length= */ 4),
+                        new PasswordMetrics(
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, /* length= */
+                                4));
+
+        /**
+         * Definition of {@link DevicePolicyManager#PASSWORD_COMPLEXITY_LOW} in terms of
+         * {@link PasswordMetrics}.
+         */
+        private static final PasswordComplexityBucket LOW =
+                new PasswordComplexityBucket(
+                        PASSWORD_COMPLEXITY_LOW,
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC),
+                        new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC));
+
+        /**
+         * A special bucket to represent {@link DevicePolicyManager#PASSWORD_COMPLEXITY_NONE}.
+         */
+        private static final PasswordComplexityBucket NONE =
+                new PasswordComplexityBucket(PASSWORD_COMPLEXITY_NONE, new PasswordMetrics());
+
+        /** Array containing all buckets from high to low. */
+        private static final PasswordComplexityBucket[] BUCKETS =
+                new PasswordComplexityBucket[] {HIGH, MEDIUM, LOW};
+
+        @PasswordComplexity
+        private final int mComplexityLevel;
+        private final PasswordMetrics[] mMetrics;
+
+        /**
+         * @param metricsArray must be sorted in ascending order of {@link #quality}.
+         */
+        private PasswordComplexityBucket(@PasswordComplexity int complexityLevel,
+                PasswordMetrics... metricsArray) {
+            int previousQuality = PASSWORD_QUALITY_UNSPECIFIED;
+            for (PasswordMetrics metrics : metricsArray) {
+                if (metrics.quality < previousQuality) {
+                    throw new IllegalArgumentException("metricsArray must be sorted in ascending"
+                            + " order of quality");
+                }
+                previousQuality = metrics.quality;
+            }
+
+            this.mMetrics = metricsArray;
+            this.mComplexityLevel = complexityLevel;
+
+        }
+
+        /** Returns the bucket that {@code complexityLevel} represents. */
+        private static PasswordComplexityBucket complexityLevelToBucket(
+                @PasswordComplexity int complexityLevel) {
+            for (PasswordComplexityBucket bucket : BUCKETS) {
+                if (bucket.mComplexityLevel == complexityLevel) {
+                    return bucket;
+                }
+            }
+            return NONE;
         }
     }
 }

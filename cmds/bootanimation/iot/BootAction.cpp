@@ -32,7 +32,7 @@ BootAction::~BootAction() {
 }
 
 bool BootAction::init(const std::string& libraryPath,
-                      const std::vector<ABootActionParameter>& parameters) {
+                      const std::unique_ptr<BootParameters>& bootParameters) {
     APeripheralManagerClient* client = nullptr;
     ALOGD("Connecting to peripheralmanager");
     // Wait for peripheral manager to come up.
@@ -77,9 +77,32 @@ bool BootAction::init(const std::string& libraryPath,
         mLibStartPart = reinterpret_cast<libStartPart>(loaded);
     }
 
-    ALOGD("Entering boot_action_init");
-    bool result = mLibInit(parameters.data(), parameters.size());
-    ALOGD("Returned from boot_action_init");
+    // SilentBoot is considered optional, if it isn't exported by the library
+    // and the boot is silent, no method is called.
+    loaded = nullptr;
+    if (!loadSymbol("boot_action_silent_boot", &loaded) || loaded == nullptr) {
+        ALOGW("No boot_action_silent_boot found, boot action will not be "
+              "executed during a silent boot.");
+    } else {
+        mLibSilentBoot = reinterpret_cast<libInit>(loaded);
+    }
+
+    bool result = true;
+    const auto& parameters = bootParameters->getParameters();
+    if (bootParameters->isSilentBoot()) {
+        if (mLibSilentBoot != nullptr) {
+            ALOGD("Entering boot_action_silent_boot");
+            result = mLibSilentBoot(parameters.data(), parameters.size());
+            ALOGD("Returned from boot_action_silent_boot");
+        } else {
+            ALOGW("Skipping missing boot_action_silent_boot");
+        }
+    } else {
+        ALOGD("Entering boot_action_init");
+        result = mLibInit(parameters.data(), parameters.size());
+        ALOGD("Returned from boot_action_init");
+    }
+
     return result;
 }
 
@@ -99,7 +122,7 @@ void BootAction::shutdown() {
 
 bool BootAction::loadSymbol(const char* symbol, void** loaded) {
     *loaded = dlsym(mLibHandle, symbol);
-    if (loaded == nullptr) {
+    if (*loaded == nullptr) {
         ALOGE("Unable to load symbol : %s :: %s", symbol, dlerror());
         return false;
     }

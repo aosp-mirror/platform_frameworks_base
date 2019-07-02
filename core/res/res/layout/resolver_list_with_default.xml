@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
         android:orientation="vertical"
-        android:background="@color/white"
+        android:background="?attr/colorBackgroundFloating"
         android:elevation="8dp">
 
         <LinearLayout
@@ -111,7 +111,6 @@
             android:paddingBottom="8dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:background="@color/white"
             android:elevation="8dp">
 
             <Button
@@ -151,7 +150,7 @@
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:background="@color/white"
+        android:background="?attr/colorBackgroundFloating"
         android:elevation="8dp"
         android:nestedScrollingEnabled="true"
         android:divider="@null" />

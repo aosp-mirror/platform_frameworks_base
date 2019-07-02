@@ -13,11 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
@@ -98,8 +100,70 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         assertEquals(30802, timer.getTotalDurationMsLocked(220302));
     }
 
+    /**
+     * Tests that reset(boolean detachIfReset) clears the correct times if detachIfReset is false.
+     */
     @SmallTest
     public void testReset() throws Exception {
+        final MockClocks clocks = new MockClocks();
+
+        final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
+        timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
+
+        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks,
+                null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
+
+        timeBase.setRunning(true, /* uptimeUs */ 0, /* realtimeUs */ 100_000);
+        timer.startRunningLocked(700);
+        timer.stopRunningLocked(3_100);
+        assertFalse(timer.isRunningLocked());
+        assertEquals(0, timer.getCurrentDurationMsLocked(6_300));
+        assertEquals(2_400, timer.getMaxDurationMsLocked(6_301));
+        assertEquals(2_400, timer.getTotalDurationMsLocked(6_302));
+
+        timer.reset(false);
+        assertEquals(0, timer.getCurrentDurationMsLocked(12_000));
+        assertEquals(0, timer.getMaxDurationMsLocked(12_001));
+        assertEquals(0, timer.getTotalDurationMsLocked(12_002));
+
+        assertEquals(true, timeBase.hasObserver(timer));
+
+        timer.startRunningLocked(24_100);
+        clocks.uptime = clocks.realtime = 24_200;
+        timer.reset(false);
+        assertEquals(34_300, timer.getCurrentDurationMsLocked(58_500));
+        assertEquals(34_301, timer.getMaxDurationMsLocked(58_501));
+        assertEquals(34_302, timer.getTotalDurationMsLocked(58_502));
+    }
+
+    /**
+     * Tests that reset(boolean detachIfReset) clears the correct times if detachIfReset is true.
+     */
+    @SmallTest
+    public void testResetAndDetach() throws Exception {
+        final MockClocks clocks = new MockClocks();
+
+        final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
+        timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
+
+        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks,
+                null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
+
+        timeBase.setRunning(true, /* uptimeUs */ 0, /* realtimeUs */ 100_000);
+        timer.startRunningLocked(700);
+        timer.stopRunningLocked(3_100);
+        assertFalse(timer.isRunningLocked());
+        assertEquals(0, timer.getCurrentDurationMsLocked(6_300));
+        assertEquals(2_400, timer.getMaxDurationMsLocked(6_301));
+        assertEquals(2_400, timer.getTotalDurationMsLocked(6_302));
+
+        timer.reset(true);
+        clocks.uptime = clocks.realtime = 7_000;
+        assertEquals(0, timer.getCurrentDurationMsLocked(8_000));
+        assertEquals(0, timer.getMaxDurationMsLocked(8_001));
+        assertEquals(0, timer.getTotalDurationMsLocked(8_002));
+
+        assertEquals(false, timeBase.hasObserver(timer));
     }
 
     @SmallTest

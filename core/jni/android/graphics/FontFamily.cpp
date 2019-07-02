@@ -44,9 +44,9 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(static_cast<minikin::FontFamily::Variant>(variant)) {}
+        : langId(langId), variant(static_cast<minikin::FamilyVariant>(variant)) {}
     uint32_t langId;
-    minikin::FontFamily::Variant variant;
+    minikin::FamilyVariant variant;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
 };
@@ -83,7 +83,8 @@ static jlong FontFamily_create(jlong builderPtr) {
         return 0;
     }
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            builder->langId, builder->variant, std::move(builder->fonts));
+            builder->langId, builder->variant, std::move(builder->fonts),
+            true /* isCustomFallback */);
     if (family->getCoverage().length() == 0) {
         return 0;
     }
@@ -129,7 +130,7 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
         return false;
     }
     std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
+            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, "", ttcIndex,
                     builder->axes);
     minikin::Font::Builder fontBuilder(minikinFont);
 

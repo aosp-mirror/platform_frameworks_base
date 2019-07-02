@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include <GpuMemoryTracker.h>
 #include <utils/RefBase.h>
 
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkColorSpace.h>
-#include <SkBlendMode.h>
 #include <SkPaint.h>
-
-#include "Matrix.h"
+#include <SkImage.h>
+#include <SkMatrix.h>
+#include <system/graphics.h>
 
 namespace android {
 namespace uirenderer {
@@ -38,26 +38,21 @@ class RenderState;
 /**
  * A layer has dimensions and is backed by a backend specific texture or framebuffer.
  */
-class Layer : public VirtualLightRefBase, GpuMemoryTracker {
+class Layer : public VirtualLightRefBase {
 public:
-    enum class Api {
-        OpenGL = 0,
-        Vulkan = 1,
-    };
-
-    Api getApi() const { return mApi; }
+    Layer(RenderState& renderState, sk_sp<SkColorFilter>, int alpha, SkBlendMode mode);
 
     ~Layer();
 
-    virtual uint32_t getWidth() const = 0;
+    uint32_t getWidth() const { return mWidth; }
 
-    virtual uint32_t getHeight() const = 0;
+    uint32_t getHeight() const { return mHeight; }
 
-    virtual void setSize(uint32_t width, uint32_t height) = 0;
+    void setSize(uint32_t width, uint32_t height) { mWidth = width; mHeight = height; }
 
-    virtual void setBlend(bool blend) = 0;
+    void setBlend(bool blend) { mBlend = blend; }
 
-    virtual bool isBlend() const = 0;
+    bool isBlend() const { return mBlend; }
 
     inline void setForceFilter(bool forceFilter) { this->forceFilter = forceFilter; }
 
@@ -72,21 +67,15 @@ public:
 
     inline int getAlpha() const { return alpha; }
 
-    virtual SkBlendMode getMode() const { return mode; }
+    SkBlendMode getMode() const;
 
-    inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
+    inline sk_sp<SkColorFilter> getColorFilter() const { return mColorFilter; }
 
-    void setColorFilter(sk_sp<SkColorFilter> filter);
+    void setColorFilter(sk_sp<SkColorFilter> filter) { mColorFilter = filter; };
 
-    void setDataSpace(android_dataspace dataspace);
+    inline SkMatrix& getTexTransform() { return texTransform; }
 
-    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
-
-    inline sk_sp<SkColorFilter> getColorSpaceWithFilter() const { return mColorSpaceWithFilter; }
-
-    inline mat4& getTexTransform() { return texTransform; }
-
-    inline mat4& getTransform() { return transform; }
+    inline SkMatrix& getTransform() { return transform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -94,45 +83,19 @@ public:
      */
     void postDecStrong();
 
-    inline void setBufferSize(uint32_t width, uint32_t height) {
-        mBufferWidth = width;
-        mBufferHeight = height;
-    }
+    inline void setImage(const sk_sp<SkImage>& image) { this->layerImage = image; }
 
-    inline uint32_t getBufferWidth() const { return mBufferWidth; }
-
-    inline uint32_t getBufferHeight() const { return mBufferHeight; }
+    inline sk_sp<SkImage> getImage() const { return this->layerImage; }
 
 protected:
-    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha,
-          SkBlendMode mode);
 
     RenderState& mRenderState;
 
-    /**
-     * Blending mode of the layer.
-     */
-    SkBlendMode mode;
-
 private:
-    void buildColorSpaceWithFilter();
-
-    Api mApi;
-
     /**
      * Color filter used to draw this layer. Optional.
      */
     sk_sp<SkColorFilter> mColorFilter;
-
-    /**
-     * Colorspace of the contents of the layer. Optional.
-     */
-    android_dataspace mCurrentDataspace = HAL_DATASPACE_UNKNOWN;
-
-    /**
-     * A color filter that is the combination of the mColorFilter and mColorSpace. Optional.
-     */
-    sk_sp<SkColorFilter> mColorSpaceWithFilter;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.
@@ -145,19 +108,41 @@ private:
     int alpha;
 
     /**
+     * Blending mode of the layer.
+     */
+    SkBlendMode mode;
+
+    /**
      * Optional texture coordinates transform.
      */
-    mat4 texTransform;
+    SkMatrix texTransform;
 
     /**
      * Optional transform.
      */
-    mat4 transform;
+    SkMatrix transform;
 
-    uint32_t mBufferWidth = 0;
+    /**
+     * An image backing the layer.
+     */
+    sk_sp<SkImage> layerImage;
 
-    uint32_t mBufferHeight = 0;
+    /**
+     * layer width.
+     */
+    uint32_t mWidth = 0;
+
+    /**
+     * layer height.
+     */
+    uint32_t mHeight = 0;
+
+    /**
+     * enable blending
+     */
+    bool mBlend = false;
+
 };  // struct Layer
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

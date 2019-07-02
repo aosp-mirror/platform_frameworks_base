@@ -27,9 +27,10 @@ public abstract class PowerCalculator {
      * @param u The recorded stats for the app.
      * @param rawRealtimeUs The raw system realtime in microseconds.
      * @param rawUptimeUs The raw system uptime in microseconds.
-     * @param statsType The type of stats. Can be {@link BatteryStats#STATS_CURRENT},
-     *                  {@link BatteryStats#STATS_SINCE_CHARGED}, or
-     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED}.
+     * @param statsType The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this can
+     *                  only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
+     *                  {@link BatteryStats#STATS_CURRENT} and
+     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
      */
     public abstract void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                                       long rawUptimeUs, int statsType);
@@ -40,9 +41,10 @@ public abstract class PowerCalculator {
      * @param stats The BatteryStats object from which to retrieve data.
      * @param rawRealtimeUs The raw system realtime in microseconds.
      * @param rawUptimeUs The raw system uptime in microseconds.
-     * @param statsType The type of stats. Can be {@link BatteryStats#STATS_CURRENT},
-     *                  {@link BatteryStats#STATS_SINCE_CHARGED}, or
-     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED}.
+     * @param statsType The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this can
+     *                  only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
+     *                  {@link BatteryStats#STATS_CURRENT} and
+     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
      */
     public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
                                    long rawUptimeUs, int statsType) {

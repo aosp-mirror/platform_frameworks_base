@@ -16,13 +16,13 @@
 
 package com.android.server.pm;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.app.ActivityManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -159,6 +159,41 @@ public class UserManagerTest extends AndroidTestCase {
         removeUser(userInfo.id);
 
         assertFalse(findUser(userInfo.id));
+    }
+
+    @MediumTest
+    public void testRemoveUserByHandle() {
+        UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        final UserHandle user = userInfo.getUserHandle();
+        synchronized (mUserRemoveLock) {
+            mUserManager.removeUser(user);
+            long time = System.currentTimeMillis();
+            while (mUserManager.getUserInfo(user.getIdentifier()) != null) {
+                try {
+                    mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
+                    fail("Timeout waiting for removeUser. userId = " + user.getIdentifier());
+                }
+            }
+        }
+
+        assertFalse(findUser(userInfo.id));
+    }
+
+    @MediumTest
+    public void testRemoveUserByHandle_ThrowsException() {
+        synchronized (mUserRemoveLock) {
+            try {
+                mUserManager.removeUser(null);
+                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
+            } catch (IllegalArgumentException expected) {
+                // Do nothing - exception is expected.
+            }
+        }
     }
 
     @MediumTest
@@ -497,6 +532,12 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    public void testGetUserSwitchability() {
+        int userSwitchable = mUserManager.getUserSwitchability();
+        assertEquals("Expected users to be switchable", UserManager.SWITCHABILITY_STATUS_OK,
+                userSwitchable);
+    }
+
     @LargeTest
     public void testSwitchUser() {
         ActivityManager am = getContext().getSystemService(ActivityManager.class);
@@ -504,9 +545,33 @@ public class UserManagerTest extends AndroidTestCase {
         UserInfo user = createUser("User", 0);
         assertNotNull(user);
         // Switch to the user just created.
-        switchUser(user.id);
+        switchUser(user.id, null, true);
         // Switch back to the starting user.
-        switchUser(startUser);
+        switchUser(startUser, null, true);
+    }
+
+    @LargeTest
+    public void testSwitchUserByHandle() {
+        ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        final int startUser = am.getCurrentUser();
+        UserInfo user = createUser("User", 0);
+        assertNotNull(user);
+        // Switch to the user just created.
+        switchUser(-1, user.getUserHandle(), false);
+        // Switch back to the starting user.
+        switchUser(-1, UserHandle.of(startUser), false);
+    }
+
+    public void testSwitchUserByHandle_ThrowsException() {
+        synchronized (mUserSwitchLock) {
+            try {
+                ActivityManager am = getContext().getSystemService(ActivityManager.class);
+                am.switchUser(null);
+                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
+            } catch (IllegalArgumentException expected) {
+                // Do nothing - exception is expected.
+            }
+        }
     }
 
     @MediumTest
@@ -544,10 +609,20 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
-    private void switchUser(int userId) {
+    /**
+     * @param userId value will be used to call switchUser(int) only if ignoreHandle is false.
+     * @param user value will be used to call switchUser(UserHandle) only if ignoreHandle is true.
+     * @param ignoreHandle if true, switchUser(int) will be called with the provided userId,
+     *                     else, switchUser(UserHandle) will be called with the provided user.
+     */
+    private void switchUser(int userId, UserHandle user, boolean ignoreHandle) {
         synchronized (mUserSwitchLock) {
             ActivityManager am = getContext().getSystemService(ActivityManager.class);
-            am.switchUser(userId);
+            if (ignoreHandle) {
+                am.switchUser(userId);
+            } else {
+                am.switchUser(user);
+            }
             long time = System.currentTimeMillis();
             try {
                 mUserSwitchLock.wait(SWITCH_USER_TIMEOUT_MILLIS);
@@ -556,7 +631,8 @@ public class UserManagerTest extends AndroidTestCase {
                 return;
             }
             if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
-                fail("Timeout waiting for the user switch to u" + userId);
+                fail("Timeout waiting for the user switch to u"
+                        + (ignoreHandle ? userId : user.getIdentifier()));
             }
         }
     }

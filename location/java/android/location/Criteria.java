@@ -324,7 +324,7 @@ public class Criteria implements Parcelable {
         return mBearingRequired;
     }
 
-    public static final Parcelable.Creator<Criteria> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Criteria> CREATOR =
         new Parcelable.Creator<Criteria>() {
         @Override
         public Criteria createFromParcel(Parcel in) {

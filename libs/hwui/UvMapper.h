@@ -124,7 +124,7 @@ private:
     float mMaxV;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_UV_MAPPER_H

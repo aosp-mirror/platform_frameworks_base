@@ -54,8 +54,8 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
-    // TODO: get the report and check the content after the ProtoOutputStream change is done.
-    // eventProducer.onDumpReport();
+    // TODO(b/110561136): get the report and check the content after the ProtoOutputStream change
+    // is done eventProducer.onDumpReport();
 }
 
 TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {

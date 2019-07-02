@@ -45,6 +45,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
@@ -236,6 +237,8 @@ public class Toolbar extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Toolbar,
                 defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.Toolbar,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mTitleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0);
         mSubtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0);
@@ -383,6 +386,7 @@ public class Toolbar extends ViewGroup {
      *         0 if menus are inflated against the toolbar theme
      * @see #setPopupTheme(int)
      */
+    @InspectableProperty
     public int getPopupTheme() {
         return mPopupTheme;
     }
@@ -414,6 +418,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginStart(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginStart
      */
+    @InspectableProperty
     public int getTitleMarginStart() {
         return mTitleMarginStart;
     }
@@ -436,6 +441,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginTop(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginTop
      */
+    @InspectableProperty
     public int getTitleMarginTop() {
         return mTitleMarginTop;
     }
@@ -458,6 +464,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginEnd(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginEnd
      */
+    @InspectableProperty
     public int getTitleMarginEnd() {
         return mTitleMarginEnd;
     }
@@ -480,6 +487,7 @@ public class Toolbar extends ViewGroup {
      * @see #setTitleMarginBottom(int)
      * @attr ref android.R.styleable#Toolbar_titleMarginBottom
      */
+    @InspectableProperty
     public int getTitleMarginBottom() {
         return mTitleMarginBottom;
     }
@@ -650,6 +658,7 @@ public class Toolbar extends ViewGroup {
      * @see #setLogo(int)
      * @see #setLogo(android.graphics.drawable.Drawable)
      */
+    @InspectableProperty
     public Drawable getLogo() {
         return mLogoView != null ? mLogoView.getDrawable() : null;
     }
@@ -688,6 +697,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return A description of the logo
      */
+    @InspectableProperty
     public CharSequence getLogoDescription() {
         return mLogoView != null ? mLogoView.getContentDescription() : null;
     }
@@ -735,6 +745,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return The current title.
      */
+    @InspectableProperty
     public CharSequence getTitle() {
         return mTitleText;
     }
@@ -791,6 +802,7 @@ public class Toolbar extends ViewGroup {
      *
      * @return The current subtitle
      */
+    @InspectableProperty
     public CharSequence getSubtitle() {
         return mSubtitleText;
     }
@@ -895,6 +907,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
+    @InspectableProperty
     @Nullable
     public CharSequence getNavigationContentDescription() {
         return mNavButtonView != null ? mNavButtonView.getContentDescription() : null;
@@ -987,6 +1000,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
+    @InspectableProperty
     @Nullable
     public Drawable getNavigationIcon() {
         return mNavButtonView != null ? mNavButtonView.getDrawable() : null;
@@ -1013,6 +1027,100 @@ public class Toolbar extends ViewGroup {
     @TestApi
     public View getNavigationView() {
         return mNavButtonView;
+    }
+
+    /**
+     * Retrieve the currently configured content description for the collapse button view.
+     * This will be used to describe the collapse action to users through mechanisms such
+     * as screen readers or tooltips.
+     *
+     * @return The collapse button's content description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    @InspectableProperty
+    @Nullable
+    public CharSequence getCollapseContentDescription() {
+        return mCollapseButtonView != null ? mCollapseButtonView.getContentDescription() : null;
+    }
+
+    /**
+     * Set a content description for the collapse button if one is present. The content description
+     * will be read via screen readers or other accessibility systems to explain the action of the
+     * collapse button.
+     *
+     * @param resId Resource ID of a content description string to set, or 0 to
+     *              clear the description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    public void setCollapseContentDescription(@StringRes int resId) {
+        setCollapseContentDescription(resId != 0 ? getContext().getText(resId) : null);
+    }
+
+    /**
+     * Set a content description for the collapse button if one is present. The content description
+     * will be read via screen readers or other accessibility systems to explain the action of the
+     * navigation button.
+     *
+     * @param description Content description to set, or <code>null</code> to
+     *                    clear the content description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    public void setCollapseContentDescription(@Nullable CharSequence description) {
+        if (!TextUtils.isEmpty(description)) {
+            ensureCollapseButtonView();
+        }
+        if (mCollapseButtonView != null) {
+            mCollapseButtonView.setContentDescription(description);
+        }
+    }
+
+    /**
+     * Return the current drawable used as the collapse icon.
+     *
+     * @return The collapse icon drawable
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    @InspectableProperty
+    @Nullable
+    public Drawable getCollapseIcon() {
+        return mCollapseButtonView != null ? mCollapseButtonView.getDrawable() : null;
+    }
+
+    /**
+     * Set the icon to use for the toolbar's collapse button.
+     *
+     * <p>The collapse button appears at the start of the toolbar when an action view is present
+     * .</p>
+     *
+     * @param resId Resource ID of a drawable to set
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    public void setCollapseIcon(@DrawableRes int resId) {
+        setCollapseIcon(getContext().getDrawable(resId));
+    }
+
+    /**
+     * Set the icon to use for the toolbar's collapse button.
+     *
+     * <p>The collapse button appears at the start of the toolbar when an action view is present
+     * .</p>
+     *
+     * @param icon Drawable to set, may be null to use the default icon
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    public void setCollapseIcon(@Nullable Drawable icon) {
+        if (icon != null) {
+            ensureCollapseButtonView();
+            mCollapseButtonView.setImageDrawable(icon);
+        } else if (mCollapseButtonView != null) {
+            mCollapseButtonView.setImageDrawable(mCollapseIcon);
+        }
     }
 
     /**
@@ -1142,6 +1250,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
+    @InspectableProperty
     public int getContentInsetStart() {
         return mContentInsets != null ? mContentInsets.getStart() : 0;
     }
@@ -1162,6 +1271,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetEnd
      */
+    @InspectableProperty
     public int getContentInsetEnd() {
         return mContentInsets != null ? mContentInsets.getEnd() : 0;
     }
@@ -1205,6 +1315,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetRight()
      * @attr ref android.R.styleable#Toolbar_contentInsetLeft
      */
+    @InspectableProperty
     public int getContentInsetLeft() {
         return mContentInsets != null ? mContentInsets.getLeft() : 0;
     }
@@ -1225,6 +1336,7 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetLeft()
      * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
+    @InspectableProperty
     public int getContentInsetRight() {
         return mContentInsets != null ? mContentInsets.getRight() : 0;
     }
@@ -1241,6 +1353,7 @@ public class Toolbar extends ViewGroup {
      * @see #setContentInsetStartWithNavigation(int)
      * @attr ref android.R.styleable#Toolbar_contentInsetStartWithNavigation
      */
+    @InspectableProperty
     public int getContentInsetStartWithNavigation() {
         return mContentInsetStartWithNavigation != RtlSpacingHelper.UNDEFINED
                 ? mContentInsetStartWithNavigation
@@ -1284,6 +1397,7 @@ public class Toolbar extends ViewGroup {
      * @see #setContentInsetEndWithActions(int)
      * @attr ref android.R.styleable#Toolbar_contentInsetEndWithActions
      */
+    @InspectableProperty
     public int getContentInsetEndWithActions() {
         return mContentInsetEndWithActions != RtlSpacingHelper.UNDEFINED
                 ? mContentInsetEndWithActions
@@ -2270,7 +2384,7 @@ public class Toolbar extends ViewGroup {
             out.writeInt(isOverflowOpen ? 1 : 0);
         }
 
-        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+        public static final @android.annotation.NonNull Creator<SavedState> CREATOR = new Creator<SavedState>() {
 
             @Override
             public SavedState createFromParcel(Parcel source) {

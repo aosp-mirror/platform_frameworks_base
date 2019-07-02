@@ -20,7 +20,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import androidx.annotation.DimenRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
@@ -28,14 +27,14 @@ import android.view.ViewStub.OnInflateListener;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import androidx.annotation.DimenRes;
+
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 /**
  * The container with notification stack scroller and quick settings inside.

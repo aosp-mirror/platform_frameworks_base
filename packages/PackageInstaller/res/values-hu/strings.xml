@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="7488448184431507488">"Csomagtelepítő"</string>
+    <string name="install" msgid="711829760615509273">"Telepítés"</string>
+    <string name="done" msgid="6632441120016885253">"Kész"</string>
+    <string name="cancel" msgid="1018267193425558088">"Mégse"</string>
+    <string name="installing" msgid="4921993079741206516">"Telepítés…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> telepítése…"</string>
+    <string name="install_done" msgid="5987363587661783896">"Alkalmazás telepítve."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Telepíti ezt az alkalmazást?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Telepíti a meglévő alkalmazás frissítését? Meglévő adatai nem vesznek el."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Telepíti a beépített alkalmazás frissítését? Meglévő adatai nem vesznek el."</string>
+    <string name="install_failed" msgid="5777824004474125469">"Az alkalmazás nincs telepítve."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"A csomag telepítését letiltotta a rendszer."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"A nem csomagként telepített alkalmazás ütközik egy már létező csomaggal."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"A nem alkalmazásként telepített alkalmazás nem kompatibilis az Ön táblagépével."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Ez az alkalmazás nem kompatibilis az Ön tévéjével."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"A nem alkalmazásként telepített alkalmazás nem kompatibilis az Ön telefonjával."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"A nem csomagként telepített alkalmazás érvénytelen."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás nem telepíthető a táblagépére."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás nem telepíthető a tévéjére."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás nem telepíthető a telefonjára."</string>
+    <string name="launch" msgid="3952550563999890101">"Megnyitás"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"A rendszergazda nem engedélyezi az ismeretlen forrásokból származó alkalmazások telepítését"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ez a felhasználó nem telepíthet ismeretlen alkalmazásokat"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ez a felhasználó nem telepíthet alkalmazásokat"</string>
+    <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Alkalmazáskezelés"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nincs elég hely"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazást nem lehet telepíteni. Szabadítson fel egy kis helyet, és próbálkozzon újra."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Az alkalmazás nem található"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Az alkalmazás nem található a telepített alkalmazások listáján."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Nem engedélyezett"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"A jelenlegi felhasználó számára nem engedélyezett az eltávolítás végrehajtása."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Hiba"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Az alkalmazás nem távolítható el."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Alkalmazás eltávolítása"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Frissítés eltávolítása"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"A(z) <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> a következő alkalmazás része:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Eltávolítja ezt az alkalmazást?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Szeretné eltávolítani ezt az alkalmazást "<b>"minden"</b>" felhasználónál? Az alkalmazást és adatait az eszköz "<b>"minden"</b>" felhasználójánál töröljük."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Eltávolítja ezt az alkalmazást <xliff:g id="USERNAME">%1$s</xliff:g> felhasználó esetében?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Lecseréli az alkalmazást a gyári verzióra? Minden adat törlődik."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Lecseréli az alkalmazást a gyári verzióra? Minden adat törlődik. Ez az eszköz összes felhasználóját érinti, így a munkaprofilokkal rendelkezőket is."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Távolítsa el a társított médiafájlokat is (összesen: <xliff:g id="SIZE">%1$s</xliff:g>)."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> alkalmazásadat megtartása."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Futó eltávolítások"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Sikertelen telepítések"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Eltávolítás…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"A(z) <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> eltávolítása folyamatban van…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Az eltávolítás befejeződött."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"A(z) <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> eltávolítása befejeződött"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Az eltávolítás sikertelen."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"A(z) <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> eltávolítása nem sikerült."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nem lehet eltávolítani az aktív eszközrendszergazdai alkalmazást"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nem lehet eltávolítani az aktív eszközrendszergazdai alkalmazást <xliff:g id="USERNAME">%1$s</xliff:g> felhasználó esetében"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Egyes felhasználóknak/profiloknak szüksége van erre az alkalmazásra, másoknál pedig eltávolították"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Ez az alkalmazás szükséges a profiljához, így nem távolítható el."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Az alkalmazásra szüksége van az eszköz adminisztrátorának, és nem távolítható el."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Eszközrendszergazdai alkalmazások kezelése"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Felhasználók kezelése"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"Nem sikerült a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> eltávolítása"</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Gond volt a csomag elemzésekor."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"A Wear nem támogatja a telepítés/eltávolítás műveletet."</string>
+    <string name="message_staging" msgid="8032722385658438567">"Alkalmazás fokozatos közzététele…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"Ismeretlen"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Az Ön biztonsága érdekében táblagépe nem telepíthet ebből a forrásból származó ismeretlen alkalmazásokat."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Az Ön biztonsága érdekében tévéje nem telepíthet ebből a forrásból származó ismeretlen alkalmazásokat."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Az Ön biztonsága érdekében telefonja nem telepíthet ebből a forrásból származó ismeretlen alkalmazásokat."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonja és személyes adatai fokozott kockázatnak vannak kitéve az ismeretlen alkalmazások támadásaival szemben. Az alkalmazás telepítésével elfogadja, hogy Ön a felelős az alkalmazás használatából eredő esetleges adatvesztésért és a telefont ért károkért."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Táblagépe és személyes adatai fokozott kockázatnak vannak kitéve az ismeretlen alkalmazások támadásaival szemben. Az alkalmazás telepítésével elfogadja, hogy Ön a felelős az alkalmazás használatából eredő esetleges adatvesztésért és a táblagépet ért károkért."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tévéje és személyes adatai fokozott kockázatnak vannak kitéve az ismeretlen alkalmazások támadásaival szemben. Az alkalmazás telepítésével elfogadja, hogy Ön a felelős az alkalmazás használatából eredő esetleges adatvesztésért és a tévét ért károkért."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Tovább"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Beállítások"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Wear-alkalmazások telepítése/törlése"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Alkalmazás telepítve értesítés"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Sikeresen telepítve"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> alkalmazás sikeresen telepítve"</string>
+</resources>

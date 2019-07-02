@@ -79,6 +79,7 @@
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <color name="decor_view_status_guard">#ff000000</color>
+    <color name="decor_view_status_guard_light">#ffffffff</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
@@ -146,9 +147,13 @@
 
     <color name="notification_default_color">#757575</color> <!-- Gray 600 -->
 
+    <color name="notification_action_button_text_color">@color/notification_default_color</color>
+
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 
     <color name="notification_action_list">#ffeeeeee</color>
+
+    <color name="notification_action_list_background_color">@null</color>
 
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
@@ -195,8 +200,6 @@
     <color name="Red_700">#ffc53929</color>
     <color name="Red_800">#ffb93221</color>
 
-    <color name="chooser_service_row_background_color">#fff5f5f5</color>
-
     <!-- Status bar color for semi transparent mode. -->
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
 
@@ -209,4 +212,16 @@
     <!-- FloatingToolbar -->
     <color name="floating_popup_divider_dark">#2F2F2F</color>
     <color name="floating_popup_divider_light">#E9E9E9</color>
+
+    <!-- Magnifier -->
+    <color name="default_magnifier_color_overlay">#00FFFFFF</color>
+
+    <color name="chooser_row_divider">@color/list_divider_color_light</color>
+    <color name="chooser_gradient_background">@color/loading_gradient_background_color_light</color>
+    <color name="chooser_gradient_highlight">@color/loading_gradient_highlight_color_light</color>
+
+    <color name="GM2_grey_800">#ff3C4043</color>
+
+    <!-- Resolver/Chooser -->
+    <color name="resolver_text_color_secondary_dark">#ffC4C6C6</color>
 </resources>

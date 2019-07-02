@@ -32,7 +32,7 @@ public final class VendorTagDescriptor implements Parcelable {
     private VendorTagDescriptor(Parcel source) {
     }
 
-    public static final Parcelable.Creator<VendorTagDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VendorTagDescriptor> CREATOR =
             new Parcelable.Creator<VendorTagDescriptor>() {
         @Override
         public VendorTagDescriptor createFromParcel(Parcel source) {

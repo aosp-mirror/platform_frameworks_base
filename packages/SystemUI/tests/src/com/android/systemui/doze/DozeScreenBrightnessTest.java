@@ -31,7 +31,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Intent;
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -59,13 +62,17 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, DEFAULT_BRIGHTNESS,
+                UserHandle.USER_CURRENT);
         mServiceFake = new DozeServiceFake();
         mHostFake = new DozeHostFake();
         mSensorManager = new FakeSensorManager(mContext);
         mSensor = mSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 mSensor.getSensor(), mHostFake, null /* handler */,
-                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY);
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
     }
 
     @Test
@@ -84,6 +91,30 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor.sendSensorEvent(3);
 
         assertEquals(3, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAod_usesDebugValue() throws Exception {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+
+        Intent intent = new Intent(DozeScreenBrightness.ACTION_AOD_BRIGHTNESS);
+        intent.putExtra(DozeScreenBrightness.BRIGHTNESS_BUCKET, 1);
+        mScreen.onReceive(mContext, intent);
+        mSensor.sendSensorEvent(3);
+
+        assertEquals(1, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAod_usesLightSensorRespectingUserSetting() throws Exception {
+        int maxBrightness = 3;
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, maxBrightness,
+                UserHandle.USER_CURRENT);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        assertEquals(maxBrightness, mServiceFake.screenBrightness);
     }
 
     @Test
@@ -143,7 +174,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 null /* sensor */, mHostFake, null /* handler */,
-                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY);
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
@@ -202,6 +234,18 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
 
         mSensor.sendSensorEvent(1);
         assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+    }
+
+    @Test
+    public void screenOff_softBlanks() throws Exception {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        mScreen.transitionTo(DOZE_AOD, DOZE);
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+
+        mScreen.transitionTo(DOZE, DOZE_AOD);
+        mSensor.sendSensorEvent(2);
+        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 
     @Test

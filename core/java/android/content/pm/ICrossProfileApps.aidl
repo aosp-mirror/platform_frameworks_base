@@ -28,6 +28,6 @@ import android.os.UserHandle;
  */
 interface ICrossProfileApps {
     void startActivityAsUser(in IApplicationThread caller, in String callingPackage,
-            in ComponentName component, in UserHandle user);
+            in ComponentName component, int userId, boolean launchMainActivity);
     List<UserHandle> getTargetUserProfiles(in String callingPackage);
 }

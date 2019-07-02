@@ -76,9 +76,9 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
             break;
         }
         case LogicalOperation::NOT:
-            newCondition = (conditionCache[children[0]] == ConditionState::kFalse)
-                                   ? ConditionState::kTrue
-                                   : ConditionState::kFalse;
+            newCondition = children.empty() ? ConditionState::kUnknown :
+                              ((conditionCache[children[0]] == ConditionState::kFalse) ?
+                                  ConditionState::kTrue : ConditionState::kFalse);
             break;
         case LogicalOperation::NAND:
             newCondition = hasFalse ? ConditionState::kTrue : ConditionState::kFalse;

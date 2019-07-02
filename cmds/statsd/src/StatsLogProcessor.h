@@ -18,7 +18,6 @@
 
 #include <gtest/gtest_prod.h>
 #include "config/ConfigListener.h"
-#include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
 #include "packages/UidMap.h"
 #include "external/StatsPullerManager.h"
@@ -32,29 +31,18 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Keep this in sync with DumpReportReason enum in stats_log.proto
-enum DumpReportReason {
-    DEVICE_SHUTDOWN = 1,
-    CONFIG_UPDATED = 2,
-    CONFIG_REMOVED = 3,
-    GET_DATA_CALLED = 4,
-    ADB_DUMP = 5,
-    CONFIG_RESET = 6,
-    STATSCOMPANION_DIED = 7,
-    TERMINATION_SIGNAL_RECEIVED = 8
-};
 
 class StatsLogProcessor : public ConfigListener {
 public:
-    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<StatsPullerManager>& pullerManager,
+                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
                       const int64_t timeBaseNs,
-                      const std::function<bool(const ConfigKey&)>& sendBroadcast);
+                      const std::function<bool(const ConfigKey&)>& sendBroadcast,
+                      const std::function<bool(const int&,
+                                               const vector<int64_t>&)>& sendActivationBroadcast);
     virtual ~StatsLogProcessor();
 
-    void OnLogEvent(LogEvent* event, bool reconnectionStarts);
-
-    // for testing only.
     void OnLogEvent(LogEvent* event);
 
     void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
@@ -63,9 +51,18 @@ public:
 
     size_t GetMetricsSize(const ConfigKey& key) const;
 
+    void GetActiveConfigs(const int uid, vector<int64_t>& outActiveConfigs);
+
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
-                      const bool include_current_partial_bucket,
-                      const DumpReportReason dumpReportReason, vector<uint8_t>* outData);
+                      const bool include_current_partial_bucket, const bool erase_data,
+                      const DumpReportReason dumpReportReason,
+                      const DumpLatency dumpLatency,
+                      vector<uint8_t>* outData);
+    void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
+                      const bool include_current_partial_bucket, const bool erase_data,
+                      const DumpReportReason dumpReportReason,
+                      const DumpLatency dumpLatency,
+                      ProtoOutputStream* proto);
 
     /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
     void onAnomalyAlarmFired(
@@ -78,7 +75,21 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
 
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
-    void WriteDataToDisk(const DumpReportReason dumpReportReason);
+    void WriteDataToDisk(const DumpReportReason dumpReportReason,
+                         const DumpLatency dumpLatency);
+
+    /* Persist configs containing metrics with active activations to disk. */
+    void SaveActiveConfigsToDisk(int64_t currentTimeNs);
+
+    /* Writes the current active status/ttl for all configs and metrics to ProtoOutputStream. */
+    void WriteActiveConfigsToProtoOutputStream(
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
+
+    /* Load configs containing metrics with active activations from disk. */
+    void LoadActiveConfigsFromDisk();
+
+    /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
+    void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
 
     // Reset all configs.
     void resetConfigs();
@@ -87,7 +98,7 @@ public:
         return mUidMap;
     }
 
-    void dumpStates(FILE* out, bool verbose);
+    void dumpStates(int outFd, bool verbose);
 
     void informPullAlarmFired(const int64_t timestampNs);
 
@@ -119,6 +130,9 @@ private:
 
     std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 
+    // Last time we sent a broadcast to this uid that the active configs had changed.
+    std::unordered_map<int, long> mLastActivationBroadcastTimes;
+
     // Tracks when we last checked the bytes consumed for each config key.
     std::unordered_map<ConfigKey, long> mLastByteSizeTimes;
 
@@ -127,7 +141,7 @@ private:
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
-    StatsPullerManager mStatsPullerManager;
+    sp<StatsPullerManager> mPullerManager;  // Reference to StatsPullerManager
 
     sp<AlarmMonitor> mAnomalyAlarmMonitor;
 
@@ -138,14 +152,27 @@ private:
     void OnConfigUpdatedLocked(
         const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
 
-    void WriteDataToDiskLocked(const DumpReportReason dumpReportReason);
-    void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
-                               const DumpReportReason dumpReportReason);
+    void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
 
-    void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
-                                     const bool include_current_partial_bucket,
-                                     const DumpReportReason dumpReportReason,
-                                     util::ProtoOutputStream* proto);
+    void WriteActiveConfigsToProtoOutputStreamLocked(
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
+
+    void SetConfigsActiveStateLocked(const ActiveConfigList& activeConfigList,
+                                     int64_t currentTimeNs);
+
+    void WriteDataToDiskLocked(const DumpReportReason dumpReportReason,
+                               const DumpLatency dumpLatency);
+    void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
+                               const DumpReportReason dumpReportReason,
+                               const DumpLatency dumpLatency);
+
+    void onConfigMetricsReportLocked(
+            const ConfigKey& key, const int64_t dumpTimeStampNs,
+            const bool include_current_partial_bucket, const bool erase_data,
+            const DumpReportReason dumpReportReason, const DumpLatency dumpLatency,
+            /*if dataSavedToDisk is true, it indicates the caller will write the data to disk
+             (e.g., before reboot). So no need to further persist local history.*/
+            const bool dataSavedToDisk, vector<uint8_t>* proto);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
@@ -167,6 +194,10 @@ private:
     // to retrieve the stored data.
     std::function<bool(const ConfigKey& key)> mSendBroadcast;
 
+    // Function used to send a broadcast so that receiver can be notified of which configs
+    // are currently active.
+    std::function<bool(const int& uid, const vector<int64_t>& configIds)> mSendActivationBroadcast;
+
     const int64_t mTimeBaseNs;
 
     // Largest timestamp of the events that we have processed.
@@ -174,18 +205,13 @@ private:
 
     int64_t mLastTimestampSeen = 0;
 
-    bool mInReconnection = false;
-
-    // Processed log count
-    uint64_t mLogCount = 0;
-
-    // Log loss detected count
-    int mLogLossCount = 0;
-
     long mLastPullerCacheClearTimeSec = 0;
 
     // Last time we wrote data to disk.
     int64_t mLastWriteTimeNs = 0;
+
+    // Last time we wrote active metrics to disk.
+    int64_t mLastActiveMetricsWriteNs = 0;
 
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
@@ -195,6 +221,13 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
+    FRIEND_TEST(StatsLogProcessorTest,
+            TestActivationOnBootMultipleActivationsDifferentActivationTypes);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
+
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3);
@@ -208,9 +241,12 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
-    FRIEND_TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition);
+    FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
 
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
@@ -233,6 +269,18 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
+
+    FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
+    FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
 };
 
 }  // namespace statsd

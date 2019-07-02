@@ -204,7 +204,7 @@ public final class ImsCallForwardInfo implements Parcelable {
         mServiceClass = in.readInt();
     }
 
-    public static final Creator<ImsCallForwardInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsCallForwardInfo> CREATOR =
             new Creator<ImsCallForwardInfo>() {
         @Override
         public ImsCallForwardInfo createFromParcel(Parcel in) {

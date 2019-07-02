@@ -16,13 +16,14 @@
 package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
@@ -31,6 +32,7 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.android.settingslib.R;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,33 +40,34 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class A2dpProfileTest {
 
-    @Mock Context mContext;
-    @Mock LocalBluetoothAdapter mAdapter;
-    @Mock CachedBluetoothDeviceManager mDeviceManager;
-    @Mock LocalBluetoothProfileManager mProfileManager;
-    @Mock BluetoothDevice mDevice;
-    @Mock BluetoothA2dp mBluetoothA2dp;
-    BluetoothProfile.ServiceListener mServiceListener;
+    @Mock
+    private Context mContext;
+    @Mock
+    private CachedBluetoothDeviceManager mDeviceManager;
+    @Mock
+    private LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    private BluetoothDevice mDevice;
+    @Mock
+    private BluetoothA2dp mBluetoothA2dp;
+    private BluetoothProfile.ServiceListener mServiceListener;
 
-    A2dpProfile mProfile;
+    private A2dpProfile mProfile;
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        // Capture the A2dpServiceListener our A2dpProfile will pass during its constructor, so that
-        // we can call its onServiceConnected method and get it to use our mock BluetoothA2dp
-        // object.
-        doAnswer((invocation) -> {
-            mServiceListener = (BluetoothProfile.ServiceListener) invocation.getArguments()[1];
-            return null;
-        }).when(mAdapter).getProfileProxy(any(Context.class), any(), eq(BluetoothProfile.A2DP));
-
-        mProfile = new A2dpProfile(mContext, mAdapter, mDeviceManager, mProfileManager);
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        mProfile = new A2dpProfile(mContext, mDeviceManager, mProfileManager);
+        mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP, mBluetoothA2dp);
     }
 
@@ -126,7 +129,7 @@ public class A2dpProfileTest {
     private static String KNOWN_CODEC_LABEL = "Use high quality audio: %1$s";
     private static String UNKNOWN_CODEC_LABEL = "Use high quality audio";
     private static String[] CODEC_NAMES =
-            new String[] { "Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC" };
+            new String[]{"Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC"};
 
     /**
      * Helper for setting up several tests of getHighQualityAudioOptionLabel

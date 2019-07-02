@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "Caches.h"
 #include "DeviceInfo.h"
 #include "Outline.h"
 #include "Rect.h"
@@ -89,9 +88,7 @@ public:
 
     SkBlendMode xferMode() const { return mMode; }
 
-    bool setColorFilter(SkColorFilter* filter);
-
-    SkColorFilter* colorFilter() const { return mColorFilter; }
+    SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
     // Sets alpha, xfermode, and colorfilter from an SkPaint
     // paint may be NULL, in which case defaults will be set
@@ -101,13 +98,14 @@ public:
 
     LayerProperties& operator=(const LayerProperties& other);
 
+    // Strongly recommend using effectiveLayerType instead
+    LayerType type() const { return mType; }
+
 private:
     LayerProperties();
     ~LayerProperties();
     void reset();
-
-    // Private since external users should go through properties().effectiveLayerType()
-    LayerType type() const { return mType; }
+    bool setColorFilter(SkColorFilter* filter);
 
     friend class RenderProperties;
 
@@ -116,7 +114,7 @@ private:
     bool mOpaque;
     uint8_t mAlpha;
     SkBlendMode mMode;
-    SkColorFilter* mColorFilter = nullptr;
+    sk_sp<SkColorFilter> mColorFilter;
 };
 
 /*
@@ -153,6 +151,7 @@ public:
         // parent may have already dictated that a descendant layer is needed
         bool functorsNeedLayer =
                 ancestorDictatesFunctorsNeedLayer
+                || CC_UNLIKELY(isClipMayBeComplex())
 
                 // Round rect clipping forces layer for functors
                 || CC_UNLIKELY(getOutline().willRoundRectClip()) ||
@@ -194,6 +193,12 @@ public:
     }
 
     bool isProjectionReceiver() const { return mPrimitiveFields.mProjectionReceiver; }
+
+    bool setClipMayBeComplex(bool isClipMayBeComplex) {
+        return RP_SET(mPrimitiveFields.mClipMayBeComplex, isClipMayBeComplex);
+    }
+
+    bool isClipMayBeComplex() const { return mPrimitiveFields.mClipMayBeComplex; }
 
     bool setStaticMatrix(const SkMatrix* matrix) {
         delete mStaticMatrix;
@@ -328,9 +333,7 @@ public:
 
     bool isPivotExplicitlySet() const { return mPrimitiveFields.mPivotExplicitlySet; }
 
-    bool resetPivot() {
-        return RP_SET_AND_DIRTY(mPrimitiveFields.mPivotExplicitlySet, false);
-    }
+    bool resetPivot() { return RP_SET_AND_DIRTY(mPrimitiveFields.mPivotExplicitlySet, false); }
 
     bool setCameraDistance(float distance) {
         if (distance != getCameraDistance()) {
@@ -510,17 +513,13 @@ public:
                getOutline().getAlpha() != 0.0f;
     }
 
-    SkColor getSpotShadowColor() const {
-        return mPrimitiveFields.mSpotShadowColor;
-    }
+    SkColor getSpotShadowColor() const { return mPrimitiveFields.mSpotShadowColor; }
 
     bool setSpotShadowColor(SkColor shadowColor) {
         return RP_SET(mPrimitiveFields.mSpotShadowColor, shadowColor);
     }
 
-    SkColor getAmbientShadowColor() const {
-        return mPrimitiveFields.mAmbientShadowColor;
-    }
+    SkColor getAmbientShadowColor() const { return mPrimitiveFields.mAmbientShadowColor; }
 
     bool setAmbientShadowColor(SkColor shadowColor) {
         return RP_SET(mPrimitiveFields.mAmbientShadowColor, shadowColor);
@@ -543,6 +542,14 @@ public:
         return CC_UNLIKELY(promotedToLayer()) ? LayerType::RenderLayer : mLayerProperties.mType;
     }
 
+    bool setAllowForceDark(bool allow) {
+        return RP_SET(mPrimitiveFields.mAllowForceDark, allow);
+    }
+
+    bool getAllowForceDark() const {
+        return mPrimitiveFields.mAllowForceDark;
+    }
+
 private:
     // Rendering properties
     struct PrimitiveFields {
@@ -562,6 +569,8 @@ private:
         bool mMatrixOrPivotDirty = false;
         bool mProjectBackwards = false;
         bool mProjectionReceiver = false;
+        bool mAllowForceDark = true;
+        bool mClipMayBeComplex = false;
         Rect mClipBounds;
         Outline mOutline;
         RevealClip mRevealClip;

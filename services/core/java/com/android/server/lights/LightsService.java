@@ -15,15 +15,18 @@
 
 package com.android.server.lights;
 
-import com.android.server.SystemService;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Trace;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.SurfaceControl;
+
+import com.android.server.SystemService;
 
 public class LightsService extends SystemService {
     static final String TAG = "LightsService";
@@ -33,8 +36,25 @@ public class LightsService extends SystemService {
 
     private final class LightImpl extends Light {
 
-        private LightImpl(int id) {
+        private final IBinder mDisplayToken;
+        private final int mSurfaceControlMaximumBrightness;
+
+        private LightImpl(Context context, int id) {
             mId = id;
+            mDisplayToken = SurfaceControl.getInternalDisplayToken();
+            final boolean brightnessSupport = SurfaceControl.getDisplayBrightnessSupport(
+                    mDisplayToken);
+            if (DEBUG) {
+                Slog.d(TAG, "Display brightness support: " + brightnessSupport);
+            }
+            int maximumBrightness = 0;
+            if (brightnessSupport) {
+                PowerManager pm = context.getSystemService(PowerManager.class);
+                if (pm != null) {
+                    maximumBrightness = pm.getMaximumScreenBrightnessSetting();
+                }
+            }
+            mSurfaceControlMaximumBrightness = maximumBrightness;
         }
 
         @Override
@@ -51,10 +71,26 @@ public class LightsService extends SystemService {
                             ": brightness=0x" + Integer.toHexString(brightness));
                     return;
                 }
-
-                int color = brightness & 0x000000ff;
-                color = 0xff000000 | (color << 16) | (color << 8) | color;
-                setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
+                // Ideally, we'd like to set the brightness mode through the SF/HWC as well, but
+                // right now we just fall back to the old path through Lights brightessMode is
+                // anything but USER or the device shouldBeInLowPersistenceMode().
+                if (brightnessMode == BRIGHTNESS_MODE_USER && !shouldBeInLowPersistenceMode()
+                        && mSurfaceControlMaximumBrightness == 255) {
+                    // TODO: the last check should be mSurfaceControlMaximumBrightness != 0; the
+                    // reason we enforce 255 right now is to stay consistent with the old path. In
+                    // the future, the framework should be refactored so that brightness is a float
+                    // between 0.0f and 1.0f, and the actual number of supported brightness levels
+                    // is determined in the device-specific implementation.
+                    if (DEBUG) {
+                        Slog.d(TAG, "Using new setBrightness path!");
+                    }
+                    SurfaceControl.setDisplayBrightness(mDisplayToken,
+                            (float) brightness / mSurfaceControlMaximumBrightness);
+                } else {
+                    int color = brightness & 0x000000ff;
+                    color = 0xff000000 | (color << 16) | (color << 8) | color;
+                    setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
+                }
             }
         }
 
@@ -172,7 +208,7 @@ public class LightsService extends SystemService {
         super(context);
 
         for (int i = 0; i < LightsManager.LIGHT_ID_COUNT; i++) {
-            mLights[i] = new LightImpl(i);
+            mLights[i] = new LightImpl(context, i);
         }
     }
 

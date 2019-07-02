@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.annotation.UnsupportedAppUsage;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -197,9 +198,9 @@ public final class SQLiteDatabaseConfiguration {
         return path.equalsIgnoreCase(MEMORY_DB_PATH);
     }
 
-    boolean useCompatibilityWal() {
+    boolean isLegacyCompatibilityWalEnabled() {
         return journalMode == null && syncMode == null
-                && (openFlags & SQLiteDatabase.DISABLE_COMPATIBILITY_WAL) == 0;
+                && (openFlags & SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL) != 0;
     }
 
     private static String stripPathForLogs(String path) {

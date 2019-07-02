@@ -18,6 +18,7 @@ import android.content.Context;
 import android.testing.LeakCheck;
 import android.testing.TestableContext;
 import android.util.ArrayMap;
+import android.view.Display;
 
 public class SysuiTestableContext extends TestableContext implements SysUiServiceProvider {
 
@@ -25,10 +26,12 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
 
     public SysuiTestableContext(Context base) {
         super(base);
+        setTheme(R.style.Theme_SystemUI);
     }
 
     public SysuiTestableContext(Context base, LeakCheck check) {
         super(base, check);
+        setTheme(R.style.Theme_SystemUI);
     }
 
     public ArrayMap<Class<?>, Object> getComponents() {
@@ -44,5 +47,16 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
     public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
         if (mComponents == null) mComponents = new ArrayMap<>();
         mComponents.put(interfaceType, component);
+    }
+
+    @Override
+    public Context createDisplayContext(Display display) {
+        if (display == null) {
+            throw new IllegalArgumentException("display must not be null");
+        }
+
+        SysuiTestableContext context =
+                new SysuiTestableContext(getBaseContext().createDisplayContext(display));
+        return context;
     }
 }

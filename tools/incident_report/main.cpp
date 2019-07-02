@@ -277,147 +277,6 @@ print_message(Out* out, Descriptor const* descriptor, GenericMessage const* mess
 }
 
 // ================================================================================
-static uint8_t*
-write_raw_varint(uint8_t* buf, uint32_t val)
-{
-    uint8_t* p = buf;
-    while (true) {
-        if ((val & ~0x7F) == 0) {
-            *p++ = (uint8_t)val;
-            return p;
-        } else {
-            *p++ = (uint8_t)((val & 0x7F) | 0x80);
-            val >>= 7;
-        }
-    }
-}
-
-static int
-write_all(int fd, uint8_t const* buf, size_t size)
-{
-    while (size > 0) {
-        ssize_t amt = ::write(fd, buf, size);
-        if (amt < 0) {
-            return errno;
-        }
-        size -= amt;
-        buf += amt;
-    }
-    return 0;
-}
-
-static int
-adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
-{
-    const int maxAllowedSize = 20 * 1024 * 1024; // 20MB
-    unique_ptr<uint8_t[]> buffer(new uint8_t[maxAllowedSize]);
-
-    for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
-        Descriptor const* descriptor = IncidentProto::descriptor();
-        FieldDescriptor const* field;
-
-        // Get the name and field id.
-        string name = *it;
-        char* end;
-        int id = strtol(name.c_str(), &end, 0);
-        if (*end == '\0') {
-            // If it's an id, find out the string.
-            field = descriptor->FindFieldByNumber(id);
-            if (field == NULL) {
-                fprintf(stderr, "Unable to find field number: %d\n", id);
-                return 1;
-            }
-            name = field->name();
-        } else {
-            // If it's a string, find out the id.
-            field = descriptor->FindFieldByName(name);
-            if (field == NULL) {
-                fprintf(stderr, "Unable to find field: %s\n", name.c_str());
-                return 1;
-            }
-            id = field->number();
-        }
-
-        int pfd[2];
-        if (pipe(pfd) != 0) {
-            fprintf(stderr, "pipe failed: %s\n", strerror(errno));
-            return 1;
-        }
-
-        pid_t pid = fork();
-        if (pid == -1) {
-            fprintf(stderr, "fork failed: %s\n", strerror(errno));
-            return 1;
-        } else if (pid == 0) {
-            // child
-            dup2(pfd[1], STDOUT_FILENO);
-            close(pfd[0]);
-            close(pfd[1]);
-
-            char const** args = (char const**)malloc(sizeof(char*) * 8);
-            int argpos = 0;
-            args[argpos++] = "adb";
-            if (adbSerial != NULL) {
-                args[argpos++] = "-s";
-                args[argpos++] = adbSerial;
-            }
-            args[argpos++] = "shell";
-            args[argpos++] = "dumpsys";
-            args[argpos++] = name.c_str();
-            args[argpos++] = "--proto";
-            args[argpos++] = NULL;
-            execvp(args[0], (char*const*)args);
-            fprintf(stderr, "execvp failed: %s\n", strerror(errno));
-            free(args);
-            return 1;
-        } else {
-            // parent
-            close(pfd[1]);
-
-            size_t size = 0;
-            while (size < maxAllowedSize) {
-                ssize_t amt = read(pfd[0], buffer.get() + size, maxAllowedSize - size);
-                if (amt == 0) {
-                    break;
-                } else if (amt == -1) {
-                    fprintf(stderr, "read error: %s\n", strerror(errno));
-                    return 1;
-                }
-                size += amt;
-            }
-
-            int status;
-            do {
-                waitpid(pid, &status, 0);
-            } while (!WIFEXITED(status));
-            if (WEXITSTATUS(status) != 0) {
-                return WEXITSTATUS(status);
-            }
-
-            if (size > 0) {
-                uint8_t header[20];
-                uint8_t* p = write_raw_varint(header, (id << 3) | 2);
-                p = write_raw_varint(p, size);
-                int err = write_all(STDOUT_FILENO, header, p-header);
-                if (err != 0) {
-                    fprintf(stderr, "write error: %s\n", strerror(err));
-                    return 1;
-                }
-                err = write_all(STDOUT_FILENO, buffer.get(), size);
-                if (err != 0) {
-                    fprintf(stderr, "write error: %s\n", strerror(err));
-                    return 1;
-                }
-            }
-
-            close(pfd[0]);
-        }
-    }
-
-    return 0;
-}
-
-// ================================================================================
 static void
 usage(FILE* out)
 {
@@ -433,6 +292,7 @@ usage(FILE* out)
     fprintf(out, "Take an incident report over adb (which must be in the PATH).\n");
     fprintf(out, "  -b          output the incident report raw protobuf format\n");
     fprintf(out, "  -o OUTPUT   the output file. OUTPUT may be '-' or omitted to use stdout\n");
+    fprintf(out, "  -r REASON   human readable description of why the report is taken.\n");
     fprintf(out, "  -s SERIAL   sent to adb to choose which device, instead of $ANDROID_SERIAL\n");
     fprintf(out, "  -t          output the incident report in pretty-printed text format\n");
     fprintf(out, "\n");
@@ -448,14 +308,14 @@ main(int argc, char** argv)
     enum { OUTPUT_TEXT, OUTPUT_PROTO } outputFormat = OUTPUT_TEXT;
     const char* inFilename = NULL;
     const char* outFilename = NULL;
+    const char* reason = NULL;
     const char* adbSerial = NULL;
-    bool adbIncidentWorkaround = true;
     pid_t childPid = -1;
     vector<string> sections;
     const char* privacy = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "bhi:o:s:twp:")) != -1) {
+    while ((opt = getopt(argc, argv, "bhi:o:r:s:twp:")) != -1) {
         switch (opt) {
             case 'b':
                 outputFormat = OUTPUT_PROTO;
@@ -466,6 +326,9 @@ main(int argc, char** argv)
             case 'o':
                 outFilename = optarg;
                 break;
+            case 'r':
+                reason = optarg;
+                break;
             case 's':
                 adbSerial = optarg;
                 break;
@@ -475,9 +338,6 @@ main(int argc, char** argv)
             case 'h':
                 usage(stdout);
                 return 0;
-            case 'w':
-                adbIncidentWorkaround = false;
-                break;
             case 'p':
                 privacy = optarg;
                 break;
@@ -517,20 +377,11 @@ main(int argc, char** argv)
             fprintf(stderr, "fork failed: %s\n", strerror(errno));
             return 1;
         } else if (childPid == 0) {
+            // child
             dup2(pfd[1], STDOUT_FILENO);
             close(pfd[0]);
             close(pfd[1]);
-            // child
-            if (adbIncidentWorkaround) {
-                // TODO: Until the device side incident command is checked in,
-                // the incident_report builds the outer Incident proto by hand
-                // from individual adb shell dumpsys <service> --proto calls,
-                // with a maximum allowed output size.
-                return adb_incident_workaround(adbSerial, sections);
-            }
-
-            // TODO: This is what the real implementation will be...
-            char const** args = (char const**)malloc(sizeof(char*) * (8 + sections.size()));
+            char const** args = (char const**)malloc(sizeof(char*) * (10 + sections.size()));
             int argpos = 0;
             args[argpos++] = "adb";
             if (adbSerial != NULL) {
@@ -542,6 +393,10 @@ main(int argc, char** argv)
             if (privacy != NULL) {
                 args[argpos++] = "-p";
                 args[argpos++] = privacy;
+            }
+            if (reason != NULL) {
+                args[argpos++] = "-r";
+                args[argpos++] = reason;
             }
             for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
                 args[argpos++] = it->c_str();

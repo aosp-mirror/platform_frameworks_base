@@ -39,7 +39,7 @@ public:
 // current thread can spoof being a GPU thread
 static void destroyEglContext() {
     if (TestUtils::isRenderThreadRunning()) {
-        TestUtils::runOnRenderThread([](RenderThread& thread) { thread.eglManager().destroy(); });
+        TestUtils::runOnRenderThread([](RenderThread& thread) { thread.destroyRenderingContext(); });
     }
 }
 

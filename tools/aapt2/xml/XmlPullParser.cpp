@@ -38,6 +38,7 @@ XmlPullParser::XmlPullParser(InputStream* in) : in_(in), empty_(), depth_(0) {
                               EndNamespaceHandler);
   XML_SetCharacterDataHandler(parser_, CharacterDataHandler);
   XML_SetCommentHandler(parser_, CommentDataHandler);
+  XML_SetCdataSectionHandler(parser_, StartCdataSectionHandler, EndCdataSectionHandler);
   event_queue_.push(EventData{Event::kStartDocument, 0, depth_++});
 }
 
@@ -285,6 +286,22 @@ void XMLCALL XmlPullParser::CommentDataHandler(void* user_data,
   parser->event_queue_.push(EventData{Event::kComment,
                                       XML_GetCurrentLineNumber(parser->parser_),
                                       parser->depth_, comment});
+}
+
+void XMLCALL XmlPullParser::StartCdataSectionHandler(void* user_data) {
+  XmlPullParser* parser = reinterpret_cast<XmlPullParser*>(user_data);
+
+  parser->event_queue_.push(EventData{Event::kCdataStart,
+                                      XML_GetCurrentLineNumber(parser->parser_),
+                                      parser->depth_ });
+}
+
+void XMLCALL XmlPullParser::EndCdataSectionHandler(void* user_data) {
+  XmlPullParser* parser = reinterpret_cast<XmlPullParser*>(user_data);
+
+  parser->event_queue_.push(EventData{Event::kCdataEnd,
+                                      XML_GetCurrentLineNumber(parser->parser_),
+                                      parser->depth_ });
 }
 
 Maybe<StringPiece> FindAttribute(const XmlPullParser* parser,

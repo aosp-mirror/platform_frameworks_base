@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"ແຕະເພື່ອພິມລະຫັດຜ່ານ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ພິມລະຫັດເພື່ອປົດລັອກ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ພິມລະຫັດ PIN ເພື່ອປົດລັອກ"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ໃສ່ລະຫັດ PIN ຂອງທ່ານ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"ໃສ່ຮູບແບບປົດລັອກຂອງທ່ານ"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"ປ້ອນລະຫັດຜ່ານຂອງທ່ານ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ບັດບໍ່ຖືກຕ້ອງ."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"ສາກເຕັມແລ້ວ."</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"ກຳລັງສາກໄຟ"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"ກຳລັງສາກດ່ວນ"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"ກຳລັງສາກຊ້າໆ"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"ສາກເຕັມແລ້ວ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບໄຮ້ສາຍ"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ເຊື່ອມຕໍ່ສາຍສາກຂອງທ່ານ."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ເຄືອຂ່າຍຖືກລັອກ"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ຊິມກາດຖືກລັອກດ້ວຍລະຫັດ PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ປົດລັອກ SIM card..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ພື້ນທີ່ PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"ລະຫັດຜ່ານອຸປະກອນ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ພື້ນທີ່ PIN ຂອງ SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ພື້ນທີ່ PUK ຂອງ SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"ໂມງປຸກຕໍ່ໄປຖືກຕັ້ງໄວ້ເວລາ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"ບໍ່ສາມາດປິດການນຳໃຊ້ eSIM ໄດ້ເນື່ອງຈາກມີຂໍ້ຜິດພາດ."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"ປ້ອນເຂົ້າ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ລືມຮູບແບບປົດລັອກ?"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ຮູບແບບຜິດ"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"ຮູບແບບບໍ່ຖືກຕ້ອງ"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ.</item>
@@ -136,13 +141,94 @@
       <item quantity="other">ອຸປະກອນບໍ່ໄດ້ຖືກປົດລັອກເປັນເວລາ <xliff:g id="NUMBER_1">%d</xliff:g> ຊົ່ວໂມງ. ຢືນຢັນລະຫັດຜ່ານ.</item>
       <item quantity="one">ອຸປະກອນບໍ່ໄດ້ຖືກປົດລັອກເປັນເວລາ <xliff:g id="NUMBER_0">%d</xliff:g> ຊົ່ວໂມງ. ຢືນຢັນລະຫັດຜ່ານ.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ບໍ່ຮັບຮູ້"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
-      <item quantity="one">ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ບໍ່ຮູ້ຈັກ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"ບໍ່ຮູ້ຈັກ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">ລະຫັດ SIM PIN ບໍ່ຖືກຕ້ອງ. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
+      <item quantity="one">ໃສ່ລະຫັດ SIM PIN. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການເພື່ອປົດລັອກ.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
       <item quantity="one">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"ສິບສອງ"</item>
+    <item msgid="7389464214252023751">"ໜຶ່ງ"</item>
+    <item msgid="8803180377002008046">"ສອງ"</item>
+    <item msgid="8614897059944644719">"ສາມ"</item>
+    <item msgid="2293058674782619556">"ສີ່"</item>
+    <item msgid="4815402358455041664">"ຫ້າ"</item>
+    <item msgid="3325754778509665687">"ຫົກ"</item>
+    <item msgid="5805551341866280575">"ເຈັດ"</item>
+    <item msgid="203334816668238610">"ແປດ"</item>
+    <item msgid="4828052671464488923">"ເກົ້າ"</item>
+    <item msgid="2233497913571137419">"ສິບ"</item>
+    <item msgid="5621554266768657830">"ສິບເອັດ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"O’Clock"</item>
+    <item msgid="8837126587669001578">"O’One"</item>
+    <item msgid="4294343372940455660">"O’Two"</item>
+    <item msgid="7129166637707421536">"O’Three"</item>
+    <item msgid="7579404865008788673">"O’Four"</item>
+    <item msgid="3873924689207380586">"O’Five"</item>
+    <item msgid="4849565597850069377">"O’Six"</item>
+    <item msgid="4404219424523572364">"O’Seven"</item>
+    <item msgid="8740481214764087329">"O’Eight"</item>
+    <item msgid="1713216865806811237">"O’Nine"</item>
+    <item msgid="3508406095411245038">"ສິບ"</item>
+    <item msgid="7161996337755311711">"ສິບເອັດ"</item>
+    <item msgid="4044549963329624197">"ສິບສອງ"</item>
+    <item msgid="333373157917379088">"ສິບສາມ"</item>
+    <item msgid="2631202907124819385">"ສິບສີ່"</item>
+    <item msgid="6472396076858033453">"ສິບຫ້າ"</item>
+    <item msgid="8656981856181581643">"ສິບຫົກ"</item>
+    <item msgid="7289026608562030619">"ສິບເຈັດ"</item>
+    <item msgid="3881477602692646573">"ສິບແປດ"</item>
+    <item msgid="3358129827772984226">"ສິບເກົ້າ"</item>
+    <item msgid="3308575407402865807">"ຊາວ"</item>
+    <item msgid="5346560955382229629">"ຊາວ\nເອັດ"</item>
+    <item msgid="226750304761473436">"ຊາວ\nສອງ"</item>
+    <item msgid="616811325336838734">"ຊາວ\nສາມ"</item>
+    <item msgid="616346116869053440">"ຊາວ\nສີ່"</item>
+    <item msgid="4642996410384042830">"ຊາວ\nຫ້າ"</item>
+    <item msgid="7506092849993571465">"ຊາວ\nຫົກ"</item>
+    <item msgid="1915078191101042031">"ຊາວ\nເຈັດ"</item>
+    <item msgid="4292378641900520252">"ຊາວ\nແປດ"</item>
+    <item msgid="5339513901773103696">"ຊາວ\nເກົ້າ"</item>
+    <item msgid="3574673250891657607">"ສາມສິບ"</item>
+    <item msgid="5796923836589110940">"ສາມ\nສິບເອັດ"</item>
+    <item msgid="5859323597571702052">"ສາມ\nສິບສອງ"</item>
+    <item msgid="5133326723148876507">"ສາມ\nສິບສາມ"</item>
+    <item msgid="2693999494655663096">"ສາມ\nສິບສີ່"</item>
+    <item msgid="3316754944962836197">"ສາມ\nສິບຫ້າ"</item>
+    <item msgid="816891008836796723">"ສາມ\nສິບຫົກ"</item>
+    <item msgid="9158890488666520078">"ສາມ\nສິບເຈັດ"</item>
+    <item msgid="1894769703213894011">"ສາມສິບ\nແປດ"</item>
+    <item msgid="5638820345598572399">"ສາມ\nສິບເກົ້າ"</item>
+    <item msgid="8838304023017895439">"ສີ່ສິບ"</item>
+    <item msgid="1834742948932559597">"ສີ່\nສິບເອັດ"</item>
+    <item msgid="6573707308847773944">"ສີ່\nສິບສອງ"</item>
+    <item msgid="2450149950652678001">"ສີ່\nສິບສາມ"</item>
+    <item msgid="2874667401318178036">"ສີ່\nສິບສີ່"</item>
+    <item msgid="3391101532763048862">"ສີ່\nສິບຫ້າ"</item>
+    <item msgid="1671489330863254362">"ສີ່\nສິບຫົກ"</item>
+    <item msgid="5916017359554531038">"ສີ່\nສິບເຈັດ"</item>
+    <item msgid="8205413177993059967">"ສີ່\nສິບແປດ"</item>
+    <item msgid="6607867415142171302">"ສີ່\nສິບເກົ້າ"</item>
+    <item msgid="8358850748472089162">"ຫ້າສິບ"</item>
+    <item msgid="3551313125255080234">"ຫ້າ\nສິບເອັດ"</item>
+    <item msgid="1559678130725716542">"ຫ້າ\nສິບສອງ"</item>
+    <item msgid="431441994725492377">"ຫ້າ\nສິບສາມ"</item>
+    <item msgid="6345774640539623024">"ຫ້າ\nສິບສີ່"</item>
+    <item msgid="8018192990793931120">"ຫ້າ\nສິບຫ້າ"</item>
+    <item msgid="6187650843754604534">"ຫ້າ\nສິບຫົກ"</item>
+    <item msgid="8727240174015993259">"ຫ້າ\nສິບເຈັດ"</item>
+    <item msgid="848339003778952950">"ຫ້າ\nສິບແປດ"</item>
+    <item msgid="5798985802835423618">"ຫ້າ\nສິບເກົ້າ"</item>
+  </string-array>
 </resources>

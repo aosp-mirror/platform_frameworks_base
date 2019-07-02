@@ -17,12 +17,13 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.listview.ListWithScreenOfNoSelectables;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 public class ListWithScreenOfNoSelectablesTest extends ActivityInstrumentationTestCase2<ListWithScreenOfNoSelectables> {
 

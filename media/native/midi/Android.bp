@@ -13,22 +13,22 @@
 // limitations under the License.
 
 cc_library_shared {
-    name: "libmidi",
+    name: "libamidi",
 
     srcs: [
-        "midi.cpp",
+        "amidi.cpp",
         ":IMidiDeviceServer.aidl",
     ],
 
     aidl: {
         include_dirs: ["frameworks/base/media/java"],
-        export_aidl_headers: true,
+        export_aidl_headers: false,
     },
 
     cflags: [
         "-Wall",
         "-Werror",
-        "-O0",
+        "-fvisibility=hidden",
     ],
 
     shared_libs: [
@@ -36,7 +36,28 @@ cc_library_shared {
         "libbinder",
         "libutils",
         "libmedia",
+        "libmediandk",
+        "libandroid_runtime",
     ],
 
-    export_include_dirs: ["."],
+    export_include_dirs: ["include"],
+}
+
+ndk_headers {
+    name: "amidi",
+
+    from: "include",
+
+    to: "",
+
+    srcs: ["include/amidi/AMidi.h"],
+    license: "include/amidi/NOTICE",
+}
+
+ndk_library {
+    name: "libamidi",
+
+    symbol_file: "libamidi.map.txt",
+
+    first_version: "29",
 }

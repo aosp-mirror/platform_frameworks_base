@@ -54,10 +54,11 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
@@ -364,9 +365,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private int getInstallLoc(int flags, int expInstallLocation, long pkgLen) {
         // Flags explicitly over ride everything else.
-        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            return INSTALL_LOC_SD;
-        } else if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
+        if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
             return INSTALL_LOC_INT;
         }
         // Manifest option takes precedence next
@@ -437,8 +436,6 @@ public class PackageManagerTests extends AndroidTestCase {
 
             int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
             if (rLoc == INSTALL_LOC_INT) {
-                assertFalse(
-                        (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 assertEquals(appInstallPath, srcPath);
                 assertEquals(appInstallPath, publicSrcPath);
                 assertStartsWith("Native library should point to shared lib directory",
@@ -461,8 +458,6 @@ public class PackageManagerTests extends AndroidTestCase {
                     }
                 }
             } else if (rLoc == INSTALL_LOC_SD) {
-                assertFalse("The application should not be installed forward locked",
-                        (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 assertTrue("Application flags (" + info.flags
                         + ") should contain FLAG_EXTERNAL_STORAGE",
                         (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
@@ -845,29 +840,8 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testReplaceFailSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        sampleReplaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
-    }
-
-    @LargeTest
     public void testReplaceNormalInternal() throws Exception {
         sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
-    }
-
-    @LargeTest
-    public void testReplaceSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING
-                | PackageManager.INSTALL_EXTERNAL);
     }
 
     /* -------------- Delete tests --- */
@@ -1015,29 +989,10 @@ public class PackageManagerTests extends AndroidTestCase {
         deleteFromRawResource(0, 0);
     }
 
-    @LargeTest
-    public void testDeleteSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, 0);
-    }
 
     @LargeTest
     public void testDeleteNormalInternalRetainData() throws Exception {
         deleteFromRawResource(0, PackageManager.DELETE_KEEP_DATA);
-    }
-
-    @LargeTest
-    public void testDeleteSdcardRetainData() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DELETE_KEEP_DATA);
     }
 
     void cleanUpInstall(InstallParams ip) throws Exception {
@@ -1102,60 +1057,6 @@ public class PackageManagerTests extends AndroidTestCase {
     public void testManifestInstallLocationUnspecified() throws Exception {
         installFromRawResource("install.apk", R.raw.install_loc_unspecified,
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-    }
-
-    /*
-     * Install a package on internal flash via PackageManager install flag. Replace
-     * the package via flag to install on sdcard. Make sure the new flag overrides
-     * the old install location.
-     */
-    @LargeTest
-    public void testReplaceFlagInternalSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = 0;
-        int rFlags = PackageManager.INSTALL_EXTERNAL;
-        InstallParams ip = sampleInstallFromRawResource(iFlags, false);
-        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
-        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
-        try {
-            invokeInstallPackage(ip.packageURI, replaceFlags, receiver, true);
-            assertInstall(ip.pkg, rFlags, ip.pkg.installLocation);
-        } catch (Exception e) {
-            failStr("Failed with exception : " + e);
-        } finally {
-            cleanUpInstall(ip);
-        }
-    }
-
-    /*
-     * Install a package on sdcard via PackageManager install flag. Replace
-     * the package with no flags or manifest option and make sure the old
-     * install location is retained.
-     */
-    @LargeTest
-    public void testReplaceFlagSdcardInternal() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = 0;
-        InstallParams ip = sampleInstallFromRawResource(iFlags, false);
-        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
-        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
-        try {
-            invokeInstallPackage(ip.packageURI, replaceFlags, receiver, true);
-            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
-        } catch (Exception e) {
-            failStr("Failed with exception : " + e);
-        } finally {
-            cleanUpInstall(ip);
-        }
     }
 
     @LargeTest
@@ -1375,34 +1276,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testMoveAppExternalToExternal() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int installFlags = PackageManager.INSTALL_EXTERNAL;
-        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
-        boolean fail = true;
-        int result = PackageManager.MOVE_FAILED_INVALID_LOCATION;
-        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
-    }
-
-    @LargeTest
-    public void testMoveAppExternalToInternal() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int installFlags = PackageManager.INSTALL_EXTERNAL;
-        int moveFlags = PackageManager.MOVE_INTERNAL;
-        boolean fail = false;
-        int result = PackageManager.MOVE_SUCCEEDED;
-        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
-    }
-
-    @LargeTest
     public void testMoveAppFailInternalToExternalDelete() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -1458,19 +1331,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-     * Install an app on sdcard.
-     */
-    @LargeTest
-    public void testFlagE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
-    }
-
-    /*
      * Install an app with both internal and manifest option set.
      * should install on internal.
      */
@@ -1506,59 +1366,6 @@ public class PackageManagerTests extends AndroidTestCase {
                 false, -1,
                 PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
-    /*
-     * Install an app with both external and manifest option set.
-     * should install externally.
-     */
-    @LargeTest
-    public void testFlagEManifestI() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_internal,
-                PackageManager.INSTALL_EXTERNAL,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    /*
-     * Install an app with both external and manifest preference for
-     * preferExternal. Should install externally.
-     */
-    @LargeTest
-    public void testFlagEManifestE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_EXTERNAL,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    /*
-     * Install an app with both external and manifest preference for
-     * auto. should install on external media.
-     */
-    @LargeTest
-    public void testFlagEManifestA() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_auto,
-                PackageManager.INSTALL_EXTERNAL,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
 
     /*
      * The following test functions verify install location for existing apps.
@@ -1572,75 +1379,6 @@ public class PackageManagerTests extends AndroidTestCase {
     public void testFlagIExistingI() throws Exception {
         int iFlags = PackageManager.INSTALL_INTERNAL;
         int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install,
-                rFlags,
-                true,
-                false, -1,
-                -1);
-    }
-
-    @LargeTest
-    public void testFlagIExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install,
-                rFlags,
-                true,
-                false, -1,
-                -1);
-    }
-
-    @LargeTest
-    public void testFlagEExistingI() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_INTERNAL;
-        int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install,
-                rFlags,
-                true,
-                false, -1,
-                -1);
-    }
-
-    @LargeTest
-    public void testFlagEExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
         // First install.
         installFromRawResource("install.apk", R.raw.install,
                 iFlags,
@@ -1720,29 +1458,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testManifestIExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install_loc_internal,
-                rFlags,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-    }
-
-    @LargeTest
     public void testManifestEExistingI() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -1750,29 +1465,6 @@ public class PackageManagerTests extends AndroidTestCase {
         }
 
         int iFlags = PackageManager.INSTALL_INTERNAL;
-        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                rFlags,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    @LargeTest
-    public void testManifestEExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
         int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
         // First install.
         installFromRawResource("install.apk", R.raw.install,
@@ -1804,29 +1496,6 @@ public class PackageManagerTests extends AndroidTestCase {
                 true,
                 false, -1,
                 PackageInfo.INSTALL_LOCATION_AUTO);
-    }
-
-    @LargeTest
-    public void testManifestAExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install_loc_auto,
-                rFlags,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
     }
 
     /*
@@ -1894,42 +1563,6 @@ public class PackageManagerTests extends AndroidTestCase {
         int userSetting = PackageHelper.APP_INSTALL_AUTO;
         int iFlags = PackageManager.INSTALL_INTERNAL;
         setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-    }
-
-    @LargeTest
-    public void testExistingEUserI() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    @LargeTest
-    public void testExistingEUserE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    @LargeTest
-    public void testExistingEUserA() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int userSetting = PackageHelper.APP_INSTALL_AUTO;
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
     }
 
     /*

@@ -102,6 +102,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     }
 
     public void handleBroadcast(Intent intent) {
+        if (mWifiManager == null) {
+            return;
+        }
         String action = intent.getAction();
         if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
             updateWifiState();
@@ -115,7 +118,11 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             if (connected) {
                 mWifiInfo = mWifiManager.getConnectionInfo();
                 if (mWifiInfo != null) {
-                    ssid = getValidSsid(mWifiInfo);
+                    if (mWifiInfo.isPasspointAp() || mWifiInfo.isOsuAp()) {
+                        ssid = mWifiInfo.getPasspointProviderFriendlyName();
+                    } else {
+                        ssid = getValidSsid(mWifiInfo);
+                    }
                     updateRssi(mWifiInfo.getRssi());
                     maybeRequestNetworkScore();
                 }
@@ -165,6 +172,12 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
                 mWifiNetworkScoreCache.getScoredNetwork(NetworkKey.createFromWifiInfo(mWifiInfo));
         statusLabel = scoredNetwork == null
                 ? null : AccessPoint.getSpeedLabel(mContext, scoredNetwork, rssi);
+    }
+
+    /** Refresh the status label on Locale changed. */
+    public void refreshLocale() {
+        updateStatusLabel();
+        mCallback.run();
     }
 
     private String getValidSsid(WifiInfo info) {

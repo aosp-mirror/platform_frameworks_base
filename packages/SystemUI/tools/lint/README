@@ -1,0 +1,26 @@
+This directory contains configuration files for lint, which is run
+in as an upload hook for repo upload.
+
+lint.xml contains checks that are turned on or off, or whitelisted /
+blacklisted for particular directories, if they are different from
+the default.
+
+baseline.xml contains the list of existing "grandfathered" lint
+errors in the codebase. It is generated using ./tools/lint/update_baseline.sh
+
+When you hit a lint error that should not be triggered, there are 3
+possible resolutions:
+1. Use tools:ignore or @SuppressLint annotation. This is preferred
+   for cases where the lint violation is intended, so that reviewers
+   can review whether the suppression is appropriate.
+2. Use tools/lint.xml to ignore a lint check which we don't care
+   about for any file, or checks that are not actionable by the
+   CL author (e.g. translation issues)
+3. If there are lint errors that should be fixed, but cannot be done
+   immediately for some reason, the issue should be added to
+   baseline.xml.
+
+
+References
+- https://developer.android.com/studio/write/lint.html
+- http://tools.android.com/tips/lint-checks

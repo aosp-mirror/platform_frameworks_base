@@ -52,6 +52,12 @@ public final class SaveRequest implements Parcelable {
     }
 
     /**
+     * Gets the contexts associated with each previous fill request.
+     *
+     * <p><b>Note:</b> Starting on Android {@link android.os.Build.VERSION_CODES#Q}, it could also
+     * include contexts from requests whose {@link SaveInfo} had the
+     * {@link SaveInfo#FLAG_DELAY_SAVE} flag.
+     *
      * @return The contexts associated with each previous fill request.
      */
     public @NonNull List<FillContext> getFillContexts() {
@@ -95,7 +101,7 @@ public final class SaveRequest implements Parcelable {
         parcel.writeStringList(mDatasetIds);
     }
 
-    public static final Creator<SaveRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<SaveRequest> CREATOR =
             new Creator<SaveRequest>() {
         @Override
         public SaveRequest createFromParcel(Parcel parcel) {

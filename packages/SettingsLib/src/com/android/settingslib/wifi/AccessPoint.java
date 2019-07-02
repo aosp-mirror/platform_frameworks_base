@@ -41,23 +41,25 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.TtsSpan;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.CollectionUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.utils.ThreadUtils;
 
@@ -65,8 +67,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -105,6 +109,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
+    /**
+     * Synchronization lock for managing concurrency between main and worker threads.
+     *
+     * <p>This lock should be held for all modifications to {@link #mScanResults} and
+     * {@link #mExtraScanResults}.
+     */
+    private final Object mLock = new Object();
+
     @IntDef({Speed.NONE, Speed.SLOW, Speed.MODERATE, Speed.FAST, Speed.VERY_FAST})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Speed {
@@ -131,7 +143,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /** The underlying set of scan results comprising this AccessPoint. */
+    @GuardedBy("mLock")
     private final ArraySet<ScanResult> mScanResults = new ArraySet<>();
+
+    /**
+     * Extra set of unused scan results corresponding to this AccessPoint for verbose logging
+     * purposes, such as a set of Passpoint roaming scan results when home scans are available.
+     */
+    @GuardedBy("mLock")
+    private final ArraySet<ScanResult> mExtraScanResults = new ArraySet<>();
 
     /**
      * Map of BSSIDs to scored networks for individual bssids.
@@ -155,20 +175,34 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_IS_CARRIER_AP = "key_is_carrier_ap";
     static final String KEY_CARRIER_AP_EAP_TYPE = "key_carrier_ap_eap_type";
     static final String KEY_CARRIER_NAME = "key_carrier_name";
+    static final String KEY_EAPTYPE = "eap_psktype";
     static final AtomicInteger sLastId = new AtomicInteger(0);
 
-    /**
-     * These values are matched in string arrays -- changes must be kept in sync
+    /*
+     * NOTE: These constants for security and PSK types are saved to the bundle in saveWifiState,
+     * and sent across IPC. The numeric values should remain stable, otherwise the changes will need
+     * to be synced with other unbundled users of this library.
      */
     public static final int SECURITY_NONE = 0;
     public static final int SECURITY_WEP = 1;
     public static final int SECURITY_PSK = 2;
     public static final int SECURITY_EAP = 3;
+    public static final int SECURITY_OWE = 4;
+    public static final int SECURITY_SAE = 5;
+    public static final int SECURITY_EAP_SUITE_B = 6;
+    public static final int SECURITY_PSK_SAE_TRANSITION = 7;
+    public static final int SECURITY_OWE_TRANSITION = 8;
+    public static final int SECURITY_MAX_VAL = 9; // Has to be the last
 
     private static final int PSK_UNKNOWN = 0;
     private static final int PSK_WPA = 1;
     private static final int PSK_WPA2 = 2;
     private static final int PSK_WPA_WPA2 = 3;
+    private static final int PSK_SAE = 4;
+
+    private static final int EAP_UNKNOWN = 0;
+    private static final int EAP_WPA = 1; // WPA-EAP
+    private static final int EAP_WPA2_WPA3 = 2; // RSN-EAP
 
     /**
      * The number of distinct wifi levels.
@@ -179,7 +213,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public static final int UNREACHABLE_RSSI = Integer.MIN_VALUE;
 
+    public static final String KEY_PREFIX_AP = "AP:";
+    public static final String KEY_PREFIX_FQDN = "FQDN:";
+    public static final String KEY_PREFIX_OSU = "OSU:";
+
     private final Context mContext;
+
+    private WifiManager mWifiManager;
+    private WifiManager.ActionListener mConnectListener;
 
     private String ssid;
     private String bssid;
@@ -187,6 +228,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private int networkId = WifiConfiguration.INVALID_NETWORK_ID;
 
     private int pskType = PSK_UNKNOWN;
+    private int mEapType = EAP_UNKNOWN;
 
     private WifiConfiguration mConfig;
 
@@ -201,17 +243,22 @@ public class AccessPoint implements Comparable<AccessPoint> {
     @Speed private int mSpeed = Speed.NONE;
     private boolean mIsScoredNetworkMetered = false;
 
-    // used to co-relate internal vs returned accesspoint.
-    int mId;
-
     /**
      * Information associated with the {@link PasspointConfiguration}.  Only maintaining
      * the relevant info to preserve spaces.
      */
     private String mFqdn;
     private String mProviderFriendlyName;
+    private boolean mIsRoaming = false;
 
     private boolean mIsCarrierAp = false;
+
+    private OsuProvider mOsuProvider;
+
+    private String mOsuStatus;
+    private String mOsuFailure;
+    private boolean mOsuProvisioningComplete = false;
+
     /**
      * The EAP type {@link WifiEnterpriseConfig.Eap} associated with this AP if it is a carrier AP.
      */
@@ -238,6 +285,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         if (savedState.containsKey(KEY_PSKTYPE)) {
             pskType = savedState.getInt(KEY_PSKTYPE);
+        }
+        if (savedState.containsKey(KEY_EAPTYPE)) {
+            mEapType = savedState.getInt(KEY_EAPTYPE);
         }
         mInfo = savedState.getParcelable(KEY_WIFIINFO);
         if (savedState.containsKey(KEY_NETWORKINFO)) {
@@ -276,15 +326,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         // Calculate required fields
         updateKey();
-        updateRssi();
-
-        mId = sLastId.incrementAndGet();
+        updateBestRssiInfo();
     }
 
+    /**
+     * Creates an AccessPoint with only a WifiConfiguration. This is used for the saved networks
+     * page.
+     */
     public AccessPoint(Context context, WifiConfiguration config) {
         mContext = context;
         loadConfig(config);
-        mId = sLastId.incrementAndGet();
+        updateKey();
     }
 
     /**
@@ -295,41 +347,44 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         mFqdn = config.getHomeSp().getFqdn();
         mProviderFriendlyName = config.getHomeSp().getFriendlyName();
-        mId = sLastId.incrementAndGet();
+        updateKey();
+    }
+
+    /**
+     * Initialize an AccessPoint object for a Passpoint network.
+     */
+    public AccessPoint(@NonNull Context context, @NonNull WifiConfiguration config,
+            @Nullable Collection<ScanResult> homeScans,
+            @Nullable Collection<ScanResult> roamingScans) {
+        mContext = context;
+        networkId = config.networkId;
+        mConfig = config;
+        mFqdn = config.FQDN;
+        setScanResultsPasspoint(homeScans, roamingScans);
+        updateKey();
+    }
+
+    /**
+     * Initialize an AccessPoint object for a Passpoint OSU Provider.
+     */
+    public AccessPoint(@NonNull Context context, @NonNull OsuProvider provider,
+            @NonNull Collection<ScanResult> results) {
+        mContext = context;
+        mOsuProvider = provider;
+        setScanResults(results);
+        updateKey();
     }
 
     AccessPoint(Context context, Collection<ScanResult> results) {
         mContext = context;
-
-        if (results.isEmpty()) {
-            throw new IllegalArgumentException("Cannot construct with an empty ScanResult list");
-        }
-        mScanResults.addAll(results);
-
-        // Information derived from scan results
-        ScanResult firstResult = results.iterator().next();
-        ssid = firstResult.SSID;
-        bssid = firstResult.BSSID;
-        security = getSecurity(firstResult);
-        if (security == SECURITY_PSK) {
-            pskType = getPskType(firstResult);
-        }
+        setScanResults(results);
         updateKey();
-        updateRssi();
-
-        // Passpoint Info
-        mIsCarrierAp = firstResult.isCarrierAp;
-        mCarrierApEapType = firstResult.carrierApEapType;
-        mCarrierName = firstResult.carrierName;
-
-        mId = sLastId.incrementAndGet();
     }
 
     @VisibleForTesting void loadConfig(WifiConfiguration config) {
         ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
         bssid = config.BSSID;
         security = getSecurity(config);
-        updateKey();
         networkId = config.networkId;
         mConfig = config;
     }
@@ -337,17 +392,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** Updates {@link #mKey} and should only called upon object creation/initialization. */
     private void updateKey() {
         // TODO(sghuman): Consolidate Key logic on ScanResultMatchInfo
-
-        StringBuilder builder = new StringBuilder();
-
-        if (TextUtils.isEmpty(getSsidStr())) {
-            builder.append(getBssid());
-        } else {
-            builder.append(getSsidStr());
+        if (isPasspoint()) {
+            mKey = getKey(mConfig);
+        } else if (isPasspointConfig()) {
+            mKey = getKey(mFqdn);
+        } else if (isOsuProvider()) {
+            mKey = getKey(mOsuProvider);
+        } else { // Non-Passpoint AP
+            mKey = getKey(getSsidStr(), getBssid(), getSecurity());
         }
-
-        builder.append(',').append(getSecurity());
-        mKey = builder.toString();
     }
 
     /**
@@ -391,8 +444,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return difference;
         }
 
-        // Sort by ssid.
-        difference = getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        // Sort by title.
+        difference = getTitle().compareToIgnoreCase(other.getTitle());
         if (difference != 0) {
             return difference;
         }
@@ -436,7 +489,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (isConnectable()) {
             builder.append(',').append("connectable");
         }
-        if (security != SECURITY_NONE) {
+        if ((security != SECURITY_NONE) && (security != SECURITY_OWE)) {
             builder.append(',').append(securityToString(security, pskType));
         }
         builder.append(",level=").append(getLevel());
@@ -447,7 +500,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         if (isVerboseLoggingEnabled()) {
             builder.append(",rssi=").append(mRssi);
-            builder.append(",scan cache size=").append(mScanResults.size());
+            synchronized (mLock) {
+                builder.append(",scan cache size=").append(mScanResults.size()
+                        + mExtraScanResults.size());
+            }
         }
 
         return builder.append(')').toString();
@@ -489,18 +545,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private boolean updateScores(WifiNetworkScoreCache scoreCache, long maxScoreCacheAgeMillis) {
         long nowMillis = SystemClock.elapsedRealtime();
-        for (ScanResult result : mScanResults) {
-            ScoredNetwork score = scoreCache.getScoredNetwork(result);
-            if (score == null) {
-                continue;
-            }
-            TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
-            if (timedScore == null) {
-                mScoredNetworkCache.put(
-                        result.BSSID, new TimestampedScoredNetwork(score, nowMillis));
-            } else {
-                // Update data since the has been seen in the score cache
-                timedScore.update(score, nowMillis);
+        synchronized (mLock) {
+            for (ScanResult result : mScanResults) {
+                ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                if (score == null) {
+                    continue;
+                }
+                TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
+                if (timedScore == null) {
+                    mScoredNetworkCache.put(
+                            result.BSSID, new TimestampedScoredNetwork(score, nowMillis));
+                } else {
+                    // Update data since the has been seen in the score cache
+                    timedScore.update(score, nowMillis);
+                }
             }
         }
 
@@ -576,40 +634,67 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mIsScoredNetworkMetered |= score.meteredHint;
             }
         } else {
-            for (ScanResult result : mScanResults) {
-                ScoredNetwork score = scoreCache.getScoredNetwork(result);
-                if (score == null) {
-                    continue;
+            synchronized (mLock) {
+                for (ScanResult result : mScanResults) {
+                    ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                    if (score == null) {
+                        continue;
+                    }
+                    mIsScoredNetworkMetered |= score.meteredHint;
                 }
-                mIsScoredNetworkMetered |= score.meteredHint;
             }
         }
         return oldMetering == mIsScoredNetworkMetered;
     }
 
     public static String getKey(ScanResult result) {
-        StringBuilder builder = new StringBuilder();
-
-        if (TextUtils.isEmpty(result.SSID)) {
-            builder.append(result.BSSID);
-        } else {
-            builder.append(result.SSID);
-        }
-
-        builder.append(',').append(getSecurity(result));
-        return builder.toString();
+        return getKey(result.SSID, result.BSSID, getSecurity(result));
     }
 
+    /**
+     * Returns the AccessPoint key for a WifiConfiguration.
+     * This will return a special Passpoint key if the config is for Passpoint.
+     */
     public static String getKey(WifiConfiguration config) {
-        StringBuilder builder = new StringBuilder();
-
-        if (TextUtils.isEmpty(config.SSID)) {
-            builder.append(config.BSSID);
+        if (config.isPasspoint()) {
+            return getKey(config.FQDN);
         } else {
-            builder.append(removeDoubleQuotes(config.SSID));
+            return getKey(removeDoubleQuotes(config.SSID), config.BSSID, getSecurity(config));
         }
+    }
 
-        builder.append(',').append(getSecurity(config));
+    /**
+     * Returns the AccessPoint key corresponding to a Passpoint network by its FQDN.
+     */
+    public static String getKey(String fqdn) {
+        return new StringBuilder()
+                .append(KEY_PREFIX_FQDN)
+                .append(fqdn).toString();
+    }
+
+    /**
+     * Returns the AccessPoint key corresponding to the OsuProvider.
+     */
+    public static String getKey(OsuProvider provider) {
+        return new StringBuilder()
+                .append(KEY_PREFIX_OSU)
+                .append(provider.getFriendlyName())
+                .append(',')
+                .append(provider.getServerUri()).toString();
+    }
+
+    /**
+     * Returns the AccessPoint key for a normal non-Passpoint network by ssid/bssid and security.
+     */
+    private static String getKey(String ssid, String bssid, int security) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(KEY_PREFIX_AP);
+        if (TextUtils.isEmpty(ssid)) {
+            builder.append(bssid);
+        } else {
+            builder.append(ssid);
+        }
+        builder.append(',').append(security);
         return builder.toString();
     }
 
@@ -617,13 +702,35 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mKey;
     }
 
+    /**
+     * Determines if the other AccessPoint represents the same network as this AccessPoint
+     */
+    public boolean matches(AccessPoint other) {
+        return getKey().equals(other.getKey());
+    }
+
     public boolean matches(WifiConfiguration config) {
-        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint()) {
-            return ssid.equals(removeDoubleQuotes(config.SSID)) && config.FQDN.equals(mConfig.FQDN);
-        } else {
-            return ssid.equals(removeDoubleQuotes(config.SSID))
-                    && security == getSecurity(config)
-                    && (mConfig == null || mConfig.shared == config.shared);
+        if (config.isPasspoint()) {
+            return (isPasspoint() && config.FQDN.equals(mConfig.FQDN));
+        }
+
+        if (!ssid.equals(removeDoubleQuotes(config.SSID))
+                || (mConfig != null && mConfig.shared != config.shared)) {
+            return false;
+        }
+
+        final int configSecurity = getSecurity(config);
+        final WifiManager wifiManager = getWifiManager();
+        switch (security) {
+            case SECURITY_PSK_SAE_TRANSITION:
+                return configSecurity == SECURITY_PSK
+                        || (wifiManager.isWpa3SaeSupported() && configSecurity == SECURITY_SAE);
+            case SECURITY_OWE_TRANSITION:
+                return configSecurity == SECURITY_NONE
+                        || (wifiManager.isEnhancedOpenSupported()
+                                && configSecurity == SECURITY_OWE);
+            default:
+                return security == configSecurity;
         }
     }
 
@@ -663,14 +770,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
      *
      * <p>Callers should not modify this set.
      */
-    public Set<ScanResult> getScanResults() { return mScanResults; }
+    public Set<ScanResult> getScanResults() {
+        Set<ScanResult> allScans = new ArraySet<>();
+        synchronized (mLock) {
+            allScans.addAll(mScanResults);
+            allScans.addAll(mExtraScanResults);
+        }
+        return allScans;
+    }
 
     public Map<String, TimestampedScoredNetwork> getScoredNetworkCache() {
         return mScoredNetworkCache;
     }
 
     /**
-     * Updates {@link #mRssi}.
+     * Updates {@link #mRssi} and sets scan result information to that of the best RSSI scan result.
      *
      * <p>If the given connection is active, the existing value of {@link #mRssi} will be returned.
      * If the given AccessPoint is not active, a value will be calculated from previous scan
@@ -678,22 +792,47 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * value. If the access point is not connected and there are no scan results, the rssi will be
      * set to {@link #UNREACHABLE_RSSI}.
      */
-    private void updateRssi() {
+    private void updateBestRssiInfo() {
         if (this.isActive()) {
             return;
         }
 
-        int rssi = UNREACHABLE_RSSI;
-        for (ScanResult result : mScanResults) {
-            if (result.level > rssi) {
-                rssi = result.level;
+        ScanResult bestResult = null;
+        int bestRssi = UNREACHABLE_RSSI;
+        synchronized (mLock) {
+            for (ScanResult result : mScanResults) {
+                if (result.level > bestRssi) {
+                    bestRssi = result.level;
+                    bestResult = result;
+                }
             }
         }
 
-        if (rssi != UNREACHABLE_RSSI && mRssi != UNREACHABLE_RSSI) {
-            mRssi = (mRssi + rssi) / 2; // half-life previous value
+        // Set the rssi to the average of the current rssi and the previous rssi.
+        if (bestRssi != UNREACHABLE_RSSI && mRssi != UNREACHABLE_RSSI) {
+            mRssi = (mRssi + bestRssi) / 2;
         } else {
-            mRssi = rssi;
+            mRssi = bestRssi;
+        }
+
+        if (bestResult != null) {
+            ssid = bestResult.SSID;
+            bssid = bestResult.BSSID;
+            security = getSecurity(bestResult);
+            if (security == SECURITY_PSK || security == SECURITY_SAE
+                    || security == SECURITY_PSK_SAE_TRANSITION) {
+                pskType = getPskType(bestResult);
+            }
+            if (security == SECURITY_EAP) {
+                mEapType = getEapType(bestResult);
+            }
+            mIsCarrierAp = bestResult.isCarrierAp;
+            mCarrierApEapType = bestResult.carrierApEapType;
+            mCarrierName = bestResult.carrierName;
+        }
+        // Update the config SSID of a Passpoint network to that of the best RSSI
+        if (isPasspoint()) {
+            mConfig.SSID = convertToQuotedString(ssid);
         }
     }
 
@@ -721,8 +860,23 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         switch(security) {
             case SECURITY_EAP:
-                return concise ? context.getString(R.string.wifi_security_short_eap) :
-                    context.getString(R.string.wifi_security_eap);
+                switch (mEapType) {
+                    case EAP_WPA:
+                        return concise ? context.getString(R.string.wifi_security_short_eap_wpa) :
+                                context.getString(R.string.wifi_security_eap_wpa);
+                    case EAP_WPA2_WPA3:
+                        return concise
+                                ? context.getString(R.string.wifi_security_short_eap_wpa2_wpa3) :
+                                context.getString(R.string.wifi_security_eap_wpa2_wpa3);
+                    case EAP_UNKNOWN:
+                    default:
+                        return concise
+                                ? context.getString(R.string.wifi_security_short_eap) :
+                                context.getString(R.string.wifi_security_eap);
+                }
+            case SECURITY_EAP_SUITE_B:
+                return concise ? context.getString(R.string.wifi_security_short_eap_suiteb) :
+                        context.getString(R.string.wifi_security_eap_suiteb);
             case SECURITY_PSK:
                 switch (pskType) {
                     case PSK_WPA:
@@ -742,6 +896,24 @@ public class AccessPoint implements Comparable<AccessPoint> {
             case SECURITY_WEP:
                 return concise ? context.getString(R.string.wifi_security_short_wep) :
                     context.getString(R.string.wifi_security_wep);
+            case SECURITY_SAE:
+            case SECURITY_PSK_SAE_TRANSITION:
+                if (pskType == PSK_SAE) {
+                    return concise ? context.getString(R.string.wifi_security_short_psk_sae) :
+                            context.getString(R.string.wifi_security_psk_sae);
+                } else {
+                    return concise ? context.getString(R.string.wifi_security_short_sae) :
+                            context.getString(R.string.wifi_security_sae);
+                }
+            case SECURITY_OWE_TRANSITION:
+                if (mConfig != null && getSecurity(mConfig) == SECURITY_OWE) {
+                    return concise ? context.getString(R.string.wifi_security_short_owe) :
+                            context.getString(R.string.wifi_security_owe);
+                }
+                return concise ? "" : context.getString(R.string.wifi_security_none);
+            case SECURITY_OWE:
+                return concise ? context.getString(R.string.wifi_security_short_owe) :
+                    context.getString(R.string.wifi_security_owe);
             case SECURITY_NONE:
             default:
                 return concise ? "" : context.getString(R.string.wifi_security_none);
@@ -757,12 +929,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public CharSequence getSsid() {
-        final SpannableString str = new SpannableString(ssid);
-        str.setSpan(new TtsSpan.TelephoneBuilder(ssid).build(), 0, ssid.length(),
-                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        return str;
+        return ssid;
     }
 
+    /**
+     * Returns the name associated with the stored config.
+     * @deprecated Please use {@link #getTitle()} instead to get the display name of an AccessPoint.
+     */
+    @Deprecated
     public String getConfigName() {
         if (mConfig != null && mConfig.isPasspoint()) {
             return mConfig.providerFriendlyName;
@@ -819,86 +993,120 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return "";
     }
 
+    /**
+     * Returns the display title for the AccessPoint, such as for an AccessPointPreference's title.
+     */
+    public String getTitle() {
+        if (isPasspoint()) {
+            return mConfig.providerFriendlyName;
+        } else if (isPasspointConfig()) {
+            return mProviderFriendlyName;
+        } else if (isOsuProvider()) {
+            return mOsuProvider.getFriendlyName();
+        } else {
+            return getSsidStr();
+        }
+    }
+
     public String getSummary() {
-        return getSettingsSummary(mConfig);
+        return getSettingsSummary();
     }
 
     public String getSettingsSummary() {
-        return getSettingsSummary(mConfig);
+        return getSettingsSummary(false /*convertSavedAsDisconnected*/);
     }
 
-    private String getSettingsSummary(WifiConfiguration config) {
+    /**
+     * Returns the summary for the AccessPoint.
+     */
+    public String getSettingsSummary(boolean convertSavedAsDisconnected) {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        if (isActive() && config != null && config.isPasspoint()) {
-            // This is the active connection on passpoint
-            summary.append(getSummary(mContext, getDetailedState(),
-                    false, config.providerFriendlyName));
-        } else if (isActive() && config != null && getDetailedState() == DetailedState.CONNECTED
-                && mIsCarrierAp) {
-            summary.append(String.format(mContext.getString(R.string.connected_via_carrier), mCarrierName));
-        } else if (isActive()) {
-            // This is the active connection on non-passpoint network
-            summary.append(getSummary(mContext, getDetailedState(),
-                    mInfo != null && mInfo.isEphemeral()));
-        } else if (config != null && config.isPasspoint()
-                && config.getNetworkSelectionStatus().isNetworkEnabled()) {
-            String format = mContext.getString(R.string.available_via_passpoint);
-            summary.append(String.format(format, config.providerFriendlyName));
-        } else if (config != null && config.hasNoInternetAccess()) {
-            int messageID = config.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
-                    ? R.string.wifi_no_internet_no_reconnect
-                    : R.string.wifi_no_internet;
-            summary.append(mContext.getString(messageID));
-        } else if (config != null && !config.getNetworkSelectionStatus().isNetworkEnabled()) {
-            WifiConfiguration.NetworkSelectionStatus networkStatus =
-                    config.getNetworkSelectionStatus();
-            switch (networkStatus.getNetworkSelectionDisableReason()) {
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
-                    summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD:
-                    summary.append(mContext.getString(R.string.wifi_check_password_try_again));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
-                    summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
-                    break;
-                case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
-                    summary.append(mContext.getString(R.string.wifi_disabled_generic));
-                    break;
+        if (isOsuProvider()) {
+            if (mOsuProvisioningComplete) {
+                summary.append(mContext.getString(R.string.osu_sign_up_complete));
+            } else if (mOsuFailure != null) {
+                summary.append(mOsuFailure);
+            } else if (mOsuStatus != null) {
+                summary.append(mOsuStatus);
+            } else {
+                summary.append(mContext.getString(R.string.tap_to_sign_up));
             }
-        } else if (config != null && config.getNetworkSelectionStatus().isNotRecommended()) {
-            summary.append(mContext.getString(R.string.wifi_disabled_by_recommendation_provider));
-        } else if (mIsCarrierAp) {
-            summary.append(String.format(mContext.getString(R.string.available_via_carrier), mCarrierName));
-        } else if (!isReachable()) { // Wifi out of range
-            summary.append(mContext.getString(R.string.wifi_not_in_range));
-        } else { // In range, not disabled.
-            if (config != null) { // Is saved network
-                // Last attempt to connect to this failed. Show reason why
-                switch (config.recentFailure.getAssociationStatus()) {
-                    case WifiConfiguration.RecentFailure.STATUS_AP_UNABLE_TO_HANDLE_NEW_STA:
-                        summary.append(mContext.getString(
-                                R.string.wifi_ap_unable_to_handle_new_sta));
+        } else if (isActive()) {
+            if (getDetailedState() == DetailedState.CONNECTED && mIsCarrierAp) {
+                // This is the active connection on a carrier AP
+                summary.append(String.format(mContext.getString(R.string.connected_via_carrier),
+                        mCarrierName));
+            } else {
+                summary.append(getSummary(mContext, /* ssid */ null, getDetailedState(),
+                        mInfo != null && mInfo.isEphemeral(),
+                        mInfo != null ? mInfo.getNetworkSuggestionOrSpecifierPackageName() : null));
+            }
+        } else { // not active
+            if (mConfig != null && mConfig.hasNoInternetAccess()) {
+                int messageID = mConfig.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
+                        ? R.string.wifi_no_internet_no_reconnect
+                        : R.string.wifi_no_internet;
+                summary.append(mContext.getString(messageID));
+            } else if (mConfig != null && !mConfig.getNetworkSelectionStatus().isNetworkEnabled()) {
+                WifiConfiguration.NetworkSelectionStatus networkStatus =
+                        mConfig.getNetworkSelectionStatus();
+                switch (networkStatus.getNetworkSelectionDisableReason()) {
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
+                        summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
                         break;
-                    default:
-                        // "Saved"
-                        summary.append(mContext.getString(R.string.wifi_remembered));
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD:
+                        summary.append(mContext.getString(R.string.wifi_check_password_try_again));
                         break;
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
+                        summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
+                        break;
+                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
+                        summary.append(mContext.getString(R.string.wifi_disabled_generic));
+                        break;
+                }
+            } else if (mConfig != null && mConfig.getNetworkSelectionStatus().isNotRecommended()) {
+                summary.append(mContext.getString(
+                        R.string.wifi_disabled_by_recommendation_provider));
+            } else if (mIsCarrierAp) {
+                summary.append(String.format(mContext.getString(
+                        R.string.available_via_carrier), mCarrierName));
+            } else if (!isReachable()) { // Wifi out of range
+                summary.append(mContext.getString(R.string.wifi_not_in_range));
+            } else { // In range, not disabled.
+                if (mConfig != null) { // Is saved network
+                    // Last attempt to connect to this failed. Show reason why
+                    switch (mConfig.recentFailure.getAssociationStatus()) {
+                        case WifiConfiguration.RecentFailure.STATUS_AP_UNABLE_TO_HANDLE_NEW_STA:
+                            summary.append(mContext.getString(
+                                    R.string.wifi_ap_unable_to_handle_new_sta));
+                            break;
+                        default:
+                            if (convertSavedAsDisconnected) {
+                                // Disconnected
+                                summary.append(mContext.getString(R.string.wifi_disconnected));
+                            } else {
+                                // "Saved"
+                                summary.append(mContext.getString(R.string.wifi_remembered));
+                            }
+                            break;
+                    }
                 }
             }
         }
 
+
+
         if (isVerboseLoggingEnabled()) {
-            summary.append(WifiUtils.buildLoggingSummary(this, config));
+            summary.append(WifiUtils.buildLoggingSummary(this, mConfig));
         }
 
-        if (config != null && (WifiUtils.isMeteredOverridden(config) || config.meteredHint)) {
+        if (mConfig != null && (WifiUtils.isMeteredOverridden(mConfig) || mConfig.meteredHint)) {
             return mContext.getResources().getString(
                     R.string.preference_summary_default_combination,
-                    WifiUtils.getMeteredLabel(mContext, config),
+                    WifiUtils.getMeteredLabel(mContext, mConfig),
                     summary.toString());
         }
 
@@ -947,7 +1155,27 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Return true if this AccessPoint represents a Passpoint provider configuration.
      */
     public boolean isPasspointConfig() {
-        return mFqdn != null;
+        return mFqdn != null && mConfig == null;
+    }
+
+    /**
+     * Return true if this AccessPoint represents an OSU Provider.
+     */
+    public boolean isOsuProvider() {
+        return mOsuProvider != null;
+    }
+
+    /**
+     * Starts the OSU Provisioning flow.
+     */
+    public void startOsuProvisioning(@Nullable WifiManager.ActionListener connectListener) {
+        mConnectListener = connectListener;
+
+        getWifiManager().startSubscriptionProvisioning(
+                mOsuProvider,
+                mContext.getMainExecutor(),
+                new AccessPointProvisioningCallback()
+        );
     }
 
     /**
@@ -956,21 +1184,27 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * match based on SSID and security.
      */
     private boolean isInfoForThisAccessPoint(WifiConfiguration config, WifiInfo info) {
-        if (isPasspoint() == false && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
+        if (info.isOsuAp() || mOsuStatus != null) {
+            return (info.isOsuAp() && mOsuStatus != null);
+        } else if (info.isPasspointAp() || isPasspoint()) {
+            return (info.isPasspointAp() && isPasspoint()
+                    && TextUtils.equals(info.getPasspointFqdn(), mConfig.FQDN));
+        }
+
+        if (networkId != WifiConfiguration.INVALID_NETWORK_ID) {
             return networkId == info.getNetworkId();
         } else if (config != null) {
-            return matches(config);
-        }
-        else {
+            return isKeyEqual(getKey(config));
+        } else {
             // Might be an ephemeral connection with no WifiConfiguration. Try matching on SSID.
             // (Note that we only do this if the WifiConfiguration explicitly equals INVALID).
             // TODO: Handle hex string SSIDs.
-            return ssid.equals(removeDoubleQuotes(info.getSSID()));
+            return TextUtils.equals(removeDoubleQuotes(info.getSSID()), ssid);
         }
     }
 
     public boolean isSaved() {
-        return networkId != WifiConfiguration.INVALID_NETWORK_ID;
+        return mConfig != null;
     }
 
     public Object getTag() {
@@ -986,13 +1220,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Can only be called for unsecured networks.
      */
     public void generateOpenNetworkConfig() {
-        if (security != SECURITY_NONE)
+        if ((security != SECURITY_NONE) && (security != SECURITY_OWE)
+                && (security != SECURITY_OWE_TRANSITION)) {
             throw new IllegalStateException();
+        }
         if (mConfig != null)
             return;
         mConfig = new WifiConfiguration();
         mConfig.SSID = AccessPoint.convertToQuotedString(ssid);
-        mConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+
+        if (security == SECURITY_NONE || !getWifiManager().isEasyConnectSupported()) {
+            mConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+        } else {
+            mConfig.allowedKeyManagement.set(KeyMgmt.OWE);
+            mConfig.requirePMF = true;
+        }
     }
 
     public void saveWifiState(Bundle savedState) {
@@ -1000,10 +1242,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
         savedState.putInt(KEY_SECURITY, security);
         savedState.putInt(KEY_SPEED, mSpeed);
         savedState.putInt(KEY_PSKTYPE, pskType);
+        savedState.putInt(KEY_EAPTYPE, mEapType);
         if (mConfig != null) savedState.putParcelable(KEY_CONFIG, mConfig);
         savedState.putParcelable(KEY_WIFIINFO, mInfo);
-        savedState.putParcelableArray(KEY_SCANRESULTS,
-                mScanResults.toArray(new Parcelable[mScanResults.size()]));
+        synchronized (mLock) {
+            savedState.putParcelableArray(KEY_SCANRESULTS,
+                    mScanResults.toArray(new Parcelable[mScanResults.size()
+                            + mExtraScanResults.size()]));
+        }
         savedState.putParcelableArrayList(KEY_SCOREDNETWORKCACHE,
                 new ArrayList<>(mScoredNetworkCache.values()));
         if (mNetworkInfo != null) {
@@ -1024,30 +1270,69 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mAccessPointListener = listener;
     }
 
+    private static final String sPskSuffix = "," + String.valueOf(SECURITY_PSK);
+    private static final String sSaeSuffix = "," + String.valueOf(SECURITY_SAE);
+    private static final String sPskSaeSuffix = "," + String.valueOf(SECURITY_PSK_SAE_TRANSITION);
+    private static final String sOweSuffix = "," + String.valueOf(SECURITY_OWE);
+    private static final String sOpenSuffix = "," + String.valueOf(SECURITY_NONE);
+    private static final String sOweTransSuffix = "," + String.valueOf(SECURITY_OWE_TRANSITION);
+
+    private boolean isKeyEqual(String compareTo) {
+        if (mKey == null) {
+            return false;
+        }
+
+        if (compareTo.endsWith(sPskSuffix) || compareTo.endsWith(sSaeSuffix)) {
+            if (mKey.endsWith(sPskSaeSuffix)) {
+                // Special handling for PSK-SAE transition mode. If the AP has advertised both,
+                // we compare the key with both PSK and SAE for a match.
+                return TextUtils.equals(mKey.substring(0, mKey.lastIndexOf(',')),
+                        compareTo.substring(0, compareTo.lastIndexOf(',')));
+            }
+        }
+        if (compareTo.endsWith(sOpenSuffix) || compareTo.endsWith(sOweSuffix)) {
+            if (mKey.endsWith(sOweTransSuffix)) {
+                // Special handling for OWE/Open networks. If AP advertises OWE in transition mode
+                // and we have an Open network saved, allow this connection to be established.
+                return TextUtils.equals(mKey.substring(0, mKey.lastIndexOf(',')),
+                        compareTo.substring(0, compareTo.lastIndexOf(',')));
+            }
+        }
+        return mKey.equals(compareTo);
+    }
+
     /**
-     * Sets {@link #mScanResults} to the given collection.
+     * Sets {@link #mScanResults} to the given collection and updates info based on the best RSSI
+     * scan result.
      *
      * @param scanResults a collection of scan results to add to the internal set
-     * @throws IllegalArgumentException if any of the given ScanResults did not belong to this AP
      */
     void setScanResults(Collection<ScanResult> scanResults) {
+        if (CollectionUtils.isEmpty(scanResults)) {
+            Log.d(TAG, "Cannot set scan results to empty list");
+            return;
+        }
 
-        // Validate scan results are for current AP only
-        String key = getKey();
-        for (ScanResult result : scanResults) {
-            String scanResultKey = AccessPoint.getKey(result);
-            if (!mKey.equals(scanResultKey)) {
-                throw new IllegalArgumentException(
-                        String.format("ScanResult %s\nkey of %s did not match current AP key %s",
-                                      result, scanResultKey, key));
+        // Validate scan results are for current AP only by matching SSID/BSSID
+        // Passpoint networks are not bound to a specific SSID/BSSID, so skip this for passpoint.
+        if (mKey != null && !isPasspoint() && !isOsuProvider()) {
+            for (ScanResult result : scanResults) {
+                String scanResultKey = AccessPoint.getKey(result);
+                if (!isKeyEqual(scanResultKey)) {
+                    Log.d(TAG, String.format(
+                                    "ScanResult %s\nkey of %s did not match current AP key %s",
+                                    result, scanResultKey, mKey));
+                    return;
+                }
             }
         }
 
-
         int oldLevel = getLevel();
-        mScanResults.clear();
-        mScanResults.addAll(scanResults);
-        updateRssi();
+        synchronized (mLock) {
+            mScanResults.clear();
+            mScanResults.addAll(scanResults);
+        }
+        updateBestRssiInfo();
         int newLevel = getLevel();
 
         // If newLevel is 0, there will be no displayed Preference since the AP is unreachable
@@ -1067,32 +1352,49 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mAccessPointListener.onAccessPointChanged(this);
             }
         });
+    }
 
-        if (!scanResults.isEmpty()) {
-            ScanResult result = scanResults.iterator().next();
-
-            // This flag only comes from scans, is not easily saved in config
-            if (security == SECURITY_PSK) {
-                pskType = getPskType(result);
+    /**
+     * Sets the internal scan result cache to the list of home scans.
+     * If there are no home scans, then the roaming scan list is used, and the AccessPoint is
+     * marked as roaming.
+     */
+    void setScanResultsPasspoint(
+            @Nullable Collection<ScanResult> homeScans,
+            @Nullable Collection<ScanResult> roamingScans) {
+        synchronized (mLock) {
+            mExtraScanResults.clear();
+            if (!CollectionUtils.isEmpty(homeScans)) {
+                mIsRoaming = false;
+                if (!CollectionUtils.isEmpty(roamingScans)) {
+                    mExtraScanResults.addAll(roamingScans);
+                }
+                setScanResults(homeScans);
+            } else if (!CollectionUtils.isEmpty(roamingScans)) {
+                mIsRoaming = true;
+                setScanResults(roamingScans);
             }
-
-            // The carrier info in the ScanResult is set by the platform based on the SSID and will
-            // always be the same for all matching scan results.
-            mIsCarrierAp = result.isCarrierAp;
-            mCarrierApEapType = result.carrierApEapType;
-            mCarrierName = result.carrierName;
         }
     }
 
-    /** Attempt to update the AccessPoint and return true if an update occurred. */
+    /**
+     * Attempt to update the AccessPoint with the current connection info.
+     * This is used to set an AccessPoint to the active one if the connection info matches, or
+     * conversely to set an AccessPoint to inactive if the connection info does not match. The RSSI
+     * is also updated upon a match. Listeners will be notified if an update occurred.
+     *
+     * This is called in {@link WifiTracker#updateAccessPoints} as well as in callbacks for handling
+     * NETWORK_STATE_CHANGED_ACTION, RSSI_CHANGED_ACTION, and onCapabilitiesChanged in WifiTracker.
+     *
+     * Returns true if an update occurred.
+     */
     public boolean update(
             @Nullable WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
-
         boolean updated = false;
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
             updated = (mInfo == null);
-            if (mConfig != config) {
+            if (!isPasspoint() && mConfig != config) {
                 // We do not set updated = true as we do not want to increase the amount of sorting
                 // and copying performed in WifiTracker at this time. If issues involving refresh
                 // are still seen, we will investigate further.
@@ -1133,6 +1435,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void update(@Nullable WifiConfiguration config) {
         mConfig = config;
+        if (mConfig != null) {
+            ssid = removeDoubleQuotes(mConfig.SSID);
+        }
         networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
         ThreadUtils.postOnMainThread(() -> {
             if (mAccessPointListener != null) {
@@ -1206,13 +1511,29 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mRssi != UNREACHABLE_RSSI;
     }
 
+    private static CharSequence getAppLabel(String packageName, PackageManager packageManager) {
+        CharSequence appLabel = "";
+        ApplicationInfo appInfo = null;
+        try {
+            int userId = UserHandle.getUserId(UserHandle.USER_CURRENT);
+            appInfo = packageManager.getApplicationInfoAsUser(packageName, 0 /* flags */, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Failed to get app info", e);
+            return appLabel;
+        }
+        if (appInfo != null) {
+            appLabel = appInfo.loadLabel(packageManager);
+        }
+        return appLabel;
+    }
+
     public static String getSummary(Context context, String ssid, DetailedState state,
-            boolean isEphemeral, String passpointProvider) {
-        if (state == DetailedState.CONNECTED && ssid == null) {
-            if (TextUtils.isEmpty(passpointProvider) == false) {
-                // Special case for connected + passpoint networks.
-                String format = context.getString(R.string.connected_via_passpoint);
-                return String.format(format, passpointProvider);
+            boolean isEphemeral, String suggestionOrSpecifierPackageName) {
+        if (state == DetailedState.CONNECTED) {
+            if (isEphemeral && !TextUtils.isEmpty(suggestionOrSpecifierPackageName)) {
+                CharSequence appLabel =
+                        getAppLabel(suggestionOrSpecifierPackageName, context.getPackageManager());
+                return context.getString(R.string.connected_via_app, appLabel);
             } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
                 final NetworkScoreManager networkScoreManager = context.getSystemService(
@@ -1266,52 +1587,81 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return String.format(formats[index], ssid);
     }
 
-    public static String getSummary(Context context, DetailedState state, boolean isEphemeral) {
-        return getSummary(context, null, state, isEphemeral, null);
-    }
-
-    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
-            String passpointProvider) {
-        return getSummary(context, null, state, isEphemeral, passpointProvider);
-    }
-
     public static String convertToQuotedString(String string) {
         return "\"" + string + "\"";
     }
 
     private static int getPskType(ScanResult result) {
         boolean wpa = result.capabilities.contains("WPA-PSK");
-        boolean wpa2 = result.capabilities.contains("WPA2-PSK");
-        if (wpa2 && wpa) {
+        boolean wpa2 = result.capabilities.contains("RSN-PSK");
+        boolean wpa3TransitionMode = result.capabilities.contains("PSK+SAE");
+        boolean wpa3 = result.capabilities.contains("RSN-SAE");
+        if (wpa3TransitionMode) {
+            return PSK_SAE;
+        } else if (wpa2 && wpa) {
             return PSK_WPA_WPA2;
         } else if (wpa2) {
             return PSK_WPA2;
         } else if (wpa) {
             return PSK_WPA;
         } else {
-            Log.w(TAG, "Received abnormal flag string: " + result.capabilities);
+            if (!wpa3) {
+                // Suppress warning for WPA3 only networks
+                Log.w(TAG, "Received abnormal flag string: " + result.capabilities);
+            }
             return PSK_UNKNOWN;
         }
+    }
+
+    private static int getEapType(ScanResult result) {
+        // WPA2-Enterprise and WPA3-Enterprise (non 192-bit) advertise RSN-EAP-CCMP
+        if (result.capabilities.contains("RSN-EAP")) {
+            return EAP_WPA2_WPA3;
+        }
+        // WPA-Enterprise advertises WPA-EAP-TKIP
+        if (result.capabilities.contains("WPA-EAP")) {
+            return EAP_WPA;
+        }
+        return EAP_UNKNOWN;
     }
 
     private static int getSecurity(ScanResult result) {
         if (result.capabilities.contains("WEP")) {
             return SECURITY_WEP;
+        } else if (result.capabilities.contains("PSK+SAE")) {
+            return SECURITY_PSK_SAE_TRANSITION;
+        } else if (result.capabilities.contains("SAE")) {
+            return SECURITY_SAE;
         } else if (result.capabilities.contains("PSK")) {
             return SECURITY_PSK;
+        } else if (result.capabilities.contains("EAP_SUITE_B_192")) {
+            return SECURITY_EAP_SUITE_B;
         } else if (result.capabilities.contains("EAP")) {
             return SECURITY_EAP;
+        } else if (result.capabilities.contains("OWE_TRANSITION")) {
+            return SECURITY_OWE_TRANSITION;
+        } else if (result.capabilities.contains("OWE")) {
+            return SECURITY_OWE;
         }
         return SECURITY_NONE;
     }
 
     static int getSecurity(WifiConfiguration config) {
+        if (config.allowedKeyManagement.get(KeyMgmt.SAE)) {
+            return SECURITY_SAE;
+        }
         if (config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return SECURITY_PSK;
+        }
+        if (config.allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            return SECURITY_EAP_SUITE_B;
         }
         if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
                 config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
             return SECURITY_EAP;
+        }
+        if (config.allowedKeyManagement.get(KeyMgmt.OWE)) {
+            return SECURITY_OWE;
         }
         return (config.wepKeys[0] != null) ? SECURITY_WEP : SECURITY_NONE;
     }
@@ -1330,6 +1680,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return "PSK";
         } else if (security == SECURITY_EAP) {
             return "EAP";
+        } else if (security == SECURITY_SAE) {
+            return "SAE";
+        } else if (security == SECURITY_EAP_SUITE_B) {
+            return "SUITE_B";
+        } else if (security == SECURITY_OWE) {
+            return "OWE";
+        } else if (security == SECURITY_PSK_SAE_TRANSITION) {
+            return "PSK+SAE";
+        } else if (security == SECURITY_OWE_TRANSITION) {
+            return "OWE_TRANSITION";
         }
         return "NONE";
     }
@@ -1346,12 +1706,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return string;
     }
 
+    private WifiManager getWifiManager() {
+        if (mWifiManager == null) {
+            mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        }
+        return mWifiManager;
+    }
+
     /**
      * Callbacks relaying changes to the AccessPoint representation.
      *
      * <p>All methods are invoked on the Main Thread.
      */
     public interface AccessPointListener {
+
         /**
          * Indicates a change to the externally visible state of the AccessPoint trigger by an
          * update of ScanResults, saved configuration state, connection state, or score
@@ -1368,7 +1736,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
          *                    changed
          */
         @MainThread void onAccessPointChanged(AccessPoint accessPoint);
-
         /**
          * Indicates the "wifi pie signal level" has changed, retrieved via calls to
          * {@link AccessPoint#getLevel()}.
@@ -1385,5 +1752,111 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private static boolean isVerboseLoggingEnabled() {
         return WifiTracker.sVerboseLogging || Log.isLoggable(TAG, Log.VERBOSE);
+    }
+
+    /**
+     * Callbacks relaying changes to the OSU provisioning status started in startOsuProvisioning().
+     *
+     * All methods are invoked on the Main Thread
+     */
+    @VisibleForTesting
+    class AccessPointProvisioningCallback extends ProvisioningCallback {
+        @Override
+        @MainThread public void onProvisioningFailure(int status) {
+            if (TextUtils.equals(mOsuStatus, mContext.getString(R.string.osu_completing_sign_up))) {
+                mOsuFailure = mContext.getString(R.string.osu_sign_up_failed);
+            } else {
+                mOsuFailure = mContext.getString(R.string.osu_connect_failed);
+            }
+            mOsuStatus = null;
+            mOsuProvisioningComplete = false;
+            ThreadUtils.postOnMainThread(() -> {
+                if (mAccessPointListener != null) {
+                    mAccessPointListener.onAccessPointChanged(AccessPoint.this);
+                }
+            });
+        }
+
+        @Override
+        @MainThread public void onProvisioningStatus(int status) {
+            String newStatus = null;
+            switch (status) {
+                case OSU_STATUS_AP_CONNECTING:
+                case OSU_STATUS_AP_CONNECTED:
+                case OSU_STATUS_SERVER_CONNECTING:
+                case OSU_STATUS_SERVER_VALIDATED:
+                case OSU_STATUS_SERVER_CONNECTED:
+                case OSU_STATUS_INIT_SOAP_EXCHANGE:
+                case OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE:
+                    newStatus = String.format(mContext.getString(R.string.osu_opening_provider),
+                            mOsuProvider.getFriendlyName());
+                    break;
+                case OSU_STATUS_REDIRECT_RESPONSE_RECEIVED:
+                case OSU_STATUS_SECOND_SOAP_EXCHANGE:
+                case OSU_STATUS_THIRD_SOAP_EXCHANGE:
+                case OSU_STATUS_RETRIEVING_TRUST_ROOT_CERTS:
+                    newStatus = mContext.getString(
+                            R.string.osu_completing_sign_up);
+                    break;
+            }
+            boolean updated = !TextUtils.equals(mOsuStatus, newStatus);
+            mOsuStatus = newStatus;
+            mOsuFailure = null;
+            mOsuProvisioningComplete = false;
+            if (updated) {
+                ThreadUtils.postOnMainThread(() -> {
+                    if (mAccessPointListener != null) {
+                        mAccessPointListener.onAccessPointChanged(AccessPoint.this);
+                    }
+                });
+            }
+        }
+
+        @Override
+        @MainThread public void onProvisioningComplete() {
+            mOsuProvisioningComplete = true;
+            mOsuFailure = null;
+            mOsuStatus = null;
+
+            ThreadUtils.postOnMainThread(() -> {
+                if (mAccessPointListener != null) {
+                    mAccessPointListener.onAccessPointChanged(AccessPoint.this);
+                }
+            });
+
+            // Connect to the freshly provisioned network.
+            WifiManager wifiManager = getWifiManager();
+
+            PasspointConfiguration passpointConfig = wifiManager
+                    .getMatchingPasspointConfigsForOsuProviders(Collections.singleton(mOsuProvider))
+                    .get(mOsuProvider);
+            if (passpointConfig == null) {
+                Log.e(TAG, "Missing PasspointConfiguration for newly provisioned network!");
+                if (mConnectListener != null) {
+                    mConnectListener.onFailure(0);
+                }
+                return;
+            }
+
+            String fqdn = passpointConfig.getHomeSp().getFqdn();
+            for (Pair<WifiConfiguration, Map<Integer, List<ScanResult>>> pairing :
+                    wifiManager.getAllMatchingWifiConfigs(wifiManager.getScanResults())) {
+                WifiConfiguration config = pairing.first;
+                if (TextUtils.equals(config.FQDN, fqdn)) {
+                    List<ScanResult> homeScans =
+                            pairing.second.get(WifiManager.PASSPOINT_HOME_NETWORK);
+                    List<ScanResult> roamingScans =
+                            pairing.second.get(WifiManager.PASSPOINT_ROAMING_NETWORK);
+
+                    AccessPoint connectionAp =
+                            new AccessPoint(mContext, config, homeScans, roamingScans);
+                    wifiManager.connect(connectionAp.getConfig(), mConnectListener);
+                    return;
+                }
+            }
+            if (mConnectListener != null) {
+                mConnectListener.onFailure(0);
+            }
+        }
     }
 }

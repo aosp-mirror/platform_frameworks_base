@@ -37,7 +37,6 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     private BluetoothA2dpSink mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SRC_UUIDS = {
@@ -56,7 +55,6 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothA2dpSink) proxy;
             // We just bound to the service, so refresh the UI for any connected A2DP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -66,7 +64,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "A2dpSinkProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(A2dpSinkProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
@@ -75,7 +73,6 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mIsProfileReady=false;
         }
     }
@@ -89,13 +86,11 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
         return BluetoothProfile.A2DP_SINK;
     }
 
-    A2dpSinkProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    A2dpSinkProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new A2dpSinkServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new A2dpSinkServiceListener(),
                 BluetoothProfile.A2DP_SINK);
     }
 
@@ -205,12 +200,12 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_a2dp_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_headphones_a2dp;
+        return com.android.internal.R.drawable.ic_bt_headphones_a2dp;
     }
 
     protected void finalize() {
@@ -218,7 +213,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.A2DP_SINK,
-                        mService);
+                                                                       mService);
                 mService = null;
             }catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up A2DP proxy", t);

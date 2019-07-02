@@ -58,7 +58,7 @@ class TaskSnapshotCache {
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean reducedResolution) {
 
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             // Try the running cache.
             final CacheEntry entry = mRunningCache.get(taskId);
             if (entry != null) {

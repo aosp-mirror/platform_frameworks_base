@@ -17,21 +17,20 @@
 package android.privacy;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.privacy.internal.longitudinalreporting.LongitudinalReportingConfig;
 import android.privacy.internal.longitudinalreporting.LongitudinalReportingEncoder;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 

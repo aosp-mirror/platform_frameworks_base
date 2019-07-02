@@ -935,12 +935,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
+     * Returns the value associated with the given key, or {@code null} if
+     * no mapping of the desired type exists for the given key or a {@code null}
      * value is explicitly associated with the key.
      *
-     * @param key a String, or null
-     * @return a Parcelable value, or null
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key a String, or {@code null}
+     * @return a Parcelable value, or {@code null}
      */
     @Nullable
     public <T extends Parcelable> T getParcelable(@Nullable String key) {
@@ -958,12 +962,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
-     * Returns the value associated with the given key, or null if
+     * Returns the value associated with the given key, or {@code null} if
      * no mapping of the desired type exists for the given key or a null
      * value is explicitly associated with the key.
      *
-     * @param key a String, or null
-     * @return a Parcelable[] value, or null
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key a String, or {@code null}
+     * @return a Parcelable[] value, or {@code null}
      */
     @Nullable
     public Parcelable[] getParcelableArray(@Nullable String key) {
@@ -981,12 +989,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
+     * Returns the value associated with the given key, or {@code null} if
+     * no mapping of the desired type exists for the given key or a {@code null}
      * value is explicitly associated with the key.
      *
-     * @param key a String, or null
-     * @return an ArrayList<T> value, or null
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key a String, or {@code null}
+     * @return an ArrayList<T> value, or {@code null}
      */
     @Nullable
     public <T extends Parcelable> ArrayList<T> getParcelableArrayList(@Nullable String key) {
@@ -1204,7 +1216,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<Bundle> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Bundle> CREATOR =
         new Parcelable.Creator<Bundle>() {
         @Override
         public Bundle createFromParcel(Parcel in) {

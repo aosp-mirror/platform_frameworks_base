@@ -17,12 +17,13 @@
 
 package android.net.http;
 
-import android.net.http.SslCertificate;
-import android.test.suitebuilder.annotation.LargeTest;
+import androidx.test.filters.LargeTest;
+
+import junit.framework.TestCase;
+
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import junit.framework.TestCase;
 
 public class SslCertificateTest extends TestCase {
 

@@ -28,15 +28,17 @@ import com.android.server.UiThread;
 import java.util.ArrayList;
 
 public class PointerEventDispatcher extends InputEventReceiver {
-    ArrayList<PointerEventListener> mListeners = new ArrayList<PointerEventListener>();
-    PointerEventListener[] mListenersArray = new PointerEventListener[0];
+    private final InputChannel mInputChannel;
+    private final ArrayList<PointerEventListener> mListeners = new ArrayList<>();
+    private PointerEventListener[] mListenersArray = new PointerEventListener[0];
 
     public PointerEventDispatcher(InputChannel inputChannel) {
         super(inputChannel, UiThread.getHandler().getLooper());
+        mInputChannel = inputChannel;
     }
 
     @Override
-    public void onInputEvent(InputEvent event, int displayId) {
+    public void onInputEvent(InputEvent event) {
         try {
             if (event instanceof MotionEvent
                     && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
@@ -50,7 +52,7 @@ public class PointerEventDispatcher extends InputEventReceiver {
                     listeners = mListenersArray;
                 }
                 for (int i = 0; i < listeners.length; ++i) {
-                    listeners[i].onPointerEvent(motionEvent, displayId);
+                    listeners[i].onPointerEvent(motionEvent);
                 }
             }
         } finally {
@@ -84,6 +86,17 @@ public class PointerEventDispatcher extends InputEventReceiver {
                         " not registered.");
             }
             mListeners.remove(listener);
+            mListenersArray = null;
+        }
+    }
+
+    /** Dispose the associated input channel and clean up the listeners. */
+    @Override
+    public void dispose() {
+        super.dispose();
+        mInputChannel.dispose();
+        synchronized (mListeners) {
+            mListeners.clear();
             mListenersArray = null;
         }
     }

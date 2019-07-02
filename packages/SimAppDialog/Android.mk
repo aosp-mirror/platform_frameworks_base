@@ -11,7 +11,7 @@ LOCAL_CERTIFICATE := platform
 
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-v4
+    androidx.legacy_legacy-support-v4
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 include frameworks/opt/setupwizard/library/common-platform-deprecated.mk

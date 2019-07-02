@@ -22,5 +22,5 @@
     <string name="notification_channel_tv_pip" msgid="134047986446577723">"चित्रा-मध्‍ये-चित्र"</string>
     <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(शीर्षक नसलेला कार्यक्रम)"</string>
     <string name="pip_close" msgid="3480680679023423574">"PIP बंद करा"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"पूर्ण स्क्रीन"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"फुल स्क्रीन"</string>
 </resources>

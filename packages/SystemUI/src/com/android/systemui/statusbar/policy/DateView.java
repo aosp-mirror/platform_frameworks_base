@@ -27,7 +27,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 

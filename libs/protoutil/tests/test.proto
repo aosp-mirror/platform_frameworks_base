@@ -1,0 +1,42 @@
+// This proto file is only used for testing purpose.
+syntax = "proto2";
+
+package android.util;
+
+message PrimitiveProto {
+
+    optional int32 val_int32 = 1;
+    optional int64 val_int64 = 2;
+    optional float val_float = 3;
+    optional double val_double = 4;
+    optional uint32 val_uint32 = 5;
+    optional uint64 val_uint64 = 6;
+    optional fixed32 val_fixed32 = 7;
+    optional fixed64 val_fixed64 = 8;
+    optional bool val_bool = 9;
+    optional string val_string = 10;
+    optional bytes val_bytes = 11;
+    optional sfixed32 val_sfixed32 = 12;
+    optional sfixed64 val_sfixed64 = 13;
+    optional sint32 val_sint32 = 14;
+    optional sint64 val_sint64 = 15;
+
+    enum Count {
+        ZERO = 0;
+        ONE = 1;
+        TWO = 2;
+    };
+    optional Count val_enum = 16;
+}
+
+message ComplexProto {
+
+    repeated int32 ints = 1;
+
+    message Log {
+        optional int32 id = 1;
+        optional string name = 2;
+        optional bytes data = 3;
+    }
+    repeated Log logs = 2;
+}

@@ -18,12 +18,12 @@ package android.widget.layout.linear;
 
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.ViewAsserts;
 import android.view.View;
 
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
-import android.widget.layout.linear.HorizontalOrientationVerticalAlignment;
 
 public class BaselineAlignmentSpinnerButton extends ActivityInstrumentationTestCase<HorizontalOrientationVerticalAlignment> {
     private View mSpinner;

@@ -583,7 +583,80 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           loaded_package->dynamic_package_map_.emplace_back(std::move(package_name),
                                                             dtohl(entry_iter->packageId));
         }
+      } break;
 
+      case RES_TABLE_OVERLAYABLE_TYPE: {
+        const ResTable_overlayable_header* header =
+            child_chunk.header<ResTable_overlayable_header>();
+        if (header == nullptr) {
+          LOG(ERROR) << "RES_TABLE_OVERLAYABLE_TYPE too small.";
+          return {};
+        }
+
+        std::string name;
+        util::ReadUtf16StringFromDevice(header->name, arraysize(header->name), &name);
+        std::string actor;
+        util::ReadUtf16StringFromDevice(header->actor, arraysize(header->actor), &actor);
+
+        if (loaded_package->overlayable_map_.find(name) !=
+            loaded_package->overlayable_map_.end()) {
+          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '" << name << "'.";
+          return {};
+        }
+        loaded_package->overlayable_map_.emplace(name, actor);
+
+        // Iterate over the overlayable policy chunks contained within the overlayable chunk data
+        ChunkIterator overlayable_iter(child_chunk.data_ptr(), child_chunk.data_size());
+        while (overlayable_iter.HasNext()) {
+          const Chunk overlayable_child_chunk = overlayable_iter.Next();
+
+          switch (overlayable_child_chunk.type()) {
+            case RES_TABLE_OVERLAYABLE_POLICY_TYPE: {
+              const ResTable_overlayable_policy_header* policy_header =
+                  overlayable_child_chunk.header<ResTable_overlayable_policy_header>();
+              if (policy_header == nullptr) {
+                LOG(ERROR) << "RES_TABLE_OVERLAYABLE_POLICY_TYPE too small.";
+                return {};
+              }
+
+              if ((overlayable_child_chunk.data_size() / sizeof(ResTable_ref))
+                  < dtohl(policy_header->entry_count)) {
+                LOG(ERROR) <<  "RES_TABLE_OVERLAYABLE_POLICY_TYPE too small to hold entries.";
+                return {};
+              }
+
+              // Retrieve all the resource ids belonging to this policy chunk
+              std::unordered_set<uint32_t> ids;
+              const auto ids_begin =
+                  reinterpret_cast<const ResTable_ref*>(overlayable_child_chunk.data_ptr());
+              const auto ids_end = ids_begin + dtohl(policy_header->entry_count);
+              for (auto id_iter = ids_begin; id_iter != ids_end; ++id_iter) {
+                ids.insert(dtohl(id_iter->ident));
+              }
+
+              // Add the pairing of overlayable properties and resource ids to the package
+              OverlayableInfo overlayable_info{};
+              overlayable_info.name = name;
+              overlayable_info.actor = actor;
+              overlayable_info.policy_flags = policy_header->policy_flags;
+              loaded_package->overlayable_infos_.push_back(std::make_pair(overlayable_info, ids));
+              loaded_package->defines_overlayable_ = true;
+              break;
+            }
+
+            default:
+              LOG(WARNING) << StringPrintf("Unknown chunk type '%02x'.", chunk.type());
+              break;
+          }
+        }
+
+        if (overlayable_iter.HadError()) {
+          LOG(ERROR) << StringPrintf("Error parsing RES_TABLE_OVERLAYABLE_TYPE: %s",
+                                     overlayable_iter.GetLastError().c_str());
+          if (overlayable_iter.HadFatalError()) {
+            return {};
+          }
+        }
       } break;
 
       default:

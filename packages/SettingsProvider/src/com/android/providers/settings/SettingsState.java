@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.INVALID_UID;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -34,7 +35,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -67,7 +67,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -205,6 +204,7 @@ final class SettingsState {
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
     public static final int SETTINGS_TYPE_SSAID = 3;
+    public static final int SETTINGS_TYPE_CONFIG = 4;
 
     public static final int SETTINGS_TYPE_MASK = 0xF0000000;
     public static final int SETTINGS_TYPE_SHIFT = 28;
@@ -223,6 +223,9 @@ final class SettingsState {
 
     public static String settingTypeToString(int type) {
         switch (type) {
+            case SETTINGS_TYPE_CONFIG: {
+                return "SETTINGS_CONFIG";
+            }
             case SETTINGS_TYPE_GLOBAL: {
                 return "SETTINGS_GLOBAL";
             }
@@ -274,6 +277,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public int getVersionLocked() {
         return mVersion;
     }
@@ -283,6 +287,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void setVersionLocked(int version) {
         if (version == mVersion) {
             return;
@@ -293,7 +298,8 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    public void onPackageRemovedLocked(String packageName) {
+    @GuardedBy("mLock")
+    public void removeSettingsForPackageLocked(String packageName) {
         boolean removedSomething = false;
 
         final int settingCount = mSettings.size();
@@ -317,6 +323,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public List<String> getSettingNamesLocked() {
         ArrayList<String> names = new ArrayList<>();
         final int settingsCount = mSettings.size();
@@ -328,6 +335,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {
             return mNullSetting;
@@ -350,6 +358,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void resetSettingDefaultValueLocked(String name) {
         Setting oldSetting = getSettingLocked(name);
         if (oldSetting != null && !oldSetting.isNull() && oldSetting.getDefaultValue() != null) {
@@ -366,8 +375,16 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean insertSettingLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
+        return insertSettingLocked(name, value, tag, makeDefault, false, packageName);
+    }
+
+    // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
+    public boolean insertSettingLocked(String name, String value, String tag,
+            boolean makeDefault, boolean forceNonSystemPackage, String packageName) {
         if (TextUtils.isEmpty(name)) {
             return false;
         }
@@ -378,7 +395,7 @@ final class SettingsState {
         Setting newState;
 
         if (oldState != null) {
-            if (!oldState.update(value, makeDefault, packageName, tag, false)) {
+            if (!oldState.update(value, makeDefault, packageName, tag, forceNonSystemPackage)) {
                 return false;
             }
             newState = oldState;
@@ -407,6 +424,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean deleteSettingLocked(String name) {
         if (TextUtils.isEmpty(name) || !hasSettingLocked(name)) {
             return false;
@@ -429,6 +447,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean resetSettingLocked(String name) {
         if (TextUtils.isEmpty(name) || !hasSettingLocked(name)) {
             return false;
@@ -458,6 +477,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void destroyLocked(Runnable callback) {
         mHandler.removeMessages(MyHandler.MSG_PERSIST_SETTINGS);
         if (callback != null) {
@@ -471,6 +491,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void addHistoricalOperationLocked(String type, Setting setting) {
         if (mHistoricalOperations == null) {
             return;
@@ -553,6 +574,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateMemoryUsagePerPackageLocked(String packageName, String oldValue,
             String newValue, String oldDefaultValue, String newDefaultValue) {
         if (mMaxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_UNLIMITED) {
@@ -588,10 +610,12 @@ final class SettingsState {
         mPackageToMemoryUsage.put(packageName, newSize);
     }
 
+    @GuardedBy("mLock")
     private boolean hasSettingLocked(String name) {
         return mSettings.indexOfKey(name) >= 0;
     }
 
+    @GuardedBy("mLock")
     private void scheduleWriteIfNeededLocked() {
         // If dirty then we have a write already scheduled.
         if (!mDirty) {
@@ -600,6 +624,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void writeStateAsyncLocked() {
         final long currentTimeMillis = SystemClock.uptimeMillis();
 
@@ -771,6 +796,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void readStateSyncLocked() {
         FileInputStream in;
         try {
@@ -820,6 +846,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void parseSettingsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
 
@@ -1098,11 +1125,16 @@ final class SettingsState {
         return sb.toString();
     }
 
+    // Check if a specific package belonging to the caller is part of the system package.
     public static boolean isSystemPackage(Context context, String packageName) {
-        return isSystemPackage(context, packageName, Binder.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        return isSystemPackage(context, packageName, callingUid, callingUserId);
     }
 
-    public static boolean isSystemPackage(Context context, String packageName, int callingUid) {
+    // Check if a specific package, uid, and user ID are part of the system package.
+    public static boolean isSystemPackage(Context context, String packageName, int uid,
+            int userId) {
         synchronized (sLock) {
             if (SYSTEM_PACKAGE_NAME.equals(packageName)) {
                 return true;
@@ -1114,26 +1146,19 @@ final class SettingsState {
                 return false;
             }
 
-            // Native services running as a special UID get a pass
-            final int callingAppId = UserHandle.getAppId(callingUid);
-            if (callingAppId < FIRST_APPLICATION_UID) {
-                sSystemUids.put(callingAppId, callingAppId);
-                return true;
+            if (uid != INVALID_UID) {
+                // Native services running as a special UID get a pass
+                final int callingAppId = UserHandle.getAppId(uid);
+                if (callingAppId < FIRST_APPLICATION_UID) {
+                    sSystemUids.put(callingAppId, callingAppId);
+                    return true;
+                }
             }
-
-            // While some callers may have permissions to manipulate cross user
-            // settings or some settings are stored in the parent of a managed
-            // profile for the purpose of determining whether the other end is a
-            // system component we need to use the user id of the caller for
-            // pulling information about the caller from the package manager.
-            final int callingUserId = UserHandle.getUserId(callingUid);
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                final int uid;
                 try {
-                    uid = context.getPackageManager().getPackageUidAsUser(packageName, 0,
-                            callingUserId);
+                    uid = context.getPackageManager().getPackageUidAsUser(packageName, 0, userId);
                 } catch (PackageManager.NameNotFoundException e) {
                     return false;
                 }
@@ -1161,7 +1186,7 @@ final class SettingsState {
                 PackageInfo packageInfo;
                 try {
                     packageInfo = context.getPackageManager().getPackageInfoAsUser(
-                            packageName, PackageManager.GET_SIGNATURES, callingUserId);
+                            packageName, PackageManager.GET_SIGNATURES, userId);
                     if ((packageInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_PERSISTENT) != 0
                             && (packageInfo.applicationInfo.flags

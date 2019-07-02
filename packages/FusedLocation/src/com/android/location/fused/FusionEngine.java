@@ -16,14 +16,6 @@
 
 package com.android.location.fused;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.HashMap;
-
-import com.android.location.provider.LocationProviderBase;
-import com.android.location.provider.LocationRequestUnbundled;
-import com.android.location.provider.ProviderRequestUnbundled;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -32,8 +24,15 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.WorkSource;
 import android.util.Log;
+
+import com.android.location.provider.LocationProviderBase;
+import com.android.location.provider.LocationRequestUnbundled;
+import com.android.location.provider.ProviderRequestUnbundled;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.HashMap;
 
 public class FusionEngine implements LocationListener {
     public interface Callback {
@@ -47,72 +46,35 @@ public class FusionEngine implements LocationListener {
 
     public static final long SWITCH_ON_FRESHNESS_CLIFF_NS = 11 * 1000000000L; // 11 seconds
 
-    private final Context mContext;
     private final LocationManager mLocationManager;
     private final Looper mLooper;
+    private final Callback mCallback;
 
     // all fields are only used on mLooper thread. except for in dump() which is not thread-safe
-    private Callback mCallback;
     private Location mFusedLocation;
     private Location mGpsLocation;
     private Location mNetworkLocation;
 
-    private boolean mEnabled;
     private ProviderRequestUnbundled mRequest;
 
     private final HashMap<String, ProviderStats> mStats = new HashMap<>();
 
-    public FusionEngine(Context context, Looper looper) {
-        mContext = context;
+    FusionEngine(Context context, Looper looper, Callback callback) {
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mNetworkLocation = new Location("");
         mNetworkLocation.setAccuracy(Float.MAX_VALUE);
         mGpsLocation = new Location("");
         mGpsLocation.setAccuracy(Float.MAX_VALUE);
         mLooper = looper;
+        mCallback = callback;
 
         mStats.put(GPS, new ProviderStats());
         mStats.put(NETWORK, new ProviderStats());
-
-    }
-
-    public void init(Callback callback) {
-        Log.i(TAG, "engine started (" + mContext.getPackageName() + ")");
-        mCallback = callback;
-    }
-
-    /**
-     * Called to stop doing any work, and release all resources
-     * This can happen when a better fusion engine is installed
-     * in a different package, and this one is no longer needed.
-     * Called on mLooper thread
-     */
-    public void deinit() {
-        mRequest = null;
-        disable();
-        Log.i(TAG, "engine stopped (" + mContext.getPackageName() + ")");
     }
 
     /** Called on mLooper thread */
-    public void enable() {
-        if (!mEnabled) {
-            mEnabled = true;
-            updateRequirements();
-        }
-    }
-
-    /** Called on mLooper thread */
-    public void disable() {
-        if (mEnabled) {
-            mEnabled = false;
-            updateRequirements();
-        }
-    }
-
-    /** Called on mLooper thread */
-    public void setRequest(ProviderRequestUnbundled request, WorkSource source) {
+    public void setRequest(ProviderRequestUnbundled request) {
         mRequest = request;
-        mEnabled = request.getReportLocation();
         updateRequirements();
     }
 
@@ -120,6 +82,7 @@ public class FusionEngine implements LocationListener {
         public boolean requested;
         public long requestTime;
         public long minTime;
+
         @Override
         public String toString() {
             return (requested ? " REQUESTED" : " ---");
@@ -154,7 +117,7 @@ public class FusionEngine implements LocationListener {
     }
 
     private void updateRequirements() {
-        if (!mEnabled || mRequest == null) {
+        if (mRequest == null || !mRequest.getReportLocation()) {
             mRequest = null;
             disableProvider(NETWORK);
             disableProvider(GPS);
@@ -200,29 +163,30 @@ public class FusionEngine implements LocationListener {
      * Test whether one location (a) is better to use than another (b).
      */
     private static boolean isBetterThan(Location locationA, Location locationB) {
-      if (locationA == null) {
-        return false;
-      }
-      if (locationB == null) {
-        return true;
-      }
-      // A provider is better if the reading is sufficiently newer.  Heading
-      // underground can cause GPS to stop reporting fixes.  In this case it's
-      // appropriate to revert to cell, even when its accuracy is less.
-      if (locationA.getElapsedRealtimeNanos() > locationB.getElapsedRealtimeNanos() + SWITCH_ON_FRESHNESS_CLIFF_NS) {
-        return true;
-      }
+        if (locationA == null) {
+            return false;
+        }
+        if (locationB == null) {
+            return true;
+        }
+        // A provider is better if the reading is sufficiently newer.  Heading
+        // underground can cause GPS to stop reporting fixes.  In this case it's
+        // appropriate to revert to cell, even when its accuracy is less.
+        if (locationA.getElapsedRealtimeNanos()
+                > locationB.getElapsedRealtimeNanos() + SWITCH_ON_FRESHNESS_CLIFF_NS) {
+            return true;
+        }
 
-      // A provider is better if it has better accuracy.  Assuming both readings
-      // are fresh (and by that accurate), choose the one with the smaller
-      // accuracy circle.
-      if (!locationA.hasAccuracy()) {
-        return false;
-      }
-      if (!locationB.hasAccuracy()) {
-        return true;
-      }
-      return locationA.getAccuracy() < locationB.getAccuracy();
+        // A provider is better if it has better accuracy.  Assuming both readings
+        // are fresh (and by that accurate), choose the one with the smaller
+        // accuracy circle.
+        if (!locationA.hasAccuracy()) {
+            return false;
+        }
+        if (!locationB.hasAccuracy()) {
+            return true;
+        }
+        return locationA.getAccuracy() < locationB.getAccuracy();
     }
 
     private void updateFusedLocation() {
@@ -252,9 +216,9 @@ public class FusionEngine implements LocationListener {
         }
 
         if (mCallback != null) {
-          mCallback.reportLocation(mFusedLocation);
+            mCallback.reportLocation(mFusedLocation);
         } else {
-          Log.w(TAG, "Location updates received while fusion engine not started");
+            Log.w(TAG, "Location updates received while fusion engine not started");
         }
     }
 
@@ -272,19 +236,22 @@ public class FusionEngine implements LocationListener {
 
     /** Called on mLooper thread */
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {  }
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     /** Called on mLooper thread */
     @Override
-    public void onProviderEnabled(String provider) {  }
+    public void onProviderEnabled(String provider) {
+    }
 
     /** Called on mLooper thread */
     @Override
-    public void onProviderDisabled(String provider) {  }
+    public void onProviderDisabled(String provider) {
+    }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
-        s.append("mEnabled=").append(mEnabled).append(' ').append(mRequest).append('\n');
+        s.append(mRequest).append('\n');
         s.append("fused=").append(mFusedLocation).append('\n');
         s.append(String.format("gps %s\n", mGpsLocation));
         s.append("    ").append(mStats.get(GPS)).append('\n');

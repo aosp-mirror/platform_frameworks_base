@@ -75,7 +75,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * public void requestRole() {
  *     RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
- *     Intent intent = roleManager.createRequestRoleIntent("android.app.role.CALL_SCREENING_APP");
+ *     Intent intent = roleManager.createRequestRoleIntent("android.app.role.CALL_SCREENING");
  *     startActivityForResult(intent, REQUEST_ID);
  * }
  *

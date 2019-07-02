@@ -36,8 +36,6 @@
 
 #include <ui/ANativeObjectBase.h>
 
-static int initialized = 0;
-
 static jclass egldisplayClass;
 static jclass eglcontextClass;
 static jclass eglsurfaceClass;
@@ -104,6 +102,7 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
     if (obj == NULL){
         jniThrowException(_env, "java/lang/IllegalArgumentException",
                           "Object is set to null.");
+        return nullptr;
     }
 
     return reinterpret_cast<void*>(_env->CallLongMethod(obj, mid));

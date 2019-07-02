@@ -1,0 +1,117 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.usage;
+import "frameworks/base/core/proto/android/content/configuration.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+message IntervalStatsProto {
+  message StringPool {
+    optional int32 size = 1;
+    repeated string strings = 2;
+  }
+
+  message CountAndTime {
+    optional int32 count = 1;
+    optional int64 time_ms = 2;
+  }
+
+  // Stores the relevant information from a UsageStats
+  message UsageStats {
+    message ChooserAction {
+      message CategoryCount {
+        optional string name = 1;
+        optional int32 count = 3;
+      }
+      optional string name = 1;
+      repeated CategoryCount counts = 3;
+    }
+    optional string package = 1;
+    // package_index contains the index + 1 of the package name in the string pool
+    optional int32 package_index = 2;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
+    optional int64 last_time_active_ms = 3;
+    optional int64 total_time_active_ms = 4;
+    optional int32 last_event = 5;
+    optional int32 app_launch_count = 6;
+    repeated ChooserAction chooser_actions = 7;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
+    optional int64 last_time_service_used_ms = 8;
+    optional int64 total_time_service_used_ms = 9;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
+    optional int64 last_time_visible_ms = 10;
+    optional int64 total_time_visible_ms = 11;
+  }
+
+  // Stores the relevant information an IntervalStats will have about a Configuration
+  message Configuration {
+    optional .android.content.ConfigurationProto config = 1;
+    optional int64 last_time_active_ms = 2;
+    optional int64 total_time_active_ms = 3;
+    optional int32 count = 4;
+    optional bool active = 5;
+  }
+
+  // Stores the relevant information from a UsageEvents.Event
+  message Event {
+    optional string package = 1;
+    // package_index contains the index + 1 of the package name in the string pool
+    optional int32 package_index = 2;
+    optional string class = 3;
+    // class_index contains the index + 1 of the class name in the string pool
+    optional int32 class_index = 4;
+    optional int64 time_ms = 5;
+    optional int32 flags = 6;
+    optional int32 type = 7;
+    optional .android.content.ConfigurationProto config = 8;
+    optional string shortcut_id = 9;
+    optional int32 standby_bucket = 11;
+    optional string notification_channel = 12;
+    // notification_channel_index contains the index + 1 of the channel name in the string pool
+    optional int32 notification_channel_index = 13;
+    // If class field is an Activity, instance_id is a unique id of the
+    // Activity object.
+    optional int32 instance_id = 14;
+    // task_root_package_index contains the index + 1 of the task root package name in the string
+    // pool
+    optional int32 task_root_package_index = 15;
+    // task_root_class_index contains the index + 1 of the task root class name in the string pool
+    optional int32 task_root_class_index = 16;
+  }
+
+  // The following fields contain supplemental data used to build IntervalStats, such as a string
+  // pool.
+  optional int64 end_time_ms = 1;
+  // stringpool contains all the package and class names used by UsageStats and Event
+  // They will hold a number that is equal to the index + 1 of their string in the pool
+  optional StringPool stringpool = 2;
+  optional int32 major_version = 3;
+  optional int32 minor_version = 4;
+
+  // The following fields contain aggregated usage stats data
+  optional CountAndTime interactive = 10;
+  optional CountAndTime non_interactive = 11;
+  optional CountAndTime keyguard_shown = 12;
+  optional CountAndTime keyguard_hidden = 13;
+
+  // The following fields contain listed usage stats data
+  repeated UsageStats packages = 20;
+  repeated Configuration configurations = 21;
+  repeated Event event_log = 22;
+}

@@ -15,8 +15,10 @@
  */
 package android.os;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
+import android.util.Slog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Wrapper class for sending data from Android OS to StatsD.
@@ -24,115 +26,236 @@ import java.nio.charset.StandardCharsets;
  * @hide
  */
 public final class StatsLogEventWrapper implements Parcelable {
-    private ByteArrayOutputStream mStorage = new ByteArrayOutputStream();
+    static final boolean DEBUG = false;
+    static final String TAG = "StatsLogEventWrapper";
 
-    // Below are constants copied from log/log.h
-    private static final int EVENT_TYPE_INT = 0;  /* int32_t */
-    private static final int EVENT_TYPE_LONG = 1; /* int64_t */
-    private static final int EVENT_TYPE_STRING = 2;
-    private static final int EVENT_TYPE_LIST = 3;
-    private static final int EVENT_TYPE_FLOAT = 4;
+    // Keep in sync with FieldValue.h enums
+    private static final int EVENT_TYPE_UNKNOWN = 0;
+    private static final int EVENT_TYPE_INT = 1; /* int32_t */
+    private static final int EVENT_TYPE_LONG = 2; /* int64_t */
+    private static final int EVENT_TYPE_FLOAT = 3;
+    private static final int EVENT_TYPE_DOUBLE = 4;
+    private static final int EVENT_TYPE_STRING = 5;
+    private static final int EVENT_TYPE_STORAGE = 6;
 
-    // Keep this in sync with system/core/logcat/event.logtags
-    private static final int STATS_BUFFER_TAG_ID = 1937006964;
-    /**
-     * Creates a log_event that is binary-encoded as implemented in
-     * system/core/liblog/log_event_list.c; this allows us to use the same parsing logic in statsd
-     * for pushed and pulled data. The write* methods must be called in the same order as their
-     * field number. There is no checking that the correct number of write* methods is called.
-     * We also write an END_LIST character before beginning to write to parcel, but this END_LIST
-     * may be unnecessary.
-     *
-     * @param tag    The integer representing the tag for this event.
-     * @param fields The number of fields specified in this event.
-     */
-    public StatsLogEventWrapper(long elapsedNanos, int tag, int fields) {
-        // Write four bytes from tag, starting with least-significant bit.
-        // For pulled data, this tag number is not really used. We use the same tag number as
-        // pushed ones to be consistent.
-        write4Bytes(STATS_BUFFER_TAG_ID);
-        mStorage.write(EVENT_TYPE_LIST); // This is required to start the log entry.
-        mStorage.write(fields + 2); // Indicate number of elements in this list. +1 for the tag
-        // The first element is the elapsed realtime.
-        writeLong(elapsedNanos);
-        // The second element is the real atom tag number
-        writeInt(tag);
+    List<Integer> mTypes = new ArrayList<>();
+    List<Object> mValues = new ArrayList<>();
+    int mTag;
+    long mElapsedTimeNs;
+    long mWallClockTimeNs;
+    WorkSource mWorkSource = null;
+
+    public StatsLogEventWrapper(int tag, long elapsedTimeNs, long wallClockTimeNs) {
+        this.mTag = tag;
+        this.mElapsedTimeNs = elapsedTimeNs;
+        this.mWallClockTimeNs = wallClockTimeNs;
     }
 
     /**
      * Boilerplate for Parcel.
      */
-    public static final Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
             Parcelable.Creator<StatsLogEventWrapper>() {
                 public StatsLogEventWrapper createFromParcel(Parcel in) {
-                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
-                            android.os.Binder.getCallingUid(), "");
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
+                    return new StatsLogEventWrapper(in);
                 }
 
                 public StatsLogEventWrapper[] newArray(int size) {
-                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
-                            android.os.Binder.getCallingUid(), "");
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
+                    return new StatsLogEventWrapper[size];
                 }
             };
 
-    private void write4Bytes(int val) {
-        mStorage.write(val);
-        mStorage.write(val >>> 8);
-        mStorage.write(val >>> 16);
-        mStorage.write(val >>> 24);
-    }
-
-    private void write8Bytes(long val) {
-        write4Bytes((int) (val & 0xFFFFFFFF)); // keep the lowe 32-bits
-        write4Bytes((int) (val >>> 32)); // Write the high 32-bits.
+    private StatsLogEventWrapper(Parcel in) {
+        readFromParcel(in);
     }
 
     /**
-     * Adds 32-bit integer to output.
+     * Set work source if any.
+     */
+    public void setWorkSource(WorkSource ws) {
+        if (ws.getWorkChains() == null || ws.getWorkChains().size() == 0) {
+            Slog.w(TAG, "Empty worksource!");
+            return;
+        }
+        mWorkSource = ws;
+    }
+
+    /**
+     * Write a int value.
      */
     public void writeInt(int val) {
-        mStorage.write(EVENT_TYPE_INT);
-        write4Bytes(val);
+        mTypes.add(EVENT_TYPE_INT);
+        mValues.add(val);
     }
 
     /**
-     * Adds 64-bit long to output.
+     * Write a long value.
      */
     public void writeLong(long val) {
-        mStorage.write(EVENT_TYPE_LONG);
-        write8Bytes(val);
+        mTypes.add(EVENT_TYPE_LONG);
+        mValues.add(val);
     }
 
     /**
-     * Adds a 4-byte floating point value to output.
-     */
-    public void writeFloat(float val) {
-        int v = Float.floatToIntBits(val);
-        mStorage.write(EVENT_TYPE_FLOAT);
-        write4Bytes(v);
-    }
-
-    /**
-     * Adds a string to the output.
+     * Write a string value.
      */
     public void writeString(String val) {
-        mStorage.write(EVENT_TYPE_STRING);
-        write4Bytes(val.length());
-        byte[] bytes = val.getBytes(StandardCharsets.UTF_8);
-        mStorage.write(bytes, 0, bytes.length);
+        mTypes.add(EVENT_TYPE_STRING);
+        // use empty string for null
+        mValues.add(val == null ? "" : val);
     }
 
     /**
-     * Writes the stored fields to a byte array. Will first write a new-line character to denote
-     * END_LIST before writing contents to byte array.
+     * Write a float value.
      */
+    public void writeFloat(float val) {
+        mTypes.add(EVENT_TYPE_FLOAT);
+        mValues.add(val);
+    }
+
+    /**
+     * Write a storage value.
+     */
+    public void writeStorage(byte[] val) {
+        mTypes.add(EVENT_TYPE_STORAGE);
+        mValues.add(val);
+    }
+
+    /**
+     * Write a boolean value.
+     */
+    public void writeBoolean(boolean val) {
+        mTypes.add(EVENT_TYPE_INT);
+        mValues.add(val ? 1 : 0);
+    }
+
     public void writeToParcel(Parcel out, int flags) {
-        mStorage.write(10); // new-line character is same as END_LIST
-        out.writeByteArray(mStorage.toByteArray());
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "Writing " + mTag + " " + mElapsedTimeNs + " " + mWallClockTimeNs + " and "
+                            + mTypes.size() + " elements.");
+        }
+        out.writeInt(mTag);
+        out.writeLong(mElapsedTimeNs);
+        out.writeLong(mWallClockTimeNs);
+        if (mWorkSource != null) {
+            ArrayList<android.os.WorkSource.WorkChain> workChains = mWorkSource.getWorkChains();
+            // number of chains
+            out.writeInt(workChains.size());
+            for (int i = 0; i < workChains.size(); i++) {
+                android.os.WorkSource.WorkChain wc = workChains.get(i);
+                if (wc.getSize() == 0) {
+                    Slog.w(TAG, "Empty work chain.");
+                    out.writeInt(0);
+                    continue;
+                }
+                if (wc.getUids().length != wc.getTags().length
+                        || wc.getUids().length != wc.getSize()) {
+                    Slog.w(TAG, "Malformated work chain.");
+                    out.writeInt(0);
+                    continue;
+                }
+                // number of nodes
+                out.writeInt(wc.getSize());
+                for (int j = 0; j < wc.getSize(); j++) {
+                    out.writeInt(wc.getUids()[j]);
+                    out.writeString(wc.getTags()[j] == null ? "" : wc.getTags()[j]);
+                }
+            }
+        } else {
+            // no chains
+            out.writeInt(0);
+        }
+        out.writeInt(mTypes.size());
+        for (int i = 0; i < mTypes.size(); i++) {
+            out.writeInt(mTypes.get(i));
+            switch (mTypes.get(i)) {
+                case EVENT_TYPE_INT:
+                    out.writeInt((int) mValues.get(i));
+                    break;
+                case EVENT_TYPE_LONG:
+                    out.writeLong((long) mValues.get(i));
+                    break;
+                case EVENT_TYPE_FLOAT:
+                    out.writeFloat((float) mValues.get(i));
+                    break;
+                case EVENT_TYPE_DOUBLE:
+                    out.writeDouble((double) mValues.get(i));
+                    break;
+                case EVENT_TYPE_STRING:
+                    out.writeString((String) mValues.get(i));
+                    break;
+                case EVENT_TYPE_STORAGE:
+                    out.writeByteArray((byte[]) mValues.get(i));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Reads from parcel and appropriately fills member fields.
+     */
+    public void readFromParcel(Parcel in) {
+        mTypes = new ArrayList<>();
+        mValues = new ArrayList<>();
+        mWorkSource = null;
+
+        mTag = in.readInt();
+        mElapsedTimeNs = in.readLong();
+        mWallClockTimeNs = in.readLong();
+
+        // Clear any data.
+        if (DEBUG) {
+            Slog.d(TAG, "Reading " + mTag + " " + mElapsedTimeNs + " " + mWallClockTimeNs);
+        }
+        // Set up worksource if present.
+        int numWorkChains = in.readInt();
+        if (numWorkChains > 0) {
+            mWorkSource = new WorkSource();
+            for (int i = 0; i < numWorkChains; i++) {
+                android.os.WorkSource.WorkChain workChain = mWorkSource.createWorkChain();
+                int workChainSize = in.readInt();
+                for (int j = 0; j < workChainSize; j++) {
+                    int uid = in.readInt();
+                    String tag = in.readString();
+                    workChain.addNode(uid, tag);
+                }
+            }
+        }
+
+        // Do the rest of the types.
+        int numTypes = in.readInt();
+        if (DEBUG) {
+            Slog.d(TAG, "Reading " + numTypes + " elements");
+        }
+        for (int i = 0; i < numTypes; i++) {
+            int type = in.readInt();
+            mTypes.add(type);
+            switch (type) {
+                case EVENT_TYPE_INT:
+                    mValues.add(in.readInt());
+                    break;
+                case EVENT_TYPE_LONG:
+                    mValues.add(in.readLong());
+                    break;
+                case EVENT_TYPE_FLOAT:
+                    mValues.add(in.readFloat());
+                    break;
+                case EVENT_TYPE_DOUBLE:
+                    mValues.add(in.readDouble());
+                    break;
+                case EVENT_TYPE_STRING:
+                    mValues.add(in.readString());
+                    break;
+                case EVENT_TYPE_STORAGE:
+                    mValues.add(in.createByteArray());
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**

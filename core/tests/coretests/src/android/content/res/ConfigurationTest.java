@@ -13,19 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package android.content.res;
 
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import org.junit.runners.JUnit4;
-
-import android.content.res.Configuration;
-import android.support.test.filters.SmallTest;
 import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Build/install/run: bit FrameworksCoreTests:android.content.res.ConfigurationTest

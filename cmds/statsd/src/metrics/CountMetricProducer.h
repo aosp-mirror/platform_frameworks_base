@@ -40,10 +40,9 @@ struct CountBucket {
 
 class CountMetricProducer : public MetricProducer {
 public:
-    // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int64_t startTimeNs);
+                        const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~CountMetricProducer();
 
@@ -57,6 +56,8 @@ private:
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
+                            const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
 
@@ -78,9 +79,9 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const int64_t& newEventTime) override;
 
-    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                  const int64_t& nextBucketStartTimeNs) override;
 
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
     // The current bucket (may be a partial bucket).
@@ -100,6 +101,7 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgrade);
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket);
+    FRIEND_TEST(CountMetricProducerTest, TestFirstBucket);
 };
 
 }  // namespace statsd

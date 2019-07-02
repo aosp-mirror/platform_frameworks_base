@@ -24,10 +24,10 @@ import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.Surface;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarView;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * The "dead zone" consumes unintentional taps along the top edge of the navigation bar.
@@ -44,7 +44,7 @@ public class DeadZone {
     public static final int VERTICAL = 1;  // Consume taps along the left edge.
 
     private static final boolean CHATTY = true; // print to logcat when we eat a click
-    private final StatusBar mStatusBar;
+    private final NavigationBarController mNavBarController;
     private final NavigationBarView mNavigationBarView;
 
     private boolean mShouldFlash;
@@ -58,6 +58,7 @@ public class DeadZone {
     private boolean mVertical;
     private long mLastPokeTime;
     private int mDisplayRotation;
+    private final int mDisplayId;
 
     private final Runnable mDebugFlash = new Runnable() {
         @Override
@@ -68,8 +69,8 @@ public class DeadZone {
 
     public DeadZone(NavigationBarView view) {
         mNavigationBarView = view;
-        mStatusBar = SysUiServiceProvider.getComponent(mNavigationBarView.getContext(),
-                StatusBar.class);
+        mNavBarController = Dependency.get(NavigationBarController.class);
+        mDisplayId = view.getContext().getDisplayId();
         onConfigurationChanged(HORIZONTAL);
     }
 
@@ -133,7 +134,7 @@ public class DeadZone {
             if (DEBUG) {
                 Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
             }
-            if (mStatusBar != null) mStatusBar.touchAutoDim();
+            mNavBarController.touchAutoDim(mDisplayId);
             int size = (int) getSize(event.getEventTime());
             // In the vertical orientation consume taps along the left edge.
             // In horizontal orientation consume taps along the top edge.

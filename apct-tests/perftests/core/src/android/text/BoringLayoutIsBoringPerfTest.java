@@ -18,8 +18,9 @@ package android.text;
 import android.graphics.Canvas;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
 import android.text.NonEditableTextGenerator.TextType;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class BoringLayoutIsBoringPerfTest {
 
     private static final boolean[] BOOLEANS = new boolean[]{false, true};
 
-    @Parameterized.Parameters(name = "cached={4},{1}chars,{0}")
+    @Parameterized.Parameters(name = "cached {4} {1}chars {0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {

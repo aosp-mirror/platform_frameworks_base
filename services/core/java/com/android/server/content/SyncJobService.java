@@ -16,12 +16,10 @@
 
 package com.android.server.content;
 
+import android.annotation.Nullable;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.content.Intent;
 import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
@@ -34,78 +32,86 @@ import com.android.internal.annotations.GuardedBy;
 public class SyncJobService extends JobService {
     private static final String TAG = "SyncManager";
 
-    public static final String EXTRA_MESSENGER = "messenger";
+    private static final Object sLock = new Object();
 
-    private Messenger mMessenger;
+    @GuardedBy("sLock")
+    private static SyncJobService sInstance;
 
-    private final Object mLock = new Object();
+    @GuardedBy("sLock")
+    private static final SparseArray<JobParameters> sJobParamsMap = new SparseArray<>();
 
-    @GuardedBy("mLock")
-    private final SparseArray<JobParameters> mJobParamsMap = new SparseArray<>();
+    @GuardedBy("sLock")
+    private static final SparseBooleanArray sStartedSyncs = new SparseBooleanArray();
 
-    @GuardedBy("mLock")
-    private final SparseBooleanArray mStartedSyncs = new SparseBooleanArray();
+    @GuardedBy("sLock")
+    private static final SparseLongArray sJobStartUptimes = new SparseLongArray();
 
-    @GuardedBy("mLock")
-    private final SparseLongArray mJobStartUptimes = new SparseLongArray();
+    private static final SyncLogger sLogger = SyncLogger.getInstance();
 
-    private final SyncLogger mLogger = SyncLogger.getInstance();
-
-    /**
-     * This service is started by the SyncManager which passes a messenger object to
-     * communicate back with it. It never stops while the device is running.
-     */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mMessenger = intent.getParcelableExtra(EXTRA_MESSENGER);
-        Message m = Message.obtain();
-        m.what = SyncManager.SyncHandler.MESSAGE_JOBSERVICE_OBJECT;
-        m.obj = this;
-        sendMessage(m);
-
-        return START_NOT_STICKY;
+    private void updateInstance() {
+        synchronized (SyncJobService.class) {
+            sInstance = this;
+        }
     }
 
-    private void sendMessage(Message message) {
-        if (mMessenger == null) {
-            Slog.e(TAG, "Messenger not initialized.");
-            return;
+    @Nullable
+    private static SyncJobService getInstance() {
+        synchronized (sLock) {
+            if (sInstance == null) {
+                Slog.wtf(TAG, "sInstance == null");
+            }
+            return sInstance;
         }
-        try {
-            mMessenger.send(message);
-        } catch (RemoteException e) {
-            Slog.e(TAG, e.toString());
+    }
+
+    public static boolean isReady() {
+        synchronized (sLock) {
+            return sInstance != null;
         }
     }
 
     @Override
     public boolean onStartJob(JobParameters params) {
+        updateInstance();
 
-        mLogger.purgeOldLogs();
+        sLogger.purgeOldLogs();
+
+        SyncOperation op = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
+
+        if (op == null) {
+            Slog.wtf(TAG, "Got invalid job " + params.getJobId());
+            return false;
+        }
+
+        final boolean readyToSync = SyncManager.readyToSync(op.target.userId);
+
+        sLogger.log("onStartJob() jobid=", params.getJobId(), " op=", op,
+                " readyToSync", readyToSync);
+
+        if (!readyToSync) {
+            // If the user isn't unlocked or the device has been provisioned yet, just stop the job
+            // at this point. If it's a non-periodic sync, ask the job scheduler to reschedule it.
+            // If it's a periodic sync, then just wait until the next cycle.
+            final boolean wantsReschedule = !op.isPeriodic;
+            jobFinished(params, wantsReschedule);
+            return true;
+        }
 
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
-        synchronized (mLock) {
+        synchronized (sLock) {
             final int jobId = params.getJobId();
-            mJobParamsMap.put(jobId, params);
+            sJobParamsMap.put(jobId, params);
 
-            mStartedSyncs.delete(jobId);
-            mJobStartUptimes.put(jobId, SystemClock.uptimeMillis());
+            sStartedSyncs.delete(jobId);
+            sJobStartUptimes.put(jobId, SystemClock.uptimeMillis());
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_START_SYNC;
-        SyncOperation op = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
-
-        mLogger.log("onStartJob() jobid=", params.getJobId(), " op=", op);
-
-        if (op == null) {
-            Slog.e(TAG, "Got invalid job " + params.getJobId());
-            return false;
-        }
         if (isLoggable) {
             Slog.v(TAG, "Got start job message " + op.target);
         }
         m.obj = op;
-        sendMessage(m);
+        SyncManager.sendMessage(m);
         return true;
     }
 
@@ -115,81 +121,81 @@ public class SyncJobService extends JobService {
             Slog.v(TAG, "onStopJob called " + params.getJobId() + ", reason: "
                     + params.getStopReason());
         }
-        final boolean readyToSync = SyncManager.readyToSync();
+        final SyncOperation op = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
+        if (op == null) {
+            Slog.wtf(TAG, "Got invalid job " + params.getJobId());
+            return false;
+        }
 
-        mLogger.log("onStopJob() ", mLogger.jobParametersToString(params),
+        final boolean readyToSync = SyncManager.readyToSync(op.target.userId);
+
+        sLogger.log("onStopJob() ", sLogger.jobParametersToString(params),
                 " readyToSync=", readyToSync);
-        synchronized (mLock) {
-            final int jobId = params.getJobId();
-            mJobParamsMap.remove(jobId);
 
-            final long startUptime = mJobStartUptimes.get(jobId);
+        synchronized (sLock) {
+            final int jobId = params.getJobId();
+            sJobParamsMap.remove(jobId);
+
+            final long startUptime = sJobStartUptimes.get(jobId);
             final long nowUptime = SystemClock.uptimeMillis();
             final long runtime = nowUptime - startUptime;
 
 
-            if (startUptime == 0) {
-                wtf("Job " + jobId + " start uptime not found: "
-                        + " params=" + jobParametersToString(params));
-            } else if (runtime > 60 * 1000) {
+            if (runtime > 60 * 1000) {
                 // WTF if startSyncH() hasn't happened, *unless* onStopJob() was called too soon.
                 // (1 minute threshold.)
                 // Also don't wtf when it's not ready to sync.
-                if (readyToSync && !mStartedSyncs.get(jobId)) {
+                if (readyToSync && !sStartedSyncs.get(jobId)) {
                     wtf("Job " + jobId + " didn't start: "
                             + " startUptime=" + startUptime
                             + " nowUptime=" + nowUptime
                             + " params=" + jobParametersToString(params));
                 }
-            } else if (runtime < 10 * 1000) {
-                // This happens too in a normal case too, and it's rather too often.
-                // Disable it for now.
-//                // Job stopped too soon. WTF.
-//                wtf("Job " + jobId + " stopped in " + runtime + " ms: "
-//                        + " startUptime=" + startUptime
-//                        + " nowUptime=" + nowUptime
-//                        + " params=" + jobParametersToString(params));
             }
 
-            mStartedSyncs.delete(jobId);
-            mJobStartUptimes.delete(jobId);
+            sStartedSyncs.delete(jobId);
+            sJobStartUptimes.delete(jobId);
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_STOP_SYNC;
-        m.obj = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
-        if (m.obj == null) {
-            return false;
-        }
+        m.obj = op;
 
         // Reschedule if this job was NOT explicitly canceled.
         m.arg1 = params.getStopReason() != JobParameters.REASON_CANCELED ? 1 : 0;
         // Apply backoff only if stop is called due to timeout.
         m.arg2 = params.getStopReason() == JobParameters.REASON_TIMEOUT ? 1 : 0;
 
-        sendMessage(m);
+        SyncManager.sendMessage(m);
         return false;
     }
 
-    public void callJobFinished(int jobId, boolean needsReschedule, String why) {
-        synchronized (mLock) {
-            JobParameters params = mJobParamsMap.get(jobId);
-            mLogger.log("callJobFinished()",
+    public static void callJobFinished(int jobId, boolean needsReschedule, String why) {
+        final SyncJobService instance = getInstance();
+        if (instance != null) {
+            instance.callJobFinishedInner(jobId, needsReschedule, why);
+        }
+    }
+
+    public void callJobFinishedInner(int jobId, boolean needsReschedule, String why) {
+        synchronized (sLock) {
+            JobParameters params = sJobParamsMap.get(jobId);
+            sLogger.log("callJobFinished()",
                     " jobid=", jobId,
                     " needsReschedule=", needsReschedule,
-                    " ", mLogger.jobParametersToString(params),
+                    " ", sLogger.jobParametersToString(params),
                     " why=", why);
             if (params != null) {
                 jobFinished(params, needsReschedule);
-                mJobParamsMap.remove(jobId);
+                sJobParamsMap.remove(jobId);
             } else {
                 Slog.e(TAG, "Job params not found for " + String.valueOf(jobId));
             }
         }
     }
 
-    public void markSyncStarted(int jobId) {
-        synchronized (mLock) {
-            mStartedSyncs.put(jobId, true);
+    public static void markSyncStarted(int jobId) {
+        synchronized (sLock) {
+            sStartedSyncs.put(jobId, true);
         }
     }
 
@@ -203,8 +209,8 @@ public class SyncJobService extends JobService {
         }
     }
 
-    private void wtf(String message) {
-        mLogger.log(message);
+    private static void wtf(String message) {
+        sLogger.log(message);
         Slog.wtf(TAG, message);
     }
 }

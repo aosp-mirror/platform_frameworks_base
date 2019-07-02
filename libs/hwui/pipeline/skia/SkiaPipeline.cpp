@@ -17,6 +17,7 @@
 #include "SkiaPipeline.h"
 
 #include <SkImageEncoder.h>
+#include <SkImageInfo.h>
 #include <SkImagePriv.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
@@ -24,6 +25,7 @@
 #include <SkPictureRecorder.h>
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
+#include "thread/CommonPool.h"
 #include "utils/TraceUtils.h"
 
 #include <unistd.h>
@@ -46,10 +48,6 @@ SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
 
 SkiaPipeline::~SkiaPipeline() {
     unpinImages();
-}
-
-TaskManager* SkiaPipeline::getTaskManager() {
-    return mRenderThread.cacheManager().getTaskManager();
 }
 
 void SkiaPipeline::onDestroyHardwareResources() {
@@ -81,18 +79,17 @@ void SkiaPipeline::onPrepareTree() {
     mVectorDrawables.clear();
 }
 
-void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
+void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
                                 LayerUpdateQueue* layerUpdateQueue, bool opaque,
-                                bool wideColorGamut, const BakedOpRenderer::LightInfo& lightInfo) {
+                                const LightInfo& lightInfo) {
     updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderVectorDrawableCache();
-    renderLayersImpl(*layerUpdateQueue, opaque, wideColorGamut);
+    renderLayersImpl(*layerUpdateQueue, opaque);
     layerUpdateQueue->clear();
 }
 
-void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
-                                    bool wideColorGamut) {
+void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
     sk_sp<GrContext> cachedContext;
 
     // Render all layers that need to be updated, in order.
@@ -103,7 +100,6 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
         // as not to lose info on what portion is damaged
         if (CC_LIKELY(layerNode->getLayerSurface() != nullptr)) {
             SkASSERT(layerNode->getLayerSurface());
-            SkASSERT(layerNode->getDisplayList()->isSkiaDL());
             SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
             if (!displayList || displayList->isEmpty()) {
                 SkDEBUGF(("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName()));
@@ -112,7 +108,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
 
             const Rect& layerDamage = layers.entries()[i].damage;
 
-            SkCanvas* layerCanvas = tryCapture(layerNode->getLayerSurface());
+            SkCanvas* layerCanvas = layerNode->getLayerSurface()->getCanvas();
 
             int saveCount = layerCanvas->save();
             SkASSERT(saveCount == 1);
@@ -140,8 +136,6 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
             layerCanvas->restoreToCount(saveCount);
             mLightCenter = savedLightCenter;
 
-            endCapture(layerNode->getLayerSurface());
-
             // cache the current context so that we can defer flushing it until
             // either all the layers have been rendered or the context changes
             GrContext* currentContext = layerNode->getLayerSurface()->getCanvas()->getGrContext();
@@ -162,7 +156,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
 }
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                       bool wideColorGamut, ErrorHandler* errorHandler) {
+                                       ErrorHandler* errorHandler) {
     // compute the size of the surface (i.e. texture) to be allocated for this layer
     const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
     const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
@@ -170,34 +164,31 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
     SkSurface* layer = node->getLayerSurface();
     if (!layer || layer->width() != surfaceWidth || layer->height() != surfaceHeight) {
         SkImageInfo info;
-        if (wideColorGamut) {
-            info = SkImageInfo::Make(surfaceWidth, surfaceHeight, kRGBA_F16_SkColorType,
-                                     kPremul_SkAlphaType);
-        } else {
-            info = SkImageInfo::MakeN32Premul(surfaceWidth, surfaceHeight);
-        }
+        info = SkImageInfo::Make(surfaceWidth, surfaceHeight, getSurfaceColorType(),
+                                 kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                          SkBudgeted::kYes, info, 0, &props));
+                                                          SkBudgeted::kYes, info, 0,
+                                                          this->getSurfaceOrigin(), &props));
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source
             // position
             Matrix4 windowTransform;
             damageAccumulator.computeCurrentTransform(&windowTransform);
-            node->getSkiaLayer()->inverseTransformInWindow = windowTransform;
+            node->getSkiaLayer()->inverseTransformInWindow.loadInverse(windowTransform);
         } else {
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
-                    &mRenderThread.renderState());
+                                                         &mRenderThread.renderState());
             ALOGE("%s", cachesOutput.string());
             if (errorHandler) {
                 std::ostringstream err;
                 err << "Unable to create layer for " << node->getName();
                 const int maxTextureSize = DeviceInfo::get()->maxTextureSize();
                 err << ", size " << info.width() << "x" << info.height() << " max size "
-                    << maxTextureSize << " color type " << (int)info.colorType()
-                    << " has context " << (int)(mRenderThread.getGrContext() != nullptr);
+                    << maxTextureSize << " color type " << (int)info.colorType() << " has context "
+                    << (int)(mRenderThread.getGrContext() != nullptr);
                 errorHandler->onError(err.str());
             }
         }
@@ -206,16 +197,11 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
     return false;
 }
 
-void SkiaPipeline::destroyLayer(RenderNode* node) {
-    node->setLayerSurface(nullptr);
-}
-
 void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
     GrContext* context = thread.getGrContext();
     if (context) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
-        sk_sp<SkColorFilter> colorFilter;
-        auto image = bitmap->makeImage(&colorFilter);
+        auto image = bitmap->makeImage();
         if (image.get() && !bitmap->isHardware()) {
             SkImage_pinAsTexture(image.get(), context);
             SkImage_unpinAsTexture(image.get(), context);
@@ -236,85 +222,68 @@ void SkiaPipeline::renderVectorDrawableCache() {
     }
 }
 
-class SkiaPipeline::SavePictureProcessor : public TaskProcessor<bool> {
-public:
-    explicit SavePictureProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
-
-    struct SavePictureTask : public Task<bool> {
-        sk_sp<SkData> data;
-        std::string filename;
-    };
-
-    void savePicture(const sk_sp<SkData>& data, const std::string& filename) {
-        sp<SavePictureTask> task(new SavePictureTask());
-        task->data = data;
-        task->filename = filename;
-        TaskProcessor<bool>::add(task);
-    }
-
-    virtual void onProcess(const sp<Task<bool>>& task) override {
-        SavePictureTask* t = static_cast<SavePictureTask*>(task.get());
-
-        if (0 == access(t->filename.c_str(), F_OK)) {
-            task->setResult(false);
+static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filename) {
+    CommonPool::post([data, filename] {
+        if (0 == access(filename.c_str(), F_OK)) {
             return;
         }
 
-        SkFILEWStream stream(t->filename.c_str());
+        SkFILEWStream stream(filename.c_str());
         if (stream.isValid()) {
-            stream.write(t->data->data(), t->data->size());
+            stream.write(data->data(), data->size());
             stream.flush();
             SkDebugf("SKP Captured Drawing Output (%d bytes) for frame. %s", stream.bytesWritten(),
-                     t->filename.c_str());
+                     filename.c_str());
         }
-
-        task->setResult(true);
-    }
-};
+    });
+}
 
 SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
     if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
-        bool recordingPicture = mCaptureSequence > 0;
         char prop[PROPERTY_VALUE_MAX] = {'\0'};
-        if (!recordingPicture) {
+        if (mCaptureSequence <= 0) {
             property_get(PROPERTY_CAPTURE_SKP_FILENAME, prop, "0");
-            recordingPicture = prop[0] != '0' &&
-                               mCapturedFile != prop;  // ensure we capture only once per filename
-            if (recordingPicture) {
+            if (prop[0] != '0' && mCapturedFile != prop) {
                 mCapturedFile = prop;
                 mCaptureSequence = property_get_int32(PROPERTY_CAPTURE_SKP_FRAMES, 1);
             }
         }
-        if (recordingPicture) {
+        if (mCaptureSequence > 0 || mPictureCapturedCallback) {
             mRecorder.reset(new SkPictureRecorder());
-            return mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
-                                             SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+            SkCanvas* pictureCanvas =
+                    mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
+                                              SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+            mNwayCanvas = std::make_unique<SkNWayCanvas>(surface->width(), surface->height());
+            mNwayCanvas->addCanvas(surface->getCanvas());
+            mNwayCanvas->addCanvas(pictureCanvas);
+            return mNwayCanvas.get();
         }
     }
     return surface->getCanvas();
 }
 
 void SkiaPipeline::endCapture(SkSurface* surface) {
+    mNwayCanvas.reset();
     if (CC_UNLIKELY(mRecorder.get())) {
+        ATRACE_CALL();
         sk_sp<SkPicture> picture = mRecorder->finishRecordingAsPicture();
-        surface->getCanvas()->drawPicture(picture);
         if (picture->approximateOpCount() > 0) {
-            auto data = picture->serialize();
+            if (mCaptureSequence > 0) {
+                ATRACE_BEGIN("picture->serialize");
+                auto data = picture->serialize();
+                ATRACE_END();
 
-            // offload saving to file in a different thread
-            if (!mSavePictureProcessor.get()) {
-                TaskManager* taskManager = getTaskManager();
-                mSavePictureProcessor = new SavePictureProcessor(
-                        taskManager->canRunTasks() ? taskManager : nullptr);
+                // offload saving to file in a different thread
+                if (1 == mCaptureSequence) {
+                    savePictureAsync(data, mCapturedFile);
+                } else {
+                    savePictureAsync(data, mCapturedFile + "_" + std::to_string(mCaptureSequence));
+                }
+                mCaptureSequence--;
             }
-            if (1 == mCaptureSequence) {
-                mSavePictureProcessor->savePicture(data, mCapturedFile);
-            } else {
-                mSavePictureProcessor->savePicture(
-                        data,
-                        mCapturedFile + "_" + std::to_string(mCaptureSequence));
+            if (mPictureCapturedCallback) {
+                std::invoke(mPictureCapturedCallback, std::move(picture));
             }
-            mCaptureSequence--;
         }
         mRecorder.reset();
     }
@@ -322,28 +291,35 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
 
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                                const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                               bool wideColorGamut, const Rect& contentDrawBounds,
-                               sk_sp<SkSurface> surface) {
+                               const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
+                               const SkMatrix& preTransform) {
+    bool previousSkpEnabled = Properties::skpCaptureEnabled;
+    if (mPictureCapturedCallback) {
+        Properties::skpCaptureEnabled = true;
+    }
+
     renderVectorDrawableCache();
 
     // draw all layers up front
-    renderLayersImpl(layers, opaque, wideColorGamut);
+    renderLayersImpl(layers, opaque);
 
     // initialize the canvas for the current frame, that might be a recording canvas if SKP
     // capture is enabled.
     std::unique_ptr<SkPictureRecorder> recorder;
     SkCanvas* canvas = tryCapture(surface.get());
 
-    renderFrameImpl(layers, clip, nodes, opaque, wideColorGamut, contentDrawBounds, canvas);
+    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas, preTransform);
 
     endCapture(surface.get());
 
     if (CC_UNLIKELY(Properties::debugOverdraw)) {
-        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface);
+        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface, preTransform);
     }
 
     ATRACE_NAME("flush commands");
     surface->getCanvas()->flush();
+
+    Properties::skpCaptureEnabled = previousSkpEnabled;
 }
 
 namespace {
@@ -351,17 +327,18 @@ static Rect nodeBounds(RenderNode& node) {
     auto& props = node.properties();
     return Rect(props.getLeft(), props.getTop(), props.getRight(), props.getBottom());
 }
-}
+}  // namespace
 
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
                                    const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                                   bool wideColorGamut, const Rect& contentDrawBounds,
-                                   SkCanvas* canvas) {
+                                   const Rect& contentDrawBounds, SkCanvas* canvas,
+                                   const SkMatrix& preTransform) {
     SkAutoCanvasRestore saver(canvas, true);
-    canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
+    canvas->androidFramework_setDeviceClipRestriction(preTransform.mapRect(clip).roundOut());
+    canvas->concat(preTransform);
 
     // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
-    if (!opaque || wideColorGamut) {
+    if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
@@ -466,6 +443,18 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
     ALOGD("%s", log.c_str());
 }
 
+void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
+    if (colorMode == ColorMode::SRGB) {
+        mSurfaceColorType = SkColorType::kN32_SkColorType;
+        mSurfaceColorSpace = SkColorSpace::MakeSRGB();
+    } else if (colorMode == ColorMode::WideColorGamut) {
+        mSurfaceColorType = DeviceInfo::get()->getWideColorType();
+        mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
+    } else {
+        LOG_ALWAYS_FATAL("Unreachable: unsupported color mode.");
+    }
+}
+
 // Overdraw debugging
 
 // These colors should be kept in sync with Caches::getOverdrawColor() with a few differences.
@@ -475,16 +464,27 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
 // (3) Requires RGBA colors (instead of BGRA).
 static const uint32_t kOverdrawColors[2][6] = {
         {
-                0x00000000, 0x00000000, 0x2f2f0000, 0x2f002f00, 0x3f00003f, 0x7f00007f,
+                0x00000000,
+                0x00000000,
+                0x2f2f0000,
+                0x2f002f00,
+                0x3f00003f,
+                0x7f00007f,
         },
         {
-                0x00000000, 0x00000000, 0x2f2f0000, 0x4f004f4f, 0x5f50335f, 0x7f00007f,
+                0x00000000,
+                0x00000000,
+                0x2f2f0000,
+                0x4f004f4f,
+                0x5f50335f,
+                0x7f00007f,
         },
 };
 
 void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
                                   const std::vector<sp<RenderNode>>& nodes,
-                                  const Rect& contentDrawBounds, sk_sp<SkSurface> surface) {
+                                  const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
+                                  const SkMatrix& preTransform) {
     // Set up the overdraw canvas.
     SkImageInfo offscreenInfo = SkImageInfo::MakeA8(surface->width(), surface->height());
     sk_sp<SkSurface> offscreen = surface->makeSurface(offscreenInfo);
@@ -494,7 +494,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // each time a pixel would have been drawn.
     // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
     // initialized.
-    renderFrameImpl(layers, clip, nodes, true, false, contentDrawBounds, &overdrawCanvas);
+    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas, preTransform);
     sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.

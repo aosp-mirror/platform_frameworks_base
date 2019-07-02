@@ -20,10 +20,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.text.format.DateUtils;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-import android.text.format.DateUtils;
 
 import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.lifecycle.Lifecycle;
@@ -88,7 +89,7 @@ public abstract class AbstractUptimePreferenceController extends AbstractPrefere
     }
 
     private void updateTimes() {
-        mUptime.setSummary(DateUtils.formatDuration(SystemClock.elapsedRealtime()));
+        mUptime.setSummary(DateUtils.formatElapsedTime(SystemClock.elapsedRealtime() / 1000));
     }
 
     private static class MyHandler extends Handler {

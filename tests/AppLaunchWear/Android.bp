@@ -8,6 +8,6 @@ android_test {
         "android.test.base",
         "android.test.runner",
     ],
-    static_libs: ["android-support-test"],
+    static_libs: ["androidx.test.rules"],
     test_suites: ["device-tests"],
 }

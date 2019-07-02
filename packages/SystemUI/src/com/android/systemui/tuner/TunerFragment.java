@@ -19,20 +19,21 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.Preference;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.plugins.PluginPrefs;
+import com.android.systemui.shared.plugins.PluginPrefs;
 
 public class TunerFragment extends PreferenceFragment {
 

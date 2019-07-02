@@ -24,24 +24,25 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.CallSuper;
-import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.PreferenceScreen;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.lifecycle.LifecycleOwner;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+
 /**
- * {@link PreferenceFragment} that has hooks to observe fragment lifecycle events.
+ * {@link PreferenceFragmentCompat} that has hooks to observe fragment lifecycle events.
  */
-public abstract class ObservablePreferenceFragment extends PreferenceFragment
+public abstract class ObservablePreferenceFragment extends PreferenceFragmentCompat
         implements LifecycleOwner {
 
     private final Lifecycle mLifecycle = new Lifecycle(this);
 
-    public Lifecycle getLifecycle() {
+    public Lifecycle getSettingsLifecycle() {
         return mLifecycle;
     }
 

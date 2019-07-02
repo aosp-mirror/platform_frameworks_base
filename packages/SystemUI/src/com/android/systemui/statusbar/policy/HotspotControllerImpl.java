@@ -16,19 +16,27 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.os.UserManager;
 import android.util.Log;
-
-import com.android.systemui.Dependency;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class HotspotControllerImpl implements HotspotController, WifiManager.SoftApCallback {
 
     private static final String TAG = "HotspotController";
@@ -37,17 +45,22 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final ConnectivityManager mConnectivityManager;
     private final WifiManager mWifiManager;
+    private final Handler mMainHandler;
     private final Context mContext;
 
     private int mHotspotState;
     private int mNumConnectedDevices;
     private boolean mWaitingForTerminalState;
 
-    public HotspotControllerImpl(Context context) {
+    /**
+     */
+    @Inject
+    public HotspotControllerImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
         mContext = context;
         mConnectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        mMainHandler = mainHandler;
     }
 
     @Override
@@ -80,14 +93,28 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         return null;
     }
 
+    /**
+     * Adds {@code callback} to the controller. The controller will update the callback on state
+     * changes. It will immediately trigger the callback added to notify current state.
+     * @param callback
+     */
     @Override
     public void addCallback(Callback callback) {
         synchronized (mCallbacks) {
             if (callback == null || mCallbacks.contains(callback)) return;
             if (DEBUG) Log.d(TAG, "addCallback " + callback);
             mCallbacks.add(callback);
-
-            updateWifiStateListeners(!mCallbacks.isEmpty());
+            if (mWifiManager != null) {
+                if (mCallbacks.size() == 1) {
+                    mWifiManager.registerSoftApCallback(this, mMainHandler);
+                } else {
+                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
+                    // on the Main Handler. In order to always update the callback on added, we
+                    // make this call when adding callbacks after the first.
+                    mMainHandler.post(() ->
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+                }
+            }
         }
     }
 
@@ -97,24 +124,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
-            updateWifiStateListeners(!mCallbacks.isEmpty());
-        }
-    }
-
-    /**
-     * Updates the wifi state receiver to either start or stop listening to get updates to the
-     * hotspot status. Additionally starts listening to wifi manager state to track the number of
-     * connected devices.
-     *
-     * @param shouldListen whether we should start listening to various wifi statuses
-     */
-    private void updateWifiStateListeners(boolean shouldListen) {
-        if (shouldListen) {
-            mWifiManager.registerSoftApCallback(
-                    this,
-                    Dependency.get(Dependency.MAIN_HANDLER));
-        } else {
-            mWifiManager.unregisterSoftApCallback(this);
+            if (mCallbacks.isEmpty() && mWifiManager != null) {
+                mWifiManager.unregisterSoftApCallback(this);
+            }
         }
     }
 
@@ -188,7 +200,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (!mWaitingForTerminalState) {
             return; // Only reset soft AP state if enabled from this controller.
         }
-
         switch (mHotspotState) {
             case WifiManager.WIFI_AP_STATE_FAILED:
                 // TODO(b/110697252): must be called to reset soft ap state after failure

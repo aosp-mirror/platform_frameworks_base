@@ -25,9 +25,12 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
 import libcore.io.Streams;
+
 import org.junit.runner.RunWith;
 
 import java.io.FileInputStream;

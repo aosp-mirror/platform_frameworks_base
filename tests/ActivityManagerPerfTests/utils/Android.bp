@@ -20,7 +20,7 @@ java_test {
         "src/com/android/frameworks/perftests/am/util/ITimeReceiverCallback.aidl",
     ],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "junit",
         "ub-uiautomator",
     ],

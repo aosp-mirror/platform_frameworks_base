@@ -64,6 +64,8 @@ public class PackageHelper {
     public static final int RECOMMEND_MEDIA_UNAVAILABLE = -5;
     public static final int RECOMMEND_FAILED_INVALID_URI = -6;
     public static final int RECOMMEND_FAILED_VERSION_DOWNGRADE = -7;
+    /** {@hide} */
+    public static final int RECOMMEND_FAILED_WRONG_INSTALLED_VERSION = -8;
 
     private static final String TAG = "PackageHelper";
     // App installation location settings values
@@ -308,9 +310,6 @@ public class PackageHelper {
             checkBoth = false;
         } else if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
-            checkBoth = false;
-        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            prefer = RECOMMEND_INSTALL_EXTERNAL;
             checkBoth = false;
         } else if (params.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
             prefer = RECOMMEND_INSTALL_INTERNAL;

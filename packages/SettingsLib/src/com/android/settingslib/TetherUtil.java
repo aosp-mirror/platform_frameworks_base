@@ -15,10 +15,15 @@
  */
 package com.android.settingslib;
 
+import static android.os.UserManager.DISALLOW_CONFIG_TETHERING;
+
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.SystemProperties;
-import androidx.annotation.VisibleForTesting;
+import android.os.UserHandle;
 import android.telephony.CarrierConfigManager;
+
+import androidx.annotation.VisibleForTesting;
 
 public class TetherUtil {
 
@@ -48,5 +53,15 @@ public class TetherUtil {
             return false;
         }
         return (provisionApp.length == 2);
+    }
+
+    public static boolean isTetherAvailable(Context context) {
+        final ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
+        final boolean tetherConfigDisallowed = RestrictedLockUtilsInternal
+                .checkIfRestrictionEnforced(context, DISALLOW_CONFIG_TETHERING,
+                        UserHandle.myUserId()) != null;
+        final boolean hasBaseUserRestriction = RestrictedLockUtilsInternal.hasBaseUserRestriction(
+                context, DISALLOW_CONFIG_TETHERING, UserHandle.myUserId());
+        return (cm.isTetheringSupported() || tetherConfigDisallowed) && !hasBaseUserRestriction;
     }
 }

@@ -22,7 +22,7 @@ package android.os;
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message BatteryStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -58,6 +58,10 @@ message ControllerActivityProto {
         optional int64 duration_ms = 2;
     }
     repeated TxLevel tx = 4;
+
+    // Total rail charge consumed by the monitored rails by the controller. The value may
+    // always be 0 if the device doesn't support monitored rail calculations.
+    optional double monitored_rail_charge_mah = 5;
 }
 
 message SystemProto {
@@ -788,7 +792,7 @@ message UidProto {
     message UserActivity {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional android.os.PowerManagerProto.UserActivityEvent name = 1;
+        optional PowerManagerProto.UserActivityEvent name = 1;
         optional int32 count = 2;
     };
     repeated UserActivity user_activity = 23;

@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
@@ -235,6 +236,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public float maxAspectRatio;
 
     /**
+     * Value indicating the minimum aspect ratio the activity supports.
+     * <p>
+     * 0 means unset.
+     * @See {@link android.R.attr#minAspectRatio}.
+     * @hide
+     */
+    public float minAspectRatio;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
@@ -403,7 +413,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * Bit in {@link #flags} indicating that this activity should be run with VR mode enabled.
      *
-     * {@see android.app.Activity#setVrMode(boolean)}.
+     * @see android.app.Activity#setVrModeEnabled(boolean, ComponentName)
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
 
@@ -494,6 +504,22 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER}.
      */
     public int flags;
+
+    /**
+     * Bit in {@link #privateFlags} indicating if the activity should be shown when locked in case
+     * an activity behind this can also be shown when locked.
+     * See {@link android.R.attr#inheritShowWhenLocked}.
+     * @hide
+     */
+    public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;
+
+    /**
+     * Options that have been set in the activity declaration in the manifest.
+     * These include:
+     * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED}.
+     * @hide
+     */
+    public int privateFlags;
 
     /** @hide */
     @IntDef(prefix = { "SCREEN_ORIENTATION_" }, value = {
@@ -965,6 +991,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         taskAffinity = orig.taskAffinity;
         targetActivity = orig.targetActivity;
         flags = orig.flags;
+        privateFlags = orig.privateFlags;
         screenOrientation = orig.screenOrientation;
         configChanges = orig.configChanges;
         softInputMode = orig.softInputMode;
@@ -978,6 +1005,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         rotationAnimation = orig.rotationAnimation;
         colorMode = orig.colorMode;
         maxAspectRatio = orig.maxAspectRatio;
+        minAspectRatio = orig.minAspectRatio;
     }
 
     /**
@@ -1001,10 +1029,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
+     * Returns true if the activity has maximum or minimum aspect ratio.
+     * @hide
+     */
+    public boolean hasFixedAspectRatio() {
+        return maxAspectRatio != 0 || minAspectRatio != 0;
+    }
+
+    /**
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    boolean isFixedOrientation() {
+    public boolean isFixedOrientation() {
         return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
     }
@@ -1111,9 +1147,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                     + " targetActivity=" + targetActivity
                     + " persistableMode=" + persistableModeToString());
         }
-        if (launchMode != 0 || flags != 0 || theme != 0) {
+        if (launchMode != 0 || flags != 0 || privateFlags != 0 || theme != 0) {
             pw.println(prefix + "launchMode=" + launchMode
                     + " flags=0x" + Integer.toHexString(flags)
+                    + " privateFlags=0x" + Integer.toHexString(privateFlags)
                     + " theme=0x" + Integer.toHexString(theme));
         }
         if (screenOrientation != SCREEN_ORIENTATION_UNSPECIFIED
@@ -1141,6 +1178,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (maxAspectRatio != 0) {
             pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
         }
+        if (minAspectRatio != 0) {
+            pw.println(prefix + "minAspectRatio=" + minAspectRatio);
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1164,6 +1204,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeString(targetActivity);
         dest.writeString(launchToken);
         dest.writeInt(flags);
+        dest.writeInt(privateFlags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
         dest.writeInt(softInputMode);
@@ -1189,6 +1230,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
+        dest.writeFloat(minAspectRatio);
     }
 
     /**
@@ -1272,7 +1314,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ActivityInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ActivityInfo> CREATOR
             = new Parcelable.Creator<ActivityInfo>() {
         public ActivityInfo createFromParcel(Parcel source) {
             return new ActivityInfo(source);
@@ -1292,6 +1334,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         targetActivity = source.readString();
         launchToken = source.readString();
         flags = source.readInt();
+        privateFlags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();
         softInputMode = source.readInt();
@@ -1308,6 +1351,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
+        minAspectRatio = source.readFloat();
     }
 
     /**
@@ -1407,5 +1451,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
          * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
          */
         public final int minHeight;
+
+        /**
+         * Returns if this {@link WindowLayout} has specified bounds.
+         * @hide
+         */
+        public boolean hasSpecifiedSize() {
+            return width >= 0 || height >= 0 || widthFraction >= 0 || heightFraction >= 0;
+        }
     }
 }

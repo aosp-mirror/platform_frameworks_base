@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.MessageQueueProto;
 import android.util.Log;
@@ -467,7 +468,7 @@ public final class MessageQueue {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public int postSyncBarrier() {
         return postSyncBarrier(SystemClock.uptimeMillis());
     }
@@ -511,7 +512,7 @@ public final class MessageQueue {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public void removeSyncBarrier(int token) {
         // Remove a sync barrier token from the queue.
         // If the queue is no longer stalled by a barrier then wake it.

@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2018 The Android Open Source Project
+Copyright (C) 2019 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,24 +13,18 @@ Copyright (C) 2018 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="vector"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <group android:name="stat_sys_adb">
-        <path
-            android:name="outer"
-            android:pathData="M 18 30 L 24 30 C 29.523 30 34 25.523 34 20 C 34 14.477 29.523 10 24 10 C 18.477 10 14 14.477 14 20 L 14 44"
-            android:strokeColor="#000000"
-            android:strokeWidth="10"/>
-        <path
-            android:name="inner"
-            android:pathData="M 19 30 L 24 30 C 29.523 30 34 25.523 34 20 C 34 14.477 29.523 10 24 10 C 18.477 10 14 14.477 14 20 L 14 44"
-            android:strokeColor="#000000"
-            android:strokeAlpha="0"
-            android:strokeWidth="6"/>
-    </group>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M16.28,16.19A6,6 0,1 0,6 12c0,0.1 0,0.19 0,0.29L9.2,9.11Z"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M16,19.48a8.57,8.57 0,1 1,2 -1.52l1.77,1.77a11.07,11.07 0,1 0,-2 1.57Z"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12,18a5.77,5.77 0,0 0,2 -0.34l0.19,-0.07 -0.87,-0.87L9.2,12.64 6.82,15A6,6 0,0 0,12 18Z"/>
 </vector>

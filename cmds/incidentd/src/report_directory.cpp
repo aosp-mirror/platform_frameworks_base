@@ -33,63 +33,6 @@ namespace android {
 namespace os {
 namespace incidentd {
 
-status_t create_directory(const char* directory) {
-    struct stat st;
-    status_t err = NO_ERROR;
-    char* dir = strdup(directory);
-
-    // Skip first slash
-    char* d = dir + 1;
-
-    // Create directories, assigning them to the system user
-    bool last = false;
-    while (!last) {
-        d = strchr(d, '/');
-        if (d != NULL) {
-            *d = '\0';
-        } else {
-            last = true;
-        }
-        if (stat(dir, &st) == 0) {
-            if (!S_ISDIR(st.st_mode)) {
-                err = ALREADY_EXISTS;
-                goto done;
-            }
-        } else {
-            ALOGE("No such directory %s, something wrong.", dir);
-            err = -1;
-            goto done;
-        }
-        if (!last) {
-            *d++ = '/';
-        }
-    }
-
-    // Ensure that the final directory is owned by the system with 0770. If it isn't
-    // we won't write into it.
-    if (stat(directory, &st) != 0) {
-        ALOGE("No incident reports today. Can't stat: %s", directory);
-        err = -errno;
-        goto done;
-    }
-    if ((st.st_mode & 0777) != 0770) {
-        ALOGE("No incident reports today. Mode is %0o on report directory %s", st.st_mode,
-              directory);
-        err = BAD_VALUE;
-        goto done;
-    }
-    if (st.st_uid != AID_INCIDENTD || st.st_gid != AID_INCIDENTD) {
-        ALOGE("No incident reports today. Owner is %d and group is %d on report directory %s",
-              st.st_uid, st.st_gid, directory);
-        err = BAD_VALUE;
-        goto done;
-    }
-
-done:
-    free(dir);
-    return err;
-}
-
 static bool stat_mtime_cmp(const std::pair<String8, struct stat>& a,
                            const std::pair<String8, struct stat>& b) {
     return a.second.st_mtime < b.second.st_mtime;

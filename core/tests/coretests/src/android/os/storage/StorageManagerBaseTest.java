@@ -65,95 +65,6 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
         + "to ourselves and our posterity, do ordain and establish this Constitution\n"
         + "for the United States of America.\n\n";
 
-    class MountingObbThread extends Thread {
-        boolean mStop = false;
-        volatile boolean mFileOpenOnObb = false;
-        private String mObbFilePath = null;
-        private String mPathToContentsFile = null;
-        private String mOfficialObbFilePath = null;
-
-        /**
-         * Constructor
-         *
-         * @param obbFilePath path to the OBB image file
-         * @param pathToContentsFile path to a file on the mounted OBB volume to open after the OBB
-         *      has been mounted
-         */
-        public MountingObbThread (String obbFilePath, String pathToContentsFile) {
-            assertTrue("obbFilePath cannot be null!", obbFilePath != null);
-            mObbFilePath = obbFilePath;
-            assertTrue("path to contents file cannot be null!", pathToContentsFile != null);
-            mPathToContentsFile = pathToContentsFile;
-        }
-
-        /**
-         * Runs the thread
-         *
-         * Mounts OBB_FILE_1, and tries to open a file on the mounted OBB (specified in the
-         * constructor). Once it's open, it waits until someone calls its doStop(), after which it
-         * closes the opened file.
-         */
-        public void run() {
-            // the official OBB file path and the mount-request file path should be the same, but
-            // let's distinguish the two as they may make for some interesting tests later
-            mOfficialObbFilePath = mountObb(mObbFilePath);
-            assertEquals("Expected and actual OBB file paths differ!", mObbFilePath,
-                    mOfficialObbFilePath);
-
-            // open a file on OBB 1...
-            DataInputStream inputFile = openFileOnMountedObb(mOfficialObbFilePath,
-                    mPathToContentsFile);
-            assertTrue("Failed to open file!", inputFile != null);
-
-            synchronized (this) {
-                mFileOpenOnObb = true;
-                notifyAll();
-            }
-
-            while (!mStop) {
-                try {
-                    Thread.sleep(WAIT_TIME_INCR);
-                } catch (InterruptedException e) {
-                    // nothing special to be done for interruptions
-                }
-            }
-            try {
-                inputFile.close();
-            } catch (IOException e) {
-                fail("Failed to close file on OBB due to error: " + e.toString());
-            }
-        }
-
-        /**
-         * Tells whether a file has yet been successfully opened on the OBB or not
-         *
-         * @return true if the specified file on the OBB was opened; false otherwise
-         */
-        public boolean isFileOpenOnObb() {
-            return mFileOpenOnObb;
-        }
-
-        /**
-         * Returns the official path of the OBB file that was mounted
-         *
-         * This is not the mount path, but the normalized path to the actual OBB file
-         *
-         * @return a {@link String} representation of the path to the OBB file that was mounted
-         */
-        public String officialObbFilePath() {
-            return mOfficialObbFilePath;
-        }
-
-        /**
-         * Requests the thread to stop running
-         *
-         * Closes the opened file and returns
-         */
-        public void doStop() {
-            mStop = true;
-        }
-    }
-
     public class ObbListener extends OnObbStateChangeListener {
         private String LOG_TAG = "StorageManagerBaseTest.ObbListener";
 
@@ -362,7 +273,8 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
         assertTrue("mountObb call failed", mSm.mountObb(obbFilePath, key, obbListener));
         assertTrue("Failed to get OBB mount status change for file: " + obbFilePath,
                 doWaitForObbStateChange(obbListener));
-        assertEquals("OBB mount state not what was expected!", expectedState, obbListener.state());
+        assertEquals("OBB mount state not what was expected!", expectedState,
+                obbListener.state());
 
         if (OnObbStateChangeListener.MOUNTED == expectedState) {
             assertEquals(obbFilePath, obbListener.officialPath());
@@ -373,7 +285,8 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
                     mSm.isObbMounted(obbListener.officialPath()));
         }
 
-        assertEquals("Mount state is not what was expected!", expectedState, obbListener.state());
+        assertEquals("Mount state is not what was expected!", expectedState,
+                obbListener.state());
         return obbListener.officialPath();
     }
 

@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
+import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
@@ -31,11 +32,11 @@ import com.android.internal.util.VirtualRefBasePtr;
  *
  * @hide
  */
-final class TextureLayer {
-    private ThreadedRenderer mRenderer;
+public final class TextureLayer {
+    private HardwareRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
-    private TextureLayer(ThreadedRenderer renderer, long deferredUpdater) {
+    private TextureLayer(HardwareRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
@@ -139,7 +140,8 @@ final class TextureLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    static TextureLayer adoptTextureLayer(ThreadedRenderer renderer, long layer) {
+    /** @hide */
+    public static TextureLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
         return new TextureLayer(renderer, layer);
     }
 

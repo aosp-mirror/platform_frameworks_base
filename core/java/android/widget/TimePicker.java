@@ -35,6 +35,7 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -126,6 +127,8 @@ public class TimePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TimePicker,
+                attrs, a, defStyleAttr, defStyleRes);
         final boolean isDialogMode = a.getBoolean(R.styleable.TimePicker_dialogMode, false);
         final int requestedMode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
         a.recycle();
@@ -165,6 +168,10 @@ public class TimePicker extends FrameLayout {
      */
     @TimePickerMode
     @TestApi
+    @InspectableProperty(name = "timePickerMode", enumMapping = {
+            @InspectableProperty.EnumEntry(name = "clock", value = MODE_CLOCK),
+            @InspectableProperty.EnumEntry(name = "spinner", value = MODE_SPINNER)
+    })
     public int getMode() {
         return mMode;
     }
@@ -185,6 +192,7 @@ public class TimePicker extends FrameLayout {
      * @return the currently selected hour, in the range (0-23)
      * @see #setHour(int)
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getHour() {
         return mDelegate.getHour();
     }
@@ -205,6 +213,7 @@ public class TimePicker extends FrameLayout {
      * @return the currently selected minute, in the range (0-59)
      * @see #setMinute(int)
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getMinute() {
         return mDelegate.getMinute();
     }
@@ -272,6 +281,7 @@ public class TimePicker extends FrameLayout {
      *         {@code false} otherwise}
      * @see #setIs24HourView(Boolean)
      */
+    @InspectableProperty(hasAttributeId = false, name = "24Hour")
     public boolean is24HourView() {
         return mDelegate.is24Hour();
     }
@@ -542,7 +552,7 @@ public class TimePicker extends FrameLayout {
             }
 
             @SuppressWarnings({"unused", "hiding"})
-            public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            public static final @android.annotation.NonNull Creator<SavedState> CREATOR = new Creator<SavedState>() {
                 public SavedState createFromParcel(Parcel in) {
                     return new SavedState(in);
                 }

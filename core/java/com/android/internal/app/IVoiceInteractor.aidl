@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.app.VoiceInteractor;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 
 import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
@@ -38,4 +39,6 @@ interface IVoiceInteractor {
     IVoiceInteractorRequest startCommand(String callingPackage,
             IVoiceInteractorCallback callback, String command, in Bundle extras);
     boolean[] supportsCommands(String callingPackage, in String[] commands);
+    void notifyDirectActionsChanged(int taskId, IBinder assistToken);
+    void setKillCallback(in ICancellationSignal callback);
 }

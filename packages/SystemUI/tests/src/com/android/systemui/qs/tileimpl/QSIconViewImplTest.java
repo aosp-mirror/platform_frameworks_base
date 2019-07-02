@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -43,6 +45,7 @@ import org.junit.runner.RunWith;
 public class QSIconViewImplTest extends SysuiTestCase {
 
     private QSIconViewImpl mIconView;
+    private static int RES_ID = 1;
 
     @Before
     public void setup() {
@@ -58,14 +61,14 @@ public class QSIconViewImplTest extends SysuiTestCase {
         // No current icon, only the static drawable should be used.
         s.icon = mock(Icon.class);
         when(iv.getDrawable()).thenReturn(null);
-        mIconView.updateIcon(iv, s);
+        mIconView.updateIcon(iv, s, true);
         verify(s.icon, never()).getDrawable(any());
         verify(s.icon).getInvisibleDrawable(any());
 
         // Has icon, should use the standard (animated) form.
         s.icon = mock(Icon.class);
         when(iv.getDrawable()).thenReturn(mock(Drawable.class));
-        mIconView.updateIcon(iv, s);
+        mIconView.updateIcon(iv, s, true);
         verify(s.icon).getDrawable(any());
         verify(s.icon, never()).getInvisibleDrawable(any());
     }
@@ -78,7 +81,27 @@ public class QSIconViewImplTest extends SysuiTestCase {
         int desiredColor = mIconView.getColor(s.state);
         when(iv.isShown()).thenReturn(true);
 
-        mIconView.setIcon(iv, s);
+        mIconView.setIcon(iv, s, true);
         verify(iv).setImageTintList(argThat(stateList -> stateList.getColors()[0] == desiredColor));
+    }
+
+    @Test
+    public void testStateSetCorrectly_toString() {
+        ImageView iv = mock(ImageView.class);
+        State s = new State();
+        s.state = Tile.STATE_ACTIVE;
+        int desiredColor = mIconView.getColor(s.state);
+        Icon i = mock(Icon.class);
+        s.icon = i;
+        when(i.toString()).thenReturn("MOCK ICON");
+        mIconView.setIcon(iv, s, false);
+
+        assertEquals("QSIconViewImpl[state=" + Tile.STATE_ACTIVE + ", tint=" + desiredColor
+                + ", lastIcon=" + i.toString() + "]", mIconView.toString());
+    }
+
+    @Test
+    public void testIconNotSet_toString() {
+        assertFalse(mIconView.toString().contains("lastIcon"));
     }
 }

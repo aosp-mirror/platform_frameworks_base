@@ -16,35 +16,47 @@
 
 package android.view.textclassifier;
 
-import android.util.Slog;
-
 /**
  * Logging for android.view.textclassifier package.
+ * <p>
+ * To enable full log:
+ * 1. adb shell setprop log.tag.androidtc VERBOSE
+ * 2. adb shell stop && adb shell start
+ *
+ * @hide
  */
-final class Log {
+public final class Log {
 
     /**
      * true: Enables full logging.
      * false: Limits logging to debug level.
      */
-    private static final boolean ENABLE_FULL_LOGGING = false;
+    static final boolean ENABLE_FULL_LOGGING =
+            android.util.Log.isLoggable(TextClassifier.DEFAULT_LOG_TAG, android.util.Log.VERBOSE);
 
-    private Log() {}
+    private Log() {
+    }
+
+    public static void v(String tag, String msg) {
+        if (ENABLE_FULL_LOGGING) {
+            android.util.Log.v(tag, msg);
+        }
+    }
 
     public static void d(String tag, String msg) {
-        Slog.d(tag, msg);
+        android.util.Log.d(tag, msg);
     }
 
     public static void w(String tag, String msg) {
-        Slog.w(tag, msg);
+        android.util.Log.w(tag, msg);
     }
 
     public static void e(String tag, String msg, Throwable tr) {
         if (ENABLE_FULL_LOGGING) {
-            Slog.e(tag, msg, tr);
+            android.util.Log.e(tag, msg, tr);
         } else {
             final String trString = (tr != null) ? tr.getClass().getSimpleName() : "??";
-            Slog.d(tag, String.format("%s (%s)", msg, trString));
+            android.util.Log.d(tag, String.format("%s (%s)", msg, trString));
         }
     }
 }

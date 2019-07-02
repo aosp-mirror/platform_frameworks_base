@@ -15,6 +15,7 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/system_icons"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,5 +33,6 @@
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:clipToPadding="false"
-        android:clipChildren="false" />
+        android:clipChildren="false"
+        systemui:textAppearance="@style/TextAppearance.StatusBar.Clock" />
 </LinearLayout>

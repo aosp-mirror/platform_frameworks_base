@@ -18,69 +18,92 @@ package com.android.server.backup.internal;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.RUN_BACKUP_ACTION;
 import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.UserBackupManagerService.RUN_BACKUP_ACTION;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
 
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 
+/**
+ * A {@link BroadcastReceiver} for the action {@link UserBackupManagerService#RUN_BACKUP_ACTION}
+ * that runs an immediate backup operation if eligible.
+ */
 public class RunBackupReceiver extends BroadcastReceiver {
+    private final UserBackupManagerService mUserBackupManagerService;
 
-    private BackupManagerService backupManagerService;
-
-    public RunBackupReceiver(BackupManagerService backupManagerService) {
-        this.backupManagerService = backupManagerService;
+    public RunBackupReceiver(UserBackupManagerService userBackupManagerService) {
+        mUserBackupManagerService = userBackupManagerService;
     }
 
+    /**
+     * Run a backup pass if we're eligible. We're eligible if the following conditions are met:
+     *
+     * <ul>
+     *   <li>No transports are pending initialization (otherwise we kick off an initialization
+     *       operation instead).
+     *   <li>Backup is enabled for the user.
+     *   <li>The user has completed setup.
+     *   <li>No backup operation is currently running for the user.
+     * </ul>
+     */
     public void onReceive(Context context, Intent intent) {
-        if (RUN_BACKUP_ACTION.equals(intent.getAction())) {
-            synchronized (backupManagerService.getQueueLock()) {
-                if (backupManagerService.getPendingInits().size() > 0) {
-                    // If there are pending init operations, we process those
-                    // and then settle into the usual periodic backup schedule.
-                    if (MORE_DEBUG) {
-                        Slog.v(TAG, "Init pending at scheduled backup");
-                    }
-                    try {
-                        backupManagerService.getAlarmManager().cancel(
-                                backupManagerService.getRunInitIntent());
-                        backupManagerService.getRunInitIntent().send();
-                    } catch (PendingIntent.CanceledException ce) {
-                        Slog.e(TAG, "Run init intent cancelled");
-                        // can't really do more than bail here
-                    }
-                } else {
-                    // Don't run backups now if we're disabled or not yet
-                    // fully set up.
-                    if (backupManagerService.isEnabled() && backupManagerService.isProvisioned()) {
-                        if (!backupManagerService.isBackupRunning()) {
-                            if (DEBUG) {
-                                Slog.v(TAG, "Running a backup pass");
-                            }
+        if (!RUN_BACKUP_ACTION.equals(intent.getAction())) {
+            return;
+        }
 
-                            // Acquire the wakelock and pass it to the backup thread.  it will
-                            // be released once backup concludes.
-                            backupManagerService.setBackupRunning(true);
-                            backupManagerService.getWakelock().acquire();
-
-                            Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                                    MSG_RUN_BACKUP);
-                            backupManagerService.getBackupHandler().sendMessage(msg);
-                        } else {
-                            Slog.i(TAG, "Backup time but one already running");
-                        }
-                    } else {
-                        Slog.w(TAG, "Backup pass but e=" + backupManagerService.isEnabled() + " p="
-                                + backupManagerService.isProvisioned());
-                    }
+        synchronized (mUserBackupManagerService.getQueueLock()) {
+            if (mUserBackupManagerService.getPendingInits().size() > 0) {
+                // If there are pending init operations, we process those and then settle into the
+                // usual periodic backup schedule.
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "Init pending at scheduled backup");
                 }
+                try {
+                    PendingIntent runInitIntent = mUserBackupManagerService.getRunInitIntent();
+                    mUserBackupManagerService.getAlarmManager().cancel(runInitIntent);
+                    runInitIntent.send();
+                } catch (PendingIntent.CanceledException ce) {
+                    Slog.w(TAG, "Run init intent cancelled");
+                }
+            } else {
+                // Don't run backups if we're disabled or not yet set up.
+                if (!mUserBackupManagerService.isEnabled()
+                        || !mUserBackupManagerService.isSetupComplete()) {
+                    Slog.w(
+                            TAG,
+                            "Backup pass but enabled="
+                                    + mUserBackupManagerService.isEnabled()
+                                    + " setupComplete="
+                                    + mUserBackupManagerService.isSetupComplete());
+                    return;
+                }
+
+                // Don't run backups if one is already running.
+                if (mUserBackupManagerService.isBackupRunning()) {
+                    Slog.i(TAG, "Backup time but one already running");
+                    return;
+                }
+
+                if (DEBUG) {
+                    Slog.v(TAG, "Running a backup pass");
+                }
+
+                // Acquire the wakelock and pass it to the backup thread. It will be released once
+                // backup concludes.
+                mUserBackupManagerService.setBackupRunning(true);
+                mUserBackupManagerService.getWakelock().acquire();
+
+                Handler backupHandler = mUserBackupManagerService.getBackupHandler();
+                Message message = backupHandler.obtainMessage(MSG_RUN_BACKUP);
+                backupHandler.sendMessage(message);
             }
         }
     }

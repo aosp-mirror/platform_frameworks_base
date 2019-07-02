@@ -37,6 +37,22 @@
             android:text="@string/install_carrier_app_description_default"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </LinearLayout>
+
+        <com.android.setupwizardlib.view.FillContentLayout
+            android:id="@+id/illo_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <ImageView
+                android:src="@drawable/illo_sim_app_dialog"
+                style="@style/SuwContentIllustration"
+                android:contentDescription="@string/install_carrier_app_image_content_description"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </com.android.setupwizardlib.view.FillContentLayout>
+</LinearLayout>
 
 </com.android.setupwizardlib.GlifLayout>

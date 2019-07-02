@@ -54,7 +54,7 @@
     </application>
 
     <!-- This runs in its own process, hence it instruments itself -->
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
             android:targetPackage="com.android.printspooler.outofprocess.tests"
             android:label="PrintSpooler Out of Process Test Cases">
     </instrumentation>

@@ -15,8 +15,9 @@
  */
 package com.android.systemui.qs;
 
-import androidx.annotation.Nullable;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 /**
  * The bottom footer of the quick settings panel.

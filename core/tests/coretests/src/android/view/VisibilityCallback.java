@@ -16,16 +16,15 @@
 
 package android.view;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.TextView;
-import com.android.frameworks.coretests.R;
-
-import android.os.Bundle;
 import android.widget.Button;
-import android.view.View;
-import android.app.Activity;
+import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercise View's ability to change their visibility: GONE, INVISIBLE and

@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import android.test.suitebuilder.annotation.LargeTest;
+import androidx.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 

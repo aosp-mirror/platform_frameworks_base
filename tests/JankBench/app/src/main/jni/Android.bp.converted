@@ -12,20 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-<<<<<<< HEAD
 cc_library_shared {
     name: "libnativebench",
     cflags: [
         "-Wno-unused-parameter",
         "-Wno-unused-variable",
     ],
-=======
-// ANDROIDMK TRANSLATION WARNING: No 'include $(CLEAR_VARS)' detected before first assignment; clearing vars now
-
-cc_library_shared {
-    name: "libnativebench",
-    cflags: ["-Wno-unused-parameter"],
->>>>>>> Convert Android.mk file to Android.bp
     srcs: [
         "Bench.cpp",
         "WorkerPool.cpp",

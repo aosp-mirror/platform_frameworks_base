@@ -19,19 +19,20 @@ package com.android.systemui.pip.phone;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
+import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS;
+import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
 
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
-
-import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -66,14 +67,13 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.HidePipMenuEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,8 +93,8 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
     public static final int MESSAGE_ANIMATION_ENDED = 6;
 
-    private static final long INITIAL_DISMISS_DELAY = 3500;
-    private static final long POST_INTERACTION_DISMISS_DELAY = 2000;
+    private static final int INITIAL_DISMISS_DELAY = 3500;
+    private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
@@ -108,6 +108,7 @@ public class PipMenuActivity extends Activity {
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
+    private AccessibilityManager mAccessibilityManager;
     private View mViewRoot;
     private Drawable mBackgroundDrawable;
     private View mMenuContainer;
@@ -151,7 +152,7 @@ public class PipMenuActivity extends Activity {
                     cancelDelayedFinish();
                     break;
                 case MESSAGE_HIDE_MENU:
-                    hideMenu();
+                    hideMenu((Runnable) msg.obj);
                     break;
                 case MESSAGE_UPDATE_ACTIONS: {
                     final Bundle data = (Bundle) msg.obj;
@@ -197,6 +198,7 @@ public class PipMenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pip_menu_activity);
 
+        mAccessibilityManager = getSystemService(AccessibilityManager.class);
         mBackgroundDrawable = new ColorDrawable(Color.BLACK);
         mBackgroundDrawable.setAlpha(0);
         mViewRoot = findViewById(R.id.background);
@@ -222,6 +224,9 @@ public class PipMenuActivity extends Activity {
                         // next tap
                         mTouchState.scheduleDoubleTapTimeoutCallback();
                     }
+                    // Fall through
+                case MotionEvent.ACTION_CANCEL:
+                    mTouchState.reset();
                     break;
             }
             return true;
@@ -229,7 +234,9 @@ public class PipMenuActivity extends Activity {
         mSettingsButton = findViewById(R.id.settings);
         mSettingsButton.setAlpha(0);
         mSettingsButton.setOnClickListener((v) -> {
-            showSettings();
+            if (v.getAlpha() != 0) {
+                showSettings();
+            }
         });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);
@@ -273,7 +280,6 @@ public class PipMenuActivity extends Activity {
         super.onStop();
 
         cancelDelayedFinish();
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -333,19 +339,6 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
-    public final void onBusEvent(HidePipMenuEvent event) {
-        if (mMenuState != MENU_STATE_NONE) {
-            // If the menu is visible in either the closed or full state, then hide the menu and
-            // trigger the animation trigger afterwards
-            event.getAnimationTrigger().increment();
-            hideMenu(() -> {
-                mHandler.post(() -> {
-                    event.getAnimationTrigger().decrement();
-                });
-            }, true /* notifyMenuVisibility */, false /* isDismissing */);
-        }
-    }
-
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout, boolean resizeMenuOnShow) {
         mAllowMenuTimeout = allowMenuTimeout;
@@ -396,8 +389,11 @@ public class PipMenuActivity extends Activity {
     }
 
     private void hideMenu() {
-        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */,
-                false /* isDismissing */);
+        hideMenu(null);
+    }
+
+    private void hideMenu(Runnable animationEndCallback) {
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false /* isDismissing */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
@@ -447,9 +443,6 @@ public class PipMenuActivity extends Activity {
             return;
         }
         notifyActivityCallback(mMessenger);
-
-        // Register for HidePipMenuEvents once we notify the controller of this activity
-        EventBus.getDefault().register(this);
 
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
@@ -654,8 +647,10 @@ public class PipMenuActivity extends Activity {
         mHandler.removeCallbacks(mFinishRunnable);
     }
 
-    private void repostDelayedFinish(long delay) {
+    private void repostDelayedFinish(int delay) {
+        int recommendedTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
+                FLAG_CONTENT_ICONS | FLAG_CONTENT_CONTROLS);
         mHandler.removeCallbacks(mFinishRunnable);
-        mHandler.postDelayed(mFinishRunnable, delay);
+        mHandler.postDelayed(mFinishRunnable, recommendedTimeout);
     }
 }

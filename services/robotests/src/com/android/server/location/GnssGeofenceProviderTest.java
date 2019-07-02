@@ -1,35 +1,26 @@
 package com.android.server.location;
 
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
 /**
  * Unit tests for {@link GnssGeofenceProvider}.
  */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 27
-)
-@SystemLoaderPackages({"com.android.server.location"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class GnssGeofenceProviderTest {
     private static final int GEOFENCE_ID = 12345;
@@ -52,7 +43,7 @@ public class GnssGeofenceProviderTest {
         when(mMockNative.pauseGeofence(anyInt())).thenReturn(true);
         when(mMockNative.removeGeofence(anyInt())).thenReturn(true);
         when(mMockNative.resumeGeofence(anyInt(), anyInt())).thenReturn(true);
-        mTestProvider = new GnssGeofenceProvider(Looper.myLooper(), mMockNative);
+        mTestProvider = new GnssGeofenceProvider(mMockNative);
         mTestProvider.addCircularHardwareGeofence(GEOFENCE_ID, LATITUDE,
                 LONGITUDE, RADIUS, LAST_TRANSITION, MONITOR_TRANSITIONS,
                 NOTIFICATION_RESPONSIVENESS,

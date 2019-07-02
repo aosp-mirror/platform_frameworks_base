@@ -19,19 +19,20 @@
 #include "DeferredLayerUpdater.h"
 #include "hwui/Paint.h"
 
-#include <SkClipStack.h>
 #include <minikin/Layout.h>
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
 #include <pipeline/skia/SkiaVulkanPipeline.h>
 #include <renderthread/EglManager.h>
-#include <renderthread/OpenGLPipeline.h>
 #include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
 
-#include <SkGlyphCache.h>
+#include "SkColorData.h"
+#include "SkUnPreMultiply.h"
 
 namespace android {
 namespace uirenderer {
+
+std::unordered_map<int, TestUtils::CallCounts> TestUtils::sMockFunctorCounts{};
 
 SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) {
     int startA = (start >> 24) & 0xff;
@@ -53,9 +54,7 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread) {
     android::uirenderer::renderthread::IRenderPipeline* pipeline;
-    if (Properties::getRenderPipelineType() == RenderPipelineType::OpenGL) {
-        pipeline = new renderthread::OpenGLPipeline(renderThread);
-    } else if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         pipeline = new skiapipeline::SkiaOpenGLPipeline(renderThread);
     } else {
         pipeline = new skiapipeline::SkiaVulkanPipeline(renderThread);
@@ -70,90 +69,45 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
         const SkMatrix& transform) {
     sp<DeferredLayerUpdater> layerUpdater = createTextureLayerUpdater(renderThread);
-    layerUpdater->backingLayer()->getTransform().load(transform);
+    layerUpdater->backingLayer()->getTransform() = transform;
     layerUpdater->setSize(width, height);
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    layerUpdater->updateLayer(true, Matrix4::identity().data, HAL_DATASPACE_UNKNOWN);
-    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
-        static_cast<GlLayer*>(layerUpdater->backingLayer())
-                ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
-    }
+    layerUpdater->updateLayer(true, SkMatrix::I(), nullptr);
     return layerUpdater;
 }
 
-void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
-                                   std::vector<glyph_t>* outGlyphs,
-                                   std::vector<float>* outPositions, float* outTotalAdvance,
-                                   Rect* outBounds) {
-    Rect bounds;
-    float totalAdvance = 0;
-    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
-    while (*text != '\0') {
-        size_t nextIndex = 0;
-        int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
-        text += nextIndex;
-
-        glyph_t glyph = autoCache.getCache()->unicharToGlyph(unichar);
-        autoCache.getCache()->unicharToGlyph(unichar);
-
-        // push glyph and its relative position
-        outGlyphs->push_back(glyph);
-        outPositions->push_back(totalAdvance);
-        outPositions->push_back(0);
-
-        // compute bounds
-        SkGlyph skGlyph = autoCache.getCache()->getUnicharMetrics(unichar);
-        Rect glyphBounds(skGlyph.fWidth, skGlyph.fHeight);
-        glyphBounds.translate(totalAdvance + skGlyph.fLeft, skGlyph.fTop);
-        bounds.unionWith(glyphBounds);
-
-        // advance next character
-        SkScalar skWidth;
-        paint.getTextWidths(&glyph, sizeof(glyph), &skWidth, NULL);
-        totalAdvance += skWidth;
-    }
-    *outBounds = bounds;
-    *outTotalAdvance = totalAdvance;
-}
-
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint, float x,
                                  float y) {
     auto utf16 = asciiToUtf16(text);
-    SkPaint glyphPaint(paint);
-    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR,
-            glyphPaint, nullptr, nullptr /* measured text */);
+    uint32_t length = strlen(text);
+
+    canvas->drawText(utf16.get(), length,  // text buffer
+                     0, length,            // draw range
+                     0, length,            // context range
+                     x, y, minikin::Bidi::LTR, paint, nullptr, nullptr /* measured text */);
 }
 
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const Paint& paint,
                                  const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    SkPaint glyphPaint(paint);
-    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
-            nullptr);
+    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, paint,
+                           nullptr);
 }
 
 void TestUtils::TestTask::run() {
     // RenderState only valid once RenderThread is running, so queried here
     renderthread::RenderThread& renderThread = renderthread::RenderThread::getInstance();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        renderThread.vulkanManager().initialize();
+        renderThread.requireVkContext();
     } else {
-        renderThread.eglManager().initialize();
+        renderThread.requireGlContext();
     }
 
     rtCallback(renderThread);
 
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        renderThread.vulkanManager().destroy();
-    } else {
-        renderThread.renderState().flush(Caches::FlushMode::Full);
-        renderThread.eglManager().destroy();
-    }
+    renderThread.destroyRenderingContext();
 }
 
 std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {

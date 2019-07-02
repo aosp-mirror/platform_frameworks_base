@@ -15,6 +15,8 @@
  */
 package com.android.server.am;
 
+import static android.net.wifi.WifiManager.WIFI_FEATURE_LINK_LAYER_STATS;
+
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
@@ -23,14 +25,17 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.BatteryStats;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.ThreadLocalWorkSource;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -40,11 +45,9 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,7 +74,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private final ScheduledExecutorService mExecutorService =
             Executors.newSingleThreadScheduledExecutor(
                     (ThreadFactory) r -> {
-                        Thread t = new Thread(r, "batterystats-worker");
+                        Thread t = new Thread(
+                                () -> {
+                                    ThreadLocalWorkSource.setUid(Process.myUid());
+                                    r.run();
+                                },
+                                "batterystats-worker");
                         t.setPriority(Thread.NORM_PRIORITY);
                         return t;
                     });
@@ -367,6 +375,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 // Clean up any UIDs if necessary.
                 synchronized (mStats) {
                     for (int uid : uidsToRemove) {
+                        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, -1, uid,
+                                StatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
                         mStats.removeIsolatedUidLocked(uid);
                     }
                     mStats.clearPendingRemovedUids();
@@ -397,6 +407,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
         SynchronousResultReceiver modemReceiver = null;
+        boolean railUpdated = false;
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
@@ -407,12 +418,19 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
             if (mWifiManager != null) {
                 try {
-                    wifiReceiver = new SynchronousResultReceiver("wifi");
-                    mWifiManager.requestActivityInfo(wifiReceiver);
+                    // Only fetch WiFi power data if it is supported.
+                    if ((mWifiManager.getSupportedFeatures() & WIFI_FEATURE_LINK_LAYER_STATS) != 0) {
+                        wifiReceiver = new SynchronousResultReceiver("wifi");
+                        mWifiManager.requestActivityInfo(wifiReceiver);
+                    }
                 } catch (RemoteException e) {
                     // Oh well.
                 }
             }
+            synchronized (mStats) {
+                mStats.updateRailStatsLocked();
+            }
+            railUpdated = true;
         }
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_BT) != 0) {
@@ -433,6 +451,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (mTelephony != null) {
                 modemReceiver = new SynchronousResultReceiver("telephony");
                 mTelephony.requestModemActivityInfo(modemReceiver);
+            }
+            if (!railUpdated) {
+                synchronized (mStats) {
+                    mStats.updateRailStatsLocked();
+                }
             }
         }
 

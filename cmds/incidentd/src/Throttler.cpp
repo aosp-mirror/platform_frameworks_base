@@ -18,6 +18,7 @@
 
 #include "Throttler.h"
 
+#include <inttypes.h>
 #include <utils/SystemClock.h>
 
 namespace android {
@@ -32,6 +33,21 @@ Throttler::Throttler(size_t limit, int64_t refractoryPeriodMs)
 
 Throttler::~Throttler() {}
 
+sp<ReportBatch> Throttler::filterBatch(const sp<ReportBatch>& queued) {
+    sp<ReportBatch> result = new ReportBatch();
+
+    // We will never throttle the streaming ones.
+    queued->transferStreamingRequests(result);
+
+    // If the persisted ones aren't to be throttled, then add them to the
+    // batch we're going to do.
+    if (!shouldThrottle()) {
+        queued->transferPersistedRequests(result);
+    }
+
+    return result;
+}
+
 bool Throttler::shouldThrottle() {
     int64_t now = android::elapsedRealtime();
     if (now > mRefractoryPeriodMs + mLastRefractoryMs) {
@@ -42,15 +58,15 @@ bool Throttler::shouldThrottle() {
 }
 
 void Throttler::addReportSize(size_t reportByteSize) {
-    VLOG("The current request took %d bytes to dropbox", (int)reportByteSize);
+    VLOG("The current request took %zu bytes to dropbox", reportByteSize);
     mAccumulatedSize += reportByteSize;
 }
 
 void Throttler::dump(FILE* out) {
-    fprintf(out, "mSizeLimit=%d\n", (int)mSizeLimit);
-    fprintf(out, "mAccumulatedSize=%d\n", (int)mAccumulatedSize);
-    fprintf(out, "mRefractoryPeriodMs=%d\n", (int)mRefractoryPeriodMs);
-    fprintf(out, "mLastRefractoryMs=%d\n", (int)mLastRefractoryMs);
+    fprintf(out, "mSizeLimit=%zu\n", mSizeLimit);
+    fprintf(out, "mAccumulatedSize=%zu\n", mAccumulatedSize);
+    fprintf(out, "mRefractoryPeriodMs=%" PRIi64 "\n", mRefractoryPeriodMs);
+    fprintf(out, "mLastRefractoryMs=%" PRIi64 "\n", mLastRefractoryMs);
 }
 
 }  // namespace incidentd

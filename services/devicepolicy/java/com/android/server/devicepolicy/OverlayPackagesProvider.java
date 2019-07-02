@@ -23,6 +23,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USE
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,15 +31,13 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.view.IInputMethodManager;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,18 +52,38 @@ public class OverlayPackagesProvider {
     protected static final String TAG = "OverlayPackagesProvider";
 
     private final PackageManager mPm;
-    private final IInputMethodManager mIInputMethodManager;
     private final Context mContext;
+    private final Injector mInjector;
 
     public OverlayPackagesProvider(Context context) {
-        this(context, getIInputMethodManager());
+        this(context, new DefaultInjector());
     }
 
     @VisibleForTesting
-    OverlayPackagesProvider(Context context, IInputMethodManager iInputMethodManager) {
+    interface Injector {
+        boolean isPerProfileImeEnabled();
+        @NonNull
+        List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
+    }
+
+    private static final class DefaultInjector implements Injector {
+        @Override
+        public boolean isPerProfileImeEnabled() {
+            return InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
+        }
+
+        @NonNull
+        @Override
+        public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
+            return InputMethodManagerInternal.get().getInputMethodListAsUser(userId);
+        }
+    }
+
+    @VisibleForTesting
+    OverlayPackagesProvider(Context context, Injector injector) {
         mContext = context;
         mPm = checkNotNull(context.getPackageManager());
-        mIInputMethodManager = checkNotNull(iInputMethodManager);
+        mInjector = checkNotNull(injector);
     }
 
     /**
@@ -89,10 +108,12 @@ public class OverlayPackagesProvider {
         // Newly installed system apps are uninstalled when they are not required and are either
         // disallowed or have a launcher icon.
         nonRequiredApps.removeAll(getRequiredApps(provisioningAction, admin.getPackageName()));
-        // Don't delete the system input method packages in case of Device owner provisioning.
-        if (ACTION_PROVISION_MANAGED_DEVICE.equals(provisioningAction)
+        if (mInjector.isPerProfileImeEnabled()) {
+            nonRequiredApps.removeAll(getSystemInputMethods(userId));
+        } else if (ACTION_PROVISION_MANAGED_DEVICE.equals(provisioningAction)
                 || ACTION_PROVISION_MANAGED_USER.equals(provisioningAction)) {
-            nonRequiredApps.removeAll(getSystemInputMethods());
+            // Don't delete the system input method packages in case of Device owner provisioning.
+            nonRequiredApps.removeAll(getSystemInputMethods(userId));
         }
         nonRequiredApps.addAll(getDisallowedApps(provisioningAction));
         return nonRequiredApps;
@@ -114,16 +135,8 @@ public class OverlayPackagesProvider {
         return apps;
     }
 
-    private Set<String> getSystemInputMethods() {
-        // InputMethodManager is final so it cannot be mocked.
-        // So, we're using IInputMethodManager directly because it can be mocked.
-        final List<InputMethodInfo> inputMethods;
-        try {
-            inputMethods = mIInputMethodManager.getInputMethodList();
-        } catch (RemoteException e) {
-            // Should not happen
-            return null;
-        }
+    private Set<String> getSystemInputMethods(int userId) {
+        final List<InputMethodInfo> inputMethods = mInjector.getInputMethodListAsUser(userId);
         final Set<String> systemInputMethods = new ArraySet<>();
         for (InputMethodInfo inputMethodInfo : inputMethods) {
             ApplicationInfo applicationInfo = inputMethodInfo.getServiceInfo().applicationInfo;
@@ -147,11 +160,6 @@ public class OverlayPackagesProvider {
         disallowedApps.addAll(getDisallowedAppsSet(provisioningAction));
         disallowedApps.addAll(getVendorDisallowedAppsSet(provisioningAction));
         return disallowedApps;
-    }
-
-    private static IInputMethodManager getIInputMethodManager() {
-        final IBinder b = ServiceManager.getService(Context.INPUT_METHOD_SERVICE);
-        return IInputMethodManager.Stub.asInterface(b);
     }
 
     private Set<String> getRequiredAppsSet(String provisioningAction) {

@@ -41,9 +41,9 @@ public:
         int top = bounds.fTop;
 
         mBluePaint.setColor(SkColorSetARGB(255, 0, 0, 255));
-        mBluePaint.setTextSize(padding);
+        mBluePaint.getSkFont().setSize(padding);
         mGreenPaint.setColor(SkColorSetARGB(255, 0, 255, 0));
-        mGreenPaint.setTextSize(padding);
+        mGreenPaint.getSkFont().setSize(padding);
 
         // interleave drawText and drawRect with saveLayer ops
         for (int i = 0; i < regions; i++, top += smallRectHeight) {

@@ -16,6 +16,8 @@
 
 package android.graphics.perftests;
 
+import static junit.framework.Assert.assertTrue;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -25,20 +27,16 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.BitmapUtils;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.perftests.core.R;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
-
-import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest

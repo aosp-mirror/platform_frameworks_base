@@ -37,6 +37,7 @@ class Canvas;
 class Picture {
 public:
     explicit Picture(const Picture* src = NULL);
+    explicit Picture(sk_sp<SkPicture>&& src);
 
     Canvas* beginRecording(int width, int height);
 

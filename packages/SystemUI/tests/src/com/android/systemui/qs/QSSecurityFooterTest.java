@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -58,7 +57,7 @@ import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class QSSecurityFooterTest extends SysuiTestCase {
 
     private final String MANAGING_ORGANIZATION = "organization";
@@ -76,7 +75,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mDependency.injectTestDependency(SecurityController.class, mSecurityController);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
+        mDependency.injectTestDependency(Dependency.BG_LOOPER,
+                TestableLooper.get(this).getLooper());
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)
@@ -194,7 +194,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                                         VPN_PACKAGE),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
 
         // Same situation, but with organization name set
         when(mSecurityController.getDeviceOwnerOrganizationName())
@@ -220,7 +220,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_vpns),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
 
         // Same situation, but with organization name set
         when(mSecurityController.getDeviceOwnerOrganizationName())
@@ -243,7 +243,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
                 mFooterText.getText());
     }
@@ -294,7 +294,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_vpns),
                      mFooterText.getText());
     }
@@ -306,7 +306,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(
                              R.string.quick_settings_disclosure_managed_profile_named_vpn,
                              VPN_PACKAGE_2),
@@ -320,7 +320,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
-        assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
+        assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                                         VPN_PACKAGE),
                      mFooterText.getText());

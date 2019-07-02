@@ -18,7 +18,13 @@ package com.android.server.am;
 
 import android.os.Binder;
 import android.os.SystemClock;
+import android.util.Slog;
 import android.util.TimeUtils;
+
+import com.android.internal.app.procstats.AssociationState;
+import com.android.internal.app.procstats.ProcessStats;
+
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 /**
  * Represents a link between a content provider and client.
@@ -26,6 +32,8 @@ import android.util.TimeUtils;
 public final class ContentProviderConnection extends Binder {
     public final ContentProviderRecord provider;
     public final ProcessRecord client;
+    public final String clientPackage;
+    public AssociationState.SourceState association;
     public final long createTime;
     public int stableCount;
     public int unstableCount;
@@ -39,10 +47,49 @@ public final class ContentProviderConnection extends Binder {
     public int numStableIncs;
     public int numUnstableIncs;
 
-    public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client) {
+    public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client,
+            String _clientPackage) {
         provider = _provider;
         client = _client;
+        clientPackage = _clientPackage;
         createTime = SystemClock.elapsedRealtime();
+    }
+
+    public void startAssociationIfNeeded() {
+        // If we don't already have an active association, create one...  but only if this
+        // is an association between two different processes.
+        if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS
+                && association == null && provider.proc != null
+                && (provider.appInfo.uid != client.uid
+                        || !provider.info.processName.equals(client.processName))) {
+            ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
+                    provider.name.getPackageName());
+            if (holder == null) {
+                Slog.wtf(TAG_AM, "No package in referenced provider "
+                        + provider.name.toShortString() + ": proc=" + provider.proc);
+            } else if (holder.pkg == null) {
+                Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
+                        + provider.name.toShortString() + ": proc=" + provider.proc);
+            } else {
+                association = holder.pkg.getAssociationStateLocked(holder.state,
+                        provider.name.getClassName()).startSource(client.uid, client.processName,
+                        clientPackage);
+
+            }
+        }
+    }
+
+    public void trackProcState(int procState, int seq, long now) {
+        if (association != null) {
+            association.trackProcState(procState, seq, now);
+        }
+    }
+
+    public void stopAssociation() {
+        if (association != null) {
+            association.stop();
+            association = null;
+        }
     }
 
     public String toString() {

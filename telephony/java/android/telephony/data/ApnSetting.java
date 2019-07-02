@@ -1417,6 +1417,28 @@ public class ApnSetting implements Parcelable {
         return port == UNSPECIFIED_INT ? null : Integer.toString(port);
     }
 
+    /**
+     * Check if this APN setting can support the given network
+     *
+     * @param networkType The network type
+     * @return {@code true} if this APN setting can support the given network.
+     *
+     * @hide
+     */
+    public boolean canSupportNetworkType(@TelephonyManager.NetworkType int networkType) {
+        // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
+        // be used for data. We allow it here because in some DSDS corner cases, on the non-DDS
+        // sub, modem reports data rat unknown. In that case if voice is GSM and this APN supports
+        // GPRS or EDGE, this APN setting should be selected.
+        if (networkType == TelephonyManager.NETWORK_TYPE_GSM
+                && (mNetworkTypeBitmask & (TelephonyManager.NETWORK_TYPE_BITMASK_GPRS
+                | TelephonyManager.NETWORK_TYPE_BITMASK_EDGE)) != 0) {
+            return true;
+        }
+
+        return ServiceState.bitmaskHasTech(mNetworkTypeBitmask, networkType);
+    }
+
     // Implement Parcelable.
     @Override
     /** @hide */
@@ -1479,7 +1501,7 @@ public class ApnSetting implements Parcelable {
                 0, 0, 0, 0, mvnoType, null, apnSetId, carrierId, skip464xlat);
     }
 
-    public static final Parcelable.Creator<ApnSetting> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ApnSetting> CREATOR =
             new Parcelable.Creator<ApnSetting>() {
                 @Override
                 public ApnSetting createFromParcel(Parcel in) {

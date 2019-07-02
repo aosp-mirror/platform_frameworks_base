@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static android.service.notification.NotificationStats.DISMISSAL_PEEK;
+import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEGATIVE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -47,6 +48,7 @@ public class NotificationStatsTest extends UiServiceTestCase {
         assertFalse(stats.hasViewedSettings());
         assertFalse(stats.hasSnoozed());
         assertEquals(NotificationStats.DISMISSAL_NOT_DISMISSED, stats.getDismissalSurface());
+        assertEquals(NotificationStats.DISMISS_SENTIMENT_UNKNOWN, stats.getDismissalSentiment());
     }
 
     @Test
@@ -98,10 +100,19 @@ public class NotificationStatsTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDismissalSentiment() {
+        NotificationStats stats = new NotificationStats();
+        stats.setDismissalSentiment(DISMISS_SENTIMENT_NEGATIVE);
+        assertEquals(DISMISS_SENTIMENT_NEGATIVE, stats.getDismissalSentiment());
+        assertFalse(stats.hasInteracted());
+    }
+
+    @Test
     public void testWriteToParcel() {
         NotificationStats stats = new NotificationStats();
         stats.setViewedSettings();
         stats.setDismissalSurface(NotificationStats.DISMISSAL_AOD);
+        stats.setDismissalSentiment(NotificationStats.DISMISS_SENTIMENT_POSITIVE);
         Parcel parcel = Parcel.obtain();
         stats.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);

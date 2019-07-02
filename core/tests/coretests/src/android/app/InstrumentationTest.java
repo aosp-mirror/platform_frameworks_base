@@ -17,8 +17,9 @@
 package android.app;
 
 import android.os.Bundle;
-import android.support.test.filters.LargeTest;
 import android.test.InstrumentationTestCase;
+
+import androidx.test.filters.LargeTest;
 
 @LargeTest
 public class InstrumentationTest extends InstrumentationTestCase {

@@ -38,6 +38,7 @@ message ResultsBundle {
 message TestStatus {
     optional sint32 result_code = 3;
     optional ResultsBundle results = 4;
+    optional string logcat = 5;
 }
 
 enum SessionStatusCode {

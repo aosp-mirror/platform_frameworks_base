@@ -29,6 +29,7 @@
 
 #include "androidfw/Asset.h"
 #include "androidfw/Idmap.h"
+#include "androidfw/misc.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 
@@ -39,8 +40,10 @@ using base::unique_fd;
 
 static const std::string kResourcesArsc("resources.arsc");
 
-ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle, const std::string& path)
-    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path) {
+ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle,
+                     const std::string& path,
+                     time_t last_mod_time)
+    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time) {
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system) {
@@ -116,8 +119,10 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
     return {};
   }
 
+  time_t last_mod_time = getFileModDate(path.c_str());
+
   // Wrap the handle in a unique_ptr so it gets automatically closed.
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(unmanaged_handle, path));
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time));
 
   // Find the resource table.
   ::ZipEntry entry;
@@ -243,6 +248,10 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
 
   // -1 is end of iteration, anything else is an error.
   return result == -1;
+}
+
+bool ApkAssets::IsUpToDate() const {
+  return last_mod_time_ == getFileModDate(path_.c_str());
 }
 
 }  // namespace android

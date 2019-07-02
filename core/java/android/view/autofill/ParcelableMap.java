@@ -47,7 +47,7 @@ class ParcelableMap extends HashMap<AutofillId, AutofillValue> implements Parcel
         }
     }
 
-    public static final Parcelable.Creator<ParcelableMap> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableMap> CREATOR =
             new Parcelable.Creator<ParcelableMap>() {
                 @Override
                 public ParcelableMap createFromParcel(Parcel source) {

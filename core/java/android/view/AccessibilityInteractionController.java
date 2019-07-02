@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
@@ -32,6 +33,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.text.style.AccessibilityClickableSpan;
 import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
@@ -39,13 +41,16 @@ import android.util.Slog;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeIdManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityRequestPreparer;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -63,8 +68,11 @@ import java.util.function.Predicate;
  * called from the interaction connection ViewAncestor gives the system to
  * talk to it and a corresponding *UiThread method that is executed on the
  * UI thread.
+ *
+ * @hide
  */
-final class AccessibilityInteractionController {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public final class AccessibilityInteractionController {
 
     private static final String LOG_TAG = "AccessibilityInteractionController";
 
@@ -84,7 +92,7 @@ final class AccessibilityInteractionController {
 
     private final Object mLock = new Object();
 
-    private final Handler mHandler;
+    private final PrivateHandler mHandler;
 
     private final ViewRootImpl mViewRootImpl;
 
@@ -130,23 +138,25 @@ final class AccessibilityInteractionController {
             // thread in this process, set the message as a static reference so
             // after this call completes the same thread but in the interrogating
             // client can handle the message to generate the result.
-            if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
+            if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId
+                    && mHandler.hasAccessibilityCallback(message)) {
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                mHandler.sendMessage(message);
+                // For messages without callback of interrogating client, just handle the
+                // message immediately if this is UI thread.
+                if (!mHandler.hasAccessibilityCallback(message)
+                        && Thread.currentThread().getId() == mMyLooperThreadId) {
+                    mHandler.handleMessage(message);
+                } else {
+                    mHandler.sendMessage(message);
+                }
             }
         }
     }
 
     private boolean isShown(View view) {
-        // The first two checks are made also made by isShown() which
-        // however traverses the tree up to the parent to catch that.
-        // Therefore, we do some fail fast check to minimize the up
-        // tree traversal.
-        return (view.mAttachInfo != null
-                && view.mAttachInfo.mWindowVisibility == View.VISIBLE
-                && view.isShown());
+        return (view != null) && (view.getWindowVisibility() == View.VISIBLE && view.isShown());
     }
 
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
@@ -326,12 +336,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View root = null;
-            if (accessibilityViewId == AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                root = mViewRootImpl.mView;
-            } else {
-                root = findViewByAccessibilityId(accessibilityViewId);
-            }
+            final View root = findViewByAccessibilityId(accessibilityViewId);
             if (root != null && isShown(root)) {
                 mPrefetcher.prefetchAccessibilityNodeInfos(
                         root, virtualDescendantId, flags, infos, arguments);
@@ -382,12 +387,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                root = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                root = mViewRootImpl.mView;
-            }
+            final View root = findViewByAccessibilityId(accessibilityViewId);
             if (root != null) {
                 final int resolvedViewId = root.getContext().getResources()
                         .getIdentifier(viewId, null, null);
@@ -448,12 +448,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                root = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                root = mViewRootImpl.mView;
-            }
+            final View root = findViewByAccessibilityId(accessibilityViewId);
             if (root != null && isShown(root)) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
@@ -536,12 +531,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                root = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                root = mViewRootImpl.mView;
-            }
+            final View root = findViewByAccessibilityId(accessibilityViewId);
             if (root != null && isShown(root)) {
                 switch (focusType) {
                     case AccessibilityNodeInfo.FOCUS_ACCESSIBILITY: {
@@ -569,7 +559,7 @@ final class AccessibilityInteractionController {
                     } break;
                     case AccessibilityNodeInfo.FOCUS_INPUT: {
                         View target = root.findFocus();
-                        if (target == null || !isShown(target)) {
+                        if (!isShown(target)) {
                             break;
                         }
                         AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
@@ -631,12 +621,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                root = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                root = mViewRootImpl.mView;
-            }
+            final View root = findViewByAccessibilityId(accessibilityViewId);
             if (root != null && isShown(root)) {
                 View nextView = root.focusSearch(direction);
                 if (nextView != null) {
@@ -691,12 +676,7 @@ final class AccessibilityInteractionController {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
-            View target = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
-                target = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                target = mViewRootImpl.mView;
-            }
+            final View target = findViewByAccessibilityId(accessibilityViewId);
             if (target != null && isShown(target)) {
                 if (action == R.id.accessibilityActionClickOnClickableSpan) {
                     // Handle this hidden action separately
@@ -722,16 +702,85 @@ final class AccessibilityInteractionController {
         }
     }
 
+    /**
+     * Finds the accessibility focused node in the root, and clears the accessibility focus.
+     */
+    public void clearAccessibilityFocusClientThread() {
+        final Message message = mHandler.obtainMessage();
+        message.what = PrivateHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS;
+
+        // Don't care about pid and tid because there's no interrogating client for this message.
+        scheduleMessage(message, 0, 0, CONSIDER_REQUEST_PREPARERS);
+    }
+
+    private void clearAccessibilityFocusUiThread() {
+        if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null) {
+            return;
+        }
+        try {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags =
+                    AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            final View root = mViewRootImpl.mView;
+            if (root != null && isShown(root)) {
+                final View host = mViewRootImpl.mAccessibilityFocusedHost;
+                // If there is no accessibility focus host or it is not a descendant
+                // of the root from which to start the search, then the search failed.
+                if (host == null || !ViewRootImpl.isViewDescendantOf(host, root)) {
+                    return;
+                }
+                final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
+                final AccessibilityNodeInfo focusNode =
+                        mViewRootImpl.mAccessibilityFocusedVirtualView;
+                if (provider != null && focusNode != null) {
+                    final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                            focusNode.getSourceNodeId());
+                    provider.performAction(virtualNodeId,
+                            AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS.getId(),
+                            null);
+                } else {
+                    host.performAccessibilityAction(
+                            AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS.getId(),
+                            null);
+                }
+            }
+        } finally {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+        }
+    }
+
+    /**
+     * Notify outside touch event to the target window.
+     */
+    public void notifyOutsideTouchClientThread() {
+        final Message message = mHandler.obtainMessage();
+        message.what = PrivateHandler.MSG_NOTIFY_OUTSIDE_TOUCH;
+
+        // Don't care about pid and tid because there's no interrogating client for this message.
+        scheduleMessage(message, 0, 0, CONSIDER_REQUEST_PREPARERS);
+    }
+
+    private void notifyOutsideTouchUiThread() {
+        if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null
+                || mViewRootImpl.mStopped || mViewRootImpl.mPausedForTransition) {
+            return;
+        }
+        final View root = mViewRootImpl.mView;
+        if (root != null && isShown(root)) {
+            // trigger ACTION_OUTSIDE to notify windows
+            final long now = SystemClock.uptimeMillis();
+            final MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_OUTSIDE,
+                    0, 0, 0);
+            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            mViewRootImpl.dispatchInputEvent(event);
+        }
+    }
+
     private View findViewByAccessibilityId(int accessibilityId) {
-        View root = mViewRootImpl.mView;
-        if (root == null) {
-            return null;
+        if (accessibilityId == AccessibilityNodeInfo.ROOT_ITEM_ID) {
+            return mViewRootImpl.mView;
+        } else {
+            return AccessibilityNodeIdManager.getInstance().findView(accessibilityId);
         }
-        View foundView = root.findViewByAccessibilityId(accessibilityId);
-        if (foundView != null && !isShown(foundView)) {
-            return null;
-        }
-        return foundView;
     }
 
     private void applyAppScaleAndMagnificationSpecIfNeeded(List<AccessibilityNodeInfo> infos,
@@ -768,9 +817,17 @@ final class AccessibilityInteractionController {
         }
         Rect boundsInScreen = mTempRect;
         info.getBoundsInScreen(boundsInScreen);
-        if (interactiveRegion.quickReject(boundsInScreen)) {
+        if (interactiveRegion.quickReject(boundsInScreen) && !shouldBypassAdjustIsVisible()) {
             info.setVisibleToUser(false);
         }
+    }
+
+    private boolean shouldBypassAdjustIsVisible() {
+        final int windowType = mViewRootImpl.mOrigWindowType;
+        if (windowType == TYPE_INPUT_METHOD) {
+            return true;
+        }
+        return false;
     }
 
     private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,
@@ -1103,7 +1160,7 @@ final class AccessibilityInteractionController {
                         }
                         View child = children.get(i);
                         if (child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                                &&  isShown(child)) {
+                                && isShown(child)) {
                             AccessibilityNodeInfo info = null;
                             AccessibilityNodeProvider provider =
                                 child.getAccessibilityNodeProvider();
@@ -1285,6 +1342,14 @@ final class AccessibilityInteractionController {
         private static final int MSG_APP_PREPARATION_FINISHED = 8;
         private static final int MSG_APP_PREPARATION_TIMEOUT = 9;
 
+        // Uses FIRST_NO_ACCESSIBILITY_CALLBACK_MSG for messages that don't need to call back
+        // results to interrogating client.
+        private static final int FIRST_NO_ACCESSIBILITY_CALLBACK_MSG = 100;
+        private static final int MSG_CLEAR_ACCESSIBILITY_FOCUS =
+                FIRST_NO_ACCESSIBILITY_CALLBACK_MSG + 1;
+        private static final int MSG_NOTIFY_OUTSIDE_TOUCH =
+                FIRST_NO_ACCESSIBILITY_CALLBACK_MSG + 2;
+
         public PrivateHandler(Looper looper) {
             super(looper);
         }
@@ -1311,6 +1376,10 @@ final class AccessibilityInteractionController {
                     return "MSG_APP_PREPARATION_FINISHED";
                 case MSG_APP_PREPARATION_TIMEOUT:
                     return "MSG_APP_PREPARATION_TIMEOUT";
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS:
+                    return "MSG_CLEAR_ACCESSIBILITY_FOCUS";
+                case MSG_NOTIFY_OUTSIDE_TOUCH:
+                    return "MSG_NOTIFY_OUTSIDE_TOUCH";
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1347,9 +1416,19 @@ final class AccessibilityInteractionController {
                 case MSG_APP_PREPARATION_TIMEOUT: {
                     requestPreparerTimeoutUiThread();
                 } break;
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
+                    clearAccessibilityFocusUiThread();
+                } break;
+                case MSG_NOTIFY_OUTSIDE_TOUCH: {
+                    notifyOutsideTouchUiThread();
+                } break;
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
+        }
+
+        boolean hasAccessibilityCallback(Message message) {
+            return message.what < FIRST_NO_ACCESSIBILITY_CALLBACK_MSG ? true : false;
         }
     }
 

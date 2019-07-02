@@ -81,6 +81,34 @@ StatsdConfig CreateDurationMetricConfig_NoLink_AND_CombinationCondition(
 
 }  // namespace
 
+/*
+ The following test has the following input.
+
+{ 10000000002 10000000002 (8)9999[I], [S], job0[S], 1[I],  }
+{ 10000000010 10000000010 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadEmail[S], 1[I],  }
+{ 10000000011 10000000011 (29)1[I],  }
+{ 10000000040 10000000040 (29)2[I],  }
+{ 10000000050 10000000050 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadEmail[S], 0[I],  }
+{ 10000000101 10000000101 (8)9999[I], [S], job0[S], 0[I],  }
+{ 10000000102 10000000102 (29)1[I],  }
+{ 10000000200 10000000200 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadEmail[S], 1[I],  }
+{ 10000000201 10000000201 (8)9999[I], [S], job2[S], 1[I],  }
+{ 10000000400 10000000400 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadDoc[S], 1[I],  }
+{ 10000000401 10000000401 (7)333[I], App2[S], 222[I], GMSCoreModule1[S], 555[I], GMSCoreModule2[S], ReadEmail[S], 1[I],  }
+{ 10000000450 10000000450 (29)2[I],  }
+{ 10000000500 10000000500 (8)9999[I], [S], job2[S], 0[I],  }
+{ 10000000600 10000000600 (8)8888[I], [S], job2[S], 1[I],  }
+{ 10000000650 10000000650 (29)1[I],  }
+{ 309999999999 309999999999 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadDoc[S], 0[I],  }
+{ 310000000100 310000000100 (29)2[I],  }
+{ 310000000300 310000000300 (7)111[I], App1[S], 222[I], GMSCoreModule1[S], 222[I], GMSCoreModule2[S], ReadEmail[S], 0[I],  }
+{ 310000000600 310000000600 (8)8888[I], [S], job1[S], 1[I],  }
+{ 310000000640 310000000640 (29)1[I],  }
+{ 310000000650 310000000650 (29)2[I],  }
+{ 310000000700 310000000700 (7)333[I], App2[S], 222[I], GMSCoreModule1[S], 555[I], GMSCoreModule2[S], ReadEmail[S], 0[I],  }
+{ 310000000850 310000000850 (8)8888[I], [S], job2[S], 0[I],  }
+{ 310000000900 310000000900 (8)8888[I], [S], job1[S], 0[I],  }
+*/
 TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondition) {
     for (const bool hashStringInReport : { true, false }) {
         for (bool isDimensionInConditionSubSetOfConditionTrackerDimension : { true, false }) {
@@ -184,7 +212,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                 ConfigMetricsReportList reports;
                 vector<uint8_t> buffer;
                 processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false,
-                                        ADB_DUMP, &buffer);
+                                        true, ADB_DUMP, FAST, &buffer);
                 EXPECT_TRUE(buffer.size() > 0);
                 EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
                 backfillDimensionPath(&reports);
@@ -250,7 +278,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
                     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
-                    EXPECT_EQ(data.bucket_info(0).duration_nanos(), 450 - 201 + bucketSizeNs - 600);
+                    EXPECT_EQ(data.bucket_info(0).duration_nanos(), 450 - 201 + bucketSizeNs - 650);
                     EXPECT_EQ(data.bucket_info(1).duration_nanos(), 100);
                     EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
@@ -269,7 +297,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                             data.dimensions_in_condition(),
                             android::util::SYNC_STATE_CHANGED, 333, "App2");
                     EXPECT_EQ(data.bucket_info_size(), 2);
-                    EXPECT_EQ(data.bucket_info(0).duration_nanos(), 450 - 401 + bucketSizeNs - 600);
+                    EXPECT_EQ(data.bucket_info(0).duration_nanos(), 450 - 401 + bucketSizeNs - 650);
                     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
                     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
@@ -331,7 +359,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
                     EXPECT_EQ(data.bucket_info(0).duration_nanos(), 450 - 201);
-                    EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs - 600 + 100);
+                    EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs - 650 + 100);
                     EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
                     EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
@@ -353,7 +381,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
                     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
-                    EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs - 600 + 110);
+                    EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs - 650 + 110);
                     EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
                               bucketStartTimeNs + bucketSizeNs);
                     EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
@@ -520,7 +548,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationConditi
             ConfigMetricsReportList reports;
             vector<uint8_t> buffer;
             processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false,
-                                    ADB_DUMP, &buffer);
+                                    true, ADB_DUMP, FAST, &buffer);
             EXPECT_TRUE(buffer.size() > 0);
             EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
             backfillDimensionPath(&reports);
@@ -770,7 +798,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_Combination
             ConfigMetricsReportList reports;
             vector<uint8_t> buffer;
             processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false,
-                                    ADB_DUMP, &buffer);
+                                    true, ADB_DUMP, FAST, &buffer);
             EXPECT_TRUE(buffer.size() > 0);
             EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
             backfillDimensionPath(&reports);

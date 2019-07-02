@@ -82,12 +82,14 @@ public final class RangingResult implements Parcelable {
     private final int mNumSuccessfulMeasurements;
     private final byte[] mLci;
     private final byte[] mLcr;
+    private final ResponderLocation mResponderLocation;
     private final long mTimestamp;
 
     /** @hide */
     public RangingResult(@RangeResultStatus int status, @NonNull MacAddress mac, int distanceMm,
             int distanceStdDevMm, int rssi, int numAttemptedMeasurements,
-            int numSuccessfulMeasurements, byte[] lci, byte[] lcr, long timestamp) {
+            int numSuccessfulMeasurements, byte[] lci, byte[] lcr,
+            ResponderLocation responderLocation, long timestamp) {
         mStatus = status;
         mMac = mac;
         mPeerHandle = null;
@@ -98,13 +100,15 @@ public final class RangingResult implements Parcelable {
         mNumSuccessfulMeasurements = numSuccessfulMeasurements;
         mLci = lci == null ? EMPTY_BYTE_ARRAY : lci;
         mLcr = lcr == null ? EMPTY_BYTE_ARRAY : lcr;
+        mResponderLocation = responderLocation;
         mTimestamp = timestamp;
     }
 
     /** @hide */
     public RangingResult(@RangeResultStatus int status, PeerHandle peerHandle, int distanceMm,
             int distanceStdDevMm, int rssi, int numAttemptedMeasurements,
-            int numSuccessfulMeasurements, byte[] lci, byte[] lcr, long timestamp) {
+            int numSuccessfulMeasurements, byte[] lci, byte[] lcr,
+            ResponderLocation responderLocation, long timestamp) {
         mStatus = status;
         mMac = null;
         mPeerHandle = peerHandle;
@@ -115,6 +119,7 @@ public final class RangingResult implements Parcelable {
         mNumSuccessfulMeasurements = numSuccessfulMeasurements;
         mLci = lci == null ? EMPTY_BYTE_ARRAY : lci;
         mLcr = lcr == null ? EMPTY_BYTE_ARRAY : lcr;
+        mResponderLocation = responderLocation;
         mTimestamp = timestamp;
     }
 
@@ -240,6 +245,27 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
+     * @return The unverified responder location represented as {@link ResponderLocation} which
+     * captures location information the responder is programmed to broadcast. The responder
+     * location is referred to as unverified, because we are relying on the device/site
+     * administrator to correctly configure its location data.
+     * <p>
+     * Will return a {@code null} when the location information cannot be parsed.
+     * <p>
+     * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
+     * exception.
+     */
+    @Nullable
+    public ResponderLocation getUnverifiedResponderLocation() {
+        if (mStatus != STATUS_SUCCESS) {
+            throw new IllegalStateException(
+                    "getUnverifiedResponderLocation(): invoked on an invalid result: getStatus()="
+                            + mStatus);
+        }
+        return mResponderLocation;
+    }
+
+    /**
      * @return The Location Configuration Information (LCI) as self-reported by the peer. The format
      * is specified in the IEEE 802.11-2016 specifications, section 9.4.2.22.10.
      * <p>
@@ -322,10 +348,11 @@ public final class RangingResult implements Parcelable {
         dest.writeInt(mNumSuccessfulMeasurements);
         dest.writeByteArray(mLci);
         dest.writeByteArray(mLcr);
+        dest.writeParcelable(mResponderLocation, flags);
         dest.writeLong(mTimestamp);
     }
 
-    public static final Creator<RangingResult> CREATOR = new Creator<RangingResult>() {
+    public static final @android.annotation.NonNull Creator<RangingResult> CREATOR = new Creator<RangingResult>() {
         @Override
         public RangingResult[] newArray(int size) {
             return new RangingResult[size];
@@ -351,13 +378,17 @@ public final class RangingResult implements Parcelable {
             int numSuccessfulMeasurements = in.readInt();
             byte[] lci = in.createByteArray();
             byte[] lcr = in.createByteArray();
+            ResponderLocation responderLocation =
+                    in.readParcelable(this.getClass().getClassLoader());
             long timestamp = in.readLong();
             if (peerHandlePresent) {
                 return new RangingResult(status, peerHandle, distanceMm, distanceStdDevMm, rssi,
-                        numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, timestamp);
+                        numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr,
+                        responderLocation, timestamp);
             } else {
                 return new RangingResult(status, mac, distanceMm, distanceStdDevMm, rssi,
-                        numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, timestamp);
+                        numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr,
+                        responderLocation, timestamp);
             }
         }
     };
@@ -372,7 +403,8 @@ public final class RangingResult implements Parcelable {
                 ", rssi=").append(mRssi).append(", numAttemptedMeasurements=").append(
                 mNumAttemptedMeasurements).append(", numSuccessfulMeasurements=").append(
                 mNumSuccessfulMeasurements).append(", lci=").append(mLci).append(", lcr=").append(
-                mLcr).append(", timestamp=").append(mTimestamp).append("]").toString();
+                mLcr).append(", responderLocation=").append(mResponderLocation)
+                .append(", timestamp=").append(mTimestamp).append("]").toString();
     }
 
     @Override
@@ -393,12 +425,14 @@ public final class RangingResult implements Parcelable {
                 && mNumAttemptedMeasurements == lhs.mNumAttemptedMeasurements
                 && mNumSuccessfulMeasurements == lhs.mNumSuccessfulMeasurements
                 && Arrays.equals(mLci, lhs.mLci) && Arrays.equals(mLcr, lhs.mLcr)
-                && mTimestamp == lhs.mTimestamp;
+                && mTimestamp == lhs.mTimestamp
+                && Objects.equals(mResponderLocation, lhs.mResponderLocation);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mStatus, mMac, mPeerHandle, mDistanceMm, mDistanceStdDevMm, mRssi,
-                mNumAttemptedMeasurements, mNumSuccessfulMeasurements, mLci, mLcr, mTimestamp);
+                mNumAttemptedMeasurements, mNumSuccessfulMeasurements, mLci, mLcr,
+                mResponderLocation, mTimestamp);
     }
 }

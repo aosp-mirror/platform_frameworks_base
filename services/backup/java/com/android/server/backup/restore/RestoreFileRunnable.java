@@ -21,7 +21,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
 import com.android.server.backup.FileMetadata;
-import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.UserBackupManagerService;
 
 import java.io.IOException;
 
@@ -35,9 +35,9 @@ class RestoreFileRunnable implements Runnable {
     private final FileMetadata mInfo;
     private final ParcelFileDescriptor mSocket;
     private final int mToken;
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
 
-    RestoreFileRunnable(BackupManagerService backupManagerService, IBackupAgent agent,
+    RestoreFileRunnable(UserBackupManagerService backupManagerService, IBackupAgent agent,
             FileMetadata info, ParcelFileDescriptor socket, int token) throws IOException {
         mAgent = agent;
         mInfo = info;

@@ -506,6 +506,14 @@ public final class InputMethodInfo implements Parcelable {
 
     /**
      * @hide
+     * @return {@code true} if the IME is a trusted system component (e.g. pre-installed)
+     */
+    public boolean isSystem() {
+        return (mService.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * @hide
      */
     public boolean isAuxiliaryIme() {
         return mIsAuxIme;
@@ -540,7 +548,7 @@ public final class InputMethodInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<InputMethodInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InputMethodInfo> CREATOR
             = new Parcelable.Creator<InputMethodInfo>() {
         @Override
         public InputMethodInfo createFromParcel(Parcel source) {

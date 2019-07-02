@@ -1465,7 +1465,7 @@ public final class PrintAttributes implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrintAttributes> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintAttributes> CREATOR =
             new Creator<PrintAttributes>() {
         @Override
         public PrintAttributes createFromParcel(Parcel parcel) {

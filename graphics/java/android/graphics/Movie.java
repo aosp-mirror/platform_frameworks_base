@@ -26,6 +26,7 @@ import java.io.InputStream;
 /**
  * @deprecated Prefer {@link android.graphics.drawable.AnimatedImageDrawable}.
  */
+@Deprecated
 public class Movie {
     @UnsupportedAppUsage
     private long mNativeMovie;

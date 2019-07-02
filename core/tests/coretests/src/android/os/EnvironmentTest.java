@@ -25,8 +25,9 @@ import static android.os.Environment.classifyExternalStorageDirectory;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

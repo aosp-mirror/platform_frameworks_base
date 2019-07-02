@@ -18,45 +18,52 @@
 
 #define LOG_TAG "BootParameters"
 
+#include <errno.h>
 #include <fcntl.h>
 
-#include <string>
-
 #include <android-base/file.h>
-#include <base/json/json_parser.h>
-#include <base/json/json_reader.h>
-#include <base/json/json_value_converter.h>
+#include <json/json.h>
 #include <utils/Log.h>
 
-using android::base::RemoveFileIfExists;
 using android::base::ReadFileToString;
-using base::JSONReader;
-using base::JSONValueConverter;
-using base::Value;
+using android::base::RemoveFileIfExists;
+using android::base::WriteStringToFile;
+using Json::ArrayIndex;
+using Json::Reader;
+using Json::Value;
 
 namespace android {
 
 namespace {
 
-// Brightness and volume are stored as integer strings in next_boot.json.
-// They are divided by this constant to produce the actual float values in
-// range [0.0, 1.0]. This constant must match its counterpart in
-// DeviceManager.
-constexpr const float kFloatScaleFactor = 1000.0f;
+// Keys for deprecated parameters. Devices that OTA from N to O and that used
+// the hidden BootParameters API will store these in the JSON blob. To support
+// the transition from N to O, these keys are mapped to the new parameters.
+constexpr const char *kKeyLegacyVolume = "volume";
+constexpr const char *kKeyLegacyAnimationsDisabled = "boot_animation_disabled";
+constexpr const char *kKeyLegacyParamNames = "param_names";
+constexpr const char *kKeyLegacyParamValues = "param_values";
 
-constexpr const char* kNextBootFile = "/data/misc/bootanimation/next_boot.json";
-constexpr const char* kLastBootFile = "/data/misc/bootanimation/last_boot.json";
+constexpr const char *kNextBootFile = "/data/misc/bootanimation/next_boot.proto";
+constexpr const char *kLastBootFile = "/data/misc/bootanimation/last_boot.proto";
 
-void swapBootConfigs() {
-    // rename() will fail if next_boot.json doesn't exist, so delete
-    // last_boot.json manually first.
+constexpr const char *kLegacyNextBootFile = "/data/misc/bootanimation/next_boot.json";
+constexpr const char *kLegacyLastBootFile = "/data/misc/bootanimation/last_boot.json";
+
+void removeLegacyFiles() {
     std::string err;
-    if (!RemoveFileIfExists(kLastBootFile, &err))
-        ALOGE("Unable to delete last boot file: %s", err.c_str());
+    if (!RemoveFileIfExists(kLegacyLastBootFile, &err)) {
+        ALOGW("Unable to delete %s: %s", kLegacyLastBootFile, err.c_str());
+    }
 
-    if (rename(kNextBootFile, kLastBootFile) && errno != ENOENT)
-        ALOGE("Unable to swap boot files: %s", strerror(errno));
+    err.clear();
+    if (!RemoveFileIfExists(kLegacyNextBootFile, &err)) {
+        ALOGW("Unable to delete %s: %s", kLegacyNextBootFile, err.c_str());
+    }
+}
 
+void createNextBootFile() {
+    errno = 0;
     int fd = open(kNextBootFile, O_CREAT, DEFFILEMODE);
     if (fd == -1) {
         ALOGE("Unable to create next boot file: %s", strerror(errno));
@@ -71,53 +78,119 @@ void swapBootConfigs() {
 
 }  // namespace
 
-BootParameters::SavedBootParameters::SavedBootParameters()
-    : brightness(-kFloatScaleFactor), volume(-kFloatScaleFactor) {}
+// Renames the 'next' boot file to the 'last' file and reads its contents.
+bool BootParameters::swapAndLoadBootConfigContents(const char *lastBootFile,
+                                                   const char *nextBootFile,
+                                                   std::string *contents) {
+    if (!ReadFileToString(nextBootFile, contents)) {
+        RemoveFileIfExists(lastBootFile);
+        return false;
+    }
 
-void BootParameters::SavedBootParameters::RegisterJSONConverter(
-        JSONValueConverter<SavedBootParameters>* converter) {
-    converter->RegisterIntField("brightness", &SavedBootParameters::brightness);
-    converter->RegisterIntField("volume", &SavedBootParameters::volume);
-    converter->RegisterRepeatedString("param_names",
-                                      &SavedBootParameters::param_names);
-    converter->RegisterRepeatedString("param_values",
-                                      &SavedBootParameters::param_values);
+    errno = 0;
+    if (rename(nextBootFile, lastBootFile) && errno != ENOENT)
+        ALOGE("Unable to swap boot files: %s", strerror(errno));
+
+    return true;
 }
 
 BootParameters::BootParameters() {
-    swapBootConfigs();
     loadParameters();
 }
 
+// Saves the boot parameters state to disk so the framework can read it.
+void BootParameters::storeParameters() {
+    errno = 0;
+    if (!WriteStringToFile(mProto.SerializeAsString(), kLastBootFile)) {
+        ALOGE("Failed to write boot parameters to %s: %s", kLastBootFile, strerror(errno));
+    }
+
+    // WriteStringToFile sets the file permissions to 0666, but these are not
+    // honored by the system.
+    errno = 0;
+    if (chmod(kLastBootFile, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) {
+        ALOGE("Failed to set permissions for %s: %s", kLastBootFile, strerror(errno));
+    }
+}
+
+// Load the boot parameters from disk, try the old location and format if the
+// file does not exist. Note:
+// - Parse errors result in defaults being used (a normal boot).
+// - Legacy boot parameters default to a silent boot.
 void BootParameters::loadParameters() {
+    // Precedence is given to the new file format (.proto).
     std::string contents;
-    if (!ReadFileToString(kLastBootFile, &contents)) {
-        if (errno != ENOENT)
-            ALOGE("Unable to read from %s: %s", kLastBootFile, strerror(errno));
+    if (swapAndLoadBootConfigContents(kLastBootFile, kNextBootFile, &contents)) {
+        parseBootParameters(contents);
+    } else if (swapAndLoadBootConfigContents(kLegacyLastBootFile, kLegacyNextBootFile, &contents)) {
+        parseLegacyBootParameters(contents);
+        storeParameters();
+        removeLegacyFiles();
+    }
 
+    createNextBootFile();
+}
+
+void BootParameters::parseBootParameters(const std::string &contents) {
+    if (!mProto.ParseFromString(contents)) {
+        ALOGW("Failed to parse parameters from %s", kLastBootFile);
         return;
     }
 
-    std::unique_ptr<Value> json = JSONReader::Read(contents);
-    if (json.get() == nullptr) {
+    loadStateFromProto();
+}
+
+// Parses the JSON in the proto.
+void BootParameters::parseLegacyBootParameters(const std::string &contents) {
+    Value json;
+    if (!Reader().parse(contents, json)) {
+        ALOGW("Failed to parse parameters from %s", kLegacyLastBootFile);
         return;
     }
 
-    JSONValueConverter<SavedBootParameters> converter;
-    if (converter.Convert(*(json.get()), &mRawParameters)) {
-        mBrightness = mRawParameters.brightness / kFloatScaleFactor;
-        mVolume = mRawParameters.volume / kFloatScaleFactor;
+    int volume = 0;
+    bool bootAnimationDisabled = true;
 
-        if (mRawParameters.param_names.size() == mRawParameters.param_values.size()) {
-            for (size_t i = 0; i < mRawParameters.param_names.size(); i++) {
-                mParameters.push_back({
-                        .key = mRawParameters.param_names[i]->c_str(),
-                        .value = mRawParameters.param_values[i]->c_str()
-                });
+    Value &jsonValue = json[kKeyLegacyVolume];
+    if (jsonValue.isIntegral()) {
+        volume = jsonValue.asInt();
+    }
+
+    jsonValue = json[kKeyLegacyAnimationsDisabled];
+    if (jsonValue.isIntegral()) {
+        bootAnimationDisabled = jsonValue.asInt() == 1;
+    }
+
+    // Assume a silent boot unless all of the following are true -
+    // 1. The volume is neither 0 nor -1000 (the legacy default value).
+    // 2. The boot animations are explicitly enabled.
+    // Note: brightness was never used.
+    mProto.set_silent_boot((volume == 0) || (volume == -1000) || bootAnimationDisabled);
+
+    Value &keys = json[kKeyLegacyParamNames];
+    Value &values = json[kKeyLegacyParamValues];
+    if (keys.isArray() && values.isArray() && (keys.size() == values.size())) {
+        for (ArrayIndex i = 0; i < keys.size(); ++i) {
+            auto &key = keys[i];
+            auto &value = values[i];
+            if (key.isString() && value.isString()) {
+                auto userParameter = mProto.add_user_parameter();
+                userParameter->set_key(key.asString());
+                userParameter->set_value(value.asString());
             }
-        } else {
-            ALOGW("Parameter names and values size mismatch");
         }
+    }
+
+    loadStateFromProto();
+}
+
+void BootParameters::loadStateFromProto() {
+    // A missing key returns a safe, default value.
+    // Ignore invalid or missing parameters.
+    mIsSilentBoot = mProto.silent_boot();
+
+    for (const auto &param : mProto.user_parameter()) {
+        mParameters.push_back({.key = param.key().c_str(), .value = param.value().c_str()});
     }
 }
 

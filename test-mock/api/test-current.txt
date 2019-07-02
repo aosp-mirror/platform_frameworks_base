@@ -1,18 +1,25 @@
 // Signature format: 2.0
 package android.test.mock {
 
+  public class MockContext extends android.content.Context {
+    method public android.view.Display getDisplay();
+    method public int getDisplayId();
+  }
+
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
+    method public boolean arePermissionsIndividuallyControlled();
     method public String getDefaultBrowserPackageNameAsUser(int);
     method public int getInstallReason(String, android.os.UserHandle);
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public String[] getNamesForUids(int[]);
     method public String getPermissionControllerPackageName();
+    method public int getPermissionFlags(String, String, android.os.UserHandle);
     method @NonNull public String getServicesSystemSharedLibraryPackageName();
     method @NonNull public String getSharedSystemSharedLibraryPackageName();
     method public void grantRuntimePermission(String, String, android.os.UserHandle);
-    method public boolean isPermissionReviewModeEnabled();
     method public void revokeRuntimePermission(String, String, android.os.UserHandle);
+    method public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);
   }
 
 }

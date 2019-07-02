@@ -20,7 +20,8 @@
 #include <android-base/test_utils.h>
 #include <android/os/IncidentReportArgs.h>
 #include <android/util/protobuf.h>
-#include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
+#include <frameworks/base/core/proto/android/os/incident.pb.h>
+#include <frameworks/base/core/proto/android/os/header.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string.h>
@@ -62,7 +63,6 @@ public:
 
 protected:
     TemporaryFile tf;
-    ReportRequestSet requests;
 
     const std::string kTestPath = GetExecutableDirectory();
     const std::string kTestDataPath = kTestPath + "/testdata/";
@@ -74,7 +74,8 @@ public:
     virtual ~SimpleListener(){};
 
     virtual Status onReportStarted() { return Status::ok(); };
-    virtual Status onReportSectionStatus(int /*section*/, int /*status*/) { return Status::ok(); };
+    virtual Status onReportSectionStatus(int /*section*/, int /*status*/)
+            { return Status::ok(); };
     virtual Status onReportFinished() { return Status::ok(); };
     virtual Status onReportFailed() { return Status::ok(); };
 
@@ -82,51 +83,30 @@ protected:
     virtual IBinder* onAsBinder() override { return nullptr; };
 };
 
-TEST_F(SectionTest, HeaderSection) {
-    HeaderSection hs;
-
-    IncidentReportArgs args1, args2;
-    args1.addSection(1);
-    args1.addSection(2);
-    args2.setAll(true);
-
-    IncidentHeaderProto head1, head2;
-    head1.set_reason("axe");
-    head2.set_reason("pup");
-
-    args1.addHeader(head1);
-    args1.addHeader(head2);
-    args2.addHeader(head2);
-
-    requests.add(new ReportRequest(args1, new SimpleListener(), -1));
-    requests.add(new ReportRequest(args2, new SimpleListener(), tf.fd));
-    requests.setMainFd(STDOUT_FILENO);
-
-    std::string content;
-    CaptureStdout();
-    ASSERT_EQ(NO_ERROR, hs.Execute(&requests));
-    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x5"
-                                           "\x12\x3"
-                                           "axe\n\x05\x12\x03pup"));
-
-    EXPECT_TRUE(ReadFileToString(tf.path, &content));
-    EXPECT_THAT(content, StrEq("\n\x05\x12\x03pup"));
-}
-
+/*
 TEST_F(SectionTest, MetadataSection) {
     MetadataSection ms;
-    const std::string testFile = kTestDataPath + "metadata.txt";
-    std::string expect;
-    ASSERT_TRUE(ReadFileToString(testFile, &expect));
 
-    requests.setMainFd(STDOUT_FILENO);
-    requests.setMainDest(android::os::DEST_LOCAL);
-    requests.sectionStats(1)->set_success(true);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
+
+    requestSet.setMainPrivacyPolicy(android::os::PRIVACY_POLICY_LOCAL);
+    requestSet.editSectionStats(1)->set_success(true);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, ms.Execute(&requests));
-    // Notice message_lite.h ParseFromString doesn't work so we just match the bytes directly.
-    EXPECT_THAT(GetCapturedStdout(), StrEq(expect));
+    ASSERT_EQ(NO_ERROR, ms.Execute(&requestSet));
+
+    string out = GetCapturedStdout();
+    IncidentProto expectedIncident;
+    expectedIncident.ParseFromArray(out.data(), out.size());
+    ASSERT_TRUE(expectedIncident.has_metadata());
+    const IncidentMetadata& expectedMetadata = expectedIncident.metadata();
+    ASSERT_EQ(IncidentMetadata::LOCAL, expectedMetadata.dest());
+    ASSERT_EQ(1, expectedMetadata.sections_size());
+    ASSERT_EQ(1, expectedMetadata.sections(0).id());
+    ASSERT_TRUE(expectedMetadata.sections(0).has_success());
+    ASSERT_TRUE(expectedMetadata.sections(0).success());
 }
 
 TEST_F(SectionTest, FileSection) {
@@ -134,27 +114,35 @@ TEST_F(SectionTest, FileSection) {
 
     ASSERT_TRUE(WriteStringToFile("iamtestdata", tf.path));
 
-    requests.setMainFd(STDOUT_FILENO);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
     // The input string is reversed in incident helper
     // The length is 11, in 128Varint it is "0000 1011" -> \v
     EXPECT_THAT(GetCapturedStdout(), StrEq("\xa\vatadtsetmai"));
 }
 
 TEST_F(SectionTest, FileSectionNotExist) {
-    FileSection fs1(NOOP_PARSER, "notexist", false, QUICK_TIMEOUT_MS);
-    ASSERT_EQ(NO_ERROR, fs1.Execute(&requests));
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
 
-    FileSection fs2(NOOP_PARSER, "notexist", true, QUICK_TIMEOUT_MS);
-    ASSERT_EQ(NO_ERROR, fs2.Execute(&requests));
+    FileSection fs1(NOOP_PARSER, "notexist", QUICK_TIMEOUT_MS);
+    ASSERT_EQ(NO_ERROR, fs1.Execute(&requestSet));
+
+    FileSection fs2(NOOP_PARSER, "notexist", QUICK_TIMEOUT_MS);
+    ASSERT_EQ(NO_ERROR, fs2.Execute(&requestSet));
 }
 
 TEST_F(SectionTest, FileSectionTimeout) {
-    FileSection fs(TIMEOUT_PARSER, tf.path, false, QUICK_TIMEOUT_MS);
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
-    ASSERT_TRUE(requests.sectionStats(TIMEOUT_PARSER)->timed_out());
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+
+    FileSection fs(TIMEOUT_PARSER, tf.path, QUICK_TIMEOUT_MS);
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
+    ASSERT_TRUE(requestSet.getSectionStats(TIMEOUT_PARSER)->timed_out());
 }
 
 TEST_F(SectionTest, GZipSection) {
@@ -162,10 +150,12 @@ TEST_F(SectionTest, GZipSection) {
     const std::string testGzFile = testFile + ".gz";
     GZipSection gs(NOOP_PARSER, "/tmp/nonexist", testFile.c_str(), NULL);
 
-    requests.setMainFd(tf.fd);
-    requests.setMainDest(android::os::DEST_LOCAL);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(tf.fd);
+    requestSet.setMainPrivacyPolicy(android::os::PRIVACY_POLICY_LOCAL);
 
-    ASSERT_EQ(NO_ERROR, gs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, gs.Execute(&requestSet));
     std::string expected, gzFile, actual;
     ASSERT_TRUE(ReadFileToString(testGzFile, &gzFile));
     ASSERT_TRUE(ReadFileToString(tf.path, &actual));
@@ -184,8 +174,10 @@ TEST_F(SectionTest, GZipSection) {
 
 TEST_F(SectionTest, GZipSectionNoFileFound) {
     GZipSection gs(NOOP_PARSER, "/tmp/nonexist1", "/tmp/nonexist2", NULL);
-    requests.setMainFd(STDOUT_FILENO);
-    ASSERT_EQ(NO_ERROR, gs.Execute(&requests));
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
+    ASSERT_EQ(NO_ERROR, gs.Execute(&requestSet));
 }
 
 TEST_F(SectionTest, CommandSectionConstructor) {
@@ -204,51 +196,65 @@ TEST_F(SectionTest, CommandSectionConstructor) {
 
 TEST_F(SectionTest, CommandSectionEcho) {
     CommandSection cs(REVERSE_PARSER, "/system/bin/echo", "about", NULL);
-    requests.setMainFd(STDOUT_FILENO);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requestSet));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\xa\x06\ntuoba"));
 }
 
 TEST_F(SectionTest, CommandSectionCommandTimeout) {
     CommandSection cs(NOOP_PARSER, QUICK_TIMEOUT_MS, "/system/bin/yes", NULL);
-    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
-    ASSERT_TRUE(requests.sectionStats(NOOP_PARSER)->timed_out());
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requestSet));
+    ASSERT_TRUE(requestSet.getSectionStats(NOOP_PARSER)->timed_out());
 }
 
 TEST_F(SectionTest, CommandSectionIncidentHelperTimeout) {
     CommandSection cs(TIMEOUT_PARSER, QUICK_TIMEOUT_MS, "/system/bin/echo", "about", NULL);
-    requests.setMainFd(STDOUT_FILENO);
-    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
-    ASSERT_TRUE(requests.sectionStats(TIMEOUT_PARSER)->timed_out());
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requestSet));
+    ASSERT_TRUE(requestSet.getSectionStats(TIMEOUT_PARSER)->timed_out());
 }
 
 TEST_F(SectionTest, CommandSectionBadCommand) {
     CommandSection cs(NOOP_PARSER, "echoo", "about", NULL);
-    ASSERT_EQ(NAME_NOT_FOUND, cs.Execute(&requests));
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    ASSERT_EQ(NAME_NOT_FOUND, cs.Execute(&requestSet));
 }
 
 TEST_F(SectionTest, CommandSectionBadCommandAndTimeout) {
     CommandSection cs(TIMEOUT_PARSER, QUICK_TIMEOUT_MS, "nonexistcommand", "-opt", NULL);
     // timeout will return first
-    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
-    ASSERT_TRUE(requests.sectionStats(TIMEOUT_PARSER)->timed_out());
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requestSet));
+    ASSERT_TRUE(requestSet.getSectionStats(TIMEOUT_PARSER)->timed_out());
 }
 
 TEST_F(SectionTest, LogSectionBinary) {
     LogSection ls(1, LOG_ID_EVENTS);
-    requests.setMainFd(STDOUT_FILENO);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, ls.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, ls.Execute(&requestSet));
     std::string results = GetCapturedStdout();
     EXPECT_FALSE(results.empty());
 }
 
 TEST_F(SectionTest, LogSectionSystem) {
     LogSection ls(1, LOG_ID_SYSTEM);
-    requests.setMainFd(STDOUT_FILENO);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, ls.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, ls.Execute(&requestSet));
     std::string results = GetCapturedStdout();
     EXPECT_FALSE(results.empty());
 }
@@ -258,10 +264,12 @@ TEST_F(SectionTest, TestFilterPiiTaggedFields) {
 
     ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, tf.path));
 
-    requests.setMainFd(STDOUT_FILENO);
+    vector<sp<ReportRequest>> requests;
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
 }
 
@@ -271,13 +279,16 @@ TEST_F(SectionTest, TestBadFdRequest) {
 
     IncidentReportArgs args;
     args.setAll(true);
-    args.setDest(0);
+    args.setPrivacyPolicy(0);
     sp<ReportRequest> badFdRequest = new ReportRequest(args, new SimpleListener(), 1234567);
-    requests.add(badFdRequest);
-    requests.setMainFd(STDOUT_FILENO);
+
+    vector<sp<ReportRequest>> requests;
+    requests.push_back(badFdRequest);
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
     EXPECT_EQ(badFdRequest->err, -EBADF);
 }
@@ -288,9 +299,13 @@ TEST_F(SectionTest, TestBadRequests) {
 
     IncidentReportArgs args;
     args.setAll(true);
-    args.setDest(0);
-    requests.add(new ReportRequest(args, new SimpleListener(), -1));
-    EXPECT_EQ(fs.Execute(&requests), -EBADF);
+    args.setPrivacyPolicy(0);
+
+    vector<sp<ReportRequest>> requests;
+    requests.push_back(new ReportRequest(args, new SimpleListener(), -1));
+    ReportRequestSet requestSet(requests);
+
+    EXPECT_EQ(fs.Execute(&requestSet), -EBADF);
 }
 
 TEST_F(SectionTest, TestMultipleRequests) {
@@ -304,17 +319,20 @@ TEST_F(SectionTest, TestMultipleRequests) {
 
     IncidentReportArgs args1, args2, args3;
     args1.setAll(true);
-    args1.setDest(android::os::DEST_LOCAL);
+    args1.setPrivacyPolicy(android::os::PRIVACY_POLICY_LOCAL);
     args2.setAll(true);
-    args2.setDest(android::os::DEST_EXPLICIT);
+    args2.setPrivacyPolicy(android::os::PRIVACY_POLICY_EXPLICIT);
     sp<SimpleListener> l = new SimpleListener();
-    requests.add(new ReportRequest(args1, l, output1.fd));
-    requests.add(new ReportRequest(args2, l, output2.fd));
-    requests.add(new ReportRequest(args3, l, output3.fd));
-    requests.setMainFd(STDOUT_FILENO);
+
+    vector<sp<ReportRequest>> requests;
+    requests.push_back(new ReportRequest(args1, l, output1.fd));
+    requests.push_back(new ReportRequest(args2, l, output2.fd));
+    requests.push_back(new ReportRequest(args3, l, output3.fd));
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
 
     std::string content, expect;
@@ -345,18 +363,21 @@ TEST_F(SectionTest, TestMultipleRequestsBySpec) {
 
     IncidentReportArgs args1, args2, args3;
     args1.setAll(true);
-    args1.setDest(android::os::DEST_EXPLICIT);
+    args1.setPrivacyPolicy(android::os::PRIVACY_POLICY_EXPLICIT);
     args2.setAll(true);
-    args2.setDest(android::os::DEST_EXPLICIT);
+    args2.setPrivacyPolicy(android::os::PRIVACY_POLICY_EXPLICIT);
     args3.setAll(true);
     sp<SimpleListener> l = new SimpleListener();
-    requests.add(new ReportRequest(args1, l, output1.fd));
-    requests.add(new ReportRequest(args2, l, output2.fd));
-    requests.add(new ReportRequest(args3, l, output3.fd));
-    requests.setMainFd(STDOUT_FILENO);
+
+    vector<sp<ReportRequest>> requests;
+    requests.push_back(new ReportRequest(args1, l, output1.fd));
+    requests.push_back(new ReportRequest(args2, l, output2.fd));
+    requests.push_back(new ReportRequest(args3, l, output3.fd));
+    ReportRequestSet requestSet(requests);
+    requestSet.setMainFd(STDOUT_FILENO);
 
     CaptureStdout();
-    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requestSet));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
 
     std::string content, expect;
@@ -374,3 +395,4 @@ TEST_F(SectionTest, TestMultipleRequestsBySpec) {
     EXPECT_TRUE(ReadFileToString(output3.path, &content));
     EXPECT_THAT(content, StrEq(string("\x02") + c + STRING_FIELD_2));
 }
+*/

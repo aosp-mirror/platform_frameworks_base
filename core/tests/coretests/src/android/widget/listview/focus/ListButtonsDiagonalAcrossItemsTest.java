@@ -16,15 +16,15 @@
 
 package android.widget.listview.focus;
 
-import android.widget.listview.ListButtonsDiagonalAcrossItems;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.listview.ListButtonsDiagonalAcrossItems;
+
+import androidx.test.filters.MediumTest;
 
 /**
  * Test that ListView will override default behavior of focus searching to

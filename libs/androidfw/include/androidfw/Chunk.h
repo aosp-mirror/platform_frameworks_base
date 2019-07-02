@@ -89,7 +89,9 @@ class ChunkIterator {
         len_(len),
         last_error_(nullptr) {
     CHECK(next_chunk_ != nullptr) << "data can't be nullptr";
-    VerifyNextChunk();
+    if (len_ != 0) {
+      VerifyNextChunk();
+    }
   }
 
   Chunk Next();

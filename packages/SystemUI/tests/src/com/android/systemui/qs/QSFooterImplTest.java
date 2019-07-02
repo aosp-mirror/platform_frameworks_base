@@ -42,7 +42,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-@Ignore("failing")
 public class QSFooterImplTest extends LeakCheckedTest {
 
     private QSFooterImpl mFooter;
@@ -61,6 +60,7 @@ public class QSFooterImplTest extends LeakCheckedTest {
     }
 
     @Test
+    @Ignore("failing")
     public void testSettings_UserNotSetup() {
         View settingsButton = mFooter.findViewById(id.settings_button);
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(false);

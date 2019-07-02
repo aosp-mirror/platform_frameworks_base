@@ -19,7 +19,8 @@ package android.text;
 import static org.junit.Assert.assertArrayEquals;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

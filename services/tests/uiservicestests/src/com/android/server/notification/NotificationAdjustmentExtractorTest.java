@@ -25,6 +25,9 @@ import static junit.framework.Assert.assertTrue;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.Adjustment;
@@ -54,6 +57,9 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         ArrayList<String> people = new ArrayList<>();
         people.add("you");
         signals.putStringArrayList(Adjustment.KEY_PEOPLE, people);
+        ArrayList<Notification.Action> smartActions = new ArrayList<>();
+        smartActions.add(createAction());
+        signals.putParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, smartActions);
         Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
         r.addAdjustment(adjustment);
 
@@ -66,6 +72,7 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         assertTrue(r.getGroupKey().contains(GroupHelper.AUTOGROUP_KEY));
         assertEquals(people, r.getPeopleOverride());
         assertEquals(snoozeCriteria, r.getSnoozeCriteria());
+        assertEquals(smartActions, r.getSystemGeneratedSmartActions());
     }
 
     @Test
@@ -113,5 +120,12 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         StatusBarNotification sbn = new StatusBarNotification("", "", 0, "", 0,
                 0, n, UserHandle.ALL, null, System.currentTimeMillis());
        return new NotificationRecord(getContext(), sbn, channel);
+    }
+
+    private Notification.Action createAction() {
+        return new Notification.Action.Builder(
+                Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
+                "action",
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
     }
 }

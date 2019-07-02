@@ -27,24 +27,29 @@ cc_library_shared {
         "libbinder",
         "liblog",
         "libutils",
+        "libprotobuf-cpp-lite",
+    ],
+
+    static_libs: [
+        "libplatformprotos",
+    ],
+
+    whole_static_libs: [
+        "libincidentcompanion",
     ],
 
     aidl: {
-        include_dirs: ["frameworks/base/core/java"],
+        include_dirs: [
+            "frameworks/base/core/java",
+            "frameworks/native/libs/incidentcompanion/binder",
+        ],
         export_aidl_headers: true,
     },
 
     srcs: [
         ":libincident_aidl",
-        "proto/android/os/header.proto",
-        "proto/android/os/metadata.proto",
         "src/IncidentReportArgs.cpp",
     ],
-
-    proto: {
-        type: "lite",
-        export_proto_headers: true,
-    },
 
     export_include_dirs: ["include"],
 }

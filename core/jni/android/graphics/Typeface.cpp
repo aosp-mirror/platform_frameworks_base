@@ -20,11 +20,13 @@
 #include "FontUtils.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "SkTypeface.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
 #include <hwui/Typeface.h>
 #include <minikin/FontFamily.h>
+#include <minikin/SystemFonts.h>
 
 using namespace android;
 
@@ -108,6 +110,7 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
 // CriticalNative
 static void Typeface_setDefault(jlong faceHandle) {
     Typeface::setDefault(toTypeface(faceHandle));
+    minikin::SystemFonts::registerDefault(toTypeface(faceHandle)->fFontCollection);
 }
 
 static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle) {
@@ -128,6 +131,12 @@ static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle)
     return result;
 }
 
+static void Typeface_registerGenericFamily(JNIEnv *env, jobject, jstring familyName, jlong ptr) {
+    ScopedUtfChars familyNameChars(env, familyName);
+    minikin::SystemFonts::registerFallback(familyNameChars.c_str(),
+                                           toTypeface(ptr)->fFontCollection);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -144,6 +153,8 @@ static const JNINativeMethod gTypefaceMethods[] = {
                                            (void*)Typeface_createFromArray },
     { "nativeSetDefault",         "(J)V",   (void*)Typeface_setDefault },
     { "nativeGetSupportedAxes",   "(J)[I",  (void*)Typeface_getSupportedAxes },
+    { "nativeRegisterGenericFamily", "(Ljava/lang/String;J)V",
+          (void*)Typeface_registerGenericFamily },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)

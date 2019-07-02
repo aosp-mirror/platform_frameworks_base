@@ -48,4 +48,11 @@ public interface KeyguardSecurityCallback {
      * Resets the keyguard view.
      */
     void reset();
+
+    /**
+     * Call when cancel button is pressed in bouncer.
+     */
+    default void onCancelClicked() {
+        // No-op
+    }
 }

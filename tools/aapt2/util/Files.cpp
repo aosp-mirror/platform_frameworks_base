@@ -102,12 +102,34 @@ FileType GetFileType(const std::string& path) {
 #endif
 
 bool mkdirs(const std::string& path) {
-  constexpr const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP;
+ #ifdef _WIN32
+  // Start after the long path prefix if present.
+  bool require_drive = false;
+  size_t current_pos = 0u;
+  if (util::StartsWith(path, R"(\\?\)")) {
+    require_drive = true;
+    current_pos = 4u;
+  }
+
+  // Start after the drive path if present.
+  if (path.size() >= 3 && path[current_pos + 1] == ':' &&
+       (path[current_pos + 2] == '\\' || path[current_pos + 2] == '/')) {
+    current_pos += 3u;
+  } else if (require_drive) {
+    return false;
+  }
+ #else
   // Start after the first character so that we don't consume the root '/'.
   // This is safe to do with unicode because '/' will never match with a continuation character.
   size_t current_pos = 1u;
+ #endif
+  constexpr const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP;
   while ((current_pos = path.find(sDirSep, current_pos)) != std::string::npos) {
     std::string parent_path = path.substr(0, current_pos);
+    if (parent_path.empty()) {
+      continue;
+    }
+
     int result = ::android::base::utf8::mkdir(parent_path.c_str(), mode);
     if (result < 0 && errno != EEXIST) {
       return false;
@@ -149,6 +171,10 @@ StringPiece GetExtension(const StringPiece& path) {
   return {};
 }
 
+bool IsHidden(const android::StringPiece& path) {
+  return util::StartsWith(GetFilename(path), ".");
+}
+
 void AppendPath(std::string* base, StringPiece part) {
   CHECK(base != nullptr);
   const bool base_has_trailing_sep = (!base->empty() && *(base->end() - 1) == sDirSep);
@@ -161,6 +187,17 @@ void AppendPath(std::string* base, StringPiece part) {
     *base += sDirSep;
   }
   base->append(part.data(), part.size());
+}
+
+std::string BuildPath(std::vector<const StringPiece>&& args) {
+  if (args.empty()) {
+    return "";
+  }
+  std::string out = args[0].to_string();
+  for (int i = 1; i < args.size(); i++) {
+    file::AppendPath(&out, args[i]);
+  }
+  return out;
 }
 
 std::string PackageToPath(const StringPiece& package) {
@@ -218,6 +255,25 @@ bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_a
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
       out_arglist->push_back(line.to_string());
+    }
+  }
+  return true;
+}
+
+bool AppendSetArgsFromFile(const StringPiece& path, std::unordered_set<std::string>* out_argset,
+                           std::string* out_error) {
+  std::string contents;
+  if(!ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+    if (out_error) {
+      *out_error = "failed to read argument-list file";
+    }
+    return false;
+  }
+
+  for (StringPiece line : util::Tokenize(contents, ' ')) {
+    line = util::TrimWhitespace(line);
+    if (!line.empty()) {
+      out_argset->insert(line.to_string());
     }
   }
   return true;

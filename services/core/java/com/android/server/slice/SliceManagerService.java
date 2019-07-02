@@ -26,10 +26,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import android.Manifest.permission;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.ContentProviderHolder;
-import android.app.IActivityManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceSpec;
 import android.app.usage.UsageStatsManagerInternal;
@@ -198,6 +195,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     public SliceSpec[] getPinnedSpecs(Uri uri, String pkg) throws RemoteException {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
+        uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
         return getPinnedSlice(uri).getSpecs();
     }
 
@@ -218,12 +216,12 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @Override
-    public int checkSlicePermission(Uri uri, String pkg, int pid, int uid,
+    public int checkSlicePermission(Uri uri, String callingPkg, String pkg, int pid, int uid,
             String[] autoGrantPermissions) {
         int userId = UserHandle.getUserId(uid);
         if (pkg == null) {
             for (String p : mContext.getPackageManager().getPackagesForUid(uid)) {
-                if (checkSlicePermission(uri, p, pid, uid, autoGrantPermissions)
+                if (checkSlicePermission(uri, callingPkg, p, pid, uid, autoGrantPermissions)
                         == PERMISSION_GRANTED) {
                     return PERMISSION_GRANTED;
                 }
@@ -236,9 +234,9 @@ public class SliceManagerService extends ISliceManager.Stub {
         if (mPermissions.hasPermission(pkg, userId, uri)) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        if (autoGrantPermissions != null) {
+        if (autoGrantPermissions != null && callingPkg != null) {
             // Need to own the Uri to call in with permissions to grant.
-            enforceOwner(pkg, uri, userId);
+            enforceOwner(callingPkg, uri, userId);
             for (String perm : autoGrantPermissions) {
                 if (mContext.checkPermission(perm, pid, uid) == PERMISSION_GRANTED) {
                     int providerUser = ContentProvider.getUserIdFromUri(uri, userId);
@@ -390,7 +388,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     protected int checkAccess(String pkg, Uri uri, int uid, int pid) {
-        return checkSlicePermission(uri, pkg, uid, pid, null);
+        return checkSlicePermission(uri, null, pkg, pid, uid, null);
     }
 
     private String getProviderPkg(Uri uri, int user) {

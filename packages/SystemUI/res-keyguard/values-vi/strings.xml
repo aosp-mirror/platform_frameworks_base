@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Chạm để nhập mật khẩu"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Nhập mật khẩu để mở khóa"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Nhập mã PIN để mở khóa"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Nhập mã PIN của bạn"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Nhập hình mở khóa của bạn"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Nhập mật khẩu của bạn"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Mã PIN không chính xác."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Thẻ không hợp lệ."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Đã sạc đầy"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Đang sạc"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Đang sạc nhanh"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Đang sạc chậm"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Đã sạc đầy"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc không dây"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc nhanh"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc chậm"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Kết nối bộ sạc của bạn."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Nhấn vào Menu để mở khóa."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Mạng đã bị khóa"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Thẻ SIM đã bị khóa bằng mã PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Đang mở khóa thẻ SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Khu vực mã PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Mật khẩu thiết bị"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Khu vực mã PIN của SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Khu vực mã PUK của SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Báo thức tiếp theo được đặt cho <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Không thể tắt eSIM do lỗi."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Nhập"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Đã quên hình mở khóa"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Hình mở khóa sai"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Mật khẩu sai"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Hình mở khóa sai"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Mã PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Hãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây.</item>
@@ -136,13 +141,41 @@
       <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
       <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Không nhận dạng được"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Hãy nhập mã PIN của SIM, bạn còn <xliff:g id="NUMBER_1">%d</xliff:g> lần thử.</item>
-      <item quantity="one">Hãy nhập mã PIN của SIM, bạn còn <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Không nhận dạng được"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Không nhận dạng được"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Hãy nhập mã PIN của SIM. Bạn còn <xliff:g id="NUMBER_1">%d</xliff:g> lần thử.</item>
+      <item quantity="one">Hãy nhập mã PIN của SIM. Bạn còn <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi phải liên hệ với nhà mạng để mở khóa thiết bị của mình.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn <xliff:g id="_NUMBER_1">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết chi tiết.</item>
       <item quantity="one">SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn <xliff:g id="_NUMBER_0">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết chi tiết.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color"></annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color"></annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Mười hai"</item>
+    <item msgid="7389464214252023751">"Một"</item>
+    <item msgid="8803180377002008046">"Hai"</item>
+    <item msgid="8614897059944644719">"Ba"</item>
+    <item msgid="2293058674782619556">"Bốn"</item>
+    <item msgid="4815402358455041664">"Năm"</item>
+    <item msgid="3325754778509665687">"Sáu"</item>
+    <item msgid="5805551341866280575">"Bảy"</item>
+    <item msgid="203334816668238610">"Tám"</item>
+    <item msgid="4828052671464488923">"Chín"</item>
+    <item msgid="2233497913571137419">"Mười"</item>
+    <item msgid="5621554266768657830">"Mười một"</item>
+  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

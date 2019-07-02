@@ -1,8 +1,0 @@
-android_app {
-    name: "DefaultContainerService",
-    srcs: ["**/*.java"],
-    platform_apis: true,
-    jni_libs: ["libdefcontainer_jni"],
-    certificate: "platform",
-    privileged: true,
-}

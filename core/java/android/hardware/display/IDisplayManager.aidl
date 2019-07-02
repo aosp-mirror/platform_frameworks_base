@@ -34,6 +34,8 @@ interface IDisplayManager {
     DisplayInfo getDisplayInfo(int displayId);
     int[] getDisplayIds();
 
+    boolean isUidPresentOnDisplay(int uid, int displayId);
+
     void registerCallback(in IDisplayManagerCallback callback);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
@@ -67,9 +69,6 @@ interface IDisplayManager {
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
-    // Requires CONTROL_DISPLAY_SATURATION
-    void setSaturationLevel(float level);
-
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
     // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in IVirtualDisplayCallback callback,
@@ -85,6 +84,9 @@ interface IDisplayManager {
 
     // No permissions required but must be same Uid as the creator.
     void releaseVirtualDisplay(in IVirtualDisplayCallback token);
+
+    // No permissions required but must be same Uid as the creator.
+    void setVirtualDisplayState(in IVirtualDisplayCallback token, boolean isOn);
 
     // Get a stable metric for the device's display size. No permissions required.
     Point getStableDisplaySize();
@@ -117,4 +119,9 @@ interface IDisplayManager {
 
     // Get the minimum brightness curve.
     Curve getMinimumBrightnessCurve();
+
+    // Gets the id of the preferred wide gamut color space for all displays.
+    // The wide gamut color space is returned from composition pipeline
+    // based on hardware capability.
+    int getPreferredWideGamutColorSpaceId();
 }

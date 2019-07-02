@@ -19,6 +19,7 @@ package android.app.admin;
 import android.accounts.AccountManager;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -296,7 +297,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Broadcast action: notify that a new batch of network logs is ready to be collected.
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
-     * @hide
+     * @see DelegatedAdminReceiver#onNetworkLogsAvailable
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(explicitOnly = true)
@@ -425,7 +426,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
-    /** @hide */
+    /**
+     * Broadcast action: notify that some app is attempting to choose a KeyChain key.
+     * @see DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * @see DelegatedAdminReceiver#onChoosePrivateKeyAlias
+     */
     public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS =
             "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
 
@@ -511,7 +516,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * Retrieve the DevicePolicyManager interface for this administrator to work
      * with the system.
      */
-    public DevicePolicyManager getManager(Context context) {
+    public @NonNull DevicePolicyManager getManager(@NonNull Context context) {
         if (mManager != null) {
             return mManager;
         }
@@ -525,7 +530,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * use in {@link DevicePolicyManager} APIs that require the administrator to
      * identify itself.
      */
-    public ComponentName getWho(Context context) {
+    public @NonNull ComponentName getWho(@NonNull Context context) {
         if (mWho != null) {
             return mWho;
         }
@@ -546,7 +551,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
-    public void onEnabled(Context context, Intent intent) {
+    public void onEnabled(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -560,7 +565,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @return Return the warning message to display to the user before
      * being disabled; if null is returned, no message is displayed.
      */
-    public CharSequence onDisableRequested(Context context, Intent intent) {
+    public @Nullable CharSequence onDisableRequested(@NonNull Context context,
+            @NonNull Intent intent) {
         return null;
     }
 
@@ -572,7 +578,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
-    public void onDisabled(Context context, Intent intent) {
+    public void onDisabled(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -587,7 +593,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *             {@link #onPasswordChanged(Context, Intent, UserHandle)} instead.
      */
     @Deprecated
-    public void onPasswordChanged(Context context, Intent intent) {
+    public void onPasswordChanged(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -601,7 +607,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *        user is the current profile or a parent user, check for equality with
      *        {@link Process#myUserHandle}.
      */
-    public void onPasswordChanged(Context context, Intent intent, UserHandle user) {
+    public void onPasswordChanged(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle user) {
         onPasswordChanged(context, intent);
     }
 
@@ -617,7 +624,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *             {@link #onPasswordFailed(Context, Intent, UserHandle)} instead.
      */
     @Deprecated
-    public void onPasswordFailed(Context context, Intent intent) {
+    public void onPasswordFailed(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -631,7 +638,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *        user is the current profile or a parent user, check for equality with
      *        {@link Process#myUserHandle}.
      */
-    public void onPasswordFailed(Context context, Intent intent, UserHandle user) {
+    public void onPasswordFailed(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle user) {
         onPasswordFailed(context, intent);
     }
 
@@ -647,7 +655,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *             {@link #onPasswordSucceeded(Context, Intent, UserHandle)} instead.
      */
     @Deprecated
-    public void onPasswordSucceeded(Context context, Intent intent) {
+    public void onPasswordSucceeded(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -661,7 +669,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *        user is the current profile or a parent user, check for equality with
      *        {@link Process#myUserHandle}.
      */
-    public void onPasswordSucceeded(Context context, Intent intent, UserHandle user) {
+    public void onPasswordSucceeded(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle user) {
         onPasswordSucceeded(context, intent);
     }
 
@@ -687,7 +696,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *             {@link #onPasswordExpiring(Context, Intent, UserHandle)} instead.
      */
     @Deprecated
-    public void onPasswordExpiring(Context context, Intent intent) {
+    public void onPasswordExpiring(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -711,7 +720,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *        user is the current profile or a parent user, check for equality with
      *        {@link Process#myUserHandle}.
      */
-    public void onPasswordExpiring(Context context, Intent intent, UserHandle user) {
+    public void onPasswordExpiring(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle user) {
         onPasswordExpiring(context, intent);
     }
 
@@ -742,7 +752,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
-    public void onProfileProvisioningComplete(Context context, Intent intent) {
+    public void onProfileProvisioningComplete(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -754,7 +764,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @deprecated Do not use
      */
     @Deprecated
-    public void onReadyForUserInitialization(Context context, Intent intent) {
+    public void onReadyForUserInitialization(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -762,9 +772,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @param pkg If entering, the authorized package using lock task mode, otherwise null.
+     * @param pkg The authorized package using lock task mode.
      */
-    public void onLockTaskModeEntering(Context context, Intent intent, String pkg) {
+    public void onLockTaskModeEntering(@NonNull Context context, @NonNull Intent intent,
+            @NonNull String pkg) {
     }
 
     /**
@@ -773,7 +784,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
-    public void onLockTaskModeExiting(Context context, Intent intent) {
+    public void onLockTaskModeExiting(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -783,14 +794,14 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @param uid The uid asking for the private key and certificate pair.
+     * @param uid The uid of the app asking for the private key and certificate pair.
      * @param uri The URI to authenticate, may be null.
      * @param alias The alias preselected by the client, or null.
      * @return The private key alias to return and grant access to.
      * @see KeyChain#choosePrivateKeyAlias
      */
-    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, Uri uri,
-            String alias) {
+    public @Nullable String onChoosePrivateKeyAlias(@NonNull Context context,
+            @NonNull Intent intent, int uid, @Nullable Uri uri, @Nullable String alias) {
         return null;
     }
 
@@ -814,7 +825,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *        the current pending update was first available. -1 if no pending update is available.
      * @see DevicePolicyManager#getPendingSystemUpdate
      */
-    public void onSystemUpdatePending(Context context, Intent intent, long receivedTime) {
+    public void onSystemUpdatePending(@NonNull Context context, @NonNull Intent intent,
+            long receivedTime) {
     }
 
     /**
@@ -826,7 +838,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @see DevicePolicyManager#requestBugreport
      */
-    public void onBugreportSharingDeclined(Context context, Intent intent) {
+    public void onBugreportSharingDeclined(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -841,7 +853,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param bugreportHash SHA-256 hash of the bugreport file.
      * @see DevicePolicyManager#requestBugreport
      */
-    public void onBugreportShared(Context context, Intent intent, String bugreportHash) {
+    public void onBugreportShared(@NonNull Context context, @NonNull Intent intent,
+            @NonNull String bugreportHash) {
     }
 
     /**
@@ -856,7 +869,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * or {@link #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE}
      * @see DevicePolicyManager#requestBugreport
      */
-    public void onBugreportFailed(Context context, Intent intent,
+    public void onBugreportFailed(@NonNull Context context, @NonNull Intent intent,
             @BugreportFailureCode int failureCode) {
     }
 
@@ -875,7 +888,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @see DevicePolicyManager#retrieveSecurityLogs(ComponentName)
      */
-    public void onSecurityLogsAvailable(Context context, Intent intent) {
+    public void onSecurityLogsAvailable(@NonNull Context context, @NonNull Intent intent) {
     }
 
     /**
@@ -896,8 +909,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param networkLogsCount The total count of events in the current batch of network logs.
      * @see DevicePolicyManager#retrieveNetworkLogs
      */
-    public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
-            int networkLogsCount) {
+    public void onNetworkLogsAvailable(@NonNull Context context, @NonNull Intent intent,
+            long batchToken, @IntRange(from = 1) int networkLogsCount) {
     }
 
     /**
@@ -909,7 +922,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param newUser The {@link UserHandle} of the user that has just been added.
      */
-    public void onUserAdded(Context context, Intent intent, @NonNull UserHandle newUser) {
+    public void onUserAdded(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle newUser) {
     }
 
     /**
@@ -921,7 +935,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param removedUser The {@link UserHandle} of the user that has just been removed.
      */
-    public void onUserRemoved(Context context, Intent intent, @NonNull UserHandle removedUser) {
+    public void onUserRemoved(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle removedUser) {
     }
 
     /**
@@ -933,7 +948,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param startedUser The {@link UserHandle} of the user that has just been started.
      */
-    public void onUserStarted(Context context, Intent intent, @NonNull UserHandle startedUser) {
+    public void onUserStarted(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle startedUser) {
     }
 
     /**
@@ -945,7 +961,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param stoppedUser The {@link UserHandle} of the user that has just been stopped.
      */
-    public void onUserStopped(Context context, Intent intent, @NonNull UserHandle stoppedUser) {
+    public void onUserStopped(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle stoppedUser) {
     }
 
     /**
@@ -957,7 +974,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param switchedUser The {@link UserHandle} of the user that has just been switched to.
      */
-    public void onUserSwitched(Context context, Intent intent, @NonNull UserHandle switchedUser) {
+    public void onUserSwitched(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle switchedUser) {
     }
 
     /**
@@ -991,7 +1009,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param user the {@link UserHandle} of the affiliated user
      * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
      */
-    public void onTransferAffiliatedProfileOwnershipComplete(Context context, UserHandle user) {
+    public void onTransferAffiliatedProfileOwnershipComplete(@NonNull Context context,
+            @NonNull UserHandle user) {
     }
 
     /**
@@ -1000,7 +1019,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * convenience callbacks for each action.
      */
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {

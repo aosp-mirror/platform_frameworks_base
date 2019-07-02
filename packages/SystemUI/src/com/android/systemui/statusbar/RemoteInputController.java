@@ -16,18 +16,16 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.internal.util.Preconditions;
-import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-import com.android.systemui.statusbar.policy.RemoteInputView;
-
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Pair;
+
+import com.android.internal.util.Preconditions;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ public class RemoteInputController {
     private static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
 
-    private final ArrayList<Pair<WeakReference<NotificationData.Entry>, Object>> mOpen
+    private final ArrayList<Pair<WeakReference<NotificationEntry>, Object>> mOpen
             = new ArrayList<>();
     private final ArrayMap<String, Object> mSpinning = new ArrayMap<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
@@ -103,7 +101,7 @@ public class RemoteInputController {
      * @param entry the entry for which a remote input is now active.
      * @param token a token identifying the view that is managing the remote input
      */
-    public void addRemoteInput(NotificationData.Entry entry, Object token) {
+    public void addRemoteInput(NotificationEntry entry, Object token) {
         Preconditions.checkNotNull(entry);
         Preconditions.checkNotNull(token);
 
@@ -124,7 +122,7 @@ public class RemoteInputController {
      *              the entry is only removed if the token matches the last added token for this
      *              entry. If null, the entry is removed regardless.
      */
-    public void removeRemoteInput(NotificationData.Entry entry, Object token) {
+    public void removeRemoteInput(NotificationEntry entry, Object token) {
         Preconditions.checkNotNull(entry);
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
@@ -175,7 +173,7 @@ public class RemoteInputController {
         return mSpinning.get(key) == token;
     }
 
-    private void apply(NotificationData.Entry entry) {
+    private void apply(NotificationEntry entry) {
         mDelegate.setRemoteInputActive(entry, isRemoteInputActive(entry));
         boolean remoteInputActive = isRemoteInputActive();
         int N = mCallbacks.size();
@@ -187,7 +185,7 @@ public class RemoteInputController {
     /**
      * @return true if {@param entry} has an active RemoteInput
      */
-    public boolean isRemoteInputActive(NotificationData.Entry entry) {
+    public boolean isRemoteInputActive(NotificationEntry entry) {
         return pruneWeakThenRemoveAndContains(entry /* contains */, null /* remove */,
                 null /* removeToken */);
     }
@@ -210,10 +208,10 @@ public class RemoteInputController {
      * @return true if {@param contains} is in the set of active remote inputs
      */
     private boolean pruneWeakThenRemoveAndContains(
-            NotificationData.Entry contains, NotificationData.Entry remove, Object removeToken) {
+            NotificationEntry contains, NotificationEntry remove, Object removeToken) {
         boolean found = false;
         for (int i = mOpen.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = mOpen.get(i).first.get();
+            NotificationEntry item = mOpen.get(i).first.get();
             Object itemToken = mOpen.get(i).second;
             boolean removeTokenMatches = (removeToken == null || itemToken == removeToken);
 
@@ -237,7 +235,7 @@ public class RemoteInputController {
         mCallbacks.add(callback);
     }
 
-    public void remoteInputSent(NotificationData.Entry entry) {
+    public void remoteInputSent(NotificationEntry entry) {
         int N = mCallbacks.size();
         for (int i = 0; i < N; i++) {
             mCallbacks.get(i).onRemoteInputSent(entry);
@@ -250,18 +248,18 @@ public class RemoteInputController {
         }
 
         // Make a copy because closing the remote inputs will modify mOpen.
-        ArrayList<NotificationData.Entry> list = new ArrayList<>(mOpen.size());
+        ArrayList<NotificationEntry> list = new ArrayList<>(mOpen.size());
         for (int i = mOpen.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = mOpen.get(i).first.get();
-            if (item != null && item.row != null) {
-                list.add(item);
+            NotificationEntry entry = mOpen.get(i).first.get();
+            if (entry != null && entry.rowExists()) {
+                list.add(entry);
             }
         }
 
         for (int i = list.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = list.get(i);
-            if (item.row != null) {
-                item.row.closeRemoteInput();
+            NotificationEntry entry = list.get(i);
+            if (entry.rowExists()) {
+                entry.closeRemoteInput();
             }
         }
     }
@@ -270,31 +268,31 @@ public class RemoteInputController {
         mDelegate.requestDisallowLongPressAndDismiss();
     }
 
-    public void lockScrollTo(NotificationData.Entry entry) {
+    public void lockScrollTo(NotificationEntry entry) {
         mDelegate.lockScrollTo(entry);
     }
 
     public interface Callback {
         default void onRemoteInputActive(boolean active) {}
 
-        default void onRemoteInputSent(NotificationData.Entry entry) {}
+        default void onRemoteInputSent(NotificationEntry entry) {}
     }
 
     public interface Delegate {
         /**
          * Activate remote input if necessary.
          */
-        void setRemoteInputActive(NotificationData.Entry entry, boolean remoteInputActive);
+        void setRemoteInputActive(NotificationEntry entry, boolean remoteInputActive);
 
-       /**
-        * Request that the view does not dismiss nor perform long press for the current touch.
-        */
-       void requestDisallowLongPressAndDismiss();
+        /**
+         * Request that the view does not dismiss nor perform long press for the current touch.
+         */
+        void requestDisallowLongPressAndDismiss();
 
-      /**
-       * Request that the view is made visible by scrolling to it, and keep the scroll locked until
-       * the user scrolls, or {@param v} loses focus or is detached.
-       */
-       void lockScrollTo(NotificationData.Entry entry);
+        /**
+         * Request that the view is made visible by scrolling to it, and keep the scroll locked until
+         * the user scrolls, or {@param entry} loses focus or is detached.
+         */
+        void lockScrollTo(NotificationEntry entry);
     }
 }

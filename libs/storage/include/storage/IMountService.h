@@ -20,6 +20,7 @@
 #include <storage/IMountServiceListener.h>
 #include <storage/IMountShutdownObserver.h>
 #include <storage/IObbActionListener.h>
+#include <storage/ObbInfo.h>
 
 #include <utils/String8.h>
 
@@ -64,7 +65,7 @@ public:
     virtual void finishMediaUpdate() = 0;
     virtual void mountObb(const String16& rawPath, const String16& canonicalPath,
             const String16& key, const sp<IObbActionListener>& token,
-            const int32_t nonce) = 0;
+            const int32_t nonce, const sp<ObbInfo>& obbInfo) = 0;
     virtual void unmountObb(const String16& filename, const bool force,
             const sp<IObbActionListener>& token, const int32_t nonce) = 0;
     virtual bool isObbMounted(const String16& filename) = 0;

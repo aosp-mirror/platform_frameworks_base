@@ -370,7 +370,7 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    public static final Parcelable.Creator<AssetFileDescriptor> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AssetFileDescriptor> CREATOR
             = new Parcelable.Creator<AssetFileDescriptor>() {
         public AssetFileDescriptor createFromParcel(Parcel in) {
             return new AssetFileDescriptor(in);

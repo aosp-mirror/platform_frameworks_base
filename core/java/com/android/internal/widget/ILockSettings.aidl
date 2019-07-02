@@ -42,19 +42,19 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     @UnsupportedAppUsage
     String getString(in String key, in String defaultValue, in int userId);
-    void setLockCredential(in String credential, int type, in String savedCredential, int requestedQuality, int userId);
+    void setLockCredential(in byte[] credential, int type, in byte[] savedCredential, int requestedQuality, int userId, boolean allowUntrustedChange);
     void resetKeyStore(int userId);
-    VerifyCredentialResponse checkCredential(in String credential, int type, int userId,
+    VerifyCredentialResponse checkCredential(in byte[] credential, int type, int userId,
             in ICheckCredentialProgressCallback progressCallback);
-    VerifyCredentialResponse verifyCredential(in String credential, int type, long challenge, int userId);
-    VerifyCredentialResponse verifyTiedProfileChallenge(String credential, int type, long challenge, int userId);
+    VerifyCredentialResponse verifyCredential(in byte[] credential, int type, long challenge, int userId);
+    VerifyCredentialResponse verifyTiedProfileChallenge(in byte[] credential, int type, long challenge, int userId);
     boolean checkVoldPassword(int userId);
     @UnsupportedAppUsage
     boolean havePattern(int userId);
     @UnsupportedAppUsage
     boolean havePassword(int userId);
-    byte[] getHashFactor(String currentCredential, int userId);
-    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, String managedUserPassword);
+    byte[] getHashFactor(in byte[] currentCredential, int userId);
+    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in byte[] managedUserPassword);
     boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
     void unregisterStrongAuthTracker(in IStrongAuthTracker tracker);
@@ -62,6 +62,7 @@ interface ILockSettings {
     void systemReady();
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
+    boolean hasPendingEscrowToken(int userId);
 
     // Keystore RecoveryController methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
@@ -70,7 +71,9 @@ interface ILockSettings {
             in byte[] recoveryServiceCertFile, in byte[] recoveryServiceSigFile);
     KeyChainSnapshot getKeyChainSnapshot();
     String generateKey(String alias);
+    String generateKeyWithMetadata(String alias, in byte[] metadata);
     String importKey(String alias, in byte[] keyBytes);
+    String importKeyWithMetadata(String alias, in byte[] keyBytes, in byte[] metadata);
     String getKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);

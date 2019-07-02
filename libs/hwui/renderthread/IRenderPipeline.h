@@ -16,29 +16,38 @@
 
 #pragma once
 
+#include "DamageAccumulator.h"
 #include "FrameInfoVisualizer.h"
+#include "LayerUpdateQueue.h"
+#include "Lighting.h"
 #include "SwapBehavior.h"
+#include "hwui/Bitmap.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
 
 class GrContext;
 
-namespace android {
+struct ANativeWindow;
 
-class Surface;
+namespace android {
 
 namespace uirenderer {
 
 class DeferredLayerUpdater;
 class ErrorHandler;
+class TaskManager;
 
 namespace renderthread {
 
 enum class MakeCurrentResult { AlreadyCurrent, Failed, Succeeded };
 
 enum class ColorMode {
-    Srgb,
+    // SRGB means HWUI will produce buffer in SRGB color space.
+    SRGB,
+    // WideColorGamut means HWUI would support rendering scRGB non-linear into
+    // a signed buffer with enough range to support the wide color gamut of the
+    // display.
     WideColorGamut,
     // Hdr
 };
@@ -50,30 +59,33 @@ public:
     virtual MakeCurrentResult makeCurrent() = 0;
     virtual Frame getFrame() = 0;
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                      const FrameBuilder::LightGeometry& lightGeometry,
-                      LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                      bool opaque, bool wideColorGamut, const BakedOpRenderer::LightInfo& lightInfo,
+                      const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+                      const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
                       const std::vector<sp<RenderNode>>& renderNodes,
                       FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
-    virtual bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
-    virtual bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
+    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior, ColorMode colorMode,
+                            uint32_t extraBuffers) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;
     virtual void onDestroyHardwareResources() = 0;
-    virtual void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-                              LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-                              const BakedOpRenderer::LightInfo& lightInfo) = 0;
-    virtual TaskManager* getTaskManager() = 0;
+    virtual void renderLayers(const LightGeometry& lightGeometry,
+                              LayerUpdateQueue* layerUpdateQueue, bool opaque,
+                              const LightInfo& lightInfo) = 0;
     virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                     bool wideColorGamut, ErrorHandler* errorHandler) = 0;
+                                     ErrorHandler* errorHandler) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
     virtual void onPrepareTree() = 0;
+    virtual SkColorType getSurfaceColorType() const = 0;
+    virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
+    virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
+    virtual void setPictureCapturedCallback(
+            const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 
     virtual ~IRenderPipeline() {}
 };

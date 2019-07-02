@@ -24,16 +24,16 @@
 
 #include "ResourceHealthManagerPuller.h"
 #include "logd/LogEvent.h"
-#include "statslog.h"
 #include "stats_log_util.h"
+#include "statslog.h"
 
 using android::hardware::hidl_vec;
+using android::hardware::Return;
+using android::hardware::Void;
 using android::hardware::health::V2_0::get_health_service;
 using android::hardware::health::V2_0::HealthInfo;
 using android::hardware::health::V2_0::IHealth;
 using android::hardware::health::V2_0::Result;
-using android::hardware::Return;
-using android::hardware::Void;
 
 using std::make_shared;
 using std::shared_ptr;
@@ -54,7 +54,7 @@ bool getHealthHal() {
 ResourceHealthManagerPuller::ResourceHealthManagerPuller(int tagId) : StatsPuller(tagId) {
 }
 
-// TODO: add other health atoms (eg. Temperature).
+// TODO(b/110565992): add other health atoms (eg. Temperature).
 bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     if (!getHealthHal()) {
         ALOGE("Health Hal not loaded");
@@ -67,6 +67,7 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
     data->clear();
     bool result_success = true;
 
+    // Get the data from the Health HAL (hardware/interfaces/health/1.0/types.hal).
     Return<void> ret = gHealthHal->getHealthInfo([&](Result r, HealthInfo v) {
         if (r != Result::SUCCESS) {
             result_success = false;
@@ -74,14 +75,32 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
         }
         if (mTagId == android::util::REMAINING_BATTERY_CAPACITY) {
             auto ptr = make_shared<LogEvent>(android::util::REMAINING_BATTERY_CAPACITY,
-                wallClockTimestampNs, elapsedTimestampNs);
+                                             wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(v.legacy.batteryChargeCounter);
             ptr->init();
             data->push_back(ptr);
         } else if (mTagId == android::util::FULL_BATTERY_CAPACITY) {
             auto ptr = make_shared<LogEvent>(android::util::FULL_BATTERY_CAPACITY,
-                wallClockTimestampNs, elapsedTimestampNs);
+                                             wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(v.legacy.batteryFullCharge);
+            ptr->init();
+            data->push_back(ptr);
+        } else if (mTagId == android::util::BATTERY_VOLTAGE) {
+            auto ptr = make_shared<LogEvent>(android::util::BATTERY_VOLTAGE, wallClockTimestampNs,
+                                             elapsedTimestampNs);
+            ptr->write(v.legacy.batteryVoltage);
+            ptr->init();
+            data->push_back(ptr);
+        } else if (mTagId == android::util::BATTERY_LEVEL) {
+            auto ptr = make_shared<LogEvent>(android::util::BATTERY_LEVEL, wallClockTimestampNs,
+                                             elapsedTimestampNs);
+            ptr->write(v.legacy.batteryLevel);
+            ptr->init();
+            data->push_back(ptr);
+        } else if (mTagId == android::util::BATTERY_CYCLE_COUNT) {
+            auto ptr = make_shared<LogEvent>(android::util::BATTERY_CYCLE_COUNT,
+                                             wallClockTimestampNs, elapsedTimestampNs);
+            ptr->write(v.legacy.batteryCycleCount);
             ptr->init();
             data->push_back(ptr);
         } else {
@@ -90,7 +109,7 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
     });
     if (!result_success || !ret.isOk()) {
         ALOGE("getHealthHal() failed: health HAL service not available. Description: %s",
-                ret.description().c_str());
+              ret.description().c_str());
         if (!ret.isOk() && ret.isDeadObject()) {
             gHealthHal = nullptr;
         }

@@ -20,6 +20,7 @@ import android.app.backup.BackupDataInput;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 
 import java.io.EOFException;
 import java.io.FileDescriptor;
@@ -33,24 +34,37 @@ import java.io.ObjectInputStream;
  */
 @Implements(BackupDataInput.class)
 public class ShadowBackupDataInput {
+    private static boolean sReadNextHeaderThrow = false;
+
+    public static void throwInNextHeaderRead() {
+        sReadNextHeaderThrow = true;
+    }
+
+    @Resetter
+    public static void reset() {
+        sReadNextHeaderThrow = false;
+    }
+
+    private FileDescriptor mFileDescriptor;
     private ObjectInputStream mInput;
     private int mSize;
     private String mKey;
     private boolean mHeaderReady;
 
     @Implementation
-    public void __constructor__(FileDescriptor fd) {
-        try {
-            mInput = new ObjectInputStream(new FileInputStream(fd));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+    protected void __constructor__(FileDescriptor fd) {
+        mFileDescriptor = fd;
     }
 
     @Implementation
-    public boolean readNextHeader() throws IOException {
+    protected boolean readNextHeader() throws IOException {
+        if (sReadNextHeaderThrow) {
+            sReadNextHeaderThrow = false;
+            throw new IOException("Fake exception");
+        }
         mHeaderReady = false;
         try {
+            ensureInput();
             mSize = mInput.readInt();
         } catch (EOFException e) {
             return false;
@@ -61,19 +75,19 @@ public class ShadowBackupDataInput {
     }
 
     @Implementation
-    public String getKey() {
+    protected String getKey() {
         checkHeaderReady();
         return mKey;
     }
 
     @Implementation
-    public int getDataSize() {
+    protected int getDataSize() {
         checkHeaderReady();
         return mSize;
     }
 
     @Implementation
-    public int readEntityData(byte[] data, int offset, int size) throws IOException {
+    protected int readEntityData(byte[] data, int offset, int size) throws IOException {
         checkHeaderReady();
         int result = mInput.read(data, offset, size);
         if (result < 0) {
@@ -83,7 +97,7 @@ public class ShadowBackupDataInput {
     }
 
     @Implementation
-    public void skipEntityData() throws IOException {
+    protected void skipEntityData() throws IOException {
         checkHeaderReady();
         mInput.read(new byte[mSize], 0, mSize);
     }
@@ -91,6 +105,24 @@ public class ShadowBackupDataInput {
     private void checkHeaderReady() {
         if (!mHeaderReady) {
             throw new IllegalStateException("Entity header not read");
+        }
+    }
+
+    /**
+     * Lazily initializing input to avoid throwing exception when stream is completely empty in
+     * constructor (Java Object IO writes/reads some header data).
+     *
+     * @throws EOFException When the input is empty.
+     */
+    private void ensureInput() throws EOFException {
+        if (mInput == null) {
+            try {
+                mInput = new ObjectInputStream(new FileInputStream(mFileDescriptor));
+            } catch (EOFException e) {
+                throw e;
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 }

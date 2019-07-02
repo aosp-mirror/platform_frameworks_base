@@ -27,6 +27,7 @@
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "configuration/ConfigurationParser.h"
+#include "cmd/Util.h"
 #include "filter/AbiFilter.h"
 #include "filter/Filter.h"
 #include "format/Archive.h"
@@ -267,7 +268,7 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
 
   // Make sure the first element is <manifest> with package attribute.
   xml::Element* manifest_el = manifest->root.get();
-  if (manifest_el == nullptr) {
+  if (!manifest_el) {
     return false;
   }
 
@@ -276,21 +277,35 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
     return false;
   }
 
-  // Update the versionCode attribute.
-  xml::Attribute* versionCode = manifest_el->FindAttribute(kSchemaAndroid, "versionCode");
-  if (versionCode == nullptr) {
+  // Retrieve the versionCode attribute.
+  auto version_code = manifest_el->FindAttribute(kSchemaAndroid, "versionCode");
+  if (!version_code) {
     diag->Error(DiagMessage(manifest->file.source) << "manifest must have a versionCode attribute");
     return false;
   }
 
-  auto* compiled_version = ValueCast<BinaryPrimitive>(versionCode->compiled_value.get());
-  if (compiled_version == nullptr) {
+  auto version_code_value = ValueCast<BinaryPrimitive>(version_code->compiled_value.get());
+  if (!version_code_value) {
     diag->Error(DiagMessage(manifest->file.source) << "versionCode is invalid");
     return false;
   }
 
-  int new_version = compiled_version->value.data + artifact.version;
-  versionCode->compiled_value = ResourceUtils::TryParseInt(std::to_string(new_version));
+  // Retrieve the versionCodeMajor attribute.
+  auto version_code_major = manifest_el->FindAttribute(kSchemaAndroid, "versionCodeMajor");
+  BinaryPrimitive* version_code_major_value = nullptr;
+  if (version_code_major) {
+    version_code_major_value = ValueCast<BinaryPrimitive>(version_code_major->compiled_value.get());
+    if (!version_code_major_value) {
+      diag->Error(DiagMessage(manifest->file.source) << "versionCodeMajor is invalid");
+      return false;
+    }
+  }
+
+  // Calculate and set the updated version code
+  uint64_t major = (version_code_major_value)
+                  ? ((uint64_t) version_code_major_value->value.data) << 32 : 0;
+  uint64_t new_version = (major | version_code_value->value.data) + artifact.version;
+  SetLongVersionCode(manifest_el, new_version);
 
   // Check to see if the minSdkVersion needs to be updated.
   if (artifact.android_sdk) {

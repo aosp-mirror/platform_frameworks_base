@@ -130,7 +130,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
         return mReadOnlyMeasurements;
     }
 
-    public static final Creator<GnssMeasurementsEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<GnssMeasurementsEvent> CREATOR =
             new Creator<GnssMeasurementsEvent>() {
         @Override
         public GnssMeasurementsEvent createFromParcel(Parcel in) {

@@ -26,6 +26,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -41,6 +42,9 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -57,8 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import libcore.io.IoUtils;
 
 /**
  * Stores and restores state for the Device and Profile owners and related device-wide information.
@@ -99,10 +101,12 @@ class Owners {
     private static final String ATTR_USER_RESTRICTIONS_MIGRATED = "userRestrictionsMigrated";
     private static final String ATTR_FREEZE_RECORD_START = "start";
     private static final String ATTR_FREEZE_RECORD_END = "end";
+    private static final String ATTR_CAN_ACCESS_DEVICE_IDS = "canAccessDeviceIds";
 
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     private boolean mSystemReady;
 
@@ -128,18 +132,22 @@ class Owners {
 
     public Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
-            PackageManagerInternal packageManagerInternal) {
-        this(userManager, userManagerInternal, packageManagerInternal, new Injector());
+            PackageManagerInternal packageManagerInternal,
+            ActivityTaskManagerInternal activityTaskManagerInternal) {
+        this(userManager, userManagerInternal, packageManagerInternal,
+                activityTaskManagerInternal, new Injector());
     }
 
     @VisibleForTesting
     Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
+            ActivityTaskManagerInternal activityTaskManagerInternal,
             Injector injector) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
+        mActivityTaskManagerInternal = activityTaskManagerInternal;
         mInjector = injector;
     }
 
@@ -186,6 +194,7 @@ class Owners {
                         getDeviceOwnerUserId()));
             }
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -198,6 +207,14 @@ class Owners {
         mPackageManagerInternal.setDeviceAndProfileOwnerPackages(
                 mDeviceOwnerUserId, (mDeviceOwner != null ? mDeviceOwner.packageName : null),
                 po);
+    }
+
+    private void pushToActivityTaskManagerLocked() {
+        final int uid = mDeviceOwner != null ? mPackageManagerInternal.getPackageUid(
+                mDeviceOwner.packageName,
+                PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES, mDeviceOwnerUserId)
+                : Process.INVALID_UID;
+        mActivityTaskManagerInternal.setDeviceOwnerUid(uid);
     }
 
     String getDeviceOwnerPackageName() {
@@ -264,12 +281,17 @@ class Owners {
     void setDeviceOwnerWithRestrictionsMigrated(ComponentName admin, String ownerName, int userId,
             boolean userRestrictionsMigrated) {
         synchronized (mLock) {
+            // A device owner is allowed to access device identifiers. Even though this flag
+            // is not currently checked for device owner, it is set to true here so that it is
+            // semantically compatible with the meaning of this flag.
             mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated,
-                    /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
+                    /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/
+                    null, /* canAccessDeviceIds =*/true);
             mDeviceOwnerUserId = userId;
 
             mUserManagerInternal.setDeviceManaged(true);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -281,6 +303,7 @@ class Owners {
 
             mUserManagerInternal.setDeviceManaged(false);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -290,7 +313,7 @@ class Owners {
             // For a newly set PO, there's no need for migration.
             mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
                     /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
-                    /* remoteBugreportHash =*/ null));
+                    /* remoteBugreportHash =*/ null, /* canAccessDeviceIds =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
             pushToPackageManagerLocked();
             pushToAppOpsLocked();
@@ -311,7 +334,8 @@ class Owners {
             final OwnerInfo ownerInfo = mProfileOwners.get(userId);
             final OwnerInfo newOwnerInfo = new OwnerInfo(target.getPackageName(), target,
                     ownerInfo.userRestrictionsMigrated, ownerInfo.remoteBugreportUri,
-                    ownerInfo.remoteBugreportHash);
+                    ownerInfo.remoteBugreportHash, /* canAccessDeviceIds =*/
+                    ownerInfo.canAccessDeviceIds);
             mProfileOwners.put(userId, newOwnerInfo);
             pushToPackageManagerLocked();
             pushToAppOpsLocked();
@@ -324,8 +348,10 @@ class Owners {
             // See DevicePolicyManagerService#getDeviceOwnerName
             mDeviceOwner = new OwnerInfo(null, target,
                     mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
-                    mDeviceOwner.remoteBugreportHash);
+                    mDeviceOwner.remoteBugreportHash, /* canAccessDeviceIds =*/
+                    mDeviceOwner.canAccessDeviceIds);
             pushToPackageManagerLocked();
+            pushToActivityTaskManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -348,6 +374,17 @@ class Owners {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
             return profileOwner != null ? profileOwner.packageName : null;
+        }
+    }
+
+    /**
+     * Returns true if {@code userId} has a profile owner and that profile owner was granted
+     * the ability to access device identifiers.
+     */
+    boolean canProfileOwnerAccessDeviceIds(int userId) {
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            return profileOwner != null ? profileOwner.canAccessDeviceIds : false;
         }
     }
 
@@ -486,6 +523,20 @@ class Owners {
         }
     }
 
+    /** Sets the grant to access device IDs, and also writes to file. */
+    void setProfileOwnerCanAccessDeviceIds(int userId) {
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            if (profileOwner != null) {
+                profileOwner.canAccessDeviceIds = true;
+            } else {
+                Slog.e(TAG, String.format(
+                        "Cannot grant Device IDs access for user %d, no profile owner.", userId));
+            }
+            writeProfileOwner(userId);
+        }
+    }
+
     private boolean readLegacyOwnerFileLocked(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.
@@ -507,7 +558,7 @@ class Owners {
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     mDeviceOwner = new OwnerInfo(name, packageName,
                             /* userRestrictionsMigrated =*/ false, /* remoteBugreportUri =*/ null,
-                            /* remoteBugreportHash =*/ null);
+                            /* remoteBugreportHash =*/ null, /* canAccessDeviceIds =*/ true);
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
                     // Deprecated tag
@@ -523,7 +574,8 @@ class Owners {
                                 profileOwnerComponentStr);
                         if (admin != null) {
                             profileOwnerInfo = new OwnerInfo(profileOwnerName, admin,
-                                /* userRestrictionsMigrated =*/ false, null, null);
+                                    /* userRestrictionsMigrated =*/ false, null,
+                                    null, /* canAccessDeviceIds =*/ false);
                         } else {
                             // This shouldn't happen but switch from package name -> component name
                             // might have written bad device owner files. b/17652534
@@ -534,7 +586,8 @@ class Owners {
                     if (profileOwnerInfo == null) {
                         profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName,
                                 /* userRestrictionsMigrated =*/ false,
-                                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
+                                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/
+                                null, /* canAccessDeviceIds =*/ false);
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
                 } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
@@ -894,25 +947,28 @@ class Owners {
         public boolean userRestrictionsMigrated;
         public String remoteBugreportUri;
         public String remoteBugreportHash;
+        public boolean canAccessDeviceIds;
 
         public OwnerInfo(String name, String packageName, boolean userRestrictionsMigrated,
-                String remoteBugreportUri, String remoteBugreportHash) {
+                String remoteBugreportUri, String remoteBugreportHash, boolean canAccessDeviceIds) {
             this.name = name;
             this.packageName = packageName;
             this.admin = new ComponentName(packageName, "");
             this.userRestrictionsMigrated = userRestrictionsMigrated;
             this.remoteBugreportUri = remoteBugreportUri;
             this.remoteBugreportHash = remoteBugreportHash;
+            this.canAccessDeviceIds = canAccessDeviceIds;
         }
 
         public OwnerInfo(String name, ComponentName admin, boolean userRestrictionsMigrated,
-                String remoteBugreportUri, String remoteBugreportHash) {
+                String remoteBugreportUri, String remoteBugreportHash, boolean canAccessDeviceIds) {
             this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
             this.userRestrictionsMigrated = userRestrictionsMigrated;
             this.remoteBugreportUri = remoteBugreportUri;
             this.remoteBugreportHash = remoteBugreportHash;
+            this.canAccessDeviceIds = canAccessDeviceIds;
         }
 
         public void writeToXml(XmlSerializer out, String tag) throws IOException {
@@ -932,6 +988,10 @@ class Owners {
             if (remoteBugreportHash != null) {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_HASH, remoteBugreportHash);
             }
+            if (canAccessDeviceIds) {
+                out.attribute(null, ATTR_CAN_ACCESS_DEVICE_IDS,
+                        String.valueOf(canAccessDeviceIds));
+            }
             out.endTag(null, tag);
         }
 
@@ -948,13 +1008,17 @@ class Owners {
                     ATTR_REMOTE_BUGREPORT_URI);
             final String remoteBugreportHash = parser.getAttributeValue(null,
                     ATTR_REMOTE_BUGREPORT_HASH);
+            final String canAccessDeviceIdsStr =
+                    parser.getAttributeValue(null, ATTR_CAN_ACCESS_DEVICE_IDS);
+            final boolean canAccessDeviceIds =
+                    ("true".equals(canAccessDeviceIdsStr));
 
             // Has component name?  If so, return [name, component]
             if (componentName != null) {
                 final ComponentName admin = ComponentName.unflattenFromString(componentName);
                 if (admin != null) {
                     return new OwnerInfo(name, admin, userRestrictionsMigrated,
-                            remoteBugreportUri, remoteBugreportHash);
+                            remoteBugreportUri, remoteBugreportHash, canAccessDeviceIds);
                 } else {
                     // This shouldn't happen but switch from package name -> component name
                     // might have written bad device owner files. b/17652534
@@ -965,13 +1029,14 @@ class Owners {
 
             // Else, build with [name, package]
             return new OwnerInfo(name, packageName, userRestrictionsMigrated, remoteBugreportUri,
-                    remoteBugreportHash);
+                    remoteBugreportHash, canAccessDeviceIds);
         }
 
         public void dump(String prefix, PrintWriter pw) {
             pw.println(prefix + "admin=" + admin);
             pw.println(prefix + "name=" + name);
             pw.println(prefix + "package=" + packageName);
+            pw.println(prefix + "canAccessDeviceIds=" + canAccessDeviceIds);
         }
     }
 

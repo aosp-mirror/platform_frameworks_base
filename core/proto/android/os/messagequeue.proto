@@ -20,12 +20,12 @@ package android.os;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/message.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message MessageQueueProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    repeated android.os.MessageProto messages = 1;
+    repeated MessageProto messages = 1;
     optional bool is_polling_locked = 2;
     optional bool is_quitting = 3;
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+
+  NOTE: You might also want to edit: core/res/res/values-night/*.xml
+  -->
+<resources>
+    <!-- The color of the material notification background -->
+    <color name="notification_material_background_color">@*android:color/notification_material_background_color</color>
+
+    <!-- The color of the legacy notifications with customs backgrounds (gingerbread and lollipop.)
+    It's fine to override this color since at that point the shade was dark. -->
+    <color name="notification_legacy_background_color">@*android:color/notification_material_background_color</color>
+
+    <!-- The color of the material notification background when dimmed -->
+    <color name="notification_material_background_dimmed_color">#aa000000</color>
+
+    <!-- The color of the dividing line between grouped notifications while . -->
+    <color name="notification_divider_color">#212121</color>
+
+    <!-- The background color of the notification shade -->
+    <color name="notification_shade_background_color">@color/GM2_grey_900</color>
+
+    <!-- The color of the gear shown behind a notification -->
+    <color name="notification_gear_color">@color/GM2_grey_500</color>
+
+    <!-- The color of the ripples on the untinted notifications -->
+    <color name="notification_ripple_untinted_color">#30ffffff</color>
+
+    <!-- The "inside" of a notification, reached via longpress -->
+    <color name="notification_guts_bg_color">@color/GM2_grey_900</color>
+
+    <!-- The color of the text inside a notification -->
+    <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
+
+    <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
+    <color name="notification_guts_sub_text_color">@color/GM2_grey_300</color>
+    <color name="notification_guts_header_text_color">@color/GM2_grey_200</color>
+    <color name="notification_guts_info_button_color">@color/GM2_blue_300</color>
+    <color name="notification_guts_priority_button_content_color">@color/GM2_grey_500</color>
+    <color name="notification_guts_priority_button_content_color_selected">@color/GM2_blue_300</color>
+    <color name="notification_guts_priority_button_bg_fill_color">@color/transparent</color>
+    <color name="notification_guts_priority_button_bg_fill_color_selected">@color/GM2_grey_800</color>
+    <color name="notification_guts_priority_button_bg_stroke_color">@color/GM2_grey_700</color>
+    <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_blue_300</color>
+
+    <color name="notification_section_header_label_color">@color/GM2_grey_200</color>
+    <color name="notification_section_clear_all_btn_color">@color/GM2_grey_500</color>
+    <color name="notification_channel_dialog_separator">@color/GM2_grey_700</color>
+
+    <!-- The color of the background in the top part of QSCustomizer -->
+    <color name="qs_customize_background">@color/GM2_grey_900</color>
+
+    <!-- The color of the background in the bottom part of QSCustomizer -->
+    <color name="qs_customize_decoration">@color/GM2_grey_800</color>
+
+    <!-- The color of the background in the separated list of the Global Actions menu -->
+    <color name="global_actions_separated_background">@color/GM2_grey_900</color>
+
+    <!-- The color of the background in the grid of the Global Actions menu -->
+    <color name="global_actions_grid_background">@color/GM2_grey_800</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_text">@color/GM2_grey_200</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_alert_text">@color/GM2_red_300</color>
+
+    <!-- Biometric dialog colors -->
+    <color name="biometric_dialog_gray">#ff888888</color>
+    <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
+    <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+
+</resources>

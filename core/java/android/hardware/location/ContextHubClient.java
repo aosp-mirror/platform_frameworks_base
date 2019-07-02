@@ -18,6 +18,7 @@ package android.hardware.location;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
@@ -47,13 +48,25 @@ public class ContextHubClient implements Closeable {
      */
     private final ContextHubInfo mAttachedHub;
 
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard;
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
-    /* package */ ContextHubClient(ContextHubInfo hubInfo) {
+    /*
+     * True if this is a persistent client (i.e. does not have to close the connection when the
+     * resource is freed from the system).
+     */
+    private final boolean mPersistent;
+
+    /* package */ ContextHubClient(ContextHubInfo hubInfo, boolean persistent) {
         mAttachedHub = hubInfo;
-        mCloseGuard.open("close");
+        mPersistent = persistent;
+        if (mPersistent) {
+            mCloseGuard = null;
+        } else {
+            mCloseGuard = CloseGuard.get();
+            mCloseGuard.open("close");
+        }
     }
 
     /**
@@ -86,11 +99,18 @@ public class ContextHubClient implements Closeable {
      * Closes the connection for this client and the Context Hub Service.
      *
      * When this function is invoked, the messaging associated with this client is invalidated.
-     * All futures messages targeted for this client are dropped at the service.
+     * All futures messages targeted for this client are dropped at the service, and the
+     * ContextHubClient is unregistered from the service.
+     *
+     * If this object has a PendingIntent, i.e. the object was generated via
+     * {@link ContextHubManager.createClient(PendingIntent, ContextHubInfo, long)}, then the
+     * Intent events corresponding to the PendingIntent will no longer be triggered.
      */
     public void close() {
         if (!mIsClosed.getAndSet(true)) {
-            mCloseGuard.close();
+            if (mCloseGuard != null) {
+                mCloseGuard.close();
+            }
             try {
                 mClientProxy.close();
             } catch (RemoteException e) {
@@ -102,7 +122,7 @@ public class ContextHubClient implements Closeable {
     /**
      * Sends a message to a nanoapp through the Context Hub Service.
      *
-     * This function returns TRANSACTION_SUCCESS if the message has reached the HAL, but
+     * This function returns RESULT_SUCCESS if the message has reached the HAL, but
      * does not guarantee delivery of the message to the target nanoapp.
      *
      * @param message the message object to send
@@ -132,7 +152,9 @@ public class ContextHubClient implements Closeable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            close();
+            if (!mPersistent) {
+                close();
+            }
         } finally {
             super.finalize();
         }

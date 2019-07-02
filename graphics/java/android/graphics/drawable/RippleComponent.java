@@ -16,15 +16,8 @@
 
 package android.graphics.drawable;
 
-import android.animation.Animator;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
-import android.view.DisplayListCanvas;
-import android.view.RenderNodeAnimator;
-
-import java.util.ArrayList;
 
 /**
  * Abstract class that handles size & positioning common to the ripple & focus states.

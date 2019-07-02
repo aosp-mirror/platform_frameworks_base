@@ -40,11 +40,8 @@
     <bool name="def_wifi_display_on">false</bool>
     <bool name="def_install_non_market_apps">false</bool>
     <bool name="def_package_verifier_enable">true</bool>
-    <!-- Comma-separated list of location providers.
-         Network location is off by default because it requires
-         user opt-in via Setup Wizard or Settings.
-    -->
-    <string name="def_location_providers_allowed" translatable="false">gps</string>
+    <!-- 0 == off, 3 == on -->
+    <integer name="def_location_mode">3</integer>
     <bool name="assisted_gps_enabled">true</bool>
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
@@ -55,7 +52,7 @@
     <bool name="def_networks_available_notification_on">true</bool>
 
     <bool name="def_backup_enabled">false</bool>
-    <string name="def_backup_transport" translatable="false">android/com.android.internal.backup.LocalTransport</string>
+    <string name="def_backup_transport" translatable="false">com.android.localtransport/.LocalTransport</string>
 
     <!-- Default value for whether or not to pulse the notification LED when there is a
          pending notification -->
@@ -217,4 +214,28 @@
 
     <!-- Default for Settings.System.VIBRATE_WHEN_RINGING -->
     <bool name="def_vibrate_when_ringing">false</bool>
+
+    <!-- Default for Settings.Global.APPLY_RAMPING_RINGER -->
+    <bool name="def_apply_ramping_ringer">false</bool>
+
+    <!-- Default for Settings.Secure.CHARGING_VIBRATION_ENABLED -->
+    <bool name="def_charging_vibration_enabled">true</bool>
+
+    <!-- Default for Settings.Secure.CHARGING_SOUNDS_ENABLED -->
+    <bool name="def_charging_sounds_enabled">true</bool>
+
+    <!-- Default for Settings.Secure.NOTIFICATION_BUBBLES -->
+    <bool name="def_notification_bubbles">false</bool>
+
+    <!-- Default for Settings.Secure.AWARE_ENABLED -->
+    <bool name="def_aware_enabled">false</bool>
+
+    <!-- Default for Settings.Secure.SKIP_GESTURE -->
+    <bool name="def_skip_gesture">false</bool>
+
+    <!-- Default for Settings.Secure.SILENCE_GESTURE -->
+    <bool name="def_silence_gesture">false</bool>
+
+    <!-- Default for Settings.Secure.AWARE_LOCK_ENABLED -->
+    <bool name="def_aware_lock_enabled">false</bool>
 </resources>

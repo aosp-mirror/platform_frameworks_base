@@ -20,21 +20,11 @@ android_library {
         "src/**/I*.aidl",
     ],
 
-}
-
-android_app {
-
-    name: "SysUISharedLib",
-    platform_apis: true,
-    srcs: [
-        "src/**/*.java",
-        "src/**/I*.aidl",
+    static_libs: [
+        "PluginCoreLib"
     ],
 
-    static_libs: ["SystemUISharedLib"],
-
-    optimize: {
-        enabled: false,
-    },
-
+    // Enforce that the library is built against java 7 so that there are
+    // no compatibility issues with launcher
+    java_version: "1.7",
 }

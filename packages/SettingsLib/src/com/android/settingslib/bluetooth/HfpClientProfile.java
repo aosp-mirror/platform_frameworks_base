@@ -16,10 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
-import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -40,7 +40,6 @@ final class HfpClientProfile implements LocalBluetoothProfile {
     private BluetoothHeadsetClient mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SRC_UUIDS = {
@@ -60,7 +59,6 @@ final class HfpClientProfile implements LocalBluetoothProfile {
 
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothHeadsetClient) proxy;
             // We just bound to the service, so refresh the UI for any connected HFP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -70,7 +68,7 @@ final class HfpClientProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HfpClient profile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(
                     HfpClientProfile.this, BluetoothProfile.STATE_CONNECTED);
@@ -81,7 +79,6 @@ final class HfpClientProfile implements LocalBluetoothProfile {
 
         @Override
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mIsProfileReady=false;
         }
     }
@@ -96,14 +93,12 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         return BluetoothProfile.HEADSET_CLIENT;
     }
 
-    HfpClientProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    HfpClientProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new HfpClientServiceListener(),
-                BluetoothProfile.HEADSET_CLIENT);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new HfpClientServiceListener(), BluetoothProfile.HEADSET_CLIENT);
     }
 
     @Override
@@ -210,13 +205,13 @@ final class HfpClientProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_headset_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     @Override
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_headset_hfp;
+        return com.android.internal.R.drawable.ic_bt_headset_hfp;
     }
 
     protected void finalize() {

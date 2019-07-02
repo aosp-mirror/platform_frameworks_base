@@ -19,13 +19,14 @@ package android.widget;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
 import android.text.Selection;
 import android.view.KeyEvent;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Assert;
 import org.junit.Rule;

@@ -18,7 +18,9 @@ package com.android.tests.memoryusage;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
@@ -66,6 +68,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     private Map<String, String> mNameToResultKey;
     private Set<String> mPersistentProcesses;
     private IActivityManager mAm;
+    private IActivityTaskManager mAtm;
 
     @Override
     protected void setUp() throws Exception {
@@ -84,6 +87,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                 (MemoryUsageInstrumentation) getInstrumentation();
         Bundle args = instrumentation.getBundle();
         mAm = ActivityManager.getService();
+        mAtm = ActivityTaskManager.getService();
 
         createMappings();
         parseArgs(args);
@@ -316,7 +320,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                             UserHandle.USER_CURRENT);
                 }
 
-                mAm.startActivityAndWait(null, null, mLaunchIntent, mimeType,
+                mAtm.startActivityAndWait(null, null, mLaunchIntent, mimeType,
                         null, null, 0, mLaunchIntent.getFlags(), null, null,
                         UserHandle.USER_CURRENT_OR_SELF);
             } catch (RemoteException e) {

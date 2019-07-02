@@ -29,7 +29,7 @@ import java.util.Objects;
 
 /**
  * The current condition of an {@link android.app.AutomaticZenRule}, provided by the
- * {@link ConditionProviderService} that owns the rule. Used to tell the system to enter Do Not
+ * app that owns the rule. Used to tell the system to enter Do Not
  * Disturb mode and request that the system exit Do Not Disturb mode.
  */
 public final class Condition implements Parcelable {
@@ -48,8 +48,8 @@ public final class Condition implements Parcelable {
 
     /**
      * Indicates that Do Not Disturb should be turned off. Note that all Conditions from all
-     * {@link ConditionProviderService} providers must be off for Do Not Disturb to be turned off on
-     * the device.
+     * {@link android.app.AutomaticZenRule} providers must be off for Do Not Disturb to be turned
+     * off on the device.
      */
     public static final int STATE_FALSE = 0;
     /**
@@ -154,7 +154,7 @@ public final class Condition implements Parcelable {
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
-        // id is guarantreed not to be null.
+        // id is guaranteed not to be null.
         proto.write(ConditionProto.ID, id.toString());
         proto.write(ConditionProto.SUMMARY, summary);
         proto.write(ConditionProto.LINE_1, line1);
@@ -227,7 +227,7 @@ public final class Condition implements Parcelable {
         return id != null && SCHEME.equals(id.getScheme()) && pkg.equals(id.getAuthority());
     }
 
-    public static final Parcelable.Creator<Condition> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Condition> CREATOR
             = new Parcelable.Creator<Condition>() {
         @Override
         public Condition createFromParcel(Parcel source) {

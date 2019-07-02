@@ -21,26 +21,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sys.gr.snitt"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Fjern"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"De sist brukte skjermene dine vises her"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylig brukte apper"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d skjermer i oversikten</item>
-      <item quantity="one">1 skjerm i oversikten</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varsler"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Batterikapasiteten er lav"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Du har lite batteri. Slå på batterisparing"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Batteriet går kanskje snart tomt"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%s</xliff:g> igjen basert på bruken din"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%s</xliff:g> igjen"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%2$s</xliff:g> igjen basert på bruken din"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%2$s</xliff:g> igjen"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår. Batterisparing er på."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB-lading støttes ikke.\nBruk kun den medfølgende laderen."</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"Lading via USB støttes ikke."</string>
-    <string name="invalid_charger_text" msgid="5474997287953892710">"Bruk bare den tilhørende laderen."</string>
+    <string name="invalid_charger" msgid="2741987096648693172">"Kan ikke lade via USB. Bruk laderen som fulgte med enheten."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"Kan ikke lade via USB"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Bruk laderen som fulgte med enheten"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Innstillinger"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Vil du slå på batterisparing?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Slå på"</string>
@@ -66,20 +57,38 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vil du tillate USB-feilsøking?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datamaskinens nøkkelfingeravtrykk for RSA er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillat alltid fra denne datamaskinen"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Tillat"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-feilsøking er ikke tillatt"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren."</string>
+    <string name="usb_contaminant_title" msgid="206854874263058490">"USB-porten er deaktivert"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"For å beskytte enheten din mot væsker eller rusk er USB-porten deaktivert og kan ikke oppdage tilbehør.\n\nDu blir varslet når det er trygt å bruke USB-porten igjen."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strekk for å fylle skjerm"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Skjermdump"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Lagrer skjermdumpen …"</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"Skjermdumpen lagres"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Skjermdumpen er lagret"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Trykk for å se skjermdumpen"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"Kan ikke lagre skjermdumpen"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Det oppsto et problem under lagring av skjermdumpen"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"Kunne ikke lagre skjermdump"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Prøv å ta skjermdump på nytt"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Kan ikke lagre skjermdumpen på grunn av begrenset lagringsplass"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Skjermopptak"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Vedvarende varsel for et skjermopptak"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Start opptak"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Ta opp et kommentarspor"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Vis trykk"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Stopp"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Sett på pause"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Gjenoppta"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Avbryt"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Del"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Slett"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Skjermopptak er avbrutt"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Skjermopptaket er lagret. Trykk for å se det"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Skjermopptaket er slettet"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Feil ved sletting av skjermopptaket"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Kunne ikke få tillatelser"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Altern. for USB-filoverføring"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Sett inn som mediespiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Sett inn som kamera (PTP)"</string>
@@ -97,17 +106,20 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås opp"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Venger på fingeravtrykk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Lås opp uten å bruke fingeravtrykk"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Skanning av ansikt"</string>
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Send"</string>
     <string name="unlock_label" msgid="8779712358041029439">"lås opp"</string>
     <string name="phone_label" msgid="2320074140205331708">"åpne telefonen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"åpne talehjelp"</string>
     <string name="camera_label" msgid="7261107956054836961">"åpne kamera"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Velg en ny utforming for oppgaver"</string>
     <string name="cancel" msgid="6442560571259935130">"Avbryt"</string>
-    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Område for hjelpemelding"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bekreft"</string>
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Prøv på nytt"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Trykk på fingeravtrykkssensoren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon for fingeravtrykk"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Appikon"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Område for hjelpemelding"</string>
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ser etter deg …"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Ansiktikon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoomknapp for kompatibilitet."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom fra mindre til større skjerm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth er tilkoblet."</string>
@@ -148,28 +160,31 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Av."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Tilkoblet."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Kobler til."</string>
-    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
-    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
-    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
-    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
-    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
-    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
-    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
-    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
-    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
-    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
+    <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
+    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
+    <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
+    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
+    <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
+    <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Uten SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobildata er slått på"</string>
-    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobildata er slått av"</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobildata er slått av"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Av"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-internettdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN på."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Mangler SIM-kort."</string>
-    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Bytting av operatørnettverk."</string>
+    <string name="carrier_network_change_mode" msgid="8149202439957837762">"Bytting av operatørnettverk"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Åpne informasjon om batteriet"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteriet lades – <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> prosent."</string>
@@ -186,11 +201,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Avvis <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> avvist."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Alle nylig brukte apper er avvist."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Åpne appinformasjonen for <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Starter <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Varselet ble skjult."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Varselskygge."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Hurtiginnstillinger."</string>
@@ -208,11 +218,9 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Flymodus er på."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Flymodus er slått av."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Flymodus er slått på."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"«Ikke forstyrr» er på – bare prioritert."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Ikke forstyrr er slått på, full stillhet."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Ikke forstyrr er på – bare alarmer."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"total stillhet"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"bare alarmer"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ikke forstyrr."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"«Ikke forstyrr» er av."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"«Ikke forstyrr» er slått av."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"«Ikke forstyrr» er slått på."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -246,6 +254,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Arbeidsmodusen er slått på."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Datasparing er slått av."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Datasparing er slått på."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"Sensor Privacy er slått av."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Sensor Privacy er slått på."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Lysstyrken på skjermen"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Lader"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G- og 3G-data er satt på pause"</string>
@@ -259,6 +269,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive stedsforespørsler"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Fjern alle varslinger."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> andre varsler i gruppen.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> annet varsel i gruppen.</item>
@@ -274,8 +285,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessertmonter"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Skjermsparer"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Trykk og hold på ikonene for å se flere alternativer"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"«Ikke forstyrr»"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Bare prioritet"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Bare alarmer"</string>
@@ -288,12 +298,14 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Lyd"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Hodetelefoner"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Innenhet"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Høreapparater"</string>
+    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Slår på …"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Lysstyrke"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotér automatisk"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Rotér skjermen automatisk"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g>-modus"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotasjonen er låst"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portrett"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stående"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Landskap"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Inndatametode"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Sted"</string>
@@ -312,12 +324,13 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi er av"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi er på"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ingen tilgjengelige Wi-Fi-nettverk"</string>
-    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Slår på …"</string>
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Skjermcasting"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhet uten navn"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Klar til å caste"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Ingen enheter er tilgjengelige"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi-Fi er ikke tilkoblet"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverter farger"</string>
@@ -329,7 +342,8 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Kobler til …"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internettdeling"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Wi-Fi-sone"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Slår på …"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Slår på …"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Datasparing er på"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d enheter</item>
       <item quantity="one">%d enhet</item>
@@ -343,31 +357,18 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> brukt"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Grense på <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advarsel for <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Jobbprofil"</string>
-    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Varsler og apper er slått av"</string>
+    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Jobbprofil"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Nattlys"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"På ved solnedgang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Til soloppgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"På kl. <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Til <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Til <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC er slått av"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC er slått på"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Ingen nylige elementer"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Du har fjernet alt"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Appinformasjon"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"én-appsmodus"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"Søk"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Kunne ikke starte <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> er slått av i sikker modus."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Tøm alt"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra hit for å bruke delt skjerm"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Del horisontalt"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Del vertikalt"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Del tilpasset"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Delt skjerm øverst"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Delt skjerm til venstre"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Delt skjerm til høyre"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Sveip opp for å bytte apper"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Dra til høyre for å bytte apper raskt"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Slå oversikten av eller på"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Oppladet"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Lader"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Fulladet om <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -397,9 +398,10 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nstillhet"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Bare\nPrioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Bare\nalarmer"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Lader raskt (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Lader sakte (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader trådløst (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader raskt (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader sakte (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Bytt bruker"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Bytt bruker, gjeldende bruker er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Gjeldende bruker: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -424,15 +426,23 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGG UT BRUKER"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Grensen for antall brukere er nådd"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Du kan legge til opptil <xliff:g id="COUNT">%d</xliff:g> brukere.</item>
+      <item quantity="one">Du kan bare opprette én bruker.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vil du fjerne brukeren?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apper og data som tilhører denne brukeren, blir slettet."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Fjern"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterisparing er på"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduserer ytelsen og begrenser bakgrunnsdataene"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Slå av batterisparing"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tar opp alt som vies på skjermen din."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> begynner å ta opp alt på skjermen din, inkludert varsler, passord, bilder, meldinger og betalingsopplysninger."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Vil du tillate at <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tar opp eller caster skjermen din?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ikke vis igjen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Fjern alt"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"Administrer"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Varsler er satt på pause av «Ikke forstyrr»"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Start nå"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ingen varsler"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilen kan overvåkes"</string>
@@ -500,6 +510,7 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Konfigurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Slå av nå"</string>
+    <string name="accessibility_volume_settings" msgid="4915364006817819212">"Lydinnstillinger"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Utvid"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skjul"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Bytt enhet for lydutgang"</string>
@@ -517,7 +528,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Den vises igjen neste gang du slår den på i innstillingene."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skjul"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruker jobbprofilen din"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Anrop"</string>
     <string name="stream_system" msgid="7493299064422163147">"System"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Ring"</string>
@@ -531,12 +541,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Ring"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrer"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Ignorer"</string>
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Telefonen er satt til vibrering"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Lyden på telefonen er slått av"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Trykk for å slå på lyden."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Trykk for å angi vibrasjon. Lyden kan bli slått av for tilgjengelighetstjenestene."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Trykk for å slå av lyden. Lyden kan bli slått av for tilgjengelighetstjenestene."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Trykk for å angi vibrasjon."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Trykk for å slå av lyden."</string>
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"kutt lyden"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"slå på lyden"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"vibrer"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s volumkontroller"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Anrop og varsler ringer (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Medieutdata"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Utgang for telefonsamtaler"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Fant ingen enheter"</string>
@@ -592,12 +608,33 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Med effektive varselinnstillinger kan du angi viktighetsnivåer fra 0 til 5 for appvarsler. \n\n"<b>"Nivå 5"</b>" \n– Vis øverst på varsellisten \n– Tillat forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 4"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 3"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n\n"<b>"Nivå 2"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri fort \n– Tillat aldri lyder eller vibrering \n\n"<b>"Nivå 1"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n– Tillat aldri lyder eller vibrering \n– Skjul fra låseskjermen og statusfeltet \n– Vis nederst på varsellisten \n\n"<b>"Nivå 0"</b>" \n– Blokkér alle varsler fra appen"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Varsler"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Du ser ikke disse varslene lenger"</string>
+    <string name="notification_channel_minimized" msgid="1664411570378910931">"Disse varslene minimeres"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Disse varslene vises lydløst"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Disse varslene varsler deg"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Du avviser vanligvis disse varslene. \nVil du fortsette å vise dem?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"Ferdig"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Vil du fortsette å vise disse varslene?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Stopp varsler"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Levér lydløse varsler"</string>
+    <string name="inline_block_button" msgid="8735843688021655065">"Blokkér"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Fortsett å vise"</string>
+    <string name="inline_minimize_button" msgid="966233327974702195">"Minimer"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Vis uten lyd"</string>
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Forbli lydløs"</string>
+    <string name="inline_silent_button_alert" msgid="7961887853830826523">"Varsle meg"</string>
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Fortsett å varsle"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vil du fortsette å vise varsler fra denne appen?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Du kan ikke slå av disse varslene"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="appops_camera" msgid="8100147441602585776">"Denne appen bruker kameraet."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Denne appen bruker mikrofonen."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Denne appen vises over andre apper på skjermen."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Denne appen bruker mikrofonen og kameraet."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Denne appen vises over andre apper på skjermen, og bruker kameraet."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Denne appen vises over andre apper på skjermen, og bruker mikrofonen."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Denne appen vises over andre apper på skjermen, og bruker mikrofonen og kameraet."</string>
+    <string name="notification_appops_settings" msgid="1028328314935908050">"Innstillinger"</string>
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er åpnet"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er lukket"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Tillat varsler fra denne kanalen"</string>
@@ -608,6 +645,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"varselinnstillinger"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"slumrealternativer for varsler"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"Slumre"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANGRE"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Slumrer i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -654,7 +692,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Tilbake"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Varsler"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Hurtigtaster"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Bytt inndatametode"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Bytt tastaturoppsett"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Apper"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assist"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Nettleser"</string>
@@ -671,6 +709,7 @@
     <string name="battery" msgid="7498329822413202973">"Batteri"</string>
     <string name="clock" msgid="7416090374234785905">"Klokke"</string>
     <string name="headset" msgid="4534219457597457353">"Hodetelefoner"</string>
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Åpne innstillingene"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Øretelefoner er tilkoblet"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Hodetelefoner er tilkoblet"</string>
     <string name="data_saver" msgid="5037565123367048522">"Datasparing"</string>
@@ -705,8 +744,10 @@
     <string name="right_keycode" msgid="708447961000848163">"Høyre-tastkode"</string>
     <string name="left_icon" msgid="3096287125959387541">"Venstre-ikon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Høyre-ikon"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til felt"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Hold og dra for å legge til ruter"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Hold og dra for å endre rekkefølge for ruter"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Dra hit for å fjerne"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Du trenger minst seks ruter"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Endre"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Tid"</string>
   <string-array name="clock_options">
@@ -719,6 +760,7 @@
     <item msgid="2139628951880142927">"Vis prosentandel under lading (standard)"</item>
     <item msgid="3327323682209964956">"Ikke vis dette ikonet"</item>
   </string-array>
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Vis ikoner for varsler med lav prioritet"</string>
     <string name="other" msgid="4060683095962566764">"Annet"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Skilleelement for delt skjerm"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Utvid den venstre delen av skjermen til hele skjermen"</string>
@@ -733,12 +775,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Utvid den nederste delen av skjermen til hele skjermen"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Plassering <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dobbelttrykk for å endre."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dobbelttrykk for å legge til."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Plassering <xliff:g id="POSITION">%1$d</xliff:g>. Dobbelttrykk for å velge."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Fjern <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> er lagt til i plassering <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> er fjernet"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> er flyttet til plassering <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Legg til <xliff:g id="TILE_NAME">%1$s</xliff:g> i posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g> til posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Redigeringsvindu for hurtiginnstillinger."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-varsel: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
@@ -750,8 +790,9 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm er angitt."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Logget på som <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Ingen Internett-tilkobling."</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Åpne informasjonen."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Utilgjengelig fordi <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Endre rekkefølgen på innstillingene."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
@@ -774,6 +815,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonen begynner å bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Koble fra laderen"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Det oppsto et problem med lading av enheten. Koble fra strømadapteren, og vær forsiktig, kabelen kan være varm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Se vedlikeholdstrinnene"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Venstre hurtigtast"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Høyre hurtigtast"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Venstre hurtigtast låser også opp"</string>
@@ -793,11 +837,15 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skjermdumper"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Generelle meldinger"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Lagring"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"Hint"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Du trenger ikke å installere instant-apper."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"Appen ble åpnet uten at den ble installert."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Appen ble åpnet uten at den ble installert. Trykk for å finne ut mer."</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Gå til nettleser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobildata"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi er av"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth er av"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Ikke forstyrr er av"</string>
@@ -809,7 +857,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Erstatt"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Trykk for detaljer om batteri- og databruk"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vil du slå av mobildata?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Vil du slå av mobildata?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Du får ikke tilgang til data eller Internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett blir bare tilgjengelig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"operatøren din"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Vil du tillate at <xliff:g id="APP_0">%1$s</xliff:g> viser <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"– Den kan lese informasjon fra <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -817,4 +867,44 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Tillat at <xliff:g id="APP">%1$s</xliff:g> viser utsnitt fra alle apper"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Tillat"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Avvis"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"Trykk for å planlegge batterisparing"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Slå på automatisk når batteriet er på <xliff:g id="PERCENTAGE">%d</xliff:g> %%"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"Nei takk"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Tidsplan for batterisparing er slått på"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batterisparing slås på automatisk når batteriet er lavere enn <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"Innstillinger"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"Greit"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI-heap"</string>
+    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
+      <item quantity="other"><xliff:g id="NUM_APPS_2">%d</xliff:g> apper</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> app</item>
+    </plurals>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> bruker <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Apper bruker <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"I bruk:"</string>
+    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
+      <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> apper bruker <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> app bruker <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
+    </plurals>
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Greit"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Personverninnst."</string>
+    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App som bruker <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Apper som bruker <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" og "</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"posisjon"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofon"</string>
+    <plurals name="ongoing_privacy_dialog_overflow_text" formatted="false" msgid="3441296594927649172">
+      <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> andre apper</item>
+      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> annen app</item>
+    </plurals>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensorer er av"</string>
+    <string name="device_services" msgid="1191212554435440592">"Enhetstjenester"</string>
+    <string name="music_controls_no_title" msgid="5236895307087002011">"Ingen tittel"</string>
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Åpne <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Åpne varslingsinnstillinger for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="2684301469286150276">"Vil du tillate bobler fra denne appen?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"Blokkér"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"Tillat"</string>
 </resources>

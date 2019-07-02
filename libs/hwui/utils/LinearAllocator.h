@@ -201,7 +201,7 @@ public:
             : std::vector<T, LinearStdAllocator<T>>(allocator) {}
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_LINEARALLOCATOR_H

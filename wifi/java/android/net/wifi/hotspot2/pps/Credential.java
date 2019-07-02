@@ -18,8 +18,8 @@ package android.net.wifi.hotspot2.pps;
 
 import android.net.wifi.EAPConstants;
 import android.net.wifi.ParcelUtil;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -428,7 +428,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<UserCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<UserCredential> CREATOR =
             new Creator<UserCredential>() {
                 @Override
                 public UserCredential createFromParcel(Parcel in) {
@@ -572,7 +572,7 @@ public final class Credential implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mCertType, mCertSha256Fingerprint);
+            return Objects.hash(mCertType, Arrays.hashCode(mCertSha256Fingerprint));
         }
 
         @Override
@@ -599,7 +599,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<CertificateCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<CertificateCredential> CREATOR =
             new Creator<CertificateCredential>() {
                 @Override
                 public CertificateCredential createFromParcel(Parcel in) {
@@ -770,7 +770,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<SimCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<SimCredential> CREATOR =
             new Creator<SimCredential>() {
                 @Override
                 public SimCredential createFromParcel(Parcel in) {
@@ -842,24 +842,50 @@ public final class Credential implements Parcelable {
     }
 
     /**
-     * CA (Certificate Authority) X509 certificate.
+     * CA (Certificate Authority) X509 certificates.
      */
-    private X509Certificate mCaCertificate = null;
+    private X509Certificate[] mCaCertificates = null;
+
     /**
      * Set the CA (Certification Authority) certificate associated with this credential.
      *
      * @param caCertificate The CA certificate to set to
      */
     public void setCaCertificate(X509Certificate caCertificate) {
-        mCaCertificate = caCertificate;
+        mCaCertificates = null;
+        if (caCertificate != null) {
+            mCaCertificates = new X509Certificate[] {caCertificate};
+        }
     }
+
+    /**
+     * Set the CA (Certification Authority) certificates associated with this credential.
+     *
+     * @param caCertificates The list of CA certificates to set to
+     * @hide
+     */
+    public void setCaCertificates(X509Certificate[] caCertificates) {
+        mCaCertificates = caCertificates;
+    }
+
     /**
      * Get the CA (Certification Authority) certificate associated with this credential.
      *
-     * @return CA certificate associated with this credential
+     * @return CA certificate associated with this credential, {@code null} if certificate is not
+     * set or certificate is more than one.
      */
     public X509Certificate getCaCertificate() {
-        return mCaCertificate;
+        return mCaCertificates == null || mCaCertificates.length > 1 ? null : mCaCertificates[0];
+    }
+
+    /**
+     * Get the CA (Certification Authority) certificates associated with this credential.
+     *
+     * @return The list of CA certificates associated with this credential
+     * @hide
+     */
+    public X509Certificate[] getCaCertificates() {
+        return mCaCertificates;
     }
 
     /**
@@ -933,7 +959,11 @@ public final class Credential implements Parcelable {
                 mClientCertificateChain = Arrays.copyOf(source.mClientCertificateChain,
                                                         source.mClientCertificateChain.length);
             }
-            mCaCertificate = source.mCaCertificate;
+            if (source.mCaCertificates != null) {
+                mCaCertificates = Arrays.copyOf(source.mCaCertificates,
+                        source.mCaCertificates.length);
+            }
+
             mClientPrivateKey = source.mClientPrivateKey;
         }
     }
@@ -952,7 +982,7 @@ public final class Credential implements Parcelable {
         dest.writeParcelable(mUserCredential, flags);
         dest.writeParcelable(mCertCredential, flags);
         dest.writeParcelable(mSimCredential, flags);
-        ParcelUtil.writeCertificate(dest, mCaCertificate);
+        ParcelUtil.writeCertificates(dest, mCaCertificates);
         ParcelUtil.writeCertificates(dest, mClientCertificateChain);
         ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
     }
@@ -977,16 +1007,17 @@ public final class Credential implements Parcelable {
                     : mCertCredential.equals(that.mCertCredential))
                 && (mSimCredential == null ? that.mSimCredential == null
                     : mSimCredential.equals(that.mSimCredential))
-                && isX509CertificateEquals(mCaCertificate, that.mCaCertificate)
+                && isX509CertificatesEquals(mCaCertificates, that.mCaCertificates)
                 && isX509CertificatesEquals(mClientCertificateChain, that.mClientCertificateChain)
                 && isPrivateKeyEquals(mClientPrivateKey, that.mClientPrivateKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRealm, mCreationTimeInMillis, mExpirationTimeInMillis,
+        return Objects.hash(mCreationTimeInMillis, mExpirationTimeInMillis, mRealm,
                 mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
-                mCaCertificate, mClientCertificateChain, mClientPrivateKey);
+                mClientPrivateKey, Arrays.hashCode(mCaCertificates),
+                Arrays.hashCode(mClientCertificateChain));
     }
 
     @Override
@@ -1019,10 +1050,11 @@ public final class Credential implements Parcelable {
     /**
      * Validate the configuration data.
      *
+     * @param isR1 {@code true} if the configuration is for R1
      * @return true on success or false on failure
      * @hide
      */
-    public boolean validate() {
+    public boolean validate(boolean isR1) {
         if (TextUtils.isEmpty(mRealm)) {
             Log.d(TAG, "Missing realm");
             return false;
@@ -1035,11 +1067,11 @@ public final class Credential implements Parcelable {
 
         // Verify the credential.
         if (mUserCredential != null) {
-            if (!verifyUserCredential()) {
+            if (!verifyUserCredential(isR1)) {
                 return false;
             }
         } else if (mCertCredential != null) {
-            if (!verifyCertCredential()) {
+            if (!verifyCertCredential(isR1)) {
                 return false;
             }
         } else if (mSimCredential != null) {
@@ -1054,7 +1086,7 @@ public final class Credential implements Parcelable {
         return true;
     }
 
-    public static final Creator<Credential> CREATOR =
+    public static final @android.annotation.NonNull Creator<Credential> CREATOR =
         new Creator<Credential>() {
             @Override
             public Credential createFromParcel(Parcel in) {
@@ -1066,7 +1098,7 @@ public final class Credential implements Parcelable {
                 credential.setUserCredential(in.readParcelable(null));
                 credential.setCertCredential(in.readParcelable(null));
                 credential.setSimCredential(in.readParcelable(null));
-                credential.setCaCertificate(ParcelUtil.readCertificate(in));
+                credential.setCaCertificates(ParcelUtil.readCertificates(in));
                 credential.setClientCertificateChain(ParcelUtil.readCertificates(in));
                 credential.setClientPrivateKey(ParcelUtil.readPrivateKey(in));
                 return credential;
@@ -1081,9 +1113,10 @@ public final class Credential implements Parcelable {
     /**
      * Verify user credential.
      *
+     * @param isR1 {@code true} if credential is for R1
      * @return true if user credential is valid, false otherwise.
      */
-    private boolean verifyUserCredential() {
+    private boolean verifyUserCredential(boolean isR1) {
         if (mUserCredential == null) {
             Log.d(TAG, "Missing user credential");
             return false;
@@ -1095,7 +1128,10 @@ public final class Credential implements Parcelable {
         if (!mUserCredential.validate()) {
             return false;
         }
-        if (mCaCertificate == null) {
+
+        // CA certificate is required for R1 Passpoint profile.
+        // For R2, it is downloaded using cert URL provided in PPS MO after validation completes.
+        if (isR1 && mCaCertificates == null) {
             Log.d(TAG, "Missing CA Certificate for user credential");
             return false;
         }
@@ -1106,9 +1142,10 @@ public final class Credential implements Parcelable {
      * Verify certificate credential, which is used for EAP-TLS.  This will verify
      * that the necessary client key and certificates are provided.
      *
+     * @param isR1 {@code true} if credential is for R1
      * @return true if certificate credential is valid, false otherwise.
      */
-    private boolean verifyCertCredential() {
+    private boolean verifyCertCredential(boolean isR1) {
         if (mCertCredential == null) {
             Log.d(TAG, "Missing certificate credential");
             return false;
@@ -1123,7 +1160,9 @@ public final class Credential implements Parcelable {
         }
 
         // Verify required key and certificates for certificate credential.
-        if (mCaCertificate == null) {
+        // CA certificate is required for R1 Passpoint profile.
+        // For R2, it is downloaded using cert URL provided in PPS MO after validation completes.
+        if (isR1 && mCaCertificates == null) {
             Log.d(TAG, "Missing CA Certificate for certificate credential");
             return false;
         }
@@ -1177,7 +1216,15 @@ public final class Credential implements Parcelable {
                 Arrays.equals(key1.getEncoded(), key2.getEncoded());
     }
 
-    private static boolean isX509CertificateEquals(X509Certificate cert1, X509Certificate cert2) {
+    /**
+     * Verify two X.509 certificates are identical.
+     *
+     * @param cert1 a certificate to compare
+     * @param cert2 a certificate to compare
+     * @return {@code true} if given certificates are the same each other, {@code false} otherwise.
+     * @hide
+     */
+    public static boolean isX509CertificateEquals(X509Certificate cert1, X509Certificate cert2) {
         if (cert1 == null && cert2 == null) {
             return true;
         }

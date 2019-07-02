@@ -17,6 +17,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -33,6 +34,10 @@ public class BackgroundFallback {
 
     public void setDrawable(Drawable d) {
         mBackgroundFallback = d;
+    }
+
+    public @Nullable Drawable getDrawable() {
+        return mBackgroundFallback;
     }
 
     public boolean hasFallback() {

@@ -46,13 +46,6 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz) {
     return reinterpret_cast<jlong>(client);
 }
 
-static jlong nativeCreateScoped(JNIEnv* env, jclass clazz, jlong surfaceObject) {
-    Surface *parent = reinterpret_cast<Surface*>(surfaceObject);
-    SurfaceComposerClient* client = new SurfaceComposerClient(parent->getIGraphicBufferProducer());
-    client->incStrong((void*)nativeCreate);
-    return reinterpret_cast<jlong>(client);
-}
-
 static void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     SurfaceComposerClient* client = reinterpret_cast<SurfaceComposerClient*>(ptr);
     client->decStrong((void*)nativeCreate);
@@ -67,8 +60,6 @@ static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeCreate", "()J",
             (void*)nativeCreate },
-    { "nativeCreateScoped", "(J)J",
-            (void*)nativeCreateScoped },
     { "nativeDestroy", "(J)V",
             (void*)nativeDestroy },
     { "nativeKill", "(J)V",

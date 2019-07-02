@@ -17,7 +17,7 @@
 android_test {
     name: "BackgroundDexOptServiceIntegrationTests",
     srcs: ["src/**/*.java"],
-    static_libs: ["android-support-test"],
+    static_libs: ["androidx.test.rules"],
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",

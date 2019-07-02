@@ -960,7 +960,7 @@ public class SearchManager
         try {
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             if (inclContext) {
-                IActivityManager am = ActivityManager.getService();
+                IActivityTaskManager am = ActivityTaskManager.getService();
                 Bundle extras = am.getAssistContextExtras(ActivityManager.ASSIST_CONTEXT_BASIC);
                 if (extras != null) {
                     intent.replaceExtras(extras);

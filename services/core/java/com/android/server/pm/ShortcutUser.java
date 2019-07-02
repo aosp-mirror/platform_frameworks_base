@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.pm.ShortcutManager;
+import android.metrics.LogMaker;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -27,6 +28,8 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
@@ -646,5 +649,24 @@ class ShortcutUser {
         }
 
         return result;
+    }
+
+    void logSharingShortcutStats(MetricsLogger logger) {
+        int packageWithShareTargetsCount = 0;
+        int totalSharingShortcutCount = 0;
+        for (int i = 0; i < mPackages.size(); i++) {
+            if (mPackages.valueAt(i).hasShareTargets()) {
+                packageWithShareTargetsCount++;
+                totalSharingShortcutCount += mPackages.valueAt(i).getSharingShortcutCount();
+            }
+        }
+
+        final LogMaker logMaker = new LogMaker(MetricsEvent.ACTION_SHORTCUTS_CHANGED);
+        logger.write(logMaker.setType(MetricsEvent.SHORTCUTS_CHANGED_USER_ID)
+                .setSubtype(mUserId));
+        logger.write(logMaker.setType(MetricsEvent.SHORTCUTS_CHANGED_PACKAGE_COUNT)
+                .setSubtype(packageWithShareTargetsCount));
+        logger.write(logMaker.setType(MetricsEvent.SHORTCUTS_CHANGED_SHORTCUT_COUNT)
+                .setSubtype(totalSharingShortcutCount));
     }
 }

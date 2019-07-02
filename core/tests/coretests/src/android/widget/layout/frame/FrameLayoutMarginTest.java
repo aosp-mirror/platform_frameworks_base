@@ -16,13 +16,14 @@
 
 package android.widget.layout.frame;
 
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.ViewAsserts;
 import android.app.Activity;
+import android.test.ActivityInstrumentationTestCase;
+import android.test.ViewAsserts;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.layout.frame.FrameLayoutMargin;
+
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
 
 public class FrameLayoutMarginTest extends ActivityInstrumentationTestCase<FrameLayoutMargin> {

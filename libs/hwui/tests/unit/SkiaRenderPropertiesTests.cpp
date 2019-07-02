@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 
 #include <SkClipStack.h>
-#include <SkLiteRecorder.h>
 #include <SkSurface_Base.h>
 #include <string.h>
 #include "AnimationContext.h"

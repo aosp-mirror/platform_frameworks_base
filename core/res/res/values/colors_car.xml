@@ -17,15 +17,276 @@
  */
 -->
 <resources>
-  <!-- car support colors from
-  https://cs.corp.google.com/android/frameworks/support/car/res/values/colors.xml -->
-  <color name="car_user_switcher_user_image_bgcolor">@color/car_grey_50</color>
-  <color name="car_user_switcher_user_image_fgcolor">@color/car_grey_900</color>
-  <color name="car_card_dark">@color/car_dark_blue_grey_700</color>
-  <color name="car_body1_light">@color/car_grey_100</color>
+    <color name="car_background">@color/black</color>
 
-  <color name="car_grey_50">#fffafafa</color>
-  <color name="car_grey_900">#ff212121</color>
-  <color name="car_dark_blue_grey_700">#ff172026</color>
-  <color name="car_grey_100">#fff5f5f5</color>
+    <color name="car_colorPrimary">@color/car_grey_868</color>
+    <color name="car_colorSecondary">@color/car_grey_900</color>
+    <color name="car_colorPrimaryDark">@color/car_grey_958</color>
+
+
+    <!-- Various colors for text sizes. "Light" and "dark" here refer to the lighter or darker
+          shades. -->
+    <color name="car_title_light">@color/car_grey_100</color>
+    <color name="car_title_dark">@color/car_grey_900</color>
+    <color name="car_title">@color/car_title_light</color>
+
+    <color name="car_title2_light">@color/car_grey_100</color>
+    <color name="car_title2_dark">@color/car_grey_900</color>
+    <color name="car_title2">@color/car_title2_light</color>
+
+    <color name="car_headline1_light">@color/car_grey_100</color>
+    <color name="car_headline1_dark">@color/car_grey_800</color>
+    <color name="car_headline1">@color/car_headline1_light</color>
+
+    <color name="car_headline2_light">@color/car_grey_100</color>
+    <color name="car_headline2_dark">@color/car_grey_900</color>
+    <color name="car_headline2">@color/car_headline2_light</color>
+
+    <color name="car_headline3_light">@android:color/white</color>
+    <color name="car_headline3_dark">@color/car_grey_900</color>
+    <color name="car_headline3">@color/car_headline3_light</color>
+
+    <color name="car_headline4_light">@android:color/white</color>
+    <color name="car_headline4_dark">@android:color/black</color>
+    <color name="car_headline4">@color/car_headline4_light</color>
+
+    <color name="car_body1_light">@color/car_grey_50</color>
+    <color name="car_body1_dark">@color/car_grey_900</color>
+    <color name="car_body1">@color/car_body1_light</color>
+
+    <color name="car_body2_light">@color/car_grey_300</color>
+    <color name="car_body2_dark">@color/car_grey_700</color>
+    <color name="car_body2">@color/car_body2_light</color>
+
+    <color name="car_body3_light">@color/car_grey_400</color>
+    <color name="car_body3_dark">@android:color/black</color>
+    <color name="car_body3">@color/car_body3_light</color>
+
+    <color name="car_body4_light">@android:color/white</color>
+    <color name="car_body4_dark">@android:color/black</color>
+    <color name="car_body4">@color/car_body4_light</color>
+
+    <color name="car_action1_light">@color/car_grey_900</color>
+    <color name="car_action1_dark">@color/car_grey_50</color>
+    <color name="car_action1">@color/car_action1_light</color>
+
+    <!-- The tinting colors to create a light- and dark-colored icon respectively. -->
+    <color name="car_tint_light">@color/car_grey_50</color>
+    <color name="car_tint_dark">@color/car_grey_900</color>
+
+    <!-- The tinting color for an icon. This icon is assumed to be on a light background. -->
+    <color name="car_tint">@color/car_tint_light</color>
+
+    <!-- An inverted tinting from car_tint. -->
+    <color name="car_tint_inverse">@color/car_tint_dark</color>
+
+    <!-- The color of the divider. The color here is a lighter shade. -->
+    <color name="car_list_divider_light">#1fffffff</color>
+
+    <!-- The color of the divider. The color here is a darker shade. -->
+    <color name="car_list_divider_dark">#1f000000</color>
+
+    <!-- The color of the dividers in the list. This color is assumed to be on a light colored
+         view. -->
+    <color name="car_list_divider">@color/car_list_divider_light</color>
+
+    <!-- A light and dark colored card. -->
+    <color name="car_card_light">@color/car_grey_50</color>
+    <color name="car_card_dark">@color/car_dark_blue_grey_700</color>
+
+    <!-- The default color of a card in car UI. -->
+    <color name="car_card">@color/car_card_dark</color>
+
+    <!-- The ripple colors. The "dark" and "light" designation here refers to the color of the
+         ripple  itself. -->
+    <color name="car_card_ripple_background_dark">#8F000000</color>
+    <color name="car_card_ripple_background_light">#27ffffff</color>
+
+    <!-- The ripple color for a light colored card. -->
+    <color name="car_card_ripple_background">@color/car_card_ripple_background_light</color>
+
+    <!-- The ripple color for a dark-colored card. This color is the opposite of
+         car_card_ripple_background. -->
+    <color name="car_card_ripple_background_inverse">@color/car_card_ripple_background_dark</color>
+
+    <!-- The top margin before the start of content in an application. -->
+    <dimen name="app_header_height">96dp</dimen>
+
+    <!-- The lighter and darker color for the scrollbar thumb. -->
+    <color name="car_scrollbar_thumb_light">#99ffffff</color>
+    <color name="car_scrollbar_thumb_dark">#7f0b0f12</color>
+
+    <!-- The color of the scroll bar indicator in the PagedListView. This color is assumed to be on
+         a light-colored background. -->
+    <color name="car_scrollbar_thumb">@color/car_scrollbar_thumb_light</color>
+
+    <!-- The inverted color of the scroll bar indicator. This color is always the opposite of
+         car_scrollbar_thumb. -->
+    <color name="car_scrollbar_thumb_inverse">@color/car_scrollbar_thumb_dark</color>
+
+    <!-- The color of the seekbar track secondary progress in SeekbarListItem. -->
+    <color name="car_seekbar_track_secondary_progress">@color/car_grey_500</color>
+
+    <!-- The lighter and darker color for the seekbar track background. -->
+    <color name="car_seekbar_track_background_light">@color/car_grey_400</color>
+    <color name="car_seekbar_track_background_dark">@color/car_grey_700</color>
+    <!-- The color of the seekbar track background in SeekbarListItem. This color is assumed to be
+         on a light-colored background. -->
+    <color name="car_seekbar_track_background">@color/car_seekbar_track_background_dark</color>
+    <!-- background is car_grey_868 with .9 alpha -->
+    <color name="car_toast_background">#E6282a2d</color>
+
+    <!-- Misc colors -->
+    <color name="car_highlight_light">#ff66b5ff</color>
+    <color name="car_highlight_dark">#ff60a8f0</color>
+    <color name="car_highlight">@color/car_highlight_dark</color>
+    <color name="car_accent_light">@color/car_highlight_light</color>
+    <color name="car_accent_dark">@color/car_highlight_dark</color>
+    <color name="car_accent">@color/car_highlight_dark</color>
+
+    <color name="car_user_switcher_user_image_bgcolor">@color/car_grey_50</color>
+    <color name="car_user_switcher_user_image_fgcolor">@color/car_grey_900</color>
+
+    <!-- Color palette for cars -->
+    <color name="car_grey_972">#ff090A0C</color>
+    <color name="car_grey_958">#ff0e1013</color>
+    <color name="car_grey_928">#ff17181b</color>
+    <color name="car_grey_900">#ff202124</color>
+    <color name="car_grey_868">#ff282a2d</color>
+    <color name="car_grey_846">#ff2e3234</color>
+    <color name="car_grey_800">#ff3c4043</color>
+    <color name="car_grey_772">#ff464a4d</color>
+    <color name="car_grey_746">#ff4d5256</color>
+    <color name="car_grey_700">#ff5f6368</color>
+    <color name="car_grey_600">#ff80868b</color>
+    <color name="car_grey_500">#ff9aa0a6</color>
+    <color name="car_grey_400">#ffbdc1c6</color>
+    <color name="car_grey_300">#ffdadce0</color>
+    <color name="car_grey_200">#ffe8eaed</color>
+    <color name="car_grey_100">#fff1f3f4</color>
+    <color name="car_grey_50">#fff8f9fa</color>
+
+    <color name="car_blue_900">#ff1d57a9</color>
+    <color name="car_blue_800">#ff2065bb</color>
+    <color name="car_blue_700">#ff2374ce</color>
+    <color name="car_blue_600">#ff2581df</color>
+    <color name="car_blue_500">#ff5195ea</color>
+    <color name="car_blue_400">#ff6ba5ed</color>
+    <color name="car_blue_300">#ff96bff2</color>
+    <color name="car_blue_200">#ffb9d4f6</color>
+    <color name="car_blue_100">#ffd9e6f9</color>
+    <color name="car_blue_50">#ffebf1fc</color>
+
+    <color name="car_green_900">#ff136e39</color>
+    <color name="car_green_800">#ff1b7e42</color>
+    <color name="car_green_700">#ff218c48</color>
+    <color name="car_green_600">#ff28994f</color>
+    <color name="car_green_500">#ff41af6a</color>
+    <color name="car_green_400">#ff5dba80</color>
+    <color name="car_green_300">#ff8dcfa5</color>
+    <color name="car_green_200">#ffb3dfc3</color>
+    <color name="car_green_100">#ffd5ebdf</color>
+    <color name="car_green_50">#ffe8f3ee</color>
+
+    <color name="car_red_900">#ffa81314</color>
+    <color name="car_red_800">#ffb41b1a</color>
+    <color name="car_red_700">#ffc22a2a</color>
+    <color name="car_red_600">#ffd33b30</color>
+    <color name="car_red_500">#ffe25142</color>
+    <color name="car_red_400">#ffe66a5e</color>
+    <color name="car_red_300">#ffed968d</color>
+    <color name="car_red_200">#fff3b9b3</color>
+    <color name="car_red_100">#fff7d8d9</color>
+    <color name="car_red_50">#fffaebeb</color>
+
+    <color name="car_yellow_900">#ffdd860e</color>
+    <color name="car_yellow_800">#ffe59810</color>
+    <color name="car_yellow_700">#ffeda912</color>
+    <color name="car_yellow_600">#fff3b713</color>
+    <color name="car_yellow_500">#fff5c518</color>
+    <color name="car_yellow_400">#fff6cd3a</color>
+    <color name="car_yellow_300">#fff9dc74</color>
+    <color name="car_yellow_200">#fffbe7a2</color>
+    <color name="car_yellow_100">#fffcf0ce</color>
+    <color name="car_yellow_50">#fffdf7e6</color>
+
+    <color name="car_orange_900">#ffb06000</color>
+    <color name="car_orange_800">#ffc26401</color>
+    <color name="car_orange_700">#ffd56e0c</color>
+    <color name="car_orange_600">#ffe8710a</color>
+    <color name="car_orange_500">#fffa7b17</color>
+    <color name="car_orange_400">#fffa903e</color>
+    <color name="car_orange_300">#fffcad70</color>
+    <color name="car_orange_200">#fffdc69c</color>
+    <color name="car_orange_100">#fffedfc8</color>
+    <color name="car_orange_50">#fffeefe3</color>
+
+    <color name="car_pink_900">#ff9c166b</color>
+    <color name="car_pink_800">#ffb80672</color>
+    <color name="car_pink_700">#ffd01884</color>
+    <color name="car_pink_600">#ffe52592</color>
+    <color name="car_pink_500">#fff439a0</color>
+    <color name="car_pink_400">#ffff63b8</color>
+    <color name="car_pink_300">#ffff8bcb</color>
+    <color name="car_pink_200">#fffba9d6</color>
+    <color name="car_pink_100">#fffdcfe8</color>
+    <color name="car_pink_50">#fffde7f3</color>
+
+    <color name="car_teal_900">#ff004d40</color>
+    <color name="car_teal_800">#ff00695c</color>
+    <color name="car_teal_700">#ff00796b</color>
+    <color name="car_teal_600">#ff00897b</color>
+    <color name="car_teal_500">#ff009688</color>
+    <color name="car_teal_400">#ff26a69a</color>
+    <color name="car_teal_300">#ff4db6ac</color>
+    <color name="car_teal_200">#ff80cbc4</color>
+    <color name="car_teal_100">#ffb2dfdb</color>
+    <color name="car_teal_50">#ffe0f2f1</color>
+
+    <color name="car_purple_900">#ff681da8</color>
+    <color name="car_purple_800">#ff7627bb</color>
+    <color name="car_purple_700">#ff8430ce</color>
+    <color name="car_purple_600">#ff9334e6</color>
+    <color name="car_purple_500">#ffa142f4</color>
+    <color name="car_purple_400">#ffaf5cf7</color>
+    <color name="car_purple_300">#ffc58af9</color>
+    <color name="car_purple_200">#ffd7aefb</color>
+    <color name="car_purple_100">#ffe9d2fd</color>
+    <color name="car_purple_50">#fff3e8fd</color>
+
+    <color name="car_cyan_900">#ff01877e</color>
+    <color name="car_cyan_800">#ff099091</color>
+    <color name="car_cyan_700">#ff12a4af</color>
+    <color name="car_cyan_600">#ff12b5cb</color>
+    <color name="car_cyan_500">#ff24c1e0</color>
+    <color name="car_cyan_400">#ff4ecde6</color>
+    <color name="car_cyan_300">#ff78d9ec</color>
+    <color name="car_cyan_200">#ffa1e4f2</color>
+    <color name="car_cyan_100">#ffcbf0f8</color>
+    <color name="car_cyan_50">#ffe4f7fb</color>
+
+
+    <color name="car_grey_1000">#cc000000</color>
+    <color name="car_white_1000">#1effffff</color>
+    <color name="car_blue_grey_800">#ff37474F</color>
+    <color name="car_blue_grey_900">#ff263238</color>
+    <color name="car_dark_blue_grey_600">#ff1d272d</color>
+    <color name="car_dark_blue_grey_700">#ff172026</color>
+    <color name="car_dark_blue_grey_800">#ff11181d</color>
+    <color name="car_dark_blue_grey_900">#ff0c1013</color>
+    <color name="car_dark_blue_grey_1000">#ff090c0f</color>
+    <color name="car_light_blue_300">#ff4fc3f7</color>
+    <color name="car_light_blue_500">#ff03A9F4</color>
+    <color name="car_light_blue_600">#ff039be5</color>
+    <color name="car_light_blue_700">#ff0288d1</color>
+    <color name="car_light_blue_800">#ff0277bd</color>
+    <color name="car_light_blue_900">#ff01579b</color>
+
+
+    <color name="car_red_500a">#ffd50000</color>
+    <color name="car_red_a700">#ffd50000</color>
+
+    <color name="car_keyboard_divider_line">#38ffffff</color>
+    <color name="car_keyboard_text_primary_color">@color/car_grey_50</color>
+    <color name="car_keyboard_text_secondary_color">#8af8f9fa</color>
 </resources>

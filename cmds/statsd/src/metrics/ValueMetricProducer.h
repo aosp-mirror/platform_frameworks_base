@@ -19,10 +19,13 @@
 #include <gtest/gtest_prod.h>
 #include <utils/threads.h>
 #include <list>
-#include "../anomaly/AnomalyTracker.h"
-#include "../condition/ConditionTracker.h"
-#include "../external/PullDataReceiver.h"
-#include "../external/StatsPullerManager.h"
+#include "anomaly/AnomalyTracker.h"
+#include "condition/ConditionTimer.h"
+#include "condition/ConditionTracker.h"
+#include "external/PullDataReceiver.h"
+#include "external/StatsPullerManager.h"
+#include "matchers/EventMatcherWizard.h"
+#include "stats_log_util.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
@@ -33,52 +36,46 @@ namespace statsd {
 struct ValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
-    int64_t mValue;
+    std::vector<int> valueIndex;
+    std::vector<Value> values;
+    // If the metric has no condition, then this field is just wasted.
+    // When we tune statsd memory usage in the future, this is a candidate to optimize.
+    int64_t mConditionTrueNs;
 };
 
+
+// Aggregates values within buckets.
+//
+// There are different events that might complete a bucket
+// - a condition change
+// - an app upgrade
+// - an alarm set to the end of the bucket
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
+                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
+                        const int whatMatcherIndex,
+                        const sp<EventMatcherWizard>& matcherWizard,
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
+                        const sp<StatsPullerManager>& pullerManager);
 
     virtual ~ValueMetricProducer();
 
-    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
+    // Process data pulled on bucket boundary.
+    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data,
+                      bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // ValueMetric needs special logic if it's a pulled atom.
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
-
-        if (mPullTagId != -1 && (mCondition == true || mConditionTrackerIndex < 0) ) {
-            vector<shared_ptr<LogEvent>> allData;
-            mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
-            if (allData.size() == 0) {
-                // This shouldn't happen since this valuemetric is not useful now.
-            }
-
-            // Pretend the pulled data occurs right before the app upgrade event.
-            mCondition = false;
-            for (const auto& data : allData) {
-                data->setElapsedTimestampNs(eventTimeNs - 1);
-                onMatchedLogEventLocked(0, *data);
-            }
-
-            flushCurrentBucketLocked(eventTimeNs);
-            mCurrentBucketStartTimeNs = eventTimeNs;
-
-            mCondition = true;
-            for (const auto& data : allData) {
-                data->setElapsedTimestampNs(eventTimeNs);
-                onMatchedLogEventLocked(0, *data);
-            }
-        } else {
-            // For pushed value metric or pulled metric where condition is not true,
-            // we simply flush and reset the current bucket start.
-            flushCurrentBucketLocked(eventTimeNs);
-            mCurrentBucketStartTimeNs = eventTimeNs;
+        if (!mSplitBucketForAppUpgrade) {
+            return;
         }
+        if (mIsPulled && mCondition) {
+            pullAndMatchEventsLocked(eventTimeNs, mCondition);
+        }
+        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     };
 
 protected:
@@ -90,9 +87,14 @@ protected:
 private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
+                            const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
     void clearPastBucketsLocked(const int64_t dumpTimeNs) override;
+
+    // Internal interface to handle active state change.
+    void onActiveStateChangedLocked(const int64_t& eventTimeNs) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
@@ -105,51 +107,71 @@ private:
 
     void dumpStatesLocked(FILE* out, bool verbose) const override;
 
-    // Util function to flush the old packet.
+    // For pulled metrics, this method should only be called if a pull has be done. Else we will
+    // not have complete data for the bucket.
     void flushIfNeededLocked(const int64_t& eventTime) override;
 
-    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
+    // For pulled metrics, this method should only be called if a pulled have be done. Else we will
+    // not have complete data for the bucket.
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                  const int64_t& nextBucketStartTimeNs) override;
+
+    void prepareFirstBucketLocked() override;
 
     void dropDataLocked(const int64_t dropTimeNs) override;
 
-    const FieldMatcher mValueField;
+    // Calculate previous bucket end time based on current time.
+    int64_t calcPreviousBucketEndTime(const int64_t currentTimeNs);
 
-    std::shared_ptr<StatsPullerManager> mStatsPullerManager;
+    // Calculate how many buckets are present between the current bucket and eventTimeNs.
+    int64_t calcBucketsForwardCount(const int64_t& eventTimeNs) const;
 
-    // for testing
-    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
-                        std::shared_ptr<StatsPullerManager> statsPullerManager);
+    // Mark the data as invalid.
+    void invalidateCurrentBucket();
+    void invalidateCurrentBucketWithoutResetBase();
+
+    const int mWhatMatcherIndex;
+
+    sp<EventMatcherWizard> mEventMatcherWizard;
+
+    sp<StatsPullerManager> mPullerManager;
+
+    // Value fields for matching.
+    std::vector<Matcher> mFieldMatchers;
+
+    // Value fields for matching.
+    std::set<MetricDimensionKey> mMatchedMetricDimensionKeys;
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
-    int mField;
+    // if this is pulled metric
+    const bool mIsPulled;
 
-    // internal state of a bucket.
+    // internal state of an ongoing aggregation bucket.
     typedef struct {
-        // Pulled data always come in pair of <start, end>. This holds the value
-        // for start. The diff (end - start) is added to sum.
-        int64_t start;
-        // Whether the start data point is updated
-        bool startUpdated;
-        // If end data point comes before the start, record this pair as tainted
-        // and the value is not added to the running sum.
-        int tainted;
-        // Running sum of known pairs in this bucket
-        int64_t sum;
+        // Index in multi value aggregation.
+        int valueIndex;
+        // Holds current base value of the dimension. Take diff and update if necessary.
+        Value base;
+        // Whether there is a base to diff to.
+        bool hasBase;
+        // Current value, depending on the aggregation type.
+        Value value;
+        // Number of samples collected.
+        int sampleSize;
         // If this dimension has any non-tainted value. If not, don't report the
         // dimension.
-        bool hasValue;
+        bool hasValue = false;
+        // Whether new data is seen in the bucket.
+        bool seenNewData = false;
     } Interval;
 
-    std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;
+    std::unordered_map<MetricDimensionKey, std::vector<Interval>> mCurrentSlicedBucket;
 
     std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
     // Pairs of (elapsed start, elapsed end) denoting buckets that were skipped.
@@ -159,6 +181,23 @@ private:
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
+    bool hasReachedGuardRailLimit() const;
+
+    bool hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey);
+
+    void pullAndMatchEventsLocked(const int64_t timestampNs, ConditionState condition);
+
+    void accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
+                          int64_t originalPullTimeNs, int64_t eventElapsedTimeNs,
+                          ConditionState condition);
+
+    ValueBucket buildPartialBucket(int64_t bucketEndTime,
+                                   const std::vector<Interval>& intervals);
+    void initCurrentSlicedBucket(int64_t nextBucketStartTimeNs);
+    void appendToFullBucket(int64_t eventTimeNs, int64_t fullBucketEndTimeNs);
+
+    // Reset diff base and mHasGlobalBase
+    void resetBase();
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 
@@ -168,20 +207,93 @@ private:
 
     const bool mUseAbsoluteValueOnReset;
 
-    FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
-    FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
-    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse);
-    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
-    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithCondition);
+    const ValueMetric::AggregationType mAggregationType;
+
+    const bool mUseDiff;
+
+    const ValueMetric::ValueDirection mValueDirection;
+
+    const bool mSkipZeroDiffOutput;
+
+    // If true, use a zero value as base to compute the diff.
+    // This is used for new keys which are present in the new data but was not
+    // present in the base data.
+    // The default base will only be used if we have a global base.
+    const bool mUseZeroDefaultBase;
+
+    // For pulled metrics, this is always set to true whenever a pull succeeds.
+    // It is set to false when a pull fails, or upon condition change to false.
+    // This is used to decide if we have the right base data to compute the
+    // diff against.
+    bool mHasGlobalBase;
+
+    // Invalid bucket. There was a problem in collecting data in the current bucket so we cannot
+    // trust any of the data in this bucket.
+    //
+    // For instance, one pull failed.
+    bool mCurrentBucketIsInvalid;
+
+    const int64_t mMaxPullDelayNs;
+
+    const bool mSplitBucketForAppUpgrade;
+
+    ConditionTimer mConditionTimer;
+
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnConditionChange);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2);
-    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketIncludingUnknownConditionIsInvalid);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet);
+    FRIEND_TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime);
+    FRIEND_TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onConditionChanged);
+    FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onDataPulled);
+    FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestFirstBucket);
+    FRIEND_TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
+    FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff);
+    FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff);
+    FRIEND_TEST(ValueMetricProducerTest, TestPartialBucketCreated);
+    FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryFalse);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateAvg);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateMax);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateMin);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateSum);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange_EndOfBucket);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailBeforeConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
+    FRIEND_TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput);
+    FRIEND_TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue);
+    FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
+    FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
+    FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
+    friend class ValueMetricProducerTestHelper;
 };
 
 }  // namespace statsd

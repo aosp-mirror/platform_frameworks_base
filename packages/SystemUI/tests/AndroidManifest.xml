@@ -17,6 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:sharedUserId="android.uid.system"
     package="com.android.systemui.tests">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -51,7 +52,7 @@
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
@@ -67,13 +68,20 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name="com.android.systemui.bubbles.BubblesTestActivity"
+            android:allowEmbedded="true"
+            android:documentLaunchMode="always"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:resizeableActivity="true" />
+
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
             tools:replace="android:authorities"
             android:authorities="${applicationId}.lifecycle-tests"
             android:exported="false"
+            android:enabled="false"
             android:multiprocess="true" />
-
         <provider android:name="com.android.systemui.keyguard.KeyguardSliceProvider"
             android:authorities="com.android.systemui.test.keyguard.disabled"
             android:enabled="false"
@@ -84,6 +92,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.systemui.test.fileprovider"
             android:exported="false"
+            android:enabled="false"
             tools:replace="android:authorities"
             android:grantUriPermissions="true" />
     </application>

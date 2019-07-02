@@ -16,6 +16,8 @@
 
 package com.android.settingslib;
 
+import static android.content.Context.TELEPHONY_SERVICE;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -30,6 +32,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+
 import androidx.annotation.VisibleForTesting;
 
 import java.io.BufferedReader;
@@ -42,8 +45,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.content.Context.TELEPHONY_SERVICE;
 
 public class DeviceInfoUtils {
     private static final String TAG = "DeviceInfoUtils";

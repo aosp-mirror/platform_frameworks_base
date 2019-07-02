@@ -1,0 +1,23 @@
+{
+  "postsubmit": [
+    {
+      "name": "CtsWindowManagerDeviceTestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        }
+      ]
+    },
+    {
+      "name": "WmTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        }
+      ]
+    }
+  ]
+}

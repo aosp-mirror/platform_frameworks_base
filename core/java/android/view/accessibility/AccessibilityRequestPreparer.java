@@ -51,6 +51,7 @@ public abstract class AccessibilityRequestPreparer {
     public @interface RequestTypes {}
 
     private final WeakReference<View> mViewRef;
+    private final int mAccessibilityViewId;
     private final int mRequestTypes;
 
     /**
@@ -68,6 +69,7 @@ public abstract class AccessibilityRequestPreparer {
             throw new IllegalStateException("View must be attached to a window");
         }
         mViewRef = new WeakReference<>(view);
+        mAccessibilityViewId = view.getAccessibilityViewId();
         mRequestTypes = requestTypes;
         view.addOnAttachStateChangeListener(new ViewAttachStateListener());
     }
@@ -85,8 +87,8 @@ public abstract class AccessibilityRequestPreparer {
      * are complete.
      *
      * @see View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, String, Bundle)
-     * @see AccessibilityDelegate#addExtraDataToAccessibilityNodeInfo(View, AccessibilityNodeInfo,
-     * String, Bundle)
+     * @see View.AccessibilityDelegate#addExtraDataToAccessibilityNodeInfo(
+     * View, AccessibilityNodeInfo, String, Bundle)
      * @see AccessibilityNodeProvider#addExtraDataToAccessibilityNodeInfo(
      * int, AccessibilityNodeInfo, String, Bundle)
      */
@@ -117,5 +119,9 @@ public abstract class AccessibilityRequestPreparer {
             }
             v.removeOnAttachStateChangeListener(this);
         }
+    }
+
+    int getAccessibilityViewId() {
+        return mAccessibilityViewId;
     }
 }

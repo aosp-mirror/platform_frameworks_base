@@ -31,6 +31,23 @@ public class RoSystemProperties {
     public static final String CONTROL_PRIVAPP_PERMISSIONS =
             SystemProperties.get("ro.control_privapp_permissions");
 
+    // ------ ro.hdmi.* -------- //
+    /**
+     * Property to indicate if a CEC audio device should forward volume keys when system audio
+     * mode is off.
+     */
+    public static final boolean CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF =
+            SystemProperties.getBoolean(
+                    "ro.hdmi.cec_audio_device_forward_volume_keys_system_audio_mode_off", false);
+
+    /**
+     * Property to indicate if the current device is a cec switch device.
+     *
+     * <p> Default is false.
+     */
+    public static final String PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH =
+            "ro.hdmi.property_is_device_hdmi_cec_switch";
+
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_AVOID_GFX_ACCEL =
             SystemProperties.getBoolean("ro.config.avoid_gfx_accel", false);
@@ -42,6 +59,8 @@ public class RoSystemProperties {
     // ------ ro.fw.* ------------ //
     public static final boolean FW_SYSTEM_USER_SPLIT =
             SystemProperties.getBoolean("ro.fw.system_user_split", false);
+    public static final boolean MULTIUSER_HEADLESS_SYSTEM_USER =
+            SystemProperties.getBoolean("ro.fw.mu.headless_system_user", false);
 
     // ------ ro.crypto.* -------- //
     public static final CryptoProperties.state_values CRYPTO_STATE =

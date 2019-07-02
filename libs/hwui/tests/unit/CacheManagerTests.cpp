@@ -33,7 +33,7 @@ static size_t getCacheUsage(GrContext* grContext) {
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
-    DisplayInfo displayInfo = renderThread.mainDisplayInfo();
+    DisplayInfo displayInfo = DeviceInfo::get()->displayInfo();
     GrContext* grContext = renderThread.getGrContext();
     ASSERT_TRUE(grContext != nullptr);
 
@@ -54,8 +54,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     // create an image and pin it so that we have something with a unique key in the cache
     sk_sp<Bitmap> bitmap =
             Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(displayInfo.w, displayInfo.h));
-    sk_sp<SkColorFilter> filter;
-    sk_sp<SkImage> image = bitmap->makeImage(&filter);
+    sk_sp<SkImage> image = bitmap->makeImage();
     ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
 
     // attempt to trim all memory while we still hold strong refs

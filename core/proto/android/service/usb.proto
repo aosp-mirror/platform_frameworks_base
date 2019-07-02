@@ -22,7 +22,7 @@ option java_outer_classname = "UsbServiceProto";
 
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/service/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message UsbServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -78,16 +78,24 @@ message UsbAccessoryProto {
 
     optional string manufacturer = 1;
     optional string model = 2;
+    // For "classical" USB-accessories the manufacturer bakes this into the
+    // firmware of the device. If an Android phone is configured as accessory, the
+    // app that sets up the accessory side of the connection set this. Either way,
+    // these are part of the detection protocol, and so they cannot be user set or
+    // unique.
     optional string description = 3;
     optional string version = 4;
     optional string uri = 5 [ (android.privacy).dest = DEST_EXPLICIT ];
-    optional string serial = 6 [ (android.privacy).dest = DEST_EXPLICIT ];
+    // Non-resettable hardware ID.
+    optional string serial = 6 [ (android.privacy).dest = DEST_LOCAL ];
 }
 
 message UsbDebuggingManagerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional bool connected_to_adb = 1;
+    // A workstation that connects to the phone for debugging is identified by
+    // this key.
     optional string last_key_received = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
     optional string user_keys = 3 [ (android.privacy).dest = DEST_LOCAL ];
     optional string system_keys = 4 [ (android.privacy).dest = DEST_LOCAL ];
@@ -105,8 +113,12 @@ message UsbHostManagerProto {
 message UsbDeviceProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Generic USB name, not user-provided.
     optional string name = 1;
+    // ID specific to the vendor, not the device.
     optional int32 vendor_id = 2;
+    // ID of this product type: Each vendor gives each product a unique ID. E.g.
+    // all mice of the same model would have the same ID.
     optional int32 product_id = 3;
     optional int32 class = 4;
     optional int32 subclass = 5;
@@ -114,14 +126,20 @@ message UsbDeviceProto {
     optional string manufacturer_name = 7;
     optional string product_name = 8;
     optional string version = 9;
-    optional string serial_number = 10 [ (android.privacy).dest = DEST_EXPLICIT ];
+    // Non-resettable hardware ID.
+    optional string serial_number = 10 [ (android.privacy).dest = DEST_LOCAL ];
     repeated UsbConfigurationProto configurations = 11;
 }
 
 message UsbConfigurationProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // A single USB device can have several configurations and the app accessing
+    // the USB device can switch between them. At any time only one can be active.
+    // Each configuration can present completely different interfaces end
+    // endpoints, i.e. a completely different behavior.
     optional int32 id = 1;
+    // Hardware-defined name, not set by the user.
     optional string name = 2;
     optional uint32 attributes = 3;
     optional int32 max_power = 4;
@@ -131,6 +149,7 @@ message UsbConfigurationProto {
 message UsbInterfaceProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Hardware defined. This is the id used by the app to identify the interface.
     optional int32 id = 1;
     optional int32 alternate_settings = 2;
     optional string name = 3;
@@ -145,6 +164,7 @@ message UsbEndPointProto {
 
     optional int32 endpoint_number = 1;
     optional android.service.UsbEndPointDirection direction = 2;
+      // The address of the endpoint. Needed to read and write to the endpoint.
     optional int32 address = 3;
     optional android.service.UsbEndPointType type = 4;
     optional uint32 attributes = 5;
@@ -186,6 +206,8 @@ message UsbPortInfoProto {
     optional bool can_change_mode = 3;
     optional bool can_change_power_role = 4;
     optional bool can_change_data_role = 5;
+    optional int64 connected_at_millis = 6;
+    optional int64 last_connect_duration_millis = 7;
 }
 
 message UsbPortProto {
@@ -201,8 +223,18 @@ message UsbPortProto {
         MODE_DEBUG_ACCESSORY = 8;
     }
 
+    // ID of the port. A device (eg: Chromebooks) might have multiple ports.
     optional string id = 1;
     repeated Mode supported_modes = 2;
+}
+
+/* Same as android.hardware.usb.V1_2.Constants.ContaminantPresenceStatus */
+enum ContaminantPresenceStatus {
+    CONTAMINANT_STATUS_UNKNOWN = 0;
+    CONTAMINANT_STATUS_NOT_SUPPORTED = 1;
+    CONTAMINANT_STATUS_DISABLED = 2;
+    CONTAMINANT_STATUS_NOT_DETECTED = 3;
+    CONTAMINANT_STATUS_DETECTED = 4;
 }
 
 message UsbPortStatusProto {
@@ -227,6 +259,7 @@ message UsbPortStatusProto {
     optional PowerRole power_role = 3;
     optional DataRole data_role = 4;
     repeated UsbPortStatusRoleCombinationProto role_combinations = 5;
+    optional ContaminantPresenceStatus contaminant_presence_status = 6;
 }
 
 message UsbPortStatusRoleCombinationProto {
@@ -278,6 +311,8 @@ message UsbUserSettingsManagerProto {
     optional int32 user_id = 1;
     repeated UsbSettingsDevicePermissionProto device_permissions = 2;
     repeated UsbSettingsAccessoryPermissionProto accessory_permissions = 3;
+    repeated UsbDeviceAttachedActivities device_attached_activities = 4;
+    repeated UsbAccessoryAttachedActivities accessory_attached_activities = 5;
 }
 
 message UsbSettingsDevicePermissionProto {
@@ -297,6 +332,7 @@ message UsbSettingsAccessoryPermissionProto {
 message UsbProfileGroupSettingsManagerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // The user id of the personal profile if the device has a work profile.
     optional int32 parent_user_id = 1;
     repeated UsbSettingsDevicePreferenceProto device_preferences = 2;
     repeated UsbSettingsAccessoryPreferenceProto accessory_preferences = 3;
@@ -312,6 +348,7 @@ message UsbSettingsDevicePreferenceProto {
 message UsbDeviceFilterProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Mirrors the vendor_id of UsbDeviceProto.
     optional int32 vendor_id = 1;
     optional int32 product_id = 2;
     optional int32 class = 3;
@@ -342,4 +379,18 @@ message UsbAccessoryFilterProto {
     optional string manufacturer = 1;
     optional string model = 2;
     optional string version = 3;
+}
+
+message UsbDeviceAttachedActivities {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.content.ComponentNameProto activity = 1;
+    repeated UsbDeviceFilterProto filters = 2;
+}
+
+message UsbAccessoryAttachedActivities {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.content.ComponentNameProto activity = 1;
+    repeated UsbAccessoryFilterProto filters = 2;
 }

@@ -77,15 +77,16 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Qo‘ng‘iroq qiluvchi ma’lumotlari cheklanmagan. Keyingi qo‘ng‘iroq: cheklanmagan"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Xizmat ishalamaydi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Qo‘ng‘iroq qiluvchining ID raqami sozlamasini o‘zgartirib bo‘lmaydi."</string>
-    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Mobil internet ishlamaydi"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Favqulodda chaqiruvlar ishlamaydi"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Mobil internet ishlamayapti"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Favqulodda chaqiruv ishlamayapti"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ovozli chaqiruvlar ishlamaydi"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ovozli va favqulodda chaqiruvlar ishlamaydi"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"Hududingizda mobil tarmoq tomonidan vaqtinchalik taklif etilmayapti"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tarmoq bilan bog‘lanib bo‘lmadi"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Qabul qilish sifatini yaxshilash uchun Sozlamalar &gt; Tarmoq va Internet &gt; Mobil tarmoqlar > Asosiy tarmoq turi orqali o‘zgartirib ko‘ring."</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi chaqiruv faol"</string>
-    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Favqulodda chaqiruvlar uchun mobil internet zarur."</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Ovozli yoki favqulodda chaqiruvlar ishlamayapti"</string>
+    <string name="RestrictedStateContent" msgid="6538703255570997248">"Aloqa operatoringiz tomonidan vaqtinchalik faolsizlantirilgan"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"<xliff:g id="SIMNUMBER">%d</xliff:g>-SIM karta uchun aloqa operatoringiz tomonidan vaqtinchalik faolsizlantirilgan"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Mobil tarmoqqa ulanib bo‘lmadi"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Tarmoq turini almashtiring. Almashtirish uchun bosing."</string>
+    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Favqulodda chaqiruv ishlamayapti"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Wi‑Fi orqali favqulodda chaqiruvlar amalga oshirilmadi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ogohlantirishlar"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chaqiruvlarni uzatish"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Favqulodda qaytarib chaqirish rejimi"</string>
@@ -99,7 +100,7 @@
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Teng huquqli ishtirokchi teletayp rejimini VCO (gapiradi, eshitolmaydi) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Teng huquqli ishtirokchi teletayp rejimini OFF (o‘chirilgan) qilib o‘zgartirdi"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ovozli aloqa"</string>
-    <string name="serviceClassData" msgid="872456782077937893">"Ma’lumot"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Internet"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asinx"</string>
@@ -120,20 +121,30 @@
     <string name="roamingText11" msgid="4154476854426920970">"Rouming banneri yoqilgan"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Rouming banneri o‘chirilgan"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xizmatlar qidirilmoqda"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Wi‑Fi chaqiruv sozlanmadi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi orqali qo‘ng‘iroqlarni amalga oshirish va xabarlar bilan almashinish uchun uyali aloqa operatoringizdan ushbu xizmatni yoqib qo‘yishni so‘rashingiz lozim. Keyin sozlamalarda Wi-Fi qo‘ng‘irog‘i imkoniyatini yoqib olishingiz mumkin. (Xato kodi: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7472393097168811593">"Aloqa operatoringiz bilan ro‘yxatdan o‘ting (Xato kodi: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="7372514042696663278">"Aloqa operatoringiz orqali Wi-Fi chaqiruv funksiyasinini ulashda xato: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi qo‘ng‘iroqlar"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN chaqiruv"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN chaqiruv"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi chaqiruv | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet ustivorligi"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -160,12 +171,12 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Juda ko‘p so‘rovlar amalga oshirilmoqda. Keyinroq urinib ko‘ring."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> hisobiga kirishda xato"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinx."</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinx."</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Juda ko‘p <xliff:g id="CONTENT_TYPE">%s</xliff:g> o‘chirishlar."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Sinxronlanmadi"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Juda ko‘p elementni (<xliff:g id="CONTENT_TYPE">%s</xliff:g>) o‘chirib tashlashga urindingiz."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sertifikat markazi sertifikatlari o‘rnatildi</item>
       <item quantity="one">Sertifikat markazi sertifikati o‘rnatildi</item>
@@ -174,14 +185,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Ishchi profil administratori"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tomonidan"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Ichshi profil o‘chirildi"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Administrator ilovasi yo‘qligi sababli ishchi profil o‘chirib tashlandi"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Ishchi profilning administrator ilovasi yo‘q yoki buzilgan. Shuning uchun, ishchi profilingiz va unga aloqador ma’lumotlar o‘chirib tashlandi. Yordam olish uchun administratoringizga murojaat qiling."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Bu qurilmada endi ishchi profilingiz mavjud emas"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Parol ko‘p marta xato kiritildi"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Bu – boshqariladigan qurilma"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Tashkilotingiz bu qurilmani boshqaradi va tarmoq trafigini nazorat qilishi mumkin. Tafsilotlar uchun bosing."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
     <string name="me" msgid="6545696007631404292">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planshet sozlamalari"</string>
@@ -220,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Nosozlik haqida ma’lumot berish"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Seansni yakunlash"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Skrinshot"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisoboti"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Qurilmangiz holati haqidagi ma’lumotlar to‘planib, e-pochta orqali yuboriladi. Hisobotni tayyorlash biroz vaqt olishi mumkin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv hisobot"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Bundan maxsus vaziyatlarda foydalaning. Bu hisobot jarayonini kuzatish imkonini beradi, muammo haqida batafsil ma’lumotlarni ko‘rishingiz va skrinshotlar olishingiz mumkin bo‘ladi. Hisobot uchun ko‘p vaqt oladigan kam ishlatiladigan bo‘limlar qoldirib ketilishi mumkin."</string>
@@ -269,31 +280,52 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Ishchi profilga almashtirish"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarga kirish"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun kontaktlaringizga ruxsat berish"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun kontaktlaringizga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"shu qurilmaning joylashuvi haqidagi axborotga kirish"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilma joylashuv axborotidan foydalanishga ruxsat berish"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan foydalanishiga ruxsat berilsinmi?"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvimingizga kirish"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun taqvimingizga ruxsat berish"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun taqvimingizga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun SMS xabarlarni yuborish va ko‘rishga ruxsat berish"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun SMS xabarlarni yuborish va ko‘rishga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi surat, multimedia va fayllarga kirish"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun qurilmangizdagi surat, multimedia va fayllarga ruxsat berish"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ilovasiga qurilmangizdagi surat, multimedia va fayllarga kirish uchun ruxsat berilsinmi?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ovoz yozib olish"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun audioni yozib olishga ruxsat berish"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun audio yozib olishga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Harakatni aniqlash"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"harakatni aniqlash"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun jismoniy harakatlaringizni aniqlashga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"suratga olish va video yozib olish"</string>
-    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun surat va videoga olishga ruxsat berish"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun surat va videoga olishga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Chaqiruvlar jurnali"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun telefon chaqiruvlari tarixiga kirishga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun telefon chaqiruvlarini amalga oshirish va boshqarishga ruxsat berish"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tana sezgichlari"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun telefon chaqiruvlarini amalga oshirish va boshqarishga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tana sezgichlari"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun organizm holati haqidagi sezgich ma’lumotlariga ruxsat berish"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun organizm holati haqidagi sezgichlar axborotlariga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Musiqa"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"musiqaga kirish"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun musiqangizga kirishga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Suratlar va videolar"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"surat va videolarga kirish"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Teginib o‘rganish xizmatini yoqadi"</string>
@@ -305,7 +337,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Imo-ishoralar bilan boshqarish"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Bosish, surish; jipslashtirish va boshqa imo-ishoralarni amalga oshirish mumkin."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Barmoq izi ishoralari"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Barmoq izi skanerlarida kiritilgan ishoralarni taniy oladi."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Barmoq izi skanerida kiritilgan ishoralarni taniy oladi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"holat qatorida ko‘rinishi"</string>
@@ -356,6 +388,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va planshetni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ilovaga o‘zining muayyan qismlarining xotiraning turg‘un qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, televizorning ishlashi sekinlashishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"faol xizmatlarni ishga tushirish"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Ilovaga faol xizmatlardan foydalanishga ruxsat beradi."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"ilovalar egallagan xotira joyini hisoblash"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Ilova o‘zining kodi, ma’lumotlari va kesh o‘lchami to‘g‘risidagi ma’lumotlarni olishi mumkin"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"tizim sozlamalarini o‘zgartirish"</string>
@@ -394,18 +428,22 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu ilova telefonga taqvim tadbirlarini qo‘shishi, olib tashlashi yoki o‘zgartirishi mumkin. Bu ilova taqvim egalari nomidan ko‘rinadigan SMS yuborishi yoki egalarini ogohlantirmasdan tadbirlarni o‘zgartirishi mumkin."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"aniq joylashuv ma’lumotiga kirish (GPS va tarmoq asosida)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari yoki GPS asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefonda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"taxminiy joylashuv (tarmoq asosida) ma’lumotlaridan foydalanishga ruxsat"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular televizorda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"aniq joylashuv axborotini olishga faqat old fonda ruxsat"</string>
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu ilova faqat fon rejimida aniq joylashuv axborotingizdan foydalanishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq turishi va ishlashi kerak. Bunda batareya sarfi oshishi mumkin."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"faqat faol rejimda taxminiy joylashuv axborotiga (tarmoq asosida) ruxsat"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetingizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular televizoringizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"fonda joylashuv axborotidan foydalanish"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Agar taxminiy yoki aniq joylashuv axborotiga qo‘shimcha tarzda ruxsat berilgan bo‘lsa, ilova ishlayotganda joylashuv axborotidan fonda foydala oladi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ovoz yozib olish"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Bu ilova xohlagan vaqtda mikrofon yordami audio yozib olishi mumkin."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM kartaga buyruqlar yuborish"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Dasturga SIM kartaga buyruqlar jo‘natishga ruxsat beradi. Bu juda ham xavfli."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"jismoniy harakatni aniqlash"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Bu ilova jismoniy harakatlaringizni aniqlay oladi."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"rasm va videoga olish"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Bu ilova xohlagan vaqtda kamera orqali suratga olishi va video yozib olishi mumkin."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"tebranishni boshqarish"</string>
@@ -418,6 +456,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"chaqiruvlarni tizim orqali yo‘naltirish"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"tizim orqali chaqiruvlarni tekshirish va boshqarish."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Ilovaga qurilmadagi amaldagi chaqiruvlarni tekshirish va boshqarish imkonini beradi. Shuningdek, chaqiruvlar holati va kiruvchi-chiquvchi chaqiruv raqamlari axborotiga ham ruxsat beradi."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"chaqiruvni boshqa ilovada davom ettirish"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Ilovaga boshqa ilovada boshlangan chaqiruvni davom ettirish imkon beradi"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon raqamlarini o‘qish"</string>
@@ -478,10 +518,36 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrik sensordan foydalanish"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Haqiqiylikni tekshirish uchun biometrik sensordan foydalanish imkonini beradi"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"barmoq izi skanerini boshqarish"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ilova foydalanish uchun barmoq izi namunalarini qo‘shish va o‘chirish usullarini qo‘llashi mumkin."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"barmoq izi sensoridan foydalanish"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ilova haqiqiylikni tekshirish uchun barmoq izi sensoridan foydalanishi mumkin"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"musiqiy to‘plamni o‘qish"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Ilovaga musiqiy to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"musiqiy to‘plamni o‘zgartirish"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Ilovaga musiqiy to‘plamni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"video to‘plamni o‘qish"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Ilovaga video to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"video to‘plamni o‘zgartirish"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Ilovaga video to‘plamingizni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"suratlar to‘plamini o‘qish"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Ilovaga suratlar to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"suratlar to‘plamini o‘zgartirish"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Ilovaga suratlar to‘plamingizni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"multimedia to‘plamidan joylashuv axborotini o‘qish"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ilovaga multimedia to‘plamingizdan joylashuv axborotini o‘qishga ruxsat beradi."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ilovasi qurilma qulfini ochmoqchi."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrik sensor ishlamayapti"</string>
+    <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentifikatsiya bekor qilindi"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Aniqlanmadi"</string>
+    <string name="biometric_error_canceled" msgid="349665227864885880">"Autentifikatsiya bekor qilindi"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN kod, grafik kalit yoki parol sozlanmagan"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi skaneri kirlangan. Uni tozalab, keyin qayta urinib ko‘ring."</string>
@@ -489,7 +555,9 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Aniqlanmadi"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Barmoq izi tekshirildi"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Yuzingiz aniqlandi"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Yuzingiz aniqlandi, tasdiqlash uchun bosing"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Barmoq izi skaneri ish holatida emas."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmoq izini saqlab bo‘lmadi. Mavjud barmoq izlaridan birini o‘chirib tashlang."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
@@ -499,25 +567,82 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Urinishlar soni ko‘payib ketdi. Barmoq izi skaneri bloklandi."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Hech qanday barmoq izi qayd qilinmagan."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Bu qurilmada barmoq izi skaneri yo‘q"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Bu qurilmada barmoq izi skaneri mavjud emas."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Barmoq izi <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Barmoq izi belgisi"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"yuzni aniqlash qurilmasini boshqarish"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Ilova foydalanish uchun yuz namunalarini qo‘shish va o‘chirish usullarini tatbiq qilishi mumkin."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"yuzni aniqlash qurilmasidan foydalanish"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Haqiqiylikni tekshirish uchun skanerdan foydalanish imkonini beradi"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Yuzingizni qaytadan qayd qildiring."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Yuz ifodasi oldingiday. Holatingizni oʻzgartiring."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Boshingizni tik tuting."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Yuzni aniqlash uchun qurilma mavjud emas."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
+    <string name="face_error_no_space" msgid="8224993703466381314">"Aniqlangan yuz saqlanmadi."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Yuzni aniqlash bekor qilindi."</string>
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Yuz tekshiruvi bekor qilindi."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Juda ko‘p urinildi. Keyinroq qaytadan urining."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Juda ko‘p urinildi. Skaner faolsizlantirildi."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
+    <string name="face_name_template" msgid="7004562145809595384">"Yuz <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Yuz belgisi"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinx.ni yoqish/o‘chirish"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ilovaga hisobning sinxronlash sozlamalarini o‘zgartirish uchun ruxsat beradi. Masalan, bundan \"Odamlar\" ilovasini hisob bilan sinxronlanlash uchun foydalanish mumkin."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"sinxronlash statistikasini o‘qish"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ilovaga hisobning sinxronlash statistikasini, shu jumladan, sinxronlangan hodisalar tarixi va qancha ma’lumot sinxronlanganligi haqidagi ma’lumotni o‘qishga ruxsat beradi."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB xotiradagi ma’lumotlarni ko‘rish"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD xotira kartasi tarkibidagilarni o‘qish"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Dasturga USB xotiradagi ma’lumotlarini ko‘rib chiqish uchun ruxsat beradi."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Dasturga SD kartadagi ma’lumotlarni ko‘rib chiqishga ruxsat berish."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB xotiradagi ma’lumotlarni o‘zgartirish/o‘chirish"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD xotira kartasi tarkibidagilarni o‘zgartirish yoki o‘chirish"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ilova USB xotiraga ma’lumot yozishi mumkin."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Ilova SD kartaga ma’lumot yozishi mumkin."</string>
+    <string name="permlab_sdcardRead" msgid="1438933556581438863">"umumiy xotiradagi kontentlarni ochish"</string>
+    <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Ilovaga umumiy xotiradagi kontentlarni ochishga ruxsat beradi."</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"umumiy xotiradagi kontentlarni tahrirlash yoki oʻchirib tashlash"</string>
+    <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Ilovaga umumiy xotiradagi kontentlarga yozish imkonini beradi."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP qo‘ng‘iroqlarini amalga oshirish/qabul qilish"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ilovaga SIP qo‘ng‘iroqlarini amalga oshirish va qabul qilish uchun ruxsat beradi."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"yangi SIM kartali telekommunikatsiya aloqalarini ro‘yxatga olish"</string>
@@ -802,6 +927,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Grafik kalit bilan ochish."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Qulfni yuzni tanitib ochish"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin qulfini ochish."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM kartani PIN kod bilan ochish."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM kartani PUK kod bilan ochish."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Parolli qulfni ochish."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Grafik kalit chiziladigan hudud."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Maydonni silang"</string>
@@ -826,7 +953,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Maslahat: kattalashtirish va kichiklashtirish uchun ikki marta bosing."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Avtomatik to‘ldirish"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Avto-to‘ldirishni sozlash"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Avto-to‘ldirish"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> yordamida avtomatik kiritish"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -861,8 +988,15 @@
     <string name="save_password_never" msgid="8274330296785855105">"Hech qachon"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Sizda ushbu sahifani ochish uchun vakolat yo‘q."</string>
     <string name="text_copied" msgid="4985729524670131385">"Matn klipboardga nusxa olindi."</string>
+    <string name="copied" msgid="8564151838171791598">"Nusxalandi"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Yana"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menyu+"</string>
+    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
+    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
+    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
+    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
+    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Fn+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"delete"</string>
@@ -994,14 +1128,27 @@
     <string name="inputMethod" msgid="1653630062304567879">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Matn yozish"</string>
     <string name="email" msgid="4560673117055050403">"E-pochta"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Belgilangan e-pochta manziliga xat yuborish"</string>
     <string name="dial" msgid="1253998302767701559">"Chaqiruv"</string>
-    <string name="map" msgid="6521159124535543457">"Xaritadan topish"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Belgilangan raqamga telefon qilish"</string>
+    <string name="map" msgid="5441053548030107189">"Xarita"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Belgilangan manzilni xaritadan topish"</string>
     <string name="browse" msgid="1245903488306147205">"Ochish"</string>
-    <string name="sms" msgid="4560537514610063430">"Xabar"</string>
-    <string name="add_contact" msgid="7867066569670597203">"Qo‘shish"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Belgilangan URL manzilini ochish"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS yozish"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Belgilangan telefon raqamiga SMS yuborish"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Saqlab olish"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Kontaktlarga saqlash"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ochish"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Jadval"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Trek"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Belgilangan vaqtni taqvimda ochish"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Rejalashtirish"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Belgilangan vaqt uchun tadbir rejalashtirish"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Kuzatish"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Belgilangan parvozni kuzatish"</string>
+    <string name="translate" msgid="9218619809342576858">"Tarjima qilish"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Belgilangan matnni tarjima qilish"</string>
+    <string name="define" msgid="7394820043869954211">"Izohini olish"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Belgilangan matnning izohini aniqlash"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
@@ -1021,10 +1168,13 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s bilan ochish"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ochish"</string>
+    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"<xliff:g id="HOST">%1$s</xliff:g> havolalarini ushbu ilova bilan ochishga ruxsat bering:"</string>
+    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="HOST">%1$s</xliff:g> havolalarini <xliff:g id="APPLICATION">%2$s</xliff:g> bilan ochishga ruxsat bering"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Ruxsat berish"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Tahrirlash"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish"</string>
+    <string name="whichSendApplication" msgid="5803792421724377602">"Ulashish"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"“%1$s” orqali ulashish"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Ulashish"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ilovani tanlang"</string>
@@ -1047,7 +1197,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ilovani qayta ochish"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Kutish"</string>
@@ -1074,47 +1224,52 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Yangilanish borligini tekshirish"</string>
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>” ilovasi (jarayaon: <xliff:g id="PROCESS">%2$s</xliff:g>) o‘zining StrictMode qoidasini buzdi."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni o‘zining o‘zi-bajaruvchi StrictMode siyosatini buzdi."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android yangilanmoqda…"</string>
-    <string name="android_start_title" msgid="8418054686415318207">"Android ishga tushmoqda…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Telefon yangilanmoqda…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Planshet yangilanmoqda…"</string>
+    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Qurilma yangilanmoqda…"</string>
+    <string name="android_start_title" product="default" msgid="4536778526365907780">"Telefon ishga tushirilmoqda…"</string>
+    <string name="android_start_title" product="automotive" msgid="8418054686415318207">"Android ishga tushmoqda…"</string>
+    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Planshet ishga tushirilmoqda…"</string>
+    <string name="android_start_title" product="device" msgid="7467484093260449437">"Qurilma ishga tushirilmoqda…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Xotira optimallashtirilmoqda."</string>
-    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android yangilanishi tugay deb qoldi…"</string>
-    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Yangilanish vaqtida ba’zi ilovalar to‘g‘ri ishlamasligi mumkin"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"Tizimni yangilash tugay deb qoldi…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi yangilanmoqda…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ilovalar optimallashtirilmoqda (<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>)."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> tayyorlanmoqda."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ilovalar ishga tushirilmoqda."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Tizimni yuklashni tugatish."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ishlamoqda"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"O‘yinga qaytish uchun bosing"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"O‘yinni tanlang"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Yaxshiroq samaradorlik uchun hozir shu o‘yinlardan faqat bittasini ochish mumkin."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> ilovasiga qaytish"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> ilovasini ochish"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> saqlanmasdan yopiladi"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> foydalanish uchun ajratilgan xotira chegarasidan o‘tib ketdi"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Hip-damp yaratildi; uni yuborish uchun bosing"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Hip-damp yaratildi. Uni ulashish uchun bosing."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Hip-damp ma’lumotlari bilan ulashasizmi?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> jarayoni o‘zi uchun ajratilgan <xliff:g id="SIZE">%2$s</xliff:g> xotira chegarasidan o‘tib ketdi. Ilova dasturchisi bilan ulashishingiz uchun hip-damp ma’lumotlari yig‘ilib qoldi. Ehtiyot bo\'ling: ushbu hip-dampda ilova uchun foydalanishga ruxsat berilgan shaxsiy ma’lumotlaringiz bo‘lishi mumkin."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Matn uchun amalni tanlash"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Jiringlaganda tovush balandligi"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Multimedia ovozi"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Multimedia tovushi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="3941680041282788711">"Suhbat vaqtidagi tovush balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Signal ovozi"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Signal tovushi balandligi"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Tovush balandligi"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth tovushi"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Rington balandligi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Qo‘ng‘iroq tovushi balandligi"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia ovozi"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia tovushi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standart (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1133,12 +1288,18 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Ochiq Wi‑Fi tarmoqqa ulaning"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Aloqa operatori Wi-Fi tarmog‘iga ulanish"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ochiq Wi‑Fi tarmoqqa ulanilmoqda"</string>
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi tarmoqqa ulanmoqda"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi tarmoqqa ulanildi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi tarmoqqa ulanib bo‘lmadi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Barcha tarmoqlarni ko‘rish uchun bosing"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ulanish"</string>
-    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Barcha tarmoqlar"</string>
+    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Barcha tarmoqlar"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
+    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ha"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Yoʻq"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi avtomatik ravishda yoqiladi"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Saqlangan tarmoqlar ichidan signali yaxshisi hududida ekaningizda"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Qayta yoqilmasin"</string>
@@ -1148,8 +1309,17 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Tarmoqqa kirish"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tarmoqda internet aloqasi yo‘q"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Variantlarni ko‘rsatish uchun bosing"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ulandi"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot sozlamalari o‘zgartirildi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot chastotasi o‘zgartirildi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Qurilma faqat 5 GGs chastotada ishlay olmaydi. Bu chastotadan imkoniyatga qarab foydalaniladi."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Agar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tarmoqda internet uzilsa, qurilma <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ga ulanadi. Sarflangan trafik uchun haq olinishi mumkin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> tarmog‘idan <xliff:g id="NEW_NETWORK">%2$s</xliff:g> tarmog‘iga o‘tildi"</string>
@@ -1205,6 +1375,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib yoqish"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Mobil xizmatni faollashtirish"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Yangi SIM kartani faollashtirish uchun aloqa operatori ilovasini yuklab oling"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Yangi SIM kartani faollashtirish uchun <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasini yuklab oling"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Ilovani yuklab olish"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Yangi SIM karta solindi"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Sozlash uchun bosing"</string>
@@ -1223,21 +1394,29 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB orqali PTP rejimi yoqildi"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB modem rejimi yoqildi"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB orqali MIDI rejimi yoqildi"</string>
-    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB qurilma ulandi"</string>
+    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"USB qurilma ulandi"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Ulangan qurilma quvvatlanmoqda. Boshqa parametrlar uchun bosing."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analogli audio uskuna aniqlandi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Biriktirilgan qurilma mazkur telefon bilan mos emas. Batafsil axborot olish uchun bu yerga bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Faolsizlantirish uchun bu yerga bosing."</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB orqali nosozliklarni aniqlashni faolsizlantirish uchun bosing"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB orqali nosozliklarni tuzatishni o‘chirib qo‘yish uchun bosing."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
+    <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB portda suyuqlik yoki parcha bor"</string>
+    <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB port avtomatik tarzda faolsizlashtirildi. Batafsil axborot olish uchun bosing."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB portdan foydalanish xavfsiz"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon endi suyuqlik yoki turli parchalarni aniqlay olmaydi."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Xatoliklar hisoboti olinmoqda…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Xatoliklar hisoboti yuborilmoqda…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi mumkin."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"BAHAM KO‘RISH"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RAD ETISH"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Matn kiritish usulini tanlang"</string>
     <string name="show_ime" msgid="2506087537466597099">"Tashqi klaviaturadan foydalanilayotganda buni ekranda saqlab turish"</string>
     <string name="hardware" msgid="194658061510127999">"Virtual klaviatura ko‘rsatilsin"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Tashqi klaviaturani sozlash"</string>
@@ -1248,34 +1427,36 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali o‘chirib qo‘yish mumkin."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"O‘CHIRIB QO‘YISH"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> tayyorlanmoqda"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolar qidirilmoqda"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yangi <xliff:g id="NAME">%s</xliff:g> kartasi aniqlandi"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Faolsizlantirish"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> tekshirilmoqda…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Joriy kontent tekshirilmoqda"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Yangi <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Sozlash uchun bosing"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasm va boshqa fayllarni o‘tkazish"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"“<xliff:g id="NAME">%s</xliff:g>” buzilgan"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>: buzilgan. Uni tuzatish uchun bosing."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> bilan muammo"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Tuzatish uchun bosing"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>: buzilgan. Tuzatish uchun uni tanlang."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> qo‘llab-quvvatlanmaydi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Bu xotira qurilmasi (<xliff:g id="NAME">%s</xliff:g>) qo‘llab-quvvatlanmaydi. Uni mos keladigan formatda sozlash uchun bu yerga bosing."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Bu xotira qurilmasi (<xliff:g id="NAME">%s</xliff:g>) qo‘llab-quvvatlanmaydi. Mos formatda sozlash uchun uni tanlang."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> kutilmaganda chiqarib olindi"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Ma’lumotlar yo‘qolishining oldini  olish uchun <xliff:g id="NAME">%s</xliff:g> kartasini chiqarishdan oldin u bilan ulanishni uzing"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"“<xliff:g id="NAME">%s</xliff:g>” kartasi chiqarib olingan"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> chiqarib olingan; yangisini kiriting"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"“<xliff:g id="NAME">%s</xliff:g>” kartasi chiqarilmoqda…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Chiqara ko‘rmang"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Xotira qurilmasini olib tashlashdan oldin, uni o‘chiring, shuda ma’lumotlar o‘chib ketmaydi."</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> olib tashlandi"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Ayrim funksiyalar xato ishlashi mumkin. Yangi xotira joylang."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> chiqarib olinmoqda"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Chiqarib olinmasin"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Chiqarish"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"O‘rganish"</string>
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Audio chiqishni almashtirish"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> topilmadi"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Qurilmani qaytadan joylang"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Qurilmani yana ulang"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ko‘chirib o‘tkazilmoqda"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Ma’lumotlar ko‘chirilmoqda"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Ko‘chirib o‘tkazish tugadi"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Ma’lumotlar <xliff:g id="NAME">%s</xliff:g> xotirasiga ko‘chirib o‘tkazildi"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Ma’lumotlar ko‘chirilmadi"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Ma’lumotlar o‘z joyida qoldi"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Kontent ko‘chirildi"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Kontent <xliff:g id="NAME">%s</xliff:g> xotirasiga ko‘chirildi"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Kontent ko‘chirilmadi"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Kontentni qaytadan ko‘chirib ko‘ring"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Sug‘urib olingan"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Chiqarib olingan"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Tekshirilmoqda…"</string>
@@ -1334,14 +1515,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ulanmoqda…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ulandi"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Doimiy VPN tarmoqdan uzildi"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Xato"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Doimiy VPN tarmoqqa ulanmadi"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Tarmoq yoki VPN sozlamalarini o‘zgartiring"</string>
     <string name="upload_file" msgid="2897957172366730416">"Faylni tanlash"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Hech qanday fayl tanlanmadi"</string>
     <string name="reset" msgid="2448168080964209908">"Asliga qaytarish"</string>
     <string name="submit" msgid="1602335572089911941">"Yuborish"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mashina usuli yoqilgan"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Avtomobil rejimidan chiqish uchun bosing."</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Avtomobil ilovasi ishlayapti"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Avtomobil ilovasidan chiqish uchun bosing"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Modem rejimi yoniq"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Sozlash uchun bosing."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Modem rejimi faolsizlantirildi"</string>
@@ -1356,8 +1537,7 @@
       <item quantity="one">1 ta natija</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Tayyor"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB xotirasi tozalanmoqda…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD xotira kartasi tozalanmoqda…"</string>
+    <string name="progress_erasing" msgid="2569962663843586562">"Umumiy xotira tozalanmoqda…"</string>
     <string name="share" msgid="1778686618230011964">"Yuborish"</string>
     <string name="find" msgid="4808270900322985960">"Topish"</string>
     <string name="websearch" msgid="4337157977400211589">"Veb qidiruv"</string>
@@ -1419,22 +1599,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB xotira qurilmasi"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB xotira"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Tahrirlash"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Trafik sarfi bo‘yicha ogohlantirish"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Trafik sarfi va sozlamalarni ko‘rish uchun bosing."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G trafik chekloviga yetdi"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G trafik chekloviga yetdi"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Ogohlantirishlar"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"<xliff:g id="APP">%s</xliff:g> trafik sarflandi"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Mobil internet-trafik limitga yetdi"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi internet chekloviga yetdi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Mobil internet o‘chirib qo‘yildi"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ma’lumot cheklovdan o‘tdi"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ma’lumot cheklovdan o‘tdi"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobayl ma’lumot cheklovdan o‘tdi"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ma’lumot cheklovdan o‘tdi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Chegaradan <xliff:g id="SIZE">%s</xliff:g> oshib ketdi."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Internet davr oxirigacha pauza qilindi"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Mobil trafik limitdan oshib ketdi"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Wi-Fi trafik limitdan oshib ketdi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"Cheklovdan <xliff:g id="SIZE">%s</xliff:g> ortiqcha sarflandi"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Fon rejimi cheklangan"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Cheklovni olib tashlash uchun bosing."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Ko‘p trafik sarflandi"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Oxirgi bir necha kunda odatdagidan ko‘proq trafik sarflandi. Trafik sarfi va sozlamalarni ko‘rish uchun bosing."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Mobil trafik ortiqcha sarflandi"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Ilovalar odatdagidan ortiqcha trafik sarflashdi"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> odatdagidan ortiqcha trafik sarfladi"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Xavfsizlik sertifikati"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ushbu sertifikat - to‘g‘ri."</string>
     <string name="issued_to" msgid="454239480274921032">"Tegishli:"</string>
@@ -1457,6 +1634,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Qo‘ng‘iroqni qabul qilasizmi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Har doim"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Faqat hozir"</string>
+    <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Sozlamalar"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"“%1$s” ishchi profilni qo‘llab-quvvatlamaydi"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Planshet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1484,6 +1662,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tasvir uzatish #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", xavfsiz"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Keyingi Android Q nashrlarida fondagi ushbu <xliff:g id="PACKAGENAME">%1$s</xliff:g> jarayoni bloklanadi. Batafsil: go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Fondagi <xliff:g id="PACKAGENAME">%1$s</xliff:g> jarayoni bloklandi. Batafsil: go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit xato"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
@@ -1536,6 +1716,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Rangni tuzatish"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmati yoqildi"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmati o‘chirib qo‘yildi"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatidan foydalanish uchun ikkala ovoz balandligi tugmalarini uzoq bosib turing"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Maxsus imkoniyatlar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Funksiyalarni o‘zgartirish uchun Maxsus imkoniyatlar tugmasini bosib turing."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Kattalashtirish"</string>
@@ -1650,7 +1831,7 @@
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Keyinroq urinib ko‘ring"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"To‘liq ekranli rejim"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Butun ekranli rejim"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Chiqish uchun tepadan pastga torting."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Tayyor"</string>
@@ -1670,8 +1851,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administrator tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administrator tomonidan o‘chirilgan"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fondan internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Batareya quvvatini tejash maqsadida Quvvat tejash rejimida ayrim qurilma funksiyalari faolsizlantiriladi va ilovalar ishlashi cheklanadi. "<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Batareya quvvatini tejash maqsadida Quvvat tejash rejimida ayrim qurilma funksiyalari faolsizlantiriladi va ilovalar ishlashi cheklanadi."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1682,9 +1864,9 @@
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
       <item quantity="one">1 daqiqa (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
       <item quantity="other">%1$d soat (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
-      <item quantity="one">Bir soat (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>
+      <item quantity="one">1 soat (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">%1$d soat (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
@@ -1698,9 +1880,9 @@
       <item quantity="other">%d daqiqa</item>
       <item quantity="one">1 daqiqa</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
       <item quantity="other">%d soat</item>
-      <item quantity="one">Bir soat</item>
+      <item quantity="one">1 soat</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d soat</item>
@@ -1718,18 +1900,19 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Dam olish kunlari"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tadbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Uyquda"</string>
-    <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ayrim tovushlarni ovozsiz qilgan"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. U zavod sozlamalari tiklanmaguncha barqaror ishlamasligi mumkin."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. Tafsilotlar uchun qurilmangiz ishlab chiqaruvchisiga murojaat qiling."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD so‘rovi SS so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD so‘rovi yangi USSD so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD so‘rovi Video DIAL so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS so‘rovi Video DIAL so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS so‘rovi USSD so‘roviga o‘zgartirildi."</string>
-    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD talabi odatiy chaqiruvga almashtirildi"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD talabi SS talabiga almashtirildi"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Yangi USSD talabiga almashtirildi"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD talabi video chaqiruvga almashtirildi"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS talabi odatiy chaqiruvga almashtirildi"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS talabi video chaqiruvga almashtirildi"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS talabi USSD talabiga almashtirildi"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Yangi SS talabiga almashtirildi"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Ishchi profil"</string>
+    <string name="notification_alerted_content_description" msgid="1296617716556420585">"Ogohlantirildi"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Yoyish"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Yig‘ish"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ochish yoki yopish"</string>
@@ -1757,6 +1940,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Barcha tillar"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Barcha hududlar"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Qidiruv"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Ilova ishlamayapti"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ishlamayapti. Uning ishlashini <xliff:g id="APP_NAME_1">%2$s</xliff:g> cheklamoqda."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Batafsil"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ishchi profil yoqilsinmi?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ishchi ilovalar, bildirishnomalar, ma’lumotlar va boshqa ishchi profil imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
@@ -1771,8 +1957,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Qulfini ochish uchun bosing"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> qurilmasiga ulandi"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Fayllarni ko‘rish uchun bosing"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Qadash"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Olib tashlash"</string>
     <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo boshlanmoqda…"</string>
@@ -1805,12 +1989,17 @@
       <item quantity="other">Avtomatik to‘ldirishga oid <xliff:g id="COUNT">%1$s</xliff:g> ta taklif</item>
       <item quantity="one">Avtomatik to‘ldirishga oid bitta taklif</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" xizmatiga saqlansinmi?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" xizmatida yangilansinmi?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> yangilansinmi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saqlash"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"Yo‘q, kerak emas"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"Kerak emas"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Yangilash"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"manzil"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredit karta"</string>
@@ -1826,6 +2015,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Ovoz uchun SIM karta taqdim etilmagan"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Ovoz uchun SIM karta ishlatish taqiqlangan"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ovoz uchun telefon taqiqlangan"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"<xliff:g id="SIMNUMBER">%d</xliff:g>-SIM kartani ishlatish taqiqlangan"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"<xliff:g id="SIMNUMBER">%d</xliff:g>-SIM karta faollashtirilmagan"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"<xliff:g id="SIMNUMBER">%d</xliff:g>-SIM kartani ishlatish taqiqlangan"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"<xliff:g id="SIMNUMBER">%d</xliff:g>-SIM kartani ishlatish taqiqlangan"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Qalqib chiquvchi oyna"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ilova versiyasi eski yoki bu yorliq bilan mos emas"</string>
@@ -1838,7 +2031,61 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Zararli ilova aniqlandi"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasi <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatish uchun ruxsat so‘ramoqda"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Tahrirlash"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Chaqiruvlar va bildirishnomalar tebranadi"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Chaqiruvlar va bildirishnomalar ovozsiz qilinadi"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Tizimga oid o‘zgarishlar"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Bezovta qilinmasin"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Yangi: Bezovta qilinmasin rejimi bildirishnomalarni berkitmoqda"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Batafsil axborot olish va o‘zgartirish uchun bosing."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Bezovta qilinmasin rejimi sozlamalari o‘zgartirildi"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Ularni tekshirish uchun bosing."</string>
+    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nimalar bloklanganini tekshirish uchun bosing"</string>
+    <string name="notification_app_name_system" msgid="4205032194610042794">"Tizim"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"Sozlamalar"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ekranda boshqa ilovalar ustidan ochiladi"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
+    <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batareya quvvati uzoqroq ishlashi uchun Tejamkor rejim yoqildi"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
+    <string name="mime_type_folder" msgid="7111951698626315204">"Jild"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android ilova"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Fayl"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> fayl"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Audio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> audio"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Video"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> video"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Rasm"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> rasm"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arxiv"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> arxiv"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Hujjat"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> hujjat"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Jadval"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> jadval"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Taqdimot"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> taqdimot"</string>
+    <string name="car_loading_profile" msgid="3545132581795684027">"Yuklanmoqda"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ta fayl</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ta fayl</item>
+    </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

@@ -182,7 +182,7 @@ public final class RulesState implements Parcelable {
         return mBaseRulesVersion.compareTo(distroRulesVersion.getRulesVersion()) > 0;
     }
 
-    public static final Parcelable.Creator<RulesState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RulesState> CREATOR =
             new Parcelable.Creator<RulesState>() {
         public RulesState createFromParcel(Parcel in) {
             return RulesState.createFromParcel(in);

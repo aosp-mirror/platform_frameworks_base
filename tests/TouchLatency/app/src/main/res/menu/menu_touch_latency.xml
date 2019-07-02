@@ -15,6 +15,14 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".TouchLatencyActivity">
-    <item android:id="@+id/action_settings" android:title="@string/mode"
-        android:orderInCategory="100" android:showAsAction="always" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="101"
+        android:showAsAction="always"
+        android:title="@string/mode"/>
+    <item
+        android:id="@+id/display_mode"
+        android:showAsAction="ifRoom"
+        android:title="@string/display_mode"
+        android:visible="false"/>
 </menu>

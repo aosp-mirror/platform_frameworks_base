@@ -136,8 +136,11 @@ public class SecurityLog {
     public static final int TAG_APP_PROCESS_START = SecurityLogTags.SECURITY_APP_PROCESS_START;
 
     /**
-     * Indicates that keyguard has been dismissed.
+     * Indicates that keyguard has been dismissed. This event is only logged if the device
+     * has a secure keyguard. It is logged regardless of how keyguard is dismissed, including
+     * via PIN/pattern/password, biometrics or via a trust agent.
      * There is no extra payload in the log event.
+     * @see #TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT
      */
     public static final int TAG_KEYGUARD_DISMISSED = SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
 
@@ -602,7 +605,7 @@ public class SecurityLog {
             dest.writeByteArray(mEvent.getBytes());
         }
 
-        public static final Parcelable.Creator<SecurityEvent> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SecurityEvent> CREATOR =
                 new Parcelable.Creator<SecurityEvent>() {
             @Override
             public SecurityEvent createFromParcel(Parcel source) {
@@ -632,6 +635,11 @@ public class SecurityLog {
         @Override
         public int hashCode() {
             return Objects.hash(mEvent, mId);
+        }
+
+        /** @hide */
+        public boolean eventEquals(SecurityEvent other) {
+            return other != null && mEvent.equals(other.mEvent);
         }
     }
     /**

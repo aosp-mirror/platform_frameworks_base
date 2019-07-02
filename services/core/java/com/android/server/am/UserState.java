@@ -19,6 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.UserIdInt;
 import android.app.IStopUserCallback;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -48,14 +49,20 @@ public final class UserState {
     public final static int STATE_SHUTDOWN = 5;
 
     public final UserHandle mHandle;
-    public final ArrayList<IStopUserCallback> mStopCallbacks
-            = new ArrayList<IStopUserCallback>();
+    public final ArrayList<IStopUserCallback> mStopCallbacks = new ArrayList<>();
     public final ProgressReporter mUnlockProgress;
+    public final ArrayList<KeyEvictedCallback> mKeyEvictedCallbacks = new ArrayList<>();
 
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
     public boolean switching;
     public boolean tokenProvided;
+
+    /** Callback for key eviction. */
+    public interface KeyEvictedCallback {
+        /** Invoked when the key is evicted. */
+        void keyEvicted(@UserIdInt int userId);
+    }
 
     /**
      * The last time that a provider was reported to usage stats as being brought to important

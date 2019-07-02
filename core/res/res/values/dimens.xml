@@ -47,6 +47,21 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+    <!-- How much we expand the touchable region of the status bar below the notch to catch touches
+         that just start below the notch. -->
+    <dimen name="display_cutout_touchable_region_size">12dp</dimen>
+
+    <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
+         where that is the height reported to all the other windows to resize themselves around the
+         navigation bar window but navigation_bar_frame_height is reported to SystemUI navigation
+         bar view's window -->
+    <dimen name="navigation_bar_frame_height">@dimen/navigation_bar_height</dimen>
+    <!-- Height of the bottom navigation bar frame in landscape -->
+    <dimen name="navigation_bar_frame_height_landscape">@dimen/navigation_bar_frame_height</dimen>
+
+    <!-- The height of the navigation gesture area if the gesture is starting from the bottom. -->
+    <dimen name="navigation_bar_gesture_height">@dimen/navigation_bar_frame_height</dimen>
+
     <!-- Height of the bottom navigation / system bar in car mode. -->
     <dimen name="navigation_bar_height_car_mode">96dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as
@@ -56,6 +71,11 @@
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">22dip</dimen>
+    <!-- Desired size of system icons in status bar. -->
+    <dimen name="status_bar_system_icon_size">15dp</dimen>
+    <!-- Intrinsic size of most system icons in status bar. This is the default value that
+         is used if a Drawable reports an intrinsic size of 0. -->
+    <dimen name="status_bar_system_icon_intrinsic_size">17dp</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
@@ -180,11 +200,11 @@
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>
 
-    <!-- The additional margin on the sides of the ambient view. -->
-    <dimen name="notification_extra_margin_ambient">16dp</dimen>
-
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
+
+    <!-- The margin of the notification action list at the top -->
+    <dimen name="notification_action_list_margin_top">0dp</dimen>
 
     <!-- The height of the notification action list -->
     <dimen name="notification_action_emphasized_height">48dp</dimen>
@@ -216,9 +236,6 @@
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">16dp</dimen>
 
-    <!-- The margin at the top of the notification header when dozing. -->
-    <dimen name="notification_header_margin_top_ambient">3dp</dimen>
-
     <!-- The margin at the bottom of the notification header. -->
     <dimen name="notification_header_margin_bottom">0dp</dimen>
 
@@ -229,7 +246,7 @@
     <dimen name="notification_header_icon_size">18dp</dimen>
 
     <!-- size (width and height) of the icon in the notification header -->
-    <dimen name="notification_header_icon_size_ambient">20dp</dimen>
+    <dimen name="notification_header_icon_size_ambient">18dp</dimen>
 
     <!-- The margin before the start of the app name in the header. -->
     <dimen name="notification_header_app_name_margin_start">3dp</dimen>
@@ -383,11 +400,6 @@
     <dimen name="notification_title_text_size">14sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
-    <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
-    <dimen name="notification_ambient_text_size">16sp</dimen>
-    <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
-    <dimen name="notification_ambient_title_text_size">24sp</dimen>
-
     <!-- Top padding for notifications in the standard layout. -->
     <dimen name="notification_top_pad">10dp</dimen>
 
@@ -411,6 +423,9 @@
 
     <!-- Size of the profile badge for notifications -->
     <dimen name="notification_badge_size">12dp</dimen>
+
+    <!-- Size of the alerted icon for notifications -->
+    <dimen name="notification_alerted_size">12dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
@@ -561,13 +576,14 @@
     <dimen name="floating_toolbar_icon_text_spacing">8dp</dimen>
 
     <!-- Magnifier dimensions -->
-    <dimen name="magnifier_width">100dp</dimen>
-    <dimen name="magnifier_height">48dp</dimen>
-    <dimen name="magnifier_elevation">4dp</dimen>
-    <dimen name="magnifier_offset">42dp</dimen>
-    <item type="dimen" format="float" name="magnifier_zoom_scale">1.25</item>
+    <dimen name="default_magnifier_width">100dp</dimen>
+    <dimen name="default_magnifier_height">48dp</dimen>
+    <dimen name="default_magnifier_elevation">4dp</dimen>
+    <dimen name="default_magnifier_corner_radius">2dp</dimen>
+    <dimen name="default_magnifier_vertical_offset">-42dp</dimen>
+    <dimen name="default_magnifier_horizontal_offset">0dp</dimen>
+    <item type="dimen" format="float" name="default_magnifier_zoom">1.25</item>
 
-    <dimen name="chooser_grid_padding">0dp</dimen>
     <!-- Spacing around the background change frome service to non-service -->
     <dimen name="chooser_service_spacing">8dp</dimen>
 
@@ -655,6 +671,16 @@
     <dimen name="autofill_dataset_picker_max_width">90%</dimen>
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>
 
+    <!-- Autofill save dialog padding -->
+    <dimen name="autofill_save_outer_top_margin">32dp</dimen>
+    <dimen name="autofill_save_outer_top_padding">16dp</dimen>
+    <dimen name="autofill_elevation">32dp</dimen>
+    <dimen name="autofill_save_inner_padding">16dp</dimen>
+    <dimen name="autofill_save_icon_size">24dp</dimen>
+    <dimen name="autofill_save_title_start_padding">8dp</dimen>
+    <dimen name="autofill_save_scroll_view_top_margin">4dp</dimen>
+    <dimen name="autofill_save_button_bar_padding">16dp</dimen>
+
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
@@ -703,4 +729,21 @@
     <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
     <!-- Line spacing modifier for the message field of the harmful app dialog -->
     <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
+
+    <!-- chooser (sharesheet) spacing -->
+    <dimen name="chooser_corner_radius">8dp</dimen>
+    <dimen name="chooser_row_text_option_translate">25dp</dimen>
+    <dimen name="chooser_view_spacing">18dp</dimen>
+    <dimen name="chooser_edge_margin_thin">16dp</dimen>
+    <dimen name="chooser_edge_margin_normal">24dp</dimen>
+    <dimen name="chooser_preview_image_font_size">20sp</dimen>
+    <dimen name="chooser_preview_image_border">1dp</dimen>
+    <dimen name="chooser_preview_width">-1px</dimen>
+    <dimen name="resolver_icon_size">42dp</dimen>
+    <dimen name="resolver_button_bar_spacing">8dp</dimen>
+    <dimen name="resolver_badge_size">18dp</dimen>
+    <dimen name="chooser_target_width">90dp</dimen>
+    <dimen name="chooser_header_scroll_elevation">4dp</dimen>
+    <dimen name="chooser_max_collapsed_height">288dp</dimen>
+    <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
 </resources>

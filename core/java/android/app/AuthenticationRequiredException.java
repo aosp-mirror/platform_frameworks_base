@@ -81,7 +81,7 @@ public final class AuthenticationRequiredException extends SecurityException imp
         mUserAction.writeToParcel(dest, flags);
     }
 
-    public static final Creator<AuthenticationRequiredException> CREATOR =
+    public static final @android.annotation.NonNull Creator<AuthenticationRequiredException> CREATOR =
             new Creator<AuthenticationRequiredException>() {
         @Override
         public AuthenticationRequiredException createFromParcel(Parcel source) {

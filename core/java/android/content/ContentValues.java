@@ -22,9 +22,12 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -57,6 +60,7 @@ public final class ContentValues implements Parcelable {
      * @param size the initial size of the set of values
      */
     public ContentValues(int size) {
+        Preconditions.checkArgumentNonnegative(size);
         mMap = new ArrayMap<>(size);
     }
 
@@ -66,6 +70,7 @@ public final class ContentValues implements Parcelable {
      * @param from the values to copy
      */
     public ContentValues(ContentValues from) {
+        Objects.requireNonNull(from);
         mMap = new ArrayMap<>(from.mMap);
     }
 
@@ -492,7 +497,7 @@ public final class ContentValues implements Parcelable {
         return mMap.keySet();
     }
 
-    public static final Parcelable.Creator<ContentValues> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentValues> CREATOR =
             new Parcelable.Creator<ContentValues>() {
         @Override
         public ContentValues createFromParcel(Parcel in) {

@@ -36,7 +36,7 @@ public class ShadowSmsApplication {
     }
 
     @Implementation
-    public static ComponentName getDefaultSmsApplication(Context context, boolean updateIfNeeded) {
+    protected static ComponentName getDefaultSmsApplication(Context context, boolean update) {
         return sDefaultSmsApplication;
     }
 

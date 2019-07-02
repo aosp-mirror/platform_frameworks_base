@@ -16,11 +16,14 @@
 
 package android.widget;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,11 +32,12 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Parcel;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 
@@ -443,5 +447,56 @@ public class RemoteViewsTest {
             PendingIntent.setOnMarshaledListener(null);
         }
         return found[0];
+    }
+
+    @Test
+    public void sharedElement_pendingIntent_notifyParent() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
+                new Intent("android.widget.RemoteViewsTest_shared_element"),
+                PendingIntent.FLAG_ONE_SHOT);
+        views.setOnClickResponse(R.id.image, RemoteViews.RemoteResponse.fromPendingIntent(pi)
+                .addSharedElement(0, "e0")
+                .addSharedElement(1, "e1")
+                .addSharedElement(2, "e2"));
+
+        WidgetContainer container = new WidgetContainer(mContext);
+        container.addView(new RemoteViews(views).apply(mContext, container));
+        container.findViewById(R.id.image).performClick();
+
+        assertArrayEquals(container.mSharedViewIds, new int[] {0, 1, 2});
+        assertArrayEquals(container.mSharedViewNames, new String[] {"e0", "e1", "e2"});
+    }
+
+    @Test
+    public void setIntTag() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        int index = 10;
+        views.setIntTag(
+                R.id.layout, com.android.internal.R.id.notification_action_index_tag, index);
+
+        RemoteViews recovered = parcelAndRecreate(views);
+        RemoteViews cloned = new RemoteViews(recovered);
+        View inflated = cloned.apply(mContext, mContainer);
+
+        assertEquals(
+                index, inflated.getTag(com.android.internal.R.id.notification_action_index_tag));
+    }
+
+    private class WidgetContainer extends AppWidgetHostView {
+        int[] mSharedViewIds;
+        String[] mSharedViewNames;
+
+        WidgetContainer(Context context) {
+            super(context);
+        }
+
+        @Override
+        public ActivityOptions createSharedElementActivityOptions(
+                int[] sharedViewIds, String[] sharedViewNames, Intent fillInIntent) {
+            mSharedViewIds = sharedViewIds;
+            mSharedViewNames = sharedViewNames;
+            return null;
+        }
     }
 }

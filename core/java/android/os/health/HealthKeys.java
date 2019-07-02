@@ -16,11 +16,8 @@
 
 package android.os.health;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.annotation.TestApi;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,6 +30,7 @@ import java.util.Arrays;
  *
  * @hide
  */
+@TestApi
 public class HealthKeys {
 
     /**
@@ -82,6 +80,7 @@ public class HealthKeys {
      *
      * @hide
      */
+    @TestApi
     public static class Constants {
         private final String mDataType;
         private final int[][] mKeys = new int[TYPE_COUNT][];
@@ -90,7 +89,6 @@ public class HealthKeys {
          * Pass in a class to gather the public static final int fields that are
          * tagged with the @Constant annotation.
          */
-        @UnsupportedAppUsage
         public Constants(Class clazz) {
             // Save the class name for debugging
             mDataType = clazz.getSimpleName();

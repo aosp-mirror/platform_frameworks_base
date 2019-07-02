@@ -66,7 +66,7 @@ public class AccountManagerResponse implements Parcelable {
     }
 
     /** @hide */
-    public static final Creator<AccountManagerResponse> CREATOR =
+    public static final @android.annotation.NonNull Creator<AccountManagerResponse> CREATOR =
             new Creator<AccountManagerResponse>() {
         public AccountManagerResponse createFromParcel(Parcel source) {
             return new AccountManagerResponse(source);

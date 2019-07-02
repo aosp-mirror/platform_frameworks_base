@@ -192,6 +192,11 @@ public class ConditionProviders extends ManagedServices {
         return true;
     }
 
+    @Override
+    protected String getRequiredPermission() {
+        return null;
+    }
+
     public ManagedServiceInfo checkServiceToken(IConditionProvider provider) {
         synchronized(mMutex) {
             return checkServiceTokenLocked(provider);
@@ -279,11 +284,13 @@ public class ConditionProviders extends ManagedServices {
 
     public void ensureRecordExists(ComponentName component, Uri conditionId,
             IConditionProvider provider) {
-        // constructed by convention, make sure the record exists...
-        final ConditionRecord r = getRecordLocked(conditionId, component, true /*create*/);
-        if (r.info == null) {
-            // ... and is associated with the in-process service
-            r.info = checkServiceTokenLocked(provider);
+        synchronized (mMutex) {
+            // constructed by convention, make sure the record exists...
+            final ConditionRecord r = getRecordLocked(conditionId, component, true /*create*/);
+            if (r.info == null) {
+                // ... and is associated with the in-process service
+                r.info = checkServiceTokenLocked(provider);
+            }
         }
     }
 

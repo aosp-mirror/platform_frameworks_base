@@ -34,6 +34,10 @@ public:
         return (value >= -NON_ZERO_EPSILON) && (value <= NON_ZERO_EPSILON);
     }
 
+    inline static bool isOne(float value) {
+        return areEqual(value, 1.0f);
+    }
+
     inline static bool isPositive(float value) { return value >= NON_ZERO_EPSILON; }
 
     /**

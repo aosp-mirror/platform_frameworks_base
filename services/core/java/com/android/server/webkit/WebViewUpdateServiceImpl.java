@@ -16,48 +16,38 @@
 package com.android.server.webkit;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.Signature;
+import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.util.Slog;
-import android.webkit.UserPackage;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
 import java.io.PrintWriter;
-import java.lang.Integer;
-import java.util.List;
 
 /**
  * Implementation of the WebViewUpdateService.
  * This class doesn't depend on the android system like the actual Service does and can be used
  * directly by tests (as long as they implement a SystemInterface).
  *
- * This class implements two main features - handling WebView fallback packages and keeping track
- * of, and preparing, the current WebView implementation. The fallback mechanism is meant to be
- * uncoupled from the rest of the WebView preparation and does not store any state. The code for
- * choosing and preparing a WebView implementation needs to keep track of a couple of different
- * things such as what package is used as WebView implementation.
+ * This class keeps track of and prepares the current WebView implementation, and needs to keep
+ * track of a couple of different things such as what package is used as WebView implementation.
  *
  * The public methods in this class are accessed from WebViewUpdateService either on the UI thread
- * or on one of multiple Binder threads. This means that the code in this class needs to be
- * thread-safe. The fallback mechanism shares (almost) no information between threads which makes
- * it easier to argue about thread-safety (in theory, if timed badly, the fallback mechanism can
- * incorrectly enable/disable a fallback package but that fault will be corrected when we later
- * receive an intent for that enabling/disabling). On the other hand, the WebView preparation code
- * shares state between threads meaning that code that chooses a new WebView implementation or
- * checks which implementation is being used needs to hold a lock.
+ * or on one of multiple Binder threads. The WebView preparation code shares state between threads
+ * meaning that code that chooses a new WebView implementation or checks which implementation is
+ * being used needs to hold a lock.
  *
  * The WebViewUpdateService can be accessed in a couple of different ways.
  * 1. It is started from the SystemServer at boot - at that point we just initiate some state such
  * as the WebView preparation class.
  * 2. The SystemServer calls WebViewUpdateService.prepareWebViewInSystemServer. This happens at boot
  * and the WebViewUpdateService should not have been accessed before this call. In this call we
- * enable/disable fallback packages and then choose WebView implementation for the first time.
+ * migrate away from the old fallback logic if necessary and then choose WebView implementation for
+ * the first time.
  * 3. The update service listens for Intents related to package installs and removals. These intents
- * are received and processed on the UI thread. Each intent can result in enabling/disabling
- * fallback packages and changing WebView implementation.
+ * are received and processed on the UI thread. Each intent can result in changing WebView
+ * implementation.
  * 4. The update service can be reached through Binder calls which are handled on specific binder
  * threads. These calls can be made from any process. Generally they are used for changing WebView
  * implementation (from Settings), getting information about the current WebView implementation (for
@@ -86,33 +76,40 @@ public class WebViewUpdateServiceImpl {
         // We don't early out here in different cases where we could potentially early-out (e.g. if
         // we receive PACKAGE_CHANGED for another user than the system user) since that would
         // complicate this logic further and open up for more edge cases.
-        updateFallbackStateOnPackageChange(packageName, changedState);
         mWebViewUpdater.packageStateChanged(packageName, changedState);
     }
 
     void prepareWebViewInSystemServer() {
-        updateFallbackStateOnBoot();
+        migrateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
-        mSystemInterface.notifyZygote(isMultiProcessEnabled());
-    }
-
-    private boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
-        for (WebViewProviderInfo provider : providers) {
-            if (provider.availableByDefault && !provider.isFallback) {
-                // userPackages can contain null objects.
-                List<UserPackage> userPackages =
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider);
-                if (WebViewUpdater.isInstalledAndEnabledForAllUsers(userPackages) &&
-                        // Checking validity of the package for the system user (rather than all
-                        // users) since package validity depends not on the user but on the package
-                        // itself.
-                        mWebViewUpdater.isValidProvider(provider,
-                                userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo())) {
-                    return true;
-                }
+        if (getCurrentWebViewPackage() == null) {
+            // We didn't find a valid WebView implementation. Try explicitly re-enabling the
+            // fallback package for all users in case it was disabled, even if we already did the
+            // one-time migration before. If this actually changes the state, WebViewUpdater will
+            // see the PackageManager broadcast shortly and try again.
+            WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
+            WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
+            if (fallbackProvider != null) {
+                Slog.w(TAG, "No valid provider, trying to enable " + fallbackProvider.packageName);
+                mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName,
+                                                          true);
+            } else {
+                Slog.e(TAG, "No valid provider and no fallback available.");
             }
         }
-        return false;
+
+        boolean multiProcessEnabled = isMultiProcessEnabled();
+        mSystemInterface.notifyZygote(multiProcessEnabled);
+        if (multiProcessEnabled) {
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
+        }
+    }
+
+    void startZygoteWhenReady() {
+        // Wait on a background thread for RELRO creation to be done. We ignore the return value
+        // because even if RELRO creation failed we still want to start the zygote.
+        waitForAndGetProvider();
+        mSystemInterface.ensureZygoteStarted();
     }
 
     void handleNewUser(int userId) {
@@ -128,14 +125,11 @@ public class WebViewUpdateServiceImpl {
     }
 
     /**
-     * Called when a user was added or removed to ensure fallback logic and WebView preparation are
-     * triggered. This has to be done since the WebView package we use depends on the enabled-state
+     * Called when a user was added or removed to ensure WebView preparation is triggered.
+     * This has to be done since the WebView package we use depends on the enabled-state
      * of packages for all users (so adding or removing a user might cause us to change package).
      */
     private void handleUserChange() {
-        if (mSystemInterface.isFallbackLogicEnabled()) {
-            updateFallbackState(mSystemInterface.getWebViewPackages());
-        }
         // Potentially trigger package-changing logic.
         mWebViewUpdater.updateCurrentWebViewPackage(null);
     }
@@ -164,60 +158,25 @@ public class WebViewUpdateServiceImpl {
         return mWebViewUpdater.getCurrentWebViewPackage();
     }
 
-    void enableFallbackLogic(boolean enable) {
-        mSystemInterface.enableFallbackLogic(enable);
-    }
-
-    private void updateFallbackStateOnBoot() {
-        if (!mSystemInterface.isFallbackLogicEnabled()) return;
-
-        WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-        updateFallbackState(webviewProviders);
-    }
-
     /**
-     * Handle the enabled-state of our fallback package, i.e. if there exists some non-fallback
-     * package that is valid (and available by default) then disable the fallback package,
-     * otherwise, enable the fallback package.
+     * If the fallback logic is enabled, re-enable any fallback package for all users, then
+     * disable the fallback logic.
+     *
+     * This migrates away from the old fallback mechanism to the new state where packages are never
+     * automatically enableenableisabled.
      */
-    private void updateFallbackStateOnPackageChange(String changedPackage, int changedState) {
+    private void migrateFallbackStateOnBoot() {
         if (!mSystemInterface.isFallbackLogicEnabled()) return;
 
         WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-
-        // A package was changed / updated / downgraded, early out if it is not one of the
-        // webview packages that are available by default.
-        boolean changedPackageAvailableByDefault = false;
-        for (WebViewProviderInfo provider : webviewProviders) {
-            if (provider.packageName.equals(changedPackage)) {
-                if (provider.availableByDefault) {
-                    changedPackageAvailableByDefault = true;
-                }
-                break;
-            }
-        }
-        if (!changedPackageAvailableByDefault) return;
-        updateFallbackState(webviewProviders);
-    }
-
-    private void updateFallbackState(WebViewProviderInfo[] webviewProviders) {
-        // If there exists a valid and enabled non-fallback package - disable the fallback
-        // package, otherwise, enable it.
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
-        if (fallbackProvider == null) return;
-        boolean existsValidNonFallbackProvider = existsValidNonFallbackProvider(webviewProviders);
-
-        List<UserPackage> userPackages =
-                mSystemInterface.getPackageInfoForProviderAllUsers(mContext, fallbackProvider);
-        if (existsValidNonFallbackProvider && !isDisabledForAllUsers(userPackages)) {
-            mSystemInterface.uninstallAndDisablePackageForAllUsers(mContext,
-                    fallbackProvider.packageName);
-        } else if (!existsValidNonFallbackProvider
-                && !WebViewUpdater.isInstalledAndEnabledForAllUsers(userPackages)) {
-            // Enable the fallback package for all users.
-            mSystemInterface.enablePackageForAllUsers(mContext,
-                    fallbackProvider.packageName, true);
+        if (fallbackProvider != null) {
+            Slog.i(TAG, "One-time migration: enabling " + fallbackProvider.packageName);
+            mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName, true);
+        } else {
+            Slog.i(TAG, "Skipping one-time migration: no fallback provider");
         }
+        mSystemInterface.enableFallbackLogic(false);
     }
 
     /**
@@ -230,15 +189,6 @@ public class WebViewUpdateServiceImpl {
             }
         }
         return null;
-    }
-
-    boolean isFallbackPackage(String packageName) {
-        if (packageName == null || !mSystemInterface.isFallbackLogicEnabled()) return false;
-
-        WebViewProviderInfo[] webviewPackages = mSystemInterface.getWebViewPackages();
-        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewPackages);
-        return (fallbackProvider != null
-                && packageName.equals(fallbackProvider.packageName));
     }
 
     boolean isMultiProcessEnabled() {
@@ -260,15 +210,6 @@ public class WebViewUpdateServiceImpl {
         if (current != null) {
             mSystemInterface.killPackageDependents(current.packageName);
         }
-    }
-
-    private static boolean isDisabledForAllUsers(List<UserPackage> userPackages) {
-        for (UserPackage userPackage : userPackages) {
-            if (userPackage.getPackageInfo() != null && userPackage.isEnabledPackage()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

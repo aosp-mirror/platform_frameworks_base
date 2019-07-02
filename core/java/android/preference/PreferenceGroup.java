@@ -16,14 +16,15 @@
 
 package android.preference;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A container for multiple
@@ -38,7 +39,14 @@ import android.util.AttributeSet;
  * </div>
  *
  * @attr ref android.R.styleable#PreferenceGroup_orderingFromXml
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 public abstract class PreferenceGroup extends Preference implements GenericInflater.Parent<Preference> {
     /**
      * The container for child {@link Preference}s. This is sorted based on the

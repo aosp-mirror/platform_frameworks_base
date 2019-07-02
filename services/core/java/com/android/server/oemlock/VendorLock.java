@@ -22,8 +22,6 @@ import android.hardware.oemlock.V1_0.IOemLock;
 import android.hardware.oemlock.V1_0.OemLockSecureStatus;
 import android.hardware.oemlock.V1_0.OemLockStatus;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -55,14 +53,49 @@ class VendorLock extends OemLock {
     }
 
     @Override
+    @Nullable
+    String getLockName() {
+        final Integer[] requestStatus = new Integer[1];
+        final String[] lockName = new String[1];
+
+        try {
+            mOemLock.getName((status, name) -> {
+                requestStatus[0] = status;
+                lockName[0] = name;
+            });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to get name from HAL", e);
+            throw e.rethrowFromSystemServer();
+        }
+
+        switch (requestStatus[0]) {
+            case OemLockStatus.OK:
+                // Success
+                return lockName[0];
+
+            case OemLockStatus.FAILED:
+                Slog.e(TAG, "Failed to get OEM lock name.");
+                return null;
+
+            default:
+                Slog.e(TAG, "Unknown return value indicates code is out of sync with HAL");
+                return null;
+        }
+    }
+
+    @Override
     void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
         try {
-            switch (mOemLock.setOemUnlockAllowedByCarrier(allowed, toByteArrayList(signature))) {
+            ArrayList<Byte> signatureBytes = toByteArrayList(signature);
+            switch (mOemLock.setOemUnlockAllowedByCarrier(allowed, signatureBytes)) {
                 case OemLockSecureStatus.OK:
                     Slog.i(TAG, "Updated carrier allows OEM lock state to: " + allowed);
                     return;
 
                 case OemLockSecureStatus.INVALID_SIGNATURE:
+                    if (signatureBytes.isEmpty()) {
+                        throw new IllegalArgumentException("Signature required for carrier unlock");
+                    }
                     throw new SecurityException(
                             "Invalid signature used in attempt to carrier unlock");
 
@@ -154,9 +187,9 @@ class VendorLock extends OemLock {
         }
     }
 
-    private ArrayList toByteArrayList(byte[] data) {
+    private ArrayList<Byte> toByteArrayList(byte[] data) {
         if (data == null) {
-            return null;
+            return new ArrayList<Byte>();
         }
         ArrayList<Byte> result = new ArrayList<Byte>(data.length);
         for (final byte b : data) {

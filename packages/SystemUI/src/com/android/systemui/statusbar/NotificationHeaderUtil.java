@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
@@ -24,6 +25,10 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.internal.util.ContrastColorUtil;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,8 +79,11 @@ public class NotificationHeaderUtil {
                 imageView.getDrawable().mutate();
                 if (shouldApply) {
                     // lets gray it out
-                    int grey = view.getContext().getColor(
-                            com.android.internal.R.color.notification_default_color_light);
+                    Configuration config = view.getContext().getResources().getConfiguration();
+                    boolean inNightMode = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                            == Configuration.UI_MODE_NIGHT_YES;
+                    int grey = ContrastColorUtil.resolveColor(view.getContext(),
+                            Notification.COLOR_DEFAULT, inNightMode);
                     imageView.getDrawable().setColorFilter(grey, PorterDuff.Mode.SRC_ATOP);
                 } else {
                     // lets reset it

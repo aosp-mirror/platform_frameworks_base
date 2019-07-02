@@ -26,6 +26,7 @@ import com.android.systemui.util.Assert;
 
 public class KeepAwakeAnimationListener extends AnimatorListenerAdapter
         implements Animation.AnimationListener {
+    private static final String TAG = "KeepAwakeAnimListener";
     @VisibleForTesting
     static WakeLock sWakeLock;
 
@@ -63,11 +64,11 @@ public class KeepAwakeAnimationListener extends AnimatorListenerAdapter
 
     private void onStart() {
         Assert.isMainThread();
-        sWakeLock.acquire();
+        sWakeLock.acquire(TAG);
     }
 
     private void onEnd() {
         Assert.isMainThread();
-        sWakeLock.release();
+        sWakeLock.release(TAG);
     }
 }

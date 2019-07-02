@@ -35,12 +35,6 @@ interface AnimationAdapter {
     long STATUS_BAR_TRANSITION_DURATION = 120L;
 
     /**
-     * @return Whether we should detach the wallpaper during the animation.
-     * @see Animation#setDetachWallpaper
-     */
-    boolean getDetachWallpaper();
-
-    /**
      * @return Whether we should show the wallpaper during the animation.
      * @see Animation#getShowWallpaper()
      */

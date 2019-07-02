@@ -28,7 +28,7 @@ import android.service.euicc.EuiccService.Result;
 @SystemApi
 public final class DownloadSubscriptionResult implements Parcelable {
 
-    public static final Creator<DownloadSubscriptionResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<DownloadSubscriptionResult> CREATOR =
             new Creator<DownloadSubscriptionResult>() {
         @Override
         public DownloadSubscriptionResult createFromParcel(Parcel in) {

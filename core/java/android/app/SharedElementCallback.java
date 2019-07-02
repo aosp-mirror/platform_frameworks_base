@@ -18,11 +18,13 @@ package android.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.transition.TransitionUtils;
@@ -48,6 +50,7 @@ public abstract class SharedElementCallback {
     private static final String BUNDLE_SNAPSHOT_BITMAP = "sharedElement:snapshot:bitmap";
     private static final String BUNDLE_SNAPSHOT_GRAPHIC_BUFFER =
             "sharedElement:snapshot:graphicBuffer";
+    private static final String BUNDLE_SNAPSHOT_COLOR_SPACE = "sharedElement:snapshot:colorSpace";
     private static final String BUNDLE_SNAPSHOT_IMAGE_SCALETYPE = "sharedElement:snapshot:imageScaleType";
     private static final String BUNDLE_SNAPSHOT_IMAGE_MATRIX = "sharedElement:snapshot:imageMatrix";
 
@@ -185,6 +188,10 @@ public abstract class SharedElementCallback {
                     } else {
                         GraphicBuffer graphicBuffer = bitmap.createGraphicBufferHandle();
                         bundle.putParcelable(BUNDLE_SNAPSHOT_GRAPHIC_BUFFER, graphicBuffer);
+                        ColorSpace cs = bitmap.getColorSpace();
+                        if (cs != null) {
+                            bundle.putInt(BUNDLE_SNAPSHOT_COLOR_SPACE, cs.getId());
+                        }
                     }
                     bundle.putString(BUNDLE_SNAPSHOT_IMAGE_SCALETYPE,
                             imageView.getScaleType().toString());
@@ -234,7 +241,13 @@ public abstract class SharedElementCallback {
                 return null;
             }
             if (bitmap == null) {
-                bitmap = Bitmap.createHardwareBitmap(buffer);
+                ColorSpace colorSpace = null;
+                int colorSpaceId = bundle.getInt(BUNDLE_SNAPSHOT_COLOR_SPACE, 0);
+                if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
+                    colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
+                }
+                bitmap = Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(buffer),
+                                                   colorSpace);
             }
             ImageView imageView = new ImageView(context);
             view = imageView;

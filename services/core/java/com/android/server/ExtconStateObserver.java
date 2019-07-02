@@ -21,7 +21,6 @@ import android.os.FileUtils;
 import android.util.Slog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -36,31 +35,18 @@ public abstract class ExtconStateObserver<S> extends ExtconUEventObserver {
     private static final boolean LOG = false;
 
     /**
-     * Parses the current state from the state file for {@code extconInfo} and calls {@link
-     * #updateState(ExtconInfo, String, Object)}
+     * Parses the current state from the state file for {@code extconInfo}.
      *
-     * @param extconInfo the extconInfo to update state for
+     * @param extconInfo the extconInfo to parse state for
      * @see #parseState(ExtconInfo, String)
      * @see ExtconInfo#getStatePath()
      */
-    public void updateStateFromFile(ExtconInfo extconInfo) {
+    @Nullable
+    public S parseStateFromFile(ExtconInfo extconInfo) throws IOException {
         String statePath = extconInfo.getStatePath();
-        try {
-            S state =
-                    parseState(
-                            extconInfo,
-                            FileUtils.readTextFile(new File(statePath), 0, null).trim());
-            if (state != null) {
-                updateState(extconInfo, extconInfo.getName(), state);
-            }
-        } catch (FileNotFoundException e) {
-            Slog.w(TAG, statePath + " not found while attempting to determine initial state", e);
-        } catch (IOException e) {
-            Slog.e(
-                    TAG,
-                    "Error reading " + statePath + " while attempting to determine initial state ",
-                    e);
-        }
+        return parseState(
+                extconInfo,
+                FileUtils.readTextFile(new File(statePath), 0, null).trim());
     }
 
     @Override

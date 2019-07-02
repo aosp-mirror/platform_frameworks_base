@@ -18,7 +18,8 @@ package android.view;
 
 import android.graphics.Rect;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 public class FocusFinderTest extends AndroidTestCase {
 

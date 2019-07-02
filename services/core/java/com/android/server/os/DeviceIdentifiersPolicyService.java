@@ -16,18 +16,15 @@
 
 package com.android.server.os;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IDeviceIdentifiersPolicyService;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
+
+import com.android.internal.telephony.TelephonyPermissions;
 import com.android.server.SystemService;
 
 /**
@@ -54,15 +51,22 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
 
         @Override
         public @Nullable String getSerial() throws RemoteException {
-            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID
-                    && mContext.checkCallingOrSelfPermission(
-                            Manifest.permission.READ_PHONE_STATE)
-                                    != PackageManager.PERMISSION_GRANTED
-                    && mContext.checkCallingOrSelfPermission(
-                            Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-                                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("getSerial requires READ_PHONE_STATE"
-                        + " or READ_PRIVILEGED_PHONE_STATE permission");
+            // Since this invocation is on the server side a null value is used for the
+            // callingPackage as the server's package name (typically android) should not be used
+            // for any device / profile owner checks. The majority of requests for the serial number
+            // should use the getSerialForPackage method with the calling package specified.
+            if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
+                    /* callingPackage */ null, "getSerial")) {
+                return Build.UNKNOWN;
+            }
+            return SystemProperties.get("ro.serialno", Build.UNKNOWN);
+        }
+
+        @Override
+        public @Nullable String getSerialForPackage(String callingPackage) throws RemoteException {
+            if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
+                    callingPackage, "getSerial")) {
+                return Build.UNKNOWN;
             }
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
         }

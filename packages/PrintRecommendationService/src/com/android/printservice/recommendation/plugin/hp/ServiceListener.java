@@ -24,6 +24,7 @@ import android.text.TextUtils;
 
 import com.android.printservice.recommendation.R;
 import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
+import com.android.printservice.recommendation.util.PrinterHashMap;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -183,9 +184,7 @@ public class ServiceListener implements ServiceResolveQueue.ResolveCallback {
         ArrayList<InetAddress> printerAddressess = new ArrayList<>();
 
         for (PrinterHashMap oneVendorPrinters : mVendorHashMap.values()) {
-            for (NsdServiceInfo printer : oneVendorPrinters.values()) {
-                printerAddressess.add(printer.getHost());
-            }
+            printerAddressess.addAll(oneVendorPrinters.getPrinterAddresses());
         }
 
         return printerAddressess;

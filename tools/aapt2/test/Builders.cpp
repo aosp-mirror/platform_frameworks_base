@@ -135,6 +135,14 @@ ResourceTableBuilder& ResourceTableBuilder::SetSymbolState(const StringPiece& na
   return *this;
 }
 
+ResourceTableBuilder& ResourceTableBuilder::SetOverlayable(const StringPiece& name,
+                                                           const OverlayableItem& overlayable) {
+
+  ResourceName res_name = ParseNameOrDie(name);
+  CHECK(table_->SetOverlayable(res_name, overlayable, GetDiagnostics()));
+  return *this;
+}
+
 StringPool* ResourceTableBuilder::string_pool() {
   return &table_->string_pool;
 }

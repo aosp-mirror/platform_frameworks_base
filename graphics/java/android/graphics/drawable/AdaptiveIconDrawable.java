@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -26,6 +27,7 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -34,7 +36,6 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Shader;
@@ -108,10 +109,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * Scaled mask based on the view bounds.
      */
     private final Path mMask;
+    private final Path mMaskScaleOnly;
     private final Matrix mMaskMatrix;
     private final Region mTransparentRegion;
-
-    private Bitmap mMaskBitmap;
 
     /**
      * Indices used to access {@link #mLayerState.mChildDrawable} array for foreground and
@@ -151,13 +151,16 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     AdaptiveIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
         mLayerState = createConstantState(state, res);
-
-        if (sMask == null) {
-            sMask = PathParser.createPathFromPathData(
-                Resources.getSystem().getString(R.string.config_icon_mask));
-        }
-        mMask = PathParser.createPathFromPathData(
-            Resources.getSystem().getString(R.string.config_icon_mask));
+        // config_icon_mask from context bound resource may have been chaged using
+        // OverlayManager. Read that one first.
+        Resources r = ActivityThread.currentActivityThread() == null
+                ? Resources.getSystem()
+                : ActivityThread.currentActivityThread().getApplication().getResources();
+        // TODO: either make sMask update only when config_icon_mask changes OR
+        // get rid of it all-together in layoutlib
+        sMask = PathParser.createPathFromPathData(r.getString(R.string.config_icon_mask));
+        mMask = new Path(sMask);
+        mMaskScaleOnly = new Path(mMask);
         mMaskMatrix = new Matrix();
         mCanvas = new Canvas();
         mTransparentRegion = new Region();
@@ -329,24 +332,19 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     private void updateMaskBoundsInternal(Rect b) {
+        // reset everything that depends on the view bounds
         mMaskMatrix.setScale(b.width() / MASK_SIZE, b.height() / MASK_SIZE);
+        sMask.transform(mMaskMatrix, mMaskScaleOnly);
+
+        mMaskMatrix.postTranslate(b.left, b.top);
         sMask.transform(mMaskMatrix, mMask);
 
-        if (mMaskBitmap == null || mMaskBitmap.getWidth() != b.width() ||
-            mMaskBitmap.getHeight() != b.height()) {
-            mMaskBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ALPHA_8);
+        if (mLayersBitmap == null || mLayersBitmap.getWidth() != b.width()
+                || mLayersBitmap.getHeight() != b.height()) {
             mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
         }
-        // mMaskBitmap bound [0, w] x [0, h]
-        mCanvas.setBitmap(mMaskBitmap);
-        mPaint.setShader(null);
-        mCanvas.drawPath(mMask, mPaint);
 
-        // mMask bound [left, top, right, bottom]
-        mMaskMatrix.postTranslate(b.left, b.top);
-        mMask.reset();
-        sMask.transform(mMaskMatrix, mMask);
-        // reset everything that depends on the view bounds
+        mPaint.setShader(null);
         mTransparentRegion.setEmpty();
         mLayersShader = null;
     }
@@ -371,9 +369,11 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             mLayersShader = new BitmapShader(mLayersBitmap, TileMode.CLAMP, TileMode.CLAMP);
             mPaint.setShader(mLayersShader);
         }
-        if (mMaskBitmap != null) {
+        if (mMaskScaleOnly != null) {
             Rect bounds = getBounds();
-            canvas.drawBitmap(mMaskBitmap, bounds.left, bounds.top, mPaint);
+            canvas.translate(bounds.left, bounds.top);
+            canvas.drawPath(mMaskScaleOnly, mPaint);
+            canvas.translate(-bounds.left, -bounds.top);
         }
     }
 
@@ -549,7 +549,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
         final ChildDrawable[] layers = mLayerState.mChildren;
         for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
-            if (layers[i].mDrawable.isProjected()) {
+            if (layers[i].mDrawable != null && layers[i].mDrawable.isProjected()) {
                 return true;
             }
         }
@@ -674,7 +674,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public int getAlpha() {
-        return PixelFormat.TRANSLUCENT;
+        return mPaint.getAlpha();
     }
 
     @Override
@@ -701,13 +701,13 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     @Override
-    public void setTintMode(Mode tintMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.N_CHILDREN;
         for (int i = 0; i < N; i++) {
             final Drawable dr = array[i].mDrawable;
             if (dr != null) {
-                dr.setTintMode(tintMode);
+                dr.setTintBlendMode(blendMode);
             }
         }
     }
@@ -718,10 +718,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public int getOpacity() {
-        if (mLayerState.mOpacityOverride != PixelFormat.UNKNOWN) {
-            return mLayerState.mOpacityOverride;
-        }
-        return mLayerState.getOpacity();
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override

@@ -48,7 +48,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
     private MessageDigest mDigester;
 
     public WifiAwareAgentNetworkSpecifier() {
-        // do nothing, already initialized to empty
+        initialize();
     }
 
     public WifiAwareAgentNetworkSpecifier(WifiAwareNetworkSpecifier ns) {
@@ -77,7 +77,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
         dest.writeArray(mNetworkSpecifiers.toArray());
     }
 
-    public static final Creator<WifiAwareAgentNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiAwareAgentNetworkSpecifier> CREATOR =
             new Creator<WifiAwareAgentNetworkSpecifier>() {
                 @Override
                 public WifiAwareAgentNetworkSpecifier createFromParcel(Parcel in) {
@@ -149,6 +149,11 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
                 "WifiAwareAgentNetworkSpecifier should not be used in network requests");
     }
 
+    @Override
+    public NetworkSpecifier redact() {
+        return null;
+    }
+
     private void initialize() {
         try {
             mDigester = MessageDigest.getInstance("SHA-256");
@@ -205,7 +210,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
             dest.writeBlob(mData);
         }
 
-        public static final Creator<ByteArrayWrapper> CREATOR =
+        public static final @android.annotation.NonNull Creator<ByteArrayWrapper> CREATOR =
                 new Creator<ByteArrayWrapper>() {
                     @Override
                     public ByteArrayWrapper createFromParcel(Parcel in) {

@@ -127,6 +127,7 @@ public final class BatteryService extends SystemService {
     // discharge stats before the device dies.
     private int mCriticalBatteryLevel;
 
+    // TODO: Current args don't work since "--unplugged" flag was purposefully removed.
     private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "--unplugged" };
 
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
@@ -416,6 +417,12 @@ public final class BatteryService extends SystemService {
 
     private void update(android.hardware.health.V2_0.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
+
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryChargeCounter",
+                info.legacy.batteryChargeCounter);
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
+                info.legacy.batteryCurrent);
+
         synchronized (mLock) {
             if (!mUpdatesStopped) {
                 mHealthInfo = info.legacy;
@@ -745,6 +752,7 @@ public final class BatteryService extends SystemService {
         mLastBatteryLevelChangedSentMs = SystemClock.elapsedRealtime();
     }
 
+    // TODO: Current code doesn't work since "--unplugged" flag in BSS was purposefully removed.
     private void logBatteryStatsLocked() {
         IBinder batteryInfoService = ServiceManager.getService(BatteryStats.SERVICE_NAME);
         if (batteryInfoService == null) return;

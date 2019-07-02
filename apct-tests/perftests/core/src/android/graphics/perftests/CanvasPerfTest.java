@@ -17,14 +17,15 @@
 package android.graphics.perftests;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class CanvasPerfTest {
         RenderNode child = RenderNode.create("child", null);
         child.setLeftTopRightBottom(50, 50, 100, 100);
 
-        DisplayListCanvas canvas = node.start(100, 100);
+        RecordingCanvas canvas = node.start(100, 100);
         node.end(canvas);
         canvas = child.start(50, 50);
         canvas.drawColor(Color.WHITE);
@@ -70,7 +71,7 @@ public class CanvasPerfTest {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode node = RenderNode.create("benchmark", null);
 
-        DisplayListCanvas canvas = node.start(100, 100);
+        RecordingCanvas canvas = node.start(100, 100);
         node.end(canvas);
         Bitmap bitmap = Bitmap.createBitmap(80, 80, Config.ARGB_8888);
         Paint paint = new Paint();

@@ -16,17 +16,8 @@
 
 package com.android.server.accessibility;
 
-import android.accessibilityservice.FingerprintGestureController;
-import android.accessibilityservice.FingerprintGestureController.FingerprintGestureCallback;
-import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.os.Looper;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static android.accessibilityservice.FingerprintGestureController.FINGERPRINT_GESTURE_SWIPE_DOWN;
+import static android.accessibilityservice.FingerprintGestureController
+        .FINGERPRINT_GESTURE_SWIPE_DOWN;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -36,6 +27,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.FingerprintGestureController;
+import android.accessibilityservice.FingerprintGestureController.FingerprintGestureCallback;
+import android.accessibilityservice.IAccessibilityServiceConnection;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 /**
  * Tests for FingerprintGestureController.
  * TODO: These tests aren't really for server code, so this isn't their ideal home.
@@ -44,13 +44,6 @@ public class FingerprintGestureControllerTest {
     @Mock IAccessibilityServiceConnection mMockAccessibilityServiceConnection;
     @Mock FingerprintGestureCallback mMockFingerprintGestureCallback;
     FingerprintGestureController mFingerprintGestureController;
-
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
 
     @Before
     public void setUp() {
@@ -124,6 +117,8 @@ public class FingerprintGestureControllerTest {
         mFingerprintGestureController.onGestureDetectionActiveChanged(false);
         assertFalse(messageCapturingHandler.hasMessages());
         verifyZeroInteractions(mMockFingerprintGestureCallback);
+
+        messageCapturingHandler.removeAllMessages();
     }
 
     @Test
@@ -163,5 +158,7 @@ public class FingerprintGestureControllerTest {
         mFingerprintGestureController.onGesture(FINGERPRINT_GESTURE_SWIPE_DOWN);
         assertFalse(messageCapturingHandler.hasMessages());
         verifyZeroInteractions(mMockFingerprintGestureCallback);
+
+        messageCapturingHandler.removeAllMessages();
     }
 }

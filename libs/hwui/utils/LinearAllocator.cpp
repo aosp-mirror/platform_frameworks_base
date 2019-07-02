@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <utils/Log.h>
+#include <utils/Macros.h>
 
 // The ideal size of a page allocation (these need to be multiples of 8)
 #define INITIAL_PAGE_SIZE ((size_t)512)  // 512b
@@ -40,15 +41,6 @@
 // Too high, and we may waste too much space
 // Must be smaller than INITIAL_PAGE_SIZE
 #define MAX_WASTE_RATIO (0.5f)
-
-#if ALIGN_DOUBLE
-#define ALIGN_SZ (sizeof(double))
-#else
-#define ALIGN_SZ (sizeof(int))
-#endif
-
-#define ALIGN(x) (((x) + ALIGN_SZ - 1) & ~(ALIGN_SZ - 1))
-#define ALIGN_PTR(p) ((void*)(ALIGN((size_t)(p))))
 
 #if LOG_NDEBUG
 #define ADD_ALLOCATION()
@@ -257,5 +249,5 @@ void LinearAllocator::dumpMemoryStats(const char* prefix) {
     ALOGD("%sPages %zu (dedicated %zu)", prefix, mPageCount, mDedicatedPageCount);
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

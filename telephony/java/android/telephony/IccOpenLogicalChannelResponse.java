@@ -110,7 +110,7 @@ public class IccOpenLogicalChannelResponse implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<IccOpenLogicalChannelResponse> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IccOpenLogicalChannelResponse> CREATOR
              = new Parcelable.Creator<IccOpenLogicalChannelResponse>() {
 
         @Override

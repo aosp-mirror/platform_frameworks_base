@@ -1,0 +1,60 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsAppTestCases",
+      "options": [
+        {
+          "include-filter": "android.app.cts.TaskDescriptionTest"
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "file_patterns": ["AppCompactor\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        }
+      ]
+    }
+  ]
+}

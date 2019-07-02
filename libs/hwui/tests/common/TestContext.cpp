@@ -37,11 +37,13 @@ static android::DisplayInfo DUMMY_DISPLAY{
         0,      // presentationDeadline
 };
 
-DisplayInfo getBuiltInDisplay() {
+DisplayInfo getInternalDisplay() {
 #if !HWUI_NULL_GPU
     DisplayInfo display;
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &display);
+    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+    LOG_ALWAYS_FATAL_IF(token == nullptr,
+                        "Failed to get display info because internal display is disconnected\n");
+    status_t status = SurfaceComposerClient::getDisplayInfo(token, &display);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
     return display;
 #else

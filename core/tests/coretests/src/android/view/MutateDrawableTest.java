@@ -17,9 +17,8 @@
 package android.view;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.view.View;
-import android.view.MutateDrawable;
+
+import androidx.test.filters.MediumTest;
 
 public class MutateDrawableTest extends ActivityInstrumentationTestCase2<MutateDrawable> {
     private View mFirstButton;

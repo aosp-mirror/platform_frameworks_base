@@ -252,8 +252,16 @@ abstract class HdmiCecFeatureAction {
         return (HdmiCecLocalDevicePlayback) mSource;
     }
 
+    protected final HdmiCecLocalDeviceSource source() {
+        return (HdmiCecLocalDeviceSource) mSource;
+    }
+
     protected final HdmiCecLocalDeviceTv tv() {
         return (HdmiCecLocalDeviceTv) mSource;
+    }
+
+    protected final HdmiCecLocalDeviceAudioSystem audioSystem() {
+        return (HdmiCecLocalDeviceAudioSystem) mSource;
     }
 
     protected final int getSourceAddress() {

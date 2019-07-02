@@ -20,7 +20,7 @@ package android.providers.settings;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/providers/settings/common.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Note: it's a conscious decision to add each setting as a separate field. This
 // allows annotating each setting with its own privacy tag.
@@ -72,6 +72,9 @@ message SecureSettingsProto {
         // List of the accessibility services to which the user has granted
         // permission to put the device into touch exploration mode.
         optional SettingProto touch_exploration_granted_accessibility_services = 31;
+        // Settings for accessibility timeout
+        optional SettingProto non_interactive_ui_timeout_ms = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto interactive_ui_timeout_ms = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 
@@ -144,6 +147,10 @@ message SecureSettingsProto {
         optional SettingProto provisioned = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto transport = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto manager_constants = 5;
+        // Local transport parameters so we can configure it for tests.
+        // This is encoded as a key=value list, separated by commas.
+        // The following keys are supported:
+        //   fake_encryption_flag  (boolean)
         optional SettingProto local_transport_parameters = 6;
         optional SettingProto packages_to_clear_data_before_full_restore = 7;
     }
@@ -178,11 +185,27 @@ message SecureSettingsProto {
         optional SettingProto pulse_on_pick_up = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_long_press = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_double_tap = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto pulse_on_tap = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Doze doze = 21;
 
     optional SettingProto emergency_assistance_application = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto enhanced_voice_privacy_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Gesture {
+        optional SettingProto aware_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto silence_alarms_count = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_calls_count = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_notification_count = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_timer_count = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto skip_count = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto skip_enabled = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Gesture gesture = 74;
+
     optional SettingProto immersive_mode_confirmations = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Incall {
@@ -227,8 +250,24 @@ message SecureSettingsProto {
         optional SettingProto mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // The App or module that changes the location mode.
         optional SettingProto changer = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // What should happen to the location permissions when upgraded to Android Q.
+        // 0 == revoke permissions. Anything else == do nothing.
+        optional SettingProto permissions_upgrade_to_q_mode = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Location location = 31;
+
+    // How frequently will the user be reminded about location permission grants
+    message LocationAccessCheck {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Time in between periodic checks
+        optional SettingProto interval_millis = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // Time in between the user granting a location permission and a check
+        optional SettingProto delay_millis = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional LocationAccessCheck location_access_check = 73;
 
     message LockScreen {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -265,6 +304,7 @@ message SecureSettingsProto {
 
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
     message NfcPayment {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -300,6 +340,8 @@ message SecureSettingsProto {
         optional SettingProto enabled_policy_access_packages = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto badging = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto show_note_about_notification_hiding = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto in_call_notification_enabled = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto bubbles = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 41;
 
@@ -404,10 +446,20 @@ message SecureSettingsProto {
     optional SettingProto skip_first_use_hints = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sleep_timeout = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sms_default_application = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Sounds {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto charging_sounds_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto charging_vibration_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Sounds sounds = 72;
+
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
     optional SettingProto sync_parent_sounds = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto system_navigation_keys_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Tts {
@@ -484,7 +536,22 @@ message SecureSettingsProto {
 
     optional SettingProto wake_gesture_enabled = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    message Zen {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // If 0, turning on dnd manually will last indefinitely. Else if
+        // non-negative, turning on dnd manually will last for this many minutes.
+        // Else (if negative), turning on dnd manually will surface a dialog that
+        // prompts user to specify a duration.
+        optional SettingProto duration = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_zen_upgrade_notification = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_zen_settings_suggestion = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto settings_updated = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto settings_suggestion_viewed = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Zen zen = 71;
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 71;
+    // Next tag = 77;
 }

@@ -65,6 +65,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private OneShotPreDrawListener mViewsReadyListener;
     private final boolean mIsCrossTask;
     private Drawable mReplacedBackground;
+    private ArrayList<String> mPendingExitNames;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
@@ -249,11 +250,20 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             case MSG_CANCEL:
                 cancel();
                 break;
+            case MSG_ALLOW_RETURN_TRANSITION:
+                if (!mIsCanceled) {
+                    mPendingExitNames = mAllSharedElementNames;
+                }
+                break;
         }
     }
 
     public boolean isWaitingForRemoteExit() {
         return mIsReturning && mResultReceiver != null;
+    }
+
+    public ArrayList<String> getPendingExitSharedElementNames() {
+        return mPendingExitNames;
     }
 
     /**

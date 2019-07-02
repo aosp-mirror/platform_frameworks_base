@@ -26,17 +26,7 @@ using android::ConfigDescription;
 
 namespace aapt {
 
-static bool IsDefaultConfigRequired(const ConfigDescription& config) {
-  // We don't want to be overzealous with resource removal, so have strict requirements.
-  // If a resource defines a value for a locale-only configuration, the default configuration is
-  // required.
-  if (ConfigDescription::DefaultConfig().diff(config) == ConfigDescription::CONFIG_LOCALE) {
-    return true;
-  }
-  return false;
-}
-
-static bool KeepResource(const std::unique_ptr<ResourceEntry>& entry) {
+static bool KeepResource(const std::unique_ptr<ResourceEntry>& entry, int minSdk) {
   if (entry->visibility.level == Visibility::Level::kPublic) {
     // Removing a public API without the developer knowing is bad, so just leave this here for now.
     return true;
@@ -48,22 +38,44 @@ static bool KeepResource(const std::unique_ptr<ResourceEntry>& entry) {
   }
 
   // There is no default value defined, check if removal is required.
+  bool defaultRequired = false;
   for (const auto& config_value : entry->values) {
-    if (IsDefaultConfigRequired(config_value->config)) {
-      return false;
+    const int config = ConfigDescription::DefaultConfig().diff(config_value->config);
+    // If a resource defines a value for a locale-only configuration, the default configuration is
+    // required.
+    if (config == ConfigDescription::CONFIG_LOCALE) {
+      defaultRequired = true;
+    }
+    // If a resource defines a version-only config, the config value can be used as a default if
+    // the version is at most the minimum sdk version
+    else if (config == ConfigDescription::CONFIG_VERSION
+        && config_value->config.sdkVersion <= minSdk) {
+      return true;
+    }
+    // If a resource defines a value for a density only configuration, then that value could be used
+    // as a default and the entry should not be removed
+    else if (config == ConfigDescription::CONFIG_DENSITY
+        || (config == (ConfigDescription::CONFIG_DENSITY | ConfigDescription::CONFIG_VERSION)
+            && config_value->config.sdkVersion <= minSdk)) {
+      return true;
     }
   }
-  return true;
+
+  return !defaultRequired;
 }
 
 bool NoDefaultResourceRemover::Consume(IAaptContext* context, ResourceTable* table) {
-  const ConfigDescription default_config = ConfigDescription::DefaultConfig();
   for (auto& pkg : table->packages) {
     for (auto& type : pkg->types) {
+      // Gather the entries without defaults that must be removed
+      const int minSdk = context->GetMinSdkVersion();
       const auto end_iter = type->entries.end();
-      const auto new_end_iter =
-          std::stable_partition(type->entries.begin(), end_iter, KeepResource);
-      for (auto iter = new_end_iter; iter != end_iter; ++iter) {
+      const auto remove_iter = std::stable_partition(type->entries.begin(), end_iter,
+          [&minSdk](const std::unique_ptr<ResourceEntry>& entry) -> bool {
+        return KeepResource(entry, minSdk);
+      });
+
+      for (auto iter = remove_iter; iter != end_iter; ++iter) {
         const ResourceName name(pkg->name, type->type, (*iter)->name);
         IDiagnostics* diag = context->GetDiagnostics();
         diag->Warn(DiagMessage() << "removing resource " << name
@@ -78,7 +90,7 @@ bool NoDefaultResourceRemover::Consume(IAaptContext* context, ResourceTable* tab
         }
       }
 
-      type->entries.erase(new_end_iter, type->entries.end());
+      type->entries.erase(remove_iter, end_iter);
     }
   }
   return true;

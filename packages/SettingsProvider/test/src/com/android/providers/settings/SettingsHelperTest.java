@@ -17,19 +17,10 @@
 package com.android.providers.settings;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.fail;
-
-import com.android.internal.app.LocalePicker;
-import com.android.providers.settings.SettingsHelper;
 
 import android.os.LocaleList;
-import android.support.test.runner.AndroidJUnit4;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

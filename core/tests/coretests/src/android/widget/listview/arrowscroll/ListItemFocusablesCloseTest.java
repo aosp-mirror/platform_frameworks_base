@@ -17,11 +17,12 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.listview.ListItemFocusablesClose;
+
+import androidx.test.filters.MediumTest;
 
 public class ListItemFocusablesCloseTest extends ActivityInstrumentationTestCase<ListItemFocusablesClose> {
     private ListView mListView;

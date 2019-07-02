@@ -23,6 +23,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -182,10 +183,12 @@ public abstract class Animation implements Cloneable {
     Interpolator mInterpolator;
 
     /**
-     * The animation listener to be notified when the animation starts, ends or repeats.
+     * An animation listener to be notified when the animation starts, ends or repeats.
      */
-    @UnsupportedAppUsage
-    AnimationListener mListener;
+    // If you need to chain the AnimationListener, wrap the existing Animation into an AnimationSet
+    // and add your new listener to that set
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117519981)
+    private AnimationListener mListener;
 
     /**
      * Desired Z order mode during animation.
@@ -203,12 +206,8 @@ public abstract class Animation implements Cloneable {
      */
     private float mScaleFactor = 1f;
 
-    /**
-     * Don't animate the wallpaper.
-     */
-    private boolean mDetachWallpaper = false;
-
     private boolean mShowWallpaper;
+    private boolean mHasRoundedCorners;
 
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
@@ -265,6 +264,8 @@ public abstract class Animation implements Cloneable {
                 a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         setShowWallpaper(
                 a.getBoolean(com.android.internal.R.styleable.Animation_showWallpaper, false));
+        setHasRoundedCorners(
+                a.getBoolean(com.android.internal.R.styleable.Animation_hasRoundedCorners, false));
 
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
@@ -376,23 +377,17 @@ public abstract class Animation implements Cloneable {
         if (mListenerHandler == null) {
             mOnStart = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationStart(Animation.this);
-                    }
+                    dispatchAnimationStart();
                 }
             };
             mOnRepeat = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationRepeat(Animation.this);
-                    }
+                    dispatchAnimationRepeat();
                 }
             };
             mOnEnd = new Runnable() {
                 public void run() {
-                    if (mListener != null) {
-                        mListener.onAnimationEnd(Animation.this);
-                    }
+                    dispatchAnimationEnd();
                 }
             };
         }
@@ -667,9 +662,10 @@ public abstract class Animation implements Cloneable {
      *
      * @param detachWallpaper true if the wallpaper should be detached from the animation
      * @attr ref android.R.styleable#Animation_detachWallpaper
+     *
+     * @deprecated All window animations are running with detached wallpaper.
      */
     public void setDetachWallpaper(boolean detachWallpaper) {
-        mDetachWallpaper = detachWallpaper;
     }
 
     /**
@@ -682,6 +678,19 @@ public abstract class Animation implements Cloneable {
      */
     public void setShowWallpaper(boolean showWallpaper) {
         mShowWallpaper = showWallpaper;
+    }
+
+    /**
+     * If this is a window animation, the window will have rounded corners matching the display
+     * corner radius.
+     *
+     * @param hasRoundedCorners Whether the window should have rounded corners or not.
+     * @attr ref android.R.styleable#Animation_hasRoundedCorners
+     * @see com.android.internal.policy.ScreenDecorationsUtils#getWindowCornerRadius(Resources)
+     * @hide
+     */
+    public void setHasRoundedCorners(boolean hasRoundedCorners) {
+        mHasRoundedCorners = hasRoundedCorners;
     }
 
     /**
@@ -793,9 +802,11 @@ public abstract class Animation implements Cloneable {
     /**
      * Return value of {@link #setDetachWallpaper(boolean)}.
      * @attr ref android.R.styleable#Animation_detachWallpaper
+     *
+     * @deprecated All window animations are running with detached wallpaper.
      */
     public boolean getDetachWallpaper() {
-        return mDetachWallpaper;
+        return true;
     }
 
     /**
@@ -806,6 +817,16 @@ public abstract class Animation implements Cloneable {
      */
     public boolean getShowWallpaper() {
         return mShowWallpaper;
+    }
+
+    /**
+     * @return if a window animation should have rounded corners or not.
+     *
+     * @attr ref android.R.styleable#Animation_hasRoundedCorners
+     * @hide
+     */
+    public boolean hasRoundedCorners() {
+        return mHasRoundedCorners;
     }
 
     /**
@@ -830,6 +851,10 @@ public abstract class Animation implements Cloneable {
     public boolean willChangeBounds() {
         // assume we will change the bounds
         return true;
+    }
+
+    private boolean hasAnimationListener() {
+        return mListener != null;
     }
 
     /**
@@ -949,23 +974,41 @@ public abstract class Animation implements Cloneable {
     }
 
     private void fireAnimationStart() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationStart(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationStart();
             else mListenerHandler.postAtFrontOfQueue(mOnStart);
         }
     }
 
     private void fireAnimationRepeat() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationRepeat(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationRepeat();
             else mListenerHandler.postAtFrontOfQueue(mOnRepeat);
         }
     }
 
     private void fireAnimationEnd() {
-        if (mListener != null) {
-            if (mListenerHandler == null) mListener.onAnimationEnd(this);
+        if (hasAnimationListener()) {
+            if (mListenerHandler == null) dispatchAnimationEnd();
             else mListenerHandler.postAtFrontOfQueue(mOnEnd);
+        }
+    }
+
+    void dispatchAnimationStart() {
+        if (mListener != null) {
+            mListener.onAnimationStart(this);
+        }
+    }
+
+    void dispatchAnimationRepeat() {
+        if (mListener != null) {
+            mListener.onAnimationRepeat(this);
+        }
+    }
+
+    void dispatchAnimationEnd() {
+        if (mListener != null) {
+            mListener.onAnimationEnd(this);
         }
     }
 

@@ -31,6 +31,7 @@
 #include <gui/ISurfaceComposer.h>
 
 #include <ui/DisplayInfo.h>
+#include <ui/GraphicTypes.h>
 #include <ui/PixelFormat.h>
 
 #include <system/graphics.h>
@@ -45,23 +46,22 @@
 
 using namespace android;
 
-static uint32_t DEFAULT_DISPLAY_ID = ISurfaceComposer::eDisplayIdMain;
-
 #define COLORSPACE_UNKNOWN    0
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname)
+static void usage(const char* pname, PhysicalDisplayId displayId)
 {
     fprintf(stderr,
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the display id to capture, default %d.\n"
+            "   -d: specify the physical display ID to capture (default: %"
+                    ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ")\n"
+            "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, DEFAULT_DISPLAY_ID
-    );
+            pname, displayId);
 }
 
 static SkColorType flinger2skia(PixelFormat f)
@@ -74,25 +74,24 @@ static SkColorType flinger2skia(PixelFormat f)
     }
 }
 
-static sk_sp<SkColorSpace> dataSpaceToColorSpace(android_dataspace d)
+static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
 {
     switch (d) {
-        case HAL_DATASPACE_V0_SRGB:
+        case ui::Dataspace::V0_SRGB:
             return SkColorSpace::MakeSRGB();
-        case HAL_DATASPACE_DISPLAY_P3:
-            return SkColorSpace::MakeRGB(
-                    SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+        case ui::Dataspace::DISPLAY_P3:
+            return SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
         default:
             return nullptr;
     }
 }
 
-static uint32_t dataSpaceToInt(android_dataspace d)
+static uint32_t dataSpaceToInt(ui::Dataspace d)
 {
     switch (d) {
-        case HAL_DATASPACE_V0_SRGB:
+        case ui::Dataspace::V0_SRGB:
             return COLORSPACE_SRGB;
-        case HAL_DATASPACE_DISPLAY_P3:
+        case ui::Dataspace::DISPLAY_P3:
             return COLORSPACE_DISPLAY_P3;
         default:
             return COLORSPACE_UNKNOWN;
@@ -113,9 +112,14 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
+    std::optional<PhysicalDisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
+    if (!displayId) {
+        fprintf(stderr, "Failed to get token for internal display\n");
+        return 1;
+    }
+
     const char* pname = argv[0];
     bool png = false;
-    int32_t displayId = DEFAULT_DISPLAY_ID;
     int c;
     while ((c = getopt(argc, argv, "phd:")) != -1) {
         switch (c) {
@@ -123,11 +127,11 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = atoi(optarg);
+                displayId = atoll(optarg);
                 break;
             case '?':
             case 'h':
-                usage(pname);
+                usage(pname, *displayId);
                 return 1;
         }
     }
@@ -152,7 +156,7 @@ int main(int argc, char** argv)
     }
 
     if (fd == -1) {
-        usage(pname);
+        usage(pname, *displayId);
         return 1;
     }
 
@@ -161,16 +165,7 @@ int main(int argc, char** argv)
 
     void* base = NULL;
     uint32_t w, s, h, f;
-    android_dataspace d;
     size_t size = 0;
-
-    // Maps orientations from DisplayInfo to ISurfaceComposer
-    static const uint32_t ORIENTATION_MAP[] = {
-        ISurfaceComposer::eRotateNone, // 0 == DISPLAY_ORIENTATION_0
-        ISurfaceComposer::eRotate270, // 1 == DISPLAY_ORIENTATION_90
-        ISurfaceComposer::eRotate180, // 2 == DISPLAY_ORIENTATION_180
-        ISurfaceComposer::eRotate90, // 3 == DISPLAY_ORIENTATION_270
-    };
 
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
     // not allowed to spawn any additional threads, but we still spawn
@@ -179,27 +174,10 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
-    if (display == NULL) {
-        fprintf(stderr, "Unable to get handle for display %d\n", displayId);
-        return 1;
-    }
-
-    Vector<DisplayInfo> configs;
-    SurfaceComposerClient::getDisplayConfigs(display, &configs);
-    int activeConfig = SurfaceComposerClient::getActiveConfig(display);
-    if (static_cast<size_t>(activeConfig) >= configs.size()) {
-        fprintf(stderr, "Active config %d not inside configs (size %zu)\n",
-                activeConfig, configs.size());
-        return 1;
-    }
-    uint8_t displayOrientation = configs[activeConfig].orientation;
-    uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
-
+    ui::Dataspace outDataspace;
     sp<GraphicBuffer> outBuffer;
-    status_t result = ScreenshotClient::capture(display, Rect(), 0 /* reqWidth */,
-            0 /* reqHeight */, INT32_MIN, INT32_MAX, /* all layers */ false, captureOrientation,
-            &outBuffer);
+
+    status_t result = ScreenshotClient::capture(*displayId, &outDataspace, &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
@@ -207,7 +185,14 @@ int main(int argc, char** argv)
 
     result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
-    if (base == NULL) {
+    if (base == nullptr || result != NO_ERROR) {
+        String8 reason;
+        if (result != NO_ERROR) {
+            reason.appendFormat(" Error Code: %d", result);
+        } else {
+            reason = "Failed to write to buffer";
+        }
+        fprintf(stderr, "Failed to take screenshot (%s)\n", reason.c_str());
         close(fd);
         return 1;
     }
@@ -216,12 +201,12 @@ int main(int argc, char** argv)
     h = outBuffer->getHeight();
     s = outBuffer->getStride();
     f = outBuffer->getPixelFormat();
-    d = HAL_DATASPACE_UNKNOWN;
     size = s * h * bytesPerPixel(f);
 
     if (png) {
         const SkImageInfo info =
-            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType, dataSpaceToColorSpace(d));
+            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
+                              dataSpaceToColorSpace(outDataspace));
         SkPixmap pixmap(info, base, s * bytesPerPixel(f));
         struct FDWStream final : public SkWStream {
           size_t fBytesWritten = 0;
@@ -238,7 +223,7 @@ int main(int argc, char** argv)
             notifyMediaScanner(fn);
         }
     } else {
-        uint32_t c = dataSpaceToInt(d);
+        uint32_t c = dataSpaceToInt(outDataspace);
         write(fd, &w, 4);
         write(fd, &h, 4);
         write(fd, &f, 4);

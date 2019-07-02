@@ -15,10 +15,9 @@
  */
 package com.android.settingslib.applications;
 
-import android.annotation.NonNull;
 import android.content.Context;
-import android.content.pm.permission.RuntimePermissionPresentationInfo;
-import android.content.pm.permission.RuntimePermissionPresenter;
+import android.permission.PermissionControllerManager;
+import android.permission.RuntimePermissionPresentationInfo;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -29,39 +28,35 @@ public class PermissionsSummaryHelper  {
 
     public static void getPermissionSummary(Context context, String pkg,
             final PermissionsResultCallback callback) {
-        final RuntimePermissionPresenter presenter =
-                RuntimePermissionPresenter.getInstance(context);
-        presenter.getAppPermissions(pkg, new RuntimePermissionPresenter.OnResultCallback() {
-            @Override
-            public void onGetAppPermissions(
-                    @NonNull List<RuntimePermissionPresentationInfo> permissions) {
-                final int permissionCount = permissions.size();
+        final PermissionControllerManager permController =
+                context.getSystemService(PermissionControllerManager.class);
+        permController.getAppPermissions(pkg, permissions -> {
+            final int permissionCount = permissions.size();
 
-                int grantedStandardCount = 0;
-                int grantedAdditionalCount = 0;
-                int requestedCount = 0;
-                List<CharSequence> grantedStandardLabels = new ArrayList<>();
+            int grantedStandardCount = 0;
+            int grantedAdditionalCount = 0;
+            int requestedCount = 0;
+            List<CharSequence> grantedStandardLabels = new ArrayList<>();
 
-                for (int i = 0; i < permissionCount; i++) {
-                    RuntimePermissionPresentationInfo permission = permissions.get(i);
-                    requestedCount++;
-                    if (permission.isGranted()) {
-                        if (permission.isStandard()) {
-                            grantedStandardLabels.add(permission.getLabel());
-                            grantedStandardCount++;
-                        } else {
-                            grantedAdditionalCount++;
-                        }
+            for (int i = 0; i < permissionCount; i++) {
+                RuntimePermissionPresentationInfo permission = permissions.get(i);
+                requestedCount++;
+                if (permission.isGranted()) {
+                    if (permission.isStandard()) {
+                        grantedStandardLabels.add(permission.getLabel());
+                        grantedStandardCount++;
+                    } else {
+                        grantedAdditionalCount++;
                     }
                 }
-
-                Collator collator = Collator.getInstance();
-                collator.setStrength(Collator.PRIMARY);
-                Collections.sort(grantedStandardLabels, collator);
-
-                callback.onPermissionSummaryResult(grantedStandardCount, requestedCount,
-                        grantedAdditionalCount, grantedStandardLabels);
             }
+
+            Collator collator = Collator.getInstance();
+            collator.setStrength(Collator.PRIMARY);
+            Collections.sort(grantedStandardLabels, collator);
+
+            callback.onPermissionSummaryResult(grantedStandardCount, requestedCount,
+                    grantedAdditionalCount, grantedStandardLabels);
         }, null);
     }
 

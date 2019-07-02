@@ -16,8 +16,6 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuPresenter.Callback;
-
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,12 +24,13 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow.OnDismissListener;
+
+import com.android.internal.view.menu.MenuPresenter.Callback;
 
 /**
  * Presents a menu as a small, simple popup anchored to another view.
@@ -106,6 +105,9 @@ public class MenuPopupHelper implements MenuHelper {
      * menu item views.
      * <p>
      * Changes take effect on the next call to show().
+     *
+     * This method should not be accessed directly outside the framework, please use
+     * {@link android.widget.PopupMenu#setForceShowIcon(boolean)} instead.
      *
      * @param forceShowIcon {@code true} to force icons to be shown, or
      *                  {@code false} for icons to be optionally shown

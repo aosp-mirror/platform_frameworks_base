@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+package android.app.timezone;
+
 parcelable RulesState;

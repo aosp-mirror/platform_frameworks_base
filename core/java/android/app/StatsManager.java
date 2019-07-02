@@ -18,12 +18,14 @@ package android.app;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.IStatsManager;
+import android.os.IStatsPullerCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.AndroidException;
@@ -73,6 +75,11 @@ public final class StatsManager {
      */
     public static final String EXTRA_STATS_DIMENSIONS_VALUE =
             "android.app.extra.STATS_DIMENSIONS_VALUE";
+    /**
+     * Long array extra of the active configs for the uid that added those configs.
+     */
+    public static final String EXTRA_STATS_ACTIVE_CONFIG_KEYS =
+            "android.app.extra.STATS_ACTIVE_CONFIG_KEYS";
 
     /**
      * Broadcast Action: Statsd has started.
@@ -119,6 +126,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #addConfig(long, byte[])}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean addConfiguration(long configKey, byte[] config) {
         try {
@@ -154,6 +162,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #removeConfig(long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean removeConfiguration(long configKey) {
         try {
@@ -222,6 +231,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #setBroadcastSubscriber(PendingIntent, long, long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setBroadcastSubscriber(
             long configKey, long subscriberId, PendingIntent pendingIntent) {
@@ -271,10 +281,51 @@ public final class StatsManager {
         }
     }
 
+    /**
+     * Registers the operation that is called whenever there is a change in which configs are
+     * active. This must be called each time statsd starts. This operation allows
+     * statsd to inform clients that they should pull data of the configs that are currently
+     * active. The activeConfigsChangedOperation should set periodic alarms to pull data of configs
+     * that are active and stop pulling data of configs that are no longer active.
+     *
+     * @param pendingIntent the PendingIntent to use when broadcasting info to the subscriber
+     *                      associated with the given subscriberId. May be null, in which case
+     *                      it removes any associated pending intent for this client.
+     * @return A list of configs that are currently active for this client. If the pendingIntent is
+     *         null, this will be an empty list.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     */
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
+    public @NonNull long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (pendingIntent == null) {
+                    service.removeActiveConfigsChangedOperation(mContext.getOpPackageName());
+                    return new long[0];
+                } else {
+                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
+                    IBinder intentSender = pendingIntent.getTarget().asBinder();
+                    return service.setActiveConfigsChangedOperation(intentSender,
+                            mContext.getOpPackageName());
+                }
+
+            } catch (RemoteException e) {
+                Slog.e(TAG,
+                        "Failed to connect to statsd when registering active configs listener.");
+                throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
+            }
+        }
+    }
+
     // TODO: Temporary for backwards compatibility. Remove.
     /**
      * @deprecated Use {@link #setFetchReportsOperation(PendingIntent, long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
         try {
@@ -312,6 +363,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #getReports(long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getData(long configKey) {
         try {
@@ -348,12 +400,75 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #getStatsMetadata()}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getMetadata() {
         try {
             return getStatsMetadata();
         } catch (StatsUnavailableException e) {
             return null;
+        }
+    }
+
+    /**
+     * Returns the experiments IDs registered with statsd, or an empty array if there aren't any.
+     *
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public long[] getRegisteredExperimentIds()
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when getting experiment IDs");
+                    }
+                    return new long[0];
+                }
+                return service.getRegisteredExperimentIds();
+            } catch (RemoteException e) {
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when getting "
+                                    + "registered experiment IDs");
+                }
+                return new long[0];
+            }
+        }
+    }
+
+    /**
+     * Registers a callback for an atom when that atom is to be pulled. The stats service will
+     * invoke pullData in the callback when the stats service determines that this atom needs to be
+     * pulled. Currently, this only works for atoms with tags above 100,000 that do not have a uid.
+     *
+     * @param atomTag   The tag of the atom for this puller callback. Must be at least 100000.
+     * @param callback  The callback to be invoked when the stats service pulls the atom.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
+    public void setPullerCallback(int atomTag, IStatsPullerCallback callback)
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (callback == null) {
+                    service.unregisterPullerCallback(atomTag, mContext.getOpPackageName());
+                } else {
+                    service.registerPullerCallback(atomTag, callback,
+                            mContext.getOpPackageName());
+                }
+
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
+                throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
+            }
         }
     }
 

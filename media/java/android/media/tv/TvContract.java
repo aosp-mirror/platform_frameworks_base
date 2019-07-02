@@ -20,9 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1098,6 +1098,17 @@ public final class TvContract {
          * @see #COLUMN_REVIEW_RATING_STYLE
          */
         String COLUMN_REVIEW_RATING = "review_rating";
+
+        /**
+         * The series ID of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the series ID. Programs in the same series share a series ID.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        String COLUMN_SERIES_ID = "series_id";
     }
 
     /**
@@ -1669,6 +1680,7 @@ public final class TvContract {
                 TYPE_ISDB_T,
                 TYPE_ISDB_TB,
                 TYPE_ISDB_S,
+                TYPE_ISDB_S3,
                 TYPE_ISDB_C,
                 TYPE_1SEG,
                 TYPE_DTMB,
@@ -1808,6 +1820,13 @@ public final class TvContract {
          * @see #COLUMN_TYPE
          */
         public static final String TYPE_ISDB_S = "TYPE_ISDB_S";
+
+        /**
+         * The channel type for ISDB-S3 (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_ISDB_S3 = "TYPE_ISDB_S3";
 
         /**
          * The channel type for ISDB-C (cable).
@@ -2015,6 +2034,7 @@ public final class TvContract {
          * {@link #TYPE_DVB_T2},
          * {@link #TYPE_ISDB_C},
          * {@link #TYPE_ISDB_S},
+         * {@link #TYPE_ISDB_S3},
          * {@link #TYPE_ISDB_T},
          * {@link #TYPE_ISDB_TB},
          * {@link #TYPE_NTSC},

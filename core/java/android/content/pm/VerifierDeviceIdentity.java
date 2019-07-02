@@ -230,7 +230,7 @@ public class VerifierDeviceIdentity implements Parcelable {
         dest.writeLong(mIdentity);
     }
 
-    public static final Parcelable.Creator<VerifierDeviceIdentity> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<VerifierDeviceIdentity> CREATOR
             = new Parcelable.Creator<VerifierDeviceIdentity>() {
         public VerifierDeviceIdentity createFromParcel(Parcel source) {
             return new VerifierDeviceIdentity(source);

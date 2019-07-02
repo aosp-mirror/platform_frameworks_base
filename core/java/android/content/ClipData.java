@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.text.Html;
@@ -170,6 +171,11 @@ public class ClipData implements Parcelable {
     static final String[] MIMETYPES_TEXT_INTENT = new String[] {
         ClipDescription.MIMETYPE_TEXT_INTENT };
 
+    // Constants used in {@link #writeHtmlTextToParcel}.
+    static final int PARCEL_MAX_SIZE_BYTES = 800 * 1024;
+    static final int PARCEL_TYPE_STRING = 0;
+    static final int PARCEL_TYPE_PFD = 1;
+
     final ClipDescription mClipDescription;
 
     final Bitmap mIcon;
@@ -225,6 +231,10 @@ public class ClipData implements Parcelable {
          * with an alternative HTML formatted representation.  You <em>must</em>
          * supply a plain text representation in addition to HTML text; coercion
          * will not be done from HTML formatted text into plain text.
+         * <p class="note"><strong>Note:</strong> It is strongly recommended to
+         * use content: URI for sharing large clip data. Starting on API 30,
+         * ClipData.Item doesn't accept an HTML text if it's larger than 800KB.
+         * </p>
          */
         public Item(CharSequence text, String htmlText) {
             mText = text;
@@ -1132,7 +1142,7 @@ public class ClipData implements Parcelable {
         for (int i=0; i<N; i++) {
             Item item = mItems.get(i);
             TextUtils.writeToParcel(item.mText, dest, flags);
-            dest.writeString(item.mHtmlText);
+            writeHtmlTextToParcel(item.mHtmlText, dest, flags);
             if (item.mIntent != null) {
                 dest.writeInt(1);
                 item.mIntent.writeToParcel(dest, flags);
@@ -1159,14 +1169,14 @@ public class ClipData implements Parcelable {
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
             CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            String htmlText = in.readString();
+            String htmlText = readHtmlTextFromParcel(in);
             Intent intent = in.readInt() != 0 ? Intent.CREATOR.createFromParcel(in) : null;
             Uri uri = in.readInt() != 0 ? Uri.CREATOR.createFromParcel(in) : null;
             mItems.add(new Item(text, htmlText, intent, uri));
         }
     }
 
-    public static final Parcelable.Creator<ClipData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ClipData> CREATOR =
         new Parcelable.Creator<ClipData>() {
 
             @Override
@@ -1179,4 +1189,61 @@ public class ClipData implements Parcelable {
                 return new ClipData[size];
             }
         };
+
+    /**
+     * Helper function for writing an HTML text into a parcel.
+     * If the text size is larger than 400KB, it writes the text to a file descriptor to prevent the
+     * parcel from exceeding 800KB binder size limit. {@link android.os.Binder#checkParcel()}
+     * Otherwise, it directly writes the text into the parcel.
+     * Note: This function is a workaround for existing applications that still use HTML for sharing
+     * large clip data. We will ask application developers to use content: URI instead and remove
+     * this function in API 30.
+     */
+    private static void writeHtmlTextToParcel(String text, Parcel dest, int flags) {
+        byte[] textData = (text != null) ? text.getBytes() : new byte[0];
+        if (textData.length > PARCEL_MAX_SIZE_BYTES / 2
+                && Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            try {
+                ParcelFileDescriptor pfd = ParcelFileDescriptor.fromData(textData, null);
+                dest.writeInt(PARCEL_TYPE_PFD);
+                dest.writeParcelable(pfd, flags);
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                        "Error creating the shared memory area: " + e.toString());
+            }
+        } else {
+            dest.writeInt(PARCEL_TYPE_STRING);
+            dest.writeString(text);
+        }
+    }
+
+    /**
+     * Reads a text written by writeHtmlTextToParcel.
+     */
+    private static String readHtmlTextFromParcel(Parcel in) {
+        if (in.readInt() == PARCEL_TYPE_STRING) {
+            return in.readString();
+        }
+        ParcelFileDescriptor pfd =
+                in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
+        if (pfd == null) {
+            throw new IllegalStateException("Error reading ParcelFileDescriptor from Parcel");
+        }
+        FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        InputStreamReader reader = new InputStreamReader(fis);
+        StringBuilder builder = new StringBuilder();
+        char[] buffer = new char[4096];
+        int numRead;
+        try {
+            while ((numRead = reader.read(buffer)) != -1) {
+                builder.append(buffer, 0, numRead);
+            }
+            return builder.toString();
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Error reading data from ParcelFileDescriptor: "  + e.toString());
+        } finally {
+            IoUtils.closeQuietly(fis);
+        }
+    }
 }

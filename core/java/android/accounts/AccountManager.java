@@ -16,17 +16,15 @@
 
 package android.accounts;
 
-import static android.Manifest.permission.GET_ACCOUNTS;
-
+import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.BroadcastBehavior;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -36,27 +34,24 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.res.Resources;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.database.SQLException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+
 import com.google.android.collect.Maps;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.SuppressWarnings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -510,7 +505,7 @@ public class AccountManager {
      * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
      *
      * @param account The account to query for user data
-     * @return The user data, null if the account or key doesn't exist
+     * @return The user data, null if the account, key doesn't exist, or the user is locked
      */
     public String getUserData(final Account account, final String key) {
         if (account == null) throw new IllegalArgumentException("account is null");
@@ -880,7 +875,7 @@ public class AccountManager {
      * @param userdata String values to use for the account's userdata, null for
      *            none
      * @return True if the account was successfully added, false if the account
-     *         already exists, the account is null, or another error occurs.
+     *         already exists, the account is null, the user is locked, or another error occurs.
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         if (account == null) throw new IllegalArgumentException("account is null");
@@ -1349,7 +1344,7 @@ public class AccountManager {
      * @param account The account for which an auth token is to be fetched. Cannot be {@code null}.
      * @param authTokenType The type of auth token to fetch. Cannot be {@code null}.
      * @return The cached auth token for this account and type, or null if
-     *     no auth token is cached or the account does not exist.
+     *     no auth token is cached, the account does not exist, or the user is locked
      * @see #getAuthToken
      */
     public String peekAuthToken(final Account account, final String authTokenType) {
@@ -1420,7 +1415,7 @@ public class AccountManager {
     }
 
     /**
-     * Sets one userdata key for an account.  Intended by use for the
+     * Sets one userdata key for an account. Intended by use for the
      * authenticator to stash state for itself, not directly by applications.
      * The meaning of the keys and values is up to the authenticator.
      *
@@ -3082,7 +3077,7 @@ public class AccountManager {
     }
 
     /**
-     * Asks the user to enter a new password for an account but not updating the
+     * Asks the user to enter a new password for the account but not updating the
      * saved credentials for the account until {@link #finishSession} is called.
      * <p>
      * This method may be called from any thread, but the returned

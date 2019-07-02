@@ -20,25 +20,25 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false"
     android:zAdjustment="top">
-    <translate
-        android:fromYDelta="0"
-        android:toYDelta="4.1%"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="425"/>
-    <cliprect
-        android:fromLeft="0%"
-        android:fromTop="0%"
-        android:fromRight="100%"
-        android:fromBottom="100%"
-        android:toLeft="0%"
-        android:toTop="95.9%"
-        android:toRight="100%"
-        android:toBottom="100%"
-        android:interpolator="@interpolator/fast_out_extra_slow_in"
-        android:duration="425"/>
     <alpha
-        android:fromAlpha="1.0"
-        android:toAlpha="1.0"
-        android:interpolator="@interpolator/fast_out_linear_in"
-        android:duration="425"/>
+        android:fromAlpha="1"
+        android:toAlpha="0.0"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/linear"
+        android:startOffset="33"
+        android:duration="50"/>
+    <scale
+        android:fromXScale="1"
+        android:toXScale="0.9"
+        android:fromYScale="1"
+        android:toYScale="0.9"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_extra_slow_in"
+        android:duration="400"/>
 </set>

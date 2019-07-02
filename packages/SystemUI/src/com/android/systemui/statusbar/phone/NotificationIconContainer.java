@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
+import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -26,18 +26,19 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
-import androidx.collection.ArrayMap;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.collection.ArrayMap;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.stack.AnimationFilter;
-import com.android.systemui.statusbar.stack.AnimationProperties;
-import com.android.systemui.statusbar.stack.ViewState;
+import com.android.systemui.statusbar.notification.stack.AnimationFilter;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,7 +128,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
-    public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
+    private static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
     public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 1;
 
@@ -314,10 +315,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
+
         if (child instanceof StatusBarIconView) {
             boolean isReplacingIcon = isReplacingIcon(child);
             final StatusBarIconView icon = (StatusBarIconView) child;
-            if (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+            if (mAnimationsEnabled && icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
                     && child.getVisibility() == VISIBLE && isReplacingIcon) {
                 int animationStartIndex = findFirstViewIndexAfter(icon.getTranslationX());
                 if (mAddAnimationStartIndex < 0) {
@@ -328,7 +330,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             }
             if (!mChangingViewPositions) {
                 mIconStates.remove(child);
-                if (!isReplacingIcon) {
+                if (mAnimationsEnabled && !isReplacingIcon) {
                     addTransientView(icon, 0);
                     boolean isIsolatedIcon = child == mIsolatedIcon;
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
@@ -372,7 +374,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
         int maxVisibleIcons = mDark ? MAX_VISIBLE_ICONS_WHEN_DARK :
-                    mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
+                mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
         float layoutEnd = getLayoutEnd();
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
@@ -435,11 +437,17 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             mLastVisibleIconState = mIconStates.get(lastChild);
             mFirstVisibleIconState = mIconStates.get(getChildAt(0));
         }
+
         boolean center = mDark;
         if (center && translationX < getLayoutEnd()) {
             float initialTranslation =
                     mFirstVisibleIconState == null ? 0 : mFirstVisibleIconState.xTranslation;
-            float contentWidth = getFinalTranslationX() - initialTranslation;
+
+            float contentWidth = 0;
+            if (mLastVisibleIconState != null) {
+                contentWidth = mLastVisibleIconState.xTranslation + mIconSize;
+                contentWidth = Math.min(getWidth(), contentWidth) - initialTranslation;
+            }
             float availableSpace = getLayoutEnd() - getActualPaddingStart();
             float delta = (availableSpace - contentWidth) / 2;
 

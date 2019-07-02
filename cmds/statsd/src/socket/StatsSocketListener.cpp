@@ -41,8 +41,8 @@ namespace statsd {
 
 static const int kLogMsgHeaderSize = 28;
 
-StatsSocketListener::StatsSocketListener(const sp<LogListener>& listener)
-    : SocketListener(getLogSocket(), false /*start listen*/), mListener(listener) {
+StatsSocketListener::StatsSocketListener(std::shared_ptr<LogEventQueue> queue)
+    : SocketListener(getLogSocket(), false /*start listen*/), mQueue(queue) {
 }
 
 StatsSocketListener::~StatsSocketListener() {
@@ -99,6 +99,32 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     char* ptr = ((char*)buffer) + sizeof(android_log_header_t);
     n -= sizeof(android_log_header_t);
 
+    // When a log failed to write to statsd socket (e.g., due ot EBUSY), a special message would
+    // be sent to statsd when the socket communication becomes available again.
+    // The format is android_log_event_int_t with a single integer in the payload indicating the
+    // number of logs that failed. (*FORMAT MUST BE IN SYNC WITH system/core/libstats*)
+    // Note that all normal stats logs are in the format of event_list, so there won't be confusion.
+    //
+    // TODO(b/80538532): In addition to log it in StatsdStats, we should properly reset the config.
+    if (n == sizeof(android_log_event_long_t)) {
+        android_log_event_long_t* long_event = reinterpret_cast<android_log_event_long_t*>(ptr);
+        if (long_event->payload.type == EVENT_TYPE_LONG) {
+            int64_t composed_long = long_event->payload.data;
+
+            // format:
+            // |last_tag|dropped_count|
+            int32_t dropped_count = (int32_t)(0xffffffff & composed_long);
+            int32_t last_atom_tag = (int32_t)((0xffffffff00000000 & (uint64_t)composed_long) >> 32);
+
+            ALOGE("Found dropped events: %d error %d last atom tag %d from uid %d", dropped_count,
+                  long_event->header.tag, last_atom_tag, cred->uid);
+            StatsdStats::getInstance().noteLogLost((int32_t)getWallClockSec(), dropped_count,
+                                                   long_event->header.tag, last_atom_tag, cred->uid,
+                                                   cred->pid);
+            return true;
+        }
+    }
+
     log_msg msg;
 
     msg.entry.len = n;
@@ -108,10 +134,11 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     msg.entry.uid = cred->uid;
 
     memcpy(msg.buf + kLogMsgHeaderSize, ptr, n + 1);
-    LogEvent event(msg);
 
-    // Call the listener
-    mListener->OnLogEvent(&event, false /*reconnected, N/A in statsd socket*/);
+    int64_t oldestTimestamp;
+    if (!mQueue->push(std::make_unique<LogEvent>(msg), &oldestTimestamp)) {
+        StatsdStats::getInstance().noteEventQueueOverflow(oldestTimestamp);
+    }
 
     return true;
 }

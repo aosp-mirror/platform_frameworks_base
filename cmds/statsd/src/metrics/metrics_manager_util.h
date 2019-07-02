@@ -23,7 +23,7 @@
 
 #include "../anomaly/AlarmTracker.h"
 #include "../condition/ConditionTracker.h"
-#include "../external/StatsPullerManagerImpl.h"
+#include "../external/StatsPullerManager.h"
 #include "../matchers/LogMatchingTracker.h"
 #include "../metrics/MetricProducer.h"
 
@@ -81,9 +81,8 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 //                          the list of MetricProducer index
 // [trackerToMetricMap]: contains the mapping from log tracker to MetricProducer index.
 bool initMetrics(
-        const ConfigKey& key, const StatsdConfig& config,
-        const int64_t timeBaseTimeNs, const int64_t currentTimeNs,
-        UidMap& uidMap,
+        const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
+        const int64_t currentTimeNs, UidMap& uidMap, const sp<StatsPullerManager>& pullerManager,
         const std::unordered_map<int64_t, int>& logTrackerMap,
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
@@ -97,10 +96,10 @@ bool initMetrics(
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
+                      const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                      const sp<AlarmMonitor>& periodicAlarmMonitor,
-                      const int64_t timeBaseNs, const int64_t currentTimeNs,
-                      std::set<int>& allTagIds,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor, const int64_t timeBaseNs,
+                      const int64_t currentTimeNs, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
@@ -109,6 +108,9 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
+                      unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+                      unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+                      vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds);
 
 bool isStateTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);

@@ -57,7 +57,7 @@ public final class BluetoothMasInstance implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothMasInstance> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothMasInstance> CREATOR =
             new Parcelable.Creator<BluetoothMasInstance>() {
                 public BluetoothMasInstance createFromParcel(Parcel in) {
                     return new BluetoothMasInstance(in.readInt(), in.readString(),

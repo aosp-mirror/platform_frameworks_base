@@ -23,30 +23,34 @@ import android.os.Handler;
  */
 public class DelayedWakeLock implements WakeLock {
 
-    private static final long RELEASE_DELAY_MS = 140;
+    private static final String TO_STRING_PREFIX = "[DelayedWakeLock] ";
+    private static final long RELEASE_DELAY_MS = 100;
 
     private final Handler mHandler;
     private final WakeLock mInner;
-    private final Runnable mRelease;
 
     public DelayedWakeLock(Handler h, WakeLock inner) {
         mHandler = h;
         mInner = inner;
-        mRelease = mInner::release;
     }
 
     @Override
-    public void acquire() {
-        mInner.acquire();
+    public void acquire(String why) {
+        mInner.acquire(why);
     }
 
     @Override
-    public void release() {
-        mHandler.postDelayed(mRelease, RELEASE_DELAY_MS);
+    public void release(String why) {
+        mHandler.postDelayed(() -> mInner.release(why), RELEASE_DELAY_MS);
     }
 
     @Override
     public Runnable wrap(Runnable r) {
         return WakeLock.wrapImpl(this, r);
+    }
+
+    @Override
+    public String toString() {
+        return TO_STRING_PREFIX + mInner;
     }
 }

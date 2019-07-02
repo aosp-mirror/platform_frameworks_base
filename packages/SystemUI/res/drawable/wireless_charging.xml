@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2018, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="wireless_charging"
+    android:width="200dp"
+    android:viewportWidth="200"
+    android:height="200dp"
+    android:viewportHeight="200" >
+    <group
+        android:name="null_1"
+        android:translateX="100"
+        android:translateY="100" >
+        <group
+            android:name="dot_01" >
+            <group
+                android:name="dot_01_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_1" >
+                    <path
+                        android:name="ellipse_path_1"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_02"
+            android:rotation="20" >
+            <group
+                android:name="dot_02_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_2" >
+                    <path
+                        android:name="ellipse_path_2"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_03"
+            android:rotation="40" >
+            <group
+                android:name="dot_03_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_3" >
+                    <path
+                        android:name="ellipse_path_3"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_04"
+            android:rotation="60" >
+            <group
+                android:name="dot_04_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_4" >
+                    <path
+                        android:name="ellipse_path_4"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_05"
+            android:rotation="80" >
+            <group
+                android:name="dot_05_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_5" >
+                    <path
+                        android:name="ellipse_path_5"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_06"
+            android:rotation="100" >
+            <group
+                android:name="dot_06_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_6" >
+                    <path
+                        android:name="ellipse_path_6"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_07"
+            android:rotation="120" >
+            <group
+                android:name="dot_07_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_7" >
+                    <path
+                        android:name="ellipse_path_7"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_08"
+            android:rotation="140" >
+            <group
+                android:name="dot_08_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_8" >
+                    <path
+                        android:name="ellipse_path_8"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_09"
+            android:rotation="160" >
+            <group
+                android:name="dot_09_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_9" >
+                    <path
+                        android:name="ellipse_path_9"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_10"
+            android:rotation="180" >
+            <group
+                android:name="dot_10_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_10" >
+                    <path
+                        android:name="ellipse_path_10"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_11"
+            android:rotation="200" >
+            <group
+                android:name="dot_11_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_11" >
+                    <path
+                        android:name="ellipse_path_11"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_12"
+            android:rotation="220" >
+            <group
+                android:name="dot_12_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_12" >
+                    <path
+                        android:name="ellipse_path_12"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_13"
+            android:rotation="240" >
+            <group
+                android:name="dot_13_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_13" >
+                    <path
+                        android:name="ellipse_path_13"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_14"
+            android:rotation="260" >
+            <group
+                android:name="dot_14_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_14" >
+                    <path
+                        android:name="ellipse_path_14"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_15"
+            android:rotation="280" >
+            <group
+                android:name="dot_15_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_15" >
+                    <path
+                        android:name="ellipse_path_15"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_16"
+            android:rotation="300" >
+            <group
+                android:name="dot_16_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_16" >
+                    <path
+                        android:name="ellipse_path_16"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_17"
+            android:rotation="320" >
+            <group
+                android:name="dot_17_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_17" >
+                    <path
+                        android:name="ellipse_path_17"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+        <group
+            android:name="dot_18"
+            android:rotation="340" >
+            <group
+                android:name="dot_18_pivot"
+                android:translateY="-25" >
+                <group
+                    android:name="ellipse_18" >
+                    <path
+                        android:name="ellipse_path_18"
+                        android:fillColor="?attr/chargingAnimColor"
+                        android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
+            </group>
+        </group>
+    </group>
+</vector>

@@ -25,6 +25,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -36,6 +37,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
 import android.view.IPinnedStackController;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
@@ -64,12 +66,13 @@ public class PipTouchHandler {
     private static final boolean ENABLE_FLING_DISMISS = false;
 
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
+    private static final int BOTTOM_OFFSET_BUFFER_DP = 1;
 
     // Allow dragging the PIP to a location to close it
-    private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = true;
-
+    private final boolean mEnableDimissDragToEdge;
     private final Context mContext;
     private final IActivityManager mActivityManager;
+    private final IActivityTaskManager mActivityTaskManager;
     private final ViewConfiguration mViewConfig;
     private final PipMenuListener mMenuListener = new PipMenuListener();
     private IPinnedStackController mPinnedStackController;
@@ -101,7 +104,7 @@ public class PipTouchHandler {
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 mDismissViewController.showDismissTarget();
             }
         }
@@ -122,6 +125,7 @@ public class PipTouchHandler {
     private int mImeOffset;
     private boolean mIsShelfShowing;
     private int mShelfHeight;
+    private int mMovementBoundsExtraOffsets;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
@@ -173,12 +177,13 @@ public class PipTouchHandler {
     }
 
     public PipTouchHandler(Context context, IActivityManager activityManager,
-            PipMenuActivityController menuController,
+            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
             InputConsumerController inputConsumerController) {
 
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
+        mActivityTaskManager = activityTaskManager;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mViewConfig = ViewConfiguration.get(context);
         mMenuController = menuController;
@@ -189,8 +194,8 @@ public class PipTouchHandler {
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
-        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
-                mSnapAlgorithm, mFlingAnimationUtils);
+        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mActivityTaskManager,
+                mMenuController, mSnapAlgorithm, mFlingAnimationUtils);
         mTouchState = new PipTouchState(mViewConfig, mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
@@ -200,8 +205,10 @@ public class PipTouchHandler {
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
+        mEnableDimissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
+
         // Register the listener for input consumer touch events
-        inputConsumerController.setTouchListener(this::handleTouchEvent);
+        inputConsumerController.setInputListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
         onRegistrationChanged(inputConsumerController.isRegistered());
     }
@@ -256,7 +263,7 @@ public class PipTouchHandler {
         mShelfHeight = shelfHeight;
     }
 
-    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
+    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
 
@@ -277,6 +284,12 @@ public class PipTouchHandler {
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
                 bottomOffset);
 
+        // The extra offset does not really affect the movement bounds, but are applied based on the
+        // current state (ime showing, or shelf offset) when we need to actually shift
+        int extraOffset = Math.max(
+                mIsImeShowing ? mImeOffset : 0,
+                !mIsImeShowing && mIsShelfShowing ? mShelfHeight : 0);
+
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
         if (fromImeAdjustment || fromShelfAdjustment) {
@@ -284,39 +297,19 @@ public class PipTouchHandler {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final int adjustedOffset = Math.max(mIsImeShowing ? mImeHeight + mImeOffset : 0,
-                        mIsShelfShowing ? mShelfHeight : 0);
-                Rect normalAdjustedBounds = new Rect();
-                mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalAdjustedBounds,
-                        adjustedOffset);
-                Rect expandedAdjustedBounds = new Rect();
-                mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds,
-                        expandedAdjustedBounds, adjustedOffset);
-                final Rect toAdjustedBounds = mMenuState == MENU_STATE_FULL
-                        ? expandedAdjustedBounds
-                        : normalAdjustedBounds;
+                final float offsetBufferPx = BOTTOM_OFFSET_BUFFER_DP
+                        * mContext.getResources().getDisplayMetrics().density;
                 final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
-                        ? expandedMovementBounds
-                        : normalMovementBounds;
-
-                // If the PIP window needs to shift to right above shelf/IME and it's already above
-                // that, don't move the PIP window.
-                if (toAdjustedBounds.bottom < mMovementBounds.bottom
-                        && animatingBounds.top < toAdjustedBounds.bottom) {
-                    return;
+                        ? new Rect(expandedMovementBounds)
+                        : new Rect(normalMovementBounds);
+                final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
+                final int toBottom = toMovementBounds.bottom < toMovementBounds.top
+                        ? toMovementBounds.bottom
+                        : toMovementBounds.bottom - extraOffset;
+                if ((Math.min(prevBottom, toBottom) - offsetBufferPx) <= curBounds.top
+                        && curBounds.top <= (Math.max(prevBottom, toBottom) + offsetBufferPx)) {
+                    mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
                 }
-
-                // If the PIP window needs to shift down due to dismissal of shelf/IME but it's way
-                // above the position as if shelf/IME shows, don't move the PIP window.
-                int movementBoundsAdjustment = toMovementBounds.bottom - mMovementBounds.bottom;
-                int offsetAdjustment = fromImeAdjustment ? mImeOffset : mShelfHeight;
-                if (toAdjustedBounds.bottom >= mMovementBounds.bottom
-                        && animatingBounds.top
-                        < toAdjustedBounds.bottom - movementBoundsAdjustment - offsetAdjustment) {
-                    return;
-                }
-
-                animateToOffset(animatingBounds, toAdjustedBounds);
             }
         }
 
@@ -327,6 +320,7 @@ public class PipTouchHandler {
         mDisplayRotation = displayRotation;
         mInsetBounds.set(insetBounds);
         updateMovementBounds(mMenuState);
+        mMovementBoundsExtraOffsets = extraOffset;
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
@@ -336,15 +330,6 @@ public class PipTouchHandler {
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
         }
-    }
-
-    private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
-        final Rect bounds = new Rect(animatingBounds);
-        bounds.offset(0, toAdjustedBounds.bottom - bounds.top);
-        // In landscape mode, PIP window can go offset while launching IME. We want to align the
-        // the top of the PIP window with the top of the movement bounds in that case.
-        bounds.offset(0, Math.max(0, mMovementBounds.top - bounds.top));
-        mMotionHelper.animateToOffset(bounds);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
@@ -361,14 +346,19 @@ public class PipTouchHandler {
 
     private void onAccessibilityShowMenu() {
         mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
+                mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
     }
 
-    private boolean handleTouchEvent(MotionEvent ev) {
+    private boolean handleTouchEvent(InputEvent inputEvent) {
+        // Skip any non motion events
+        if (!(inputEvent instanceof MotionEvent)) {
+            return true;
+        }
         // Skip touch handling until we are bound to the controller
         if (mPinnedStackController == null) {
             return true;
         }
+        MotionEvent ev = (MotionEvent) inputEvent;
 
         // Update the touch state
         mTouchState.onTouchEvent(ev);
@@ -510,7 +500,7 @@ public class PipTouchHandler {
      * Sets the menu visibility.
      */
     private void setMenuState(int menuState, boolean resize) {
-        if (menuState == MENU_STATE_FULL) {
+        if (menuState == MENU_STATE_FULL && mMenuState != MENU_STATE_FULL) {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
             // fraction and snap to the closest edge
@@ -519,7 +509,7 @@ public class PipTouchHandler {
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds);
             }
-        } else if (menuState == MENU_STATE_NONE) {
+        } else if (menuState == MENU_STATE_NONE && mMenuState == MENU_STATE_FULL) {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
             // if possible
             if (resize) {
@@ -598,7 +588,7 @@ public class PipTouchHandler {
                 mMenuController.pokeMenu();
             }
 
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
             }
@@ -613,7 +603,7 @@ public class PipTouchHandler {
             if (touchState.startedDragging()) {
                 mSavedSnapFraction = -1f;
 
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     mHandler.removeCallbacks(mShowDismissAffordance);
                     mDismissViewController.showDismissTarget();
                 }
@@ -629,7 +619,7 @@ public class PipTouchHandler {
                 if (!touchState.allowDraggingOffscreen() || !ENABLE_MINIMIZE) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     // Allow pip to move past bottom bounds
                     top = Math.max(mMovementBounds.top, top);
                 } else {
@@ -644,7 +634,7 @@ public class PipTouchHandler {
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     updateDismissFraction();
                 }
 
@@ -666,7 +656,7 @@ public class PipTouchHandler {
 
         @Override
         public boolean onUp(PipTouchState touchState) {
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 // Clean up the dismiss target regardless of the touch state in case the touch
                 // enabled state changes while the user is interacting
                 cleanUpDismissTarget();
@@ -686,7 +676,7 @@ public class PipTouchHandler {
                             vel.y, isFling);
             final boolean isFlingToBot = isFling && vel.y > 0 && !isHorizontal
                     && (mMovementWithinDismiss || isUpWithinDimiss);
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 // Check if the user dragged or flung the PiP offscreen to dismiss it
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
                     MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
@@ -783,7 +773,10 @@ public class PipTouchHandler {
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
         try {
-            mPinnedStackController.setMinEdgeSize(isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+            if (mPinnedStackController != null) {
+                mPinnedStackController.setMinEdgeSize(
+                        isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not set minimized state", e);
         }
@@ -830,7 +823,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
-        pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
+        pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + mEnableDimissDragToEdge);
         pw.println(innerPrefix + "mEnableMinimize=" + ENABLE_MINIMIZE);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);

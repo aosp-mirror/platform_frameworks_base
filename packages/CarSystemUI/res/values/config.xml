@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<resources>
+    <string name="config_statusBarComponent" translatable="false">
+        com.android.systemui.statusbar.car.CarStatusBar
+    </string>
+    <string name="config_systemUIFactoryComponent" translatable="false">
+        com.android.systemui.CarSystemUIFactory
+    </string>
+
+    <bool name="config_enableFullscreenUserSwitcher">true</bool>
+
+    <!-- configure which system ui bars should be displayed -->
+    <bool name="config_enableLeftNavigationBar">false</bool>
+    <bool name="config_enableRightNavigationBar">false</bool>
+    <bool name="config_enableBottomNavigationBar">true</bool>
+
+    <!-- Whether heads-up notifications should be shown when shade is open. -->
+    <bool name="config_enableHeadsUpNotificationWhenNotificationShadeOpen">true</bool>
+
+    <bool name="config_hideNavWhenKeyguardBouncerShown">true</bool>
+    <bool name="config_enablePersistentDockedActivity">false</bool>
+    <string name="config_persistentDockedActivityIntentUri" translatable="false"></string>
+
+    <!-- How many icons may be shown at once in the system bar. Includes any
+         slots that may be reused for things like IME control. -->
+    <integer name="config_maxNotificationIcons">0</integer>
+
+</resources>

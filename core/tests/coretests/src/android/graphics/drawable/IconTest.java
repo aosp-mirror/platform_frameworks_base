@@ -25,8 +25,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.coretests.R;
 

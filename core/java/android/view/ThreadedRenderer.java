@@ -16,35 +16,25 @@
 
 package android.view;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
+import android.graphics.HardwareRenderer;
+import android.graphics.Picture;
 import android.graphics.Point;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.graphics.RenderNode;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
-import com.android.internal.util.VirtualRefBasePtr;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Threaded renderer that proxies the rendering to a render thread. Most calls
@@ -65,15 +55,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public final class ThreadedRenderer {
-    private static final String LOG_TAG = "ThreadedRenderer";
-
-    /**
-     * Name of the file that holds the shaders cache.
-     */
-    private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
-    private static final String CACHE_PATH_SKIASHADERS = "com.android.skia.shaders_cache";
-
+public final class ThreadedRenderer extends HardwareRenderer {
     /**
      * System property used to enable or disable threaded rendering profiling.
      * The default value of this property is assumed to be false.
@@ -191,6 +173,12 @@ public final class ThreadedRenderer {
      */
     public static final String DEBUG_FPS_DIVISOR = "debug.hwui.fps_divisor";
 
+    /**
+     * Forces smart-dark to be always on.
+     * @hide
+     */
+    public static final String DEBUG_FORCE_DARK = "debug.hwui.force_dark";
+
     public static int EGL_CONTEXT_PRIORITY_HIGH_IMG = 0x3101;
     public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
     public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
@@ -270,21 +258,6 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Sets the directory to use as a persistent storage for threaded rendering
-     * resources.
-     *
-     * @param cacheDir A directory the current process can write to
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static void setupDiskCache(File cacheDir) {
-        ThreadedRenderer.setupShadersDiskCache(
-                new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath(),
-                new File(cacheDir, CACHE_PATH_SKIASHADERS).getAbsolutePath());
-    }
-
-    /**
      * Creates a threaded renderer using OpenGL.
      *
      * @param translucent True if the surface is translucent, false otherwise
@@ -299,54 +272,9 @@ public final class ThreadedRenderer {
         return renderer;
     }
 
-    /**
-     * Invoke this method when the system is running out of memory. This
-     * method will attempt to recover as much memory as possible, based on
-     * the specified hint.
-     *
-     * @param level Hint about the amount of memory that should be trimmed,
-     *              see {@link android.content.ComponentCallbacks}
-     */
-    public static void trimMemory(int level) {
-        nTrimMemory(level);
-    }
-
-    public static void overrideProperty(@NonNull String name, @NonNull String value) {
-        if (name == null || value == null) {
-            throw new IllegalArgumentException("name and value must be non-null");
-        }
-        nOverrideProperty(name, value);
-    }
-
-    // Keep in sync with DrawFrameTask.h SYNC_* flags
-    // Nothing interesting to report
-    private static final int SYNC_OK = 0;
-    // Needs a ViewRoot invalidate
-    private static final int SYNC_INVALIDATE_REQUIRED = 1 << 0;
-    // Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
-    private static final int SYNC_LOST_SURFACE_REWARD_IF_FOUND = 1 << 1;
-    // setStopped is true, drawing is false
-    // TODO: Remove this and SYNC_LOST_SURFACE_REWARD_IF_FOUND?
-    // This flag isn't really used as there's nothing that we care to do
-    // in response, so it really just exists to differentiate from LOST_SURFACE
-    // but possibly both can just be deleted.
-    private static final int SYNC_CONTEXT_IS_STOPPED = 1 << 2;
-    private static final int SYNC_FRAME_DROPPED = 1 << 3;
-
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,
     };
-
-    private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
-    private static final int FLAG_DUMP_RESET        = 1 << 1;
-    private static final int FLAG_DUMP_ALL          = FLAG_DUMP_FRAMESTATS;
-
-    @IntDef(flag = true, prefix = { "FLAG_DUMP_" }, value = {
-            FLAG_DUMP_FRAMESTATS,
-            FLAG_DUMP_RESET
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DumpFlags {}
 
     // Size of the rendered content.
     private int mWidth, mHeight;
@@ -361,51 +289,39 @@ public final class ThreadedRenderer {
     // Whether the surface has insets. Used to protect opacity.
     private boolean mHasInsets;
 
-    // Light and shadow properties specified by the theme.
+    // Light properties specified by the theme.
     private final float mLightY;
     private final float mLightZ;
     private final float mLightRadius;
-    private final int mAmbientShadowAlpha;
-    private final int mSpotShadowAlpha;
 
-    private long mNativeProxy;
     private boolean mInitialized = false;
-    private RenderNode mRootNode;
     private boolean mRootNodeNeedsUpdate;
 
     private boolean mEnabled;
     private boolean mRequested = true;
-    private boolean mIsOpaque = false;
+
+    private FrameDrawingCallback mNextRtFrameCallback;
 
     ThreadedRenderer(Context context, boolean translucent, String name) {
+        super();
+        setName(name);
+        setOpaque(!translucent);
+
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
         mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
         mLightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
-        mAmbientShadowAlpha =
-                (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
-        mSpotShadowAlpha = (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
+        float ambientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
+        float spotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
         a.recycle();
-
-        long rootNodePtr = nCreateRootRenderNode();
-        mRootNode = RenderNode.adopt(rootNodePtr);
-        mRootNode.setClipToBounds(false);
-        mIsOpaque = !translucent;
-        mNativeProxy = nCreateProxy(translucent, rootNodePtr);
-        nSetName(mNativeProxy, name);
-
-        ProcessInitializer.sInstance.init(context, mNativeProxy);
-
-        loadSystemProperties();
+        setLightSourceAlpha(ambientShadowAlpha, spotShadowAlpha);
     }
 
-    /**
-     * Destroys the threaded rendering context.
-     */
-    void destroy() {
+    @Override
+    public void destroy() {
         mInitialized = false;
         updateEnabledState(null);
-        nDestroy(mNativeProxy, mRootNode.mNativeRenderNode);
+        super.destroy();
     }
 
     /**
@@ -463,7 +379,7 @@ public final class ThreadedRenderer {
         boolean status = !mInitialized;
         mInitialized = true;
         updateEnabledState(surface);
-        nInitialize(mNativeProxy, surface);
+        setSurface(surface);
         return status;
     }
 
@@ -504,26 +420,29 @@ public final class ThreadedRenderer {
      */
     void updateSurface(Surface surface) throws OutOfResourcesException {
         updateEnabledState(surface);
-        nUpdateSurface(mNativeProxy, surface);
+        setSurface(surface);
+    }
+
+    @Override
+    public void setSurface(Surface surface) {
+        // TODO: Do we ever pass a non-null but isValid() = false surface?
+        // This is here to be super conservative for ViewRootImpl
+        if (surface != null && surface.isValid()) {
+            super.setSurface(surface);
+        } else {
+            super.setSurface(null);
+        }
     }
 
     /**
-     * Halts any current rendering into the surface. Use this if it is unclear whether
-     * or not the surface used by the ThreadedRenderer will be changing. It
-     * Suspends any rendering into the surface, but will not do any destruction.
+     * Registers a callback to be executed when the next frame is being drawn on RenderThread. This
+     * callback will be executed on a RenderThread worker thread, and only used for the next frame
+     * and thus it will only fire once.
      *
-     * Any subsequent draws will override the pause, resuming normal operation.
+     * @param callback The callback to register.
      */
-    boolean pauseSurface(Surface surface) {
-        return nPauseSurface(mNativeProxy, surface);
-    }
-
-    /**
-     * Hard stops or resumes rendering into the surface. This flag is used to
-     * determine whether or not it is safe to use the given surface *at all*
-     */
-    void setStopped(boolean stopped) {
-        nSetStopped(mNativeProxy, stopped);
+    void registerRtFrameCallback(FrameDrawingCallback callback) {
+        mNextRtFrameCallback = callback;
     }
 
     /**
@@ -534,19 +453,11 @@ public final class ThreadedRenderer {
      */
     void destroyHardwareResources(View view) {
         destroyResources(view);
-        nDestroyHardwareResources(mNativeProxy);
+        clearContent();
     }
 
     private static void destroyResources(View view) {
         view.destroyHardwareResources();
-    }
-
-    /**
-     * Detaches the layer's surface texture from the GL context and releases
-     * the texture id
-     */
-    void detachSurfaceTexture(long hardwareLayer) {
-        nDetachSurfaceTexture(mNativeProxy, hardwareLayer);
     }
 
     /**
@@ -580,8 +491,6 @@ public final class ThreadedRenderer {
         }
 
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mLightRadius,
-                mAmbientShadowAlpha, mSpotShadowAlpha);
 
         setLightCenter(attachInfo);
     }
@@ -597,27 +506,7 @@ public final class ThreadedRenderer {
         attachInfo.mDisplay.getRealSize(displaySize);
         final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
         final float lightY = mLightY - attachInfo.mWindowTop;
-
-        nSetLightCenter(mNativeProxy, lightX, lightY, mLightZ);
-    }
-
-    /**
-     * Change the ThreadedRenderer's opacity
-     */
-    void setOpaque(boolean opaque) {
-        mIsOpaque = opaque && !mHasInsets;
-        nSetOpaque(mNativeProxy, mIsOpaque);
-    }
-
-    boolean isOpaque() {
-        return mIsOpaque;
-    }
-
-    /**
-     * Enable/disable wide gamut rendering on this renderer.
-     */
-    void setWideGamut(boolean wideGamut) {
-        nSetWideGamut(mNativeProxy, wideGamut);
+        setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
     }
 
     /**
@@ -662,18 +551,16 @@ public final class ThreadedRenderer {
                     break;
             }
         }
-        nDumpProfileInfo(mNativeProxy, fd, flags);
+        dumpProfileInfo(fd, flags);
     }
 
-    /**
-     * Loads system properties used by the renderer. This method is invoked
-     * whenever system properties are modified. Implementations can use this
-     * to trigger live updates of the renderer based on properties.
-     *
-     * @return True if a property has changed.
-     */
-    boolean loadSystemProperties() {
-        boolean changed = nLoadSystemProperties(mNativeProxy);
+    Picture captureRenderingCommands() {
+        return null;
+    }
+
+    @Override
+    public boolean loadSystemProperties() {
+        boolean changed = super.loadSystemProperties();
         if (changed) {
             invalidateRoot();
         }
@@ -693,70 +580,34 @@ public final class ThreadedRenderer {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Record View#draw()");
         updateViewTreeDisplayList(view);
 
-        if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
-            DisplayListCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
+        // Consume and set the frame callback after we dispatch draw to the view above, but before
+        // onPostDraw below which may reset the callback for the next frame.  This ensures that
+        // updates to the frame callback during scroll handling will also apply in this frame.
+        final FrameDrawingCallback callback = mNextRtFrameCallback;
+        mNextRtFrameCallback = null;
+        if (callback != null) {
+            setFrameCallback(callback);
+        }
+
+        if (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) {
+            RecordingCanvas canvas = mRootNode.beginRecording(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
                 callbacks.onPreDraw(canvas);
 
-                canvas.insertReorderBarrier();
+                canvas.enableZ();
                 canvas.drawRenderNode(view.updateDisplayListIfDirty());
-                canvas.insertInorderBarrier();
+                canvas.disableZ();
 
                 callbacks.onPostDraw(canvas);
                 canvas.restoreToCount(saveCount);
                 mRootNodeNeedsUpdate = false;
             } finally {
-                mRootNode.end(canvas);
+                mRootNode.endRecording();
             }
         }
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-    }
-
-    /**
-     * Adds a rendernode to the renderer which can be drawn and changed asynchronously to the
-     * rendernode of the UI thread.
-     * @param node The node to add.
-     * @param placeFront If true, the render node will be placed in front of the content node,
-     *                   otherwise behind the content node.
-     */
-    @UnsupportedAppUsage
-    public void addRenderNode(RenderNode node, boolean placeFront) {
-        nAddRenderNode(mNativeProxy, node.mNativeRenderNode, placeFront);
-    }
-
-    /**
-     * Only especially added render nodes can be removed.
-     * @param node The node which was added via addRenderNode which should get removed again.
-     */
-    @UnsupportedAppUsage
-    public void removeRenderNode(RenderNode node) {
-        nRemoveRenderNode(mNativeProxy, node.mNativeRenderNode);
-    }
-
-    /**
-     * Draws a particular render node. If the node is not the content node, only the additional
-     * nodes will get drawn and the content remains untouched.
-     * @param node The node to be drawn.
-     */
-    @UnsupportedAppUsage
-    public void drawRenderNode(RenderNode node) {
-        nDrawRenderNode(mNativeProxy, node.mNativeRenderNode);
-    }
-
-    /**
-     * To avoid unnecessary overdrawing of the main content all additionally passed render nodes
-     * will be prevented to overdraw this area. It will be synchronized with the draw call.
-     * This should be updated in the content view's draw call.
-     * @param left The left side of the protected bounds.
-     * @param top The top side of the protected bounds.
-     * @param right The right side of the protected bounds.
-     * @param bottom The bottom side of the protected bounds.
-     */
-    @UnsupportedAppUsage
-    public void setContentDrawBounds(int left, int top, int right, int bottom) {
-        nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
     }
 
     /**
@@ -771,7 +622,7 @@ public final class ThreadedRenderer {
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onPreDraw(DisplayListCanvas canvas);
+        void onPreDraw(RecordingCanvas canvas);
 
         /**
          * Invoked after a view is drawn by a threaded renderer.
@@ -779,7 +630,7 @@ public final class ThreadedRenderer {
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onPostDraw(DisplayListCanvas canvas);
+        void onPostDraw(RecordingCanvas canvas);
     }
 
     /**
@@ -795,18 +646,12 @@ public final class ThreadedRenderer {
      *
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
-     * @param callbacks Callbacks invoked when drawing happens.
      */
-    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks,
-            FrameDrawingCallback frameDrawingCallback) {
-        attachInfo.mIgnoreDirtyState = true;
-
+    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
         choreographer.mFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
-
-        attachInfo.mIgnoreDirtyState = false;
 
         // register animating rendernodes which started animating prior to renderer
         // creation, which is typical for animators started prior to first draw
@@ -822,11 +667,7 @@ public final class ThreadedRenderer {
             attachInfo.mPendingAnimatingRenderNodes = null;
         }
 
-        final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
-        if (frameDrawingCallback != null) {
-            nSetFrameCallback(mNativeProxy, frameDrawingCallback);
-        }
-        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
+        int syncResult = syncAndDrawFrame(choreographer.mFrameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
             attachInfo.mViewRootImpl.mSurface.release();
@@ -834,152 +675,14 @@ public final class ThreadedRenderer {
             // if it is still needed or do nothing if we are no longer drawing
             attachInfo.mViewRootImpl.invalidate();
         }
-        if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
+        if ((syncResult & SYNC_REDRAW_REQUESTED) != 0) {
             attachInfo.mViewRootImpl.invalidate();
         }
     }
 
-    void setFrameCompleteCallback(FrameCompleteCallback callback) {
-        nSetFrameCompleteCallback(mNativeProxy, callback);
-    }
-
-    static void invokeFunctor(long functor, boolean waitForCompletion) {
-        nInvokeFunctor(functor, waitForCompletion);
-    }
-
-    /**
-     * Creates a new hardware layer. A hardware layer built by calling this
-     * method will be treated as a texture layer, instead of as a render target.
-     *
-     * @return A hardware layer
-     */
-    TextureLayer createTextureLayer() {
-        long layer = nCreateTextureLayer(mNativeProxy);
-        return TextureLayer.adoptTextureLayer(this, layer);
-    }
-
-
-    void buildLayer(RenderNode node) {
-        nBuildLayer(mNativeProxy, node.getNativeDisplayList());
-    }
-
-
-    boolean copyLayerInto(final TextureLayer layer, final Bitmap bitmap) {
-        return nCopyLayerInto(mNativeProxy,
-                layer.getDeferredLayerUpdater(), bitmap);
-    }
-
-    /**
-     * Indicates that the specified hardware layer needs to be updated
-     * as soon as possible.
-     *
-     * @param layer The hardware layer that needs an update
-     */
-    void pushLayerUpdate(TextureLayer layer) {
-        nPushLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
-    }
-
-    /**
-     * Tells the HardwareRenderer that the layer is destroyed. The renderer
-     * should remove the layer from any update queues.
-     */
-    void onLayerDestroyed(TextureLayer layer) {
-        nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
-    }
-
-    /**
-     * Blocks until all previously queued work has completed.
-     */
-    void fence() {
-        nFence(mNativeProxy);
-    }
-
-    /**
-     * Prevents any further drawing until draw() is called. This is a signal
-     * that the contents of the RenderNode tree are no longer safe to play back.
-     * In practice this usually means that there are Functor pointers in the
-     * display list that are no longer valid.
-     */
-    void stopDrawing() {
-        nStopDrawing(mNativeProxy);
-    }
-
-    /**
-     * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
-     */
-    public void notifyFramePending() {
-        nNotifyFramePending(mNativeProxy);
-    }
-
-
-    void registerAnimatingRenderNode(RenderNode animator) {
-        nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
-    }
-
-    void registerVectorDrawableAnimator(
-        AnimatedVectorDrawable.VectorDrawableAnimatorRT animator) {
-        nRegisterVectorDrawableAnimator(mRootNode.mNativeRenderNode,
-                animator.getAnimatorNativePtr());
-    }
-
-    public void serializeDisplayListTree() {
-        nSerializeDisplayListTree(mNativeProxy);
-    }
-
-    public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
-        if (srcRect == null) {
-            // Empty rect means entire surface
-            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap);
-        } else {
-            return nCopySurfaceInto(surface, srcRect.left, srcRect.top,
-                    srcRect.right, srcRect.bottom, bitmap);
-        }
-    }
-
-    /**
-     * Creates a {@link android.graphics.Bitmap.Config#HARDWARE} bitmap from the given
-     * RenderNode. Note that the RenderNode should be created as a root node (so x/y of 0,0), and
-     * not the RenderNode from a View.
-     **/
-    @UnsupportedAppUsage
-    public static Bitmap createHardwareBitmap(RenderNode node, int width, int height) {
-        return nCreateHardwareBitmap(node.getNativeDisplayList(), width, height);
-    }
-
-    /**
-     * Sets whether or not high contrast text rendering is enabled. The setting is global
-     * but only affects content rendered after the change is made.
-     */
-    public static void setHighContrastText(boolean highContrastText) {
-        nSetHighContrastText(highContrastText);
-    }
-
-    /**
-     * If set RenderThread will avoid doing any IPC using instead a fake vsync & DisplayInfo source
-     */
-    public static void setIsolatedProcess(boolean isIsolated) {
-        nSetIsolatedProcess(isIsolated);
-    }
-
-    /**
-     * If set extra graphics debugging abilities will be enabled such as dumping skp
-     */
-    public static void setDebuggingEnabled(boolean enable) {
-        nSetDebuggingEnabled(enable);
-    }
-
-    void allocateBuffers(Surface surface) {
-        nAllocateBuffers(mNativeProxy, surface);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            nDeleteProxy(mNativeProxy);
-            mNativeProxy = 0;
-        } finally {
-            super.finalize();
-        }
+    /** The root of everything */
+    public @NonNull RenderNode getRootNode() {
+        return mRootNode;
     }
 
     /**
@@ -988,37 +691,22 @@ public final class ThreadedRenderer {
      *
      * @hide
      */
-    public static class SimpleRenderer {
-        private final RenderNode mRootNode;
-        private long mNativeProxy;
-        private final float mLightY, mLightZ;
-        private Surface mSurface;
-        private final FrameInfo mFrameInfo = new FrameInfo();
+    public static class SimpleRenderer extends HardwareRenderer {
+        private final float mLightY, mLightZ, mLightRadius;
 
         public SimpleRenderer(final Context context, final String name, final Surface surface) {
+            super();
+            setName(name);
+            setOpaque(false);
+            setSurface(surface);
             final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
             mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
             mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
-            final float lightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
-            final int ambientShadowAlpha =
-                    (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
-            final int spotShadowAlpha =
-                    (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
+            mLightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
+            final float ambientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
+            final float spotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
             a.recycle();
-
-            final long rootNodePtr = nCreateRootRenderNode();
-            mRootNode = RenderNode.adopt(rootNodePtr);
-            mRootNode.setClipToBounds(false);
-            mNativeProxy = nCreateProxy(true /* translucent */, rootNodePtr);
-            nSetName(mNativeProxy, name);
-
-            ProcessInitializer.sInstance.init(context, mNativeProxy);
-            nLoadSystemProperties(mNativeProxy);
-
-            nSetup(mNativeProxy, lightRadius, ambientShadowAlpha, spotShadowAlpha);
-
-            mSurface = surface;
-            nUpdateSurface(mNativeProxy, surface);
+            setLightSourceAlpha(ambientShadowAlpha, spotShadowAlpha);
         }
 
         /**
@@ -1032,7 +720,7 @@ public final class ThreadedRenderer {
             final float lightX = displaySize.x / 2f - windowLeft;
             final float lightY = mLightY - windowTop;
 
-            nSetLightCenter(mNativeProxy, lightX, lightY, mLightZ);
+            setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
         }
 
         public RenderNode getRootNode() {
@@ -1044,223 +732,12 @@ public final class ThreadedRenderer {
          */
         public void draw(final FrameDrawingCallback callback) {
             final long vsync = AnimationUtils.currentAnimationTimeMillis() * 1000000L;
-            mFrameInfo.setVsync(vsync, vsync);
-            mFrameInfo.addFlags(1 << 2 /* VSYNC */);
             if (callback != null) {
-                nSetFrameCallback(mNativeProxy, callback);
+                setFrameCallback(callback);
             }
-            nSyncAndDrawFrame(mNativeProxy, mFrameInfo.mFrameInfo, mFrameInfo.mFrameInfo.length);
-        }
-
-        /**
-         * Destroy the renderer.
-         */
-        public void destroy() {
-            mSurface = null;
-            nDestroy(mNativeProxy, mRootNode.mNativeRenderNode);
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                nDeleteProxy(mNativeProxy);
-                mNativeProxy = 0;
-            } finally {
-                super.finalize();
-            }
+            createRenderRequest()
+                    .setVsyncTime(vsync)
+                    .syncAndDraw();
         }
     }
-
-    /**
-     * Interface used to receive callbacks when a frame is being drawn.
-     */
-    public interface FrameDrawingCallback {
-        /**
-         * Invoked during a frame drawing.
-         *
-         * @param frame The id of the frame being drawn.
-         */
-        void onFrameDraw(long frame);
-    }
-
-    /**
-     * Interface used to be notified when a frame has finished rendering
-     */
-    public interface FrameCompleteCallback {
-        /**
-         * Invoked after a frame draw
-         *
-         * @param frameNr The id of the frame that was drawn.
-         */
-        void onFrameComplete(long frameNr);
-    }
-
-    private static class ProcessInitializer {
-        static ProcessInitializer sInstance = new ProcessInitializer();
-
-        private boolean mInitialized = false;
-
-        private Context mAppContext;
-        private IGraphicsStats mGraphicsStatsService;
-        private IGraphicsStatsCallback mGraphicsStatsCallback = new IGraphicsStatsCallback.Stub() {
-            @Override
-            public void onRotateGraphicsStatsBuffer() throws RemoteException {
-                rotateBuffer();
-            }
-        };
-
-        private ProcessInitializer() {}
-
-        synchronized void init(Context context, long renderProxy) {
-            if (mInitialized) return;
-            mInitialized = true;
-            mAppContext = context.getApplicationContext();
-
-            initSched(renderProxy);
-
-            if (mAppContext != null) {
-                initGraphicsStats();
-            }
-        }
-
-        private void initSched(long renderProxy) {
-            try {
-                int tid = nGetRenderThreadTid(renderProxy);
-                ActivityManager.getService().setRenderThread(tid);
-            } catch (Throwable t) {
-                Log.w(LOG_TAG, "Failed to set scheduler for RenderThread", t);
-            }
-        }
-
-        private void initGraphicsStats() {
-            try {
-                IBinder binder = ServiceManager.getService("graphicsstats");
-                if (binder == null) return;
-                mGraphicsStatsService = IGraphicsStats.Stub.asInterface(binder);
-                requestBuffer();
-            } catch (Throwable t) {
-                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
-            }
-        }
-
-        private void rotateBuffer() {
-            nRotateProcessStatsBuffer();
-            requestBuffer();
-        }
-
-        private void requestBuffer() {
-            try {
-                final String pkg = mAppContext.getApplicationInfo().packageName;
-                ParcelFileDescriptor pfd = mGraphicsStatsService
-                        .requestBufferForProcess(pkg, mGraphicsStatsCallback);
-                nSetProcessStatsBuffer(pfd.getFd());
-                pfd.close();
-            } catch (Throwable t) {
-                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
-            }
-        }
-    }
-
-    void addFrameMetricsObserver(FrameMetricsObserver observer) {
-        long nativeObserver = nAddFrameMetricsObserver(mNativeProxy, observer);
-        observer.mNative = new VirtualRefBasePtr(nativeObserver);
-    }
-
-    void removeFrameMetricsObserver(FrameMetricsObserver observer) {
-        nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
-        observer.mNative = null;
-    }
-
-    /** b/68769804: For low FPS experiments. */
-    public static void setFPSDivisor(int divisor) {
-        nHackySetRTAnimationsEnabled(divisor <= 1);
-    }
-
-    /**
-     * Changes the OpenGL context priority if IMG_context_priority extension is available. Must be
-     * called before any OpenGL context is created.
-     *
-     * @param priority The priority to use. Must be one of EGL_CONTEXT_PRIORITY_* values.
-     */
-    public static void setContextPriority(int priority) {
-        nSetContextPriority(priority);
-    }
-
-    /** Not actually public - internal use only. This doc to make lint happy */
-    public static native void disableVsync();
-
-    static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
-
-    private static native void nRotateProcessStatsBuffer();
-    private static native void nSetProcessStatsBuffer(int fd);
-    private static native int nGetRenderThreadTid(long nativeProxy);
-
-    private static native long nCreateRootRenderNode();
-    private static native long nCreateProxy(boolean translucent, long rootRenderNode);
-    private static native void nDeleteProxy(long nativeProxy);
-
-    private static native boolean nLoadSystemProperties(long nativeProxy);
-    private static native void nSetName(long nativeProxy, String name);
-
-    private static native void nInitialize(long nativeProxy, Surface window);
-    private static native void nUpdateSurface(long nativeProxy, Surface window);
-    private static native boolean nPauseSurface(long nativeProxy, Surface window);
-    private static native void nSetStopped(long nativeProxy, boolean stopped);
-    private static native void nSetup(long nativeProxy,
-            float lightRadius, int ambientShadowAlpha, int spotShadowAlpha);
-    private static native void nSetLightCenter(long nativeProxy,
-            float lightX, float lightY, float lightZ);
-    private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native void nSetWideGamut(long nativeProxy, boolean wideGamut);
-    private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
-    private static native void nDestroy(long nativeProxy, long rootRenderNode);
-    private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
-    private static native void nRegisterVectorDrawableAnimator(long rootRenderNode, long animator);
-
-    private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
-
-    private static native long nCreateTextureLayer(long nativeProxy);
-    private static native void nBuildLayer(long nativeProxy, long node);
-    private static native boolean nCopyLayerInto(long nativeProxy, long layer, Bitmap bitmap);
-    private static native void nPushLayerUpdate(long nativeProxy, long layer);
-    private static native void nCancelLayerUpdate(long nativeProxy, long layer);
-    private static native void nDetachSurfaceTexture(long nativeProxy, long layer);
-
-    private static native void nDestroyHardwareResources(long nativeProxy);
-    private static native void nTrimMemory(int level);
-    private static native void nOverrideProperty(String name, String value);
-
-    private static native void nFence(long nativeProxy);
-    private static native void nStopDrawing(long nativeProxy);
-    private static native void nNotifyFramePending(long nativeProxy);
-
-    private static native void nSerializeDisplayListTree(long nativeProxy);
-
-    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
-            @DumpFlags int dumpFlags);
-
-    private static native void nAddRenderNode(long nativeProxy, long rootRenderNode,
-             boolean placeFront);
-    private static native void nRemoveRenderNode(long nativeProxy, long rootRenderNode);
-    private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
-    private static native void nSetContentDrawBounds(long nativeProxy, int left,
-             int top, int right, int bottom);
-    private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
-    private static native void nSetFrameCompleteCallback(long nativeProxy,
-            FrameCompleteCallback callback);
-
-    private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
-    private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
-
-    private static native int nCopySurfaceInto(Surface surface,
-            int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
-
-    private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
-    private static native void nSetHighContrastText(boolean enabled);
-    // For temporary experimentation b/66945974
-    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
-    private static native void nSetDebuggingEnabled(boolean enabled);
-    private static native void nSetIsolatedProcess(boolean enabled);
-    private static native void nSetContextPriority(int priority);
-    private static native void nAllocateBuffers(long nativeProxy, Surface window);
 }

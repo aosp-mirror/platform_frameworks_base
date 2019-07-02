@@ -21,10 +21,9 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 /**
  * A helper class to handle touches on the heads-up views.
@@ -32,7 +31,7 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
     private HeadsUpManagerPhone mHeadsUpManager;
-    private NotificationStackScrollLayout mStackScroller;
+    private Callback mCallback;
     private int mTrackingPointer;
     private float mTouchSlop;
     private float mInitialTouchX;
@@ -44,12 +43,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private ExpandableNotificationRow mPickedChild;
 
     public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
-            NotificationStackScrollLayout stackScroller,
+            Callback callback,
             NotificationPanelView notificationPanelView) {
         mHeadsUpManager = headsUpManager;
-        mStackScroller = stackScroller;
+        mCallback = callback;
         mPanel = notificationPanelView;
-        Context context = stackScroller.getContext();
+        Context context = mCallback.getContext();
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
     }
@@ -75,18 +74,18 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 mInitialTouchY = y;
                 mInitialTouchX = x;
                 setTrackingHeadsUp(false);
-                ExpandableView child = mStackScroller.getChildAtRawPosition(x, y);
+                ExpandableView child = mCallback.getChildAtRawPosition(x, y);
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
                     mPickedChild = (ExpandableNotificationRow) child;
-                    mTouchingHeadsUpView = !mStackScroller.isExpanded()
+                    mTouchingHeadsUpView = !mCallback.isExpanded()
                             && mPickedChild.isHeadsUp() && mPickedChild.isPinned();
-                } else if (child == null && !mStackScroller.isExpanded()) {
+                } else if (child == null && !mCallback.isExpanded()) {
                     // We might touch above the visible heads up child, but then we still would
                     // like to capture it.
-                    NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
-                    if (topEntry != null && topEntry.row.isPinned()) {
-                        mPickedChild = topEntry.row;
+                    NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
+                    if (topEntry != null && topEntry.isRowPinned()) {
+                        mPickedChild = topEntry.getRow();
                         mTouchingHeadsUpView = true;
                     }
                 }
@@ -118,7 +117,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mPanel.startExpandingFromPeek();
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.
-                    mHeadsUpManager.unpinAll();
+                    mHeadsUpManager.unpinAll(true);
                     mPanel.clearNotificationEffects();
                     endMotion();
                     return true;
@@ -173,5 +172,11 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         mTrackingPointer = -1;
         mPickedChild = null;
         mTouchingHeadsUpView = false;
+    }
+
+    public interface Callback {
+        ExpandableView getChildAtRawPosition(float touchX, float touchY);
+        boolean isExpanded();
+        Context getContext();
     }
 }

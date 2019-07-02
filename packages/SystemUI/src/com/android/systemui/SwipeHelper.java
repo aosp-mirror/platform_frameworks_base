@@ -33,11 +33,12 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
-import com.android.systemui.classifier.FalsingManager;
+
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -62,13 +63,14 @@ public class SwipeHelper implements Gefingerpoken {
     public static final float SWIPED_FAR_ENOUGH_SIZE_FRACTION = 0.6f;
     static final float MAX_SCROLL_SIZE_FRACTION = 0.3f;
 
+    protected final Handler mHandler;
+
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
     private final Callback mCallback;
-    private final Handler mHandler;
     private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
     private final FalsingManager mFalsingManager;
@@ -111,7 +113,7 @@ public class SwipeHelper implements Gefingerpoken {
         mDensityScale =  res.getDisplayMetrics().density;
         mFalsingThreshold = res.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
         mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
-        mFalsingManager = FalsingManager.getInstance(context);
+        mFalsingManager = FalsingManagerFactory.getInstance(context);
         mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
     }
 
@@ -264,7 +266,9 @@ public class SwipeHelper implements Gefingerpoken {
     public boolean onInterceptTouchEvent(final MotionEvent ev) {
         if (mCurrView instanceof ExpandableNotificationRow) {
             NotificationMenuRowPlugin nmr = ((ExpandableNotificationRow) mCurrView).getProvider();
-            mMenuRowIntercepting = nmr.onInterceptTouchEvent(mCurrView, ev);
+            if (nmr != null) {
+                mMenuRowIntercepting = nmr.onInterceptTouchEvent(mCurrView, ev);
+            }
         }
         final int action = ev.getAction();
 
@@ -473,8 +477,6 @@ public class SwipeHelper implements Gefingerpoken {
         if (anim == null) {
             return;
         }
-        int duration = SNAP_ANIM_LEN;
-        anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
             boolean wasCancelled = false;
 
@@ -488,13 +490,24 @@ public class SwipeHelper implements Gefingerpoken {
                 mSnappingChild = false;
                 if (!wasCancelled) {
                     updateSwipeProgressFromOffset(animView, canBeDismissed);
+                    onChildSnappedBack(animView, targetLeft);
                     mCallback.onChildSnappedBack(animView, targetLeft);
                 }
             }
         });
         prepareSnapBackAnimation(animView, anim);
         mSnappingChild = true;
+        float maxDistance = Math.abs(targetLeft - getTranslation(animView));
+        mFlingAnimationUtils.apply(anim, getTranslation(animView), targetLeft, velocity,
+                maxDistance);
         anim.start();
+    }
+
+    /**
+     * Give the swipe helper itself a chance to do something on snap back so NSSL doesn't have
+     * to tell us what to do
+     */
+    protected void onChildSnappedBack(View animView, float targetLeft) {
     }
 
     /**
@@ -596,13 +609,21 @@ public class SwipeHelper implements Gefingerpoken {
                     }
                     // don't let items that can't be dismissed be dragged more than
                     // maxScrollDistance
-                    if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissed(mCurrView)) {
+                    if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissedInDirection(mCurrView,
+                            delta > 0)) {
                         float size = getSize(mCurrView);
                         float maxScrollDistance = MAX_SCROLL_SIZE_FRACTION * size;
                         if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
-                            delta = maxScrollDistance * (float) Math.sin((delta/size)*(Math.PI/2));
+                            int startPosition = mCallback.getConstrainSwipeStartPosition();
+                            if (absDelta > startPosition) {
+                                int signedStartPosition =
+                                        (int) (startPosition * Math.signum(delta));
+                                delta = signedStartPosition
+                                        + maxScrollDistance * (float) Math.sin(
+                                        ((delta - signedStartPosition) / size) * (Math.PI / 2));
+                            }
                         }
                     }
 
@@ -665,9 +686,11 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     public boolean isDismissGesture(MotionEvent ev) {
+        float translation = getTranslation(mCurrView);
         return ev.getActionMasked() == MotionEvent.ACTION_UP
+                && !mFalsingManager.isUnlockingDisabled()
                 && !isFalseGesture(ev) && (swipedFastEnough() || swipedFarEnough())
-                && mCallback.canChildBeDismissed(mCurrView);
+                && mCallback.canChildBeDismissedInDirection(mCurrView, translation > 0);
     }
 
     public boolean isFalseGesture(MotionEvent ev) {
@@ -698,6 +721,16 @@ public class SwipeHelper implements Gefingerpoken {
 
         boolean canChildBeDismissed(View v);
 
+        /**
+         * Returns true if the provided child can be dismissed by a swipe in the given direction.
+         *
+         * @param isRightOrDown {@code true} if the swipe direction is right or down,
+         *                      {@code false} if it is left or up.
+         */
+        default boolean canChildBeDismissedInDirection(View v, boolean isRightOrDown) {
+            return canChildBeDismissed(v);
+        }
+
         boolean isAntiFalsingNeeded();
 
         void onBeginDrag(View v);
@@ -725,6 +758,14 @@ public class SwipeHelper implements Gefingerpoken {
          * @return The factor the falsing threshold should be multiplied with
          */
         float getFalsingThresholdFactor();
+
+        /**
+         * @return The position, in pixels, at which a constrained swipe should start being
+         * constrained.
+         */
+        default int getConstrainSwipeStartPosition() {
+            return 0;
+        }
 
         /**
          * @return If true, the given view is draggable.

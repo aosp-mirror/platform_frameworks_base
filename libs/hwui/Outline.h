@@ -42,9 +42,8 @@ public:
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
 
-
         // Reuse memory if previous outline was the same shape (rect or round rect).
-        if ( mPath.countVerbs() > 10) {
+        if (mPath.countVerbs() > 10) {
             mPath.reset();
         } else {
             mPath.rewind();

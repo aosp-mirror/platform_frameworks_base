@@ -452,14 +452,17 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key) {
     sp<UidMap> uidMap = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     sp<AlarmMonitor> anomalyAlarmMonitor =
         new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
                 [](const sp<IStatsCompanionService>&){});
     sp<AlarmMonitor> periodicAlarmMonitor =
         new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
                 [](const sp<IStatsCompanionService>&){});
-    sp<StatsLogProcessor> processor = new StatsLogProcessor(
-        uidMap, anomalyAlarmMonitor, periodicAlarmMonitor, timeBaseNs, [](const ConfigKey&){return true;});
+    sp<StatsLogProcessor> processor =
+            new StatsLogProcessor(uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseNs, [](const ConfigKey&) { return true; },
+                                  [](const int&, const vector<int64_t>&) {return true;});
     processor->OnConfigUpdated(currentTimeNs, key, config);
     return processor;
 }

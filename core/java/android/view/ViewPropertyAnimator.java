@@ -19,7 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.annotation.UnsupportedAppUsage;
+import android.graphics.RenderNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,12 +108,6 @@ public class ViewPropertyAnimator {
      * (duration, start delay, interpolator, etc.).
      */
     private ValueAnimator mTempValueAnimator;
-
-    /**
-     * A RenderThread-driven backend that may intercept startAnimation
-     */
-    @UnsupportedAppUsage
-    private ViewPropertyAnimatorRT mRTBackend;
 
     /**
      * This listener is the mechanism by which the underlying Animator causes changes to the
@@ -436,9 +430,6 @@ public class ViewPropertyAnimator {
         mPendingOnStartAction = null;
         mPendingOnEndAction = null;
         mView.removeCallbacks(mAnimationStarter);
-        if (mRTBackend != null) {
-            mRTBackend.cancelAll();
-        }
     }
 
     /**
@@ -861,9 +852,6 @@ public class ViewPropertyAnimator {
      * value accordingly.
      */
     private void startAnimation() {
-        if (mRTBackend != null && mRTBackend.startAnimation(this)) {
-            return;
-        }
         mView.setHasTransientState(true);
         ValueAnimator animator = ValueAnimator.ofFloat(1.0f);
         ArrayList<NameValuesHolder> nameValueList =
@@ -984,7 +972,6 @@ public class ViewPropertyAnimator {
      * @param value The value to set the property to
      */
     private void setValue(int propertyConstant, float value) {
-        final View.TransformationInfo info = mView.mTransformationInfo;
         final RenderNode renderNode = mView.mRenderNode;
         switch (propertyConstant) {
             case TRANSLATION_X:
@@ -997,7 +984,7 @@ public class ViewPropertyAnimator {
                 renderNode.setTranslationZ(value);
                 break;
             case ROTATION:
-                renderNode.setRotation(value);
+                renderNode.setRotationZ(value);
                 break;
             case ROTATION_X:
                 renderNode.setRotationX(value);
@@ -1021,7 +1008,7 @@ public class ViewPropertyAnimator {
                 renderNode.setTranslationZ(value - renderNode.getElevation());
                 break;
             case ALPHA:
-                info.mAlpha = value;
+                mView.setAlphaInternal(value);
                 renderNode.setAlpha(value);
                 break;
         }
@@ -1043,7 +1030,7 @@ public class ViewPropertyAnimator {
             case TRANSLATION_Z:
                 return node.getTranslationZ();
             case ROTATION:
-                return node.getRotation();
+                return node.getRotationZ();
             case ROTATION_X:
                 return node.getRotationX();
             case ROTATION_Y:
@@ -1059,7 +1046,7 @@ public class ViewPropertyAnimator {
             case Z:
                 return node.getElevation() + node.getTranslationZ();
             case ALPHA:
-                return mView.mTransformationInfo.mAlpha;
+                return mView.getAlpha();
         }
         return 0;
     }
@@ -1151,12 +1138,6 @@ public class ViewPropertyAnimator {
 
             boolean hardwareAccelerated = mView.isHardwareAccelerated();
 
-            // alpha requires slightly different treatment than the other (transform) properties.
-            // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
-            // logic is dependent on how the view handles an internal call to onSetAlpha().
-            // We track what kinds of properties are set, and how alpha is handled when it is
-            // set, and perform the invalidation steps appropriately.
-            boolean alphaHandled = false;
             if (!hardwareAccelerated) {
                 mView.invalidateParentCaches();
             }
@@ -1171,11 +1152,7 @@ public class ViewPropertyAnimator {
                 for (int i = 0; i < count; ++i) {
                     NameValuesHolder values = valueList.get(i);
                     float value = values.mFromValue + fraction * values.mDeltaValue;
-                    if (values.mNameConstant == ALPHA) {
-                        alphaHandled = mView.setAlphaNoInvalidation(value);
-                    } else {
-                        setValue(values.mNameConstant, value);
-                    }
+                    setValue(values.mNameConstant, value);
                 }
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
@@ -1183,13 +1160,8 @@ public class ViewPropertyAnimator {
                     mView.mPrivateFlags |= View.PFLAG_DRAWN; // force another invalidation
                 }
             }
-            // invalidate(false) in all cases except if alphaHandled gets set to true
-            // via the call to setAlphaNoInvalidation(), above
-            if (alphaHandled) {
-                mView.invalidate(true);
-            } else {
-                mView.invalidateViewProperty(false, false);
-            }
+
+            mView.invalidateViewProperty(false, false);
             if (mUpdateListener != null) {
                 mUpdateListener.onAnimationUpdate(animation);
             }

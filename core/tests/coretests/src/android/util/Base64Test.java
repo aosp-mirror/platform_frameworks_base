@@ -16,15 +16,20 @@
 
 package android.util;
 
-import android.support.test.filters.LargeTest;
+import androidx.test.filters.LargeTest;
+
+import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
-import junit.framework.TestCase;
+import java.util.stream.Collectors;
 
 @LargeTest
 public class Base64Test extends TestCase {
@@ -530,4 +535,74 @@ public class Base64Test extends TestCase {
             assertEquals(plain, actual);
         }
     }
+
+    public void testOutputStream_ioExceptionDuringClose() {
+        OutputStream out = new OutputStream() {
+            @Override public void write(int b) throws IOException { }
+            @Override public void close() throws IOException {
+                throw new IOException("close()");
+            }
+        };
+        OutputStream out2 = new Base64OutputStream(out, Base64.DEFAULT);
+        try {
+            out2.close();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
+    public void testOutputStream_ioExceptionDuringCloseAndWrite() {
+        OutputStream out = new OutputStream() {
+            @Override public void write(int b) throws IOException {
+                throw new IOException("write()");
+            }
+            @Override public void write(byte[] b) throws IOException {
+                throw new IOException("write()");
+            }
+            @Override public void write(byte[] b, int off, int len) throws IOException {
+                throw new IOException("write()");
+            }
+            @Override public void close() throws IOException {
+                throw new IOException("close()");
+            }
+        };
+        OutputStream out2 = new Base64OutputStream(out, Base64.DEFAULT);
+        try {
+            out2.close();
+            fail();
+        } catch (IOException expected) {
+            // Base64OutputStream write()s pending (possibly empty) data
+            // before close(), so the IOE from write() should be thrown and
+            // any later exception suppressed.
+            assertEquals("write()", expected.getMessage());
+            Throwable[] suppressed = expected.getSuppressed();
+            List<String> suppressedMessages = Arrays.asList(suppressed).stream()
+                    .map((e) -> e.getMessage())
+                    .collect(Collectors.toList());
+            assertEquals(Collections.singletonList("close()"), suppressedMessages);
+        }
+    }
+
+    public void testOutputStream_ioExceptionDuringWrite() {
+        OutputStream out = new OutputStream() {
+            @Override public void write(int b) throws IOException {
+                throw new IOException("write()");
+            }
+            @Override public void write(byte[] b) throws IOException {
+                throw new IOException("write()");
+            }
+            @Override public void write(byte[] b, int off, int len) throws IOException {
+                throw new IOException("write()");
+            }
+        };
+        // Base64OutputStream write()s pending (possibly empty) data
+        // before close(), so the IOE from write() should be thrown.
+        OutputStream out2 = new Base64OutputStream(out, Base64.DEFAULT);
+        try {
+            out2.close();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
 }

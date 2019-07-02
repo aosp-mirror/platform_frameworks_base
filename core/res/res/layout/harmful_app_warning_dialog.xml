@@ -49,7 +49,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:textColor="@color/primary_text_material_light"
+                    android:textColor="?attr/textColorPrimary"
                     android:textSize="@dimen/text_size_subhead_material"
                     android:paddingLeft="@dimen/harmful_app_icon_name_padding">
             </TextView>

@@ -22,6 +22,8 @@ applications that come with the platform
 <permissions>
     <privapp-permissions package="android.ext.services">
         <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+        <permission name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
+        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.apps.tag">
@@ -47,13 +49,6 @@ applications that come with the platform
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.defcontainer">
-        <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
-        <permission name="android.permission.ALLOCATE_AGGRESSIVE"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
@@ -74,11 +69,14 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MASTER_CLEAR"/>
+        <permission name="android.permission.NETWORK_MANAGED_PROVISIONING"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.mms.service">
@@ -101,23 +99,26 @@ applications that come with the platform
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.omadm.service">
-        <permission name="android.permission.CHANGE_CONFIGURATION"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.WRITE_APN_SETTINGS"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.packageinstaller">
-        <permission name="android.permission.CLEAR_APP_CACHE"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
+        <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
+        <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.permissioncontroller">
+        <permission name="android.permission.CLEAR_APP_CACHE"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
+        <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
+        <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+        <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -165,6 +166,8 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.providers.calendar">
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS" />
+        <permission name="android.permission.MANAGE_USERS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
     </privapp-permissions>
@@ -182,6 +185,7 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
         <permission name="android.permission.CLEAR_APP_CACHE"/>
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
@@ -192,6 +196,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.WATCH_APPOPS"/>
+        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -226,6 +232,7 @@ applications that come with the platform
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MANAGE_ROLE_HOLDERS"/>
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
@@ -256,11 +263,14 @@ applications that come with the platform
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
         <permission name="android.permission.FORCE_STOP_PACKAGES"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
+        <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
+        <!-- Needed for test only -->
+        <permission name="android.permission.INTERACT_ACROSS_PROFILES"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
-        <permission name="android.permission.MANAGE_ACTIVITY_STACKS"/>
+        <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
@@ -268,14 +278,17 @@ applications that come with the platform
         <permission name="android.permission.MOUNT_FORMAT_FILESYSTEMS"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.MOVE_PACKAGE"/>
+        <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.NETWORK_SCAN"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <!-- Needed for test only -->
         <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
+        <permission name="android.permission.POWER_SAVER" />
         <permission name="android.permission.READ_FRAME_BUFFER"/>
         <permission name="android.permission.READ_LOWPAN_CREDENTIAL"/>
         <!-- Needed for test only -->
         <permission name="android.permission.READ_PRECISE_PHONE_STATE" />
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
@@ -289,13 +302,24 @@ applications that come with the platform
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SIGNAL_PERSISTENT_PROCESSES"/>
+        <permission name="android.permission.STATUS_BAR"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
         <permission name="android.permission.START_TASKS_FROM_RECENTS" />
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
+        <permission name="android.permission.SUSPEND_APPS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.STATUS_BAR_SERVICE"/>
+        <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
+        <permission name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"/>
+        <permission name="android.permission.SET_WALLPAPER" />
+        <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
+        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
+        <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
+        <permission name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -316,6 +340,11 @@ applications that come with the platform
     <privapp-permissions package="com.android.vpndialogs">
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CONTROL_VPN"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.dynsystem">
+        <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
 
 </permissions>

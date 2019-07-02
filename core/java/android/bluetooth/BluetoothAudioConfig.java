@@ -64,7 +64,7 @@ public final class BluetoothAudioConfig implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothAudioConfig> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothAudioConfig> CREATOR =
             new Parcelable.Creator<BluetoothAudioConfig>() {
                 public BluetoothAudioConfig createFromParcel(Parcel in) {
                     int sampleRate = in.readInt();

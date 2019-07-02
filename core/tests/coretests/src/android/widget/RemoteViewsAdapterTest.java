@@ -38,10 +38,11 @@ import android.database.DataSetObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.widget.IRemoteViewsFactory;

@@ -26,14 +26,15 @@ import static org.junit.Assert.fail;
 
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.LargeTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.MoreAsserts;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.view.View;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.collect.Lists;
 
@@ -776,5 +777,20 @@ public class TextUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testTrimToSizeThrowsExceptionForZeroSize() {
         TextUtils.trimToSize("abc", 0);
+    }
+
+    @Test
+    public void length() {
+        assertEquals(0, TextUtils.length(null));
+        assertEquals(0, TextUtils.length(""));
+        assertEquals(2, TextUtils.length("  "));
+        assertEquals(6, TextUtils.length("Hello!"));
+    }
+
+    @Test
+    public void testTrimToLengthWithEllipsis() {
+        assertEquals("ABC...", TextUtils.trimToLengthWithEllipsis("ABCDEF", 3));
+        assertEquals("ABC", TextUtils.trimToLengthWithEllipsis("ABC", 3));
+        assertEquals("", TextUtils.trimToLengthWithEllipsis("", 3));
     }
 }

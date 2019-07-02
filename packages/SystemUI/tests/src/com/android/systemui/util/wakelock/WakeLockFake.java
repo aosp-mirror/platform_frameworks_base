@@ -23,24 +23,24 @@ public class WakeLockFake implements WakeLock {
     private int mAcquired = 0;
 
     @Override
-    public void acquire() {
+    public void acquire(String why) {
         mAcquired++;
     }
 
     @Override
-    public void release() {
+    public void release(String why) {
         Preconditions.checkState(mAcquired > 0);
         mAcquired--;
     }
 
     @Override
     public Runnable wrap(Runnable runnable) {
-        acquire();
+        acquire(WakeLockFake.class.getSimpleName());
         return () -> {
             try {
                 runnable.run();
             } finally {
-                release();
+                release(WakeLockFake.class.getSimpleName());
             }
         };
     }

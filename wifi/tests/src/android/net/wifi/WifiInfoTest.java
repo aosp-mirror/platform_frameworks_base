@@ -18,9 +18,11 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
@@ -33,6 +35,9 @@ public class WifiInfoTest {
     private static final long TEST_TX_RETRIES = 2;
     private static final long TEST_TX_BAD = 3;
     private static final long TEST_RX_SUCCESS = 4;
+    private static final String TEST_PACKAGE_NAME = "com.test.example";
+    private static final String TEST_FQDN = "test.com";
+    private static final String TEST_PROVIDER_NAME = "test";
 
     /**
      *  Verify parcel write/read with WifiInfo.
@@ -44,6 +49,11 @@ public class WifiInfoTest {
         writeWifiInfo.txRetries = TEST_TX_RETRIES;
         writeWifiInfo.txBad = TEST_TX_BAD;
         writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
+        writeWifiInfo.setTrusted(true);
+        writeWifiInfo.setOsuAp(true);
+        writeWifiInfo.setFQDN(TEST_FQDN);
+        writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
+        writeWifiInfo.setNetworkSuggestionOrSpecifierPackageName(TEST_PACKAGE_NAME);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -56,5 +66,11 @@ public class WifiInfoTest {
         assertEquals(TEST_TX_RETRIES, readWifiInfo.txRetries);
         assertEquals(TEST_TX_BAD, readWifiInfo.txBad);
         assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
+        assertTrue(readWifiInfo.isTrusted());
+        assertTrue(readWifiInfo.isOsuAp());
+        assertTrue(readWifiInfo.isPasspointAp());
+        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getNetworkSuggestionOrSpecifierPackageName());
+        assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
+        assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
     }
 }

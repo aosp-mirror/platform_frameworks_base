@@ -18,10 +18,9 @@ package com.android.settingslib.license;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -32,7 +31,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class LicenseHtmlGeneratorFromXmlTest {
     private static final String VALILD_XML_STRING =
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -92,8 +91,8 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testParseValidXmlStream() throws XmlPullParserException, IOException {
-        Map<String, String> fileNameToContentIdMap = new HashMap<String, String>();
-        Map<String, String> contentIdToFileContentMap = new HashMap<String, String>();
+        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         LicenseHtmlGeneratorFromXml.parse(
                 new InputStreamReader(new ByteArrayInputStream(VALILD_XML_STRING.getBytes())),
@@ -107,8 +106,8 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test(expected = XmlPullParserException.class)
     public void testParseInvalidXmlStream() throws XmlPullParserException, IOException {
-        Map<String, String> fileNameToContentIdMap = new HashMap<String, String>();
-        Map<String, String> contentIdToFileContentMap = new HashMap<String, String>();
+        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         LicenseHtmlGeneratorFromXml.parse(
                 new InputStreamReader(new ByteArrayInputStream(INVALILD_XML_STRING.getBytes())),
@@ -117,8 +116,8 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testGenerateHtml() {
-        Map<String, String> fileNameToContentIdMap = new HashMap<String, String>();
-        Map<String, String> contentIdToFileContentMap = new HashMap<String, String>();
+        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         fileNameToContentIdMap.put("/file0", "0");
         fileNameToContentIdMap.put("/file1", "0");
@@ -132,8 +131,8 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testGenerateHtmlWithCustomHeading() {
-        Map<String, String> fileNameToContentIdMap = new HashMap<String, String>();
-        Map<String, String> contentIdToFileContentMap = new HashMap<String, String>();
+        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         fileNameToContentIdMap.put("/file0", "0");
         fileNameToContentIdMap.put("/file1", "0");

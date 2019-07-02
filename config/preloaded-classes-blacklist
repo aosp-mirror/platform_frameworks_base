@@ -1,5 +1,12 @@
+android.content.AsyncTaskLoader$LoadTask
 android.net.ConnectivityThread$Singleton
 android.os.AsyncTask
 android.os.FileObserver
+android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
 android.widget.Magnifier
 sun.nio.fs.UnixChannelFactory
+com.android.server.SystemConfig$PermissionEntry
+com.android.server.SystemConfig$SharedLibraryEntry
+com.android.server.SystemConfig
+android.permission.PermissionManager$SplitPermissionInfo
+android.permission.PermissionManager

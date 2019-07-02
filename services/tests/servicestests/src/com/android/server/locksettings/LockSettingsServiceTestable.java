@@ -30,6 +30,7 @@ import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 
 import java.io.FileNotFoundException;
 
@@ -44,11 +45,14 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
         private IAuthSecret mAuthSecretService;
+        private FakeGsiService mGsiService;
+        private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager, LockPatternUtils lockPatternUtils,
                 IStorageManager storageManager, SyntheticPasswordManager spManager,
-                IAuthSecret authSecretService) {
+                IAuthSecret authSecretService, FakeGsiService gsiService,
+                RecoverableKeyStoreManager recoverableKeyStoreManager) {
             super(context);
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
@@ -56,6 +60,8 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             mLockPatternUtils = lockPatternUtils;
             mStorageManager = storageManager;
             mSpManager = spManager;
+            mGsiService = gsiService;
+            mRecoverableKeyStoreManager = recoverableKeyStoreManager;
         }
 
         @Override
@@ -104,28 +110,45 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
+        public boolean hasEnrolledBiometrics() {
+            return false;
+        }
+
+        @Override
         public int binderGetCallingUid() {
             return Process.SYSTEM_UID;
+        }
+
+        @Override
+        public boolean isGsiRunning() {
+            return mGsiService.isGsiRunning();
+        }
+
+        @Override
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
+            return mRecoverableKeyStoreManager;
         }
     }
 
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
             LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
-            SyntheticPasswordManager spManager, IAuthSecret authSecretService) {
+            SyntheticPasswordManager spManager, IAuthSecret authSecretService,
+            FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
-                storageManager, spManager, authSecretService));
+                storageManager, spManager, authSecretService, gsiService,
+                recoverableKeyStoreManager));
         mGateKeeperService = gatekeeper;
         mAuthSecretService = authSecretService;
     }
 
     @Override
-    protected void tieProfileLockToParent(int userId, String password) {
-        mStorage.writeChildProfileLock(userId, password.getBytes());
+    protected void tieProfileLockToParent(int userId, byte[] password) {
+        mStorage.writeChildProfileLock(userId, password);
     }
 
     @Override
-    protected String getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException,
+    protected byte[] getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException,
             KeyPermanentlyInvalidatedException {
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
@@ -138,7 +161,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         } catch (RemoteException e) {
             // shouldn't happen.
         }
-        return new String(storedData);
+        return storedData;
     }
-
 }

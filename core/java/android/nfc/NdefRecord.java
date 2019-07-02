@@ -992,7 +992,7 @@ public final class NdefRecord implements Parcelable {
         dest.writeByteArray(mPayload);
     }
 
-    public static final Parcelable.Creator<NdefRecord> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NdefRecord> CREATOR =
             new Parcelable.Creator<NdefRecord>() {
         @Override
         public NdefRecord createFromParcel(Parcel in) {

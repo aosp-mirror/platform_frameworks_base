@@ -16,6 +16,7 @@
 
 #include "ResourceUtils.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include "android-base/stringprintf.h"
@@ -41,6 +42,7 @@ namespace ResourceUtils {
 
 Maybe<ResourceName> ToResourceName(
     const android::ResTable::resource_name& name_in) {
+  // TODO: Remove this when ResTable and AssetManager(1) are removed from AAPT2
   ResourceName name_out;
   if (!name_in.package) {
     return {};
@@ -70,6 +72,41 @@ Maybe<ResourceName> ToResourceName(
         util::Utf16ToUtf8(StringPiece16(name_in.name, name_in.nameLen));
   } else if (name_in.name8) {
     name_out.entry.assign(name_in.name8, name_in.nameLen);
+  } else {
+    return {};
+  }
+  return name_out;
+}
+
+Maybe<ResourceName> ToResourceName(const android::AssetManager2::ResourceName& name_in) {
+  ResourceName name_out;
+  if (!name_in.package) {
+    return {};
+  }
+
+  name_out.package = std::string(name_in.package, name_in.package_len);
+
+  const ResourceType* type;
+  if (name_in.type16) {
+    type = ParseResourceType(
+        util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
+  } else if (name_in.type) {
+    type = ParseResourceType(StringPiece(name_in.type, name_in.type_len));
+  } else {
+    return {};
+  }
+
+  if (!type) {
+    return {};
+  }
+
+  name_out.type = *type;
+
+  if (name_in.entry16) {
+    name_out.entry =
+        util::Utf16ToUtf8(StringPiece16(name_in.entry16, name_in.entry_len));
+  } else if (name_in.entry) {
+    name_out.entry = std::string(name_in.entry, name_in.entry_len);
   } else {
     return {};
   }
@@ -501,6 +538,15 @@ Maybe<int> ParseSdkVersion(const StringPiece& str) {
   if (entry) {
     return entry.value();
   }
+
+  // Try parsing codename from "[codename].[preview_sdk_fingerprint]" value.
+  const StringPiece::const_iterator begin = std::begin(trimmed_str);
+  const StringPiece::const_iterator end = std::end(trimmed_str);
+  const StringPiece::const_iterator codename_end = std::find(begin, end, '.');
+  entry = GetDevelopmentSdkCodeNameVersion(trimmed_str.substr(begin, codename_end));
+  if (entry) {
+    return entry.value();
+  }
   return {};
 }
 
@@ -807,7 +853,8 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
   Utf8Iterator iter(text);
   while (iter.HasNext()) {
     char32_t codepoint = iter.Next();
-    if (!quote_ && iswspace(codepoint)) {
+    if (!preserve_spaces_ && !quote_ && (codepoint <= std::numeric_limits<char>::max())
+                                         && isspace(static_cast<char>(codepoint))) {
       if (!last_codepoint_was_space_) {
         // Emit a space if it's the first.
         xml_string_.text += ' ';
@@ -828,7 +875,6 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
           case U't':
             xml_string_.text += '\t';
             break;
-
           case U'n':
             xml_string_.text += '\n';
             break;
@@ -860,8 +906,8 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
       // Only toggle the quote state when we are not preserving spaces.
       quote_ = !quote_;
 
-    } else if (!quote_ && codepoint == U'\'') {
-      // This should be escaped.
+    } else if (!preserve_spaces_ && !quote_ && codepoint == U'\'') {
+      // This should be escaped when we are not preserving spaces
       error_ = StringPrintf("unescaped apostrophe in string\n\"%s\"", text.c_str());
       return *this;
 

@@ -16,23 +16,16 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises context menus in lists

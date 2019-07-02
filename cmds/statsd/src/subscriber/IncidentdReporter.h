@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "HashableDimensionKey.h"
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert, IncidentdDetails
 
@@ -26,7 +27,8 @@ namespace statsd {
 /**
  * Calls incidentd to trigger an incident report and put in dropbox for uploading.
  */
-bool GenerateIncidentReport(const IncidentdDetails& config, const int64_t& rule_id,
+bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int64_t metricId,
+                            const MetricDimensionKey& dimensionKey, int64_t metricValue,
                             const ConfigKey& configKey);
 
 }  // namespace statsd

@@ -16,6 +16,7 @@
 package android.metrics;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.util.Log;
 import android.util.SparseArray;
@@ -31,6 +32,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  * @hide
  */
 @SystemApi
+@TestApi
 public class LogMaker {
     private static final String TAG = "LogBuilder";
 
@@ -435,5 +437,13 @@ public class LogMaker {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * @return entries containing key value pairs.
+     * @hide
+     */
+    public SparseArray<Object> getEntries() {
+        return entries;
     }
 }

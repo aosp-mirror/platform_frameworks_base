@@ -16,10 +16,10 @@
 
 package android.widget;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,11 +31,25 @@ public class DateTimeViewTest {
     @UiThreadTest
     @Test
     public void additionalOnDetachedFromWindow_noException() {
-        final DateTimeView dateTimeView = new DateTimeView(InstrumentationRegistry.getContext());
-        dateTimeView.onAttachedToWindow();
-        dateTimeView.onAttachedToWindow();
+        final TestDateTimeView dateTimeView = new TestDateTimeView();
+        dateTimeView.attachedToWindow();
+        dateTimeView.detachedFromWindow();
         // Even there is an additional detach (abnormal), DateTimeView should not unregister
         // receiver again that raises "java.lang.IllegalArgumentException: Receiver not registered".
-        dateTimeView.onDetachedFromWindow();
+        dateTimeView.detachedFromWindow();
+    }
+
+    private static class TestDateTimeView extends DateTimeView {
+        TestDateTimeView() {
+            super(InstrumentationRegistry.getContext());
+        }
+
+        void attachedToWindow() {
+            super.onAttachedToWindow();
+        }
+
+        void detachedFromWindow() {
+            super.onDetachedFromWindow();
+        }
     }
 }

@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Додирните за унос лозинке"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Унесите лозинку да бисте откључали"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Унесите PIN за откључавање"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Унесите PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Унесите шаблон"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Унесите лозинку"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN кôд је нетачан."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Неважећа картица."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Напуњена је"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Пуни се"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Брзо се пуни"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Споро се пуни"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Напуњена је у потпуности"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бежично пуњење"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Брзо се пуни"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Споро се пуни"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Прикључите пуњач."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Притисните Мени да бисте откључали."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Мрежа је закључана"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM картица је закључана PUK кодом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM картица се откључава…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Област за PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Лозинка за уређај"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Област за PIN за SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Област за PUK за SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Следећи аларм је подешен за <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM не може да се онемогући због грешке."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Заборавио/ла сам шаблон"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Погрешан шаблон"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Погрешна лозинка"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Погрешан шаблон"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Погрешан PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">Пробајте поново за <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
@@ -142,8 +147,9 @@
       <item quantity="few">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сата. Потврдите лозинку.</item>
       <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите лозинку.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Није препознат"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Није препознат"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Није препознат"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај.</item>
       <item quantity="few">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
       <item quantity="other">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
@@ -153,4 +159,85 @@
       <item quantity="few">SIM је сада онемогућен. Унесите PUK кôд да бисте наставили. Имате још <xliff:g id="_NUMBER_1">%d</xliff:g> покушаја пре него што SIM постане трајно неупотребљив. Детаљне информације потражите од мобилног оператера.</item>
       <item quantity="other">SIM је сада онемогућен. Унесите PUK кôд да бисте наставили. Имате још <xliff:g id="_NUMBER_1">%d</xliff:g> покушаја пре него што SIM постане трајно неупотребљив. Детаљне информације потражите од мобилног оператера.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Сада је"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Сада је"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Сада је"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"дванаест"</item>
+    <item msgid="7389464214252023751">"један"</item>
+    <item msgid="8803180377002008046">"два"</item>
+    <item msgid="8614897059944644719">"три"</item>
+    <item msgid="2293058674782619556">"четири"</item>
+    <item msgid="4815402358455041664">"пет"</item>
+    <item msgid="3325754778509665687">"шест"</item>
+    <item msgid="5805551341866280575">"седам"</item>
+    <item msgid="203334816668238610">"осам"</item>
+    <item msgid="4828052671464488923">"девет"</item>
+    <item msgid="2233497913571137419">"десет"</item>
+    <item msgid="5621554266768657830">"једанаест"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"сата(и)"</item>
+    <item msgid="8837126587669001578">"један"</item>
+    <item msgid="4294343372940455660">"два"</item>
+    <item msgid="7129166637707421536">"три"</item>
+    <item msgid="7579404865008788673">"четири"</item>
+    <item msgid="3873924689207380586">"пет"</item>
+    <item msgid="4849565597850069377">"шест"</item>
+    <item msgid="4404219424523572364">"седам"</item>
+    <item msgid="8740481214764087329">"осам"</item>
+    <item msgid="1713216865806811237">"девет"</item>
+    <item msgid="3508406095411245038">"десет"</item>
+    <item msgid="7161996337755311711">"једанаест"</item>
+    <item msgid="4044549963329624197">"дванаест"</item>
+    <item msgid="333373157917379088">"тринаест"</item>
+    <item msgid="2631202907124819385">"четрнаест"</item>
+    <item msgid="6472396076858033453">"петнаест"</item>
+    <item msgid="8656981856181581643">"шеснаест"</item>
+    <item msgid="7289026608562030619">"седамнаест"</item>
+    <item msgid="3881477602692646573">"осамнаест"</item>
+    <item msgid="3358129827772984226">"деветнаест"</item>
+    <item msgid="3308575407402865807">"двадесет"</item>
+    <item msgid="5346560955382229629">"двадесет\nједан"</item>
+    <item msgid="226750304761473436">"двадесет\nдва"</item>
+    <item msgid="616811325336838734">"двадесет\nтри"</item>
+    <item msgid="616346116869053440">"двадесет\nчетири"</item>
+    <item msgid="4642996410384042830">"двадесет\nпет"</item>
+    <item msgid="7506092849993571465">"двадесет\nшест"</item>
+    <item msgid="1915078191101042031">"двадесет\nседам"</item>
+    <item msgid="4292378641900520252">"двадесет\nосам"</item>
+    <item msgid="5339513901773103696">"двадесет\nдевет"</item>
+    <item msgid="3574673250891657607">"тридесет"</item>
+    <item msgid="5796923836589110940">"тридесет\nједан"</item>
+    <item msgid="5859323597571702052">"тридесет\nдва"</item>
+    <item msgid="5133326723148876507">"тридесет\nтри"</item>
+    <item msgid="2693999494655663096">"тридесет\nчетири"</item>
+    <item msgid="3316754944962836197">"тридесет\nпет"</item>
+    <item msgid="816891008836796723">"тридесет\nшест"</item>
+    <item msgid="9158890488666520078">"тридесет\nседам"</item>
+    <item msgid="1894769703213894011">"тридесет\nосам"</item>
+    <item msgid="5638820345598572399">"тридесет\nдевет"</item>
+    <item msgid="8838304023017895439">"четрдесет"</item>
+    <item msgid="1834742948932559597">"четрдесет\nједан"</item>
+    <item msgid="6573707308847773944">"четрдесет\nдва"</item>
+    <item msgid="2450149950652678001">"четрдесет\nтри"</item>
+    <item msgid="2874667401318178036">"четрдесет\nчетири"</item>
+    <item msgid="3391101532763048862">"четрдесет\nпет"</item>
+    <item msgid="1671489330863254362">"четрдесет\nшест"</item>
+    <item msgid="5916017359554531038">"четрдесет\nседам"</item>
+    <item msgid="8205413177993059967">"четрдесет\nосам"</item>
+    <item msgid="6607867415142171302">"четрдесет\nдевет"</item>
+    <item msgid="8358850748472089162">"педесет"</item>
+    <item msgid="3551313125255080234">"педесет\nједан"</item>
+    <item msgid="1559678130725716542">"педесет\nдва"</item>
+    <item msgid="431441994725492377">"педесет\nтри"</item>
+    <item msgid="6345774640539623024">"педесет\nчетири"</item>
+    <item msgid="8018192990793931120">"педесет\nпет"</item>
+    <item msgid="6187650843754604534">"педесет\nшест"</item>
+    <item msgid="8727240174015993259">"педесет\nседам"</item>
+    <item msgid="848339003778952950">"педесет\nосам"</item>
+    <item msgid="5798985802835423618">"педесет\nдевет"</item>
+  </string-array>
 </resources>

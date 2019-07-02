@@ -17,10 +17,10 @@
 
 package android.widget;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.android.frameworks.coretests.R;
 
 public class RadioGroupActivity extends Activity {
     @Override

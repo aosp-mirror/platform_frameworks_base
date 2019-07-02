@@ -1,20 +1,23 @@
 package android.app;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.ArrayMap;
+import android.view.Display;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Used to control aspects of a devices Virtual Reality (VR) capabilities.
@@ -28,7 +31,7 @@ public class VrManager {
         final IVrStateCallbacks mStateCallback = new IVrStateCallbacks.Stub() {
             @Override
             public void onVrStateChanged(boolean enabled) {
-                mHandler.post(() -> mCallback.onVrStateChanged(enabled));
+                mExecutor.execute(() -> mCallback.onVrStateChanged(enabled));
             }
 
         };
@@ -36,15 +39,15 @@ public class VrManager {
                 new IPersistentVrStateCallbacks.Stub() {
             @Override
             public void onPersistentVrStateChanged(boolean enabled) {
-                mHandler.post(() -> mCallback.onPersistentVrStateChanged(enabled));
+                mExecutor.execute(() -> mCallback.onPersistentVrStateChanged(enabled));
             }
         };
         final VrStateCallback mCallback;
-        final Handler mHandler;
+        final Executor mExecutor;
 
-        CallbackEntry(VrStateCallback callback, Handler handler) {
+        CallbackEntry(VrStateCallback callback, Executor executor) {
             mCallback = callback;
-            mHandler = handler;
+            mExecutor = executor;
         }
     }
 
@@ -63,19 +66,18 @@ public class VrManager {
      * Registers a callback to be notified of changes to the VR Mode state.
      *
      * @param callback The callback to register.
-     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
-    @UnsupportedAppUsage
-    public void registerVrStateCallback(VrStateCallback callback, @NonNull Handler handler) {
+    public void registerVrStateCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull VrStateCallback callback) {
         if (callback == null || mCallbackMap.containsKey(callback)) {
             return;
         }
 
-        CallbackEntry entry = new CallbackEntry(callback, handler);
+        CallbackEntry entry = new CallbackEntry(callback, executor);
         mCallbackMap.put(callback, entry);
         try {
             mService.registerListener(entry.mStateCallback);
@@ -93,14 +95,12 @@ public class VrManager {
      * Deregisters VR State callbacks.
      *
      * @param callback The callback to deregister.
-     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
-    @UnsupportedAppUsage
-    public void unregisterVrStateCallback(VrStateCallback callback) {
+    public void unregisterVrStateCallback(@NonNull VrStateCallback callback) {
         CallbackEntry entry = mCallbackMap.remove(callback);
         if (entry != null) {
             try {
@@ -119,13 +119,12 @@ public class VrManager {
 
     /**
      * Returns the current VrMode state.
-     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
-    public boolean getVrModeEnabled() {
+    public boolean isVrModeEnabled() {
         try {
             return mService.getVrModeState();
         } catch (RemoteException e) {
@@ -136,14 +135,12 @@ public class VrManager {
 
     /**
      * Returns the current VrMode state.
-     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
-    @UnsupportedAppUsage
-    public boolean getPersistentVrModeEnabled() {
+    public boolean isPersistentVrModeEnabled() {
         try {
             return mService.getPersistentVrModeEnabled();
         } catch (RemoteException e) {
@@ -176,12 +173,10 @@ public class VrManager {
      * @param vr2dDisplayProp properties to be set to the virtual display for
      * 2D applications in VR mode.
      *
-     * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
-    @UnsupportedAppUsage
     public void setVr2dDisplayProperties(
-            Vr2dDisplayProperties vr2dDisplayProp) {
+            @NonNull Vr2dDisplayProperties vr2dDisplayProp) {
         try {
             mService.setVr2dDisplayProperties(vr2dDisplayProp);
         } catch (RemoteException e) {
@@ -210,7 +205,6 @@ public class VrManager {
      * devices. Standby mode is a deep sleep state where it's appropriate to turn off vr mode.
      *
      * @param standby True if the device is entering standby, false if it's exiting standby.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_VR_MANAGER)
     public void setStandbyEnabled(boolean standby) {
@@ -222,19 +216,26 @@ public class VrManager {
     }
 
     /**
-     * Start VR Input method for the packageName in {@link ComponentName}.
-     * This method notifies InputMethodManagerService to use VR IME instead of
-     * regular phone IME.
-     * @param componentName ComponentName of a VR InputMethod that should be set as selected
-     * input by InputMethodManagerService.
-     * @hide
+     * This method is not implemented.
+     *
+     * @param componentName not used
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
-    public void setVrInputMethod(ComponentName componentName) {
+    public void setVrInputMethod(@Nullable ComponentName componentName) {
+    }
+
+    /**
+     * Returns the display id of VR's {@link VirtualDisplay}.
+     *
+     * @see DisplayManager#getDisplay(int)
+     */
+    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    public int getVr2dDisplayId() {
         try {
-            mService.setVrInputMethod(componentName);
+            return mService.getVr2dDisplayId();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return Display.INVALID_DISPLAY;
     }
 }

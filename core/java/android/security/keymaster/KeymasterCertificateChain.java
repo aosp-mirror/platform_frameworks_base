@@ -32,7 +32,7 @@ public class KeymasterCertificateChain implements Parcelable {
 
     private List<byte[]> mCertificates;
 
-    public static final Parcelable.Creator<KeymasterCertificateChain> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<KeymasterCertificateChain> CREATOR = new
             Parcelable.Creator<KeymasterCertificateChain>() {
                 public KeymasterCertificateChain createFromParcel(Parcel in) {
                     return new KeymasterCertificateChain(in);

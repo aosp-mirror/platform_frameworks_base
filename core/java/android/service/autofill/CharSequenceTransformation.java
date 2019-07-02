@@ -78,7 +78,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             int childViewId) throws Exception {
         final StringBuilder converted = new StringBuilder();
         final int size = mFields.size();
-        if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
+        if (sDebug) Log.d(TAG, size + " fields on id " + childViewId);
         for (Entry<AutofillId, Pair<Pattern, String>> entry : mFields.entrySet()) {
             final AutofillId id = entry.getKey();
             final Pair<Pattern, String> field = entry.getValue();
@@ -90,7 +90,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             try {
                 final Matcher matcher = field.first.matcher(value);
                 if (!matcher.find()) {
-                    if (sDebug) Log.d(TAG, "match for " + field.first + " failed on id " + id);
+                    if (sDebug) Log.d(TAG, "Match for " + field.first + " failed on id " + id);
                     return;
                 }
                 // replaceAll throws an exception if the subst is invalid
@@ -103,6 +103,9 @@ public final class CharSequenceTransformation extends InternalTransformation imp
                 throw e;
             }
         }
+        // Cannot log converted, it might have PII
+        Log.d(TAG, "Converting text on child " + childViewId + " to " + converted.length()
+                + "_chars");
         parentTemplate.setCharSequence(childViewId, "setText", converted);
     }
 
@@ -205,7 +208,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         parcel.writeStringArray(substs);
     }
 
-    public static final Parcelable.Creator<CharSequenceTransformation> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CharSequenceTransformation> CREATOR =
             new Parcelable.Creator<CharSequenceTransformation>() {
         @Override
         public CharSequenceTransformation createFromParcel(Parcel parcel) {

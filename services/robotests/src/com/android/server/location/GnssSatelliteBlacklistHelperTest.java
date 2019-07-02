@@ -2,7 +2,7 @@ package com.android.server.location;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -13,18 +13,15 @@ import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
-import org.robolectric.annotation.Config;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,18 +29,10 @@ import java.util.List;
 /**
  * Unit tests for {@link GnssSatelliteBlacklistHelper}.
  */
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        shadows = {
-        },
-        sdk = 27
-)
-@SystemLoaderPackages({"com.android.server.location"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class GnssSatelliteBlacklistHelperTest {
 
-    private Context mContext;
     private ContentResolver mContentResolver;
     @Mock
     private GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback mCallback;
@@ -51,9 +40,9 @@ public class GnssSatelliteBlacklistHelperTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
-        mContentResolver = mContext.getContentResolver();
-        new GnssSatelliteBlacklistHelper(mContext, Looper.myLooper(), mCallback);
+        Context context = RuntimeEnvironment.application;
+        mContentResolver = context.getContentResolver();
+        new GnssSatelliteBlacklistHelper(context, Looper.myLooper(), mCallback);
     }
 
     @Test

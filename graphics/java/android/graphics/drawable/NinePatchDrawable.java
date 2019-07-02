@@ -25,6 +25,8 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.ImageDecoder;
@@ -33,9 +35,6 @@ import android.graphics.NinePatch;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.AttributeSet;
@@ -73,7 +72,7 @@ public class NinePatchDrawable extends Drawable {
 
     @UnsupportedAppUsage
     private NinePatchState mNinePatchState;
-    private PorterDuffColorFilter mTintFilter;
+    private BlendModeColorFilter mBlendModeFilter;
     private Rect mPadding;
     private Insets mOpticalInsets = Insets.NONE;
     private Rect mOutlineInsets;
@@ -198,8 +197,8 @@ public class NinePatchDrawable extends Drawable {
         int restoreToCount = -1;
 
         final boolean clearColorFilter;
-        if (mTintFilter != null && getPaint().getColorFilter() == null) {
-            mPaint.setColorFilter(mTintFilter);
+        if (mBlendModeFilter != null && getPaint().getColorFilter() == null) {
+            mPaint.setColorFilter(mBlendModeFilter);
             clearColorFilter = true;
         } else {
             clearColorFilter = false;
@@ -301,9 +300,6 @@ public class NinePatchDrawable extends Drawable {
         super.getOutline(outline);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public Insets getOpticalInsets() {
         final Insets opticalInsets = mOpticalInsets;
@@ -347,14 +343,16 @@ public class NinePatchDrawable extends Drawable {
     @Override
     public void setTintList(@Nullable ColorStateList tint) {
         mNinePatchState.mTint = tint;
-        mTintFilter = updateTintFilter(mTintFilter, tint, mNinePatchState.mTintMode);
+        mBlendModeFilter = updateBlendModeFilter(mBlendModeFilter, tint,
+                mNinePatchState.mBlendMode);
         invalidateSelf();
     }
 
     @Override
-    public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mNinePatchState.mTintMode = tintMode;
-        mTintFilter = updateTintFilter(mTintFilter, mNinePatchState.mTint, tintMode);
+    public void setTintBlendMode(@Nullable BlendMode blendMode) {
+        mNinePatchState.mBlendMode = blendMode;
+        mBlendModeFilter = updateBlendModeFilter(mBlendModeFilter, mNinePatchState.mTint,
+                blendMode);
         invalidateSelf();
     }
 
@@ -470,7 +468,7 @@ public class NinePatchDrawable extends Drawable {
 
         final int tintMode = a.getInt(R.styleable.NinePatchDrawable_tintMode, -1);
         if (tintMode != -1) {
-            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
+            state.mBlendMode = Drawable.parseBlendMode(tintMode, BlendMode.SRC_IN);
         }
 
         final ColorStateList tint = a.getColorStateList(R.styleable.NinePatchDrawable_tint);
@@ -569,8 +567,9 @@ public class NinePatchDrawable extends Drawable {
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final NinePatchState state = mNinePatchState;
-        if (state.mTint != null && state.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        if (state.mTint != null && state.mBlendMode != null) {
+            mBlendModeFilter = updateBlendModeFilter(mBlendModeFilter, state.mTint,
+                    state.mBlendMode);
             return true;
         }
 
@@ -596,7 +595,7 @@ public class NinePatchDrawable extends Drawable {
         @UnsupportedAppUsage
         NinePatch mNinePatch = null;
         ColorStateList mTint = null;
-        Mode mTintMode = DEFAULT_TINT_MODE;
+        BlendMode mBlendMode = DEFAULT_BLEND_MODE;
         Rect mPadding = null;
         Insets mOpticalInsets = Insets.NONE;
         float mBaseAlpha = 1.0f;
@@ -631,7 +630,7 @@ public class NinePatchDrawable extends Drawable {
             mChangingConfigurations = orig.mChangingConfigurations;
             mNinePatch = orig.mNinePatch;
             mTint = orig.mTint;
-            mTintMode = orig.mTintMode;
+            mBlendMode = orig.mBlendMode;
             mPadding = orig.mPadding;
             mOpticalInsets = orig.mOpticalInsets;
             mBaseAlpha = orig.mBaseAlpha;
@@ -754,7 +753,7 @@ public class NinePatchDrawable extends Drawable {
         } else {
             mTargetDensity = Drawable.resolveDensity(res, mTargetDensity);
         }
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mBlendModeFilter = updateBlendModeFilter(mBlendModeFilter, state.mTint, state.mBlendMode);
         computeBitmapSize();
     }
 }

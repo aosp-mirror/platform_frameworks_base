@@ -16,11 +16,19 @@
 
 package android.content.pm;
 
+import static android.content.res.Resources.ID_NULL;
+
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information you can retrieve about a particular security permission
@@ -33,7 +41,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * permission's description.  From the "description" attribute or,
      * if not set, 0.
      */
-    public int descriptionRes;
+    public @StringRes int descriptionRes;
 
     /**
      * A string resource identifier (in the package's resources) used to request the permissions.
@@ -45,12 +53,48 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     public @StringRes int requestRes;
 
     /**
+     * A string resource identifier (in the package's resources) used as subtitle when requesting
+     * only access while in the foreground.
+     *
+     * From the "requestDetail" attribute or, if not set, {@link
+     * android.content.res.Resources#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final @StringRes int requestDetailResourceId;
+
+    /**
+     * A string resource identifier (in the package's resources) used when requesting background
+     * access. Also used when requesting both foreground and background access.
+     *
+     * From the "backgroundRequest" attribute or, if not set, {@link
+     * android.content.res.Resources#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final @StringRes int backgroundRequestResourceId;
+
+    /**
+     * A string resource identifier (in the package's resources) used as subtitle when requesting
+     * background access.
+     *
+     * From the "backgroundRequestDetail" attribute or, if not set, {@link
+     * android.content.res.Resources#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final @StringRes int backgroundRequestDetailResourceId;
+
+    /**
      * The description string provided in the AndroidManifest file, if any.  You
      * probably don't want to use this, since it will be null if the description
      * is in a resource.  You probably want
      * {@link PermissionInfo#loadDescription} instead.
      */
-    public CharSequence nonLocalizedDescription;
+    public @Nullable CharSequence nonLocalizedDescription;
 
     /**
      * Flag for {@link #flags}, corresponding to <code>personalInfo</code>
@@ -58,24 +102,54 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int FLAG_PERSONAL_INFO = 1<<0;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_PERSONAL_INFO,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
     /**
      * Additional flags about this group as given by
      * {@link android.R.attr#permissionGroupFlags}.
      */
-    public int flags;
+    public @Flags int flags;
 
     /**
      * Prioritization of this group, for visually sorting with other groups.
      */
     public int priority;
 
-    public PermissionGroupInfo() {
+    /**
+     * @hide
+     */
+    public PermissionGroupInfo(@StringRes int requestDetailResourceId,
+            @StringRes int backgroundRequestResourceId,
+            @StringRes int backgroundRequestDetailResourceId) {
+        this.requestDetailResourceId = requestDetailResourceId;
+        this.backgroundRequestResourceId = backgroundRequestResourceId;
+        this.backgroundRequestDetailResourceId = backgroundRequestDetailResourceId;
     }
 
-    public PermissionGroupInfo(PermissionGroupInfo orig) {
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionGroupInfo() {
+        this(ID_NULL, ID_NULL, ID_NULL);
+    }
+
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionGroupInfo(@NonNull PermissionGroupInfo orig) {
         super(orig);
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
+        requestDetailResourceId = orig.requestDetailResourceId;
+        backgroundRequestResourceId = orig.backgroundRequestResourceId;
+        backgroundRequestDetailResourceId = orig.backgroundRequestDetailResourceId;
         nonLocalizedDescription = orig.nonLocalizedDescription;
         flags = orig.flags;
         priority = orig.priority;
@@ -92,7 +166,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the permission's description.
      * If there is no description, null is returned.
      */
-    public CharSequence loadDescription(PackageManager pm) {
+    public @Nullable CharSequence loadDescription(@NonNull PackageManager pm) {
         if (nonLocalizedDescription != null) {
             return nonLocalizedDescription;
         }
@@ -119,12 +193,15 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
+        dest.writeInt(requestDetailResourceId);
+        dest.writeInt(backgroundRequestResourceId);
+        dest.writeInt(backgroundRequestDetailResourceId);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
         dest.writeInt(flags);
         dest.writeInt(priority);
     }
 
-    public static final Creator<PermissionGroupInfo> CREATOR =
+    public static final @NonNull Creator<PermissionGroupInfo> CREATOR =
             new Creator<PermissionGroupInfo>() {
         public PermissionGroupInfo createFromParcel(Parcel source) {
             return new PermissionGroupInfo(source);
@@ -138,6 +215,9 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         super(source);
         descriptionRes = source.readInt();
         requestRes = source.readInt();
+        requestDetailResourceId = source.readInt();
+        backgroundRequestResourceId = source.readInt();
+        backgroundRequestDetailResourceId = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         flags = source.readInt();
         priority = source.readInt();

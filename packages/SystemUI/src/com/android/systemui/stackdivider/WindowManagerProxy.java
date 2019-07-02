@@ -18,7 +18,7 @@ package com.android.systemui.stackdivider;
 
 import static android.view.WindowManager.DOCKED_INVALID;
 
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
@@ -71,7 +71,7 @@ public class WindowManagerProxy {
                 mTmpRect5.set(mTempOtherInsetRect);
             }
             try {
-                ActivityManager.getService()
+                ActivityTaskManager.getService()
                         .resizeDockedStack(mTmpRect1,
                                 mTmpRect2.isEmpty() ? null : mTmpRect2,
                                 mTmpRect3.isEmpty() ? null : mTmpRect3,
@@ -87,7 +87,7 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManager.getService().dismissSplitScreenMode(false /* onTop */);
+                ActivityTaskManager.getService().dismissSplitScreenMode(false /* onTop */);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to remove stack: " + e);
             }
@@ -98,7 +98,7 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManager.getService().dismissSplitScreenMode(true /* onTop */);
+                ActivityTaskManager.getService().dismissSplitScreenMode(true /* onTop */);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }
@@ -180,7 +180,7 @@ public class WindowManagerProxy {
             @Override
             public void run() {
                 try {
-                    ActivityManager.getService().setSplitScreenResizing(resizing);
+                    ActivityTaskManager.getService().setSplitScreenResizing(resizing);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Error calling setDockedStackResizing: " + e);
                 }

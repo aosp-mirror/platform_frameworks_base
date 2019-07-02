@@ -51,6 +51,7 @@ import java.util.Comparator;
 public class TileServices extends IQSService.Stub {
     static final int DEFAULT_MAX_BOUND = 3;
     static final int REDUCED_MAX_BOUND = 1;
+    private static final String TAG = "TileServices";
 
     private final ArrayMap<CustomTile, TileServiceManager> mServices = new ArrayMap<>();
     private final ArrayMap<ComponentName, CustomTile> mTiles = new ArrayMap<>();
@@ -87,6 +88,8 @@ public class TileServices extends IQSService.Stub {
             mTiles.put(component, tile);
             mTokenMap.put(service.getToken(), tile);
         }
+        // Makes sure binding only happens after the maps have been populated
+        service.startLifecycleManagerAndAddTile();
         return service;
     }
 
@@ -179,6 +182,11 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             synchronized (mServices) {
                 final TileServiceManager tileServiceManager = mServices.get(customTile);
+                if (tileServiceManager == null || !tileServiceManager.isLifecycleStarted()) {
+                    Log.e(TAG, "TileServiceManager not started for " + customTile.getComponent(),
+                            new IllegalStateException());
+                    return;
+                }
                 tileServiceManager.clearPendingBind();
                 tileServiceManager.setLastUpdate(System.currentTimeMillis());
             }
@@ -194,6 +202,13 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             synchronized (mServices) {
                 final TileServiceManager tileServiceManager = mServices.get(customTile);
+                // This should not happen as the TileServiceManager should have been started for the
+                // first bind to happen.
+                if (tileServiceManager == null || !tileServiceManager.isLifecycleStarted()) {
+                    Log.e(TAG, "TileServiceManager not started for " + customTile.getComponent(),
+                            new IllegalStateException());
+                    return;
+                }
                 tileServiceManager.clearPendingBind();
             }
             customTile.refreshState();

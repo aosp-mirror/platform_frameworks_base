@@ -103,4 +103,18 @@ public class EventList {
         }
         return result;
     }
+
+    /**
+     * Merge the {@link UsageEvents.Event events} in the given {@link EventList list} into this
+     * list while keeping the list sorted based on the event {@link
+     * UsageEvents.Event#mTimeStamp timestamps}.
+     *
+     * @param events The event list to merge
+     */
+    public void merge(EventList events) {
+        final int size = events.size();
+        for (int i = 0; i < size; i++) {
+            insert(events.get(i));
+        }
+    }
 }

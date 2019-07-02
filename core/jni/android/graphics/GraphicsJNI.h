@@ -10,7 +10,6 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkColorSpace.h"
-#include "SkMatrix44.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
 #include <hwui/Bitmap.h>
@@ -63,7 +62,6 @@ public:
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
-    static SkPixelRef* refSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     /*
@@ -86,9 +84,6 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::Bitmap* mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-            int fd, void* addr, size_t size, bool readOnly);
-
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
      * of that bitmap.  The memory is then attached to the bitmap via an
@@ -103,19 +98,35 @@ public:
     */
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
-            const SkBitmap& dstBitmap);
+            SkBitmap* dstBitmap);
 
-    static sk_sp<SkColorSpace> defaultColorSpace();
-    static sk_sp<SkColorSpace> linearColorSpace();
-    static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
-    static bool isColorSpaceSRGB(SkColorSpace* colorSpace);
+    /**
+     * Convert the native SkColorSpace retrieved from ColorSpace.Rgb.getNativeInstance().
+     *
+     * This will never throw an Exception. If the ColorSpace is one that Skia cannot
+     * use, ColorSpace.Rgb.getNativeInstance() would have thrown an Exception. It may,
+     * however, be nullptr, which may be acceptable.
+     */
+    static sk_sp<SkColorSpace> getNativeColorSpace(jlong colorSpaceHandle);
 
-    static SkColorSpaceTransferFn getNativeTransferParameters(JNIEnv* env, jobject transferParams);
-    static SkMatrix44 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
-    static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);
-
-    static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
+    /**
+     * Return the android.graphics.ColorSpace Java object that corresponds to decodeColorSpace
+     * and decodeColorType.
+     *
+     * This may create a new object if none of the Named ColorSpaces match.
+     */
+    static jobject getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
             SkColorType decodeColorType);
+
+    /**
+     * Convert from a Java @ColorLong to an SkColor4f that Skia can use directly.
+     *
+     * This ignores the encoded ColorSpace, besides checking to see if it is sRGB,
+     * which is encoded differently. The color space should be passed down separately
+     * via ColorSpace#getNativeInstance(), and converted with getNativeColorSpace(),
+     * above.
+     */
+    static SkColor4f convertColorLong(jlong color);
 };
 
 class HeapAllocator : public SkBRDAllocator {

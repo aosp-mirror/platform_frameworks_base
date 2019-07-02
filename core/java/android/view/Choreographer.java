@@ -21,6 +21,7 @@ import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.FrameInfo;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
@@ -132,7 +133,7 @@ public final class Choreographer {
             };
 
     // Enable/disable vsync for animations and drawing.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769497)
     private static final boolean USE_VSYNC = SystemProperties.getBoolean(
             "debug.choreographer.vsync", true);
 
@@ -198,7 +199,7 @@ public final class Choreographer {
      * @hide
      */
     private static final String[] CALLBACK_TRACE_TITLES = {
-            "input", "animation", "traversal", "commit"
+            "input", "animation", "insets_animation", "traversal", "commit"
     };
 
     /**
@@ -208,18 +209,33 @@ public final class Choreographer {
     public static final int CALLBACK_INPUT = 0;
 
     /**
-     * Callback type: Animation callback.  Runs before traversals.
+     * Callback type: Animation callback.  Runs before {@link #CALLBACK_INSETS_ANIMATION}.
      * @hide
      */
     @TestApi
     public static final int CALLBACK_ANIMATION = 1;
 
     /**
+     * Callback type: Animation callback to handle inset updates. This is separate from
+     * {@link #CALLBACK_ANIMATION} as we need to "gather" all inset animation updates via
+     * {@link WindowInsetsAnimationController#changeInsets} for multiple ongoing animations but then
+     * update the whole view system with a single callback to {@link View#dispatchWindowInsetsAnimationProgress}
+     * that contains all the combined updated insets.
+     * <p>
+     * Both input and animation may change insets, so we need to run this after these callbacks, but
+     * before traversals.
+     * <p>
+     * Runs before traversals.
+     * @hide
+     */
+    public static final int CALLBACK_INSETS_ANIMATION = 2;
+
+    /**
      * Callback type: Traversal callback.  Handles layout and draw.  Runs
      * after all other asynchronous messages have been handled.
      * @hide
      */
-    public static final int CALLBACK_TRAVERSAL = 2;
+    public static final int CALLBACK_TRAVERSAL = 3;
 
     /**
      * Callback type: Commit callback.  Handles post-draw operations for the frame.
@@ -231,7 +247,7 @@ public final class Choreographer {
      * to the view hierarchy state) actually took effect.
      * @hide
      */
-    public static final int CALLBACK_COMMIT = 3;
+    public static final int CALLBACK_COMMIT = 4;
 
     private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
@@ -703,6 +719,7 @@ public final class Choreographer {
 
             mFrameInfo.markAnimationsStart();
             doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameTimeNanos);
 
             mFrameInfo.markPerformTraversalsStart();
             doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
@@ -896,25 +913,11 @@ public final class Choreographer {
             super(looper, vsyncSource);
         }
 
+        // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for
+        // the internal display and DisplayEventReceiver#scheduleVsync only allows requesting VSYNC
+        // for the internal display implicitly.
         @Override
-        public void onVsync(long timestampNanos, int builtInDisplayId, int frame) {
-            // Ignore vsync from secondary display.
-            // This can be problematic because the call to scheduleVsync() is a one-shot.
-            // We need to ensure that we will still receive the vsync from the primary
-            // display which is the one we really care about.  Ideally we should schedule
-            // vsync for a particular display.
-            // At this time Surface Flinger won't send us vsyncs for secondary displays
-            // but that could change in the future so let's log a message to help us remember
-            // that we need to fix this.
-            if (builtInDisplayId != SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
-                Log.d(TAG, "Received vsync from secondary display, but we don't support "
-                        + "this case yet.  Choreographer needs a way to explicitly request "
-                        + "vsync for a specific display to ensure it doesn't lose track "
-                        + "of its scheduled vsync.");
-                scheduleVsync();
-                return;
-            }
-
+        public void onVsync(long timestampNanos, long physicalDisplayId, int frame) {
             // Post the vsync event to the Handler.
             // The idea is to prevent incoming vsync events from completely starving
             // the message queue.  If there are no messages in the queue with timestamps

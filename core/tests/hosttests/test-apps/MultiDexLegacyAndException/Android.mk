@@ -18,7 +18,7 @@ LOCAL_PATH:= $(call my-dir)
 ## The application with a minimal main dex
 include $(CLEAR_VARS)
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex android-support-multidex-instrumentation android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex android-support-multidex-instrumentation androidx.test.rules
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)

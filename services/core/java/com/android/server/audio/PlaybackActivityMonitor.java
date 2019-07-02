@@ -202,7 +202,7 @@ public final class PlaybackActivityMonitor
                     if (mPrivilegedAlarmActiveCount++ == 0) {
                         mSavedAlarmVolume = AudioSystem.getStreamVolumeIndex(
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER);
-                        AudioSystem.setStreamVolumeIndex(AudioSystem.STREAM_ALARM,
+                        AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
                                 mMaxAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
                     }
                 } else if (event != AudioPlaybackConfiguration.PLAYER_STATE_STARTED &&
@@ -211,7 +211,7 @@ public final class PlaybackActivityMonitor
                         if (AudioSystem.getStreamVolumeIndex(
                                 AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER) ==
                                 mMaxAlarmVolume) {
-                            AudioSystem.setStreamVolumeIndex(AudioSystem.STREAM_ALARM,
+                            AudioSystem.setStreamVolumeIndexAS(AudioSystem.STREAM_ALARM,
                                     mSavedAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
                         }
                     }

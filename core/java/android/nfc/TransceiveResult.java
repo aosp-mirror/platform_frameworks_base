@@ -67,7 +67,7 @@ public final class TransceiveResult implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<TransceiveResult> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TransceiveResult> CREATOR =
             new Parcelable.Creator<TransceiveResult>() {
         @Override
         public TransceiveResult createFromParcel(Parcel in) {

@@ -129,7 +129,8 @@ public interface WebViewFactoryProvider {
      * Gets the TokenBindingService instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
      *
-     * @return the TokenBindingService instance
+     * @deprecated this method only returns {@code null}
+     * @return the TokenBindingService instance (which is always {@code null})
      */
     TokenBindingService getTokenBindingService();
 

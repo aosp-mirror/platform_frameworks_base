@@ -246,7 +246,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         dest.writeStringList(new ArrayList<>(mDomains));
     }
 
-    public static final Creator<IntentFilterVerificationInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<IntentFilterVerificationInfo> CREATOR =
             new Creator<IntentFilterVerificationInfo>() {
                 public IntentFilterVerificationInfo createFromParcel(Parcel source) {
                     return new IntentFilterVerificationInfo(source);

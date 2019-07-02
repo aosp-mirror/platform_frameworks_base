@@ -19,14 +19,16 @@ package android.net.wifi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import androidx.test.filters.SmallTest;
+
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiSsid}.
  */
+@SmallTest
 public class WifiSsidTest {
 
     private static final String TEST_SSID = "Test SSID";

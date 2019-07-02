@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.content.res.Configuration;
 
 /**
@@ -44,7 +45,7 @@ public interface ComponentCallbacks {
      *
      * @param newConfig The new device configuration.
      */
-    void onConfigurationChanged(Configuration newConfig);
+    void onConfigurationChanged(@NonNull Configuration newConfig);
 
     /**
      * This is called when the overall system is running low on memory, and

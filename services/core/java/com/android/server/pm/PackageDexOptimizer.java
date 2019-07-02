@@ -501,8 +501,10 @@ public class PackageDexOptimizer {
      */
     private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
-        // When a priv app is configured to run out of box, only verify it.
-        if (info.isPrivilegedApp() && DexManager.isPackageSelectedToRunOob(info.packageName)) {
+        // When an app or priv app is configured to run out of box, only verify it.
+        if (info.isEmbeddedDexUsed()
+                || (info.isPrivilegedApp()
+                    && DexManager.isPackageSelectedToRunOob(info.packageName))) {
             return "verify";
         }
 
@@ -553,8 +555,7 @@ public class PackageDexOptimizer {
         // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
         // the user does not have an existing profile.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !info.isForwardLocked() &&
-                (!isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata());
+        boolean isPublic = !isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata();
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.

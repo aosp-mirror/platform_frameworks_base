@@ -2,13 +2,27 @@ android_library {
 
     name: "SettingsLib",
 
-    libs: [
+    static_libs: [
         "androidx.annotation_annotation",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
+        "androidx.mediarouter_mediarouter-nodeps",
+
+        "SettingsLibHelpUtils",
+        "SettingsLibRestrictedLockUtils",
+        "SettingsLibActionBarShadow",
+        "SettingsLibAppPreference",
+        "SettingsLibSearchWidget",
+        "SettingsLibSettingsSpinner",
+        "SettingsLibLayoutPreference",
+        "SettingsLibActionButtonsPreference",
+        "SettingsLibEntityHeaderWidgets",
+        "SettingsLibBarChartPreference",
+        "SettingsLibProgressBar",
+        "SettingsLibAdaptiveIcon",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
@@ -16,7 +30,7 @@ android_library {
 
     resource_dirs: ["res"],
 
-    srcs: ["src/**/*.java"],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
 
     min_sdk_version: "21",
 
@@ -37,5 +51,3 @@ java_defaults {
         "SettingsLib",
     ],
 }
-
-// For the test package.

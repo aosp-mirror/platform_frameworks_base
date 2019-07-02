@@ -31,11 +31,12 @@ import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+
+import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -116,7 +117,8 @@ public class AppRestrictionsHelper {
                 if (info == null || !info.enabled
                         || (info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                     mIPm.installExistingPackageAsUser(packageName, mUser.getIdentifier(),
-                            0 /*installFlags*/, PackageManager.INSTALL_REASON_UNKNOWN);
+                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                            PackageManager.INSTALL_REASON_UNKNOWN, null);
                     if (DEBUG) {
                         Log.d(TAG, "Installing " + packageName);
                     }
@@ -419,7 +421,7 @@ public class AppRestrictionsHelper {
         List<InputMethodInfo> getInputMethodList() {
             InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            return imm.getInputMethodList();
+            return imm.getInputMethodListAsUser(mUser.getIdentifier());
         }
     }
 }

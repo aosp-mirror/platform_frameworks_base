@@ -17,9 +17,10 @@
 package android.os;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.MessageProto;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  *
@@ -75,11 +76,25 @@ public final class Message implements Parcelable {
     public Messenger replyTo;
 
     /**
+     * Indicates that the uid is not set;
+     *
+     * @hide Only for use within the system server.
+     */
+    public static final int UID_NONE = -1;
+
+    /**
      * Optional field indicating the uid that sent the message.  This is
      * only valid for messages posted by a {@link Messenger}; otherwise,
      * it will be -1.
      */
-    public int sendingUid = -1;
+    public int sendingUid = UID_NONE;
+
+    /**
+     * Optional field indicating the uid that caused this message to be enqueued.
+     *
+     * @hide Only for use within the system server.
+     */
+    public int workSourceUid = UID_NONE;
 
     /** If set message is in use.
      * This flag is set when the message is enqueued and remains set while it
@@ -100,8 +115,14 @@ public final class Message implements Parcelable {
     @UnsupportedAppUsage
     /*package*/ int flags;
 
+    /**
+     * The targeted delivery time of this message. The time-base is
+     * {@link SystemClock#uptimeMillis}.
+     * @hide Only for use within the tests.
+     */
     @UnsupportedAppUsage
-    /*package*/ long when;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public long when;
 
     /*package*/ Bundle data;
 
@@ -157,6 +178,7 @@ public final class Message implements Parcelable {
         m.obj = orig.obj;
         m.replyTo = orig.replyTo;
         m.sendingUid = orig.sendingUid;
+        m.workSourceUid = orig.workSourceUid;
         if (orig.data != null) {
             m.data = new Bundle(orig.data);
         }
@@ -308,7 +330,8 @@ public final class Message implements Parcelable {
         arg2 = 0;
         obj = null;
         replyTo = null;
-        sendingUid = -1;
+        sendingUid = UID_NONE;
+        workSourceUid = UID_NONE;
         when = 0;
         target = null;
         callback = null;
@@ -336,6 +359,7 @@ public final class Message implements Parcelable {
         this.obj = o.obj;
         this.replyTo = o.replyTo;
         this.sendingUid = o.sendingUid;
+        this.workSourceUid = o.workSourceUid;
 
         if (o.data != null) {
             this.data = (Bundle) o.data.clone();
@@ -581,7 +605,7 @@ public final class Message implements Parcelable {
         proto.end(messageToken);
     }
 
-    public static final Parcelable.Creator<Message> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Message> CREATOR
             = new Parcelable.Creator<Message>() {
         public Message createFromParcel(Parcel source) {
             Message msg = Message.obtain();
@@ -622,6 +646,7 @@ public final class Message implements Parcelable {
         dest.writeBundle(data);
         Messenger.writeMessengerOrNullToParcel(replyTo, dest);
         dest.writeInt(sendingUid);
+        dest.writeInt(workSourceUid);
     }
 
     private void readFromParcel(Parcel source) {
@@ -635,5 +660,6 @@ public final class Message implements Parcelable {
         data = source.readBundle();
         replyTo = Messenger.readMessengerOrNullFromParcel(source);
         sendingUid = source.readInt();
+        workSourceUid = source.readInt();
     }
 }

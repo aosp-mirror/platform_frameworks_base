@@ -17,12 +17,14 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.ASSIST_CONTEXT_FULL;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
-import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,6 +34,7 @@ import android.os.RemoteException;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 
 import java.io.PrintWriter;
@@ -48,8 +51,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     public static final String KEY_RECEIVER_EXTRA_COUNT = "count";
     public static final String KEY_RECEIVER_EXTRA_INDEX = "index";
 
-    private IActivityManager mService;
     private IWindowManager mWindowManager;
+    @VisibleForTesting
+    public IActivityTaskManager mActivityTaskManager;
     private Context mContext;
     private AppOpsManager mAppOpsManager;
 
@@ -83,7 +87,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          * is true.
          */
         @GuardedBy("mCallbacksLock")
-        void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount);
+        default void onAssistDataReceivedLocked(Bundle data, int activityIndex, int activityCount) {
+            // Do nothing
+        }
 
         /**
          * Called when we receive asynchronous assist screenshot. This call is only made if
@@ -93,7 +99,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
          * {@link #canHandleReceivedAssistDataLocked()} is true.
          */
         @GuardedBy("mCallbacksLock")
-        void onAssistScreenshotReceivedLocked(Bitmap screenshot);
+        default void onAssistScreenshotReceivedLocked(Bitmap screenshot) {
+            // Do nothing
+        }
 
         /**
          * Called when there is no more pending assist data or screenshots for the last request.
@@ -117,14 +125,14 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      *                                This can be {@link AppOpsManager#OP_NONE} to indicate that
      *                                screenshots should never be fetched.
      */
-    public AssistDataRequester(Context context, IActivityManager service,
+    public AssistDataRequester(Context context,
             IWindowManager windowManager, AppOpsManager appOpsManager,
             AssistDataRequesterCallbacks callbacks, Object callbacksLock,
             int requestStructureAppOps, int requestScreenshotAppOps) {
         mCallbacks = callbacks;
         mCallbacksLock = callbacksLock;
         mWindowManager = windowManager;
-        mService = service;
+        mActivityTaskManager = ActivityTaskManager.getService();
         mContext = context;
         mAppOpsManager = appOpsManager;
         mRequestStructureAppOps = requestStructureAppOps;
@@ -132,10 +140,39 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     }
 
     /**
+     * Request that autofill data be loaded asynchronously. The resulting data will be provided
+     * through the {@link AssistDataRequesterCallbacks}.
+     *
+     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String)}.
+     */
+    public void requestAutofillData(List<IBinder> activityTokens, int callingUid,
+            String callingPackage) {
+        requestData(activityTokens, true /* requestAutofillData */,
+                true /* fetchData */, false /* fetchScreenshot */,
+                true /* allowFetchData */, false /* allowFetchScreenshot */,
+                callingUid, callingPackage);
+    }
+
+    /**
+     * Request that assist data be loaded asynchronously. The resulting data will be provided
+     * through the {@link AssistDataRequesterCallbacks}.
+     *
+     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String)}.
+     */
+    public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
+            final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
+            int callingUid, String callingPackage) {
+        requestData(activityTokens, false /* requestAutofillData */, fetchData, fetchScreenshot,
+                allowFetchData, allowFetchScreenshot, callingUid, callingPackage);
+    }
+
+    /**
      * Request that assist data be loaded asynchronously. The resulting data will be provided
      * through the {@link AssistDataRequesterCallbacks}.
      *
      * @param activityTokens the list of visible activities
+     * @param requestAutofillData if true, will fetch the autofill data, otherwise, will fetch the
+     *     assist context data
      * @param fetchData whether or not to fetch the assist data, only applies if the caller is
      *     allowed to fetch the assist data, and the current activity allows assist data to be
      *     fetched from it
@@ -147,9 +184,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      * @param allowFetchScreenshot to be joined with other checks, determines whether or not the
      *     requester is allowed to fetch the assist screenshot
      */
-    public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
-            final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
-            int callingUid, String callingPackage) {
+    private void requestData(List<IBinder> activityTokens, final boolean requestAutofillData,
+            final boolean fetchData, final boolean fetchScreenshot, boolean allowFetchData,
+            boolean allowFetchScreenshot, int callingUid, String callingPackage) {
         // TODO(b/34090158): Known issue, if the assist data is not allowed on the current activity,
         //                   then no assist data is requested for any of the other activities
 
@@ -163,7 +200,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         // Ensure that the current activity supports assist data
         boolean isAssistDataAllowed = false;
         try {
-            isAssistDataAllowed = mService.isAssistDataAllowedOnCurrentActivity();
+            isAssistDataAllowed = mActivityTaskManager.isAssistDataAllowedOnCurrentActivity();
         } catch (RemoteException e) {
             // Should never happen
         }
@@ -188,9 +225,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                         Bundle receiverExtras = new Bundle();
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_INDEX, i);
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_COUNT, numActivities);
-                        if (mService.requestAssistContextExtras(ASSIST_CONTEXT_FULL, this,
-                                receiverExtras, topActivity, /* focused= */ i == 0,
-                                    /* newSessionId= */ i == 0)) {
+                        boolean result = requestAutofillData
+                                ? mActivityTaskManager.requestAutofillData(this,
+                                        receiverExtras, topActivity, 0 /* flags */)
+                                : mActivityTaskManager.requestAssistContextExtras(
+                                        ASSIST_CONTEXT_FULL, this, receiverExtras, topActivity,
+                                        /* focused= */ i == 0, /* newSessionId= */ i == 0);
+                        if (result) {
                             mPendingDataCount++;
                         } else if (i == 0) {
                             // Wasn't allowed... given that, let's not do the screenshot either.

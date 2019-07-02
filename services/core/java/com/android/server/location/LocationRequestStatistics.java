@@ -123,6 +123,9 @@ public class LocationRequestStatistics {
         // in foreground.
         private long mForegroundDurationMs;
 
+        // Time when package last went dormant (stopped requesting location)
+        private long mLastStopElapsedTimeMs;
+
         private PackageStatistics() {
             mInitialElapsedTimeMs = SystemClock.elapsedRealtime();
             mNumActiveRequests = 0;
@@ -131,6 +134,7 @@ public class LocationRequestStatistics {
             mSlowestIntervalMs = 0;
             mForegroundDurationMs = 0;
             mLastForegroundElapsedTimeMs = 0;
+            mLastStopElapsedTimeMs = 0;
         }
 
         private void startRequesting(long intervalMs) {
@@ -167,8 +171,8 @@ public class LocationRequestStatistics {
 
             mNumActiveRequests--;
             if (mNumActiveRequests == 0) {
-                long lastDurationMs
-                        = SystemClock.elapsedRealtime() - mLastActivitationElapsedTimeMs;
+                mLastStopElapsedTimeMs = SystemClock.elapsedRealtime();
+                long lastDurationMs = mLastStopElapsedTimeMs - mLastActivitationElapsedTimeMs;
                 mTotalDurationMs += lastDurationMs;
                 updateForeground(false);
             }
@@ -203,6 +207,13 @@ public class LocationRequestStatistics {
          */
         public long getTimeSinceFirstRequestMs() {
             return SystemClock.elapsedRealtime() - mInitialElapsedTimeMs;
+        }
+
+        /**
+         * Returns the time since the last request stopped in ms.
+         */
+        public long getTimeSinceLastRequestStoppedMs() {
+            return SystemClock.elapsedRealtime() - mLastStopElapsedTimeMs;
         }
 
         /**
@@ -244,6 +255,10 @@ public class LocationRequestStatistics {
                     .append(" minutes");
             if (isActive()) {
                 s.append(": Currently active");
+            } else {
+                s.append(": Last active ")
+                        .append((getTimeSinceLastRequestStoppedMs() / 1000) / 60)
+                        .append(" minutes ago");
             }
             return s.toString();
         }

@@ -17,8 +17,11 @@
 package com.android.server;
 
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Trace;
+
+import java.util.concurrent.Executor;
 
 /**
  * Shared singleton foreground thread for the system.  This is a thread for regular
@@ -34,6 +37,7 @@ public final class FgThread extends ServiceThread {
 
     private static FgThread sInstance;
     private static Handler sHandler;
+    private static HandlerExecutor sHandlerExecutor;
 
     private FgThread() {
         super("android.fg", android.os.Process.THREAD_PRIORITY_DEFAULT, true /*allowIo*/);
@@ -48,6 +52,7 @@ public final class FgThread extends ServiceThread {
             looper.setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
             sHandler = new Handler(sInstance.getLooper());
+            sHandlerExecutor = new HandlerExecutor(sHandler);
         }
     }
 
@@ -62,6 +67,13 @@ public final class FgThread extends ServiceThread {
         synchronized (FgThread.class) {
             ensureThreadLocked();
             return sHandler;
+        }
+    }
+
+    public static Executor getExecutor() {
+        synchronized (FgThread.class) {
+            ensureThreadLocked();
+            return sHandlerExecutor;
         }
     }
 }

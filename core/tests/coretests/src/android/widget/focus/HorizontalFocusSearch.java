@@ -17,12 +17,12 @@
 package android.widget.focus;
 
 import android.app.Activity;
-import android.widget.LinearLayout;
-import android.widget.Button;
-import android.widget.TextView;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.ViewGroup;
-import android.content.Context;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class HorizontalFocusSearch extends Activity {
 

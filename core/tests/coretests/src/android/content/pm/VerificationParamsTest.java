@@ -16,11 +16,11 @@
 
 package android.content.pm;
 
-import android.content.pm.VerificationParams;
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.LargeTest;
 
 /**
  * Tests the android.content.pm.VerificationParams class

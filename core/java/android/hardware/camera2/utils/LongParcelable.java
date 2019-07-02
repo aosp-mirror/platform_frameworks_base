@@ -32,7 +32,7 @@ public class LongParcelable implements Parcelable {
         this.number = number;
     }
 
-    public static final Parcelable.Creator<LongParcelable> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<LongParcelable> CREATOR =
             new Parcelable.Creator<LongParcelable>() {
         @Override
         public LongParcelable createFromParcel(Parcel in) {

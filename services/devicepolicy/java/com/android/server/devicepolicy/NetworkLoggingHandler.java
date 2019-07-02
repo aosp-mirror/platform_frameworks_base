@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DeviceAdminReceiver;
@@ -33,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A Handler class for managing network logging on a background thread.
@@ -59,6 +62,12 @@ final class NetworkLoggingHandler extends Handler {
 
     /** Delay after which older batches get discarded after a retrieval. */
     private static final long RETRIEVED_BATCH_DISCARD_DELAY_MS = 5 * 60 * 1000; // 5m
+
+    /** Throttle batch finalization to 10 seconds.*/
+    private static final long FORCE_FETCH_THROTTLE_NS = TimeUnit.SECONDS.toNanos(10);
+    /** Timestamp of the last call to finalise a batch. Used for throttling forced finalization.*/
+    @GuardedBy("this")
+    private long mLastFinalizationNanos = -1;
 
     /** Do not call into mDpm with locks held */
     private final DevicePolicyManagerService mDpm;
@@ -155,6 +164,26 @@ final class NetworkLoggingHandler extends Handler {
                 + "ms from now.");
     }
 
+    /**
+     * Forces batch finalisation. Throttled to 10 seconds per batch finalisation.
+     * @return the number of milliseconds to wait until batch finalisation can be forced.
+     */
+    long forceBatchFinalization() {
+        Bundle notificationExtras;
+        synchronized (this) {
+            final long toWaitNanos =
+                mLastFinalizationNanos + FORCE_FETCH_THROTTLE_NS - System.nanoTime();
+            if (toWaitNanos > 0) {
+                return NANOSECONDS.toMillis(toWaitNanos) + 1; // Round up.
+            }
+            notificationExtras = finalizeBatchAndBuildDeviceOwnerMessageLocked();
+        }
+        if (notificationExtras != null) {
+            notifyDeviceOwner(notificationExtras);
+        }
+        return 0;
+    }
+
     synchronized void pause() {
         Slog.d(TAG, "Paused network logging");
         mPaused = true;
@@ -192,6 +221,7 @@ final class NetworkLoggingHandler extends Handler {
     @GuardedBy("this")
     /** @returns extras if a message should be sent to the device owner */
     private Bundle finalizeBatchAndBuildDeviceOwnerMessageLocked() {
+        mLastFinalizationNanos = System.nanoTime();
         Bundle notificationExtras = null;
         if (mNetworkEvents.size() > 0) {
             // Assign ids to the events.

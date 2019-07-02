@@ -927,7 +927,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
             dest.writeLong(gId);
         }
         
-        public static final Parcelable.Creator<GroupMetadata> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<GroupMetadata> CREATOR =
                 new Parcelable.Creator<GroupMetadata>() {
             
             public GroupMetadata createFromParcel(Parcel in) {

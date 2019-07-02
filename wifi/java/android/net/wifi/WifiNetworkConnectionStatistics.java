@@ -68,7 +68,7 @@ public class WifiNetworkConnectionStatistics implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<WifiNetworkConnectionStatistics> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiNetworkConnectionStatistics> CREATOR =
         new Creator<WifiNetworkConnectionStatistics>() {
             public WifiNetworkConnectionStatistics createFromParcel(Parcel in) {
                 int numConnection = in.readInt();

@@ -19,17 +19,17 @@ package android.transition;
 import android.animation.AnimatorSetActivity;
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.frameworks.coretests.R;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 
 public class SlideTransitionTest extends ActivityInstrumentationTestCase2<AnimatorSetActivity> {
 

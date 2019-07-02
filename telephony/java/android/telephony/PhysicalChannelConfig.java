@@ -222,7 +222,7 @@ public final class PhysicalChannelConfig implements Parcelable {
                 mChannelNumber, mPhysicalCellId, mContextIds);
     }
 
-    public static final Parcelable.Creator<PhysicalChannelConfig> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PhysicalChannelConfig> CREATOR =
         new Parcelable.Creator<PhysicalChannelConfig>() {
             public PhysicalChannelConfig createFromParcel(Parcel in) {
                 return new PhysicalChannelConfig(in);

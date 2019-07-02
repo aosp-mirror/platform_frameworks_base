@@ -248,7 +248,11 @@ public abstract class ShellCommand {
         }
         if (DEBUG) Slog.d(TAG, "Error: Unable to open file: " + path);
         getErrPrintWriter().println("Error: Unable to open file: " + path);
-        getErrPrintWriter().println("Consider using a file under /data/local/tmp/");
+
+        String suggestedPath = "/data/local/tmp/";
+        if (path == null || !path.startsWith(suggestedPath)) {
+            getErrPrintWriter().println("Consider using a file under " + suggestedPath);
+        }
         return null;
     }
 

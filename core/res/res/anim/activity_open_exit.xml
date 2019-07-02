@@ -18,14 +18,28 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false">
-    <translate
-        android:fromYDelta="0"
-        android:toYDelta="-2%"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="425"/>
+
+    <!-- Fade out, over a black surface, which simulates a black scrim -->
     <alpha
-        android:fromAlpha="1.0"
-        android:toAlpha="0.9"
+        android:fromAlpha="1"
+        android:toAlpha="0.4"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
         android:interpolator="@interpolator/linear"
-        android:duration="117"/>
+        android:startOffset="83"
+        android:duration="167"/>
+
+    <scale
+        android:fromXScale="1"
+        android:toXScale="1.05"
+        android:fromYScale="1"
+        android:toYScale="1.05"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_extra_slow_in"
+        android:duration="400"/>
 </set>

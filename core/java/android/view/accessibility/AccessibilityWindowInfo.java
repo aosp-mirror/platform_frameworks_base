@@ -96,6 +96,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private static final int MAX_POOL_SIZE = 10;
     private static final SynchronizedPool<AccessibilityWindowInfo> sPool =
             new SynchronizedPool<AccessibilityWindowInfo>(MAX_POOL_SIZE);
+    // TODO(b/129300068): Remove sNumInstancesInUse.
     private static AtomicInteger sNumInstancesInUse;
 
     // Data.
@@ -113,6 +114,11 @@ public final class AccessibilityWindowInfo implements Parcelable {
 
     private AccessibilityWindowInfo() {
         /* do nothing - hide constructor */
+    }
+
+    /** @hide */
+    AccessibilityWindowInfo(AccessibilityWindowInfo info) {
+        init(info);
     }
 
     /**
@@ -448,26 +454,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public static AccessibilityWindowInfo obtain(AccessibilityWindowInfo info) {
         AccessibilityWindowInfo infoClone = obtain();
-
-        infoClone.mType = info.mType;
-        infoClone.mLayer = info.mLayer;
-        infoClone.mBooleanProperties = info.mBooleanProperties;
-        infoClone.mId = info.mId;
-        infoClone.mParentId = info.mParentId;
-        infoClone.mBoundsInScreen.set(info.mBoundsInScreen);
-        infoClone.mTitle = info.mTitle;
-        infoClone.mAnchorId = info.mAnchorId;
-
-        if (info.mChildIds != null && info.mChildIds.size() > 0) {
-            if (infoClone.mChildIds == null) {
-                infoClone.mChildIds = info.mChildIds.clone();
-            } else {
-                infoClone.mChildIds.addAll(info.mChildIds);
-            }
-        }
-
-        infoClone.mConnectionId = info.mConnectionId;
-
+        infoClone.init(info);
         return infoClone;
     }
 
@@ -527,6 +514,32 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
 
         parcel.writeInt(mConnectionId);
+    }
+
+    /**
+     * Initializes this instance from another one.
+     *
+     * @param other The other instance.
+     */
+    private void init(AccessibilityWindowInfo other) {
+        mType = other.mType;
+        mLayer = other.mLayer;
+        mBooleanProperties = other.mBooleanProperties;
+        mId = other.mId;
+        mParentId = other.mParentId;
+        mBoundsInScreen.set(other.mBoundsInScreen);
+        mTitle = other.mTitle;
+        mAnchorId = other.mAnchorId;
+
+        if (other.mChildIds != null && other.mChildIds.size() > 0) {
+            if (mChildIds == null) {
+                mChildIds = other.mChildIds.clone();
+            } else {
+                mChildIds.addAll(other.mChildIds);
+            }
+        }
+
+        mConnectionId = other.mConnectionId;
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -770,7 +783,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         return changes;
     }
 
-    public static final Parcelable.Creator<AccessibilityWindowInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityWindowInfo> CREATOR =
             new Creator<AccessibilityWindowInfo>() {
         @Override
         public AccessibilityWindowInfo createFromParcel(Parcel parcel) {

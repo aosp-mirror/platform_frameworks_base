@@ -52,6 +52,8 @@ class XmlPullParser : public IPackageDeclStack {
     kEndElement,
     kText,
     kComment,
+    kCdataStart,
+    kCdataEnd,
   };
 
   /**
@@ -159,6 +161,8 @@ class XmlPullParser : public IPackageDeclStack {
   static void XMLCALL EndElementHandler(void* user_data, const char* name);
   static void XMLCALL EndNamespaceHandler(void* user_data, const char* prefix);
   static void XMLCALL CommentDataHandler(void* user_data, const char* comment);
+  static void XMLCALL StartCdataSectionHandler(void* user_data);
+  static void XMLCALL EndCdataSectionHandler(void* user_data);
 
   struct EventData {
     Event event;
@@ -223,6 +227,10 @@ inline ::std::ostream& operator<<(::std::ostream& out,
       return out << "Text";
     case XmlPullParser::Event::kComment:
       return out << "Comment";
+    case XmlPullParser::Event::kCdataStart:
+      return out << "CdataStart";
+    case XmlPullParser::Event::kCdataEnd:
+      return out << "CdataEnd";
   }
   return out;
 }
@@ -240,6 +248,8 @@ inline bool XmlPullParser::NextChildNode(XmlPullParser* parser, size_t start_dep
       case Event::kText:
       case Event::kComment:
       case Event::kStartElement:
+      case Event::kCdataStart:
+      case Event::kCdataEnd:
         return true;
       default:
         break;

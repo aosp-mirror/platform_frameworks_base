@@ -21,8 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 
-import com.android.systemui.statusbar.policy.DataSaverController.Listener;
-
 import java.util.ArrayList;
 
 public class DataSaverControllerImpl implements DataSaverController {

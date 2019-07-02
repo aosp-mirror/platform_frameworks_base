@@ -40,6 +40,12 @@ class PersistentDataBlockLock extends OemLock {
     }
 
     @Override
+    @Nullable
+    String getLockName() {
+        return "";
+    }
+
+    @Override
     void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
         // Note: this implementation does not require a signature
         if (signature != null) {
@@ -67,6 +73,10 @@ class PersistentDataBlockLock extends OemLock {
         // unlocked but doesn't actually do any unlocking.
         final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
                 mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        if (pdbm == null) {
+            Slog.w(TAG, "PersistentDataBlock is not supported on this device");
+            return;
+        }
         pdbm.setOemUnlockEnabled(allowedByDevice);
     }
 
@@ -74,6 +84,10 @@ class PersistentDataBlockLock extends OemLock {
     boolean isOemUnlockAllowedByDevice() {
         final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
             mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        if (pdbm == null) {
+            Slog.w(TAG, "PersistentDataBlock is not supported on this device");
+            return false;
+        }
         return pdbm.getOemUnlockEnabled();
     }
 
@@ -85,6 +99,10 @@ class PersistentDataBlockLock extends OemLock {
     private void disallowUnlockIfNotUnlocked() {
         final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
             mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        if (pdbm == null) {
+            Slog.w(TAG, "PersistentDataBlock is not supported on this device");
+            return;
+        }
         if (pdbm.getFlashLockState() != PersistentDataBlockManager.FLASH_LOCK_UNLOCKED) {
             pdbm.setOemUnlockEnabled(false);
         }

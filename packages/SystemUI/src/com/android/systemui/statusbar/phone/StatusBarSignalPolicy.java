@@ -17,29 +17,20 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Rect;
 import android.os.Handler;
-import android.os.Looper;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.widget.ImageView;
-import com.android.settingslib.graph.SignalDrawable;
+
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -104,7 +95,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         boolean vpnVisible = mSecurityController.isVpnEnabled();
         int vpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
 
-        mIconController.setIcon(mSlotVpn, vpnIconId, null);
+        mIconController.setIcon(mSlotVpn, vpnIconId,
+                mContext.getResources().getString(R.string.accessibility_vpn_on));
         mIconController.setIconVisibility(mSlotVpn, vpnVisible);
     }
 

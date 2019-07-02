@@ -20,11 +20,13 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.widget.RemoteViews;
 
 import com.android.internal.util.Preconditions;
@@ -90,11 +92,13 @@ public final class CustomDescription implements Parcelable {
     private final RemoteViews mPresentation;
     private final ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
     private final ArrayList<Pair<InternalValidator, BatchUpdates>> mUpdates;
+    private final SparseArray<InternalOnClickAction> mActions;
 
     private CustomDescription(Builder builder) {
         mPresentation = builder.mPresentation;
         mTransformations = builder.mTransformations;
         mUpdates = builder.mUpdates;
+        mActions = builder.mActions;
     }
 
     /** @hide */
@@ -115,6 +119,13 @@ public final class CustomDescription implements Parcelable {
         return mUpdates;
     }
 
+    /** @hide */
+    @Nullable
+    @TestApi
+    public SparseArray<InternalOnClickAction> getActions() {
+        return mActions;
+    }
+
     /**
      * Builder for {@link CustomDescription} objects.
      */
@@ -124,6 +135,7 @@ public final class CustomDescription implements Parcelable {
         private boolean mDestroyed;
         private ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
         private ArrayList<Pair<InternalValidator, BatchUpdates>> mUpdates;
+        private SparseArray<InternalOnClickAction> mActions;
 
         /**
          * Default constructor.
@@ -157,10 +169,14 @@ public final class CustomDescription implements Parcelable {
          *
          * @param id view id of the children view.
          * @param transformation an implementation provided by the Android System.
+         *
          * @return this builder.
+         *
          * @throws IllegalArgumentException if {@code transformation} is not a class provided
          * by the Android System.
+         * @throws IllegalStateException if {@link #build()} was already called.
          */
+        @NonNull
         public Builder addChild(int id, @NonNull Transformation transformation) {
             throwIfDestroyed();
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
@@ -250,9 +266,12 @@ public final class CustomDescription implements Parcelable {
          * is satisfied.
          *
          * @return this builder
+         *
          * @throws IllegalArgumentException if {@code condition} is not a class provided
          * by the Android System.
+         * @throws IllegalStateException if {@link #build()} was already called.
          */
+        @NonNull
         public Builder batchUpdate(@NonNull Validator condition, @NonNull BatchUpdates updates) {
             throwIfDestroyed();
             Preconditions.checkArgument((condition instanceof InternalValidator),
@@ -266,8 +285,63 @@ public final class CustomDescription implements Parcelable {
         }
 
         /**
+         * Sets an action to be applied to the {@link RemoteViews presentation template} when the
+         * child view with the given {@code id} is clicked.
+         *
+         * <p>Typically used when the presentation uses a masked field (like {@code ****}) for
+         * sensitive fields like passwords or credit cards numbers, but offers a an icon that the
+         * user can tap to show the value for that field.
+         *
+         * <p>Example:
+         *
+         * <pre class="prettyprint">
+         * customDescriptionBuilder
+         *   .addChild(R.id.password_plain, new CharSequenceTransformation
+         *      .Builder(passwordId, Pattern.compile("^(.*)$"), "$1").build())
+         *   .addOnClickAction(R.id.showIcon, new VisibilitySetterAction
+         *     .Builder(R.id.hideIcon, View.VISIBLE)
+         *     .setVisibility(R.id.showIcon, View.GONE)
+         *     .setVisibility(R.id.password_plain, View.VISIBLE)
+         *     .setVisibility(R.id.password_masked, View.GONE)
+         *     .build())
+         *   .addOnClickAction(R.id.hideIcon, new VisibilitySetterAction
+         *     .Builder(R.id.showIcon, View.VISIBLE)
+         *     .setVisibility(R.id.hideIcon, View.GONE)
+         *     .setVisibility(R.id.password_masked, View.VISIBLE)
+         *     .setVisibility(R.id.password_plain, View.GONE)
+         *     .build());
+         * </pre>
+         *
+         * <p><b>Note:</b> Currently only one action can be applied to a child; if this method
+         * is called multiple times passing the same {@code id}, only the last call will be used.
+         *
+         * @param id resource id of the child view.
+         * @param action action to be performed. Must be an an implementation provided by the
+         * Android System.
+         *
+         * @return this builder
+         *
+         * @throws IllegalArgumentException if {@code action} is not a class provided
+         * by the Android System.
+         * @throws IllegalStateException if {@link #build()} was already called.
+         */
+        @NonNull
+        public Builder addOnClickAction(int id, @NonNull OnClickAction action) {
+            throwIfDestroyed();
+            Preconditions.checkArgument((action instanceof InternalOnClickAction),
+                    "not provided by Android System: " + action);
+            if (mActions == null) {
+                mActions = new SparseArray<InternalOnClickAction>();
+            }
+            mActions.put(id, (InternalOnClickAction) action);
+
+            return this;
+        }
+
+        /**
          * Creates a new {@link CustomDescription} instance.
          */
+        @NonNull
         public CustomDescription build() {
             throwIfDestroyed();
             mDestroyed = true;
@@ -294,6 +368,8 @@ public final class CustomDescription implements Parcelable {
                     .append(mTransformations == null ? "N/A" : mTransformations.size())
                 .append(", updates=")
                     .append(mUpdates == null ? "N/A" : mUpdates.size())
+                .append(", actions=")
+                    .append(mActions == null ? "N/A" : mActions.size())
                 .append("]").toString();
     }
 
@@ -339,8 +415,21 @@ public final class CustomDescription implements Parcelable {
             dest.writeParcelableArray(conditions, flags);
             dest.writeParcelableArray(updates, flags);
         }
+        if (mActions == null) {
+            dest.writeIntArray(null);
+        } else {
+            final int size = mActions.size();
+            final int[] ids = new int[size];
+            final InternalOnClickAction[] values = new InternalOnClickAction[size];
+            for (int i = 0; i < size; i++) {
+                ids[i] = mActions.keyAt(i);
+                values[i] = mActions.valueAt(i);
+            }
+            dest.writeIntArray(ids);
+            dest.writeParcelableArray(values, flags);
+        }
     }
-    public static final Parcelable.Creator<CustomDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CustomDescription> CREATOR =
             new Parcelable.Creator<CustomDescription>() {
         @Override
         public CustomDescription createFromParcel(Parcel parcel) {
@@ -351,13 +440,13 @@ public final class CustomDescription implements Parcelable {
             if (parentPresentation == null) return null;
 
             final Builder builder = new Builder(parentPresentation);
-            final int[] ids = parcel.createIntArray();
-            if (ids != null) {
+            final int[] transformationIds = parcel.createIntArray();
+            if (transformationIds != null) {
                 final InternalTransformation[] values =
                     parcel.readParcelableArray(null, InternalTransformation.class);
-                final int size = ids.length;
+                final int size = transformationIds.length;
                 for (int i = 0; i < size; i++) {
-                    builder.addChild(ids[i], values[i]);
+                    builder.addChild(transformationIds[i], values[i]);
                 }
             }
             final InternalValidator[] conditions =
@@ -367,6 +456,15 @@ public final class CustomDescription implements Parcelable {
                 final int size = conditions.length;
                 for (int i = 0; i < size; i++) {
                     builder.batchUpdate(conditions[i], updates[i]);
+                }
+            }
+            final int[] actionIds = parcel.createIntArray();
+            if (actionIds != null) {
+                final InternalOnClickAction[] values =
+                    parcel.readParcelableArray(null, InternalOnClickAction.class);
+                final int size = actionIds.length;
+                for (int i = 0; i < size; i++) {
+                    builder.addOnClickAction(actionIds[i], values[i]);
                 }
             }
             return builder.build();

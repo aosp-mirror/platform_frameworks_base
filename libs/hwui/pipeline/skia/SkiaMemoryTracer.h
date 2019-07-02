@@ -50,8 +50,8 @@ public:
     }
 
     bool shouldDumpWrappedObjects() const override { return true; }
-    void setMemoryBacking(const char*, const char*, const char*) override { }
-    void setDiscardableMemoryBacking(const char*, const SkDiscardableMemory&) override { }
+    void setMemoryBacking(const char*, const char*, const char*) override {}
+    void setDiscardableMemoryBacking(const char*, const SkDiscardableMemory&) override {}
 
 private:
     struct TraceValue {

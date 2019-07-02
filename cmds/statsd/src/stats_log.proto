@@ -46,7 +46,7 @@ message EventMetricData {
 
   optional Atom atom = 2;
 
-  optional int64 wall_clock_timestamp_nanos = 3;
+  optional int64 wall_clock_timestamp_nanos = 3 [deprecated = true];
 }
 
 message CountBucketInfo {
@@ -106,13 +106,31 @@ message ValueBucketInfo {
 
   optional int64 end_bucket_elapsed_nanos = 2;
 
-  optional int64 value = 3;
+  optional int64 value = 3 [deprecated = true];
+
+  oneof single_value {
+      int64 value_long = 7 [deprecated = true];
+
+      double value_double = 8 [deprecated = true];
+  }
+
+  message Value {
+      optional int32 index = 1;
+      oneof value {
+          int64 value_long = 2;
+          double value_double = 3;
+      }
+  }
+
+  repeated Value values = 9;
 
   optional int64 bucket_num = 4;
 
   optional int64 start_bucket_elapsed_millis = 5;
 
   optional int64 end_bucket_elapsed_millis = 6;
+
+  optional int64 condition_true_nanos = 10;
 }
 
 message ValueMetricData {
@@ -136,7 +154,7 @@ message GaugeBucketInfo {
 
   repeated int64 elapsed_timestamp_nanos = 4;
 
-  repeated int64 wall_clock_timestamp_nanos = 5;
+  repeated int64 wall_clock_timestamp_nanos = 5 [deprecated = true];
 
   optional int64 bucket_num = 6;
 
@@ -203,6 +221,10 @@ message StatsLogReport {
   optional DimensionsValue dimensions_path_in_what = 11;
 
   optional DimensionsValue dimensions_path_in_condition = 12;
+
+  // DO NOT USE field 13.
+
+  optional bool is_active = 14;
 }
 
 message UidMapping {
@@ -217,6 +239,14 @@ message UidMapping {
             optional bool deleted = 4;
 
             optional uint64 name_hash = 5;
+
+            optional string version_string = 6;
+
+            optional uint64 version_string_hash = 7;
+
+            optional string installer = 8;
+
+            optional uint64 installer_hash = 9;
         }
         optional int64 elapsed_timestamp_nanos = 1;
 
@@ -234,6 +264,10 @@ message UidMapping {
         optional int64 new_version = 5;
         optional int64 prev_version = 6;
         optional uint64 app_hash = 7;
+        optional string new_version_string = 8;
+        optional string prev_version_string = 9;
+        optional uint64 new_version_string_hash = 10;
+        optional uint64 prev_version_string_hash = 11;
     }
     repeated Change changes = 2;
 }
@@ -322,6 +356,7 @@ message StatsdStatsReport {
         optional bool is_valid = 9;
         repeated int32 broadcast_sent_time_sec = 10;
         repeated int32 data_drop_time_sec = 11;
+        repeated int64 data_drop_bytes = 21;
         repeated int32 dump_report_time_sec = 12;
         repeated int32 dump_report_data_size = 20;
         repeated MatcherStats matcher_stats = 13;
@@ -334,6 +369,8 @@ message StatsdStatsReport {
             optional int32 field_int32 = 2;
         }
         repeated Annotation annotation = 18;
+        repeated int32 activation_time_sec = 22;
+        repeated int32 deactivation_time_sec = 23;
     }
 
     repeated ConfigStats config_stats = 3;
@@ -363,8 +400,37 @@ message StatsdStatsReport {
         optional int64 total_pull = 2;
         optional int64 total_pull_from_cache = 3;
         optional int64 min_pull_interval_sec = 4;
+        optional int64 average_pull_time_nanos = 5;
+        optional int64 max_pull_time_nanos = 6;
+        optional int64 average_pull_delay_nanos = 7;
+        optional int64 max_pull_delay_nanos = 8;
+        optional int64 data_error = 9;
+        optional int64 pull_timeout = 10;
+        optional int64 pull_exceed_max_delay = 11;
+        optional int64 pull_failed = 12;
+        optional int64 stats_companion_pull_failed = 13;
+        optional int64 stats_companion_pull_binder_transaction_failed = 14;
+        optional int64 empty_data = 15;
+        optional int64 registered_count = 16;
+        optional int64 unregistered_count = 17;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
+
+    message AtomMetricStats {
+      optional int64 metric_id = 1;
+      optional int64 hard_dimension_limit_reached = 2;
+      optional int64 late_log_event_skipped = 3;
+      optional int64 skipped_forward_buckets = 4;
+      optional int64 bad_value_type = 5;
+      optional int64 condition_change_in_next_bucket = 6;
+      optional int64 invalidated_bucket = 7;
+      optional int64 bucket_dropped = 8;
+      optional int64 min_bucket_boundary_delay_ns = 9;
+      optional int64 max_bucket_boundary_delay_ns = 10;
+      optional int64 bucket_unknown_condition = 11;
+      optional int64 bucket_count = 12;
+    }
+    repeated AtomMetricStats atom_metric_stats = 17;
 
     message LoggerErrorStats {
         optional int32 logger_disconnection_sec = 1;
@@ -386,4 +452,43 @@ message StatsdStatsReport {
     repeated int64 log_loss_stats = 14;
 
     repeated int32 system_restart_sec = 15;
+
+    message LogLossStats {
+        optional int32 detected_time_sec = 1;
+        optional int32 count = 2;
+        optional int32 last_error = 3;
+        optional int32 last_tag = 4;
+        optional int32 uid = 5;
+        optional int32 pid = 6;
+    }
+    repeated LogLossStats detected_log_loss = 16;
+
+    message EventQueueOverflow {
+        optional int32 count = 1;
+        optional int64 max_queue_history_ns = 2;
+        optional int64 min_queue_history_ns = 3;
+    }
+
+    optional EventQueueOverflow queue_overflow = 18;
+
+    message ActivationBroadcastGuardrail {
+        optional int32 uid = 1;
+        repeated int32 guardrail_met_sec = 2;
+    }
+
+    repeated ActivationBroadcastGuardrail activation_guardrail_stats = 19;
+}
+
+message AlertTriggerDetails {
+    message MetricValue {
+        optional int64 metric_id = 1;
+        optional DimensionsValue dimension_in_what = 2;
+        optional DimensionsValue dimension_in_condition = 3;
+        optional int64 value = 4;
+    }
+    oneof value {
+        MetricValue trigger_metric = 1;
+        EventMetricData trigger_event = 2;
+    }
+    optional UidMapping.PackageInfoSnapshot package_info = 3;
 }

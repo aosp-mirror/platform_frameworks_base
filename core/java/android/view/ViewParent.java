@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -660,4 +661,17 @@ public interface ViewParent {
      * @return true if the action was consumed by this ViewParent
      */
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle arguments);
+
+    /**
+     * Given a touchable region of a child, this method reduces region by the bounds of all views on
+     * top of the child for which {@link View#canReceivePointerEvents} returns {@code true}. This
+     * applies recursively for all views in the view hierarchy on top of this one.
+     *
+     * @param touchableRegion The touchable region we want to modify.
+     * @param view A child view of this ViewGroup which indicates the z-order of the touchable
+     *             region.
+     * @hide
+     */
+    default void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
+    }
 }

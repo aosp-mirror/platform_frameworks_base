@@ -55,8 +55,13 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"Эч качан HDCP текшерүү колдонулбасын"</item>
-    <item msgid="3878793616631049349">"HDCP текшерүү DRM мазмунуна гана колдонулсун"</item>
+    <item msgid="3878793616631049349">"HDCP текшерүү DRM мазмунуна гана колдонулат"</item>
     <item msgid="45075631231212732">"Ар дайым HDCP текшерүү колдонулсун"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"Өчүк"</item>
+    <item msgid="1969681323976948639">"Чыпкалар иштетилди"</item>
+    <item msgid="8719029132154020716">"Иштетилди"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (Демейки)"</item>
@@ -130,13 +135,19 @@
     <item msgid="7158319962230727476">"Аудионун сапатын оптималдаштыруу (990кб/сек./909кб/сек.)"</item>
     <item msgid="2921767058740704969">"Теңделген аудио жана туташуу сапаты (660кб/сек./606кб/сек.)"</item>
     <item msgid="8860982705384396512">"Туташуунун сапатын оптималдаштыруу (330кб/сек./303кб/сек.)"</item>
-    <item msgid="4414060457677684127">"Эң жакшы сунуш (Ыңгайлуу өткөрүү ылдамдыгы)"</item>
+    <item msgid="4414060457677684127">"Мүмкүн болгон эң мыкты натыйжа (адаптивдүү битрейт)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Аудионун сапатын оптималдаштыруу"</item>
     <item msgid="4327143584633311908">"Теңделген аудио жана туташуу сапаты"</item>
     <item msgid="4681409244565426925">"Туташуунун сапатын оптималдаштыруу"</item>
-    <item msgid="364670732877872677">"Эң жакшы сунуш (Ыңгайлуу өткөрүү ылдамдыгы)"</item>
+    <item msgid="364670732877872677">"Мүмкүн болгон эң мыкты натыйжа (адаптивдүү битрейт)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", жандырылган"</item>
+    <item msgid="8962366465966010158">", жандырылган (аудио)"</item>
+    <item msgid="4046665544396189228">", жандырылган (телефон)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Өчүк"</item>
@@ -220,7 +231,7 @@
     <item msgid="1340692776955662664">"glGetError\'го карата стекти чакыруу"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"Өчүрүү"</item>
+    <item msgid="993742912147090253">"Өчүк"</item>
     <item msgid="675719912558941285">"Тик бурчтуу эмес кесилген аймакты көк түстө тартуу"</item>
     <item msgid="1064373276095698656">"Текшерилген тартуу буйруктарын жашыл менен белгилөө"</item>
   </string-array>

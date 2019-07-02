@@ -23,8 +23,8 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashSet;
@@ -46,7 +46,7 @@ import java.util.Set;
 final class ProcessedPackagesJournal {
     private static final String TAG = "ProcessedPackagesJournal";
     private static final String JOURNAL_FILE_NAME = "processed";
-    private static final boolean DEBUG = BackupManagerService.DEBUG || false;
+    private static final boolean DEBUG = BackupManagerService.DEBUG;
 
     // using HashSet instead of ArraySet since we expect 100-500 elements range
     @GuardedBy("mProcessedPackages")

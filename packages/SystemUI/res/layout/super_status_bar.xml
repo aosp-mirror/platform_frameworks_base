@@ -56,11 +56,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
-              android:layout="@layout/car_fullscreen_user_switcher"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"/>
-
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -74,6 +69,33 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
+    <LinearLayout
+        android:id="@+id/lock_icon_container"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_height"
+        android:layout_gravity="top|center_horizontal">
+        <com.android.systemui.statusbar.phone.LockIcon
+            android:id="@+id/lock_icon"
+            android:layout_width="@dimen/keyguard_lock_width"
+            android:layout_height="@dimen/keyguard_lock_height"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/keyguard_lock_padding"
+            android:contentDescription="@string/accessibility_unlock_button"
+            android:src="@*android:drawable/ic_lock"
+            android:scaleType="center" />
+        <com.android.keyguard.KeyguardMessageArea
+            android:id="@+id/keyguard_message_area"
+            style="@style/Keyguard.TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/keyguard_lock_padding"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:focusable="true" />
+    </LinearLayout>
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

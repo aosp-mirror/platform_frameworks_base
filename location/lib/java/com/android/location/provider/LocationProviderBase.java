@@ -16,14 +16,12 @@
 
 package com.android.location.provider;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-
+import android.annotation.Nullable;
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,9 +30,14 @@ import android.os.WorkSource;
 import android.util.Log;
 
 import com.android.internal.location.ILocationProvider;
+import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.util.FastPrintWriter;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for location providers implemented as unbundled services.
@@ -54,12 +57,6 @@ import com.android.internal.util.FastPrintWriter;
  * of this package for more information.
  */
 public abstract class LocationProviderBase {
-    private final String TAG;
-
-    /** @hide */
-    protected final ILocationManager mLocationManager;
-    private final ProviderProperties mProperties;
-    private final IBinder mBinder;
 
     /**
      * Bundle key for a version of the location containing no GPS data.
@@ -76,49 +73,36 @@ public abstract class LocationProviderBase {
      */
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
-    private final class Service extends ILocationProvider.Stub {
-        @Override
-        public void enable() {
-            onEnable();
-        }
-        @Override
-        public void disable() {
-            onDisable();
-        }
-        @Override
-        public void setRequest(ProviderRequest request, WorkSource ws) {
-            onSetRequest(new ProviderRequestUnbundled(request), ws);
-        }
-        @Override
-        public ProviderProperties getProperties() {
-            return mProperties;
-        }
-        @Override
-        public int getStatus(Bundle extras) {
-            return onGetStatus(extras);
-        }
-        @Override
-        public long getStatusUpdateTime() {
-            return onGetStatusUpdateTime();
-        }
-        @Override
-        public boolean sendExtraCommand(String command, Bundle extras) {
-            return onSendExtraCommand(command, extras);
-        }
-        @Override
-        public void dump(FileDescriptor fd, String[] args) {
-            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd));
-            onDump(fd, pw, args);
-            pw.flush();
-        }
-    }
+    private final String mTag;
+    private final IBinder mBinder;
+
+    /**
+     * This field may be removed in the future, do not rely on it.
+     *
+     * @deprecated Do not use this field! Use LocationManager APIs instead. If you use this field
+     * you may be broken in the future.
+     * @hide
+     */
+    @Deprecated
+    protected final ILocationManager mLocationManager;
+
+    // write locked on mBinder, read lock is optional depending on atomicity requirements
+    @Nullable private volatile ILocationProviderManager mManager;
+    private volatile ProviderProperties mProperties;
+    private volatile boolean mEnabled;
+    private final ArrayList<String> mAdditionalProviderPackages;
 
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
-        TAG = tag;
-        IBinder b = ServiceManager.getService(Context.LOCATION_SERVICE);
-        mLocationManager = ILocationManager.Stub.asInterface(b);
-        mProperties = properties.getProviderProperties();
+        mTag = tag;
         mBinder = new Service();
+
+        mLocationManager = ILocationManager.Stub.asInterface(
+                ServiceManager.getService(Context.LOCATION_SERVICE));
+
+        mManager = null;
+        mProperties = properties.getProviderProperties();
+        mEnabled = true;
+        mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
     public IBinder getBinder() {
@@ -126,53 +110,145 @@ public abstract class LocationProviderBase {
     }
 
     /**
-     * Used by the location provider to report new locations.
+     * Sets whether this provider is currently enabled or not. Note that this is specific to the
+     * provider only, and is not related to global location settings. This is a hint to the Location
+     * Manager that this provider will generally be unable to fulfill incoming requests. This
+     * provider may still receive callbacks to onSetRequest while not enabled, and must decide
+     * whether to attempt to satisfy those requests or not.
      *
-     * @param location new Location to report
-     *
-     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     * Some guidelines: providers should set their own enabled/disabled status based only on state
+     * "owned" by that provider. For instance, providers should not take into account the state of
+     * the location master setting when setting themselves enabled or disabled, as this state is not
+     * owned by a particular provider. If a provider requires some additional user consent that is
+     * particular to the provider, this should be use to set the enabled/disabled state. If the
+     * provider proxies to another provider, the child provider's enabled/disabled state should be
+     * taken into account in the parent's enabled/disabled state. For most providers, it is expected
+     * that they will be always enabled.
      */
-    public final void reportLocation(Location location) {
-        try {
-            mLocationManager.reportLocation(location, false);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-        } catch (Exception e) {
-            // never crash provider, might be running in a system process
-            Log.e(TAG, "Exception", e);
+    public void setEnabled(boolean enabled) {
+        synchronized (mBinder) {
+            if (mEnabled == enabled) {
+                return;
+            }
+
+            mEnabled = enabled;
+        }
+
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onSetEnabled(mEnabled);
+            } catch (RemoteException | RuntimeException e) {
+                Log.w(mTag, e);
+            }
         }
     }
 
     /**
-     * Enable the location provider.
-     * <p>The provider may initialize resources, but does
-     * not yet need to report locations.
+     * Sets the provider properties that may be queried by clients. Generally speaking, providers
+     * should try to avoid changing their properties after construction.
      */
-    public abstract void onEnable();
+    public void setProperties(ProviderPropertiesUnbundled properties) {
+        synchronized (mBinder) {
+            mProperties = properties.getProviderProperties();
+        }
 
-    /**
-     * Disable the location provider.
-     * <p>The provider must release resources, and stop
-     * performing work. It may no longer report locations.
-     */
-    public abstract void onDisable();
-
-    /**
-     * Set the {@link ProviderRequest} requirements for this provider.
-     * <p>Each call to this method overrides all previous requests.
-     * <p>This method might trigger the provider to start returning
-     * locations, or to stop returning locations, depending on the
-     * parameters in the request.
-     */
-    public abstract void onSetRequest(ProviderRequestUnbundled request, WorkSource source);
-
-    /**
-     * Dump debug information.
-     */
-    public void onDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onSetProperties(mProperties);
+            } catch (RemoteException | RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
     }
 
     /**
+     * Sets a list of additional packages that should be considered as part of this location
+     * provider for the purposes of generating locations. This should generally only be used when
+     * another package may issue location requests on behalf of this package in the course of
+     * providing location. This will inform location services to treat the other packages as
+     * location providers as well.
+     */
+    public void setAdditionalProviderPackages(List<String> packageNames) {
+        synchronized (mBinder) {
+            mAdditionalProviderPackages.clear();
+            mAdditionalProviderPackages.addAll(packageNames);
+        }
+
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
+            } catch (RemoteException | RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
+    }
+
+    /**
+     * Returns true if this provider has been set as enabled. This will be true unless explicitly
+     * set otherwise.
+     */
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    /**
+     * Reports a new location from this provider.
+     */
+    public void reportLocation(Location location) {
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onReportLocation(location);
+            } catch (RemoteException | RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
+    }
+
+    protected void onInit() {
+        // call once so that providers designed for APIs pre-Q are not broken
+        onEnable();
+    }
+
+    /**
+     * @deprecated This callback will be invoked once when the provider is created to maintain
+     * backwards compatibility with providers not designed for Android Q and above. This method
+     * should only be implemented in location providers that need to support SDKs below Android Q.
+     * Even in this case, it is usually unnecessary to implement this callback with the correct
+     * design. This method may be removed in the future.
+     */
+    @Deprecated
+    protected void onEnable() {}
+
+    /**
+     * @deprecated This callback will be never be invoked on Android Q and above. This method should
+     * only be implemented in location providers that need to support SDKs below Android Q. Even in
+     * this case, it is usually unnecessary to implement this callback with the correct design. This
+     * method may be removed in the future.
+     */
+    @Deprecated
+    protected void onDisable() {}
+
+    /**
+     * Set the {@link ProviderRequest} requirements for this provider. Each call to this method
+     * overrides all previous requests. This method might trigger the provider to start returning
+     * locations, or to stop returning locations, depending on the parameters in the request.
+     */
+    protected abstract void onSetRequest(ProviderRequestUnbundled request, WorkSource source);
+
+    /**
+     * @deprecated This callback will never be invoked on Android Q and above. This method may be
+     * removed in the future. Prefer to dump provider state via the containing service instead.
+     */
+    @Deprecated
+    protected void onDump(FileDescriptor fd, PrintWriter pw, String[] args) {}
+
+    /**
+     * This method will no longer be invoked.
+     *
      * Returns a information on the status of this provider.
      * <p>{@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
      * out of service, and this is not expected to change in the near
@@ -183,10 +259,19 @@ public abstract class LocationProviderBase {
      *
      * <p>If extras is non-null, additional status information may be
      * added to it in the form of provider-specific key/value pairs.
+     *
+     * @deprecated This callback will be never be invoked on Android Q and above. This method should
+     * only be implemented in location providers that need to support SDKs below Android Q. This
+     * method may be removed in the future.
      */
-    public abstract int onGetStatus(Bundle extras);
+    @Deprecated
+    protected int onGetStatus(Bundle extras) {
+        return LocationProvider.AVAILABLE;
+    }
 
     /**
+     * This method will no longer be invoked.
+     *
      * Returns the time at which the status was last updated. It is the
      * responsibility of the provider to appropriately set this value using
      * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
@@ -195,20 +280,63 @@ public abstract class LocationProviderBase {
      * the same status again.
      *
      * @return time of last status update in millis since last reboot
+     *
+     * @deprecated This callback will be never be invoked on Android Q and above. This method should
+     * only be implemented in location providers that need to support SDKs below Android Q. This
+     * method may be removed in the future.
      */
-    public abstract long onGetStatusUpdateTime();
+    @Deprecated
+    protected long onGetStatusUpdateTime() {
+        return 0;
+    }
 
     /**
-     * Implements addditional location provider specific additional commands.
-     *
-     * @param command name of the command to send to the provider.
-     * @param extras optional arguments for the command (or null).
-     * The provider may optionally fill the extras Bundle with results from the command.
-     *
-     * @return true if the command succeeds.
+     * Implements location provider specific custom commands. The return value will be ignored on
+     * Android Q and above.
      */
-    public boolean onSendExtraCommand(String command, Bundle extras) {
-        // default implementation
+    protected boolean onSendExtraCommand(@Nullable String command, @Nullable Bundle extras) {
         return false;
+    }
+
+    private final class Service extends ILocationProvider.Stub {
+
+        @Override
+        public void setLocationProviderManager(ILocationProviderManager manager) {
+            synchronized (mBinder) {
+                try {
+                    if (!mAdditionalProviderPackages.isEmpty()) {
+                        manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
+                    }
+                    manager.onSetProperties(mProperties);
+                    manager.onSetEnabled(mEnabled);
+                } catch (RemoteException e) {
+                    Log.w(mTag, e);
+                }
+
+                mManager = manager;
+            }
+
+            onInit();
+        }
+
+        @Override
+        public void setRequest(ProviderRequest request, WorkSource ws) {
+            onSetRequest(new ProviderRequestUnbundled(request), ws);
+        }
+
+        @Override
+        public int getStatus(Bundle extras) {
+            return onGetStatus(extras);
+        }
+
+        @Override
+        public long getStatusUpdateTime() {
+            return onGetStatusUpdateTime();
+        }
+
+        @Override
+        public void sendExtraCommand(String command, Bundle extras) {
+            onSendExtraCommand(command, extras);
+        }
     }
 }

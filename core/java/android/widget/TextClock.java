@@ -39,6 +39,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -174,6 +175,9 @@ public class TextClock extends TextView {
             if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
                 final String timeZone = intent.getStringExtra("time-zone");
                 createTime(timeZone);
+            } else if (!mShouldRunTicker && (Intent.ACTION_TIME_TICK.equals(intent.getAction())
+                    || Intent.ACTION_TIME_CHANGED.equals(intent.getAction()))) {
+                return;
             }
             onTimeChanged();
         }
@@ -241,6 +245,8 @@ public class TextClock extends TextView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TextClock, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TextClock,
+                attrs, a, defStyleAttr, defStyleRes);
         try {
             mFormat12 = a.getText(R.styleable.TextClock_format12Hour);
             mFormat24 = a.getText(R.styleable.TextClock_format24Hour);
@@ -285,6 +291,7 @@ public class TextClock extends TextView {
      * @see #setFormat12Hour(CharSequence)
      * @see #is24HourModeEnabled()
      */
+    @InspectableProperty
     @ExportedProperty
     public CharSequence getFormat12Hour() {
         return mFormat12;
@@ -344,6 +351,7 @@ public class TextClock extends TextView {
      * @see #setFormat24Hour(CharSequence)
      * @see #is24HourModeEnabled()
      */
+    @InspectableProperty
     @ExportedProperty
     public CharSequence getFormat24Hour() {
         return mFormat24;
@@ -435,6 +443,7 @@ public class TextClock extends TextView {
      * @see #setFormat24Hour(CharSequence)
      * @see #getFormat24Hour()
      */
+    @InspectableProperty(hasAttributeId = false)
     public boolean is24HourModeEnabled() {
         if (mShowCurrentUserTime) {
             return DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser());
@@ -453,6 +462,7 @@ public class TextClock extends TextView {
      * @see java.util.TimeZone#getAvailableIDs()
      * @see #setTimeZone(String)
      */
+    @InspectableProperty
     public String getTimeZone() {
         return mTimeZone;
     }
@@ -605,8 +615,16 @@ public class TextClock extends TextView {
                 resolver.registerContentObserver(uri, true,
                         mFormatChangeObserver, UserHandle.USER_ALL);
             } else {
+                // UserHandle.myUserId() is needed. This class is supported by the
+                // remote views mechanism and as a part of that the remote views
+                // can be inflated by a context for another user without the app
+                // having interact users permission - just for loading resources.
+                // For example, when adding widgets from a managed profile to the
+                // home screen. Therefore, we register the ContentObserver with the user
+                // the app is running (e.g. the launcher) and not the user of the
+                // context (e.g. the widget's profile).
                 resolver.registerContentObserver(uri, true,
-                        mFormatChangeObserver);
+                        mFormatChangeObserver, UserHandle.myUserId());
             }
         }
     }
@@ -627,12 +645,9 @@ public class TextClock extends TextView {
      */
     @UnsupportedAppUsage
     private void onTimeChanged() {
-        // mShouldRunTicker always equals the last value passed into onVisibilityAggregated
-        if (mShouldRunTicker) {
-            mTime.setTimeInMillis(System.currentTimeMillis());
-            setText(DateFormat.format(mFormat, mTime));
-            setContentDescription(DateFormat.format(mDescFormat, mTime));
-        }
+        mTime.setTimeInMillis(System.currentTimeMillis());
+        setText(DateFormat.format(mFormat, mTime));
+        setContentDescription(DateFormat.format(mDescFormat, mTime));
     }
 
     /** @hide */

@@ -90,7 +90,8 @@ void detectAndDeclareAnomalies(AnomalyTracker& tracker,
                                const std::shared_ptr<DimToValMap>& bucket,
                                const int64_t& eventTimestamp) {
     for (const auto& kv : *bucket) {
-        tracker.detectAndDeclareAnomaly(eventTimestamp, bucketNum, kv.first, kv.second);
+        tracker.detectAndDeclareAnomaly(eventTimestamp, bucketNum, 0 /*metric_id*/, kv.first,
+                                        kv.second);
     }
 }
 
@@ -305,10 +306,10 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 16, bucket16, {keyB}, {keyA, keyC, keyD}));
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
     detectAndDeclareAnomalies(anomalyTracker, 16, bucket16, eventTimestamp2);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
     checkRefractoryTimes(anomalyTracker, eventTimestamp2, refractoryPeriodSec,
             {{keyA, -1}, {keyB, eventTimestamp2}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
@@ -366,7 +367,7 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 25, bucket25, {}, {keyA, keyB, keyC, keyD}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 24L);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 25, bucket25, eventTimestamp5);
     checkRefractoryTimes(anomalyTracker, eventTimestamp5, refractoryPeriodSec,
             {{keyA, -1}, {keyB, eventTimestamp4}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
@@ -374,14 +375,14 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add past bucket #25
     anomalyTracker.addPastBucket(bucket25, 25);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 25L);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyD), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 28, bucket28, {},
             {keyA, keyB, keyC, keyD, keyE}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 28, bucket28, eventTimestamp6);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     checkRefractoryTimes(anomalyTracker, eventTimestamp6, refractoryPeriodSec,
             {{keyA, -1}, {keyB, -1}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
 
@@ -390,9 +391,9 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 28, bucket28, {keyE},
             {keyA, keyB, keyC, keyD}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 28, bucket28, eventTimestamp6 + 7);
-    // TODO: after detectAnomaly fix: EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     checkRefractoryTimes(anomalyTracker, eventTimestamp6, refractoryPeriodSec,
             {{keyA, -1}, {keyB, -1}, {keyC, -1}, {keyD, -1}, {keyE, eventTimestamp6 + 7}});
 }

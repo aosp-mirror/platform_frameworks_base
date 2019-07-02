@@ -15,7 +15,7 @@
 -->
 <resources>
     <style name="Theme.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
-    <style name="Theme.Dialog.AppError" parent="Theme.Leanback.Dialog.AppError" />
+    <style name="Theme.Dialog.Confirmation" parent="Theme.Leanback.Dialog.Confirmation" />
     <style name="Theme.Holo.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
     <style name="Theme.Material.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />

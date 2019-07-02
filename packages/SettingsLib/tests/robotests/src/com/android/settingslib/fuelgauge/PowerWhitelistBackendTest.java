@@ -17,6 +17,7 @@
 package com.android.settingslib.fuelgauge;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -30,7 +31,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowDefaultDialerManager;
 import com.android.settingslib.testutils.shadow.ShadowSmsApplication;
 
@@ -39,12 +39,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowPackageManager;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowDefaultDialerManager.class, ShadowSmsApplication.class})
 public class PowerWhitelistBackendTest {
 
@@ -64,7 +65,6 @@ public class PowerWhitelistBackendTest {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         doReturn(mContext).when(mContext).getApplicationContext();
-        doReturn(mDevicePolicyManager).when(mContext).getSystemService(DevicePolicyManager.class);
         doReturn(new String[] {}).when(mDeviceIdleService).getFullPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
@@ -72,7 +72,7 @@ public class PowerWhitelistBackendTest {
         doNothing().when(mDeviceIdleService).removePowerSaveWhitelistApp(anyString());
         mPackageManager = Shadow.extract(mContext.getPackageManager());
         mPackageManager.setSystemFeature(PackageManager.FEATURE_TELEPHONY, true);
-
+        doReturn(mDevicePolicyManager).when(mContext).getSystemService(DevicePolicyManager.class);
 
         mPowerWhitelistBackend = new PowerWhitelistBackend(mContext, mDeviceIdleService);
     }
@@ -118,6 +118,7 @@ public class PowerWhitelistBackendTest {
         ShadowSmsApplication.setDefaultSmsApplication(new ComponentName(testSms, "receiver"));
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(testSms)).isTrue();
+        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testSms)).isTrue();
     }
 
     @Test
@@ -126,6 +127,7 @@ public class PowerWhitelistBackendTest {
         ShadowDefaultDialerManager.setDefaultDialerApplication(testDialer);
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(testDialer)).isTrue();
+        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(testDialer)).isTrue();
     }
 
     @Test
@@ -133,6 +135,7 @@ public class PowerWhitelistBackendTest {
         doReturn(true).when(mDevicePolicyManager).packageHasActiveAdmins(PACKAGE_ONE);
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
+        assertThat(mPowerWhitelistBackend.isDefaultActiveApp(PACKAGE_ONE)).isTrue();
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.settingslib.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
@@ -171,11 +172,13 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
 
     public UserIconDrawable setBadgeIfManagedUser(Context context, int userId) {
         Drawable badge = null;
-        boolean isManaged = context.getSystemService(DevicePolicyManager.class)
-                .getProfileOwnerAsUser(userId) != null;
-        if (isManaged) {
-            badge = getDrawableForDisplayDensity(
-                    context, com.android.internal.R.drawable.ic_corp_badge_case);
+        if (userId != UserHandle.USER_NULL) {
+            boolean isManaged = context.getSystemService(DevicePolicyManager.class)
+                    .getProfileOwnerAsUser(userId) != null;
+            if (isManaged) {
+                badge = getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_badge_case);
+            }
         }
         return setBadge(badge);
     }
@@ -251,15 +254,24 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
                 mPaint.setColorFilter(null);
             } else {
                 int color = mTintColor.getColorForState(getState(), mTintColor.getDefaultColor());
-                if (mPaint.getColorFilter() == null) {
+                if (shouldUpdateColorFilter(color, mTintMode)) {
                     mPaint.setColorFilter(new PorterDuffColorFilter(color, mTintMode));
-                } else {
-                    ((PorterDuffColorFilter) mPaint.getColorFilter()).setMode(mTintMode);
-                    ((PorterDuffColorFilter) mPaint.getColorFilter()).setColor(color);
                 }
             }
 
             canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+        }
+    }
+
+    private boolean shouldUpdateColorFilter(@ColorInt int color, PorterDuff.Mode mode) {
+        ColorFilter colorFilter = mPaint.getColorFilter();
+        if (colorFilter instanceof PorterDuffColorFilter) {
+            PorterDuffColorFilter porterDuffColorFilter = (PorterDuffColorFilter) colorFilter;
+            int currentColor = porterDuffColorFilter.getColor();
+            PorterDuff.Mode currentMode = porterDuffColorFilter.getMode();
+            return currentColor != color || currentMode != mode;
+        } else {
+            return true;
         }
     }
 

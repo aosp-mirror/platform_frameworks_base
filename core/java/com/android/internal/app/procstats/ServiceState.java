@@ -18,30 +18,17 @@ package com.android.internal.app.procstats;
 
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.text.format.DateFormat;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.DebugUtils;
-import android.util.Log;
+import android.service.procstats.PackageServiceOperationStatsProto;
+import android.service.procstats.PackageServiceStatsProto;
+import android.service.procstats.ProcessStatsEnums;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.app.procstats.ProcessStats;
 import static com.android.internal.app.procstats.ProcessStats.STATE_NOTHING;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Objects;
 
 public final class ServiceState {
     private static final String TAG = "ProcessStats";
@@ -51,7 +38,8 @@ public final class ServiceState {
     public static final int SERVICE_STARTED = 1;
     public static final int SERVICE_BOUND = 2;
     public static final int SERVICE_EXEC = 3;
-    public static final int SERVICE_COUNT = 4;
+    public static final int SERVICE_FOREGROUND = 4;
+    public static final int SERVICE_COUNT = 5;
 
     private final String mPackage;
     private final String mProcessName;
@@ -78,6 +66,10 @@ public final class ServiceState {
     private int mExecCount;
     private int mExecState = STATE_NOTHING;
     private long mExecStartTime;
+
+    private int mForegroundCount;
+    private int mForegroundState = STATE_NOTHING;
+    private long mForegroundStartTime;
 
     public ServiceState(ProcessStats processStats, String pkg, String name,
             String processName, ProcessState proc) {
@@ -121,6 +113,9 @@ public final class ServiceState {
             if (mExecState != ProcessStats.STATE_NOTHING) {
                 setExecuting(true, memFactor, now);
             }
+            if (mForegroundState != ProcessStats.STATE_NOTHING) {
+                setForeground(true, memFactor, now);
+            }
         }
     }
 
@@ -133,7 +128,8 @@ public final class ServiceState {
                 // There was already an old owner, reset this object for its
                 // new owner.
                 mOwner = newOwner;
-                if (mStarted || mBoundState != STATE_NOTHING || mExecState != STATE_NOTHING) {
+                if (mStarted || mBoundState != STATE_NOTHING || mExecState != STATE_NOTHING
+                        || mForegroundState != STATE_NOTHING) {
                     long now = SystemClock.uptimeMillis();
                     if (mStarted) {
                         if (DEBUG) Slog.d(TAG, "Service has new owner " + newOwner
@@ -153,6 +149,12 @@ public final class ServiceState {
                                 + mPackage + " service=" + mName + " proc=" + mProc);
                         setExecuting(false, 0, now);
                     }
+                    if (mForegroundState != STATE_NOTHING) {
+                        if (DEBUG) Slog.d(TAG, "Service has new owner " + newOwner
+                                + " from " + mOwner + " while foreground: pkg="
+                                + mPackage + " service=" + mName + " proc=" + mProc);
+                        setForeground(false, 0, now);
+                    }
                 }
             }
         }
@@ -161,7 +163,8 @@ public final class ServiceState {
     public void clearCurrentOwner(Object owner, boolean silently) {
         if (mOwner == owner) {
             mProc.decActiveServices(mName);
-            if (mStarted || mBoundState != STATE_NOTHING || mExecState != STATE_NOTHING) {
+            if (mStarted || mBoundState != STATE_NOTHING || mExecState != STATE_NOTHING
+                    || mForegroundState != STATE_NOTHING) {
                 long now = SystemClock.uptimeMillis();
                 if (mStarted) {
                     if (!silently) {
@@ -187,6 +190,14 @@ public final class ServiceState {
                     }
                     setExecuting(false, 0, now);
                 }
+                if (mForegroundState != STATE_NOTHING) {
+                    if (!silently) {
+                        Slog.wtfStack(TAG, "Service owner " + owner
+                                + " cleared while foreground: pkg=" + mPackage + " service="
+                                + mName + " proc=" + mProc);
+                    }
+                    setForeground(false, 0, now);
+                }
             }
             mOwner = null;
         }
@@ -206,6 +217,7 @@ public final class ServiceState {
         mStartedCount += other.mStartedCount;
         mBoundCount += other.mBoundCount;
         mExecCount += other.mExecCount;
+        mForegroundCount += other.mForegroundCount;
     }
 
     public void resetSafely(long now) {
@@ -214,7 +226,9 @@ public final class ServiceState {
         mStartedCount = mStartedState != STATE_NOTHING ? 1 : 0;
         mBoundCount = mBoundState != STATE_NOTHING ? 1 : 0;
         mExecCount = mExecState != STATE_NOTHING ? 1 : 0;
-        mRunStartTime = mStartedStartTime = mBoundStartTime = mExecStartTime = now;
+        mForegroundCount = mForegroundState != STATE_NOTHING ? 1 : 0;
+        mRunStartTime = mStartedStartTime = mBoundStartTime = mExecStartTime =
+                mForegroundStartTime = now;
     }
 
     public void writeToParcel(Parcel out, long now) {
@@ -223,6 +237,7 @@ public final class ServiceState {
         out.writeInt(mStartedCount);
         out.writeInt(mBoundCount);
         out.writeInt(mExecCount);
+        out.writeInt(mForegroundCount);
     }
 
     public boolean readFromParcel(Parcel in) {
@@ -233,6 +248,7 @@ public final class ServiceState {
         mStartedCount = in.readInt();
         mBoundCount = in.readInt();
         mExecCount = in.readInt();
+        mForegroundCount = in.readInt();
         return true;
     }
 
@@ -257,11 +273,17 @@ public final class ServiceState {
                     now - mExecStartTime);
             mExecStartTime = now;
         }
+        if (mForegroundState != STATE_NOTHING) {
+            mDurations.addDuration(SERVICE_FOREGROUND + (mForegroundState*SERVICE_COUNT),
+                    now - mForegroundStartTime);
+            mForegroundStartTime = now;
+        }
     }
 
     private void updateRunning(int memFactor, long now) {
         final int state = (mStartedState != STATE_NOTHING || mBoundState != STATE_NOTHING
-                || mExecState != STATE_NOTHING) ? memFactor : STATE_NOTHING;
+                || mExecState != STATE_NOTHING || mForegroundState != STATE_NOTHING)
+                ? memFactor : STATE_NOTHING;
         if (mRunState != state) {
             if (mRunState != STATE_NOTHING) {
                 mDurations.addDuration(SERVICE_RUN + (mRunState*SERVICE_COUNT),
@@ -348,6 +370,24 @@ public final class ServiceState {
         }
     }
 
+    public void setForeground(boolean foreground, int memFactor, long now) {
+        if (mOwner == null) {
+            Slog.wtf(TAG, "Foregrounding service " + this + " without owner");
+        }
+        final int state = foreground ? memFactor : STATE_NOTHING;
+        if (mForegroundState != state) {
+            if (mForegroundState != STATE_NOTHING) {
+                mDurations.addDuration(SERVICE_FOREGROUND + (mForegroundState*SERVICE_COUNT),
+                        now - mForegroundStartTime);
+            } else if (foreground) {
+                mForegroundCount++;
+            }
+            mForegroundState = state;
+            mForegroundStartTime = now;
+            updateRunning(memFactor, now);
+        }
+    }
+
     public long getDuration(int opType, int curState, long startTime, int memFactor,
             long now) {
         int state = opType + (memFactor*SERVICE_COUNT);
@@ -366,6 +406,9 @@ public final class ServiceState {
         dumpStats(pw, prefix, prefixInner, headerPrefix, "Started",
                 mStartedCount, ServiceState.SERVICE_STARTED, mStartedState,
                 mStartedStartTime, now, totalTime, !dumpSummary || dumpAll);
+        dumpStats(pw, prefix, prefixInner, headerPrefix, "Foreground",
+                mForegroundCount, ServiceState.SERVICE_FOREGROUND, mForegroundState,
+                mForegroundStartTime, now, totalTime, !dumpSummary || dumpAll);
         dumpStats(pw, prefix, prefixInner, headerPrefix, "Bound",
                 mBoundCount, ServiceState.SERVICE_BOUND, mBoundState,
                 mBoundStartTime, now, totalTime, !dumpSummary || dumpAll);
@@ -393,11 +436,19 @@ public final class ServiceState {
                 pw.print(" op count "); pw.print(count); pw.println(":");
                 dumpTime(pw, prefixInner, serviceType, state, startTime, now);
             } else {
-                long myTime = dumpTime(null, null, serviceType, state, startTime, now);
+                long myTime = dumpTimeInternal(null, null, serviceType, state, startTime, now,
+                        true);
                 pw.print(prefix); pw.print(headerPrefix); pw.print(header);
                 pw.print(" count "); pw.print(count);
                 pw.print(" / time ");
+                boolean isRunning = myTime < 0;
+                if (isRunning) {
+                    myTime = -myTime;
+                }
                 DumpUtils.printPercent(pw, (double)myTime/(double)totalTime);
+                if (isRunning) {
+                    pw.print(" (running)");
+                }
                 pw.println();
             }
         }
@@ -405,8 +456,14 @@ public final class ServiceState {
 
     public long dumpTime(PrintWriter pw, String prefix,
             int serviceType, int curState, long curStartTime, long now) {
+        return dumpTimeInternal(pw, prefix, serviceType, curState, curStartTime, now, false);
+    }
+
+    long dumpTimeInternal(PrintWriter pw, String prefix,
+            int serviceType, int curState, long curStartTime, long now, boolean negativeIfRunning) {
         long totalTime = 0;
         int printedScreen = -1;
+        boolean isRunning = false;
         for (int iscreen=0; iscreen<ProcessStats.ADJ_COUNT; iscreen+=ProcessStats.ADJ_SCREEN_MOD) {
             int printedMem = -1;
             for (int imem=0; imem<ProcessStats.ADJ_MEM_FACTOR_COUNT; imem++) {
@@ -415,6 +472,7 @@ public final class ServiceState {
                 String running = "";
                 if (curState == state && pw != null) {
                     running = " (running)";
+                    isRunning = true;
                 }
                 if (time != 0) {
                     if (pw != null) {
@@ -438,7 +496,7 @@ public final class ServiceState {
             TimeUtils.formatDuration(totalTime, pw);
             pw.println();
         }
-        return totalTime;
+        return (isRunning && negativeIfRunning) ? -totalTime : totalTime;
     }
 
     public void dumpTimesCheckin(PrintWriter pw, String pkgName, int uid, long vers,
@@ -447,6 +505,9 @@ public final class ServiceState {
                 ServiceState.SERVICE_RUN, mRunCount, mRunState, mRunStartTime, now);
         dumpTimeCheckin(pw, "pkgsvc-start", pkgName, uid, vers, serviceName,
                 ServiceState.SERVICE_STARTED, mStartedCount, mStartedState, mStartedStartTime, now);
+        dumpTimeCheckin(pw, "pkgsvc-fg", pkgName, uid, vers, serviceName,
+                ServiceState.SERVICE_FOREGROUND, mForegroundCount, mForegroundState,
+                mForegroundStartTime, now);
         dumpTimeCheckin(pw, "pkgsvc-bound", pkgName, uid, vers, serviceName,
                 ServiceState.SERVICE_BOUND, mBoundCount, mBoundState, mBoundStartTime, now);
         dumpTimeCheckin(pw, "pkgsvc-exec", pkgName, uid, vers, serviceName,
@@ -493,10 +554,87 @@ public final class ServiceState {
         pw.println();
     }
 
+    public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
+        final long token = proto.start(fieldId);
+        proto.write(PackageServiceStatsProto.SERVICE_NAME, mName);
+
+        writeTypeToProto(proto, PackageServiceStatsProto.OPERATION_STATS,
+                ProcessStatsEnums.SERVICE_OPERATION_STATE_RUNNING,
+                ServiceState.SERVICE_RUN, mRunCount, mRunState, mRunStartTime, now);
+
+        writeTypeToProto(proto, PackageServiceStatsProto.OPERATION_STATS,
+                ProcessStatsEnums.SERVICE_OPERATION_STATE_STARTED,
+                ServiceState.SERVICE_STARTED, mStartedCount, mStartedState, mStartedStartTime, now);
+
+        writeTypeToProto(proto, PackageServiceStatsProto.OPERATION_STATS,
+                ProcessStatsEnums.SERVICE_OPERATION_STATE_FOREGROUND,
+                ServiceState.SERVICE_FOREGROUND, mForegroundCount, mForegroundState,
+                mForegroundStartTime, now);
+
+        writeTypeToProto(proto, PackageServiceStatsProto.OPERATION_STATS,
+                ProcessStatsEnums.SERVICE_OPERATION_STATE_BOUND,
+                ServiceState.SERVICE_BOUND, mBoundCount, mBoundState, mBoundStartTime, now);
+
+        writeTypeToProto(proto, PackageServiceStatsProto.OPERATION_STATS,
+                ProcessStatsEnums.SERVICE_OPERATION_STATE_EXECUTING,
+                ServiceState.SERVICE_EXEC, mExecCount, mExecState, mExecStartTime, now);
+
+        proto.end(token);
+    }
+
+    /**
+     * write the metrics to proto for each operation type.
+     */
+    public void writeTypeToProto(ProtoOutputStream proto, long fieldId, int opType, int serviceType,
+            int opCount, int curState, long curStartTime, long now) {
+        if (opCount <= 0) {
+            return;
+        }
+        final long token = proto.start(fieldId);
+
+        proto.write(PackageServiceOperationStatsProto.OPERATION, opType);
+        proto.write(PackageServiceOperationStatsProto.COUNT, opCount);
+
+        boolean didCurState = false;
+        final int N = mDurations.getKeyCount();
+        for (int i=0; i<N; i++) {
+            final int key = mDurations.getKeyAt(i);
+            long time = mDurations.getValue(key);
+            int type = SparseMappingTable.getIdFromKey(key);
+            int memFactor = type / ServiceState.SERVICE_COUNT;
+            type %= ServiceState.SERVICE_COUNT;
+            if (type != serviceType) {
+                continue;
+            }
+            if (curState == memFactor) {
+                didCurState = true;
+                time += now - curStartTime;
+            }
+            final long stateToken = proto.start(PackageServiceOperationStatsProto.STATE_STATS);
+            DumpUtils.printProcStateAdjTagProto(proto,
+                    PackageServiceOperationStatsProto.StateStats.SCREEN_STATE,
+                    PackageServiceOperationStatsProto.StateStats.MEMORY_STATE,
+                    type);
+            proto.write(PackageServiceOperationStatsProto.StateStats.DURATION_MS, time);
+            proto.end(stateToken);
+        }
+        if (!didCurState && curState != STATE_NOTHING) {
+            final long stateToken = proto.start(PackageServiceOperationStatsProto.STATE_STATS);
+            DumpUtils.printProcStateAdjTagProto(proto,
+                    PackageServiceOperationStatsProto.StateStats.SCREEN_STATE,
+                    PackageServiceOperationStatsProto.StateStats.MEMORY_STATE,
+                    curState);
+            proto.write(PackageServiceOperationStatsProto.StateStats.DURATION_MS,
+                    now - curStartTime);
+            proto.end(stateToken);
+        }
+
+        proto.end(token);
+    }
 
     public String toString() {
         return "ServiceState{" + Integer.toHexString(System.identityHashCode(this))
                 + " " + mName + " pkg=" + mPackage + " proc="
-                + Integer.toHexString(System.identityHashCode(this)) + "}";
+                + Integer.toHexString(System.identityHashCode(mProc)) + "}";
     }
 }

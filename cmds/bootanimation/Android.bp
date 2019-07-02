@@ -44,8 +44,11 @@ cc_binary {
         product_is_iot: {
             shared_libs: [
                 "libandroidthings",
+                "libandroidthings_protos",
                 "libchrome",
+                "libprotobuf-cpp-lite",
             ],
+            static_libs: ["libjsoncpp"],
             srcs: [
                 "iot/iotbootanimation_main.cpp",
                 "iot/BootAction.cpp",

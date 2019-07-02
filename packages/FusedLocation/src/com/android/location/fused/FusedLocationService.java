@@ -21,27 +21,24 @@ import android.content.Intent;
 import android.os.IBinder;
 
 public class FusedLocationService extends Service {
+
     private FusedLocationProvider mProvider;
 
     @Override
     public IBinder onBind(Intent intent) {
         if (mProvider == null) {
-            mProvider = new FusedLocationProvider(getApplicationContext());
+            mProvider = new FusedLocationProvider(this);
+            mProvider.init();
         }
+
         return mProvider.getBinder();
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        // make sure to stop performing work
-        if (mProvider != null) {
-            mProvider.onDisable();
-        }
-      return false;
-    }
-
-    @Override
     public void onDestroy() {
-        mProvider = null;
+        if (mProvider != null) {
+            mProvider.destroy();
+            mProvider = null;
+        }
     }
 }

@@ -119,8 +119,10 @@ public class Base64OutputStream extends FilterOutputStream {
                 out.flush();
             }
         } catch (IOException e) {
-            if (thrown != null) {
+            if (thrown == null) {
                 thrown = e;
+            } else {
+                thrown.addSuppressed(e);
             }
         }
 

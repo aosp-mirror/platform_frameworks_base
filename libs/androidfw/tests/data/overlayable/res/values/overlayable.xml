@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+<overlayable name="OverlayableResources1" actor="overlay://theme">
+    <!-- Any overlay can overlay the value of @string/overlayable1 -->
+    <item type="string" name="overlayable1" />
+
+    <!-- Any overlay on the product or system partition can overlay the value of
+        @string/overlayable2 -->
+    <policy type="product|system">
+        <item type="string" name="overlayable2" />
+    </policy>
+
+    <!-- Any overlay can overlay the value of @string/overlayable4 -->
+    <policy type="public">
+        <item type="string" name="overlayable4" />
+    </policy>
+</overlayable>
+
+<overlayable name="OverlayableResources2" actor="overlay://com.android.overlayable">
+    <!-- Any overlay on the vendor or product partition can overlay the value of
+        @string/overlayable3 -->
+    <policy type="vendor|product">
+        <item type="string" name="overlayable3" />
+    </policy>
+</overlayable>
+</resources>

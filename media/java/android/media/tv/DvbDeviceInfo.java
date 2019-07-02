@@ -29,7 +29,7 @@ import android.util.Log;
 public final class DvbDeviceInfo implements Parcelable {
     static final String TAG = "DvbDeviceInfo";
 
-    public static final Parcelable.Creator<DvbDeviceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DvbDeviceInfo> CREATOR =
             new Parcelable.Creator<DvbDeviceInfo>() {
                 @Override
                 public DvbDeviceInfo createFromParcel(Parcel source) {

@@ -17,17 +17,19 @@
 package com.android.server.display;
 
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.BrightnessCorrection;
 import android.os.PowerManager;
 import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 
-import com.android.internal.util.Preconditions;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
 
 import java.io.PrintWriter;
@@ -42,10 +44,11 @@ import java.util.Arrays;
  */
 public abstract class BrightnessMappingStrategy {
     private static final String TAG = "BrightnessMappingStrategy";
-    private static final boolean DEBUG = false;
 
     private static final float LUX_GRAD_SMOOTHING = 0.25f;
     private static final float MAX_GRAD = 1.0f;
+
+    protected boolean mLoggingEnabled;
 
     private static final Plog PLOG = Plog.createSystemPlog(TAG);
 
@@ -77,8 +80,8 @@ public abstract class BrightnessMappingStrategy {
                 Slog.w(TAG, "Screen brightness mapping does not cover whole range of available " +
                         "backlight values, autobrightness functionality may be impaired.");
             }
-            BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder();
-            builder.setCurve(luxLevels, brightnessLevelsNits);
+            BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
+                    luxLevels, brightnessLevelsNits);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange,
                     autoBrightnessAdjustmentMaxGamma);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight)) {
@@ -161,6 +164,22 @@ public abstract class BrightnessMappingStrategy {
     }
 
     /**
+     * Enable/disable logging.
+     *
+     * @param loggingEnabled
+     *      Whether logging should be on/off.
+     *
+     * @return Whether the method succeeded or not.
+     */
+    public boolean setLoggingEnabled(boolean loggingEnabled) {
+        if (mLoggingEnabled == loggingEnabled) {
+            return false;
+        }
+        mLoggingEnabled = loggingEnabled;
+        return true;
+    }
+
+    /**
      * Sets the {@link BrightnessConfiguration}.
      *
      * @param config The new configuration. If {@code null} is passed, the default configuration is
@@ -170,15 +189,33 @@ public abstract class BrightnessMappingStrategy {
     public abstract boolean setBrightnessConfiguration(@Nullable BrightnessConfiguration config);
 
     /**
-     * Returns the desired brightness of the display based on the current ambient lux.
+     * Returns the desired brightness of the display based on the current ambient lux, including
+     * any context-related corrections.
      *
      * The returned brightness will be in the range [0, 1.0], where 1.0 is the display at max
      * brightness and 0 is the display at minimum brightness.
      *
      * @param lux The current ambient brightness in lux.
+     * @param packageName the foreground app package name.
+     * @param category the foreground app package category.
      * @return The desired brightness of the display normalized to the range [0, 1.0].
      */
-    public abstract float getBrightness(float lux);
+    public abstract float getBrightness(float lux, String packageName,
+            @ApplicationInfo.Category int category);
+
+    /**
+     * Returns the desired brightness of the display based on the current ambient lux.
+     *
+     * The returned brightness wil be in the range [0, 1.0], where 1.0 is the display at max
+     * brightness and 0 is the display at minimum brightness.
+     *
+     * @param lux The current ambient brightness in lux.
+     *
+     * @return The desired brightness of the display normalized to the range [0, 1.0].
+     */
+    public float getBrightness(float lux) {
+        return getBrightness(lux, null /* packageName */, ApplicationInfo.CATEGORY_UNDEFINED);
+    }
 
     /**
      * Returns the current auto-brightness adjustment.
@@ -239,13 +276,13 @@ public abstract class BrightnessMappingStrategy {
 
     public abstract void dump(PrintWriter pw);
 
-    private static float normalizeAbsoluteBrightness(int brightness) {
+    protected float normalizeAbsoluteBrightness(int brightness) {
         brightness = MathUtils.constrain(brightness,
                 PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
         return (float) brightness / PowerManager.BRIGHTNESS_ON;
     }
 
-    private static Pair<float[], float[]> insertControlPoint(
+    private Pair<float[], float[]> insertControlPoint(
             float[] luxLevels, float[] brightnessLevels, float lux, float brightness) {
         final int idx = findInsertionPoint(luxLevels, lux);
         final float[] newLuxLevels;
@@ -278,7 +315,7 @@ public abstract class BrightnessMappingStrategy {
      * This assumes that {@code arr} is sorted. If all values in {@code arr} are greater
      * than val, then it will return the length of arr as the insertion point.
      */
-    private static int findInsertionPoint(float[] arr, float val) {
+    private int findInsertionPoint(float[] arr, float val) {
         for (int i = 0; i < arr.length; i++) {
             if (val <= arr[i]) {
                 return i;
@@ -287,8 +324,8 @@ public abstract class BrightnessMappingStrategy {
         return arr.length;
     }
 
-    private static void smoothCurve(float[] lux, float[] brightness, int idx) {
-        if (DEBUG) {
+    private void smoothCurve(float[] lux, float[] brightness, int idx) {
+        if (mLoggingEnabled) {
             PLOG.logCurve("unsmoothed curve", lux, brightness);
         }
         float prevLux = lux[idx];
@@ -323,19 +360,19 @@ public abstract class BrightnessMappingStrategy {
             prevBrightness = newBrightness;
             brightness[i] = newBrightness;
         }
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             PLOG.logCurve("smoothed curve", lux, brightness);
         }
     }
 
-    private static float permissibleRatio(float currLux, float prevLux) {
+    private float permissibleRatio(float currLux, float prevLux) {
         return MathUtils.exp(MAX_GRAD
                 * (MathUtils.log(currLux + LUX_GRAD_SMOOTHING)
                     - MathUtils.log(prevLux + LUX_GRAD_SMOOTHING)));
     }
 
-    private static float inferAutoBrightnessAdjustment(float maxGamma,
-            float desiredBrightness, float currentBrightness) {
+    protected float inferAutoBrightnessAdjustment(float maxGamma, float desiredBrightness,
+            float currentBrightness) {
         float adjustment = 0;
         float gamma = Float.NaN;
         // Extreme edge cases: use a simpler heuristic, as proper gamma correction around the edges
@@ -355,7 +392,7 @@ public abstract class BrightnessMappingStrategy {
             adjustment = -MathUtils.log(gamma) / MathUtils.log(maxGamma);
         }
         adjustment = MathUtils.constrain(adjustment, -1, +1);
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "inferAutoBrightnessAdjustment: " + maxGamma + "^" + -adjustment + "=" +
                     MathUtils.pow(maxGamma, -adjustment) + " == " + gamma);
             Slog.d(TAG, "inferAutoBrightnessAdjustment: " + currentBrightness + "^" + gamma + "=" +
@@ -364,16 +401,16 @@ public abstract class BrightnessMappingStrategy {
         return adjustment;
     }
 
-    private static Pair<float[], float[]> getAdjustedCurve(float[] lux, float[] brightness,
+    protected Pair<float[], float[]> getAdjustedCurve(float[] lux, float[] brightness,
             float userLux, float userBrightness, float adjustment, float maxGamma) {
         float[] newLux = lux;
         float[] newBrightness = Arrays.copyOf(brightness, brightness.length);
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             PLOG.logCurve("unadjusted curve", newLux, newBrightness);
         }
         adjustment = MathUtils.constrain(adjustment, -1, 1);
         float gamma = MathUtils.pow(maxGamma, -adjustment);
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             Slog.d(TAG, "getAdjustedCurve: " + maxGamma + "^" + -adjustment + "=" +
                     MathUtils.pow(maxGamma, -adjustment) + " == " + gamma);
         }
@@ -382,7 +419,7 @@ public abstract class BrightnessMappingStrategy {
                 newBrightness[i] = MathUtils.pow(newBrightness[i], gamma);
             }
         }
-        if (DEBUG) {
+        if (mLoggingEnabled) {
             PLOG.logCurve("gamma adjusted curve", newLux, newBrightness);
         }
         if (userLux != -1) {
@@ -390,7 +427,7 @@ public abstract class BrightnessMappingStrategy {
                     userBrightness);
             newLux = curve.first;
             newBrightness = curve.second;
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 PLOG.logCurve("gamma and user adjusted curve", newLux, newBrightness);
                 // This is done for comparison.
                 curve = insertControlPoint(lux, brightness, userLux, userBrightness);
@@ -440,7 +477,7 @@ public abstract class BrightnessMappingStrategy {
             mAutoBrightnessAdjustment = 0;
             mUserLux = -1;
             mUserBrightness = -1;
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 PLOG.start("simple mapping strategy");
             }
             computeSpline();
@@ -452,7 +489,8 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public float getBrightness(float lux) {
+        public float getBrightness(float lux, String packageName,
+                @ApplicationInfo.Category int category) {
             return mSpline.interpolate(lux);
         }
 
@@ -467,7 +505,7 @@ public abstract class BrightnessMappingStrategy {
             if (adjustment == mAutoBrightnessAdjustment) {
                 return false;
             }
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "setAutoBrightnessAdjustment: " + mAutoBrightnessAdjustment + " => " +
                         adjustment);
                 PLOG.start("auto-brightness adjustment");
@@ -485,7 +523,7 @@ public abstract class BrightnessMappingStrategy {
         @Override
         public void addUserDataPoint(float lux, float brightness) {
             float unadjustedBrightness = getUnadjustedBrightness(lux);
-            if (DEBUG){
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "addUserDataPoint: (" + lux + "," + brightness + ")");
                 PLOG.start("add user data point")
                         .logPoint("user data point", lux, brightness)
@@ -494,7 +532,7 @@ public abstract class BrightnessMappingStrategy {
             float adjustment = inferAutoBrightnessAdjustment(mMaxGamma,
                     brightness /* desiredBrightness */,
                     unadjustedBrightness /* currentBrightness */);
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "addUserDataPoint: " + mAutoBrightnessAdjustment + " => " +
                         adjustment);
             }
@@ -507,7 +545,7 @@ public abstract class BrightnessMappingStrategy {
         @Override
         public void clearUserDataPoints() {
             if (mUserLux != -1) {
-                if (DEBUG) {
+                if (mLoggingEnabled) {
                     Slog.d(TAG, "clearUserDataPoints: " + mAutoBrightnessAdjustment + " => 0");
                     PLOG.start("clear user data points")
                             .logPoint("user data point", mUserLux, mUserBrightness);
@@ -614,7 +652,7 @@ public abstract class BrightnessMappingStrategy {
             mBacklightToNitsSpline = Spline.createSpline(normalizedBacklight, nits);
 
             mDefaultConfig = config;
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 PLOG.start("physical mapping strategy");
             }
             mConfig = config;
@@ -629,7 +667,7 @@ public abstract class BrightnessMappingStrategy {
             if (config.equals(mConfig)) {
                 return false;
             }
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 PLOG.start("brightness configuration");
             }
             mConfig = config;
@@ -638,9 +676,17 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public float getBrightness(float lux) {
+        public float getBrightness(float lux, String packageName,
+                @ApplicationInfo.Category int category) {
             float nits = mBrightnessSpline.interpolate(lux);
             float backlight = mNitsToBacklightSpline.interpolate(nits);
+            // Correct the brightness according to the current application and its category, but
+            // only if no user data point is set (as this will oevrride the user setting).
+            if (mUserLux == -1) {
+                backlight = correctBrightness(backlight, packageName, category);
+            } else if (mLoggingEnabled) {
+                Slog.d(TAG, "user point set, correction not applied");
+            }
             return backlight;
         }
 
@@ -655,7 +701,7 @@ public abstract class BrightnessMappingStrategy {
             if (adjustment == mAutoBrightnessAdjustment) {
                 return false;
             }
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "setAutoBrightnessAdjustment: " + mAutoBrightnessAdjustment + " => " +
                         adjustment);
                 PLOG.start("auto-brightness adjustment");
@@ -673,7 +719,7 @@ public abstract class BrightnessMappingStrategy {
         @Override
         public void addUserDataPoint(float lux, float brightness) {
             float unadjustedBrightness = getUnadjustedBrightness(lux);
-            if (DEBUG){
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "addUserDataPoint: (" + lux + "," + brightness + ")");
                 PLOG.start("add user data point")
                         .logPoint("user data point", lux, brightness)
@@ -682,7 +728,7 @@ public abstract class BrightnessMappingStrategy {
             float adjustment = inferAutoBrightnessAdjustment(mMaxGamma,
                     brightness /* desiredBrightness */,
                     unadjustedBrightness /* currentBrightness */);
-            if (DEBUG) {
+            if (mLoggingEnabled) {
                 Slog.d(TAG, "addUserDataPoint: " + mAutoBrightnessAdjustment + " => " +
                         adjustment);
             }
@@ -695,7 +741,7 @@ public abstract class BrightnessMappingStrategy {
         @Override
         public void clearUserDataPoints() {
             if (mUserLux != -1) {
-                if (DEBUG) {
+                if (mLoggingEnabled) {
                     Slog.d(TAG, "clearUserDataPoints: " + mAutoBrightnessAdjustment + " => 0");
                     PLOG.start("clear user data points")
                             .logPoint("user data point", mUserLux, mUserBrightness);
@@ -732,6 +778,7 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
             pw.println("  mUserLux=" + mUserLux);
             pw.println("  mUserBrightness=" + mUserBrightness);
+            pw.println("  mDefaultConfig=" + mDefaultConfig);
         }
 
         private void computeSpline() {
@@ -757,6 +804,22 @@ public abstract class BrightnessMappingStrategy {
             Pair<float[], float[]> curve = mConfig.getCurve();
             Spline spline = Spline.createSpline(curve.first, curve.second);
             return mNitsToBacklightSpline.interpolate(spline.interpolate(lux));
+        }
+
+        private float correctBrightness(float brightness, String packageName, int category) {
+            if (packageName != null) {
+                BrightnessCorrection correction = mConfig.getCorrectionByPackageName(packageName);
+                if (correction != null) {
+                    return correction.apply(brightness);
+                }
+            }
+            if (category != ApplicationInfo.CATEGORY_UNDEFINED) {
+                BrightnessCorrection correction = mConfig.getCorrectionByCategory(category);
+                if (correction != null) {
+                    return correction.apply(brightness);
+                }
+            }
+            return brightness;
         }
     }
 }

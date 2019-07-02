@@ -15,7 +15,6 @@
  */
 
 syntax = "proto2";
-option java_package = "android.app";
 option java_multiple_files = true;
 
 package android.view;
@@ -24,9 +23,9 @@ import "frameworks/base/core/proto/android/app/window_configuration.proto";
 import "frameworks/base/core/proto/android/graphics/point.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/view/surfacecontrol.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
-/** Proto representation for RemoteAnimationTarget.java class. */
+/** Proto representation for android.view.RemoteAnimationTarget.java class. */
 message RemoteAnimationTargetProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -35,9 +34,14 @@ message RemoteAnimationTargetProto {
     optional .android.view.SurfaceControlProto leash = 3;
     optional bool is_translucent = 4;
     optional .android.graphics.RectProto clip_rect = 5;
-    optional .android.graphics.RectProto contentInsets = 6;
+    optional .android.graphics.RectProto content_insets = 6;
     optional int32 prefix_order_index = 7;
+    // The source position of the app, in screen spaces coordinates. If the
+    // position of the leash is modified from the controlling app, any animation
+    // transform needs to be offset by this amount.
     optional .android.graphics.PointProto position = 8;
     optional .android.graphics.RectProto source_container_bounds = 9;
     optional .android.app.WindowConfigurationProto window_configuration = 10;
+    optional .android.view.SurfaceControlProto start_leash = 11;
+    optional .android.graphics.RectProto start_bounds = 12;
 }

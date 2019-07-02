@@ -36,14 +36,15 @@ import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageCleanItem;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
@@ -125,9 +126,18 @@ interface IPackageManager {
     int getPermissionFlags(String permissionName, String packageName, int userId);
 
     void updatePermissionFlags(String permissionName, String packageName, int flagMask,
-            int flagValues, int userId);
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
+
+    List<String> getWhitelistedRestrictedPermissions(String packageName, int flags,
+            int userId);
+
+    boolean addWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId);
+
+    boolean removeWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId);
 
     boolean shouldShowRequestPermissionRationale(String permissionName,
             String packageName, int userId);
@@ -309,9 +319,14 @@ interface IPackageManager {
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
+    String[] setDistractingPackageRestrictionsAsUser(in String[] packageNames, int restrictionFlags,
+            int userId);
+
     String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended,
             in PersistableBundle appExtras, in PersistableBundle launcherExtras,
-            String dialogMessage, String callingPackage, int userId);
+            in SuspendDialogInfo dialogInfo, String callingPackage, int userId);
+
+    String[] getUnsuspendablePackagesForUser(in String[] packageNames, int userId);
 
     boolean isPackageSuspendedForUser(String packageName, int userId);
 
@@ -326,8 +341,6 @@ interface IPackageManager {
     void restoreDefaultApps(in byte[] backup, int userId);
     byte[] getIntentFilterVerificationBackup(int userId);
     void restoreIntentFilterVerification(in byte[] backup, int userId);
-    byte[] getPermissionGrantBackup(int userId);
-    void restorePermissionGrants(in byte[] backup, int userId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
@@ -581,6 +594,11 @@ interface IPackageManager {
             String targetCompilerFilter, boolean force);
 
     /**
+    * Ask the package manager to compile layouts in the given package.
+    */
+    boolean compileLayouts(String packageName);
+
+    /**
      * Ask the package manager to dump profiles associated with a package.
      */
     void dumpProfiles(String packageName);
@@ -600,8 +618,6 @@ interface IPackageManager {
      */
     void reconcileSecondaryDexFiles(String packageName);
 
-    PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
-
     int getMoveStatus(int moveId);
 
     void registerMoveCallback(in IPackageMoveObserver callback);
@@ -618,7 +634,7 @@ interface IPackageManager {
     int getInstallLocation();
 
     int installExistingPackageAsUser(String packageName, int userId, int installFlags,
-            int installReason);
+            int installReason, in List<String> whiteListedPermissions);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
@@ -636,7 +652,7 @@ interface IPackageManager {
 
     boolean isFirstBoot();
     boolean isOnlyCoreApps();
-    boolean isUpgrade();
+    boolean isDeviceUpgrading();
 
     void setPermissionEnforced(String permission, boolean enforced);
     boolean isPermissionEnforced(String permission);
@@ -707,6 +723,8 @@ interface IPackageManager {
 
     ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
 
+    ParceledListSlice getDeclaredSharedLibraries(in String packageName, int flags, int userId);
+
     boolean canRequestPackageInstalls(String packageName, int userId);
 
     void deletePreloadsFileCache();
@@ -731,5 +749,27 @@ interface IPackageManager {
 
     String getSystemTextClassifierPackageName();
 
+    String getAttentionServicePackageName();
+
+    String getWellbeingPackageName();
+
+    String getAppPredictionServicePackageName();
+
+    String getSystemCaptionsServicePackageName();
+
+    String getIncidentReportApproverPackageName();
+
     boolean isPackageStateProtected(String packageName, int userId);
+
+    void sendDeviceCustomizationReadyBroadcast();
+
+    List<ModuleInfo> getInstalledModules(int flags);
+
+    ModuleInfo getModuleInfo(String packageName, int flags);
+
+    int getRuntimePermissionsVersion(int userId);
+
+    void setRuntimePermissionsVersion(int version, int userId);
+
+    void notifyPackagesReplacedReceived(in String[] packages);
 }

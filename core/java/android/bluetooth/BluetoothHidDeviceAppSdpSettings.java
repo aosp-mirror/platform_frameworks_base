@@ -92,7 +92,7 @@ public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothHidDeviceAppSdpSettings> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothHidDeviceAppSdpSettings> CREATOR =
             new Parcelable.Creator<BluetoothHidDeviceAppSdpSettings>() {
 
                 @Override

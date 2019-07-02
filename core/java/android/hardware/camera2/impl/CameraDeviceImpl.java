@@ -95,6 +95,8 @@ public class CameraDeviceImpl extends CameraDevice
             new SparseArray<CaptureCallbackHolder>();
 
     private int mRepeatingRequestId = REQUEST_ID_NONE;
+    // Latest repeating request list's types
+    private int[] mRepeatingRequestTypes;
     // Map stream IDs to input/output configurations
     private SimpleEntry<Integer, InputConfiguration> mConfiguredInput =
             new SimpleEntry<>(REQUEST_ID_NONE, null);
@@ -108,7 +110,7 @@ public class CameraDeviceImpl extends CameraDevice
     private static final long NANO_PER_SECOND = 1000000000; //ns
 
     /**
-     * A list tracking request and its expected last regular frame number and last reprocess frame
+     * A list tracking request and its expected last regular/reprocess/zslStill frame
      * number. Updated when calling ICameraDeviceUser methods.
      */
     private final List<RequestLastFrameNumbersHolder> mRequestLastFrameNumbersList =
@@ -703,6 +705,17 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
+    @Override
+    public boolean isSessionConfigurationSupported(
+            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException,
+            UnsupportedOperationException, IllegalArgumentException {
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+
+            return mRemoteDevice.isSessionConfigurationSupported(sessionConfig);
+        }
+    }
+
     /**
      * For use by backwards-compatibility code only.
      */
@@ -932,11 +945,12 @@ public class CameraDeviceImpl extends CameraDevice
      * regular frame number will be added to the list mRequestLastFrameNumbersList.</p>
      *
      * @param requestId the request ID of the current repeating request.
-     *
      * @param lastFrameNumber last frame number returned from binder.
+     * @param repeatingRequestTypes the repeating requests' types.
      */
     private void checkEarlyTriggerSequenceComplete(
-            final int requestId, final long lastFrameNumber) {
+            final int requestId, final long lastFrameNumber,
+            final int[] repeatingRequestTypes) {
         // lastFrameNumber being equal to NO_FRAMES_CAPTURED means that the request
         // was never sent to HAL. Should trigger onCaptureSequenceAborted immediately.
         if (lastFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
@@ -986,15 +1000,23 @@ public class CameraDeviceImpl extends CameraDevice
                         requestId));
             }
         } else {
-            // This function is only called for regular request so lastFrameNumber is the last
-            // regular frame number.
+            // This function is only called for regular/ZslStill request so lastFrameNumber is the
+            // last regular/ZslStill frame number.
             mRequestLastFrameNumbersList.add(new RequestLastFrameNumbersHolder(requestId,
-                    lastFrameNumber));
+                    lastFrameNumber, repeatingRequestTypes));
 
             // It is possible that the last frame has already arrived, so we need to check
             // for sequence completion right away
             checkAndFireSequenceComplete();
         }
+    }
+
+    private int[] getRequestTypes(final CaptureRequest[] requestArray) {
+        int[] requestTypes = new int[requestArray.length];
+        for (int i = 0; i < requestArray.length; i++) {
+            requestTypes[i] = requestArray[i].getRequestType();
+        }
+        return requestTypes;
     }
 
     private int submitCaptureRequest(List<CaptureRequest> requestList, CaptureCallback callback,
@@ -1066,9 +1088,11 @@ public class CameraDeviceImpl extends CameraDevice
             if (repeating) {
                 if (mRepeatingRequestId != REQUEST_ID_NONE) {
                     checkEarlyTriggerSequenceComplete(mRepeatingRequestId,
-                            requestInfo.getLastFrameNumber());
+                            requestInfo.getLastFrameNumber(),
+                            mRepeatingRequestTypes);
                 }
                 mRepeatingRequestId = requestInfo.getRequestId();
+                mRepeatingRequestTypes = getRequestTypes(requestArray);
             } else {
                 mRequestLastFrameNumbersList.add(
                     new RequestLastFrameNumbersHolder(requestList, requestInfo));
@@ -1106,6 +1130,8 @@ public class CameraDeviceImpl extends CameraDevice
 
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
+                int[] requestTypes = mRepeatingRequestTypes;
+                mRepeatingRequestTypes = null;
 
                 long lastFrameNumber;
                 try {
@@ -1118,7 +1144,7 @@ public class CameraDeviceImpl extends CameraDevice
                     return;
                 }
 
-                checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
+                checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber, requestTypes);
             }
         }
     }
@@ -1151,8 +1177,10 @@ public class CameraDeviceImpl extends CameraDevice
 
             long lastFrameNumber = mRemoteDevice.flush();
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber,
+                        mRepeatingRequestTypes);
                 mRepeatingRequestId = REQUEST_ID_NONE;
+                mRepeatingRequestTypes = null;
             }
         }
     }
@@ -1459,7 +1487,7 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     /**
-     * This class holds a capture ID and its expected last regular frame number and last reprocess
+     * This class holds a capture ID and its expected last regular, zslStill, and reprocess
      * frame number.
      */
     static class RequestLastFrameNumbersHolder {
@@ -1471,6 +1499,9 @@ public class CameraDeviceImpl extends CameraDevice
         // The last reprocess frame number for this request ID. It's
         // CaptureCallback.NO_FRAMES_CAPTURED if the request ID has no reprocess request.
         private final long mLastReprocessFrameNumber;
+        // The last ZSL still capture frame number for this request ID. It's
+        // CaptureCallback.NO_FRAMES_CAPTURED if the request ID has no zsl request.
+        private final long mLastZslStillFrameNumber;
 
         /**
          * Create a request-last-frame-numbers holder with a list of requests, request ID, and
@@ -1479,6 +1510,7 @@ public class CameraDeviceImpl extends CameraDevice
         public RequestLastFrameNumbersHolder(List<CaptureRequest> requestList, SubmitInfo requestInfo) {
             long lastRegularFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
             long lastReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+            long lastZslStillFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
             long frameNumber = requestInfo.getLastFrameNumber();
 
             if (requestInfo.getLastFrameNumber() < requestList.size() - 1) {
@@ -1488,19 +1520,24 @@ public class CameraDeviceImpl extends CameraDevice
                         " requests in the list: " + requestList.size());
             }
 
-            // find the last regular frame number and the last reprocess frame number
+            // find the last regular, zslStill, and reprocess frame number
             for (int i = requestList.size() - 1; i >= 0; i--) {
                 CaptureRequest request = requestList.get(i);
-                if (request.isReprocess() && lastReprocessFrameNumber ==
-                        CaptureCallback.NO_FRAMES_CAPTURED) {
+                int requestType = request.getRequestType();
+                if (requestType == CaptureRequest.REQUEST_TYPE_REPROCESS
+                        && lastReprocessFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
                     lastReprocessFrameNumber = frameNumber;
-                } else if (!request.isReprocess() && lastRegularFrameNumber ==
-                        CaptureCallback.NO_FRAMES_CAPTURED) {
+                } else if (requestType == CaptureRequest.REQUEST_TYPE_ZSL_STILL
+                        && lastZslStillFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
+                    lastZslStillFrameNumber = frameNumber;
+                } else if (requestType == CaptureRequest.REQUEST_TYPE_REGULAR
+                        && lastRegularFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
                     lastRegularFrameNumber = frameNumber;
                 }
 
-                if (lastReprocessFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED &&
-                        lastRegularFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED) {
+                if (lastReprocessFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED
+                        && lastZslStillFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED
+                        && lastRegularFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED) {
                     break;
                 }
 
@@ -1509,15 +1546,51 @@ public class CameraDeviceImpl extends CameraDevice
 
             mLastRegularFrameNumber = lastRegularFrameNumber;
             mLastReprocessFrameNumber = lastReprocessFrameNumber;
+            mLastZslStillFrameNumber = lastZslStillFrameNumber;
             mRequestId = requestInfo.getRequestId();
         }
 
         /**
-         * Create a request-last-frame-numbers holder with a request ID and last regular frame
-         * number.
+         * Create a request-last-frame-numbers holder with a request ID and last regular/ZslStill
+         * frame number.
          */
-        public RequestLastFrameNumbersHolder(int requestId, long lastRegularFrameNumber) {
+        RequestLastFrameNumbersHolder(int requestId, long lastFrameNumber,
+                int[] repeatingRequestTypes) {
+            long lastRegularFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+            long lastZslStillFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+
+            if (repeatingRequestTypes == null) {
+                throw new IllegalArgumentException(
+                        "repeatingRequest list must not be null");
+            }
+            if (lastFrameNumber < repeatingRequestTypes.length - 1) {
+                throw new IllegalArgumentException(
+                        "lastFrameNumber: " + lastFrameNumber + " should be at least "
+                        + (repeatingRequestTypes.length - 1)
+                        + " for the number of requests in the list: "
+                        + repeatingRequestTypes.length);
+            }
+
+            long frameNumber = lastFrameNumber;
+            for (int i = repeatingRequestTypes.length - 1; i >= 0; i--) {
+                if (repeatingRequestTypes[i] == CaptureRequest.REQUEST_TYPE_ZSL_STILL
+                        && lastZslStillFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
+                    lastZslStillFrameNumber = frameNumber;
+                } else if (repeatingRequestTypes[i] == CaptureRequest.REQUEST_TYPE_REGULAR
+                        && lastRegularFrameNumber == CaptureCallback.NO_FRAMES_CAPTURED) {
+                    lastRegularFrameNumber = frameNumber;
+                }
+
+                if (lastZslStillFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED
+                        && lastRegularFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED) {
+                    break;
+                }
+
+                frameNumber--;
+            }
+
             mLastRegularFrameNumber = lastRegularFrameNumber;
+            mLastZslStillFrameNumber = lastZslStillFrameNumber;
             mLastReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
             mRequestId = requestId;
         }
@@ -1539,10 +1612,19 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         /**
+         * Return the last ZslStill frame number. Return CaptureCallback.NO_FRAMES_CAPTURED if
+         * it contains no Zsl request.
+         */
+        public long getLastZslStillFrameNumber() {
+            return mLastZslStillFrameNumber;
+        }
+
+        /**
          * Return the last frame number overall.
          */
         public long getLastFrameNumber() {
-            return Math.max(mLastRegularFrameNumber, mLastReprocessFrameNumber);
+            return Math.max(mLastZslStillFrameNumber,
+                    Math.max(mLastRegularFrameNumber, mLastReprocessFrameNumber));
         }
 
         /**
@@ -1558,43 +1640,58 @@ public class CameraDeviceImpl extends CameraDevice
      */
     public class FrameNumberTracker {
 
-        private long mCompletedFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
-        private long mCompletedReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
-        /** the skipped frame numbers that belong to regular results */
-        private final LinkedList<Long> mSkippedRegularFrameNumbers = new LinkedList<Long>();
-        /** the skipped frame numbers that belong to reprocess results */
-        private final LinkedList<Long> mSkippedReprocessFrameNumbers = new LinkedList<Long>();
-        /** frame number -> is reprocess */
-        private final TreeMap<Long, Boolean> mFutureErrorMap = new TreeMap<Long, Boolean>();
+        /** the completed frame number for each type of capture results */
+        private long[] mCompletedFrameNumber = new long[CaptureRequest.REQUEST_TYPE_COUNT];
+
+        /** the skipped frame numbers that don't belong to each type of capture results */
+        private final LinkedList<Long>[] mSkippedOtherFrameNumbers =
+                new LinkedList[CaptureRequest.REQUEST_TYPE_COUNT];
+
+        /** the skipped frame numbers that belong to each type of capture results */
+        private final LinkedList<Long>[] mSkippedFrameNumbers =
+                new LinkedList[CaptureRequest.REQUEST_TYPE_COUNT];
+
+        /** frame number -> request type */
+        private final TreeMap<Long, Integer> mFutureErrorMap = new TreeMap<Long, Integer>();
         /** Map frame numbers to list of partial results */
         private final HashMap<Long, List<CaptureResult>> mPartialResults = new HashMap<>();
+
+        public FrameNumberTracker() {
+            for (int i = 0; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
+                mCompletedFrameNumber[i] = CaptureCallback.NO_FRAMES_CAPTURED;
+                mSkippedOtherFrameNumbers[i] = new LinkedList<Long>();
+                mSkippedFrameNumbers[i] = new LinkedList<Long>();
+            }
+        }
 
         private void update() {
             Iterator iter = mFutureErrorMap.entrySet().iterator();
             while (iter.hasNext()) {
                 TreeMap.Entry pair = (TreeMap.Entry)iter.next();
                 Long errorFrameNumber = (Long)pair.getKey();
-                Boolean reprocess = (Boolean)pair.getValue();
-                Boolean removeError = true;
-                if (reprocess) {
-                    if (errorFrameNumber == mCompletedReprocessFrameNumber + 1) {
-                        mCompletedReprocessFrameNumber = errorFrameNumber;
-                    } else if (mSkippedReprocessFrameNumbers.isEmpty() != true &&
-                            errorFrameNumber == mSkippedReprocessFrameNumbers.element()) {
-                        mCompletedReprocessFrameNumber = errorFrameNumber;
-                        mSkippedReprocessFrameNumbers.remove();
-                    } else {
-                        removeError = false;
-                    }
+                int requestType = (int) pair.getValue();
+                Boolean removeError = false;
+                if (errorFrameNumber == mCompletedFrameNumber[requestType] + 1) {
+                    mCompletedFrameNumber[requestType] = errorFrameNumber;
+                    removeError = true;
                 } else {
-                    if (errorFrameNumber == mCompletedFrameNumber + 1) {
-                        mCompletedFrameNumber = errorFrameNumber;
-                    } else if (mSkippedRegularFrameNumbers.isEmpty() != true &&
-                            errorFrameNumber == mSkippedRegularFrameNumbers.element()) {
-                        mCompletedFrameNumber = errorFrameNumber;
-                        mSkippedRegularFrameNumbers.remove();
+                    if (!mSkippedFrameNumbers[requestType].isEmpty()) {
+                        if (errorFrameNumber == mSkippedFrameNumbers[requestType].element()) {
+                            mCompletedFrameNumber[requestType] = errorFrameNumber;
+                            mSkippedFrameNumbers[requestType].remove();
+                            removeError = true;
+                        }
                     } else {
-                        removeError = false;
+                        for (int i = 1; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
+                            int otherType = (requestType + i) % CaptureRequest.REQUEST_TYPE_COUNT;
+                            if (!mSkippedOtherFrameNumbers[otherType].isEmpty() && errorFrameNumber
+                                    == mSkippedOtherFrameNumbers[otherType].element()) {
+                                mCompletedFrameNumber[requestType] = errorFrameNumber;
+                                mSkippedOtherFrameNumbers[otherType].remove();
+                                removeError = true;
+                                break;
+                            }
+                        }
                     }
                 }
                 if (removeError) {
@@ -1607,18 +1704,14 @@ public class CameraDeviceImpl extends CameraDevice
          * This function is called every time when a result or an error is received.
          * @param frameNumber the frame number corresponding to the result or error
          * @param isError true if it is an error, false if it is not an error
-         * @param isReprocess true if it is a reprocess result, false if it is a regular result.
+         * @param requestType the type of capture request: Reprocess, ZslStill, or Regular.
          */
-        public void updateTracker(long frameNumber, boolean isError, boolean isReprocess) {
+        public void updateTracker(long frameNumber, boolean isError, int requestType) {
             if (isError) {
-                mFutureErrorMap.put(frameNumber, isReprocess);
+                mFutureErrorMap.put(frameNumber, requestType);
             } else {
                 try {
-                    if (isReprocess) {
-                        updateCompletedReprocessFrameNumber(frameNumber);
-                    } else {
-                        updateCompletedFrameNumber(frameNumber);
-                    }
+                    updateCompletedFrameNumber(frameNumber, requestType);
                 } catch (IllegalArgumentException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -1635,13 +1728,13 @@ public class CameraDeviceImpl extends CameraDevice
          * @param frameNumber the frame number corresponding to the result
          * @param result the total or partial result
          * @param partial {@true} if the result is partial, {@code false} if total
-         * @param isReprocess true if it is a reprocess result, false if it is a regular result.
+         * @param requestType the type of capture request: Reprocess, ZslStill, or Regular.
          */
         public void updateTracker(long frameNumber, CaptureResult result, boolean partial,
-                boolean isReprocess) {
+                int requestType) {
             if (!partial) {
                 // Update the total result's frame status as being successful
-                updateTracker(frameNumber, /*isError*/false, isReprocess);
+                updateTracker(frameNumber, /*isError*/false, requestType);
                 // Don't keep a list of total results, we don't need to track them
                 return;
             }
@@ -1677,92 +1770,105 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         public long getCompletedFrameNumber() {
-            return mCompletedFrameNumber;
+            return mCompletedFrameNumber[CaptureRequest.REQUEST_TYPE_REGULAR];
         }
 
         public long getCompletedReprocessFrameNumber() {
-            return mCompletedReprocessFrameNumber;
+            return mCompletedFrameNumber[CaptureRequest.REQUEST_TYPE_REPROCESS];
+        }
+
+        public long getCompletedZslStillFrameNumber() {
+            return mCompletedFrameNumber[CaptureRequest.REQUEST_TYPE_ZSL_STILL];
         }
 
         /**
-         * Update the completed frame number for regular results.
+         * Update the completed frame number for results of 3 categories
+         * (Regular/Reprocess/ZslStill).
          *
-         * It validates that all previous frames have arrived except for reprocess frames.
+         * It validates that all previous frames of the same category have arrived.
          *
-         * If there is a gap since previous regular frame number, assume the frames in the gap are
-         * reprocess frames and store them in the skipped reprocess frame number queue to check
-         * against when reprocess frames arrive.
+         * If there is a gap since previous frame number of the same category, assume the frames in
+         * the gap are other categories and store them in the skipped frame number queue to check
+         * against when frames of those categories arrive.
          */
-        private void updateCompletedFrameNumber(long frameNumber) throws IllegalArgumentException {
-            if (frameNumber <= mCompletedFrameNumber) {
+        private void updateCompletedFrameNumber(long frameNumber,
+                int requestType) throws IllegalArgumentException {
+            if (frameNumber <= mCompletedFrameNumber[requestType]) {
                 throw new IllegalArgumentException("frame number " + frameNumber + " is a repeat");
-            } else if (frameNumber <= mCompletedReprocessFrameNumber) {
-                // if frame number is smaller than completed reprocess frame number,
-                // it must be the head of mSkippedRegularFrameNumbers
-                if (mSkippedRegularFrameNumbers.isEmpty() == true ||
-                        frameNumber < mSkippedRegularFrameNumbers.element()) {
-                    throw new IllegalArgumentException("frame number " + frameNumber +
-                            " is a repeat");
-                } else if (frameNumber > mSkippedRegularFrameNumbers.element()) {
-                    throw new IllegalArgumentException("frame number " + frameNumber +
-                            " comes out of order. Expecting " +
-                            mSkippedRegularFrameNumbers.element());
+            }
+
+            // Assume there are only 3 different types of capture requests.
+            int otherType1 = (requestType + 1) % CaptureRequest.REQUEST_TYPE_COUNT;
+            int otherType2 = (requestType + 2) % CaptureRequest.REQUEST_TYPE_COUNT;
+            long maxOtherFrameNumberSeen =
+                    Math.max(mCompletedFrameNumber[otherType1], mCompletedFrameNumber[otherType2]);
+            if (frameNumber < maxOtherFrameNumberSeen) {
+                // if frame number is smaller than completed frame numbers of other categories,
+                // it must be:
+                // - the head of mSkippedFrameNumbers for this category, or
+                // - in one of other mSkippedOtherFrameNumbers
+                if (!mSkippedFrameNumbers[requestType].isEmpty()) {
+                    // frame number must be head of current type of mSkippedFrameNumbers if
+                    // mSkippedFrameNumbers isn't empty.
+                    if (frameNumber < mSkippedFrameNumbers[requestType].element()) {
+                        throw new IllegalArgumentException("frame number " + frameNumber
+                                + " is a repeat");
+                    } else if (frameNumber > mSkippedFrameNumbers[requestType].element()) {
+                        throw new IllegalArgumentException("frame number " + frameNumber
+                                + " comes out of order. Expecting "
+                                + mSkippedFrameNumbers[requestType].element());
+                    }
+                    // frame number matches the head of the skipped frame number queue.
+                    mSkippedFrameNumbers[requestType].remove();
+                } else {
+                    // frame number must be in one of the other mSkippedOtherFrameNumbers.
+                    int index1 = mSkippedOtherFrameNumbers[otherType1].indexOf(frameNumber);
+                    int index2 = mSkippedOtherFrameNumbers[otherType2].indexOf(frameNumber);
+                    boolean inSkippedOther1 = index1 != -1;
+                    boolean inSkippedOther2 = index2 != -1;
+                    if (!(inSkippedOther1 ^ inSkippedOther2)) {
+                        throw new IllegalArgumentException("frame number " + frameNumber
+                                + " is a repeat or invalid");
+                    }
+
+                    // We know the category of frame numbers in skippedOtherFrameNumbers leading up
+                    // to the current frame number. Move them into the correct skippedFrameNumbers.
+                    LinkedList<Long> srcList, dstList;
+                    int index;
+                    if (inSkippedOther1) {
+                        srcList = mSkippedOtherFrameNumbers[otherType1];
+                        dstList = mSkippedFrameNumbers[otherType2];
+                        index = index1;
+                    } else {
+                        srcList = mSkippedOtherFrameNumbers[otherType2];
+                        dstList = mSkippedFrameNumbers[otherType1];
+                        index = index2;
+                    }
+                    for (int i = 0; i < index; i++) {
+                        dstList.add(srcList.removeFirst());
+                    }
+
+                    // Remove current frame number from skippedOtherFrameNumbers
+                    srcList.remove();
                 }
-                // frame number matches the head of the skipped frame number queue.
-                mSkippedRegularFrameNumbers.remove();
             } else {
-                // there is a gap of unseen frame numbers which should belong to reprocess result
-                // put all the skipped frame numbers in the queue
-                for (long i = Math.max(mCompletedFrameNumber, mCompletedReprocessFrameNumber) + 1;
+                // there is a gap of unseen frame numbers which should belong to the other
+                // 2 categories. Put all the skipped frame numbers in the queue.
+                for (long i =
+                        Math.max(maxOtherFrameNumberSeen, mCompletedFrameNumber[requestType]) + 1;
                         i < frameNumber; i++) {
-                    mSkippedReprocessFrameNumbers.add(i);
+                    mSkippedOtherFrameNumbers[requestType].add(i);
                 }
             }
 
-            mCompletedFrameNumber = frameNumber;
-        }
-
-        /**
-         * Update the completed frame number for reprocess results.
-         *
-         * It validates that all previous frames have arrived except for regular frames.
-         *
-         * If there is a gap since previous reprocess frame number, assume the frames in the gap are
-         * regular frames and store them in the skipped regular frame number queue to check
-         * against when regular frames arrive.
-         */
-        private void updateCompletedReprocessFrameNumber(long frameNumber)
-                throws IllegalArgumentException {
-            if (frameNumber < mCompletedReprocessFrameNumber) {
-                throw new IllegalArgumentException("frame number " + frameNumber + " is a repeat");
-            } else if (frameNumber < mCompletedFrameNumber) {
-                // if reprocess frame number is smaller than completed regular frame number,
-                // it must be the head of the skipped reprocess frame number queue.
-                if (mSkippedReprocessFrameNumbers.isEmpty() == true ||
-                        frameNumber < mSkippedReprocessFrameNumbers.element()) {
-                    throw new IllegalArgumentException("frame number " + frameNumber +
-                            " is a repeat");
-                } else if (frameNumber > mSkippedReprocessFrameNumbers.element()) {
-                    throw new IllegalArgumentException("frame number " + frameNumber +
-                            " comes out of order. Expecting " +
-                            mSkippedReprocessFrameNumbers.element());
-                }
-                // frame number matches the head of the skipped frame number queue.
-                mSkippedReprocessFrameNumbers.remove();
-            } else {
-                // put all the skipped frame numbers in the queue
-                for (long i = Math.max(mCompletedFrameNumber, mCompletedReprocessFrameNumber) + 1;
-                        i < frameNumber; i++) {
-                    mSkippedRegularFrameNumbers.add(i);
-                }
-            }
-            mCompletedReprocessFrameNumber = frameNumber;
+            mCompletedFrameNumber[requestType] = frameNumber;
         }
     }
 
     private void checkAndFireSequenceComplete() {
         long completedFrameNumber = mFrameNumberTracker.getCompletedFrameNumber();
         long completedReprocessFrameNumber = mFrameNumberTracker.getCompletedReprocessFrameNumber();
+        long completedZslStillFrameNumber = mFrameNumberTracker.getCompletedZslStillFrameNumber();
         boolean isReprocess = false;
         Iterator<RequestLastFrameNumbersHolder> iter = mRequestLastFrameNumbersList.iterator();
         while (iter.hasNext()) {
@@ -1784,18 +1890,22 @@ public class CameraDeviceImpl extends CameraDevice
                             requestLastFrameNumbers.getLastRegularFrameNumber();
                     long lastReprocessFrameNumber =
                             requestLastFrameNumbers.getLastReprocessFrameNumber();
-
+                    long lastZslStillFrameNumber =
+                            requestLastFrameNumbers.getLastZslStillFrameNumber();
                     // check if it's okay to remove request from mCaptureCallbackMap
-                    if (lastRegularFrameNumber <= completedFrameNumber &&
-                            lastReprocessFrameNumber <= completedReprocessFrameNumber) {
+                    if (lastRegularFrameNumber <= completedFrameNumber
+                            && lastReprocessFrameNumber <= completedReprocessFrameNumber
+                            && lastZslStillFrameNumber <= completedZslStillFrameNumber) {
                         sequenceCompleted = true;
                         mCaptureCallbackMap.removeAt(index);
                         if (DEBUG) {
                             Log.v(TAG, String.format(
-                                    "Remove holder for requestId %d, because lastRegularFrame %d " +
-                                    "is <= %d and lastReprocessFrame %d is <= %d", requestId,
+                                    "Remove holder for requestId %d, because lastRegularFrame %d "
+                                    + "is <= %d, lastReprocessFrame %d is <= %d, "
+                                    + "lastZslStillFrame %d is <= %d", requestId,
                                     lastRegularFrameNumber, completedFrameNumber,
-                                    lastReprocessFrameNumber, completedReprocessFrameNumber));
+                                    lastReprocessFrameNumber, completedReprocessFrameNumber,
+                                    lastZslStillFrameNumber, completedZslStillFrameNumber));
                         }
                     }
                 }
@@ -1889,7 +1999,7 @@ public class CameraDeviceImpl extends CameraDevice
             final long ident = Binder.clearCallingIdentity();
             try {
                 CameraDeviceImpl.this.mDeviceExecutor.execute(obtainRunnable(
-                            CameraDeviceCallbacks::notifyError, this, code));
+                            CameraDeviceCallbacks::notifyError, this, code).recycleOnUse());
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1914,10 +2024,12 @@ public class CameraDeviceImpl extends CameraDevice
                     return; // Camera already closed
                 }
 
-                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber,
+                        mRepeatingRequestTypes);
                 // Check if there is already a new repeating request
                 if (mRepeatingRequestId == repeatingRequestId) {
                     mRepeatingRequestId = REQUEST_ID_NONE;
+                    mRepeatingRequestTypes = null;
                 }
             }
         }
@@ -2029,7 +2141,7 @@ public class CameraDeviceImpl extends CameraDevice
 
                 boolean isPartialResult =
                         (resultExtras.getPartialResultCount() < mTotalPartialCount);
-                boolean isReprocess = request.isReprocess();
+                int requestType = request.getRequestType();
 
                 // Check if we have a callback for this
                 if (holder == null) {
@@ -2040,7 +2152,7 @@ public class CameraDeviceImpl extends CameraDevice
                     }
 
                     mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult,
-                            isReprocess);
+                            requestType);
 
                     return;
                 }
@@ -2053,7 +2165,7 @@ public class CameraDeviceImpl extends CameraDevice
                     }
 
                     mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult,
-                            isReprocess);
+                            requestType);
                     return;
                 }
 
@@ -2161,7 +2273,7 @@ public class CameraDeviceImpl extends CameraDevice
 
                 // Collect the partials for a total result; or mark the frame as totally completed
                 mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult,
-                        isReprocess);
+                        requestType);
 
                 // Fire onCaptureSequenceCompleted
                 if (!isPartialResult) {
@@ -2221,6 +2333,7 @@ public class CameraDeviceImpl extends CameraDevice
             final int requestId = resultExtras.getRequestId();
             final int subsequenceId = resultExtras.getSubsequenceId();
             final long frameNumber = resultExtras.getFrameNumber();
+            final String errorPhysicalCameraId = resultExtras.getErrorPhysicalCameraId();
             final CaptureCallbackHolder holder =
                     CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
 
@@ -2276,7 +2389,8 @@ public class CameraDeviceImpl extends CameraDevice
                     reason,
                     /*dropped*/ mayHaveBuffers,
                     requestId,
-                    frameNumber);
+                    frameNumber,
+                    errorPhysicalCameraId);
 
                 failureDispatch = new Runnable() {
                     @Override
@@ -2294,7 +2408,8 @@ public class CameraDeviceImpl extends CameraDevice
                 if (DEBUG) {
                     Log.v(TAG, String.format("got error frame %d", frameNumber));
                 }
-                mFrameNumberTracker.updateTracker(frameNumber, /*error*/true, request.isReprocess());
+                mFrameNumberTracker.updateTracker(frameNumber,
+                        /*error*/true, request.getRequestType());
                 checkAndFireSequenceComplete();
 
                 // Dispatch the failure callback

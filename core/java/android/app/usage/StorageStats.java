@@ -106,7 +106,7 @@ public final class StorageStats implements Parcelable {
         dest.writeLong(cacheBytes);
     }
 
-    public static final Creator<StorageStats> CREATOR = new Creator<StorageStats>() {
+    public static final @android.annotation.NonNull Creator<StorageStats> CREATOR = new Creator<StorageStats>() {
         @Override
         public StorageStats createFromParcel(Parcel in) {
             return new StorageStats(in);

@@ -24,6 +24,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -42,7 +43,16 @@ struct ConfigStats {
     bool is_valid;
 
     std::list<int32_t> broadcast_sent_time_sec;
+
+    // Times at which this config is activated.
+    std::list<int32_t> activation_time_sec;
+
+    // Times at which this config is deactivated.
+    std::list<int32_t> deactivation_time_sec;
+
     std::list<int32_t> data_drop_time_sec;
+    // Number of bytes dropped at corresponding time.
+    std::list<int64_t> data_drop_bytes;
     std::list<std::pair<int32_t, int64_t>> dump_report_stats;
 
     // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
@@ -86,7 +96,6 @@ public:
     static StatsdStats& getInstance();
     ~StatsdStats(){};
 
-    // TODO: set different limit if the device is low ram.
     const static int kDimensionKeySizeSoftLimit = 500;
     const static int kDimensionKeySizeHardLimit = 800;
 
@@ -112,7 +121,7 @@ public:
 
     // Max memory allowed for storing metrics per configuration. If this limit is exceeded, statsd
     // drops the metrics data in memory.
-    static const size_t kMaxMetricsBytesPerConfig = 256 * 1024;
+    static const size_t kMaxMetricsBytesPerConfig = 2 * 1024 * 1024;
 
     // Soft memory limit per configuration. Once this limit is exceeded, we begin notifying the
     // data subscriber that it's time to call getData.
@@ -129,10 +138,16 @@ public:
     static const int64_t kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
 
     /* Min period between two checks of byte size per config key in nanoseconds. */
-    static const int64_t kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
+    static const int64_t kMinByteSizeCheckPeriodNs = 60 * NS_PER_SEC;
+
+    /* Minimum period between two activation broadcasts in nanoseconds. */
+    static const int64_t kMinActivationBroadcastPeriodNs = 10 * NS_PER_SEC;
 
     // Maximum age (30 days) that files on disk can exist in seconds.
     static const int kMaxAgeSecond = 60 * 60 * 24 * 30;
+
+    // Maximum age (2 days) that local history files on disk can exist in seconds.
+    static const int kMaxLocalHistoryAgeSecond = 60 * 60 * 24 * 2;
 
     // Maximum number of files (1000) that can be in stats directory on disk.
     static const int kMaxFileNumber = 1000;
@@ -142,6 +157,29 @@ public:
 
     // How long to try to clear puller cache from last time
     static const long kPullerCacheClearIntervalSec = 1;
+
+    // Max time to do a pull.
+    static const int64_t kPullMaxDelayNs = 10 * NS_PER_SEC;
+
+    // Maximum number of pushed atoms statsd stats will track above kMaxPushedAtomId.
+    static const int kMaxNonPlatformPushedAtoms = 100;
+
+    // Max platform atom tag number.
+    static const int32_t kMaxPlatformAtomTag = 100000;
+
+    // Vendor pulled atom start id.
+    static const int32_t kVendorPulledAtomStartTag = 150000;
+
+    // Beginning of range for timestamp truncation.
+    static const int32_t kTimestampTruncationStartTag = 300000;
+
+    // End of range for timestamp truncation.
+    static const int32_t kTimestampTruncationEndTag = 304999;
+
+    // Max accepted atom id.
+    static const int32_t kMaxAtomTag = 200000;
+
+    static const int64_t kInt64Max = 0x7fffffffffffffffLL;
 
     /**
      * Report a new config has been received and report the static stats about the config.
@@ -157,7 +195,7 @@ public:
      * Report a config has been removed.
      */
     void noteConfigRemoved(const ConfigKey& key);
-   /**
+    /**
      * Report a config has been reset when ttl expires.
      */
     void noteConfigReset(const ConfigKey& key);
@@ -168,9 +206,16 @@ public:
     void noteBroadcastSent(const ConfigKey& key);
 
     /**
+     * Report that a config has become activated or deactivated.
+     * This can be different from whether or not a broadcast is sent if the
+     * guardrail prevented the broadcast from being sent.
+     */
+    void noteActiveStatusChanged(const ConfigKey& key, bool activate);
+
+    /**
      * Report a config's metrics data has been dropped.
      */
-    void noteDataDropped(const ConfigKey& key);
+    void noteDataDropped(const ConfigKey& key, const size_t totalBytes);
 
     /**
      * Report metrics data report has been sent.
@@ -202,7 +247,6 @@ public:
      * [size]: The output tuple size.
      */
     void noteMetricDimensionSize(const ConfigKey& key, const int64_t& id, int size);
-
 
     /**
      * Report the max size of output tuple of dimension in condition across dimensions in what.
@@ -263,29 +307,148 @@ public:
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
-    // Update minimum interval between pulls for an pulled atom
+    /*
+     * Updates minimum interval between pulls for an pulled atom.
+     */
     void updateMinPullIntervalSec(int pullAtomId, long intervalSec);
 
-    // Notify pull request for an atom
+    /*
+     * Notes an atom is pulled.
+     */
     void notePull(int pullAtomId);
 
-    // Notify pull request for an atom served from cached data
+    /*
+     * Notes an atom is served from puller cache.
+     */
     void notePullFromCache(int pullAtomId);
 
-    /**
-     * Records statsd met an error while reading from logd.
+    /*
+     * Notify data error for pulled atom.
      */
-    void noteLoggerError(int error);
+    void notePullDataError(int pullAtomId);
 
     /*
-    * Records when system server restarts.
-    */
+     * Records time for actual pulling, not including those served from cache and not including
+     * statsd processing delays.
+     */
+    void notePullTime(int pullAtomId, int64_t pullTimeNs);
+
+    /*
+     * Records pull delay for a pulled atom, including those served from cache and including statsd
+     * processing delays.
+     */
+    void notePullDelay(int pullAtomId, int64_t pullDelayNs);
+
+    /*
+     * Records pull exceeds timeout for the puller.
+     */
+    void notePullTimeout(int pullAtomId);
+
+    /*
+     * Records pull exceeds max delay for a metric.
+     */
+    void notePullExceedMaxDelay(int pullAtomId);
+
+    /*
+     * Records when system server restarts.
+     */
     void noteSystemServerRestart(int32_t timeSec);
 
     /**
      * Records statsd skipped an event.
      */
-    void noteLogLost(int64_t timestamp);
+    void noteLogLost(int32_t wallClockTimeSec, int32_t count, int32_t lastError,
+                     int32_t lastAtomTag, int32_t uid, int32_t pid);
+
+    /**
+     * Records that the pull of an atom has failed
+     */
+    void notePullFailed(int atomId);
+
+    /**
+     * Records that the pull of StatsCompanionService atom has failed
+     */
+    void noteStatsCompanionPullFailed(int atomId);
+
+    /**
+     * Records that the pull of a StatsCompanionService atom has failed due to a failed binder
+     * transaction. This can happen when StatsCompanionService returns too
+     * much data (the max Binder parcel size is 1MB)
+     */
+    void noteStatsCompanionPullBinderTransactionFailed(int atomId);
+
+    /**
+     * A pull with no data occurred
+     */
+    void noteEmptyData(int atomId);
+
+    /**
+     * Records that a puller callback for the given atomId was registered or unregistered.
+     *
+     * @param registered True if the callback was registered, false if was unregistered.
+     */
+    void notePullerCallbackRegistrationChanged(int atomId, bool registered);
+
+    /**
+     * Hard limit was reached in the cardinality of an atom
+     */
+    void noteHardDimensionLimitReached(int64_t metricId);
+
+    /**
+     * A log event was too late, arrived in the wrong bucket and was skipped
+     */
+    void noteLateLogEventSkipped(int64_t metricId);
+
+    /**
+     * Buckets were skipped as time elapsed without any data for them
+     */
+    void noteSkippedForwardBuckets(int64_t metricId);
+
+    /**
+     * An unsupported value type was received
+     */
+    void noteBadValueType(int64_t metricId);
+
+    /**
+     * Buckets were dropped due to reclaim memory.
+     */
+    void noteBucketDropped(int64_t metricId);
+
+    /**
+     * A condition change was too late, arrived in the wrong bucket and was skipped
+     */
+    void noteConditionChangeInNextBucket(int64_t metricId);
+
+    /**
+     * A bucket has been tagged as invalid.
+     */
+    void noteInvalidatedBucket(int64_t metricId);
+
+    /**
+     * Tracks the total number of buckets (include skipped/invalid buckets).
+     */
+    void noteBucketCount(int64_t metricId);
+
+    /**
+     * For pulls at bucket boundaries, it represents the misalignment between the real timestamp and
+     * the end of the bucket.
+     */
+    void noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs);
+
+    /**
+     * Number of buckets with unknown condition.
+     */
+    void noteBucketUnknownCondition(int64_t metricId);
+
+    /* Reports one event has been dropped due to queue overflow, and the oldest event timestamp in
+     * the queue */
+    void noteEventQueueOverflow(int64_t oldestEventTimestampNs);
+
+    /**
+     * Reports that the activation broadcast guardrail was hit for this uid. Namely, the broadcast
+     * should have been sent, but instead was skipped due to hitting the guardrail.
+     */
+     void noteActivationBroadcastGuardrailHit(const int uid);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -302,15 +465,44 @@ public:
     void dumpStats(std::vector<uint8_t>* buffer, bool reset);
 
     /**
-     * Output statsd stats in human readable format to [out] file.
+     * Output statsd stats in human readable format to [out] file descriptor.
      */
-    void dumpStats(FILE* out) const;
+    void dumpStats(int outFd) const;
 
     typedef struct {
-        long totalPull;
-        long totalPullFromCache;
-        long minPullIntervalSec;
+        long totalPull = 0;
+        long totalPullFromCache = 0;
+        long minPullIntervalSec = LONG_MAX;
+        int64_t avgPullTimeNs = 0;
+        int64_t maxPullTimeNs = 0;
+        long numPullTime = 0;
+        int64_t avgPullDelayNs = 0;
+        int64_t maxPullDelayNs = 0;
+        long numPullDelay = 0;
+        long dataError = 0;
+        long pullTimeout = 0;
+        long pullExceedMaxDelay = 0;
+        long pullFailed = 0;
+        long statsCompanionPullFailed = 0;
+        long statsCompanionPullBinderTransactionFailed = 0;
+        long emptyData = 0;
+        long registeredCount = 0;
+        long unregisteredCount = 0;
     } PulledAtomStats;
+
+    typedef struct {
+        long hardDimensionLimitReached = 0;
+        long lateLogEventSkipped = 0;
+        long skippedForwardBuckets = 0;
+        long badValueType = 0;
+        long conditionChangeInNextBucket = 0;
+        long invalidatedBucket = 0;
+        long bucketDropped = 0;
+        int64_t minBucketBoundaryDelayNs = 0;
+        int64_t maxBucketBoundaryDelayNs = 0;
+        long bucketUnknownCondition = 0;
+        long bucketCount = 0;
+    } AtomMetricStats;
 
 private:
     StatsdStats();
@@ -332,18 +524,56 @@ private:
 
     // Stores the number of times a pushed atom is logged.
     // The size of the vector is the largest pushed atom id in atoms.proto + 1. Atoms
-    // out of that range will be dropped (it's either pulled atoms or test atoms).
+    // out of that range will be put in mNonPlatformPushedAtomStats.
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
+
+    // Stores the number of times a pushed atom is logged for atom ids above kMaxPushedAtomId.
+    // The max size of the map is kMaxNonPlatformPushedAtoms.
+    std::unordered_map<int, int> mNonPlatformPushedAtomStats;
 
     // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
 
-    // Logd errors. Size capped by kMaxLoggerErrors.
-    std::list<const std::pair<int, int>> mLoggerErrors;
+    // Maps metric ID to its stats. The size is capped by the number of metrics.
+    std::map<int64_t, AtomMetricStats> mAtomMetricStats;
 
-    // Timestamps when we detect log loss after logd reconnect.
-    std::list<int64_t> mLogLossTimestampNs;
+    // Maps uids to times when the activation changed broadcast not sent due to hitting the
+    // guardrail. The size is capped by the number of configs, and up to 20 times per uid.
+    std::map<int, std::list<int32_t>> mActivationBroadcastGuardrailStats;
+
+    struct LogLossStats {
+        LogLossStats(int32_t sec, int32_t count, int32_t error, int32_t tag, int32_t uid,
+                     int32_t pid)
+            : mWallClockSec(sec),
+              mCount(count),
+              mLastError(error),
+              mLastTag(tag),
+              mUid(uid),
+              mPid(pid) {
+        }
+        int32_t mWallClockSec;
+        int32_t mCount;
+        // error code defined in linux/errno.h
+        int32_t mLastError;
+        int32_t mLastTag;
+        int32_t mUid;
+        int32_t mPid;
+    };
+
+    // Max of {(now - oldestEventTimestamp) when overflow happens}.
+    // This number is helpful to understand how SLOW statsd can be.
+    int64_t mMaxQueueHistoryNs = 0;
+
+    // Min of {(now - oldestEventTimestamp) when overflow happens}.
+    // This number is helpful to understand how FAST the events floods to statsd.
+    int64_t mMinQueueHistoryNs = kInt64Max;
+
+    // Total number of events that are lost due to queue overflow.
+    int32_t mOverflowCount = 0;
+
+    // Timestamps when we detect log loss, and the number of logs lost.
+    std::list<LogLossStats> mLogLossStats;
 
     std::list<int32_t> mSystemServerRestartSec;
 
@@ -360,22 +590,36 @@ private:
 
     void resetInternalLocked();
 
-    void noteDataDropped(const ConfigKey& key, int32_t timeSec);
+    void noteDataDropped(const ConfigKey& key, const size_t totalBytes, int32_t timeSec);
 
     void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes, int32_t timeSec);
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
 
+    void noteActiveStatusChanged(const ConfigKey& key, bool activate, int32_t timeSec);
+
+    void noteActivationBroadcastGuardrailHit(const int uid, int32_t timeSec);
+
     void addToIceBoxLocked(std::shared_ptr<ConfigStats>& stats);
+
+    /**
+     * Get a reference to AtomMetricStats for a metric. If none exists, create it. The reference
+     * will live as long as `this`.
+     */
+    StatsdStats::AtomMetricStats& getAtomMetricStats(int64_t metricId);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestConfigRemove);
     FRIEND_TEST(StatsdStatsTest, TestSubStats);
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
+    FRIEND_TEST(StatsdStatsTest, TestNonPlatformAtomLog);
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
     FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
+    FRIEND_TEST(StatsdStatsTest, TestPullAtomStats);
+    FRIEND_TEST(StatsdStatsTest, TestAtomMetricsStats);
+    FRIEND_TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit);
 };
 
 }  // namespace statsd

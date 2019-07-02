@@ -15,8 +15,10 @@
  */
 package android.speech.tts;
 
-import org.xmlpull.v1.XmlPullParserException;
+import static android.provider.Settings.Secure.getString;
 
+import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -27,10 +29,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-
-import static android.provider.Settings.Secure.getString;
-
-import android.annotation.UnsupportedAppUsage;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech.Engine;
 import android.speech.tts.TextToSpeech.EngineInfo;
@@ -38,6 +36,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -522,7 +522,8 @@ public class TtsEngines {
      * read back, will evaluate to {@link Locale#getDefault()}.
      */
     @UnsupportedAppUsage
-    public synchronized void updateLocalePrefForEngine(String engineName, Locale newLocale) {
+    public synchronized void updateLocalePrefForEngine(
+            @NonNull String engineName, Locale newLocale) {
         final String prefList = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.TTS_DEFAULT_LOCALE);
         if (DBG) {

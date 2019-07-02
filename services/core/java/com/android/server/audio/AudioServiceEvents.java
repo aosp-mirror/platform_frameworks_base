@@ -19,7 +19,7 @@ package com.android.server.audio;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 
-import com.android.server.audio.AudioService.WiredDeviceConnectionState;
+import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 
 
 public class AudioServiceEvents {
@@ -89,9 +89,14 @@ public class AudioServiceEvents {
     }
 
     final static class VolumeEvent extends AudioEventLogger.Event {
-        final static int VOL_ADJUST_SUGG_VOL = 0;
-        final static int VOL_ADJUST_STREAM_VOL = 1;
-        final static int VOL_SET_STREAM_VOL = 2;
+        static final int VOL_ADJUST_SUGG_VOL = 0;
+        static final int VOL_ADJUST_STREAM_VOL = 1;
+        static final int VOL_SET_STREAM_VOL = 2;
+        static final int VOL_SET_HEARING_AID_VOL = 3;
+        static final int VOL_SET_AVRCP_VOL = 4;
+        static final int VOL_ADJUST_VOL_UID = 5;
+        static final int VOL_VOICE_ACTIVITY_HEARING_AID = 6;
+        static final int VOL_MODE_CHANGE_HEARING_AID = 7;
 
         final int mOp;
         final int mStream;
@@ -99,12 +104,56 @@ public class AudioServiceEvents {
         final int mVal2;
         final String mCaller;
 
+        /** used for VOL_ADJUST_VOL_UID,
+         *           VOL_ADJUST_SUGG_VOL,
+         *           VOL_ADJUST_STREAM_VOL,
+         *           VOL_SET_STREAM_VOL */
         VolumeEvent(int op, int stream, int val1, int val2, String caller) {
             mOp = op;
             mStream = stream;
             mVal1 = val1;
             mVal2 = val2;
             mCaller = caller;
+        }
+
+        /** used for VOL_SET_HEARING_AID_VOL*/
+        VolumeEvent(int op, int index, int gainDb) {
+            mOp = op;
+            mVal1 = index;
+            mVal2 = gainDb;
+            // unused
+            mStream = -1;
+            mCaller = null;
+        }
+
+        /** used for VOL_SET_AVRCP_VOL */
+        VolumeEvent(int op, int index) {
+            mOp = op;
+            mVal1 = index;
+            // unused
+            mVal2 = 0;
+            mStream = -1;
+            mCaller = null;
+        }
+
+        /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
+        VolumeEvent(int op, boolean voiceActive, int stream, int index) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = index;
+            mVal2 = voiceActive ? 1 : 0;
+            // unused
+            mCaller = null;
+        }
+
+        /** used for VOL_MODE_CHANGE_HEARING_AID */
+        VolumeEvent(int op, int mode, int stream, int index) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = index;
+            mVal2 = mode;
+            // unused
+            mCaller = null;
         }
 
         @Override
@@ -131,7 +180,35 @@ public class AudioServiceEvents {
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
                             .toString();
-               default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
+                case VOL_SET_HEARING_AID_VOL:
+                    return new StringBuilder("setHearingAidVolume:")
+                            .append(" index:").append(mVal1)
+                            .append(" gain dB:").append(mVal2)
+                            .toString();
+                case VOL_SET_AVRCP_VOL:
+                    return new StringBuilder("setAvrcpVolume:")
+                            .append(" index:").append(mVal1)
+                            .toString();
+                case VOL_ADJUST_VOL_UID:
+                    return new StringBuilder("adjustStreamVolumeForUid(stream:")
+                            .append(AudioSystem.streamToString(mStream))
+                            .append(" dir:").append(AudioManager.adjustToString(mVal1))
+                            .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(") from ").append(mCaller)
+                            .toString();
+                case VOL_VOICE_ACTIVITY_HEARING_AID:
+                    return new StringBuilder("Voice activity change (")
+                            .append(mVal2 == 1 ? "active" : "inactive")
+                            .append(") causes setting HEARING_AID volume to idx:").append(mVal1)
+                            .append(" stream:").append(AudioSystem.streamToString(mStream))
+                            .toString();
+                case VOL_MODE_CHANGE_HEARING_AID:
+                    return new StringBuilder("setMode(")
+                            .append(AudioSystem.modeToString(mVal2))
+                            .append(") causes setting HEARING_AID volume to idx:").append(mVal1)
+                            .append(" stream:").append(AudioSystem.streamToString(mStream))
+                            .toString();
+                default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
         }
     }

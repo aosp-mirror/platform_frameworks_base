@@ -23,9 +23,13 @@ import com.android.systemui.Dumpable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Tracks the screen lifecycle.
  */
+@Singleton
 public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> implements Dumpable {
 
     public static final int SCREEN_OFF = 0;
@@ -34,6 +38,10 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     public static final int SCREEN_TURNING_OFF = 3;
 
     private int mScreenState = SCREEN_OFF;
+
+    @Inject
+    public ScreenLifecycle() {
+    }
 
     public int getScreenState() {
         return mScreenState;

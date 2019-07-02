@@ -22,20 +22,20 @@ import android.content.pm.PackageInfo;
 import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.transport.TransportClient;
 
 import java.io.File;
 
 public class PerformClearTask implements Runnable {
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
     private final TransportManager mTransportManager;
     private final TransportClient mTransportClient;
     private final PackageInfo mPackage;
     private final OnTaskFinishedListener mListener;
 
-    PerformClearTask(BackupManagerService backupManagerService,
+    PerformClearTask(UserBackupManagerService backupManagerService,
             TransportClient transportClient, PackageInfo packageInfo,
             OnTaskFinishedListener listener) {
         mBackupManagerService = backupManagerService;

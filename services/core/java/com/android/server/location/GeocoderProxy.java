@@ -20,12 +20,10 @@ import android.content.Context;
 import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
 
+import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
+
 import java.util.List;
 
 /**
@@ -36,14 +34,13 @@ public class GeocoderProxy {
 
     private static final String SERVICE_ACTION = "com.android.location.service.GeocodeProvider";
 
-    private final Context mContext;
     private final ServiceWatcher mServiceWatcher;
 
     public static GeocoderProxy createAndBind(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler) {
+            int initialPackageNamesResId) {
         GeocoderProxy proxy = new GeocoderProxy(context, overlaySwitchResId,
-            defaultServicePackageNameResId, initialPackageNamesResId, handler);
+                defaultServicePackageNameResId, initialPackageNamesResId);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -53,58 +50,38 @@ public class GeocoderProxy {
 
     private GeocoderProxy(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler) {
-        mContext = context;
-
-        mServiceWatcher = new ServiceWatcher(mContext, TAG, SERVICE_ACTION, overlaySwitchResId,
-            defaultServicePackageNameResId, initialPackageNamesResId, null, handler);
+            int initialPackageNamesResId) {
+        mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
+                defaultServicePackageNameResId, initialPackageNamesResId,
+                FgThread.getHandler());
     }
 
-    private boolean bind () {
+    private boolean bind() {
         return mServiceWatcher.start();
     }
 
     public String getConnectedPackageName() {
-        return mServiceWatcher.getBestPackageName();
+        return mServiceWatcher.getCurrentPackageName();
     }
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        final String[] result = new String[] {"Service not Available"};
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
-                try {
-                    result[0] = provider.getFromLocation(
-                            latitude, longitude, maxResults, params, addrs);
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                }
-            }
-        });
-        return result[0];
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
+            IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
+            return provider.getFromLocation(latitude, longitude, maxResults, params, addrs);
+        }, "Service not Available");
     }
 
     public String getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        final String[] result = new String[] {"Service not Available"};
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
-                try {
-                    result[0] = provider.getFromLocationName(locationName, lowerLeftLatitude,
-                            lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                            maxResults, params, addrs);
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                }
-            }
-        });
-        return result[0];
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
+            IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
+            return provider.getFromLocationName(locationName, lowerLeftLatitude,
+                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                    maxResults, params, addrs);
+        }, "Service not Available");
     }
 
 }

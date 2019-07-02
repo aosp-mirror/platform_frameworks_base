@@ -33,7 +33,7 @@ public final class FileInfo implements Parcelable {
 
     private final String mimeType;
 
-    public static final Parcelable.Creator<FileInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FileInfo> CREATOR =
             new Parcelable.Creator<FileInfo>() {
         @Override
         public FileInfo createFromParcel(Parcel source) {

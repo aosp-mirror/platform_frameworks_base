@@ -17,11 +17,11 @@
 package android.widget.focus;
 
 import android.test.SingleLaunchActivityTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.FocusFinder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.focus.LinearLayoutGrid;
+
+import androidx.test.filters.MediumTest;
 
 /**
  * Tests focus searching between buttons within a grid that are touching, for example,

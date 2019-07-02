@@ -17,6 +17,7 @@
 package com.android.systemui.shared.recents.model;
 
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
 
 import android.app.ActivityManager.TaskSnapshot;
@@ -51,7 +52,7 @@ public class ThumbnailData {
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
-        thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
+        thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getSnapshot(), snapshot.getColorSpace());
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         reducedResolution = snapshot.isReducedResolution();

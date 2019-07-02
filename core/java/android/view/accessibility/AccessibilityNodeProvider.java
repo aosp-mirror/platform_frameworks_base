@@ -116,7 +116,7 @@ public abstract class AccessibilityNodeProvider {
      *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
      * @param arguments A {@link Bundle} holding any arguments relevant for this request.
      *
-     * @see AccessibilityNodeInfo#setExtraAvailableData
+     * @see AccessibilityNodeInfo#setAvailableExtraData(List)
      */
     public void addExtraDataToAccessibilityNodeInfo(
             int virtualViewId, AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {

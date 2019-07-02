@@ -35,8 +35,6 @@ public abstract class InternalSanitizer implements Sanitizer, Parcelable {
      *
      * @return sanitized value or {@code null} if value could not be sanitized (for example: didn't
      * match regex, it's an invalid type, regex failed, etc).
-     *
-     * @hide
      */
     @Nullable
     public abstract AutofillValue sanitize(@NonNull AutofillValue value);

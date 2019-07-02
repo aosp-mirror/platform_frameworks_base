@@ -70,14 +70,14 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
-    public void vibrate(int uid, String opPkg,
-            VibrationEffect effect, AudioAttributes attributes) {
+    public void vibrate(int uid, String opPkg, VibrationEffect effect,
+            String reason, AudioAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator service.");
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, effect, usageForAttributes(attributes), mToken);
+            mService.vibrate(uid, opPkg, effect, usageForAttributes(attributes), reason, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
