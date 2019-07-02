@@ -876,7 +876,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     ActiveSource getActiveSource() {
-        return mService.getActiveSource();
+        return mService.getLocalActiveSource();
     }
 
     void setActiveSource(ActiveSource newActive) {
