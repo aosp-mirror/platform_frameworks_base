@@ -169,6 +169,7 @@ message Atom {
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ProcessStartTime process_start_time = 169;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
+        DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
         NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
     }
 
@@ -3098,3 +3099,22 @@ message NetworkStackReported {
     optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }
 
+/**
+ * Logs when a package is denied access to a device identifier based on the new access requirements.
+ *
+ * Logged from:
+ *     frameworks/base/telephony/java/com/android/internal/telephony/TelephonyPermissions.java
+ */
+message DeviceIdentifierAccessDenied {
+    // The name of the package denied access to the requested device identifier.
+    optional string package_name = 1;
+
+    // The name of the device identifier method the package attempted to invoke.
+    optional string method_name = 2;
+
+    // True if the package is preinstalled.
+    optional bool is_preinstalled = 3;
+
+    // True if the package is privileged.
+    optional bool is_priv_app = 4;
+}

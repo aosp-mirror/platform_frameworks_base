@@ -15,7 +15,6 @@
  */
 package com.android.server.devicepolicy;
 
-import android.annotation.UserIdInt;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
@@ -158,5 +157,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     @Override
     public void setDefaultSmsApplication(ComponentName admin, String packageName) {
+    }
+
+    @Override
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
+        return false;
     }
 }
