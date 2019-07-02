@@ -110,6 +110,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // device id is used as key of container.
     private final SparseArray<HdmiDeviceInfo> mDeviceInfos = new SparseArray<>();
 
+    // Message buffer used to buffer selected messages to process later. <Active Source>
+    // from a source device, for instance, needs to be buffered if the device is not
+    // discovered yet. The buffered commands are taken out and when they are ready to
+    // handle.
+    private final DelayedMessageBuffer mDelayedMessageBuffer = new DelayedMessageBuffer(this);
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mRoutingControlFeatureEnabled =
@@ -151,6 +157,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             }
             mPortIdToTvInputs.put(info.getPortId(), inputId);
             mTvInputsToDeviceInfo.put(inputId, info);
+            if (info.isCecDevice()) {
+                processDelayedActiveSource(info.getLogicalAddress());
+            }
         }
     }
 
@@ -165,6 +174,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             mPortIdToTvInputs.remove(portId);
             mTvInputsToDeviceInfo.remove(inputId);
         }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean isInputReady(int portId) {
+        assertRunOnServiceThread();
+        String tvInputId = mPortIdToTvInputs.get(portId);
+        HdmiDeviceInfo info = mTvInputsToDeviceInfo.get(tvInputId);
+        return info != null;
     }
 
     /**
@@ -414,6 +432,32 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         mService.writeStringSystemProperty(
                 Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM, String.valueOf(addr));
+    }
+
+    @ServiceThreadOnly
+    void processDelayedActiveSource(int address) {
+        assertRunOnServiceThread();
+        mDelayedMessageBuffer.processActiveSource(address);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int logicalAddress = message.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
+        if (info == null) {
+            HdmiLogger.debug("Device info %X not found; buffering the command", logicalAddress);
+            mDelayedMessageBuffer.add(message);
+        } else if (!isInputReady(info.getPortId())){
+            HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
+            mDelayedMessageBuffer.add(message);
+        } else {
+            mDelayedMessageBuffer.removeActiveSource();
+            super.handleActiveSource(message);
+        }
+        return true;
     }
 
     @Override
