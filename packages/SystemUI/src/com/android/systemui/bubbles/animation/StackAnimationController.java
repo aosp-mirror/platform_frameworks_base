@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 
+import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FlingAnimation;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -33,6 +34,8 @@ import com.android.systemui.R;
 
 import com.google.android.collect.Sets;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -92,7 +95,7 @@ public class StackAnimationController extends
     private boolean mStackMovedToStartPosition = false;
 
     /** The most recent position in which the stack was resting on the edge of the screen. */
-    private PointF mRestingStackPosition;
+    @Nullable private PointF mRestingStackPosition;
 
     /** The height of the most recently visible IME. */
     private float mImeHeight = 0f;
@@ -304,6 +307,18 @@ public class StackAnimationController extends
         final float y = (allowableRegionHeight * verticalPercent) + allowablePos.top;
 
         setStackPosition(new PointF(x, y));
+    }
+
+    /** Description of current animation controller state. */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("StackAnimationController state:");
+        pw.print("  isActive:             "); pw.println(isActiveController());
+        pw.print("  restingStackPos:      ");
+        pw.println(mRestingStackPosition != null ? mRestingStackPosition.toString() : "null");
+        pw.print("  currentStackPos:      "); pw.println(mStackPosition.toString());
+        pw.print("  isMovingFromFlinging: "); pw.println(mIsMovingFromFlinging);
+        pw.print("  withinDismiss:        "); pw.println(mWithinDismissTarget);
+        pw.print("  firstBubbleSpringing: "); pw.println(mFirstBubbleSpringingToTouch);
     }
 
     /**

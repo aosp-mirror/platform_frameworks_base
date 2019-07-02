@@ -167,7 +167,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Whether this controller is the currently active controller for its associated layout. */
         protected boolean isActiveController() {
-            return this == mLayout.mController;
+            return mLayout != null && this == mLayout.mController;
         }
 
         protected void setLayout(PhysicsAnimationLayout layout) {

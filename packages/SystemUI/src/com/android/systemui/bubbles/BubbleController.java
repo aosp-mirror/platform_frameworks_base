@@ -662,6 +662,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         pw.println("BubbleController state:");
         mBubbleData.dump(fd, pw, args);
         pw.println();
+        if (mStackView != null) {
+            mStackView.dump(fd, pw, args);
+        }
+        pw.println();
     }
 
     static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {

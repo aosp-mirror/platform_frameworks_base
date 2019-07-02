@@ -72,6 +72,8 @@ import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -195,6 +197,18 @@ public class BubbleStackView extends FrameLayout {
 
     /** Whether a touch gesture, such as a stack/bubble drag or flyout drag, is in progress. */
     private boolean mIsGestureInProgress = false;
+
+    /** Description of current animation controller state. */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("Stack view state:");
+        pw.print("  gestureInProgress:    "); pw.println(mIsGestureInProgress);
+        pw.print("  showingDismiss:       "); pw.println(mShowingDismiss);
+        pw.print("  isExpansionAnimating: "); pw.println(mIsExpansionAnimating);
+        pw.print("  draggingInDismiss:    "); pw.println(mDraggingInDismissTarget);
+        pw.print("  animatingMagnet:      "); pw.println(mAnimatingMagnet);
+        mStackAnimationController.dump(fd, pw, args);
+        mExpandedAnimationController.dump(fd, pw, args);
+    }
 
     private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;

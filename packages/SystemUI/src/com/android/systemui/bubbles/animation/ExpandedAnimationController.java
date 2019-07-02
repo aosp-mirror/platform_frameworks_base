@@ -33,6 +33,8 @@ import com.android.systemui.R;
 
 import com.google.android.collect.Sets;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Set;
 
 /**
@@ -355,6 +357,16 @@ public class ExpandedAnimationController
             insets.getDisplayCutout() != null
                 ? insets.getDisplayCutout().getSafeInsetTop()
                 : 0);
+    }
+
+    /** Description of current animation controller state. */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("ExpandedAnimationController state:");
+        pw.print("  isActive:          "); pw.println(isActiveController());
+        pw.print("  animatingExpand:   "); pw.println(mAnimatingExpand);
+        pw.print("  animatingCollapse: "); pw.println(mAnimatingCollapse);
+        pw.print("  bubbleInDismiss:   "); pw.println(mIndividualBubbleWithinDismissTarget);
+        pw.print("  springingBubble:   "); pw.println(mSpringingBubbleToTouch);
     }
 
     @Override
