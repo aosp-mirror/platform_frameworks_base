@@ -297,7 +297,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public boolean canReceiveEventsLocked() {
-        return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
+        return (mEventTypes != 0 && mService != null);
     }
 
     @Override
