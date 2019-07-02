@@ -124,8 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"მიმდინარეობს თქვენი სახის ძებნა"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"სახის ამოცნობილია"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"დადასტურებული"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm (4540715260292022404) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"დასასრულებლად შეეხეთ „დადასტურებას“"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"თითის ანაბეჭდის ხატულა"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"მიმდინარეობს თქვენი ძიება…"</string>
@@ -136,9 +135,9 @@
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth კავშირი გაწყვეტილია."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"ბატარეა დამჯდარია."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ბატარეია ერთ ზოლზეა."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ელემენტი ორ ზოლზე."</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ელემენტი სამ ზოლზე."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"ელემენტი სავსეა."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ბატარეა ორ ზოლზე."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ბატარეა სამ ზოლზე."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"ბატარეა სავსეა."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"ტელეფონი არ არის."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"ტელეფონის სიგნალი ერთ ზოლზეა."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"ტელეფონის სიგნალი ორ ზოლზეა."</string>
@@ -226,7 +225,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi გამორთულია."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi ჩართულია."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"მობილურის <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ელემენტი: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ბატარეა: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"თვითმფრინავის რეჟიმი გამორთულია."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"თვითმფრინავის რეჟიმი ჩართულია."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"თვითმფრინავის რეჟიმი გამოირთო."</string>
@@ -377,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"მზის ამოსვლამდე"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"ჩაირთოს <xliff:g id="TIME">%s</xliff:g>-ზე"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g>-მდე"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"მუქი თემა"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"მუქი თემა\nბატარეის დამზოგი"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"მუქი თემა"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"მუქი თემა\nბატარეის დამზოგი"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC გათიშულია"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ჩართულია"</string>
@@ -531,7 +530,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ხმის პარამეტრები"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"გავრცობა"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ჩაკეცვა"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ავტომატური სუბტიტრების მედია"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"მედიის ავტომ. სუბტიტრირება"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"მინიშნება სუბტიტრებისთვის"</string>
     <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"სუბტიტრების გადაფარვა"</string>
     <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ჩართვა"</string>

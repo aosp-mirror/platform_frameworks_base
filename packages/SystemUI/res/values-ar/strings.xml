@@ -384,8 +384,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"مظهر الألوان الداكنة"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"مظهر داكن\nتوفير شحن البطارية"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"مظهر داكن"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"مظهر داكن\nتوفير شحن البطارية"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
