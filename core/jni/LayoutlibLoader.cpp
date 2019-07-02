@@ -91,10 +91,12 @@ struct RegJNIRec {
 // The actual list of registered classes will be determined at runtime via the 'native_classes' System property
 static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
+#ifdef __linux__
     {"android.content.AssetManager", REG_JNI(register_android_content_AssetManager)},
     {"android.content.StringBlock", REG_JNI(register_android_content_StringBlock)},
     {"android.content.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
     {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
+#endif
     {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
     {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
     {"android.graphics.ByteBufferStreamAdaptor", REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
@@ -125,10 +127,14 @@ static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
     {"android.graphics.fonts.FontFamily", REG_JNI(register_android_graphics_fonts_FontFamily)},
     {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
     {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
+#ifdef __linux__
     {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
+#endif
     {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
     {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
+#ifdef __linux__
     {"android.os.Trace", REG_JNI(register_android_os_Trace)},
+#endif
     {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
     {"android.util.Log", REG_JNI(register_android_util_Log)},
     {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
