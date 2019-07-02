@@ -27,188 +27,85 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.SoundPool;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A helper class for managing sound effects loading / unloading
- * used by AudioService.
+ * used by AudioService. As its methods are called on the message handler thread
+ * of AudioService, the actual work is offloaded to a dedicated thread.
+ * This helps keeping AudioService responsive.
  * @hide
  */
 class SoundEffectsHelper {
-    private static final String TAG = "AS.SoundEffectsHelper";
+    private static final String TAG = "AS.SfxHelper";
 
-    private final Object mSoundEffectsLock = new Object();
-    @GuardedBy("mSoundEffectsLock")
-    private SoundPool mSoundPool;
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
 
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
-    private static final List<String> SOUND_EFFECT_FILES = new ArrayList<String>();
 
-    /* Sound effect file name mapping sound effect id (AudioManager.FX_xxx) to
-     * file index in SOUND_EFFECT_FILES[] (first column) and indicating if effect
-     * uses soundpool (second column) */
-    private final int[][] mSoundEffectFilesMap = new int[AudioManager.NUM_SOUND_EFFECTS][2];
+    private static final int EFFECT_NOT_IN_SOUND_POOL = 0; // SoundPool sample IDs > 0
 
-    private final Context mContext;
-
-    // listener for SoundPool sample load completion indication
-    @GuardedBy("mSoundEffectsLock")
-    private SoundPoolCallback mSoundPoolCallBack;
-    // thread for SoundPool listener
-    private SoundPoolListenerThread mSoundPoolListenerThread;
-    // message looper for SoundPool listener
-    @GuardedBy("mSoundEffectsLock")
-    private Looper mSoundPoolLooper = null;
-
-    // volume applied to sound played with playSoundEffect()
-    private static int sSoundEffectVolumeDb;
+    private static final int MSG_LOAD_EFFECTS = 0;
+    private static final int MSG_UNLOAD_EFFECTS = 1;
+    private static final int MSG_PLAY_EFFECT = 2;
+    private static final int MSG_LOAD_EFFECTS_TIMEOUT = 3;
 
     interface OnEffectsLoadCompleteHandler {
         void run(boolean success);
     }
 
+    private final AudioEventLogger mSfxLogger = new AudioEventLogger(
+            AudioManager.NUM_SOUND_EFFECTS + 10, "Sound Effects Loading");
+
+    private final Context mContext;
+    // default attenuation applied to sound played with playSoundEffect()
+    private final int mSfxAttenuationDb;
+
+    // thread for doing all work
+    private SfxWorker mSfxWorker;
+    // thread's message handler
+    private SfxHandler mSfxHandler;
+
+    private static final class Resource {
+        final String mFileName;
+        int mSampleId;
+        boolean mLoaded;  // for effects in SoundPool
+        Resource(String fileName) {
+            mFileName = fileName;
+            mSampleId = EFFECT_NOT_IN_SOUND_POOL;
+        }
+    }
+    // All the fields below are accessed by the worker thread exclusively
+    private final List<Resource> mResources = new ArrayList<Resource>();
+    private final int[] mEffects = new int[AudioManager.NUM_SOUND_EFFECTS]; // indexes in mResources
+    private SoundPool mSoundPool;
+    private SoundPoolLoader mSoundPoolLoader;
+
     SoundEffectsHelper(Context context) {
         mContext = context;
-        sSoundEffectVolumeDb = mContext.getResources().getInteger(
+        mSfxAttenuationDb = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
+        startWorker();
     }
 
     /*package*/ void loadSoundEffects(OnEffectsLoadCompleteHandler onComplete) {
-        boolean success = doLoadSoundEffects();
-        if (onComplete != null) {
-            onComplete.run(success);
-        }
-    }
-
-    private boolean doLoadSoundEffects() {
-        int status;
-
-        synchronized (mSoundEffectsLock) {
-            if (mSoundPool != null) {
-                return true;
-            }
-
-            loadTouchSoundAssets();
-
-            mSoundPool = new SoundPool.Builder()
-                    .setMaxStreams(NUM_SOUNDPOOL_CHANNELS)
-                    .setAudioAttributes(new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build())
-                    .build();
-            mSoundPoolCallBack = null;
-            mSoundPoolListenerThread = new SoundPoolListenerThread();
-            mSoundPoolListenerThread.start();
-            int attempts = 3;
-            while ((mSoundPoolCallBack == null) && (attempts-- > 0)) {
-                try {
-                    // Wait for mSoundPoolCallBack to be set by the other thread
-                    mSoundEffectsLock.wait(SOUND_EFFECTS_LOAD_TIMEOUT_MS);
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "Interrupted while waiting sound pool listener thread.");
-                }
-            }
-
-            if (mSoundPoolCallBack == null) {
-                Log.w(TAG, "loadSoundEffects() SoundPool listener or thread creation error");
-                if (mSoundPoolLooper != null) {
-                    mSoundPoolLooper.quit();
-                    mSoundPoolLooper = null;
-                }
-                mSoundPoolListenerThread = null;
-                mSoundPool.release();
-                mSoundPool = null;
-                return false;
-            }
-            /*
-             * poolId table: The value -1 in this table indicates that corresponding
-             * file (same index in SOUND_EFFECT_FILES[] has not been loaded.
-             * Once loaded, the value in poolId is the sample ID and the same
-             * sample can be reused for another effect using the same file.
-             */
-            int[] poolId = new int[SOUND_EFFECT_FILES.size()];
-            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.size(); fileIdx++) {
-                poolId[fileIdx] = -1;
-            }
-            /*
-             * Effects whose value in mSoundEffectFilesMap[effect][1] is -1 must be loaded.
-             * If load succeeds, value in mSoundEffectFilesMap[effect][1] is > 0:
-             * this indicates we have a valid sample loaded for this effect.
-             */
-
-            int numSamples = 0;
-            for (int effect = 0; effect < AudioManager.NUM_SOUND_EFFECTS; effect++) {
-                // Do not load sample if this effect uses the MediaPlayer
-                if (mSoundEffectFilesMap[effect][1] == 0) {
-                    continue;
-                }
-                if (poolId[mSoundEffectFilesMap[effect][0]] == -1) {
-                    String filePath = getSoundEffectFilePath(effect);
-                    int sampleId = mSoundPool.load(filePath, 0);
-                    if (sampleId <= 0) {
-                        Log.w(TAG, "Soundpool could not load file: " + filePath);
-                    } else {
-                        mSoundEffectFilesMap[effect][1] = sampleId;
-                        poolId[mSoundEffectFilesMap[effect][0]] = sampleId;
-                        numSamples++;
-                    }
-                } else {
-                    mSoundEffectFilesMap[effect][1] =
-                            poolId[mSoundEffectFilesMap[effect][0]];
-                }
-            }
-            // wait for all samples to be loaded
-            if (numSamples > 0) {
-                mSoundPoolCallBack.setSamples(poolId);
-
-                attempts = 3;
-                status = 1;
-                while ((status == 1) && (attempts-- > 0)) {
-                    try {
-                        mSoundEffectsLock.wait(SOUND_EFFECTS_LOAD_TIMEOUT_MS);
-                        status = mSoundPoolCallBack.status();
-                    } catch (InterruptedException e) {
-                        Log.w(TAG, "Interrupted while waiting sound pool callback.");
-                    }
-                }
-            } else {
-                status = -1;
-            }
-
-            if (mSoundPoolLooper != null) {
-                mSoundPoolLooper.quit();
-                mSoundPoolLooper = null;
-            }
-            mSoundPoolListenerThread = null;
-            if (status != 0) {
-                Log.w(TAG,
-                        "loadSoundEffects(), Error " + status + " while loading samples");
-                for (int effect = 0; effect < AudioManager.NUM_SOUND_EFFECTS; effect++) {
-                    if (mSoundEffectFilesMap[effect][1] > 0) {
-                        mSoundEffectFilesMap[effect][1] = -1;
-                    }
-                }
-
-                mSoundPool.release();
-                mSoundPool = null;
-            }
-        }
-        return (status == 0);
+        sendMsg(MSG_LOAD_EFFECTS, 0, 0, onComplete, 0);
     }
 
     /**
@@ -217,77 +114,167 @@ class SoundEffectsHelper {
      *  sound effects are disabled.
      */
     /*package*/ void unloadSoundEffects() {
-        synchronized (mSoundEffectsLock) {
-            if (mSoundPool == null) {
-                return;
-            }
+        sendMsg(MSG_UNLOAD_EFFECTS, 0, 0, null, 0);
+    }
 
-            int[] poolId = new int[SOUND_EFFECT_FILES.size()];
-            for (int fileIdx = 0; fileIdx < SOUND_EFFECT_FILES.size(); fileIdx++) {
-                poolId[fileIdx] = 0;
-            }
+    /*package*/ void playSoundEffect(int effect, int volume) {
+        sendMsg(MSG_PLAY_EFFECT, effect, volume, null, 0);
+    }
 
-            for (int effect = 0; effect < AudioManager.NUM_SOUND_EFFECTS; effect++) {
-                if (mSoundEffectFilesMap[effect][1] <= 0) {
-                    continue;
-                }
-                if (poolId[mSoundEffectFilesMap[effect][0]] == 0) {
-                    mSoundPool.unload(mSoundEffectFilesMap[effect][1]);
-                    mSoundEffectFilesMap[effect][1] = -1;
-                    poolId[mSoundEffectFilesMap[effect][0]] = -1;
+    /*package*/ void dump(PrintWriter pw, String prefix) {
+        if (mSfxHandler != null) {
+            pw.println(prefix + "Message handler (watch for unhandled messages):");
+            mSfxHandler.dump(new PrintWriterPrinter(pw), "  ");
+        } else {
+            pw.println(prefix + "Message handler is null");
+        }
+        pw.println(prefix + "Default attenuation (dB): " + mSfxAttenuationDb);
+        mSfxLogger.dump(pw);
+    }
+
+    private void startWorker() {
+        mSfxWorker = new SfxWorker();
+        mSfxWorker.start();
+        synchronized (this) {
+            while (mSfxHandler == null) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Interrupted while waiting " + mSfxWorker.getName() + " to start");
                 }
             }
-            mSoundPool.release();
-            mSoundPool = null;
         }
     }
 
-    /*package*/ void playSoundEffect(int effectType, int volume) {
-        synchronized (mSoundEffectsLock) {
+    private void sendMsg(int msg, int arg1, int arg2, Object obj, int delayMs) {
+        mSfxHandler.sendMessageDelayed(mSfxHandler.obtainMessage(msg, arg1, arg2, obj), delayMs);
+    }
 
-            doLoadSoundEffects();
+    private void logEvent(String msg) {
+        mSfxLogger.log(new AudioEventLogger.StringEvent(msg));
+    }
 
-            if (mSoundPool == null) {
-                return;
+    // All the methods below run on the worker thread
+    private void onLoadSoundEffects(OnEffectsLoadCompleteHandler onComplete) {
+        if (mSoundPoolLoader != null) {
+            // Loading is ongoing.
+            mSoundPoolLoader.addHandler(onComplete);
+            return;
+        }
+        if (mSoundPool != null) {
+            if (onComplete != null) {
+                onComplete.run(true /*success*/);
             }
-            float volFloat;
-            // use default if volume is not specified by caller
-            if (volume < 0) {
-                volFloat = (float) Math.pow(10, (float) sSoundEffectVolumeDb / 20);
-            } else {
-                volFloat = volume / 1000.0f;
-            }
+            return;
+        }
 
-            if (mSoundEffectFilesMap[effectType][1] > 0) {
-                mSoundPool.play(mSoundEffectFilesMap[effectType][1],
-                                    volFloat, volFloat, 0, 0, 1.0f);
-            } else {
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                try {
-                    String filePath = getSoundEffectFilePath(effectType);
-                    mediaPlayer.setDataSource(filePath);
-                    mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
-                    mediaPlayer.prepare();
-                    mediaPlayer.setVolume(volFloat);
-                    mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-                        public void onCompletion(MediaPlayer mp) {
-                            cleanupPlayer(mp);
-                        }
-                    });
-                    mediaPlayer.setOnErrorListener(new OnErrorListener() {
-                        public boolean onError(MediaPlayer mp, int what, int extra) {
-                            cleanupPlayer(mp);
-                            return true;
-                        }
-                    });
-                    mediaPlayer.start();
-                } catch (IOException ex) {
-                    Log.w(TAG, "MediaPlayer IOException: " + ex);
-                } catch (IllegalArgumentException ex) {
-                    Log.w(TAG, "MediaPlayer IllegalArgumentException: " + ex);
-                } catch (IllegalStateException ex) {
-                    Log.w(TAG, "MediaPlayer IllegalStateException: " + ex);
+        logEvent("effects loading started");
+        mSoundPool = new SoundPool.Builder()
+                .setMaxStreams(NUM_SOUNDPOOL_CHANNELS)
+                .setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build())
+                .build();
+        loadTouchSoundAssets();
+
+        mSoundPoolLoader = new SoundPoolLoader();
+        mSoundPoolLoader.addHandler(new OnEffectsLoadCompleteHandler() {
+            @Override
+            public void run(boolean success) {
+                mSoundPoolLoader = null;
+                if (!success) {
+                    Log.w(TAG, "onLoadSoundEffects(), Error while loading samples");
+                    onUnloadSoundEffects();
                 }
+            }
+        });
+        mSoundPoolLoader.addHandler(onComplete);
+
+        int resourcesToLoad = 0;
+        for (Resource res : mResources) {
+            String filePath = getResourceFilePath(res);
+            int sampleId = mSoundPool.load(filePath, 0);
+            if (sampleId > 0) {
+                res.mSampleId = sampleId;
+                res.mLoaded = false;
+                resourcesToLoad++;
+            } else {
+                logEvent("effect " + filePath + " rejected by SoundPool");
+                Log.w(TAG, "SoundPool could not load file: " + filePath);
+            }
+        }
+
+        if (resourcesToLoad > 0) {
+            sendMsg(MSG_LOAD_EFFECTS_TIMEOUT, 0, 0, null, SOUND_EFFECTS_LOAD_TIMEOUT_MS);
+        } else {
+            logEvent("effects loading completed, no effects to load");
+            mSoundPoolLoader.onComplete(true /*success*/);
+        }
+    }
+
+    void onUnloadSoundEffects() {
+        if (mSoundPool == null) {
+            return;
+        }
+        if (mSoundPoolLoader != null) {
+            mSoundPoolLoader.addHandler(new OnEffectsLoadCompleteHandler() {
+                @Override
+                public void run(boolean success) {
+                    onUnloadSoundEffects();
+                }
+            });
+        }
+
+        logEvent("effects unloading started");
+        for (Resource res : mResources) {
+            if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL) {
+                mSoundPool.unload(res.mSampleId);
+            }
+        }
+        mSoundPool.release();
+        mSoundPool = null;
+        logEvent("effects unloading completed");
+    }
+
+    void onPlaySoundEffect(int effect, int volume) {
+        float volFloat;
+        // use default if volume is not specified by caller
+        if (volume < 0) {
+            volFloat = (float) Math.pow(10, (float) mSfxAttenuationDb / 20);
+        } else {
+            volFloat = volume / 1000.0f;
+        }
+
+        Resource res = mResources.get(mEffects[effect]);
+        if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && res.mLoaded) {
+            mSoundPool.play(res.mSampleId, volFloat, volFloat, 0, 0, 1.0f);
+        } else {
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            try {
+                String filePath = getResourceFilePath(res);
+                mediaPlayer.setDataSource(filePath);
+                mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
+                mediaPlayer.prepare();
+                mediaPlayer.setVolume(volFloat);
+                mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        cleanupPlayer(mp);
+                    }
+                });
+                mediaPlayer.setOnErrorListener(new OnErrorListener() {
+                    public boolean onError(MediaPlayer mp, int what, int extra) {
+                        cleanupPlayer(mp);
+                        return true;
+                    }
+                });
+                mediaPlayer.start();
+            } catch (IOException ex) {
+                Log.w(TAG, "MediaPlayer IOException: " + ex);
+            } catch (IllegalArgumentException ex) {
+                Log.w(TAG, "MediaPlayer IllegalArgumentException: " + ex);
+            } catch (IllegalStateException ex) {
+                Log.w(TAG, "MediaPlayer IllegalStateException: " + ex);
             }
         }
     }
@@ -314,23 +301,21 @@ class SoundEffectsHelper {
     private static final String ASSET_FILE_VERSION = "1.0";
     private static final String GROUP_TOUCH_SOUNDS = "touch_sounds";
 
-    private static final int SOUND_EFFECTS_LOAD_TIMEOUT_MS = 5000;
+    private static final int SOUND_EFFECTS_LOAD_TIMEOUT_MS = 15000;
 
-    private String getSoundEffectFilePath(int effectType) {
-        String filePath = Environment.getProductDirectory() + SOUND_EFFECTS_PATH
-                + SOUND_EFFECT_FILES.get(mSoundEffectFilesMap[effectType][0]);
+    private String getResourceFilePath(Resource res) {
+        String filePath = Environment.getProductDirectory() + SOUND_EFFECTS_PATH + res.mFileName;
         if (!new File(filePath).isFile()) {
-            filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH
-                    + SOUND_EFFECT_FILES.get(mSoundEffectFilesMap[effectType][0]);
+            filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH + res.mFileName;
         }
         return filePath;
     }
 
     private void loadTouchSoundAssetDefaults() {
-        SOUND_EFFECT_FILES.add("Effect_Tick.ogg");
-        for (int i = 0; i < AudioManager.NUM_SOUND_EFFECTS; i++) {
-            mSoundEffectFilesMap[i][0] = 0;
-            mSoundEffectFilesMap[i][1] = -1;
+        int defaultResourceIdx = mResources.size();
+        mResources.add(new Resource("Effect_Tick.ogg"));
+        for (int i = 0; i < mEffects.length; i++) {
+            mEffects[i] = defaultResourceIdx;
         }
     }
 
@@ -338,7 +323,7 @@ class SoundEffectsHelper {
         XmlResourceParser parser = null;
 
         // only load assets once.
-        if (!SOUND_EFFECT_FILES.isEmpty()) {
+        if (!mResources.isEmpty()) {
             return;
         }
 
@@ -385,12 +370,7 @@ class SoundEffectsHelper {
                             continue;
                         }
 
-                        int i = SOUND_EFFECT_FILES.indexOf(file);
-                        if (i == -1) {
-                            i = SOUND_EFFECT_FILES.size();
-                            SOUND_EFFECT_FILES.add(file);
-                        }
-                        mSoundEffectFilesMap[fx][0] = i;
+                        mEffects[fx] = findOrAddResourceByFileName(file);
                     } else {
                         break;
                     }
@@ -409,62 +389,133 @@ class SoundEffectsHelper {
         }
     }
 
-    private final class SoundPoolListenerThread extends Thread {
-        SoundPoolListenerThread() {
-            super("SoundPoolListenerThread");
+    private int findOrAddResourceByFileName(String fileName) {
+        for (int i = 0; i < mResources.size(); i++) {
+            if (mResources.get(i).mFileName.equals(fileName)) {
+                return i;
+            }
+        }
+        int result = mResources.size();
+        mResources.add(new Resource(fileName));
+        return result;
+    }
+
+    private Resource findResourceBySampleId(int sampleId) {
+        for (Resource res : mResources) {
+            if (res.mSampleId == sampleId) {
+                return res;
+            }
+        }
+        return null;
+    }
+
+    private class SfxWorker extends Thread {
+        SfxWorker() {
+            super("AS.SfxWorker");
         }
 
         @Override
         public void run() {
             Looper.prepare();
-            synchronized (mSoundEffectsLock) {
-                mSoundPoolLooper = Looper.myLooper();
-                if (mSoundPool != null) {
-                    mSoundPoolCallBack = new SoundPoolCallback();
-                    // This call makes SoundPool to start using the thread's looper
-                    // for load complete message handling.
-                    mSoundPool.setOnLoadCompleteListener(mSoundPoolCallBack);
-                }
-                mSoundEffectsLock.notify();
+            synchronized (SoundEffectsHelper.this) {
+                mSfxHandler = new SfxHandler();
+                SoundEffectsHelper.this.notify();
             }
             Looper.loop();
         }
     }
 
-    private final class SoundPoolCallback implements
+    private class SfxHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_LOAD_EFFECTS:
+                    onLoadSoundEffects((OnEffectsLoadCompleteHandler) msg.obj);
+                    break;
+                case MSG_UNLOAD_EFFECTS:
+                    onUnloadSoundEffects();
+                    break;
+                case MSG_PLAY_EFFECT:
+                    onLoadSoundEffects(new OnEffectsLoadCompleteHandler() {
+                        @Override
+                        public void run(boolean success) {
+                            if (success) {
+                                onPlaySoundEffect(msg.arg1 /*effect*/, msg.arg2 /*volume*/);
+                            }
+                        }
+                    });
+                    break;
+                case MSG_LOAD_EFFECTS_TIMEOUT:
+                    if (mSoundPoolLoader != null) {
+                        mSoundPoolLoader.onTimeout();
+                    }
+                    break;
+            }
+        }
+    }
+
+    private class SoundPoolLoader implements
             android.media.SoundPool.OnLoadCompleteListener {
 
-        @GuardedBy("mSoundEffectsLock")
-        private int mStatus = 1; // 1 means neither error nor last sample loaded yet
-        @GuardedBy("mSoundEffectsLock")
-        List<Integer> mSamples = new ArrayList<Integer>();
+        private List<OnEffectsLoadCompleteHandler> mLoadCompleteHandlers =
+                new ArrayList<OnEffectsLoadCompleteHandler>();
 
-        @GuardedBy("mSoundEffectsLock")
-        public int status() {
-            return mStatus;
+        SoundPoolLoader() {
+            // SoundPool use the current Looper when creating its message handler.
+            // Since SoundPoolLoader is created on the SfxWorker thread, SoundPool's
+            // message handler ends up running on it (it's OK to have multiple
+            // handlers on the same Looper). Thus, onLoadComplete gets executed
+            // on the worker thread.
+            mSoundPool.setOnLoadCompleteListener(this);
         }
 
-        @GuardedBy("mSoundEffectsLock")
-        public void setSamples(int[] samples) {
-            for (int i = 0; i < samples.length; i++) {
-                // do not wait ack for samples rejected upfront by SoundPool
-                if (samples[i] > 0) {
-                    mSamples.add(samples[i]);
-                }
+        void addHandler(OnEffectsLoadCompleteHandler handler) {
+            if (handler != null) {
+                mLoadCompleteHandlers.add(handler);
             }
         }
 
+        @Override
         public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-            synchronized (mSoundEffectsLock) {
-                int i = mSamples.indexOf(sampleId);
-                if (i >= 0) {
-                    mSamples.remove(i);
+            if (status == 0) {
+                int remainingToLoad = 0;
+                for (Resource res : mResources) {
+                    if (res.mSampleId == sampleId && !res.mLoaded) {
+                        logEvent("effect " + res.mFileName + " loaded");
+                        res.mLoaded = true;
+                    }
+                    if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && !res.mLoaded) {
+                        remainingToLoad++;
+                    }
                 }
-                if ((status != 0) || mSamples.isEmpty()) {
-                    mStatus = status;
-                    mSoundEffectsLock.notify();
+                if (remainingToLoad == 0) {
+                    onComplete(true);
                 }
+            } else {
+                Resource res = findResourceBySampleId(sampleId);
+                String filePath;
+                if (res != null) {
+                    filePath = getResourceFilePath(res);
+                } else {
+                    filePath = "with unknown sample ID " + sampleId;
+                }
+                logEvent("effect " + filePath + " loading failed, status " + status);
+                Log.w(TAG, "onLoadSoundEffects(), Error " + status + " while loading sample "
+                        + filePath);
+                onComplete(false);
             }
+        }
+
+        void onTimeout() {
+            onComplete(false);
+        }
+
+        void onComplete(boolean success) {
+            mSoundPool.setOnLoadCompleteListener(null);
+            for (OnEffectsLoadCompleteHandler handler : mLoadCompleteHandlers) {
+                handler.run(success);
+            }
+            logEvent("effects loading " + (success ? "completed" : "failed"));
         }
     }
 }

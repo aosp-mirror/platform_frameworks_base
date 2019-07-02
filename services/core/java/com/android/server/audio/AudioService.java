@@ -6028,6 +6028,8 @@ public class AudioService extends IAudioService.Stub
 
         pw.println("\nAudioDeviceBroker:");
         mDeviceBroker.dump(pw, "  ");
+        pw.println("\nSoundEffects:");
+        mSfxHelper.dump(pw, "  ");
 
         pw.println("\n");
         pw.println("\nEvent logs:");
