@@ -2531,7 +2531,6 @@ public class DisplayPolicy {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
                 } else if (topIsFullscreen
-                        && !mDisplayContent.isStackVisible(WINDOWING_MODE_FREEFORM)
                         && !mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** HIDING status bar");
                     if (mStatusBarController.setBarShowingLw(false)) {
@@ -2591,7 +2590,7 @@ public class DisplayPolicy {
      *         window.
      */
     private boolean topAppHidesStatusBar() {
-        if (mTopFullscreenOpaqueWindowState == null) {
+        if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
             return false;
         }
         final int fl = PolicyControl.getWindowFlags(null,
@@ -3253,9 +3252,9 @@ public class DisplayPolicy {
         final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
 
         // We need to force system bars when the docked stack is visible, when the freeform stack
-        // is visible but also when we are resizing for the transitions when docked stack
+        // is focused but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        mForceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing
+        mForceShowSystemBars = dockedStackVisible || win.inFreeformWindowingMode() || resizing
                 || mForceShowSystemBarsFromExternal;
         final boolean forceOpaqueStatusBar = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
 
