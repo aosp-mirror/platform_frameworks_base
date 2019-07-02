@@ -1451,9 +1451,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .execute();
     }
 
+    /**
+     * Start the recents activity to perform the recents animation.
+     *
+     * @param intent The intent to start the recents activity.
+     * @param recentsAnimationRunner Pass {@code null} to only preload the activity.
+     */
     @Override
-    public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
-            IRecentsAnimationRunner recentsAnimationRunner) {
+    public void startRecentsActivity(Intent intent, @Deprecated IAssistDataReceiver unused,
+            @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
         final long origId = Binder.clearCallingIdentity();
@@ -1464,9 +1470,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
-                        getActivityStartController(), mWindowManager, callingPid);
-                anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
-                        recentsUid, assistDataReceiver);
+                        getActivityStartController(), mWindowManager, intent, recentsComponent,
+                        recentsUid, callingPid);
+                if (recentsAnimationRunner == null) {
+                    anim.preloadRecentsActivity();
+                } else {
+                    anim.startRecentsActivity(recentsAnimationRunner);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
