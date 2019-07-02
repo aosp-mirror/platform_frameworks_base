@@ -68,6 +68,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.IPermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -297,10 +298,11 @@ class ContextImpl extends Context {
             return mPackageManager;
         }
 
-        IPackageManager pm = ActivityThread.getPackageManager();
-        if (pm != null) {
+        final IPackageManager pm = ActivityThread.getPackageManager();
+        final IPermissionManager permissionManager = ActivityThread.getPermissionManager();
+        if (pm != null && permissionManager != null) {
             // Doesn't matter if we make more than one instance.
-            return (mPackageManager = new ApplicationPackageManager(this, pm));
+            return (mPackageManager = new ApplicationPackageManager(this, pm, permissionManager));
         }
 
         return null;

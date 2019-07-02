@@ -82,6 +82,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1655,10 +1656,11 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @UnsupportedAppUsage
-    protected ApplicationPackageManager(ContextImpl context,
-                              IPackageManager pm) {
+    protected ApplicationPackageManager(ContextImpl context, IPackageManager pm,
+            IPermissionManager permissionManager) {
         mContext = context;
         mPM = pm;
+        mPermissionManager = permissionManager;
     }
 
     /**
@@ -2930,6 +2932,7 @@ public class ApplicationPackageManager extends PackageManager {
     private final ContextImpl mContext;
     @UnsupportedAppUsage
     private final IPackageManager mPM;
+    private final IPermissionManager mPermissionManager;
 
     /** Assume locked until we hear otherwise */
     private volatile boolean mUserUnlocked = false;

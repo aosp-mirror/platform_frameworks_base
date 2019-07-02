@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.permission.IPermissionManager;
 import android.util.Log;
 
 /**
@@ -45,12 +46,14 @@ public class InstallStart extends Activity {
 
     private static final String DOWNLOADS_AUTHORITY = "downloads";
     private IPackageManager mIPackageManager;
+    private IPermissionManager mIPermissionManager;
     private boolean mAbortInstall = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIPackageManager = AppGlobals.getPackageManager();
+        mIPermissionManager = AppGlobals.getPermissionManager();
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
 
@@ -137,7 +140,7 @@ public class InstallStart extends Activity {
 
     private boolean declaresAppOpPermission(int uid, String permission) {
         try {
-            final String[] packages = mIPackageManager.getAppOpPermissionPackages(permission);
+            final String[] packages = mIPermissionManager.getAppOpPermissionPackages(permission);
             if (packages == null) {
                 return false;
             }
