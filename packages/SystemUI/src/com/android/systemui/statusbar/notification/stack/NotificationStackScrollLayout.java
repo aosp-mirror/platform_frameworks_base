@@ -4716,14 +4716,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return mIntrinsicPadding;
     }
 
-    /**
-     * @return the y position of the first notification
-     */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public float getNotificationsTopY() {
-        return mTopPadding + getStackTranslation();
-    }
-
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean shouldDelayChildPressedState() {
