@@ -1944,9 +1944,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.SILENCE_GESTURE,
                 SecureSettingsProto.Gesture.SILENCE_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.SILENCE_NOTIFICATION_GESTURE_COUNT,
-                SecureSettingsProto.Gesture.SILENCE_NOTIFICATION_COUNT);
-        dumpSetting(s, p,
                 Settings.Secure.SILENCE_TIMER_GESTURE_COUNT,
                 SecureSettingsProto.Gesture.SILENCE_TIMER_COUNT);
 
@@ -1956,6 +1953,19 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SKIP_GESTURE,
                 SecureSettingsProto.Gesture.SKIP_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_ALARMS_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_ALARMS_TOUCH_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_CALL_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_CALLS_TOUCH_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_TIMER_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_TIMER_TOUCH_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SKIP_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.SKIP_TOUCH_COUNT);
         p.end(gestureToken);
 
         dumpSetting(s, p,
