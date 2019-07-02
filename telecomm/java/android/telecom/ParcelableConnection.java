@@ -53,6 +53,7 @@ public final class ParcelableConnection implements Parcelable {
     private final List<String> mConferenceableConnectionIds;
     private final Bundle mExtras;
     private String mParentCallId;
+    private @Call.Details.CallDirection int mCallDirection;
 
     /** @hide */
     public ParcelableConnection(
@@ -75,13 +76,15 @@ public final class ParcelableConnection implements Parcelable {
             DisconnectCause disconnectCause,
             List<String> conferenceableConnectionIds,
             Bundle extras,
-            String parentCallId) {
+            String parentCallId,
+            @Call.Details.CallDirection int callDirection) {
         this(phoneAccount, state, capabilities, properties, supportedAudioRoutes, address,
                 addressPresentation, callerDisplayName, callerDisplayNamePresentation,
                 videoProvider, videoState, ringbackRequested, isVoipAudioMode, connectTimeMillis,
                 connectElapsedTimeMillis, statusHints, disconnectCause, conferenceableConnectionIds,
                 extras);
         mParentCallId = parentCallId;
+        mCallDirection = callDirection;
     }
 
     /** @hide */
@@ -125,6 +128,7 @@ public final class ParcelableConnection implements Parcelable {
         mConferenceableConnectionIds = conferenceableConnectionIds;
         mExtras = extras;
         mParentCallId = null;
+        mCallDirection = Call.Details.DIRECTION_UNKNOWN;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -219,6 +223,10 @@ public final class ParcelableConnection implements Parcelable {
         return mParentCallId;
     }
 
+    public @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -234,10 +242,12 @@ public final class ParcelableConnection implements Parcelable {
                 .append(mExtras)
                 .append(", parent:")
                 .append(mParentCallId)
+                .append(", callDirection:")
+                .append(mCallDirection)
                 .toString();
     }
 
-    public static final Parcelable.Creator<ParcelableConnection> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableConnection> CREATOR =
             new Parcelable.Creator<ParcelableConnection> () {
         @Override
         public ParcelableConnection createFromParcel(Parcel source) {
@@ -265,6 +275,7 @@ public final class ParcelableConnection implements Parcelable {
             int supportedAudioRoutes = source.readInt();
             String parentCallId = source.readString();
             long connectElapsedTimeMillis = source.readLong();
+            int callDirection = source.readInt();
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -286,7 +297,8 @@ public final class ParcelableConnection implements Parcelable {
                     disconnectCause,
                     conferenceableConnectionIds,
                     extras,
-                    parentCallId);
+                    parentCallId,
+                    callDirection);
         }
 
         @Override
@@ -325,5 +337,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeInt(mSupportedAudioRoutes);
         destination.writeString(mParentCallId);
         destination.writeLong(mConnectElapsedTimeMillis);
+        destination.writeInt(mCallDirection);
     }
 }

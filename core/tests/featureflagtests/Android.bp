@@ -7,7 +7,7 @@ android_test {
     static_libs: [
         "android-common",
         "frameworks-core-util-lib",
-        "android-support-test",
+        "androidx.test.rules",
     ],
     libs: [
         "android.test.runner",

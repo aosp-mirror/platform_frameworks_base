@@ -16,12 +16,13 @@
 
 package com.android.systemui.doze;
 
+import android.hardware.display.AmbientDisplayConfiguration;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import org.mockito.Answers;
@@ -36,6 +37,8 @@ public class DozeConfigurationUtil {
         when(params.getPickupVibrationThreshold()).thenReturn(0);
         when(params.getProxCheckBeforePulse()).thenReturn(true);
         when(params.getPickupSubtypePerformsProxCheck(anyInt())).thenReturn(true);
+        when(params.getPolicy()).thenReturn(mock(AlwaysOnDisplayPolicy.class));
+        when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
 
         doneHolder[0] = true;
         return params;
@@ -45,12 +48,17 @@ public class DozeConfigurationUtil {
         boolean[] doneHolder = new boolean[1];
         AmbientDisplayConfiguration config = mock(AmbientDisplayConfiguration.class,
                 noDefaultAnswer(doneHolder));
-        when(config.pulseOnDoubleTapEnabled(anyInt())).thenReturn(false);
-        when(config.pulseOnPickupEnabled(anyInt())).thenReturn(false);
+        when(config.doubleTapGestureEnabled(anyInt())).thenReturn(false);
+        when(config.pickupGestureEnabled(anyInt())).thenReturn(false);
         when(config.pulseOnNotificationEnabled(anyInt())).thenReturn(true);
+        when(config.alwaysOnEnabled(anyInt())).thenReturn(false);
 
         when(config.doubleTapSensorType()).thenReturn(null);
-        when(config.pulseOnPickupAvailable()).thenReturn(false);
+        when(config.tapSensorType()).thenReturn(null);
+        when(config.longPressSensorType()).thenReturn(null);
+
+        when(config.dozePickupSensorAvailable()).thenReturn(false);
+        when(config.wakeScreenGestureAvailable()).thenReturn(false);
 
         doneHolder[0] = true;
         return config;

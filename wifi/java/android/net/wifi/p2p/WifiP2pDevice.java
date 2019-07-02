@@ -17,12 +17,13 @@
 package android.net.wifi.p2p;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
-import java.util.regex.Pattern;
+import java.util.Objects;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A class representing a Wi-Fi p2p device
@@ -322,6 +323,11 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hashCode(deviceAddress);
+    }
+
+    @Override
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Device: ").append(deviceName);
@@ -353,7 +359,9 @@ public class WifiP2pDevice implements Parcelable {
             deviceCapability = source.deviceCapability;
             groupCapability = source.groupCapability;
             status = source.status;
-            wfdInfo = new WifiP2pWfdInfo(source.wfdInfo);
+            if (source.wfdInfo != null) {
+                wfdInfo = new WifiP2pWfdInfo(source.wfdInfo);
+            }
         }
     }
 
@@ -377,7 +385,7 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<WifiP2pDevice> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiP2pDevice> CREATOR =
         new Creator<WifiP2pDevice>() {
             @Override
             public WifiP2pDevice createFromParcel(Parcel in) {

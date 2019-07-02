@@ -16,15 +16,16 @@
 
 package android.widget.scroll;
 
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase;
 import android.test.ViewAsserts;
-import android.test.suitebuilder.annotation.Suppress;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.test.filters.Suppress;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * This is suppressed because {@link TextView#scrollBy} isn't working.

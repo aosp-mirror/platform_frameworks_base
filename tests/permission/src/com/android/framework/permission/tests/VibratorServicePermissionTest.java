@@ -52,7 +52,7 @@ public class VibratorServicePermissionTest extends TestCase {
             final VibrationEffect effect =
                     VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE);
             mVibratorService.vibrate(Process.myUid(), null, effect, AudioManager.STREAM_ALARM,
-                    new Binder());
+                    "testVibrate", new Binder());
             fail("vibrate did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected

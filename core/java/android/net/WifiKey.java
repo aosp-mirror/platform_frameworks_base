@@ -110,7 +110,7 @@ public class WifiKey implements Parcelable {
         return "WifiKey[SSID=" + ssid + ",BSSID=" + bssid + "]";
     }
 
-    public static final Creator<WifiKey> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiKey> CREATOR =
             new Creator<WifiKey>() {
                 @Override
                 public WifiKey createFromParcel(Parcel in) {

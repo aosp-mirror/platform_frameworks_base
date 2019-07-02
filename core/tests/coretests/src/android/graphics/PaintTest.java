@@ -18,9 +18,9 @@ package android.graphics;
 
 import static org.junit.Assert.assertNotEquals;
 
-import android.graphics.Paint;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -186,44 +186,28 @@ public class PaintTest extends InstrumentationTestCase {
         Paint p = new Paint();
 
         final int count = end - start;
-        final float[][] advanceArrays = new float[4][count];
-
-        final float advance = p.getTextRunAdvances(str, start, end, contextStart, contextEnd,
-                isRtl, advanceArrays[0], 0);
-
+        final int contextCount = contextEnd - contextStart;
+        final float[][] advanceArrays = new float[2][count];
         char chars[] = str.toCharArray();
-        final float advance_c = p.getTextRunAdvances(chars, start, count, contextStart,
-                contextEnd - contextStart, isRtl, advanceArrays[1], 0);
-        assertEquals(advance, advance_c, 1.0f);
-
+        final float advance = p.getTextRunAdvances(chars, start, count,
+                contextStart, contextCount, isRtl, advanceArrays[0], 0);
         for (int c = 1; c < count; ++c) {
-            final float firstPartAdvance = p.getTextRunAdvances(str, start, start + c,
-                    contextStart, contextEnd, isRtl, advanceArrays[2], 0);
-            final float secondPartAdvance = p.getTextRunAdvances(str, start + c, end,
-                    contextStart, contextEnd, isRtl, advanceArrays[2], c);
+            final float firstPartAdvance = p.getTextRunAdvances(chars, start, c,
+                    contextStart, contextCount, isRtl, advanceArrays[1], 0);
+            final float secondPartAdvance = p.getTextRunAdvances(chars, start + c, count - c,
+                    contextStart, contextCount, isRtl, advanceArrays[1], c);
             assertEquals(advance, firstPartAdvance + secondPartAdvance, 1.0f);
 
-
-            final float firstPartAdvance_c = p.getTextRunAdvances(chars, start, c,
-                    contextStart, contextEnd - contextStart, isRtl, advanceArrays[3], 0);
-            final float secondPartAdvance_c = p.getTextRunAdvances(chars, start + c,
-                    count - c, contextStart, contextEnd - contextStart, isRtl,
-                    advanceArrays[3], c);
-            assertEquals(advance, firstPartAdvance_c + secondPartAdvance_c, 1.0f);
-            assertEquals(firstPartAdvance, firstPartAdvance_c, 1.0f);
-            assertEquals(secondPartAdvance, secondPartAdvance_c, 1.0f);
-
-            for (int i = 1; i < advanceArrays.length; i++) {
-                for (int j = 0; j < count; j++) {
-                    assertEquals(advanceArrays[0][j], advanceArrays[i][j], 1.0f);
-                }
+            for (int j = 0; j < count; j++) {
+                assertEquals(advanceArrays[0][j], advanceArrays[1][j], 1.0f);
             }
+
 
             // Compare results with measureText, getRunAdvance, and getTextWidths.
             if (compareWithOtherMethods && start == contextStart && end == contextEnd) {
                 assertEquals(advance, p.measureText(str, start, end), 1.0f);
                 assertEquals(advance, p.getRunAdvance(
-                        str, start, end, contextStart, contextEnd, isRtl, end), 1.0f);
+                        chars, start, count, contextStart, contextCount, isRtl, end), 1.0f);
 
                 final float[] widths = new float[count];
                 p.getTextWidths(str, start, end, widths);
@@ -236,19 +220,7 @@ public class PaintTest extends InstrumentationTestCase {
 
     public void testGetTextRunAdvances_invalid() {
         Paint p = new Paint();
-        String text = "test";
-
-        try {
-            p.getTextRunAdvances((String)null, 0, 0, 0, 0, false, null, 0);
-            fail("Should throw an IllegalArgumentException.");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            p.getTextRunAdvances((CharSequence)null, 0, 0, 0, 0, false, null, 0);
-            fail("Should throw an IllegalArgumentException.");
-        } catch (IllegalArgumentException e) {
-        }
+        char[] text = "test".toCharArray();
 
         try {
             p.getTextRunAdvances((char[])null, 0, 0, 0, 0, false, null, 0);
@@ -257,50 +229,43 @@ public class PaintTest extends InstrumentationTestCase {
         }
 
         try {
-            p.getTextRunAdvances(text, 0, text.length(), 0, text.length(), false,
-                    new float[text.length() - 1], 0);
+            p.getTextRunAdvances(text, 0, text.length, 0, text.length, false,
+                    new float[text.length - 1], 0);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }
 
         try {
-            p.getTextRunAdvances(text, 0, text.length(), 0, text.length(), false,
-                    new float[text.length()], 1);
+            p.getTextRunAdvances(text, 0, text.length, 0, text.length, false,
+                    new float[text.length], 1);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }
 
         // 0 > contextStart
         try {
-            p.getTextRunAdvances(text, 0, text.length(), -1, text.length(), false, null, 0);
+            p.getTextRunAdvances(text, 0, text.length, -1, text.length, false, null, 0);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }
 
         // contextStart > start
         try {
-            p.getTextRunAdvances(text, 0, text.length(), 1, text.length(), false, null, 0);
-            fail("Should throw an IndexOutOfBoundsException.");
-        } catch (IndexOutOfBoundsException e) {
-        }
-
-        // start > end
-        try {
-            p.getTextRunAdvances(text, 1, 0, 0, text.length(), false, null, 0);
+            p.getTextRunAdvances(text, 0, text.length, 1, text.length, false, null, 0);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }
 
         // end > contextEnd
         try {
-            p.getTextRunAdvances(text, 0, text.length(), 0, text.length() - 1, false, null, 0);
+            p.getTextRunAdvances(text, 0, text.length, 0, text.length - 1, false, null, 0);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }
 
         // contextEnd > text.length
         try {
-            p.getTextRunAdvances(text, 0, text.length(), 0, text.length() + 1, false, null, 0);
+            p.getTextRunAdvances(text, 0, text.length, 0, text.length + 1, false, null, 0);
             fail("Should throw an IndexOutOfBoundsException.");
         } catch (IndexOutOfBoundsException e) {
         }

@@ -20,6 +20,9 @@ package android.hardware.radio;
 parcelable RadioManager.BandConfig;
 
 /** @hide */
+parcelable RadioManager.BandDescriptor;
+
+/** @hide */
 parcelable RadioManager.ModuleProperties;
 
 /** @hide */

@@ -18,4 +18,5 @@ android_test {
     name: "HwAccelerationTest",
     srcs: ["**/*.java"],
     platform_apis: true,
+    certificate: "platform",
 }

@@ -27,6 +27,8 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.view.KeyEvent;
 
+import com.android.internal.os.IResultReceiver;
+
 /**
  * Object running in the application process and responsible for autofilling it.
  *
@@ -93,8 +95,20 @@ oneway interface IAutoFillManagerClient {
 
    /**
      * Marks the state of the session as finished.
+     *
      * @param newState STATE_FINISHED (because the autofill service returned a null
      * FillResponse) or STATE_UNKNOWN (because the session was removed).
+     * @param autofillableIds list of ids that could trigger autofill, use to not handle a new
+     * session when they're entered.
      */
-   void setSessionFinished(int newState);
+   void setSessionFinished(int newState, in List<AutofillId> autofillableIds);
+
+   /**
+    * Gets a reference to the binder object that can be used by the Augmented Autofill service.
+    *
+    * @param receiver, whose AutofillManager.EXTRA_AUGMENTED_AUTOFILL_CLIENT extra will contain
+    * the reference.
+    */
+   void getAugmentedAutofillClient(in IResultReceiver result);
+
 }

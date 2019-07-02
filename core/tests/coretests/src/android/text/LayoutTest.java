@@ -16,6 +16,7 @@
 
 package android.text;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -30,10 +31,11 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.style.StrikethroughSpan;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -687,6 +689,63 @@ public class LayoutTest {
         List<DrawCommand> getDrawCommands() {
             return mDrawCommands;
         }
+    }
+
+    private static final String LTR = "a";
+    private static final String RTL = "\u05D0";  // HEBREW LETTER ALEF
+    private static final String LTR_SP = "\uD801\uDCB0";  // OSAGE CAPITAL LETTER A
+    private static final String RTL_SP = "\uD83A\uDD00";  // ADLAM CAPITAL LETTER ALIF
+
+    private static final String LRI = "\u2066";  // LEFT-TO-RIGHT ISOLATE
+    private static final String RLI = "\u2067";  // RIGHT-TO-LEFT ISOLATE
+    private static final String PDI = "\u2069";  // POP DIRECTIONAL ISOLATE
+
+    private static void assertPrimaryIsTrailingPrevious(String input, boolean[] expected) {
+        assertEquals(input.length() + 1, expected.length);
+
+        boolean[] actual = new boolean[expected.length];
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(16.0f);
+        Layout layout = StaticLayout.Builder.obtain(
+                input, 0, input.length(), paint, Integer.MAX_VALUE).build();
+        for (int i = 0; i <= input.length(); ++i) {
+            actual[i] = layout.primaryIsTrailingPrevious(i);
+        }
+        assertArrayEquals(expected, actual);
+        assertArrayEquals(actual, layout.primaryIsTrailingPreviousAllLineOffsets(0));
+    }
+
+    @Test
+    public void testPrimaryIsTrailingPrevious() {
+        assertPrimaryIsTrailingPrevious(
+                LTR + " " + LTR + LTR + " " + LTR + LTR + LTR,
+                new boolean[]{false, false, false, false, false, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                RTL + " " + RTL + RTL + " " + RTL + RTL + RTL,
+                new boolean[]{false, false, false, false, false, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                LTR + RTL + LTR + RTL + LTR,
+                new boolean[]{false, true, false, true, false, false});
+        assertPrimaryIsTrailingPrevious(
+                RTL + LTR + RTL + LTR + RTL,
+                new boolean[]{false, true, false, true, false, false});
+        assertPrimaryIsTrailingPrevious(
+                RTL_SP + LTR_SP + RTL_SP + LTR_SP + RTL_SP,
+                new boolean[]{
+                        false, false, true, false, false, false, true, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                LTR_SP + RTL_SP + LTR_SP + RTL_SP + LTR_SP,
+                new boolean[]{
+                        false, false, true, false, false, false, true, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                LTR + RLI + LTR + RTL + PDI + LTR,
+                new boolean[]{false, false, true, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                RTL + LRI + RTL + LTR + PDI + RTL,
+                new boolean[]{false, false, true, false, false, false, false});
+        assertPrimaryIsTrailingPrevious(
+                "",
+                new boolean[]{false});
     }
 }
 

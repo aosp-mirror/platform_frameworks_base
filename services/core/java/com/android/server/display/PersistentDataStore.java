@@ -16,13 +16,6 @@
 
 package com.android.server.display;
 
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
@@ -30,13 +23,20 @@ import android.hardware.display.WifiDisplay;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.Pair;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -50,11 +50,8 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import libcore.io.IoUtils;
 
 /**
  * Manages persistent state recorded by the display manager service as an XML file.
@@ -110,14 +107,9 @@ final class PersistentDataStore {
 
     private static final String TAG_BRIGHTNESS_CONFIGURATIONS = "brightness-configurations";
     private static final String TAG_BRIGHTNESS_CONFIGURATION = "brightness-configuration";
-    private static final String TAG_BRIGHTNESS_CURVE = "brightness-curve";
-    private static final String TAG_BRIGHTNESS_POINT = "brightness-point";
     private static final String ATTR_USER_SERIAL = "user-serial";
     private static final String ATTR_PACKAGE_NAME = "package-name";
     private static final String ATTR_TIME_STAMP = "timestamp";
-    private static final String ATTR_LUX = "lux";
-    private static final String ATTR_NITS = "nits";
-    private static final String ATTR_DESCRIPTION = "description";
 
     // Remembered Wifi display devices.
     private ArrayList<WifiDisplay> mRememberedWifiDisplays = new ArrayList<WifiDisplay>();
@@ -646,7 +638,8 @@ final class PersistentDataStore {
                     }
 
                     try {
-                        BrightnessConfiguration config = loadConfigurationFromXml(parser);
+                        BrightnessConfiguration config =
+                                BrightnessConfiguration.loadFromXml(parser);
                         if (userSerial >= 0 && config != null) {
                             mConfigurations.put(userSerial, config);
                             if (timeStamp != -1) {
@@ -660,56 +653,6 @@ final class PersistentDataStore {
                         Slog.e(TAG, "Failed to load brightness configuration!", iae);
                     }
                 }
-            }
-        }
-
-        private static BrightnessConfiguration loadConfigurationFromXml(XmlPullParser parser)
-                throws IOException, XmlPullParserException {
-            final int outerDepth = parser.getDepth();
-            String description = null;
-            Pair<float[], float[]> curve = null;
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                if (TAG_BRIGHTNESS_CURVE.equals(parser.getName())) {
-                    description = parser.getAttributeValue(null, ATTR_DESCRIPTION);
-                    curve = loadCurveFromXml(parser);
-                }
-            }
-            if (curve == null) {
-                return null;
-            }
-            final BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
-                    curve.first, curve.second);
-            builder.setDescription(description);
-            return builder.build();
-        }
-
-        private static Pair<float[], float[]> loadCurveFromXml(XmlPullParser parser)
-                throws IOException, XmlPullParserException {
-            final int outerDepth = parser.getDepth();
-            List<Float> luxLevels = new ArrayList<>();
-            List<Float> nitLevels = new ArrayList<>();
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                if (TAG_BRIGHTNESS_POINT.equals(parser.getName())) {
-                    luxLevels.add(loadFloat(parser.getAttributeValue(null, ATTR_LUX)));
-                    nitLevels.add(loadFloat(parser.getAttributeValue(null, ATTR_NITS)));
-                }
-            }
-            final int N = luxLevels.size();
-            float[] lux = new float[N];
-            float[] nits = new float[N];
-            for (int i = 0; i < N; i++) {
-                lux[i] = luxLevels.get(i);
-                nits[i] = nitLevels.get(i);
-            }
-            return Pair.create(lux, nits);
-        }
-
-        private static float loadFloat(String val) {
-            try {
-                return Float.parseFloat(val);
-            } catch (NullPointerException | NumberFormatException e) {
-                Slog.e(TAG, "Failed to parse float loading brightness config", e);
-                return Float.NEGATIVE_INFINITY;
             }
         }
 
@@ -728,25 +671,9 @@ final class PersistentDataStore {
                 if (timestamp != -1) {
                     serializer.attribute(null, ATTR_TIME_STAMP, Long.toString(timestamp));
                 }
-                saveConfigurationToXml(serializer, config);
+                config.saveToXml(serializer);
                 serializer.endTag(null, TAG_BRIGHTNESS_CONFIGURATION);
             }
-        }
-
-        private static void saveConfigurationToXml(XmlSerializer serializer,
-                BrightnessConfiguration config) throws IOException {
-            serializer.startTag(null, TAG_BRIGHTNESS_CURVE);
-            if (config.getDescription() != null) {
-                serializer.attribute(null, ATTR_DESCRIPTION, config.getDescription());
-            }
-            final Pair<float[], float[]> curve = config.getCurve();
-            for (int i = 0; i < curve.first.length; i++) {
-                serializer.startTag(null, TAG_BRIGHTNESS_POINT);
-                serializer.attribute(null, ATTR_LUX, Float.toString(curve.first[i]));
-                serializer.attribute(null, ATTR_NITS, Float.toString(curve.second[i]));
-                serializer.endTag(null, TAG_BRIGHTNESS_POINT);
-            }
-            serializer.endTag(null, TAG_BRIGHTNESS_CURVE);
         }
 
         public void dump(final PrintWriter pw, final String prefix) {

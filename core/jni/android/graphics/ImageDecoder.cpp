@@ -24,6 +24,7 @@
 #include "core_jni_helpers.h"
 
 #include <hwui/Bitmap.h>
+#include <HardwareBitmapUploader.h>
 
 #include <SkAndroidCodec.h>
 #include <SkEncodedImageFormat.h>
@@ -202,7 +203,8 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                                           jint desiredWidth, jint desiredHeight, jobject jsubset,
                                           jboolean requireMutable, jint allocator,
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
-                                          jboolean asAlphaMask, jobject jcolorSpace) {
+                                          jboolean asAlphaMask, jlong colorSpaceHandle,
+                                          jboolean extended) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     SkAndroidCodec* codec = decoder->mCodec.get();
     const SkISize desiredSize = SkISize::Make(desiredWidth, desiredHeight);
@@ -252,11 +254,23 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             }
         }
         // Otherwise, stick with N32
+    } else if (extended) {
+        colorType = kRGBA_F16_SkColorType;
     } else {
-        // This is currently the only way to know that we should decode to F16.
         colorType = codec->computeOutputColorType(colorType);
     }
-    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(env, jcolorSpace);
+
+    const bool isHardware = !requireMutable
+        && (allocator == ImageDecoder::kDefault_Allocator ||
+            allocator == ImageDecoder::kHardware_Allocator)
+        && colorType != kGray_8_SkColorType;
+
+    if (colorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        colorType = kN32_SkColorType;
+    }
+
+    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     colorSpace = codec->computeOutputColorSpace(colorType, colorSpace);
     decodeInfo = decodeInfo.makeColorType(colorType).makeColorSpace(colorSpace);
 
@@ -449,10 +463,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (requireMutable) {
         bitmapCreateFlags |= bitmap::kBitmapCreateFlag_Mutable;
     } else {
-        if ((allocator == ImageDecoder::kDefault_Allocator ||
-             allocator == ImageDecoder::kHardware_Allocator)
-            && bm.colorType() != kAlpha_8_SkColorType)
-        {
+        if (isHardware) {
             sk_sp<Bitmap> hwBitmap = Bitmap::allocateHardwareBitmap(bm);
             if (hwBitmap) {
                 hwBitmap->setImmutable();
@@ -497,9 +508,9 @@ static jstring ImageDecoder_nGetMimeType(JNIEnv* env, jobject /*clazz*/, jlong n
 
 static jobject ImageDecoder_nGetColorSpace(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* codec = reinterpret_cast<ImageDecoder*>(nativePtr)->mCodec.get();
-    auto colorType = codec->computeOutputColorType(codec->getInfo().colorType());
+    auto colorType = codec->computeOutputColorType(kN32_SkColorType);
     sk_sp<SkColorSpace> colorSpace = codec->computeOutputColorSpace(colorType);
-    return GraphicsJNI::getColorSpace(env, colorSpace, colorType);
+    return GraphicsJNI::getColorSpace(env, colorSpace.get(), colorType);
 }
 
 static const JNINativeMethod gImageDecoderMethods[] = {
@@ -508,7 +519,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "([BIILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
     { "nCreate",        "(Ljava/io/InputStream;[BLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
     { "nCreate",        "(Ljava/io/FileDescriptor;Landroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
-    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZLandroid/graphics/ColorSpace;)Landroid/graphics/Bitmap;",
+    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZJZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },

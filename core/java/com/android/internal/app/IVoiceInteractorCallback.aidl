@@ -33,4 +33,5 @@ oneway interface IVoiceInteractorCallback {
     void deliverAbortVoiceResult(IVoiceInteractorRequest request, in Bundle result);
     void deliverCommandResult(IVoiceInteractorRequest request, boolean finished, in Bundle result);
     void deliverCancel(IVoiceInteractorRequest request);
+    void destroy();
 }

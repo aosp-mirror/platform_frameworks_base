@@ -103,6 +103,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     private final Rect mCloseRect = new Rect();
     private final Rect mMaximizeRect = new Rect();
     private View mClickTarget;
+    private int mRootScrollY;
 
     public DecorCaptionView(Context context) {
         super(context);
@@ -154,10 +155,11 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             final int x = (int) ev.getX();
             final int y = (int) ev.getY();
-            if (mMaximizeRect.contains(x, y)) {
+            // Only offset y for containment tests because the actual views are already translated.
+            if (mMaximizeRect.contains(x, y - mRootScrollY)) {
                 mClickTarget = mMaximize;
             }
-            if (mCloseRect.contains(x, y)) {
+            if (mCloseRect.contains(x, y - mRootScrollY)) {
                 mClickTarget = mClose;
             }
         }
@@ -186,7 +188,8 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         final int y = (int) e.getY();
         final boolean fromMouse = e.getToolType(e.getActionIndex()) == MotionEvent.TOOL_TYPE_MOUSE;
         final boolean primaryButton = (e.getButtonState() & MotionEvent.BUTTON_PRIMARY) != 0;
-        switch (e.getActionMasked()) {
+        final int actionMasked = e.getActionMasked();
+        switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
                 if (!mShow) {
                     // When there is no caption we should not react to anything.
@@ -218,6 +221,12 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
                     break;
                 }
                 // Abort the ongoing dragging.
+                if (actionMasked == MotionEvent.ACTION_UP) {
+                    // If it receives ACTION_UP event, the dragging is already finished and also
+                    // the system can not end drag on ACTION_UP event. So request to finish
+                    // dragging.
+                    finishMovingTask();
+                }
                 mDragging = false;
                 return !mCheckForDragging;
         }
@@ -319,34 +328,23 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         mOwner.notifyRestrictedCaptionAreaCallback(mMaximize.getLeft(), mMaximize.getTop(),
                 mClose.getRight(), mClose.getBottom());
     }
-    /**
-     * Determine if the workspace is entirely covered by the window.
-     * @return Returns true when the window is filling the entire screen/workspace.
-     **/
-    private boolean isFillingScreen() {
-        return (0 != ((getWindowSystemUiVisibility() | getSystemUiVisibility()) &
-                (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LOW_PROFILE)));
-    }
 
     /**
      * Updates the visibility of the caption.
      **/
     private void updateCaptionVisibility() {
-        // Don't show the caption if the window has e.g. entered full screen.
-        boolean invisible = isFillingScreen() || !mShow;
-        mCaption.setVisibility(invisible ? GONE : VISIBLE);
+        mCaption.setVisibility(mShow ? VISIBLE : GONE);
         mCaption.setOnTouchListener(this);
     }
 
     /**
-     * Maximize the window by moving it to the maximized workspace stack.
+     * Maximize or restore the window by moving it to the maximized or freeform workspace stack.
      **/
-    private void maximizeWindow() {
+    private void toggleFreeformWindowingMode() {
         Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
             try {
-                callback.exitFreeformMode();
+                callback.toggleFreeformWindowingMode();
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
             }
@@ -406,7 +404,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
         if (mClickTarget == mMaximize) {
-            maximizeWindow();
+            toggleFreeformWindowingMode();
         } else if (mClickTarget == mClose) {
             mOwner.dispatchOnWindowDismissed(
                     true /*finishTask*/, false /*suppressWindowTransition*/);
@@ -427,5 +425,17 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         return false;
+    }
+
+    /**
+     * Called when {@link android.view.ViewRootImpl} scrolls for adjustPan.
+     */
+    public void onRootViewScrollYChanged(int scrollY) {
+        // Offset the caption opposite the root scroll. This keeps the caption at the
+        // top of the window during adjustPan.
+        if (mCaption != null) {
+            mRootScrollY = scrollY;
+            mCaption.setTranslationY(scrollY);
+        }
     }
 }

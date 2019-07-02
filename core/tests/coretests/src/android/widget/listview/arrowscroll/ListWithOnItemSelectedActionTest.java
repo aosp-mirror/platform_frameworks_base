@@ -17,11 +17,12 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.view.KeyEvent;
 import android.widget.listview.ListWithOnItemSelectedAction;
+
+import androidx.test.filters.MediumTest;
 
 public class ListWithOnItemSelectedActionTest extends ActivityInstrumentationTestCase<ListWithOnItemSelectedAction> {
     private ListView mListView;

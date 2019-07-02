@@ -28,7 +28,7 @@ import java.util.List;
  */
 @SystemApi
 public final class TelecomAnalytics implements Parcelable {
-    public static final Parcelable.Creator<TelecomAnalytics> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TelecomAnalytics> CREATOR =
             new Parcelable.Creator<TelecomAnalytics> () {
 
                 @Override
@@ -43,7 +43,7 @@ public final class TelecomAnalytics implements Parcelable {
             };
 
     public static final class SessionTiming extends TimedEvent<Integer> implements Parcelable {
-        public static final Parcelable.Creator<SessionTiming> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SessionTiming> CREATOR =
                 new Parcelable.Creator<SessionTiming> () {
 
                     @Override

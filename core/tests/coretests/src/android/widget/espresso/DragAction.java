@@ -16,27 +16,30 @@
 
 package android.widget.espresso;
 
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
+
 import static org.hamcrest.Matchers.allOf;
+
 import android.annotation.Nullable;
 import android.os.SystemClock;
-import android.support.test.espresso.UiController;
-import android.support.test.espresso.PerformException;
-import android.support.test.espresso.ViewAction;
-import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.MotionEvents;
-import android.support.test.espresso.action.PrecisionDescriber;
-import android.support.test.espresso.action.Swiper;
-import android.support.test.espresso.util.HumanReadables;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import org.hamcrest.Matcher;
+import androidx.test.espresso.PerformException;
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.CoordinatesProvider;
+import androidx.test.espresso.action.MotionEvents;
+import androidx.test.espresso.action.PrecisionDescriber;
+import androidx.test.espresso.action.Swiper;
+import androidx.test.espresso.util.HumanReadables;
 
+import org.hamcrest.Matcher;
 
 /**
  * Drags on a View using touch events.<br>

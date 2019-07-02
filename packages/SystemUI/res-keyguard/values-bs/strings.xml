@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Dodirnite da upišete lozinku"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Upišite lozinku za otključavanje"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Upišite PIN za otključavanje"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Unesite svoj PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Unesite uzorak"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Unesite lozinku"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Pogrešan PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nevažeća kartica."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Napunjeno"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Punjenje"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Brzo punjenje"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Sporo punjenje"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Potpuno napunjen"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo punjenje"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sporo punjenje"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Priključite punjač."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Pritisnite meni da otključate."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Mreža je zaključana"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM kartica je zaključana PUK kodom."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Otključavanje SIM kartice…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Prostor za PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Lozinka uređaja"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Prostor za PIN za SIM karticu"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Prostor za PUK kôd za SIM karticu"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Naredni alarm je podešen za <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM nije moguće onemogućiti zbog greške."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Zaboravili ste uzorak?"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Pogrešan uzorak"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Pogrešna lozinka"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Pogrešan uzorak"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Pogrešna lozinka"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Pogrešan PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekundu.</item>
@@ -81,9 +86,9 @@
     <string name="kg_invalid_puk" msgid="5399287873762592502">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM karticu."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"Previše puta ste pokušali otključati uređaj crtanjem uzorka"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Pogrešno ste nacrtali svoj uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Pogrešno ste nacrtali svoj uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati tablet. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, tablet će se vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati telefon. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, telefon će se vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati tablet. Tablet će se sada vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
@@ -96,8 +101,8 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati telefon. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati tablet. Poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati telefon. Poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da tablet otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da telefon otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da tablet otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da telefon otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"PIN za SIM karticu je netačan. Za otključavanje uređaja sada se morate obratiti svom operateru."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="one">PIN za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
@@ -142,15 +147,97 @@
       <item quantity="few">Uređaj nije otključavan <xliff:g id="NUMBER_1">%d</xliff:g> sata. Potvrdite lozinku.</item>
       <item quantity="other">Uređaj nije otključavan <xliff:g id="NUMBER_1">%d</xliff:g> sati. Potvrdite lozinku.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nije prepoznat"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">Unesite PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
-      <item quantity="few">Unesite PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
-      <item quantity="other">Unesite PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nije prepoznato"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nije prepoznato"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
+      <item quantity="few">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+      <item quantity="other">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
       <item quantity="few">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
       <item quantity="other">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Dvanaest"</item>
+    <item msgid="7389464214252023751">"Jedan"</item>
+    <item msgid="8803180377002008046">"Dva"</item>
+    <item msgid="8614897059944644719">"Tri"</item>
+    <item msgid="2293058674782619556">"Četiri"</item>
+    <item msgid="4815402358455041664">"Pet"</item>
+    <item msgid="3325754778509665687">"Šest"</item>
+    <item msgid="5805551341866280575">"Sedam"</item>
+    <item msgid="203334816668238610">"Osam"</item>
+    <item msgid="4828052671464488923">"Devet"</item>
+    <item msgid="2233497913571137419">"Deset"</item>
+    <item msgid="5621554266768657830">"Jedanaest"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"sata(i)"</item>
+    <item msgid="8837126587669001578">"Jedna"</item>
+    <item msgid="4294343372940455660">"Dvije"</item>
+    <item msgid="7129166637707421536">"Tri"</item>
+    <item msgid="7579404865008788673">"Četiri"</item>
+    <item msgid="3873924689207380586">"Pet"</item>
+    <item msgid="4849565597850069377">"Šest"</item>
+    <item msgid="4404219424523572364">"Sedam"</item>
+    <item msgid="8740481214764087329">"Osam"</item>
+    <item msgid="1713216865806811237">"Devet"</item>
+    <item msgid="3508406095411245038">"Deset"</item>
+    <item msgid="7161996337755311711">"Jedanaest"</item>
+    <item msgid="4044549963329624197">"Dvanaest"</item>
+    <item msgid="333373157917379088">"Trinaest"</item>
+    <item msgid="2631202907124819385">"Četrnaest"</item>
+    <item msgid="6472396076858033453">"Petnaest"</item>
+    <item msgid="8656981856181581643">"Šesnaest"</item>
+    <item msgid="7289026608562030619">"Sedamnaest"</item>
+    <item msgid="3881477602692646573">"Osamnaest"</item>
+    <item msgid="3358129827772984226">"Devetnaest"</item>
+    <item msgid="3308575407402865807">"Dvadeset"</item>
+    <item msgid="5346560955382229629">"Dvadeset\njedna"</item>
+    <item msgid="226750304761473436">"Dvadeset\ndvije"</item>
+    <item msgid="616811325336838734">"Dvadeset\ntri"</item>
+    <item msgid="616346116869053440">"Dvadeset\nčetiri"</item>
+    <item msgid="4642996410384042830">"Dvadeset\npet"</item>
+    <item msgid="7506092849993571465">"Dvadeset\nšest"</item>
+    <item msgid="1915078191101042031">"Dvadeset\nsedam"</item>
+    <item msgid="4292378641900520252">"Dvadeset\nosam"</item>
+    <item msgid="5339513901773103696">"Dvadeset\ndevet"</item>
+    <item msgid="3574673250891657607">"Trideset"</item>
+    <item msgid="5796923836589110940">"Trideset\njedna"</item>
+    <item msgid="5859323597571702052">"Trideset\ndva"</item>
+    <item msgid="5133326723148876507">"Trideset\ntri"</item>
+    <item msgid="2693999494655663096">"Trideset\nčetiri"</item>
+    <item msgid="3316754944962836197">"Trideset\npet"</item>
+    <item msgid="816891008836796723">"Trideset\nšest"</item>
+    <item msgid="9158890488666520078">"Trideset\nsedam"</item>
+    <item msgid="1894769703213894011">"Trideset\nosam"</item>
+    <item msgid="5638820345598572399">"Trideset\ndevet"</item>
+    <item msgid="8838304023017895439">"Četrdeset"</item>
+    <item msgid="1834742948932559597">"Četrdeset\njedna"</item>
+    <item msgid="6573707308847773944">"Četrdeset\ndvije"</item>
+    <item msgid="2450149950652678001">"Četrdeset\ntri"</item>
+    <item msgid="2874667401318178036">"Četrdeset\nčetiri"</item>
+    <item msgid="3391101532763048862">"Četrdeset\npet"</item>
+    <item msgid="1671489330863254362">"Četrdeset\nšest"</item>
+    <item msgid="5916017359554531038">"Četrdeset\nsedam"</item>
+    <item msgid="8205413177993059967">"Četrdeset\nosam"</item>
+    <item msgid="6607867415142171302">"Četrdeset\ndevet"</item>
+    <item msgid="8358850748472089162">"Pedeset"</item>
+    <item msgid="3551313125255080234">"Pedeset\njedna"</item>
+    <item msgid="1559678130725716542">"Pedeset\ndvije"</item>
+    <item msgid="431441994725492377">"Pedeset\ntri"</item>
+    <item msgid="6345774640539623024">"Pedeset\nčetiri"</item>
+    <item msgid="8018192990793931120">"Pedeset\npet"</item>
+    <item msgid="6187650843754604534">"Pedeset\nšest"</item>
+    <item msgid="8727240174015993259">"Pedeset\nsedam"</item>
+    <item msgid="848339003778952950">"Pedeset\nosam"</item>
+    <item msgid="5798985802835423618">"Pedeset\ndevet"</item>
+  </string-array>
 </resources>

@@ -516,7 +516,7 @@ public abstract class NetworkAgent extends Handler {
     }
 
     /**
-     * Requests that the network hardware stops sending keepalive packets.
+     * Requests that the network hardware send the specified packet at the specified interval.
      */
     protected void stopSocketKeepalive(Message msg) {
         onSocketKeepaliveEvent(msg.arg1, SocketKeepalive.ERROR_UNSUPPORTED);

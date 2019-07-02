@@ -170,7 +170,7 @@ public class VideoProfile implements Parcelable {
     /**
      * Responsible for creating VideoProfile objects from deserialized Parcels.
      **/
-    public static final Parcelable.Creator<VideoProfile> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VideoProfile> CREATOR =
             new Parcelable.Creator<VideoProfile> () {
                 /**
                  * Creates a MediaProfile instances from a parcel.
@@ -389,7 +389,7 @@ public class VideoProfile implements Parcelable {
         /**
          * Responsible for creating CallCameraCapabilities objects from deserialized Parcels.
          **/
-        public static final Parcelable.Creator<CameraCapabilities> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<CameraCapabilities> CREATOR =
                 new Parcelable.Creator<CameraCapabilities> () {
                     /**
                      * Creates a CallCameraCapabilities instances from a parcel.

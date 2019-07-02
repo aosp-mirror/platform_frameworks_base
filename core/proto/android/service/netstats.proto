@@ -17,7 +17,7 @@
 syntax = "proto2";
 package android.service;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "NetworkStatsServiceProto";
@@ -47,6 +47,7 @@ message NetworkStatsServiceDumpProto {
 message NetworkInterfaceProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Name of the network interface (eg: wlan).
     optional string interface = 1;
 
     optional NetworkIdentitySetProto identities = 2;
@@ -63,11 +64,15 @@ message NetworkIdentitySetProto {
 message NetworkIdentityProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Constats from ConnectivityManager.TYPE_*.
+    // Constants from ConnectivityManager.TYPE_*.
     optional int32 type = 1;
 
+    // Full subscriber ID on eng builds. The IMSI is scrubbed on user & userdebug
+    // builds to only include the info about the GSM network operator (the info
+    // that uniquely identifies the subscriber is removed).
     optional string subscriber_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
+    // Name of the network (eg: MyWifi).
     optional string network_id = 3 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     optional bool roaming = 4;

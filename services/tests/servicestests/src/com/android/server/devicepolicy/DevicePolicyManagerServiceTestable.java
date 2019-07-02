@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
@@ -64,7 +65,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
-                    services.packageManagerInternal, new MockInjector(services));
+                    services.packageManagerInternal, services.activityTaskManagerInternal,
+                    new MockInjector(services));
         }
 
         static class MockInjector extends Injector {
@@ -179,6 +181,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         IActivityManager getIActivityManager() {
             return services.iactivityManager;
+        }
+
+        @Override
+        IActivityTaskManager getIActivityTaskManager() {
+            return services.iactivityTaskManager;
         }
 
         @Override

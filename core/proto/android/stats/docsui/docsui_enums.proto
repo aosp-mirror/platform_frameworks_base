@@ -1,0 +1,194 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.stats.docsui;
+option java_multiple_files = true;
+
+enum LaunchAction {
+    UNKNOWN = 0;
+    OPEN = 1;
+    CREATE = 2;
+    GET_CONTENT = 3;
+    OPEN_TREE = 4;
+    PICK_COPY_DEST = 5;
+    BROWSE = 6;
+    OTHER = 7;
+}
+
+enum MimeType {
+    MIME_UNKNOWN = 0;
+    MIME_NONE = 1;
+    MIME_ANY = 2;
+    MIME_APPLICATION = 3;
+    MIME_AUDIO = 4;
+    MIME_IMAGE = 5;
+    MIME_MESSAGE = 6;
+    MIME_MULTIPART = 7;
+    MIME_TEXT = 8;
+    MIME_VIDEO = 9;
+    MIME_OTHER = 10;
+}
+
+enum Root {
+    ROOT_UNKNOWN = 0;
+    ROOT_NONE = 1;
+    ROOT_OTHER_DOCS_PROVIDER = 2;
+    ROOT_AUDIO = 3;
+    ROOT_DEVICE_STORAGE = 4;
+    ROOT_DOWNLOADS = 5;
+    ROOT_HOME = 6;
+    ROOT_IMAGES = 7;
+    ROOT_RECENTS = 8;
+    ROOT_VIDEOS = 9;
+    ROOT_MTP = 10;
+    ROOT_THIRD_PARTY_APP = 11;
+}
+
+enum ContextScope {
+    SCOPE_UNKNOWN = 0;
+    SCOPE_FILES = 1;
+    SCOPE_PICKER = 2;
+}
+
+enum Provider {
+    PROVIDER_UNKNOWN = 0;
+    PROVIDER_SYSTEM = 1;
+    PROVIDER_EXTERNAL = 2;
+}
+
+enum FileOperation {
+    OP_UNKNOWN = 0;
+    OP_OTHER = 1;
+    OP_COPY = 2;
+    OP_COPY_INTRA_PROVIDER = 3;
+    OP_COPY_SYSTEM_PROVIDER = 4;
+    OP_COPY_EXTERNAL_PROVIDER = 5;
+    OP_MOVE = 6;
+    OP_MOVE_INTRA_PROVIDER = 7;
+    OP_MOVE_SYSTEM_PROVIDER = 8;
+    OP_MOVE_EXTERNAL_PROVIDER = 9;
+    OP_DELETE = 10;
+    OP_RENAME = 11;
+    OP_CREATE_DIR = 12;
+    OP_OTHER_ERROR = 13;
+    OP_DELETE_ERROR = 14;
+    OP_MOVE_ERROR = 15;
+    OP_COPY_ERROR = 16;
+    OP_RENAME_ERROR = 17;
+    OP_CREATE_DIR_ERROR = 18;
+    OP_COMPRESS_INTRA_PROVIDER = 19;
+    OP_COMPRESS_SYSTEM_PROVIDER = 20;
+    OP_COMPRESS_EXTERNAL_PROVIDER = 21;
+    OP_EXTRACT_INTRA_PROVIDER = 22;
+    OP_EXTRACT_SYSTEM_PROVIDER = 23;
+    OP_EXTRACT_EXTERNAL_PROVIDER = 24;
+    OP_COMPRESS_ERROR = 25;
+    OP_EXTRACT_ERROR = 26;
+}
+
+enum SubFileOperation {
+    SUB_OP_UNKNOWN = 0;
+    SUB_OP_QUERY_DOC = 1;
+    SUB_OP_QUERY_CHILD = 2;
+    SUB_OP_OPEN_FILE = 3;
+    SUB_OP_READ_FILE = 4;
+    SUB_OP_CREATE_DOC = 5;
+    SUB_OP_WRITE_FILE = 6;
+    SUB_OP_DELETE_DOC = 7;
+    SUB_OP_OBTAIN_STREAM_TYPE = 8;
+    SUB_OP_QUICK_MOVE = 9;
+    SUB_OP_QUICK_COPY = 10;
+}
+
+enum CopyMoveOpMode {
+    MODE_UNKNOWN = 0;
+    MODE_PROVIDER = 1;
+    MODE_CONVERTED = 2;
+    MODE_CONVENTIONAL = 3;
+}
+
+enum Authority {
+    AUTH_UNKNOWN = 0;
+    AUTH_OTHER = 1;
+    AUTH_MEDIA = 2;
+    AUTH_STORAGE_INTERNAL = 3;
+    AUTH_STORAGE_EXTERNAL = 4;
+    AUTH_DOWNLOADS = 5;
+    AUTH_MTP = 6;
+}
+
+enum UserAction {
+    ACTION_UNKNOWN = 0;
+    ACTION_OTHER = 1;
+    ACTION_GRID = 2;
+    ACTION_LIST = 3;
+    ACTION_SORT_NAME = 4;
+    ACTION_SORT_DATE = 5;
+    ACTION_SORT_SIZE = 6;
+    ACTION_SORT_TYPE = 7;
+    ACTION_SEARCH = 8;
+    ACTION_SHOW_SIZE = 9;
+    ACTION_HIDE_SIZE = 10;
+    ACTION_SETTINGS = 11;
+    ACTION_COPY_TO = 12;
+    ACTION_MOVE_TO = 13;
+    ACTION_DELETE = 14;
+    ACTION_RENAME = 15;
+    ACTION_CREATE_DIR = 16;
+    ACTION_SELECT_ALL = 17;
+    ACTION_SHARE = 18;
+    ACTION_OPEN = 19;
+    ACTION_SHOW_ADVANCED = 20;
+    ACTION_HIDE_ADVANCED = 21;
+    ACTION_NEW_WINDOW = 22;
+    ACTION_PASTE_CLIPBOARD = 23;
+    ACTION_COPY_CLIPBOARD = 24;
+    ACTION_DRAG_N_DROP = 25;
+    ACTION_DRAG_N_DROP_MULTI_WINDOW = 26;
+    ACTION_CUT_CLIPBOARD = 27;
+    ACTION_COMPRESS = 28;
+    ACTION_EXTRACT_TO = 29;
+    ACTION_VIEW_IN_APPLICATION = 30;
+    ACTION_INSPECTOR = 31;
+    ACTION_SEARCH_CHIP = 32;
+    ACTION_SEARCH_HISTORY = 33;
+}
+
+enum InvalidScopedAccess {
+    SCOPED_DIR_ACCESS_UNKNOWN = 0;
+    SCOPED_DIR_ACCESS_INVALID_ARGUMENTS = 1;
+    SCOPED_DIR_ACCESS_INVALID_DIRECTORY = 2;
+    SCOPED_DIR_ACCESS_ERROR = 3;
+    SCOPED_DIR_ACCESS_DEPRECATED = 4;
+}
+
+enum SearchType {
+    TYPE_UNKNOWN = 0;
+    TYPE_CHIP_IMAGES = 1;
+    TYPE_CHIP_AUDIOS = 2;
+    TYPE_CHIP_VIDEOS = 3;
+    TYPE_CHIP_DOCS = 4;
+    TYPE_SEARCH_HISTORY = 5;
+    TYPE_SEARCH_STRING = 6;
+}
+
+enum SearchMode {
+    SEARCH_UNKNOWN = 0;
+    SEARCH_KEYWORD = 1;
+    SEARCH_CHIPS = 2;
+    SEARCH_KEYWORD_N_CHIPS = 3;
+}

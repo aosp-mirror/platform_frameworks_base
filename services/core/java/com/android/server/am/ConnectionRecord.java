@@ -16,11 +16,18 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+
+import com.android.internal.app.procstats.AssociationState;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.server.wm.ActivityServiceConnectionsHolder;
 
 import java.io.PrintWriter;
 
@@ -29,16 +36,20 @@ import java.io.PrintWriter;
  */
 final class ConnectionRecord {
     final AppBindRecord binding;    // The application/service binding.
-    final ActivityRecord activity;  // If non-null, the owning activity.
+    final ActivityServiceConnectionsHolder<ConnectionRecord> activity;  // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
     final int clientLabel;          // String resource labeling this client.
     final PendingIntent clientIntent; // How to launch the client.
+    final int clientUid;            // The identity of this connection's client
+    final String clientProcessName; // The source process of this connection's client
+    final String clientPackageName; // The source package of this connection's client
+    public AssociationState.SourceState association; // Association tracking
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
 
     // Please keep the following two enum list synced.
-    private static int[] BIND_ORIG_ENUMS = new int[] {
+    private static final int[] BIND_ORIG_ENUMS = new int[] {
             Context.BIND_AUTO_CREATE,
             Context.BIND_DEBUG_UNBIND,
             Context.BIND_NOT_FOREGROUND,
@@ -54,8 +65,10 @@ final class ConnectionRecord {
             Context.BIND_VISIBLE,
             Context.BIND_SHOWING_UI,
             Context.BIND_NOT_VISIBLE,
+            Context.BIND_NOT_PERCEPTIBLE,
+            Context.BIND_INCLUDE_CAPABILITIES,
     };
-    private static int[] BIND_PROTO_ENUMS = new int[] {
+    private static final int[] BIND_PROTO_ENUMS = new int[] {
             ConnectionRecordProto.AUTO_CREATE,
             ConnectionRecordProto.DEBUG_UNBIND,
             ConnectionRecordProto.NOT_FG,
@@ -71,26 +84,78 @@ final class ConnectionRecord {
             ConnectionRecordProto.VISIBLE,
             ConnectionRecordProto.SHOWING_UI,
             ConnectionRecordProto.NOT_VISIBLE,
+            ConnectionRecordProto.NOT_PERCEPTIBLE,
+            ConnectionRecordProto.INCLUDE_CAPABILITIES,
     };
 
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "binding=" + binding);
         if (activity != null) {
-            pw.println(prefix + "activity=" + activity);
+            activity.dump(pw, prefix);
         }
         pw.println(prefix + "conn=" + conn.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
     }
 
-    ConnectionRecord(AppBindRecord _binding, ActivityRecord _activity,
-               IServiceConnection _conn, int _flags,
-               int _clientLabel, PendingIntent _clientIntent) {
+    ConnectionRecord(AppBindRecord _binding,
+            ActivityServiceConnectionsHolder<ConnectionRecord> _activity,
+            IServiceConnection _conn, int _flags,
+            int _clientLabel, PendingIntent _clientIntent,
+            int _clientUid, String _clientProcessName, String _clientPackageName) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
         flags = _flags;
         clientLabel = _clientLabel;
         clientIntent = _clientIntent;
+        clientUid = _clientUid;
+        clientProcessName = _clientProcessName;
+        clientPackageName = _clientPackageName;
+    }
+
+    public boolean hasFlag(final int flag) {
+        return (flags & flag) != 0;
+    }
+
+    public boolean notHasFlag(final int flag) {
+        return (flags & flag) == 0;
+    }
+
+    public void startAssociationIfNeeded() {
+        // If we don't already have an active association, create one...  but only if this
+        // is an association between two different processes.
+        if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS
+                && association == null && binding.service.app != null
+                && (binding.service.appInfo.uid != clientUid
+                        || !binding.service.processName.equals(clientProcessName))) {
+            ProcessStats.ProcessStateHolder holder = binding.service.app.pkgList.get(
+                    binding.service.instanceName.getPackageName());
+            if (holder == null) {
+                Slog.wtf(TAG_AM, "No package in referenced service "
+                        + binding.service.shortInstanceName + ": proc=" + binding.service.app);
+            } else if (holder.pkg == null) {
+                Slog.wtf(TAG_AM, "Inactive holder in referenced service "
+                        + binding.service.shortInstanceName + ": proc=" + binding.service.app);
+            } else {
+                association = holder.pkg.getAssociationStateLocked(holder.state,
+                        binding.service.instanceName.getClassName()).startSource(clientUid,
+                        clientProcessName, clientPackageName);
+
+            }
+        }
+    }
+
+    public void trackProcState(int procState, int seq, long now) {
+        if (association != null) {
+            association.trackProcState(procState, seq, now);
+        }
+    }
+
+    public void stopAssociation() {
+        if (association != null) {
+            association.stop();
+            association = null;
+        }
     }
 
     public String toString() {
@@ -139,6 +204,9 @@ final class ConnectionRecord {
         if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
             sb.append("LACT ");
         }
+        if ((flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0) {
+            sb.append("SLTA ");
+        }
         if ((flags&Context.BIND_VISIBLE) != 0) {
             sb.append("VIS ");
         }
@@ -148,10 +216,16 @@ final class ConnectionRecord {
         if ((flags&Context.BIND_NOT_VISIBLE) != 0) {
             sb.append("!VIS ");
         }
+        if ((flags & Context.BIND_NOT_PERCEPTIBLE) != 0) {
+            sb.append("!PRCP ");
+        }
+        if ((flags & Context.BIND_INCLUDE_CAPABILITIES) != 0) {
+            sb.append("CAPS ");
+        }
         if (serviceDead) {
             sb.append("DEAD ");
         }
-        sb.append(binding.service.shortName);
+        sb.append(binding.service.shortInstanceName);
         sb.append(":@");
         sb.append(Integer.toHexString(System.identityHashCode(conn.asBinder())));
         sb.append('}');
@@ -172,7 +246,7 @@ final class ConnectionRecord {
             proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.DEAD);
         }
         if (binding.service != null) {
-            proto.write(ConnectionRecordProto.SERVICE_NAME, binding.service.shortName);
+            proto.write(ConnectionRecordProto.SERVICE_NAME, binding.service.shortInstanceName);
         }
         proto.end(token);
     }

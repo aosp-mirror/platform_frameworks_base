@@ -16,12 +16,13 @@
 
 package android.widget.layout.frame;
 
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.ViewAsserts;
 import android.app.Activity;
+import android.test.ActivityInstrumentationTestCase;
+import android.test.ViewAsserts;
 import android.view.View;
-import android.widget.layout.frame.FrameLayoutGravity;
+
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
 
 public class FrameLayoutGravityTest extends ActivityInstrumentationTestCase<FrameLayoutGravity> {

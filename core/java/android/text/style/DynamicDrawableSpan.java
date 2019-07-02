@@ -16,6 +16,9 @@
 
 package android.text.style;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
+import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
 
 /**
@@ -77,6 +81,24 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
      */
     public static final int ALIGN_BASELINE = 1;
 
+    /**
+     * A constant indicating that this span should be vertically centered between
+     * the top and the lowest descender.
+     */
+    public static final int ALIGN_CENTER = 2;
+
+    /**
+     * Defines acceptable alignment types.
+     * @hide
+     */
+    @Retention(SOURCE)
+    @IntDef(prefix = { "ALIGN_" }, value = {
+            ALIGN_BOTTOM,
+            ALIGN_BASELINE,
+            ALIGN_CENTER
+    })
+    public @interface AlignmentType {}
+
     protected final int mVerticalAlignment;
 
     @UnsupportedAppUsage
@@ -93,17 +115,18 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
     /**
      * Creates a {@link DynamicDrawableSpan} based on a vertical alignment.\
      *
-     * @param verticalAlignment one of {@link #ALIGN_BOTTOM} or {@link #ALIGN_BASELINE}
+     * @param verticalAlignment one of {@link #ALIGN_BOTTOM}, {@link #ALIGN_BASELINE} or
+     *                          {@link #ALIGN_CENTER}
      */
-    protected DynamicDrawableSpan(int verticalAlignment) {
+    protected DynamicDrawableSpan(@AlignmentType int verticalAlignment) {
         mVerticalAlignment = verticalAlignment;
     }
 
     /**
-     * Returns the vertical alignment of this span, one of {@link #ALIGN_BOTTOM} or
-     * {@link #ALIGN_BASELINE}.
+     * Returns the vertical alignment of this span, one of {@link #ALIGN_BOTTOM},
+     * {@link #ALIGN_BASELINE} or {@link #ALIGN_CENTER}.
      */
-    public int getVerticalAlignment() {
+    public @AlignmentType int getVerticalAlignment() {
         return mVerticalAlignment;
     }
 
@@ -142,6 +165,8 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
         int transY = bottom - b.getBounds().bottom;
         if (mVerticalAlignment == ALIGN_BASELINE) {
             transY -= paint.getFontMetricsInt().descent;
+        } else if (mVerticalAlignment == ALIGN_CENTER) {
+            transY = (bottom - top) / 2 - b.getBounds().height() / 2;
         }
 
         canvas.translate(x, transY);

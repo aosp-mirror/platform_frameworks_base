@@ -145,7 +145,7 @@ public final class VoLteServiceState implements Parcelable {
      *
      * @hide
      */
-    public static final Parcelable.Creator<VoLteServiceState> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<VoLteServiceState> CREATOR = new Parcelable.Creator() {
         public VoLteServiceState createFromParcel(Parcel in) {
             return new VoLteServiceState(in);
         }

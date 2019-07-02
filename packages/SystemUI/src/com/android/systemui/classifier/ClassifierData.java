@@ -26,6 +26,9 @@ import java.util.ArrayList;
  * example, provide information on the current touch state.
  */
 public class ClassifierData {
+    private static final long MINIMUM_DT_NANOS = 16666666;  // 60Hz
+    private static final long MINIMUM_DT_SMEAR_NANOS = 2500000;  // 2.5ms
+
     private SparseArray<Stroke> mCurrentStrokes = new SparseArray<>();
     private ArrayList<Stroke> mEndingStrokes = new ArrayList<>();
     private final float mDpi;
@@ -34,7 +37,18 @@ public class ClassifierData {
         mDpi = dpi;
     }
 
-    public void update(MotionEvent event) {
+    /** Returns true if the event should be considered, false otherwise. */
+    public boolean update(MotionEvent event) {
+        // We limit to 60hz sampling. Drop anything happening faster than that.
+        // Legacy code was created with an assumed sampling rate. As devices increase their
+        // sampling rate, this creates potentialy false positives.
+        if (event.getActionMasked() == MotionEvent.ACTION_MOVE
+                && mCurrentStrokes.size() != 0
+                && event.getEventTimeNano() - mCurrentStrokes.valueAt(0).getLastEventTimeNano()
+                        < MINIMUM_DT_NANOS - MINIMUM_DT_SMEAR_NANOS) {
+            return false;
+        }
+
         mEndingStrokes.clear();
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -54,6 +68,8 @@ public class ClassifierData {
                 mEndingStrokes.add(getStroke(id));
             }
         }
+
+        return true;
     }
 
     public void cleanUp(MotionEvent event) {

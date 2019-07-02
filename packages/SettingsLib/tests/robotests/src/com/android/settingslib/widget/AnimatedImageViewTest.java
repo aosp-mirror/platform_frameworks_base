@@ -46,5 +46,4 @@ public class AnimatedImageViewTest {
         AnimatedRotateDrawable drawable = (AnimatedRotateDrawable) mAnimatedImageView.getDrawable();
         assertThat(drawable.isRunning()).isTrue();
     }
-
 }

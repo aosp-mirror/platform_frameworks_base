@@ -409,12 +409,29 @@ public final class Downloads {
         public static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
 
         /**
+         * Similar to {@link #COLUMN_MEDIAPROVIDER_URI}, except this cannot be updated/queried
+         * by apps and will be the source of truth when updating/deleting download entries in
+         * MediaProvider database.
+         *
+         * <P>Type: TEXT</P>
+         */
+        public static final String COLUMN_MEDIASTORE_URI = "mediastore_uri";
+
+        /**
          * The column that is used to remember whether the media scanner was invoked.
-         * It can take the values: null or 0(not scanned), 1(scanned), 2 (not scannable).
+         * It can take the values: {@link #MEDIA_NOT_SCANNED}, {@link #MEDIA_SCANNED} or
+         * {@link #MEDIA_NOT_SCANNABLE} or {@code null}. If it's value is {@code null}, it will be
+         * treated as {@link #MEDIA_NOT_SCANNED}.
+         *
          * <P>Type: TEXT</P>
          */
         @UnsupportedAppUsage
         public static final String COLUMN_MEDIA_SCANNED = "scanned";
+
+        /** Possible values for column {@link #COLUMN_MEDIA_SCANNED} */
+        public static final int MEDIA_NOT_SCANNED = 0;
+        public static final int MEDIA_SCANNED = 1;
+        public static final int MEDIA_NOT_SCANNABLE = 2;
 
         /**
          * The column with errorMsg for a failed downloaded.
@@ -827,6 +844,20 @@ public final class Downloads {
             public static final String INSERT_KEY_PREFIX = "http_header_";
         }
     }
+
+    /** @hide */
+    public static final String CALL_MEDIASTORE_DOWNLOADS_DELETED = "mediastore_downloads_deleted";
+    /** @hide */
+    public static final String CALL_CREATE_EXTERNAL_PUBLIC_DIR = "create_external_public_dir";
+    /** @hide */
+    public static final String CALL_REVOKE_MEDIASTORE_URI_PERMS = "revoke_mediastore_uri_perms";
+
+    /** @hide */
+    public static final String EXTRA_IDS = "ids";
+    /** @hide */
+    public static final String EXTRA_MIME_TYPES = "mime_types";
+    /** @hide */
+    public static final String DIR_TYPE = "dir_type";
 
     /**
      * Query where clause for general querying.

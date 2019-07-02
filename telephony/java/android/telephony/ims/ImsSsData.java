@@ -368,7 +368,7 @@ public final class ImsSsData implements Parcelable {
         mImsSsInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader());
     }
 
-    public static final Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {
+    public static final @android.annotation.NonNull Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {
         @Override
         public ImsSsData createFromParcel(Parcel in) {
             return new ImsSsData(in);

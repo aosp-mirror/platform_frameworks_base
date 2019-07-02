@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_guest" msgid="3738772168718508650">"অতিথি"</string>
+    <string name="start_guest_session" msgid="7055742120180595689">"অতিথি"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"ব্যৱহাৰকাৰী যোগ কৰক"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"নতুন ব্যৱহাৰকাৰী"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"আপুনি কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰিলে তেখেতে নিজৰ বাবে খালী ঠাই ছেট আপ কৰিব লাগে।"</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"সকলো ব্য়ৱহাৰকাৰীয়ে অইন ব্য়ৱহাৰকাৰীৰ বাবে এপসমূহ আপডেট কৰিব পাৰে।"</string>
+</resources>

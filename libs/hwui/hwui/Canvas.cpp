@@ -19,20 +19,18 @@
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Properties.h"
-#include "RecordingCanvas.h"
 #include "RenderNode.h"
 #include "Typeface.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 
-#include <SkDrawFilter.h>
+#include "hwui/PaintFilter.h"
+
+#include <SkFontMetrics.h>
 
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
-    if (uirenderer::Properties::isSkiaEnabled()) {
-        return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
-    }
-    return new uirenderer::RecordingCanvas(width, height);
+    return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
@@ -42,35 +40,29 @@ static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkSca
     canvas->drawRect(left, top, right, bottom, paint);
 }
 
-void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
-    uint32_t flags;
-    SkDrawFilter* drawFilter = getDrawFilter();
-    if (drawFilter) {
-        SkPaint paintCopy(paint);
-        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
-        flags = paintCopy.getFlags();
-    } else {
-        flags = paint.getFlags();
-    }
-    if (flags & (SkPaint::kUnderlineText_ReserveFlag | SkPaint::kStrikeThruText_ReserveFlag)) {
+void Canvas::drawTextDecorations(float x, float y, float length, const Paint& paint) {
+    // paint has already been filtered by our caller, so we can ignore any filter
+    const bool strikeThru = paint.isStrikeThru();
+    const bool underline = paint.isUnderline();
+    if (strikeThru || underline) {
         const SkScalar left = x;
         const SkScalar right = x + length;
-        if (flags & SkPaint::kUnderlineText_ReserveFlag) {
-            Paint::FontMetrics metrics;
-            paint.getFontMetrics(&metrics);
+        const float textSize = paint.getSkFont().getSize();
+        if (underline) {
+            SkFontMetrics metrics;
+            paint.getSkFont().getMetrics(&metrics);
             SkScalar position;
             if (!metrics.hasUnderlinePosition(&position)) {
-                position = paint.getTextSize() * Paint::kStdUnderline_Top;
+                position = textSize * Paint::kStdUnderline_Top;
             }
             SkScalar thickness;
             if (!metrics.hasUnderlineThickness(&thickness)) {
-                thickness = paint.getTextSize() * Paint::kStdUnderline_Thickness;
+                thickness = textSize * Paint::kStdUnderline_Thickness;
             }
             const SkScalar top = y + position;
             drawStroke(left, right, top, thickness, paint, this);
         }
-        if (flags & SkPaint::kStrikeThruText_ReserveFlag) {
-            const float textSize = paint.getTextSize();
+        if (strikeThru) {
             const float position = textSize * Paint::kStdStrikeThru_Top;
             const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
             const SkScalar top = y + position;
@@ -79,19 +71,19 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
     }
 }
 
-static void simplifyPaint(int color, SkPaint* paint) {
+static void simplifyPaint(int color, Paint* paint) {
     paint->setColor(color);
     paint->setShader(nullptr);
     paint->setColorFilter(nullptr);
     paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
+    paint->setStrokeWidth(4 + 0.04 * paint->getSkFont().getSize());
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
 }
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const SkPaint& paint, float x,
+    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const Paint& paint, float x,
                     float y, minikin::MinikinRect& bounds, float totalAdvance)
             : layout(layout)
             , canvas(canvas)
@@ -127,14 +119,14 @@ public:
             bool darken = channelSum < (128 * 3);
 
             // outline
-            SkPaint outlinePaint(paint);
+            Paint outlinePaint(paint);
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, bounds.mLeft, bounds.mTop,
                                bounds.mRight, bounds.mBottom, totalAdvance);
 
             // inner
-            SkPaint innerPaint(paint);
+            Paint innerPaint(paint);
             simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
             innerPaint.setStyle(SkPaint::kFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, bounds.mLeft, bounds.mTop,
@@ -149,22 +141,21 @@ public:
 private:
     const minikin::Layout& layout;
     Canvas* canvas;
-    const SkPaint& paint;
+    const Paint& paint;
     float x;
     float y;
     minikin::MinikinRect& bounds;
     float totalAdvance;
 };
 
-void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount, float x,
-                      float y, minikin::Bidi bidiFlags, const Paint& origPaint,
-                      const Typeface* typeface, minikin::MeasuredText* mt) {
+void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, int contextStart,
+                      int contextCount, float x, float y, minikin::Bidi bidiFlags,
+                      const Paint& origPaint, const Typeface* typeface, minikin::MeasuredText* mt) {
     // minikin may modify the original paint
     Paint paint(origPaint);
 
-    minikin::Layout layout =
-            MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, start, count, contextCount,
-                                   mt);
+    minikin::Layout layout = MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, textSize,
+                                                    start, count, contextStart, contextCount, mt);
 
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
@@ -181,6 +172,41 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
 
     DrawTextFunctor f(layout, this, paint, x, y, bounds, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
+}
+
+void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
+                            float outerBottom, float outerRx, float outerRy, float innerLeft,
+                            float innerTop, float innerRight, float innerBottom, float innerRx,
+                            float innerRy, const SkPaint& paint) {
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
+    SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
+
+    SkRRect outerRRect;
+    outerRRect.setRectXY(outer, outerRx, outerRy);
+
+    SkRRect innerRRect;
+    innerRRect.setRectXY(inner, innerRx, innerRy);
+    drawDoubleRoundRect(outerRRect, innerRRect, paint);
+}
+
+void Canvas::drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
+                            float outerBottom, const float* outerRadii, float innerLeft,
+                            float innerTop, float innerRight, float innerBottom,
+                            const float* innerRadii, const SkPaint& paint) {
+    static_assert(sizeof(SkVector) == sizeof(float) * 2);
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
+    SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
+
+    SkRRect outerRRect;
+    const SkVector* outerSkVector = reinterpret_cast<const SkVector*>(outerRadii);
+    outerRRect.setRectRadii(outer, outerSkVector);
+
+    SkRRect innerRRect;
+    const SkVector* innerSkVector = reinterpret_cast<const SkVector*>(innerRadii);
+    innerRRect.setRectRadii(inner, innerSkVector);
+    drawDoubleRoundRect(outerRRect, innerRRect, paint);
 }
 
 class DrawTextOnPathFunctor {
@@ -212,7 +238,10 @@ void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiF
                             const Typeface* typeface) {
     Paint paintCopy(paint);
     minikin::Layout layout =
-            MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface, text, 0, count, count, nullptr);
+            MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface, text, count,  // text buffer
+                                   0, count,                                      // draw range
+                                   0, count,                                      // context range
+                                   nullptr);
     hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
 
     // Set align to left for drawing, as we don't want individual

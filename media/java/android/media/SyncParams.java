@@ -86,7 +86,7 @@ public final class SyncParams {
     /**
      * Use audio track for sync source. This requires audio data and an audio track.
      *
-     * @see AudioTrack#getTimeStamp
+     * @see android.media.AudioTrack#getTimestamp(android.media.AudioTimestamp)
      */
     public static final int SYNC_SOURCE_AUDIO = 2;
 
@@ -137,9 +137,6 @@ public final class SyncParams {
      * This will make audio play faster or slower as required by the sync source
      * without changing its pitch, as long as it is supported for the playback
      * rate.
-     *
-     * @see MediaSync#PLAYBACK_RATE_AUDIO_MODE_STRETCH
-     * @see MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_STRETCH
      */
     public static final int AUDIO_ADJUST_MODE_STRETCH = 1;
 
@@ -149,9 +146,6 @@ public final class SyncParams {
      * This will make audio play faster or slower as required by the sync source
      * by changing its pitch (making it lower to play slower, and higher to play
      * faster.)
-     *
-     * @see MediaSync#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE
-     * @see MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE
      */
     public static final int AUDIO_ADJUST_MODE_RESAMPLE = 2;
 

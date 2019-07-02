@@ -155,7 +155,7 @@ final class BackStackState implements Parcelable {
         dest.writeInt(mReorderingAllowed ? 1 : 0);
     }
 
-    public static final Parcelable.Creator<BackStackState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<BackStackState> CREATOR
             = new Parcelable.Creator<BackStackState>() {
         public BackStackState createFromParcel(Parcel in) {
             return new BackStackState(in);

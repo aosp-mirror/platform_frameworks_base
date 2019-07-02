@@ -27,8 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"ଦୁଇ-ତରଫା"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ଓରିଏଣ୍ଟେଶନ୍‍"</string>
     <string name="label_pages" msgid="7768589729282182230">"ପୃଷ୍ଠା"</string>
-    <!-- no translation found for destination_default_text (5422708056807065710) -->
-    <skip />
+    <string name="destination_default_text" msgid="5422708056807065710">"ଗୋଟିଏ ପ୍ରିଣ୍ଟର୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"ସମସ୍ତ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ର ରେଞ୍ଜ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ଯେପରିକି 1—5,8,11—13"</string>
@@ -39,8 +38,7 @@
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF ଭାବରେ ସେଭ୍‍ କରନ୍ତୁ"</string>
     <string name="all_printers" msgid="5018829726861876202">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ପ୍ରିଣ୍ଟ ଡାୟଲଗ୍‍"</string>
-    <!-- no translation found for current_page_template (5145005201131935302) -->
-    <skip />
+    <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>ରୁ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ପୃଷ୍ଠା"</string>
     <string name="summary_template" msgid="8899734908625669193">"ସାରାଂଶ, କପୀ <xliff:g id="COPIES">%1$s</xliff:g>, କାଗଜ ଆକାର <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"ହ୍ୟାଣ୍ଡେଲ୍ ବଡ଼ କରନ୍ତୁ"</string>
@@ -61,37 +59,26 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା</item>
     </plurals>
-    <!-- no translation found for printer_extended_description_template (1366699227703381874) -->
-    <skip />
-    <!-- no translation found for printer_info_desc (7181988788991581654) -->
-    <skip />
-    <!-- no translation found for notification_channel_progress (872788690775721436) -->
-    <skip />
-    <!-- no translation found for notification_channel_failure (9042250774797916414) -->
-    <skip />
-    <!-- no translation found for could_not_create_file (3425025039427448443) -->
-    <skip />
-    <!-- no translation found for print_services_disabled_toast (9089060734685174685) -->
-    <skip />
+    <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"ଏହି ପ୍ରିଣ୍ଟର୍‌ ବିଷୟରେ ଅଧିକ ସୂଚନା"</string>
+    <string name="notification_channel_progress" msgid="872788690775721436">"ଚାଲୁଥିବା ପ୍ରିଣ୍ଟ ଜବ୍‌"</string>
+    <string name="notification_channel_failure" msgid="9042250774797916414">"ବିଫଳ ହୋଇଥିବା ପ୍ରିଣ୍ଟ ଜବ୍‌"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"ଫାଇଲ୍‍ ତିଆରି କରିହେଲା ନାହିଁ"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"କିଛି ପ୍ରିଣ୍ଟ ସର୍ଭିସ୍‌କୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟର୍‌ ଖୋଜାଯାଉଛି"</string>
-    <!-- no translation found for print_no_print_services (8561247706423327966) -->
-    <skip />
+    <string name="print_no_print_services" msgid="8561247706423327966">"କୌଣସି ପ୍ରିଣ୍ଟ ସେବା ସକ୍ଷମ କରାଯାଇନାହିଁ"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"କୌଣସି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା ନାହିଁ"</string>
-    <!-- no translation found for cannot_add_printer (7840348733668023106) -->
-    <skip />
-    <!-- no translation found for select_to_add_printers (3800709038689830974) -->
-    <skip />
-    <!-- no translation found for enable_print_service (3482815747043533842) -->
-    <skip />
-    <!-- no translation found for enabled_services_title (7036986099096582296) -->
-    <skip />
-    <!-- no translation found for recommended_services_title (3799434882937956924) -->
-    <skip />
-    <!-- no translation found for disabled_services_title (7313253167968363211) -->
-    <skip />
-    <!-- no translation found for all_services_title (5578662754874906455) -->
-    <skip />
-    <!-- no translation found for print_services_recommendation_subtitle (5678487708807185138) -->
+    <string name="cannot_add_printer" msgid="7840348733668023106">"ପ୍ରିଣ୍ଟର ଯୋଡ଼ିହେବ ନାହିଁ"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"ପ୍ରିଣ୍ଟର ଯୋଡ଼ିବାକୁ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"ସକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"ସକ୍ଷମ କରାଯାଇଥିବା ସର୍ଭିସ୍‌"</string>
+    <string name="recommended_services_title" msgid="3799434882937956924">"ସୁପାରିସ କରାଯାଇଥିବା ସର୍ଭିସ୍‌"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"ଅକ୍ଷମ କରାଯାଇଥିବା ସର୍ଭିସ୍‌"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"ସମସ୍ତ ସର୍ଭିସ୍‌"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ଖୋଜିବା ପାଇଁ ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ଖୋଜିବା ପାଇଁ ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ପ୍ରିଣ୍ଟ କରାଯାଉଛି"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> କ୍ୟାନ୍ସଲ୍‍ କରାଯାଉଛି"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ପ୍ରିଣ୍ଟର୍‍ ତ୍ରୁଟି"</string>
@@ -100,10 +87,8 @@
     <string name="restart" msgid="2472034227037808749">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ପ୍ରିଣ୍ଟର୍‍କୁ କୌଣସି ସଂଯୋଗ ନାହିଁ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ଅଜଣା"</string>
-    <!-- no translation found for print_service_security_warning_title (2160752291246775320) -->
-    <skip />
-    <!-- no translation found for print_service_security_warning_summary (1427434625361692006) -->
-    <skip />
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ବ୍ୟବହାର କରିବେ?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ଆପଣଙ୍କ ଡକୁମେଣ୍ଟ ପ୍ରିଣ୍ଟରକୁ ଯିବାବେଳେ ଏକ କିମ୍ବା ଅଧିକ ସର୍ଭର ଦେଇ ଯାଇପାରେ।"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"କଳା ଓ ଧଳା"</item>
     <item msgid="2762241247228983754">"ରଙ୍ଗ"</item>
@@ -121,7 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"କାମ କଲାନାହିଁ, ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ପ୍ରିଣ୍ଟର୍‍ ବର୍ତ୍ତମାନ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <!-- no translation found for print_cannot_load_page (6179560924492912009) -->
-    <skip />
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"ଝଲକ ଦେଖାଇହେବ ନାହିଁ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"ଝଲକ ତିଆରି କରାଯାଉଛି…"</string>
 </resources>

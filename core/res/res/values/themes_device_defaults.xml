@@ -68,6 +68,10 @@ easier.
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Small</item>
 
+        <item name="textAppearanceListItem">@style/TextAppearance.DeviceDefault.ListItem</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.DeviceDefault.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.DeviceDefault.ListItemSecondary</item>
+
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonStyle">@style/Widget.DeviceDefault.Button</item>
@@ -211,7 +215,8 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
-
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
@@ -719,6 +724,13 @@ easier.
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
+    <!-- Theme for the dialog shown when an app crashes or ANRs. -->
+    <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Light.Dialog.Alert">
+        <item name="windowContentTransitions">false</item>
+        <item name="windowActivityTransitions">false</item>
+        <item name="windowCloseOnTouchOutside">false</item>
+    </style>
+
     <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Material.SearchBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
@@ -776,7 +788,6 @@ easier.
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.DeviceDefault</item>
         <item name="textAppearanceInverse">@style/TextAppearance.DeviceDefault.Inverse</item>
-
         <item name="textAppearanceLarge">@style/TextAppearance.DeviceDefault.Large</item>
         <item name="textAppearanceMedium">@style/TextAppearance.DeviceDefault.Medium</item>
         <item name="textAppearanceSmall">@style/TextAppearance.DeviceDefault.Small</item>
@@ -785,11 +796,14 @@ easier.
         <item name="textAppearanceSmallInverse">@style/TextAppearance.DeviceDefault.Small.Inverse</item>
         <item name="textAppearanceSearchResultTitle">@style/TextAppearance.DeviceDefault.SearchResult.Title</item>
         <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.DeviceDefault.SearchResult.Subtitle</item>
-
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
-
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.DeviceDefault.Widget.PopupMenu.Small</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.DeviceDefault.ListItem</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.DeviceDefault.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.DeviceDefault.ListItemSecondary</item>
+
+        <item name="backgroundDimAmount">0.7</item>
 
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
@@ -929,6 +943,8 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
@@ -1378,6 +1394,8 @@ easier.
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
+    <style name="Theme.DeviceDefault.Dialog.Alert.DayNight" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
+
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
@@ -1431,10 +1449,19 @@ easier.
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
-    <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings">
+    <style name="Theme.DeviceDefault.Settings" parent="Theme.DeviceDefault.Light">
+        <!-- From Theme.Material.Light.LightStatusBar -->
+        <item name="windowLightStatusBar">true</item>
+
+        <!-- From Theme.Material.Settings -->
+        <item name="homeAsUpIndicator">@drawable/ic_ab_back_material_settings</item>
+        <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
+        <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
+        <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
+
         <!-- action bar -->
         <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar.Accent</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar</item>
         <item name="popupTheme">@style/ThemeOverlay.DeviceDefault.Popup.Light</item>
 
         <!-- Color palette -->
@@ -1444,7 +1471,7 @@ easier.
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
-        <item name="colorEdgeEffect">@android:color/black</item>
+        <item name="colorEdgeEffect">@color/edge_effect_device_default_light</item>
 
         <!-- Add white nav bar with divider that matches material -->
         <item name="navigationBarDividerColor">@color/navigation_bar_divider_device_default_settings</item>
@@ -1453,21 +1480,16 @@ easier.
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
-        <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
-
-        <!-- Text styles -->
-        <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
 
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
-        <!-- Toolbar attributes -->
-        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+        <item name="colorListDivider">@color/list_divider_color_light</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_device_default_light</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
@@ -1545,10 +1567,7 @@ easier.
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
-        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
-
+    <style name="Theme.DeviceDefault.Settings.DialogBase" parent="Theme.Material.Light.BaseDialog">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
@@ -1557,8 +1576,15 @@ easier.
         <item name="colorError">@color/error_color_device_default_light</item>
 
         <!-- Dialog attributes -->
-        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.DeviceDefault.Settings.DialogBase">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
+        <!-- Dialog attributes -->
+        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
 
         <!-- Text styles -->
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
@@ -1637,10 +1663,12 @@ easier.
 
     <style name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
 
+    <!-- DeviceDefault theme for day/night activities. -->
+    <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault.Light" />
+
     <!-- Theme used for the intent picker activity. -->
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Material.Light">
-        <item name="windowEnterTransition">@empty</item>
-        <item name="windowExitTransition">@empty</item>
+    <style name="Theme.DeviceDefault.ResolverCommon" parent="Theme.DeviceDefault.DayNight">
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Activity.Resolver</item>
         <item name="windowIsTranslucent">true</item>
         <item name="windowNoTitle">true</item>
         <item name="windowBackground">@color/transparent</item>
@@ -1650,48 +1678,37 @@ easier.
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
-
-        <!-- Dialog attributes -->
-        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
-        <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
-
-        <!-- Button styles -->
-        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
-        <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
-
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
-        <item name="colorError">@color/error_color_device_default_light</item>
-
-        <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
-        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
-
-        <!-- Toolbar attributes -->
-        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+        <item name="navigationBarColor">@android:color/transparent</item>
     </style>
 
-
-    <!-- @hide DeviceDefault theme for the autofill FillUi -->
-    <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material.Autofill.Light">
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
+        <item name="windowLightNavigationBar">true</item>
     </style>
 
-    <!-- @hide DeviceDefault theme for the autofill SaveUi -->
-    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Autofill.Save.Light">
+    <style name="Animation.DeviceDefault.Activity.Resolver" parent="Animation.DeviceDefault.Activity">
+        <item name="activityOpenEnterAnimation">@anim/resolver_launch_anim</item>
+        <item name="taskOpenEnterAnimation">@anim/resolver_launch_anim</item>
+        <!-- Handle close for profile switching -->
+        <item name="activityOpenExitAnimation">@anim/resolver_close_anim</item>
+        <item name="taskOpenExitAnimation">@anim/resolver_close_anim</item>
     </style>
+
+    <!-- @hide DeviceDefault themes for the autofill FillUi -->
+    <style name="Theme.DeviceDefault.Autofill" />
+    <style name="Theme.DeviceDefault.Light.Autofill" />
+
+    <!-- @hide DeviceDefault theme for the autofill SaveUi. NOTE: it must be a .Panel so the dialog
+         is shown at the bottom of the screen  -->
+    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.DeviceDefault.Panel"/>
+    <style name="Theme.DeviceDefault.Light.Autofill.Save" parent="Theme.DeviceDefault.Light.Panel"/>
 
     <!-- DeviceDefault theme for the default system theme.  -->
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
 
     <style name="ThemeOverlay.DeviceDefault" />
 
-    <!-- @hide Theme overlay that inherits from material actionbar, and use accent color for
-             primary text -->
-    <style name="ThemeOverlay.DeviceDefault.ActionBar.Accent" parent="ThemeOverlay.Material.ActionBar">
-        <item name="textColorPrimary">@color/btn_colored_borderless_text_material</item>
-    </style>
+    <!-- @hide Theme overlay that inherits from material actionbar -->
+    <style name="ThemeOverlay.DeviceDefault.ActionBar" parent="ThemeOverlay.Material.ActionBar" />
 
     <!-- @hide Theme overlay for a light popup in action bar -->
     <style name="ThemeOverlay.DeviceDefault.Popup.Light" parent="@style/ThemeOverlay.Material.Light" />
@@ -1704,8 +1721,26 @@ easier.
         <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
 
+    <!-- Theme overlay that replaces colorAccent with the colorAccent from {@link #Theme_DeviceDefault_DayNight}. -->
+    <style name="ThemeOverlay.DeviceDefault.Accent.DayNight"
+           parent="@style/ThemeOverlay.DeviceDefault.Accent.Light" />
+
     <style name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" parent="ThemeOverlay.Material.Dark.ActionBar">
         <item name="colorAccent">@color/accent_device_default_dark</item>
     </style>
 
+    <style name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" parent="Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_device_default_light</item>
+        <item name="layout_gravity">center</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Notification" parent="@style/Theme.Material.Notification">
+        <item name="notificationHeaderTextAppearance">@style/TextAppearance.DeviceDefault.Notification.Info</item>
+    </style>
+
+    <!-- @hide DeviceDefault theme for the DocumentsUI app.  -->
+    <style name="Theme.DeviceDefault.DocumentsUI" parent="Theme.DeviceDefault.DayNight">
+        <item name="actionModeCloseDrawable">@drawable/ic_clear_material</item>
+    </style>
 </resources>

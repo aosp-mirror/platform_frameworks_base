@@ -126,7 +126,7 @@ public final class HdmiPortInfo implements Parcelable {
     /**
      * A helper class to deserialize {@link HdmiPortInfo} for a parcel.
      */
-    public static final Parcelable.Creator<HdmiPortInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<HdmiPortInfo> CREATOR =
             new Parcelable.Creator<HdmiPortInfo>() {
                 @Override
                 public HdmiPortInfo createFromParcel(Parcel source) {

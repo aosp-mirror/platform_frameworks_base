@@ -19,7 +19,6 @@ package com.android.providers.settings;
 import android.annotation.NonNull;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -35,6 +34,13 @@ class SettingsProtoDumpUtil {
 
     static void dumpProtoLocked(SettingsProvider.SettingsRegistry settingsRegistry,
             ProtoOutputStream proto) {
+        // Config settings
+        SettingsState configSettings = settingsRegistry.getSettingsLocked(
+                SettingsProvider.SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+        if (configSettings != null) {
+            // TODO(b/113100523): dump configuration settings after they are added
+        }
+
         // Global settings
         SettingsState globalSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
@@ -186,12 +192,29 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Auto.TIME_ZONE);
         p.end(autoToken);
 
+        final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
+                GlobalSettingsProto.Autofill.COMPAT_MODE_ALLOWED_PACKAGES);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_LOGGING_LEVEL,
+                GlobalSettingsProto.Autofill.LOGGING_LEVEL);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
+                GlobalSettingsProto.Autofill.MAX_PARTITIONS_SIZE);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                GlobalSettingsProto.Autofill.MAX_VISIBLE_DATASETS);
+        p.end(autofillToken);
+
+        final long backupToken = p.start(GlobalSettingsProto.BACKUP);
         dumpSetting(s, p,
                 Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
-                GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+                GlobalSettingsProto.Backup.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+        dumpSetting(s, p,
+                Settings.Global.BACKUP_MULTI_USER_ENABLED,
+                GlobalSettingsProto.Backup.BACKUP_MULTI_USER_ENABLED);
+        p.end(backupToken);
 
         final long batteryToken = p.start(GlobalSettingsProto.BATTERY);
         dumpSetting(s, p,
@@ -373,7 +396,7 @@ class SettingsProtoDumpUtil {
         p.end(certPinToken);
 
         dumpSetting(s, p,
-                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.COMPATIBILITY_MODE,
@@ -434,6 +457,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                 GlobalSettingsProto.Debug.VIEW_ATTRIBUTES);
+        dumpSetting(s, p,
+                Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE,
+                GlobalSettingsProto.Debug.VIEW_ATTRIBUTES_APPLICATION_PACKAGE);
         p.end(debugToken);
 
         final long defaultToken = p.start(GlobalSettingsProto.DEFAULT);
@@ -462,6 +488,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.EMULATE_DISPLAY_CUTOUT,
                 GlobalSettingsProto.Development.EMULATE_DISPLAY_CUTOUT);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
+                GlobalSettingsProto.Development.FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);
@@ -549,6 +578,15 @@ class SettingsProtoDumpUtil {
                 Settings.Global.DROPBOX_TAG_PREFIX,
                 GlobalSettingsProto.Dropbox.SETTINGS);
         p.end(dropboxToken);
+
+        final long dynamicPowerSavingsToken = p.start(GlobalSettingsProto.DYNAMIC_POWER_SAVINGS);
+        dumpSetting(s, p,
+                Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
+                GlobalSettingsProto.DynamicPowerSavings.DISABLE_THRESHOLD);
+        dumpSetting(s, p,
+                Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
+                GlobalSettingsProto.DynamicPowerSavings.ENABLED);
+        p.end(dynamicPowerSavingsToken);
 
         final long emergencyToken = p.start(GlobalSettingsProto.EMERGENCY);
         dumpSetting(s, p,
@@ -648,11 +686,38 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
         dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE,
+                GlobalSettingsProto.Gpu.ANGLE_DEBUG_PACKAGE);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_ALL_ANGLE);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_PKGS);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
+                GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_WHITELIST,
+                GlobalSettingsProto.Gpu.ANGLE_WHITELIST);
+        dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
+                GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.GPU_DEBUG_LAYER_APP,
+                GlobalSettingsProto.Gpu.DEBUG_LAYER_APP);
+        dumpSetting(s, p,
+                Settings.Global.GPU_DEBUG_LAYERS_GLES,
+                GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
+        dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_ALL_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_OPT_IN_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_PRERELEASE_OPT_IN_APPS);
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
@@ -689,7 +754,7 @@ class SettingsProtoDumpUtil {
                 Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                 GlobalSettingsProto.HEADS_UP_NOTIFICATIONS_ENABLED);
         dumpSetting(s, p,
-                Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
 
         final long inetCondToken = p.start(GlobalSettingsProto.INET_CONDITION);
@@ -735,6 +800,12 @@ class SettingsProtoDumpUtil {
                 Settings.Global.JOB_SCHEDULER_CONSTANTS,
                 GlobalSettingsProto.JOB_SCHEDULER_CONSTANTS);
         dumpSetting(s, p,
+                Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS,
+                GlobalSettingsProto.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS,
+                GlobalSettingsProto.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS);
+        dumpSetting(s, p,
                 Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
                 GlobalSettingsProto.KEEP_PROFILE_IN_BACKGROUND);
 
@@ -769,6 +840,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                 GlobalSettingsProto.Location.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS);
+        dumpSetting(s, p,
+                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
+                GlobalSettingsProto.Location.IGNORE_SETTINGS_PACKAGE_WHITELIST);
         p.end(locationToken);
 
         final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);
@@ -781,6 +855,18 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                 GlobalSettingsProto.LowPowerMode.TRIGGER_LEVEL_MAX);
+        dumpSetting(s, p,
+                Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
+                GlobalSettingsProto.LowPowerMode.AUTOMATIC_POWER_SAVER_MODE);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY,
+                GlobalSettingsProto.LowPowerMode.STICKY_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
+                GlobalSettingsProto.LowPowerMode.STICKY_AUTO_DISABLE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
+                GlobalSettingsProto.LowPowerMode.STICKY_AUTO_DISABLE_LEVEL);
         p.end(lpmToken);
 
         dumpSetting(s, p,
@@ -829,6 +915,10 @@ class SettingsProtoDumpUtil {
                 Settings.Global.MULTI_SIM_SMS_PROMPT,
                 GlobalSettingsProto.MultiSim.SMS_PROMPT);
         p.end(multiSimToken);
+
+        dumpSetting(s, p,
+                Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
+                GlobalSettingsProto.NATIVE_FLAGS_HEALTH_CHECK_ENABLED);
 
         final long netstatsToken = p.start(GlobalSettingsProto.NETSTATS);
         dumpSetting(s, p,
@@ -969,6 +1059,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
         p.end(notificationToken);
 
         dumpSetting(s, p,
@@ -984,11 +1077,14 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Ntp.TIMEOUT_MS);
         p.end(ntpToken);
 
-        final long uaroToken = p.start(GlobalSettingsProto.USER_ABSENT_RADIOS_OFF);
+        final long uasbToken = p.start(GlobalSettingsProto.USER_ABSENT_SMALL_BATTERY);
         dumpSetting(s, p,
                 Settings.Global.USER_ABSENT_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
-                GlobalSettingsProto.UserAbsentRadiosOff.ENABLED_FOR_SMALL_BATTERY);
-        p.end(uaroToken);
+                GlobalSettingsProto.UserAbsentSmallBattery.RADIOS_OFF_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.USER_ABSENT_TOUCH_OFF_FOR_SMALL_BATTERY_ENABLED,
+                GlobalSettingsProto.UserAbsentSmallBattery.TOUCH_OFF_ENABLED);
+        p.end(uasbToken);
 
         dumpSetting(s, p,
                 Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
@@ -1048,9 +1144,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.POWER_MANAGER_CONSTANTS,
                 GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.PRIV_APP_OOB_ENABLED,
-                GlobalSettingsProto.PRIV_APP_OOB_ENABLED);
 
         final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
@@ -1110,6 +1203,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED,
+                GlobalSettingsProto.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED);
         // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
@@ -1117,6 +1213,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED,
+                GlobalSettingsProto.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED);
 
         final long smartSelectToken = p.start(GlobalSettingsProto.SMART_SELECTION);
         dumpSetting(s, p,
@@ -1188,17 +1287,14 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.CHARGING_STARTED_SOUND,
                 GlobalSettingsProto.Sounds.CHARGING_STARTED);
-        dumpSetting(s, p,
-                Settings.Global.CHARGING_SOUNDS_ENABLED,
-                GlobalSettingsProto.Sounds.CHARGING_SOUNDS_ENABLED);
         p.end(soundsToken);
 
         final long soundTriggerToken = p.start(GlobalSettingsProto.SOUND_TRIGGER);
         dumpSetting(s, p,
-                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
                 GlobalSettingsProto.SoundTrigger.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
         dumpSetting(s, p,
-                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
                 GlobalSettingsProto.SoundTrigger.DETECTION_SERVICE_OP_TIMEOUT_MS);
         p.end(soundTriggerToken);
 
@@ -1266,6 +1362,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SHOW_TEMPERATURE_WARNING,
                 GlobalSettingsProto.TemperatureWarning.SHOW_TEMPERATURE_WARNING);
         dumpSetting(s, p,
+                Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
+                GlobalSettingsProto.TemperatureWarning.SHOW_USB_TEMPERATURE_ALARM);
+        dumpSetting(s, p,
                 Settings.Global.WARNING_TEMPERATURE,
                 GlobalSettingsProto.TemperatureWarning.WARNING_TEMPERATURE_LEVEL);
         p.end(tempWarningToken);
@@ -1291,6 +1390,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                 GlobalSettingsProto.TEXT_CLASSIFIER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.TEXT_CLASSIFIER_ACTION_MODEL_PARAMS,
+                GlobalSettingsProto.TEXT_CLASSIFIER_ACTION_MODEL_PARAMS);
         dumpSetting(s, p,
                 Settings.Global.THEATER_MODE_ON,
                 GlobalSettingsProto.THEATER_MODE_ON);
@@ -1433,9 +1535,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
                 GlobalSettingsProto.Wifi.VERBOSE_LOGGING_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                GlobalSettingsProto.Wifi.CONNECTED_MAC_RANDOMIZATION_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                 GlobalSettingsProto.Wifi.MAX_DHCP_RETRY_COUNT);
         dumpSetting(s, p,
@@ -1484,17 +1583,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.ZEN_MODE_CONFIG_ETAG,
                 GlobalSettingsProto.Zen.MODE_CONFIG_ETAG);
-        dumpSetting(s, p,
-                Settings.Global.ZEN_DURATION,
-                GlobalSettingsProto.Zen.DURATION);
-        dumpSetting(s, p,
-                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
-                GlobalSettingsProto.Zen.SHOW_ZEN_UPGRADE_NOTIFICATION);
         p.end(zenToken);
 
         dumpSetting(s, p,
                 Settings.Global.ZRAM_ENABLED,
                 GlobalSettingsProto.ZRAM_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Global.APP_OPS_CONSTANTS,
+                GlobalSettingsProto.APP_OPS_CONSTANTS);
 
         p.end(token);
         // Please insert new settings using the same order as in GlobalSettingsProto.
@@ -1632,6 +1729,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                 SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+                SecureSettingsProto.Accessibility.NON_INTERACTIVE_UI_TIMEOUT_MS);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
+                SecureSettingsProto.Accessibility.INTERACTIVE_UI_TIMEOUT_MS);
         p.end(accessibilityToken);
 
         dumpSetting(s, p,
@@ -1806,14 +1909,17 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.DOZE_ALWAYS_ON,
                 SecureSettingsProto.Doze.ALWAYS_ON);
         dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                Settings.Secure.DOZE_PICK_UP_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_PICK_UP);
         dumpSetting(s, p,
                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                 SecureSettingsProto.Doze.PULSE_ON_LONG_PRESS);
         dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_DOUBLE_TAP);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                SecureSettingsProto.Doze.PULSE_ON_TAP);
         p.end(dozeToken);
 
         dumpSetting(s, p,
@@ -1822,6 +1928,36 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
                 SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);
+
+        final long gestureToken = p.start(SecureSettingsProto.GESTURE);
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_ENABLED,
+                SecureSettingsProto.Gesture.AWARE_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_ALARMS_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_ALARMS_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_CALL_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_CALLS_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_GESTURE,
+                SecureSettingsProto.Gesture.SILENCE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_NOTIFICATION_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_NOTIFICATION_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SILENCE_TIMER_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.SILENCE_TIMER_COUNT);
+
+        dumpSetting(s, p,
+                Settings.Secure.SKIP_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.SKIP_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.SKIP_GESTURE,
+                SecureSettingsProto.Gesture.SKIP_ENABLED);
+        p.end(gestureToken);
+
         dumpSetting(s, p,
                 Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                 SecureSettingsProto.IMMERSIVE_MODE_CONFIRMATIONS);
@@ -1880,7 +2016,19 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_CHANGER,
                 SecureSettingsProto.Location.CHANGER);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE,
+                SecureSettingsProto.Location.PERMISSIONS_UPGRADE_TO_Q_MODE);
         p.end(locationToken);
+
+        final long locationAccessCheckToken = p.start(SecureSettingsProto.LOCATION_ACCESS_CHECK);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_ACCESS_CHECK_INTERVAL_MILLIS,
+                SecureSettingsProto.LocationAccessCheck.INTERVAL_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
+                SecureSettingsProto.LocationAccessCheck.DELAY_MILLIS);
+        p.end(locationAccessCheckToken);
 
         final long lockScreenToken = p.start(SecureSettingsProto.LOCK_SCREEN);
         // Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS intentionally excluded since it's deprecated.
@@ -1941,6 +2089,10 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
 
+        dumpSetting(s, p,
+                Settings.Secure.NAVIGATION_MODE,
+                SecureSettingsProto.NAVIGATION_MODE);
+
         final long nfcPaymentToken = p.start(SecureSettingsProto.NFC_PAYMENT);
         dumpSetting(s, p,
                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
@@ -1988,8 +2140,14 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.NOTIFICATION_BADGING,
                 SecureSettingsProto.Notification.BADGING);
         dumpSetting(s, p,
+                Settings.Secure.NOTIFICATION_BUBBLES,
+                SecureSettingsProto.Notification.BUBBLES);
+        dumpSetting(s, p,
                 Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING,
                 SecureSettingsProto.Notification.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING);
+        dumpSetting(s, p,
+                Settings.Secure.IN_CALL_NOTIFICATION_ENABLED,
+                SecureSettingsProto.Notification.IN_CALL_NOTIFICATION_ENABLED);
         p.end(notificationToken);
 
         final long packageVerifierToken = p.start(SecureSettingsProto.PACKAGE_VERIFIER);
@@ -2152,12 +2310,25 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SMS_DEFAULT_APPLICATION,
                 SecureSettingsProto.SMS_DEFAULT_APPLICATION);
+
+        final long soundsToken = p.start(SecureSettingsProto.SOUNDS);
+        dumpSetting(s, p,
+                Settings.Secure.CHARGING_SOUNDS_ENABLED,
+                SecureSettingsProto.Sounds.CHARGING_SOUNDS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.CHARGING_VIBRATION_ENABLED,
+                SecureSettingsProto.Sounds.CHARGING_VIBRATION_ENABLED);
+        p.end(soundsToken);
+
         dumpSetting(s, p,
                 Settings.Secure.SYNC_PARENT_SOUNDS,
                 SecureSettingsProto.SYNC_PARENT_SOUNDS);
         dumpSetting(s, p,
                 Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
                 SecureSettingsProto.SYSTEM_NAVIGATION_KEYS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                SecureSettingsProto.THEME_CUSTOMIZATION_OVERLAY_PACKAGES);
         dumpSetting(s, p,
                 Settings.Secure.TRUST_AGENTS_INITIALIZED,
                 SecureSettingsProto.TRUST_AGENTS_INITIALIZED);
@@ -2252,11 +2423,23 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.WAKE_GESTURE_ENABLED,
                 SecureSettingsProto.WAKE_GESTURE_ENABLED);
 
-        final long launcherToken = p.start(SecureSettingsProto.LAUNCHER);
+        final long zenToken = p.start(SecureSettingsProto.ZEN);
         dumpSetting(s, p,
-                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED,
-                SecureSettingsProto.Launcher.SWIPE_UP_TO_SWITCH_APPS_ENABLED);
-        p.end(launcherToken);
+                Settings.Secure.ZEN_DURATION,
+                SecureSettingsProto.Zen.DURATION);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION,
+                SecureSettingsProto.Zen.SHOW_ZEN_UPGRADE_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION,
+                SecureSettingsProto.Zen.SHOW_ZEN_SETTINGS_SUGGESTION);
+        dumpSetting(s, p,
+                Settings.Secure.ZEN_SETTINGS_UPDATED,
+                SecureSettingsProto.Zen.SETTINGS_UPDATED);
+        dumpSetting(s, p,
+                Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
+                SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
+        p.end(zenToken);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
@@ -2574,6 +2757,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.MUTE_STREAMS_AFFECTED,
                 SystemSettingsProto.Volume.MUTE_STREAMS_AFFECTED);
+        dumpSetting(s, p,
+                Settings.System.MASTER_BALANCE,
+                SystemSettingsProto.Volume.MASTER_BALANCE);
         p.end(volumeToken);
 
         dumpSetting(s, p,

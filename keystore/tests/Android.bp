@@ -16,7 +16,10 @@ android_test {
     name: "KeystoreTests",
     // LOCAL_MODULE := keystore
     srcs: ["src/**/*.java"],
-    static_libs: ["android-support-test"],
+    static_libs: [
+        "androidx.test.rules",
+        "hamcrest-library",
+    ],
     platform_apis: true,
     libs: ["android.test.runner"],
     certificate: "platform",

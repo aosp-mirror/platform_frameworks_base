@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+
 import com.android.internal.logging.MetricsLogger;
 
 import java.io.FileDescriptor;
@@ -566,6 +567,36 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
+    int getGenericModelState(UUID modelId) {
+        synchronized (mLock) {
+            MetricsLogger.count(mContext, "sth_get_generic_model_state", 1);
+            if (modelId == null || mModule == null) {
+                return STATUS_ERROR;
+            }
+            ModelData modelData = mModelDataMap.get(modelId);
+            if (modelData == null || !modelData.isGenericModel()) {
+                Slog.w(TAG, "GetGenericModelState error: Invalid generic model id:" +
+                        modelId);
+                return STATUS_ERROR;
+            }
+            if (!modelData.isModelLoaded()) {
+                Slog.i(TAG, "GetGenericModelState: Given generic model is not loaded:" + modelId);
+                return STATUS_ERROR;
+            }
+            if (!modelData.isModelStarted()) {
+                Slog.i(TAG, "GetGenericModelState: Given generic model is not started:" + modelId);
+                return STATUS_ERROR;
+            }
+
+            return mModule.getModelState(modelData.getHandle());
+        }
+    }
+
+    int getKeyphraseModelState(UUID modelId) {
+        Slog.w(TAG, "GetKeyphraseModelState error: Not implemented");
+        return STATUS_ERROR;
+    }
+
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {
@@ -591,6 +622,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     onRecognitionFailureLocked();
                     break;
                 case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
+                case SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE:
                     if (isKeyphraseRecognitionEvent(event)) {
                         onKeyphraseRecognitionSuccessLocked((KeyphraseRecognitionEvent) event);
                     } else {
@@ -607,7 +639,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private void onGenericRecognitionSuccessLocked(GenericRecognitionEvent event) {
         MetricsLogger.count(mContext, "sth_generic_recognition_event", 1);
-        if (event.status != SoundTrigger.RECOGNITION_STATUS_SUCCESS) {
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_SUCCESS
+                && event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
             return;
         }
         ModelData model = getModelDataForLocked(event.soundModelHandle);
@@ -625,6 +658,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         model.setStopped();
+
         try {
             callback.onGenericSoundTriggerDetected((GenericRecognitionEvent) event);
         } catch (DeadObjectException e) {
@@ -766,6 +800,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Slog.w(TAG, "Received onRecognition event without callback for keyphrase model.");
             return;
         }
+
         modelData.setStopped();
 
         try {
@@ -854,7 +889,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         public void onCallStateChanged(int state, String arg1) {
             if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
             synchronized (mLock) {
-                onCallStateChangedLocked(TelephonyManager.CALL_STATE_IDLE != state);
+                onCallStateChangedLocked(TelephonyManager.CALL_STATE_OFFHOOK == state);
             }
         }
     }
@@ -889,7 +924,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         long token = Binder.clearCallingIdentity();
         try {
             // Get the current call state synchronously for the first recognition.
-            mCallActive = mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+            mCallActive = mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
 
             // Register for call state changes when the first call to start recognition occurs.
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);

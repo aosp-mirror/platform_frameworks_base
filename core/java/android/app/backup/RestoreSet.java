@@ -69,7 +69,7 @@ public class RestoreSet implements Parcelable {
         out.writeLong(token);
     }
 
-    public static final Parcelable.Creator<RestoreSet> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<RestoreSet> CREATOR
             = new Parcelable.Creator<RestoreSet>() {
         public RestoreSet createFromParcel(Parcel in) {
             return new RestoreSet(in);

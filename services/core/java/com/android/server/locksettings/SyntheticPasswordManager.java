@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
@@ -29,6 +31,7 @@ import android.hardware.weaver.V1_0.WeaverStatus;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.security.GateKeeper;
+import android.security.Scrypt;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.ArrayMap;
@@ -96,7 +99,7 @@ public class SyntheticPasswordManager {
     private static final String WEAVER_SLOT_NAME = "weaver";
 
     public static final long DEFAULT_HANDLE = 0L;
-    private static final String DEFAULT_PASSWORD = "default-password";
+    private static final byte[] DEFAULT_PASSWORD = "default-password".getBytes();
 
     private static final byte WEAVER_VERSION = 1;
     private static final int INVALID_WEAVER_SLOT = -1;
@@ -164,7 +167,7 @@ public class SyntheticPasswordManager {
             }
         }
 
-        public String deriveKeyStorePassword() {
+        public byte[] deriveKeyStorePassword() {
             return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
@@ -280,20 +283,23 @@ public class SyntheticPasswordManager {
         byte[] secdiscardableOnDisk;
         byte[] weaverSecret;
         byte[] aggregatedSecret;
+        EscrowTokenStateChangeCallback mCallback;
     }
 
     private final Context mContext;
     private LockSettingsStorage mStorage;
     private IWeaver mWeaver;
     private WeaverConfig mWeaverConfig;
+    private PasswordSlotManager mPasswordSlotManager;
 
     private final UserManager mUserManager;
 
     public SyntheticPasswordManager(Context context, LockSettingsStorage storage,
-            UserManager userManager) {
+            UserManager userManager, PasswordSlotManager passwordSlotManager) {
         mContext = context;
         mStorage = storage;
         mUserManager = userManager;
+        mPasswordSlotManager = passwordSlotManager;
     }
 
     @VisibleForTesting
@@ -323,6 +329,7 @@ public class SyntheticPasswordManager {
                         mWeaver = null;
                     }
                 });
+                mPasswordSlotManager.refreshActiveSlots(getUsedWeaverSlots());
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get weaver service", e);
@@ -453,11 +460,11 @@ public class SyntheticPasswordManager {
      *
      */
     public AuthenticationToken newSyntheticPasswordAndSid(IGateKeeperService gatekeeper,
-            byte[] hash, String credential, int userId) throws RemoteException {
+            byte[] hash, byte[] credential, int userId) throws RemoteException {
         AuthenticationToken result = AuthenticationToken.create();
         GateKeeperResponse response;
         if (hash != null) {
-            response = gatekeeper.enroll(userId, hash, credential.getBytes(),
+            response = gatekeeper.enroll(userId, hash, credential,
                     result.deriveGkPassword());
             if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
                 Log.w(TAG, "Fail to migrate SID, assuming no SID, user " + userId);
@@ -560,6 +567,7 @@ public class SyntheticPasswordManager {
                 Log.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
                 try {
                     weaverEnroll(slot, null, null);
+                    mPasswordSlotManager.markSlotDeleted(slot);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to destroy slot", e);
                 }
@@ -594,6 +602,7 @@ public class SyntheticPasswordManager {
 
     private int getNextAvailableWeaverSlot() {
         Set<Integer> usedSlots = getUsedWeaverSlots();
+        usedSlots.addAll(mPasswordSlotManager.getUsedSlots());
         for (int i = 0; i < mWeaverConfig.slots; i++) {
             if (!usedSlots.contains(i)) {
                 return i;
@@ -615,7 +624,7 @@ public class SyntheticPasswordManager {
      * @see #clearSidForUser
      */
     public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            String credential, int credentialType, AuthenticationToken authToken,
+            byte[] credential, int credentialType, AuthenticationToken authToken,
             int requestedQuality, int userId)
                     throws RemoteException {
         if (credential == null || credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
@@ -639,6 +648,7 @@ public class SyntheticPasswordManager {
                 return DEFAULT_HANDLE;
             }
             saveWeaverSlot(weaverSlot, handle, userId);
+            mPasswordSlotManager.markSlotInUse(weaverSlot);
             synchronizeWeaverFrpPassword(pwd, requestedQuality, userId, weaverSlot);
 
             pwd.passwordHandle = null;
@@ -669,7 +679,7 @@ public class SyntheticPasswordManager {
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
-            String userCredential, int credentialType,
+            byte[] userCredential, int credentialType,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
         if (persistentData.type == PersistentData.TYPE_SP) {
@@ -739,7 +749,12 @@ public class SyntheticPasswordManager {
 
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
 
-    public long createTokenBasedSyntheticPassword(byte[] token, int userId) {
+    /**
+     * Create a token based Synthetic password for the given user.
+     * @return the handle of the token
+     */
+    public long createTokenBasedSyntheticPassword(byte[] token, int userId,
+            @Nullable EscrowTokenStateChangeCallback changeCallback) {
         long handle = generateHandle();
         if (!tokenMap.containsKey(userId)) {
             tokenMap.put(userId, new ArrayMap<>());
@@ -755,6 +770,7 @@ public class SyntheticPasswordManager {
             tokenData.weaverSecret = null;
         }
         tokenData.aggregatedSecret = transformUnderSecdiscardable(token, secdiscardable);
+        tokenData.mCallback = changeCallback;
 
         tokenMap.get(userId).put(handle, tokenData);
         return handle;
@@ -797,11 +813,15 @@ public class SyntheticPasswordManager {
                 return false;
             }
             saveWeaverSlot(slot, handle, userId);
+            mPasswordSlotManager.markSlotInUse(slot);
         }
         saveSecdiscardable(handle, tokenData.secdiscardableOnDisk, userId);
         createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED, authToken,
                 tokenData.aggregatedSecret, 0L, userId);
         tokenMap.get(userId).remove(handle);
+        if (tokenData.mCallback != null) {
+            tokenData.mCallback.onEscrowTokenActivated(handle, userId);
+        }
         return true;
     }
 
@@ -838,7 +858,7 @@ public class SyntheticPasswordManager {
      * unknown. Caller might choose to validate it by examining AuthenticationResult.credentialType
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            long handle, String credential, int userId,
+            long handle, byte[] credential, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         if (credential == null) {
             credential = DEFAULT_PASSWORD;
@@ -1151,7 +1171,7 @@ public class SyntheticPasswordManager {
         return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, handle);
     }
 
-    private byte[] computePasswordToken(String password, PasswordData data) {
+    private byte[] computePasswordToken(byte[] password, PasswordData data) {
         return scrypt(password, data.salt, 1 << data.scryptN, 1 << data.scryptR, 1 << data.scryptP,
                 PASSWORD_TOKEN_LENGTH);
     }
@@ -1172,12 +1192,11 @@ public class SyntheticPasswordManager {
         return nativeSidFromPasswordHandle(handle);
     }
 
-    protected byte[] scrypt(String password, byte[] salt, int N, int r, int p, int outLen) {
-        return nativeScrypt(password.getBytes(), salt, N, r, p, outLen);
+    protected byte[] scrypt(byte[] password, byte[] salt, int n, int r, int p, int outLen) {
+        return new Scrypt().scrypt(password, salt, n, r, p, outLen);
     }
 
     native long nativeSidFromPasswordHandle(byte[] handle);
-    native byte[] nativeScrypt(byte[] password, byte[] salt, int N, int r, int p, int outLen);
 
     protected static ArrayList<Byte> toByteArrayList(byte[] data) {
         ArrayList<Byte> result = new ArrayList<Byte>(data.length);
@@ -1195,17 +1214,17 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
+    protected static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+    private static byte[] bytesToHex(byte[] bytes) {
         if (bytes == null) {
-            return "null";
+            return "null".getBytes();
         }
-        char[] hexChars = new char[bytes.length * 2];
+        byte[] hexBytes = new byte[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            hexBytes[j * 2] = HEX_ARRAY[v >>> 4];
+            hexBytes[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
-        return new String(hexChars);
+        return hexBytes;
     }
 }

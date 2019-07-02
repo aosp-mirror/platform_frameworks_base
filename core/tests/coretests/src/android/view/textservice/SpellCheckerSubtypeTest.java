@@ -16,14 +16,15 @@
 
 package android.view.textservice;
 
+import static android.test.MoreAsserts.assertNotEqual;
+
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.Arrays;
 import java.util.Locale;
-
-import static android.test.MoreAsserts.assertNotEqual;
 
 /**
  * TODO: Most of part can be, and probably should be, moved to CTS.

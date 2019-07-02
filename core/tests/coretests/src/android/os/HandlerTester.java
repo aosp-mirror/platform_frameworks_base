@@ -16,10 +16,6 @@
 
 package android.os;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
 public abstract class HandlerTester extends Thread {
     public abstract void go();
     public abstract void handleMessage(Message msg);

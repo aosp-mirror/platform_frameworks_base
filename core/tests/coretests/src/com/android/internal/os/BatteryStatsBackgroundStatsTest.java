@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.android.internal.os;
 
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
@@ -20,9 +21,10 @@ import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.os.WorkSource;
-import android.support.test.filters.SmallTest;
 import android.util.ArrayMap;
 import android.view.Display;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

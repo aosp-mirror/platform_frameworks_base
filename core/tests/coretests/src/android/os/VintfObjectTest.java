@@ -16,7 +16,6 @@
 
 package android.os;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class VintfObjectTest extends TestCase {

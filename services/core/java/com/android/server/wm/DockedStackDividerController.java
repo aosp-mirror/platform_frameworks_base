@@ -27,14 +27,16 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
+
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
-import static android.view.WindowManager.TRANSIT_NONE;
+import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
-import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -50,11 +52,12 @@ import android.view.IDockedStackListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-import android.view.inputmethod.InputMethodManagerInternal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -170,7 +173,7 @@ public class DockedStackDividerController {
             final int orientation = mTmpRect2.width() <= mTmpRect2.height()
                     ? ORIENTATION_PORTRAIT
                     : ORIENTATION_LANDSCAPE;
-            final int dockSide = getDockSide(mTmpRect, mTmpRect2, orientation);
+            final int dockSide = getDockSide(mTmpRect, mTmpRect2, orientation, rotation);
             final int position = DockedDividerUtils.calculatePositionForBounds(mTmpRect, dockSide,
                     getContentWidth());
 
@@ -183,8 +186,8 @@ public class DockedStackDividerController {
                     .calculateNonDismissingSnapTarget(position).position;
             DockedDividerUtils.calculateBoundsForPosition(snappedPosition, dockSide, mTmpRect,
                     mTmpRect2.width(), mTmpRect2.height(), getContentWidth());
-            mService.mPolicy.getStableInsetsLw(rotation, mTmpRect2.width(), mTmpRect2.height(),
-                    displayCutout, mTmpRect3);
+            mDisplayContent.getDisplayPolicy().getStableInsetsLw(rotation, mTmpRect2.width(),
+                    mTmpRect2.height(), displayCutout, mTmpRect3);
             mService.intersectDisplayInsetBounds(mTmpRect2, mTmpRect3, mTmpRect);
             minWidth = Math.min(mTmpRect.width(), minWidth);
         }
@@ -201,7 +204,7 @@ public class DockedStackDividerController {
      * @param orientation the origination of device
      * @return current docked side
      */
-    int getDockSide(Rect bounds, Rect displayRect, int orientation) {
+    int getDockSide(Rect bounds, Rect displayRect, int orientation, int rotation) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // Portrait mode, docked either at the top or the bottom.
             final int diff = (displayRect.bottom - bounds.bottom) - (bounds.top - displayRect.top);
@@ -210,7 +213,8 @@ public class DockedStackDividerController {
             } else if (diff < 0) {
                 return DOCKED_BOTTOM;
             }
-            return canPrimaryStackDockTo(DOCKED_TOP) ? DOCKED_TOP : DOCKED_BOTTOM;
+            return canPrimaryStackDockTo(DOCKED_TOP, displayRect, rotation)
+                    ? DOCKED_TOP : DOCKED_BOTTOM;
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // Landscape mode, docked either on the left or on the right.
             final int diff = (displayRect.right - bounds.right) - (bounds.left - displayRect.left);
@@ -219,37 +223,37 @@ public class DockedStackDividerController {
             } else if (diff < 0) {
                 return DOCKED_RIGHT;
             }
-            return canPrimaryStackDockTo(DOCKED_LEFT) ? DOCKED_LEFT : DOCKED_RIGHT;
+            return canPrimaryStackDockTo(DOCKED_LEFT, displayRect, rotation)
+                    ? DOCKED_LEFT : DOCKED_RIGHT;
         }
         return DOCKED_INVALID;
     }
 
-    void getHomeStackBoundsInDockedMode(Rect outBounds) {
-        final DisplayInfo di = mDisplayContent.getDisplayInfo();
-        mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, mTmpRect);
+    void getHomeStackBoundsInDockedMode(Configuration parentConfig, int dockSide, Rect outBounds) {
+        final DisplayCutout displayCutout = mDisplayContent.getDisplayInfo().displayCutout;
+        final int displayWidth = parentConfig.windowConfiguration.getBounds().width();
+        final int displayHeight = parentConfig.windowConfiguration.getBounds().height();
+        mDisplayContent.getDisplayPolicy().getStableInsetsLw(
+                parentConfig.windowConfiguration.getRotation(), displayWidth, displayHeight,
+                displayCutout, mTmpRect);
         int dividerSize = mDividerWindowWidth - 2 * mDividerInsets;
-        Configuration configuration = mDisplayContent.getConfiguration();
         // The offset in the left (landscape)/top (portrait) is calculated with the minimized
         // offset value with the divider size and any system insets in that direction.
-        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (parentConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             outBounds.set(0, mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top,
-                    di.logicalWidth, di.logicalHeight);
+                    displayWidth, displayHeight);
         } else {
-            // In landscape also inset the left/right side with the statusbar height to match the
+            // In landscape also inset the left/right side with the status bar height to match the
             // minimized size height in portrait mode.
-            final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final int primaryTaskWidth = mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top;
             int left = mTmpRect.left;
-            int right = di.logicalWidth - mTmpRect.right;
-            if (stack != null) {
-                if (stack.getDockSide() == DOCKED_LEFT) {
-                    left += primaryTaskWidth;
-                } else if (stack.getDockSide() == DOCKED_RIGHT) {
-                    right -= primaryTaskWidth;
-                }
+            int right = displayWidth - mTmpRect.right;
+            if (dockSide == DOCKED_LEFT) {
+                left += primaryTaskWidth;
+            } else if (dockSide == DOCKED_RIGHT) {
+                right -= primaryTaskWidth;
             }
-            outBounds.set(left, 0, right, di.logicalHeight);
+            outBounds.set(left, 0, right, displayHeight);
         }
     }
 
@@ -277,16 +281,16 @@ public class DockedStackDividerController {
                     : mDisplayContent.mBaseDisplayHeight;
             final DisplayCutout displayCutout =
                     mDisplayContent.calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
-            mService.mPolicy.getStableInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
+            final DisplayPolicy displayPolicy =  mDisplayContent.getDisplayPolicy();
+            displayPolicy.getStableInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
             config.unset();
             config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
 
-            final int displayId = mDisplayContent.getDisplayId();
-            final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation,
-                baseConfig.uiMode, displayId, displayCutout);
-            final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
-                baseConfig.uiMode, displayId, displayCutout);
-            mService.mPolicy.getNonDecorInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
+            final int appWidth = displayPolicy.getNonDecorDisplayWidth(dw, dh, rotation,
+                    baseConfig.uiMode, displayCutout);
+            final int appHeight = displayPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
+                    baseConfig.uiMode, displayCutout);
+            displayPolicy.getNonDecorInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
             final int leftInset = mTmpRect.left;
             final int topInset = mTmpRect.top;
 
@@ -294,10 +298,10 @@ public class DockedStackDividerController {
                     leftInset + appWidth /*right*/, topInset + appHeight /*bottom*/);
 
             final float density = mDisplayContent.getDisplayMetrics().density;
-            config.screenWidthDp = (int) (mService.mPolicy.getConfigDisplayWidth(dw, dh,
-                    rotation, baseConfig.uiMode, displayId, displayCutout) / density);
-            config.screenHeightDp = (int) (mService.mPolicy.getConfigDisplayHeight(dw, dh,
-                    rotation, baseConfig.uiMode, displayId, displayCutout) / density);
+            config.screenWidthDp = (int) (displayPolicy.getConfigDisplayWidth(dw, dh, rotation,
+                    baseConfig.uiMode, displayCutout) / density);
+            config.screenHeightDp = (int) (displayPolicy.getConfigDisplayHeight(dw, dh, rotation,
+                    baseConfig.uiMode, displayCutout) / density);
             final Context rotationContext = mService.mContext.createConfigurationContext(config);
             mSnapAlgorithmForRotation[rotation] = new DividerSnapAlgorithm(
                     rotationContext.getResources(), dw, dh, getContentWidth(),
@@ -392,6 +396,10 @@ public class DockedStackDividerController {
         if (mAdjustedForIme != adjustedForIme || (adjustedForIme && mImeHeight != imeHeight)
                 || mAdjustedForDivider != adjustedForDivider) {
             if (animate && !mAnimatingForMinimizedDockedStack) {
+                // Notify SystemUI to set the target docked stack size according current docked
+                // state without animation when calling startImeAdjustAnimation.
+                notifyDockedStackMinimizedChanged(mMinimizedDock, false /* animate */,
+                        isHomeStackResizable());
                 startImeAdjustAnimation(adjustedForIme, adjustedForDivider, imeWin);
             } else {
                 // Animation might be delayed, so only notify if we don't run an animation.
@@ -462,10 +470,33 @@ public class DockedStackDividerController {
      * @param dockSide the side to see if it is valid
      * @return true if the side provided is valid
      */
-    boolean canPrimaryStackDockTo(int dockSide) {
-        final DisplayInfo di = mDisplayContent.getDisplayInfo();
-        return mService.mPolicy.isDockSideAllowed(dockSide, mOriginalDockedSide, di.logicalWidth,
-                di.logicalHeight, di.rotation);
+    boolean canPrimaryStackDockTo(int dockSide, Rect parentRect, int rotation) {
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        return isDockSideAllowed(dockSide, mOriginalDockedSide,
+                policy.navigationBarPosition(parentRect.width(), parentRect.height(), rotation),
+                policy.navigationBarCanMove());
+    }
+
+    @VisibleForTesting
+    static boolean isDockSideAllowed(int dockSide, int originalDockSide, int navBarPosition,
+            boolean navigationBarCanMove) {
+        if (dockSide == DOCKED_TOP) {
+            return true;
+        }
+
+        if (navigationBarCanMove) {
+            // Only allow the dockside opposite to the nav bar position in landscape
+            return dockSide == DOCKED_LEFT && navBarPosition == NAV_BAR_RIGHT
+                    || dockSide == DOCKED_RIGHT && navBarPosition == NAV_BAR_LEFT;
+        }
+
+        // Side is the same as original side
+        if (dockSide == originalDockSide) {
+            return true;
+        }
+
+        // Only if original docked side was top in portrait will allow left for landscape
+        return dockSide == DOCKED_LEFT && originalDockSide == DOCKED_TOP;
     }
 
     void notifyDockedStackExistsChanged(boolean exists) {
@@ -531,16 +562,14 @@ public class DockedStackDividerController {
             final TaskStack stack =
                     mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final long transitionDuration = isAnimationMaximizing()
-                    ? mService.mAppTransition.getLastClipRevealTransitionDuration()
+                    ? mDisplayContent.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
             mAnimationDuration = (long)
                     (transitionDuration * mService.getTransitionAnimationScaleLocked());
             mMaximizeMeetFraction = getClipRevealMeetFraction(stack);
             animDuration = (long) (mAnimationDuration * mMaximizeMeetFraction);
         }
-        mService.mH.removeMessages(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED);
-        mService.mH.obtainMessage(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED,
-                minimizedDock ? 1 : 0, 0).sendToTarget();
+        mService.mAtmInternal.notifyDockedStackMinimizedChanged(minimizedDock);
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
@@ -651,7 +680,7 @@ public class DockedStackDividerController {
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
                 && appTransition != TRANSIT_NONE &&
                 !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
-            if (mService.mAmInternal.isRecentsComponentHomeActivity(mService.mCurrentUserId)) {
+            if (mService.mAtmInternal.isRecentsComponentHomeActivity(mService.mCurrentUserId)) {
                 // When the home activity is the recents component and we are already minimized,
                 // then there is nothing to do here since home is already visible
             } else {
@@ -820,7 +849,7 @@ public class DockedStackDividerController {
                 mService.mWaitingForDrawnCallback.run();
             }
             mService.mWaitingForDrawnCallback = () -> {
-                synchronized (mService.mWindowMap) {
+                synchronized (mService.mGlobalLock) {
                     mAnimationStartDelayed = false;
                     if (mDelayedImeWin != null) {
                         mDelayedImeWin.endDelayingAnimationStart();
@@ -864,7 +893,10 @@ public class DockedStackDividerController {
         }
         if (mAnimatingForMinimizedDockedStack) {
             return animateForMinimizedDockedStack(now);
-        } else if (mAnimatingForIme) {
+        } else if (mAnimatingForIme && !mDisplayContent.mAppTransition.isRunning()) {
+            // To prevent task stack resize animation may flicking when playing app transition
+            // animation & IME window enter animation in parallel, make sure app transition is done
+            // and then start to animate for IME.
             return animateForIme(now);
         }
         return false;
@@ -950,7 +982,7 @@ public class DockedStackDividerController {
             return naturalAmount;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        float startPrime = mService.mAppTransition.getLastClipRevealMaxTranslation()
+        final float startPrime = mDisplayContent.mAppTransition.getLastClipRevealMaxTranslation()
                 / (float) minimizeDistance;
         final float amountPrime = t * mAnimationTarget + (1 - t) * startPrime;
         final float t2 = Math.min(t / mMaximizeMeetFraction, 1);
@@ -963,12 +995,12 @@ public class DockedStackDividerController {
      */
     private float getClipRevealMeetFraction(TaskStack stack) {
         if (!isAnimationMaximizing() || stack == null ||
-                !mService.mAppTransition.hadClipRevealAnimation()) {
+                !mDisplayContent.mAppTransition.hadClipRevealAnimation()) {
             return 1f;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        final float fraction = Math.abs(mService.mAppTransition.getLastClipRevealMaxTranslation())
-                / (float) minimizeDistance;
+        final float fraction = Math.abs(mDisplayContent.mAppTransition
+                .getLastClipRevealMaxTranslation()) / (float) minimizeDistance;
         final float t = Math.max(0, Math.min(1, (fraction - CLIP_REVEAL_MEET_FRACTION_MIN)
                 / (CLIP_REVEAL_MEET_FRACTION_MAX - CLIP_REVEAL_MEET_FRACTION_MIN)));
         return CLIP_REVEAL_MEET_EARLIEST

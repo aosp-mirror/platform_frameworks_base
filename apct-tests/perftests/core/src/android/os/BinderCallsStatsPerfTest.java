@@ -18,10 +18,13 @@ package android.os;
 
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.BinderInternal.CallSession;
+import com.android.internal.os.CachedDeviceState;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,15 +32,30 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertNull;
-
-
 /**
  * Performance tests for {@link BinderCallsStats}
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class BinderCallsStatsPerfTest {
+    private static final int DEFAULT_BUCKET_SIZE = 1000;
+    private static final int WORKSOURCE_UID = 1;
+    static class FakeCpuTimeBinderCallsStats extends BinderCallsStats {
+        private int mTimeMs;
+
+        FakeCpuTimeBinderCallsStats() {
+            super(new BinderCallsStats.Injector());
+            setDeviceState(new CachedDeviceState(false, false).getReadonlyClient());
+        }
+
+        protected long getThreadTimeMicro() {
+            return mTimeMs++;
+        }
+
+        protected long getElapsedRealtimeMicro() {
+            return mTimeMs++;
+        }
+    }
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -45,7 +63,9 @@ public class BinderCallsStatsPerfTest {
 
     @Before
     public void setUp() {
-        mBinderCallsStats = new BinderCallsStats(true);
+        mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
+        CachedDeviceState deviceState = new CachedDeviceState(false, false);
+        mBinderCallsStats.setDeviceState(deviceState.getReadonlyClient());
     }
 
     @After
@@ -54,25 +74,53 @@ public class BinderCallsStatsPerfTest {
 
     @Test
     public void timeCallSession() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        Binder b = new Binder();
-        int i = 0;
-        while (state.keepRunning()) {
-            BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, i % 100);
-            mBinderCallsStats.callEnded(s);
-            i++;
-        }
+        mBinderCallsStats.setDetailedTracking(true);
+        runScenario(DEFAULT_BUCKET_SIZE);
+    }
+
+    @Test
+    public void timeCallSessionOnePercentSampling() {
+        mBinderCallsStats.setDetailedTracking(false);
+        mBinderCallsStats.setSamplingInterval(100);
+        runScenario(DEFAULT_BUCKET_SIZE);
     }
 
     @Test
     public void timeCallSessionTrackingDisabled() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        Binder b = new Binder();
-        mBinderCallsStats = new BinderCallsStats(false);
-        while (state.keepRunning()) {
-            BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, 0);
-            mBinderCallsStats.callEnded(s);
-        }
+        mBinderCallsStats.setDetailedTracking(false);
+        runScenario(DEFAULT_BUCKET_SIZE);
     }
 
+    @Test
+    public void timeCallSession_1000_buckets_cpuNotRecorded() {
+        mBinderCallsStats = new FakeCpuTimeBinderCallsStats();
+        mBinderCallsStats.setSamplingInterval(1);
+        runScenario(/* max bucket size */ 1000);
+    }
+
+    @Test
+    public void timeCallSession_500_buckets_cpuNotRecorded() {
+        mBinderCallsStats = new FakeCpuTimeBinderCallsStats();
+        mBinderCallsStats.setSamplingInterval(1);
+        runScenario(/* max bucket size */ 500);
+    }
+
+    @Test
+    public void timeCallSession_100_buckets_cpuNotRecorded() {
+        mBinderCallsStats = new FakeCpuTimeBinderCallsStats();
+        mBinderCallsStats.setSamplingInterval(1);
+        runScenario(/* max bucket size */ 100);
+    }
+
+    // There will be a warmup time of maxBucketSize to initialize the map of CallStat.
+    private void runScenario(int maxBucketSize) {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        Binder b = new Binder();
+        while (state.keepRunning()) {
+            for (int i = 0; i < 10000; i++) {
+                CallSession s = mBinderCallsStats.callStarted(b, i % maxBucketSize, WORKSOURCE_UID);
+                mBinderCallsStats.callEnded(s, 0, 0, WORKSOURCE_UID);
+            }
+        }
+    }
 }

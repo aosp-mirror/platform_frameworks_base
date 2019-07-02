@@ -162,7 +162,7 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
         packageName = builder.mPackageName;
     }
 
-    public static final Creator<VisualVoicemailSmsFilterSettings> CREATOR =
+    public static final @android.annotation.NonNull Creator<VisualVoicemailSmsFilterSettings> CREATOR =
             new Creator<VisualVoicemailSmsFilterSettings>() {
                 @Override
                 public VisualVoicemailSmsFilterSettings createFromParcel(Parcel in) {

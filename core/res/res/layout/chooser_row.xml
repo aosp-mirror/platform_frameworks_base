@@ -20,9 +20,13 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="100dp"
-              android:gravity="start|top"
-              android:paddingStart="@dimen/chooser_grid_padding"
-              android:paddingEnd="@dimen/chooser_grid_padding">
-
+              android:gravity="start|top">
+  <TextView
+      android:id="@+id/chooser_row_text_option"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:layout_gravity="center"
+      android:visibility="gone" />
 </LinearLayout>
 

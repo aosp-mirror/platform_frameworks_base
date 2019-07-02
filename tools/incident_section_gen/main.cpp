@@ -21,6 +21,10 @@
 #include <sstream>
 #include <string>
 
+#ifndef FALLTHROUGH_INTENDED
+#define FALLTHROUGH_INTENDED [[fallthrough]]
+#endif
+
 using namespace android;
 using namespace android::os;
 using namespace google::protobuf;
@@ -110,9 +114,7 @@ static bool generateIncidentSectionsCpp(Descriptor const* descriptor)
     N = descriptor->field_count();
     for (int i=0; i<N; i++) {
         const FieldDescriptor* field = descriptor->field(i);
-        if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-            sections[field->name()] = field;
-        }
+        sections[field->name()] = field;
     }
 
     printf("IncidentSection const INCIDENT_SECTIONS[] = {\n");
@@ -260,8 +262,9 @@ static bool isDefaultMessageImpl(const Descriptor* descriptor, const Destination
                 return false;
             case FieldDescriptor::TYPE_STRING:
                 if (getPrivacyFlags(field).patterns_size() != 0) return false;
+                break;
             default:
-                continue;
+                break;
         }
     }
     parents->erase(descriptor->full_name());
@@ -357,6 +360,7 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const Destination
                     printPrivacy(fieldName, field, "NULL", fieldDest, fieldName + "_patterns");
                     break;
                 }
+                FALLTHROUGH_INTENDED;
                 // else treat string field as primitive field and goes to default
             default:
                 if (!hasDefaultFlags[i]) printPrivacy(fieldName, field, "NULL", fieldDest, "NULL");
@@ -404,16 +408,22 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
 
-        if (field->type() != FieldDescriptor::TYPE_MESSAGE) {
-            continue;
+        if (field->type() != FieldDescriptor::TYPE_MESSAGE &&
+            field->type() != FieldDescriptor::TYPE_STRING &&
+            field->type() != FieldDescriptor::TYPE_BYTES) {
+          continue;
         }
+
         const SectionFlags s = getSectionFlags(field);
+        if (s.userdebug_and_eng_only()) {
+            printf("#if ALLOW_RESTRICTED_SECTIONS\n");
+        }
+
         switch (s.type()) {
             case SECTION_NONE:
                 continue;
             case SECTION_FILE:
-                printf("    new FileSection(%d, \"%s\", %s),\n", field->number(), s.args().c_str(),
-                       s.device_specific() ? "true" : "false");
+                printf("    new FileSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
                 break;
             case SECTION_COMMAND:
                 printf("    new CommandSection(%d,", field->number());
@@ -421,8 +431,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf(" NULL),\n");
                 break;
             case SECTION_DUMPSYS:
-                printf("    new DumpsysSection(%d, %s,", field->number(),
-                       s.userdebug_and_eng_only() ? "true" : "false");
+                printf("    new DumpsysSection(%d, ", field->number());
                 splitAndPrint(s.args());
                 printf(" NULL),\n");
                 break;
@@ -435,8 +444,12 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf(" NULL),\n");
                 break;
             case SECTION_TOMBSTONE:
-                printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
+                printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(),
+                        s.args().c_str());
                 break;
+        }
+        if (s.userdebug_and_eng_only()) {
+            printf("#endif\n");
         }
     }
     printf("    NULL };\n");
@@ -450,24 +463,27 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
     map<string, bool> variableNames;
     set<string> parents;
     vector<const FieldDescriptor*> fieldsInOrder = sortFields(descriptor);
-    bool skip[fieldsInOrder.size()];
+    vector<bool> skip(fieldsInOrder.size());
     const Destination incidentDest = getPrivacyFlags(descriptor).dest();
 
     for (size_t i=0; i<fieldsInOrder.size(); i++) {
         const FieldDescriptor* field = fieldsInOrder[i];
         const string fieldName = getFieldName(field);
         const Destination fieldDest = getFieldDest(field);
-        const string fieldMessageName = getMessageName(field->message_type(), fieldDest);
-
-        skip[i] = true;
-
+        printf("\n// Incident Report Section: %s (%d)\n", field->name().c_str(), field->number());
         if (field->type() != FieldDescriptor::TYPE_MESSAGE) {
+            printPrivacy(fieldName, field, "NULL", fieldDest, "NULL");
             continue;
         }
+
+        skip[i] = true;
+        const string fieldMessageName = getMessageName(field->message_type(), fieldDest);
         // generate privacy flags for each section.
-        if (generatePrivacyFlags(field->message_type(), fieldDest, variableNames, &parents)) {
+        if (generatePrivacyFlags(field->message_type(), incidentDest, variableNames, &parents)) {
             printPrivacy(fieldName, field, fieldMessageName, fieldDest, "NULL");
-        } else if (isDefaultField(field, incidentDest)) {
+        } else if (fieldDest == incidentDest) {
+            printf("// default %s: fieldDest=%d incidentDest=%d\n", fieldName.c_str(),
+                    getFieldDest(field), incidentDest);
             continue; // don't create a new privacy if the value is default.
         } else {
             printPrivacy(fieldName, field, "NULL", fieldDest, "NULL");

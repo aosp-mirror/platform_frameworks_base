@@ -30,7 +30,7 @@ import android.os.ParcelFormatException;
 abstract class KeymasterArgument implements Parcelable {
     public final int tag;
 
-    public static final Parcelable.Creator<KeymasterArgument> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<KeymasterArgument> CREATOR = new
             Parcelable.Creator<KeymasterArgument>() {
                 @Override
                 public KeymasterArgument createFromParcel(Parcel in) {

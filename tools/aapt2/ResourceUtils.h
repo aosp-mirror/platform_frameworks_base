@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 
+#include "androidfw/AssetManager2.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
@@ -76,6 +77,12 @@ bool IsAttributeReference(const android::StringPiece& str);
  */
 Maybe<ResourceName> ToResourceName(
     const android::ResTable::resource_name& name);
+
+/**
+ * Convert an android::AssetManager2::ResourceName to an aapt::ResourceName struct.
+ */
+Maybe<ResourceName> ToResourceName(
+    const android::AssetManager2::ResourceName& name_in);
 
 /**
  * Returns a boolean value if the string is equal to TRUE, true, True, FALSE,

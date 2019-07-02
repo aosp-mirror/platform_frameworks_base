@@ -1,5 +1,17 @@
 // Signature format: 2.0
+package android {
+
+  public static final class Manifest.permission {
+    field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+  }
+
+}
+
 package android.app {
+
+  public class AppOpsManager {
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
+  }
 
   public class Notification implements android.os.Parcelable {
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
@@ -16,6 +28,25 @@ package android.app.admin {
   public class DevicePolicyManager {
     method @Deprecated @Nullable public String getDeviceInitializerApp();
     method @Deprecated @Nullable public android.content.ComponentName getDeviceInitializerComponent();
+  }
+
+}
+
+package android.app.backup {
+
+  public class RestoreSession {
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, String[]);
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, String[]);
+  }
+
+}
+
+package android.app.prediction {
+
+  public static final class AppTarget.Builder {
+    ctor @Deprecated public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
 }
@@ -52,6 +83,41 @@ package android.content {
 
 }
 
+package android.content.pm {
+
+  public class PackageItemInfo {
+    field @Deprecated public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
+    field @Deprecated public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
+    field @Deprecated public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
+  }
+
+}
+
+package android.hardware.hdmi {
+
+  public final class HdmiControlManager {
+    method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevicesList();
+    method @Deprecated public boolean isRemoteDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOffRemoteDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOnRemoteDevice(android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+  }
+
+}
+
+package android.location {
+
+  public class LocationManager {
+    method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {
@@ -82,7 +148,7 @@ package android.net.wifi {
 package android.os {
 
   public class Build {
-    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
   }
 
   public final class PowerManager {
@@ -92,34 +158,15 @@ package android.os {
 
 }
 
-package android.security.keystore.recovery {
+package android.provider {
 
-  public final class KeyChainSnapshot implements android.os.Parcelable {
-    method @Deprecated @NonNull public byte[] getTrustedHardwarePublicKey();
+  public final class DeviceConfig {
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
   }
 
-  public class RecoveryController {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public byte[] generateAndStoreKey(@NonNull String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public java.security.Key generateKey(@NonNull String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public java.util.List<java.lang.String> getAliases(@Nullable String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public int getRecoveryStatus(String, String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public void initRecoveryService(@NonNull String, @NonNull byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public void setRecoveryStatus(@NonNull String, String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
-  }
-
-  public class RecoverySession implements java.lang.AutoCloseable {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public java.util.Map<java.lang.String,byte[]> recoverKeys(@NonNull byte[], @NonNull java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public byte[] start(@NonNull byte[], @NonNull byte[], @NonNull byte[], @NonNull java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE) public byte[] start(@NonNull java.security.cert.CertPath, @NonNull byte[], @NonNull byte[], @NonNull java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
-  }
-
-  public final class WrappedApplicationKey implements android.os.Parcelable {
-    method @Deprecated @NonNull public byte[] getAccount();
-  }
-
-  public static class WrappedApplicationKey.Builder {
-    method @Deprecated public android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(@NonNull byte[]);
+  public static interface DeviceConfig.OnPropertyChangedListener {
+    method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
   }
 
 }
@@ -140,6 +187,14 @@ package android.service.notification {
   public static class NotificationListenerService.Ranking {
     method public java.util.List<java.lang.String> getAdditionalPeople();
     method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
+  }
+
+}
+
+package android.telecom {
+
+  public class TelecomManager {
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.WRITE_SECURE_SETTINGS}) public boolean setDefaultDialer(@Nullable String);
   }
 
 }

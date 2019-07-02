@@ -19,12 +19,10 @@ package com.android.systemui.volume;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.VolumePolicy;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
@@ -57,11 +55,11 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = false;
 
     private final SystemUI mSysui;
-    private final Context mContext;
+    protected final Context mContext;
     private final VolumeDialogControllerImpl mController;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-            | ActivityInfo.CONFIG_ASSETS_PATHS);
+            | ActivityInfo.CONFIG_ASSETS_PATHS | ActivityInfo.CONFIG_UI_MODE);
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
@@ -70,7 +68,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
             400    // vibrateToSilentDebounce
     );
 
-    public VolumeDialogComponent(SystemUI sysui, Context context, Handler handler) {
+    public VolumeDialogComponent(SystemUI sysui, Context context) {
         mSysui = sysui;
         mContext = context;
         mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
@@ -81,7 +79,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
                 .withPlugin(VolumeDialog.class)
                 .withDefault(this::createDefault)
-                .withFeature(PackageManager.FEATURE_AUTOMOTIVE, this::createCarDefault)
                 .withCallback(dialog -> {
                     if (mDialog != null) {
                         mDialog.destroy();
@@ -94,16 +91,12 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
                 VOLUME_SILENT_DO_NOT_DISTURB);
     }
 
-    private VolumeDialog createDefault() {
+    protected VolumeDialog createDefault() {
         VolumeDialogImpl impl = new VolumeDialogImpl(mContext);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);
         return impl;
-    }
-
-    private VolumeDialog createCarDefault() {
-        return new CarVolumeDialogImpl(mContext);
     }
 
     @Override

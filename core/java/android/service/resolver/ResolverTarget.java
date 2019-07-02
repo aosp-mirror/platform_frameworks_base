@@ -201,7 +201,7 @@ public final class ResolverTarget implements Parcelable {
     }
 
     // creator definition for the class.
-    public static final Creator<ResolverTarget> CREATOR
+    public static final @android.annotation.NonNull Creator<ResolverTarget> CREATOR
             = new Creator<ResolverTarget>() {
         @Override
         public ResolverTarget createFromParcel(Parcel source) {

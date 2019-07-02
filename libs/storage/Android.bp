@@ -6,6 +6,7 @@ cc_library_static {
         "IMountShutdownObserver.cpp",
         "IObbActionListener.cpp",
         "IMountService.cpp",
+        "ObbInfo.cpp",
     ],
 
     export_include_dirs: ["include"],

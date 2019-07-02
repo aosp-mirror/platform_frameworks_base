@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -32,7 +31,6 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 class EmulatorDisplayOverlay {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "EmulatorDisplayOverlay" : TAG_WM;
@@ -59,7 +57,7 @@ class EmulatorDisplayOverlay {
         try {
             ctrl = dc.makeOverlay()
                     .setName("EmulatorDisplayOverlay")
-                    .setSize(mScreenSize.x, mScreenSize.y)
+                    .setBufferSize(mScreenSize.x, mScreenSize.y)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
             ctrl.setLayer(zOrder);

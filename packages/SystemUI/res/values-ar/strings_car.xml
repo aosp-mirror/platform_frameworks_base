@@ -19,6 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="unknown_user_label" msgid="4323896111737677955">"غير معروف"</string>
-    <string name="start_driving" msgid="864023351402918991">"بدء القيادة"</string>
+    <string name="car_guest" msgid="3738772168718508650">"ضيف"</string>
+    <string name="start_guest_session" msgid="7055742120180595689">"ضيف"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"إضافة المستخدم"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"مستخدم جديد"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"عند إضافة مستخدم جديد، عليه إعداد مساحته."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"يمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
 </resources>

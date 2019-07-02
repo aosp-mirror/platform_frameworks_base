@@ -18,14 +18,13 @@ package com.android.systemui.qs;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.SlashImageView;
 
@@ -119,9 +118,9 @@ public class SignalTileView extends QSIconViewImpl {
     }
 
     @Override
-    public void setIcon(QSTile.State state) {
+    public void setIcon(State state, boolean allowAnimations) {
         final SignalState s = (SignalState) state;
-        setIcon(mSignal, s);
+        setIcon(mSignal, s, allowAnimations);
 
         if (s.overlayIconId > 0) {
             mOverlay.setVisibility(VISIBLE);
@@ -134,9 +133,9 @@ public class SignalTileView extends QSIconViewImpl {
         } else {
             mSignal.setPaddingRelative(0, 0, 0, 0);
         }
-        final boolean shown = isShown();
-        setVisibility(mIn, shown, s.activityIn);
-        setVisibility(mOut, shown, s.activityOut);
+        final boolean shouldAnimate = allowAnimations && isShown();
+        setVisibility(mIn, shouldAnimate, s.activityIn);
+        setVisibility(mOut, shouldAnimate, s.activityOut);
     }
 
     private void setVisibility(View view, boolean shown, boolean visible) {

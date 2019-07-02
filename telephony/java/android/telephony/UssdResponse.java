@@ -63,7 +63,7 @@ public final class UssdResponse implements Parcelable {
         mReturnMessage = returnMessage;
     }
 
-    public static final Parcelable.Creator<UssdResponse> CREATOR = new Creator<UssdResponse>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<UssdResponse> CREATOR = new Creator<UssdResponse>() {
 
         @Override
         public UssdResponse createFromParcel(Parcel in) {

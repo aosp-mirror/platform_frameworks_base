@@ -76,7 +76,7 @@ public class AudioRoutesInfo implements Parcelable {
         dest.writeInt(mainType);
     }
 
-    public static final Parcelable.Creator<AudioRoutesInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioRoutesInfo> CREATOR
             = new Parcelable.Creator<AudioRoutesInfo>() {
         public AudioRoutesInfo createFromParcel(Parcel in) {
             return new AudioRoutesInfo(in);

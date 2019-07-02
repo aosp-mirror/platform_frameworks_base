@@ -20,8 +20,8 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,9 +29,8 @@ import android.text.Spannable;
 import android.text.method.MovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.text.util.Linkify;
-import android.text.util.Linkify.LinkifyMask;
 import android.view.View;
+import android.view.textclassifier.TextClassifier.EntityConfig;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.widget.TextView;
 
@@ -61,7 +60,7 @@ public final class TextLinks implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATUS_LINKS_APPLIED, STATUS_NO_LINKS_FOUND, STATUS_NO_LINKS_APPLIED,
-            STATUS_DIFFERENT_TEXT})
+            STATUS_DIFFERENT_TEXT, STATUS_UNSUPPORTED_CHARACTER})
     public @interface Status {}
 
     /** Links were successfully applied to the text. */
@@ -75,6 +74,9 @@ public final class TextLinks implements Parcelable {
 
     /** The specified text does not match the text used to generate the links. */
     public static final int STATUS_DIFFERENT_TEXT = 3;
+
+    /** The specified text contains unsupported characters. */
+    public static final int STATUS_UNSUPPORTED_CHARACTER = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -95,10 +97,12 @@ public final class TextLinks implements Parcelable {
 
     private final String mFullText;
     private final List<TextLink> mLinks;
+    private final Bundle mExtras;
 
-    private TextLinks(String fullText, ArrayList<TextLink> links) {
+    private TextLinks(String fullText, ArrayList<TextLink> links, Bundle extras) {
         mFullText = fullText;
         mLinks = Collections.unmodifiableList(links);
+        mExtras = extras;
     }
 
     /**
@@ -116,6 +120,16 @@ public final class TextLinks implements Parcelable {
     @NonNull
     public Collection<TextLink> getLinks() {
         return mLinks;
+    }
+
+    /**
+     * Returns the extended data.
+     *
+     * <p><b>NOTE: </b>Do not modify this bundle.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -161,9 +175,10 @@ public final class TextLinks implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mFullText);
         dest.writeTypedList(mLinks);
+        dest.writeBundle(mExtras);
     }
 
-    public static final Parcelable.Creator<TextLinks> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextLinks> CREATOR =
             new Parcelable.Creator<TextLinks>() {
                 @Override
                 public TextLinks createFromParcel(Parcel in) {
@@ -179,6 +194,7 @@ public final class TextLinks implements Parcelable {
     private TextLinks(Parcel in) {
         mFullText = in.readString();
         mLinks = in.createTypedArrayList(TextLink.CREATOR);
+        mExtras = in.readBundle();
     }
 
     /**
@@ -188,27 +204,32 @@ public final class TextLinks implements Parcelable {
         private final EntityConfidence mEntityScores;
         private final int mStart;
         private final int mEnd;
-        @Nullable final URLSpan mUrlSpan;
+        private final Bundle mExtras;
+        @Nullable private final URLSpan mUrlSpan;
 
         /**
          * Create a new TextLink.
          *
          * @param start The start index of the identified subsequence
          * @param end The end index of the identified subsequence
-         * @param entityScores A mapping of entity type to confidence score
+         * @param entityConfidence A mapping of entity type to confidence score
+         * @param extras A bundle containing custom data related to this TextLink
          * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled
          *
-         * @throws IllegalArgumentException if entityScores is null or empty
+         * @throws IllegalArgumentException if {@code entityConfidence} is null or empty
+         * @throws IllegalArgumentException if {@code start} is greater than {@code end}
          */
-        TextLink(int start, int end, Map<String, Float> entityScores,
-                @Nullable URLSpan urlSpan) {
-            Preconditions.checkNotNull(entityScores);
-            Preconditions.checkArgument(!entityScores.isEmpty());
+        private TextLink(int start, int end, @NonNull EntityConfidence entityConfidence,
+                @NonNull Bundle extras, @Nullable URLSpan urlSpan) {
+            Preconditions.checkNotNull(entityConfidence);
+            Preconditions.checkArgument(!entityConfidence.getEntities().isEmpty());
             Preconditions.checkArgument(start <= end);
+            Preconditions.checkNotNull(extras);
             mStart = start;
             mEnd = end;
-            mEntityScores = new EntityConfidence(entityScores);
+            mEntityScores = entityConfidence;
             mUrlSpan = urlSpan;
+            mExtras = extras;
         }
 
         /**
@@ -257,6 +278,14 @@ public final class TextLinks implements Parcelable {
             return mEntityScores.getConfidenceScore(entityType);
         }
 
+        /**
+         * Returns a bundle containing custom data related to this TextLink.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
         @Override
         public String toString() {
             return String.format(Locale.US,
@@ -274,13 +303,22 @@ public final class TextLinks implements Parcelable {
             mEntityScores.writeToParcel(dest, flags);
             dest.writeInt(mStart);
             dest.writeInt(mEnd);
+            dest.writeBundle(mExtras);
         }
 
-        public static final Parcelable.Creator<TextLink> CREATOR =
+        private static TextLink readFromParcel(Parcel in) {
+            final EntityConfidence entityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
+            final int start = in.readInt();
+            final int end = in.readInt();
+            final Bundle extras = in.readBundle();
+            return new TextLink(start, end, entityConfidence, extras, null /* urlSpan */);
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<TextLink> CREATOR =
                 new Parcelable.Creator<TextLink>() {
                     @Override
                     public TextLink createFromParcel(Parcel in) {
-                        return new TextLink(in);
+                        return readFromParcel(in);
                     }
 
                     @Override
@@ -288,13 +326,6 @@ public final class TextLinks implements Parcelable {
                         return new TextLink[size];
                     }
                 };
-
-        private TextLink(Parcel in) {
-            mEntityScores = EntityConfidence.CREATOR.createFromParcel(in);
-            mStart = in.readInt();
-            mEnd = in.readInt();
-            mUrlSpan = null;
-        }
     }
 
     /**
@@ -304,21 +335,22 @@ public final class TextLinks implements Parcelable {
 
         private final CharSequence mText;
         @Nullable private final LocaleList mDefaultLocales;
-        @Nullable private final TextClassifier.EntityConfig mEntityConfig;
+        @Nullable private final EntityConfig mEntityConfig;
         private final boolean mLegacyFallback;
-        private String mCallingPackageName;
+        @Nullable private String mCallingPackageName;
+        private final Bundle mExtras;
 
         private Request(
                 CharSequence text,
                 LocaleList defaultLocales,
-                TextClassifier.EntityConfig entityConfig,
+                EntityConfig entityConfig,
                 boolean legacyFallback,
-                String callingPackageName) {
+                Bundle extras) {
             mText = text;
             mDefaultLocales = defaultLocales;
             mEntityConfig = entityConfig;
             mLegacyFallback = legacyFallback;
-            mCallingPackageName = callingPackageName;
+            mExtras = extras;
         }
 
         /**
@@ -340,10 +372,10 @@ public final class TextLinks implements Parcelable {
 
         /**
          * @return The config representing the set of entities to look for
-         * @see Builder#setEntityConfig(TextClassifier.EntityConfig)
+         * @see Builder#setEntityConfig(EntityConfig)
          */
         @Nullable
-        public TextClassifier.EntityConfig getEntityConfig() {
+        public EntityConfig getEntityConfig() {
             return mEntityConfig;
         }
 
@@ -358,10 +390,33 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * Sets the name of the package that requested the links to get generated.
+         * Sets the name of the package that is sending this request.
+         * <p>
+         * Package-private for SystemTextClassifier's use.
+         * @hide
          */
-        void setCallingPackageName(@Nullable String callingPackageName) {
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setCallingPackageName(@Nullable String callingPackageName) {
             mCallingPackageName = callingPackageName;
+        }
+
+        /**
+         * Returns the name of the package that sent this request.
+         * This returns {@code null} if no calling package name is set.
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
+        }
+
+        /**
+         * Returns the extended data.
+         *
+         * <p><b>NOTE: </b>Do not modify this bundle.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
         }
 
         /**
@@ -372,9 +427,9 @@ public final class TextLinks implements Parcelable {
             private final CharSequence mText;
 
             @Nullable private LocaleList mDefaultLocales;
-            @Nullable private TextClassifier.EntityConfig mEntityConfig;
+            @Nullable private EntityConfig mEntityConfig;
             private boolean mLegacyFallback = true; // Use legacy fall back by default.
-            private String mCallingPackageName;
+            @Nullable private Bundle mExtras;
 
             public Builder(@NonNull CharSequence text) {
                 mText = Preconditions.checkNotNull(text);
@@ -401,7 +456,7 @@ public final class TextLinks implements Parcelable {
              * @return this builder
              */
             @NonNull
-            public Builder setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
+            public Builder setEntityConfig(@Nullable EntityConfig entityConfig) {
                 mEntityConfig = entityConfig;
                 return this;
             }
@@ -422,14 +477,12 @@ public final class TextLinks implements Parcelable {
             }
 
             /**
-             * Sets the name of the package that requested the links to get generated.
+             * Sets the extended data.
              *
              * @return this builder
-             * @hide
              */
-            @NonNull
-            public Builder setCallingPackageName(@Nullable String callingPackageName) {
-                mCallingPackageName = callingPackageName;
+            public Builder setExtras(@Nullable Bundle extras) {
+                mExtras = extras;
                 return this;
             }
 
@@ -440,19 +493,9 @@ public final class TextLinks implements Parcelable {
             public Request build() {
                 return new Request(
                         mText, mDefaultLocales, mEntityConfig,
-                        mLegacyFallback, mCallingPackageName);
+                        mLegacyFallback,
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
-
-        }
-
-        /**
-         * @return the name of the package that requested the links to get generated.
-         * TODO: make available as system API
-         * @hide
-         */
-        @Nullable
-        public String getCallingPackageName() {
-            return mCallingPackageName;
         }
 
         @Override
@@ -463,22 +506,30 @@ public final class TextLinks implements Parcelable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(mText.toString());
-            dest.writeInt(mDefaultLocales != null ? 1 : 0);
-            if (mDefaultLocales != null) {
-                mDefaultLocales.writeToParcel(dest, flags);
-            }
-            dest.writeInt(mEntityConfig != null ? 1 : 0);
-            if (mEntityConfig != null) {
-                mEntityConfig.writeToParcel(dest, flags);
-            }
+            dest.writeParcelable(mDefaultLocales, flags);
+            dest.writeParcelable(mEntityConfig, flags);
             dest.writeString(mCallingPackageName);
+            dest.writeBundle(mExtras);
         }
 
-        public static final Parcelable.Creator<Request> CREATOR =
+        private static Request readFromParcel(Parcel in) {
+            final String text = in.readString();
+            final LocaleList defaultLocales = in.readParcelable(null);
+            final EntityConfig entityConfig = in.readParcelable(null);
+            final String callingPackageName = in.readString();
+            final Bundle extras = in.readBundle();
+
+            final Request request = new Request(text, defaultLocales, entityConfig,
+                    /* legacyFallback= */ true, extras);
+            request.setCallingPackageName(callingPackageName);
+            return request;
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<Request> CREATOR =
                 new Parcelable.Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {
-                        return new Request(in);
+                        return readFromParcel(in);
                     }
 
                     @Override
@@ -486,15 +537,6 @@ public final class TextLinks implements Parcelable {
                         return new Request[size];
                     }
                 };
-
-        private Request(Parcel in) {
-            mText = in.readString();
-            mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
-            mEntityConfig = in.readInt() == 0
-                    ? null : TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
-            mLegacyFallback = true;
-            mCallingPackageName = in.readString();
-        }
     }
 
     /**
@@ -578,6 +620,7 @@ public final class TextLinks implements Parcelable {
     public static final class Builder {
         private final String mFullText;
         private final ArrayList<TextLink> mLinks;
+        private Bundle mExtras;
 
         /**
          * Create a new TextLinks.Builder.
@@ -599,9 +642,20 @@ public final class TextLinks implements Parcelable {
          * @throws IllegalArgumentException if entityScores is null or empty.
          */
         @NonNull
-        public Builder addLink(int start, int end, Map<String, Float> entityScores) {
-            mLinks.add(new TextLink(start, end, entityScores, null));
-            return this;
+        public Builder addLink(int start, int end, @NonNull Map<String, Float> entityScores) {
+            return addLink(start, end, entityScores, Bundle.EMPTY, null);
+        }
+
+        /**
+         * Adds a TextLink.
+         *
+         * @see #addLink(int, int, Map)
+         * @param extras An optional bundle containing custom data related to this TextLink
+         */
+        @NonNull
+        public Builder addLink(int start, int end, @NonNull Map<String, Float> entityScores,
+                @NonNull Bundle extras) {
+            return addLink(start, end, entityScores, extras, null);
         }
 
         /**
@@ -609,9 +663,15 @@ public final class TextLinks implements Parcelable {
          * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled.
          */
         @NonNull
-        Builder addLink(int start, int end, Map<String, Float> entityScores,
+        Builder addLink(int start, int end, @NonNull Map<String, Float> entityScores,
                 @Nullable URLSpan urlSpan) {
-            mLinks.add(new TextLink(start, end, entityScores, urlSpan));
+            return addLink(start, end, entityScores, Bundle.EMPTY, urlSpan);
+        }
+
+        private Builder addLink(int start, int end, @NonNull Map<String, Float> entityScores,
+                @NonNull Bundle extras, @Nullable URLSpan urlSpan) {
+            mLinks.add(new TextLink(
+                    start, end, new EntityConfidence(entityScores), extras, urlSpan));
             return this;
         }
 
@@ -625,134 +685,25 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Sets the extended data.
+         *
+         * @return this builder
+         */
+        @NonNull
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Constructs a TextLinks instance.
          *
          * @return the constructed TextLinks
          */
         @NonNull
         public TextLinks build() {
-            return new TextLinks(mFullText, mLinks);
-        }
-    }
-
-    // TODO: Remove once apps can build against the latest sdk.
-    /**
-     * Optional input parameters for generating TextLinks.
-     * @hide
-     */
-    public static final class Options {
-
-        @Nullable private final TextClassificationSessionId mSessionId;
-        @Nullable private final Request mRequest;
-        @Nullable private LocaleList mDefaultLocales;
-        @Nullable private TextClassifier.EntityConfig mEntityConfig;
-        private boolean mLegacyFallback;
-
-        private @ApplyStrategy int mApplyStrategy;
-        private Function<TextLink, TextLinkSpan> mSpanFactory;
-
-        private String mCallingPackageName;
-
-        @UnsupportedAppUsage
-        public Options() {
-            this(null, null);
-        }
-
-        private Options(
-                @Nullable TextClassificationSessionId sessionId, @Nullable Request request) {
-            mSessionId = sessionId;
-            mRequest = request;
-        }
-
-        /** Helper to create Options from a Request. */
-        public static Options from(TextClassificationSessionId sessionId, Request request) {
-            final Options options = new Options(sessionId, request);
-            options.setDefaultLocales(request.getDefaultLocales());
-            options.setEntityConfig(request.getEntityConfig());
-            return options;
-        }
-
-        /** Returns a new options object based on the specified link mask. */
-        public static Options fromLinkMask(@LinkifyMask int mask) {
-            final List<String> entitiesToFind = new ArrayList<>();
-
-            if ((mask & Linkify.WEB_URLS) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_URL);
-            }
-            if ((mask & Linkify.EMAIL_ADDRESSES) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_EMAIL);
-            }
-            if ((mask & Linkify.PHONE_NUMBERS) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_PHONE);
-            }
-            if ((mask & Linkify.MAP_ADDRESSES) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_ADDRESS);
-            }
-
-            return new Options().setEntityConfig(
-                    TextClassifier.EntityConfig.createWithEntityList(entitiesToFind));
-        }
-
-        /** @param defaultLocales ordered list of locale preferences. */
-        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
-            mDefaultLocales = defaultLocales;
-            return this;
-        }
-
-        /** @param entityConfig definition of which entity types to look for. */
-        public Options setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
-            mEntityConfig = entityConfig;
-            return this;
-        }
-
-        /** @param applyStrategy strategy to use when resolving conflicts. */
-        public Options setApplyStrategy(@ApplyStrategy int applyStrategy) {
-            checkValidApplyStrategy(applyStrategy);
-            mApplyStrategy = applyStrategy;
-            return this;
-        }
-
-        /** @param spanFactory factory for converting TextLink to TextLinkSpan. */
-        public Options setSpanFactory(@Nullable Function<TextLink, TextLinkSpan> spanFactory) {
-            mSpanFactory = spanFactory;
-            return this;
-        }
-
-        @Nullable
-        public LocaleList getDefaultLocales() {
-            return mDefaultLocales;
-        }
-
-        @Nullable
-        public TextClassifier.EntityConfig getEntityConfig() {
-            return mEntityConfig;
-        }
-
-        @ApplyStrategy
-        public int getApplyStrategy() {
-            return mApplyStrategy;
-        }
-
-        @Nullable
-        public Function<TextLink, TextLinkSpan> getSpanFactory() {
-            return mSpanFactory;
-        }
-
-        @Nullable
-        public Request getRequest() {
-            return mRequest;
-        }
-
-        @Nullable
-        public TextClassificationSessionId getSessionId() {
-            return mSessionId;
-        }
-
-        private static void checkValidApplyStrategy(int applyStrategy) {
-            if (applyStrategy != APPLY_STRATEGY_IGNORE && applyStrategy != APPLY_STRATEGY_REPLACE) {
-                throw new IllegalArgumentException(
-                        "Invalid apply strategy. See TextLinks.ApplyStrategy for options.");
-            }
+            return new TextLinks(mFullText, mLinks,
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 }

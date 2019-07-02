@@ -51,5 +51,9 @@
              4 - Snap to the long edges in each orientation and magnet to corners
     -->
     <integer name="config_pictureInPictureSnapMode">3</integer>
+
+    <!-- Controls whether the nav bar can move from the bottom to the side in landscape.
+         Only applies if the device display is not square. -->
+    <bool name="config_navBarCanMove">false</bool>
 </resources>
 

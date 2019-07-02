@@ -78,7 +78,8 @@ oneway interface IConnectionServiceAdapter {
 
     void onPostDialChar(String callId, char nextChar, in Session.Info sessionInfo);
 
-    void queryRemoteConnectionServices(RemoteServiceCallback callback, in Session.Info sessionInfo);
+    void queryRemoteConnectionServices(RemoteServiceCallback callback, String callingPackage,
+    in Session.Info sessionInfo);
 
     void setVideoProvider(String callId, IVideoProvider videoProvider, in Session.Info sessionInfo);
 

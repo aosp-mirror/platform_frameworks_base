@@ -23,31 +23,23 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.LocaleList;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Patterns;
-import android.view.textclassifier.SystemTextClassifier;
-import android.view.textclassifier.TextClassificationConstants;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextClassifierImpl;
-import android.view.textclassifier.TextLinks.TextLinkSpan;
 import android.widget.TextView;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * LinkifyTest tests {@link Linkify}.
@@ -157,56 +149,5 @@ public class LinkifyTest {
         URLSpan[] spans = spannable.getSpans(0, spannable.length(), URLSpan.class);
         assertEquals("android.com should be linkified", 1, spans.length);
         assertEquals("https://android.com", spans[0].getURL());
-    }
-
-    @Test
-    public void testAddLinksAsync_useLegacyIfSmartDisabled_localTextClassifier()
-            throws Exception {
-        final TextClassificationConstants settings =
-                TextClassificationConstants.loadFromString("smart_linkify_enabled=false");
-        final TextClassifier classifier = new TextClassifierImpl(mContext, settings);
-        testAddLinksAsync_useLegacyIfSmartDisabled(classifier);
-    }
-
-    @Test
-    public void testAddLinksAsync_useLegacyIfSmartDisabled_systemTextClassifier()
-            throws Exception {
-        final TextClassificationConstants settings =
-                TextClassificationConstants.loadFromString("smart_linkify_enabled=false");
-        final TextClassifier classifier = new SystemTextClassifier(mContext, settings);
-        testAddLinksAsync_useLegacyIfSmartDisabled(classifier);
-    }
-
-    private void testAddLinksAsync_useLegacyIfSmartDisabled(TextClassifier classifier)
-            throws Exception {
-        final int linkMask = Linkify.EMAIL_ADDRESSES | Linkify.PHONE_NUMBERS | Linkify.WEB_URLS;
-        final String string = "example@android.com\n"
-                + "(415) 555-1212\n"
-                + "http://android.com\n"
-                + "100 Android Rd California";
-        final Spannable expected = new SpannableString(string);
-        final Spannable actual = new SpannableString(string);
-
-        Linkify.addLinks(expected, linkMask);  // legacy.
-        Linkify.addLinksAsync(actual, classifier, linkMask).get();
-
-        final URLSpan[] expectedSpans = expected.getSpans(0, expected.length(), URLSpan.class);
-        final TextLinkSpan[] actualSpans = actual.getSpans(0, actual.length(), TextLinkSpan.class);
-        assertEquals(expectedSpans.length, actualSpans.length);
-        final Set<List> expectedLinkSpec = new HashSet<>();
-        final Set<List> actualLinkSpec = new HashSet<>();
-        for (int i = 0; i < expectedSpans.length; i++) {
-            final URLSpan expectedSpan = expectedSpans[i];
-            final TextLinkSpan actualSpan = actualSpans[i];
-            expectedLinkSpec.add(Arrays.asList(
-                    expected.getSpanStart(expectedSpan),
-                    expected.getSpanEnd(expectedSpan),
-                    expectedSpan.getURL()));
-            actualLinkSpec.add(Arrays.asList(
-                    actual.getSpanStart(actualSpan),
-                    actual.getSpanEnd(actualSpan),
-                    actualSpan.getUrl()));
-        }
-        assertEquals(expectedLinkSpec, actualLinkSpec);
     }
 }

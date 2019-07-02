@@ -46,6 +46,7 @@ import android.util.Printer;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -302,6 +303,8 @@ public class GridLayout extends ViewGroup {
         mDefaultGap = context.getResources().getDimensionPixelOffset(R.dimen.default_gap);
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.GridLayout, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.GridLayout,
+                attrs, a, defStyleAttr, defStyleRes);
         try {
             setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
             setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));
@@ -327,6 +330,10 @@ public class GridLayout extends ViewGroup {
      * @attr ref android.R.styleable#GridLayout_orientation
      */
     @Orientation
+    @InspectableProperty(enumMapping = {
+            @InspectableProperty.EnumEntry(value = HORIZONTAL, name = "horizontal"),
+            @InspectableProperty.EnumEntry(value = VERTICAL, name = "vertical")
+    })
     public int getOrientation() {
         return mOrientation;
     }
@@ -387,6 +394,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_rowCount
      */
+    @InspectableProperty
     public int getRowCount() {
         return mVerticalAxis.getCount();
     }
@@ -420,6 +428,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_columnCount
      */
+    @InspectableProperty
     public int getColumnCount() {
         return mHorizontalAxis.getCount();
     }
@@ -451,6 +460,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_useDefaultMargins
      */
+    @InspectableProperty
     public boolean getUseDefaultMargins() {
         return mUseDefaultMargins;
     }
@@ -474,10 +484,10 @@ public class GridLayout extends ViewGroup {
      * @see #getUseDefaultMargins()
      * @see #setAlignmentMode(int)
      *
-     * @see MarginLayoutParams#leftMargin
-     * @see MarginLayoutParams#topMargin
-     * @see MarginLayoutParams#rightMargin
-     * @see MarginLayoutParams#bottomMargin
+     * @see ViewGroup.MarginLayoutParams#leftMargin
+     * @see ViewGroup.MarginLayoutParams#topMargin
+     * @see ViewGroup.MarginLayoutParams#rightMargin
+     * @see ViewGroup.MarginLayoutParams#bottomMargin
      *
      * @attr ref android.R.styleable#GridLayout_useDefaultMargins
      */
@@ -499,6 +509,10 @@ public class GridLayout extends ViewGroup {
      * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
     @AlignmentMode
+    @InspectableProperty(enumMapping = {
+            @InspectableProperty.EnumEntry(value = ALIGN_BOUNDS, name = "alignBounds"),
+            @InspectableProperty.EnumEntry(value = ALIGN_MARGINS, name = "alignMargins"),
+    })
     public int getAlignmentMode() {
         return mAlignmentMode;
     }
@@ -533,6 +547,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_rowOrderPreserved
      */
+    @InspectableProperty
     public boolean isRowOrderPreserved() {
         return mVerticalAxis.isOrderPreserved();
     }
@@ -569,6 +584,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_columnOrderPreserved
      */
+    @InspectableProperty
     public boolean isColumnOrderPreserved() {
         return mHorizontalAxis.isOrderPreserved();
     }

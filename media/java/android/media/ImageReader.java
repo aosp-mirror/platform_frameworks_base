@@ -16,13 +16,15 @@
 
 package android.media;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
+import android.graphics.ImageFormat.Format;
 import android.hardware.HardwareBuffer;
+import android.hardware.HardwareBuffer.Usage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
@@ -74,12 +76,6 @@ public class ImageReader implements AutoCloseable {
     private static final int ACQUIRE_MAX_IMAGES = 2;
 
     /**
-     * Invalid consumer buffer usage flag. This usage flag will be ignored
-     * by the {@code ImageReader} instance is constructed with this value.
-     */
-    private static final long BUFFER_USAGE_UNKNOWN = 0;
-
-    /**
      * <p>
      * Create a new reader for images of the desired size and format.
      * </p>
@@ -128,8 +124,15 @@ public class ImageReader implements AutoCloseable {
      *            Must be greater than 0.
      * @see Image
      */
-    public static ImageReader newInstance(int width, int height, int format, int maxImages) {
-        return new ImageReader(width, height, format, maxImages, BUFFER_USAGE_UNKNOWN);
+    public static @NonNull ImageReader newInstance(
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @Format             int format,
+            @IntRange(from = 1) int maxImages) {
+        // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
+        // work, and is inscrutable anyway
+        return new ImageReader(width, height, format, maxImages,
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN);
     }
 
     /**
@@ -150,7 +153,7 @@ public class ImageReader implements AutoCloseable {
      * consumer end-points. For example, if the application intends to send the images to
      * {@link android.media.MediaCodec} or {@link android.media.MediaRecorder} for hardware video
      * encoding, the format and usage flag combination needs to be
-     * {@link ImageFormat#PRIVATE PRIVATE} and {@link HardwareBuffer#USAGE0_VIDEO_ENCODE}. When an
+     * {@link ImageFormat#PRIVATE PRIVATE} and {@link HardwareBuffer#USAGE_VIDEO_ENCODE}. When an
      * {@link ImageReader} object is created with a valid size and such format/usage flag
      * combination, the application can send the {@link Image images} to an {@link ImageWriter} that
      * is created with the input {@link android.view.Surface} provided by the
@@ -173,7 +176,7 @@ public class ImageReader implements AutoCloseable {
      * ImageReaders using other format such as {@link ImageFormat#YUV_420_888 YUV_420_888}.
      * </p>
      * <p>
-     * Note that not all format and usage flag combination is supported by the
+     * Note that not all format and usage flag combinations are supported by the
      * {@link ImageReader}. Below are the supported combinations by the {@link ImageReader}
      * (assuming the consumer end-points support the such image consumption, e.g., hardware video
      * encoding).
@@ -186,13 +189,13 @@ public class ImageReader implements AutoCloseable {
      *   <td>non-{@link android.graphics.ImageFormat#PRIVATE PRIVATE} formats defined by
      *   {@link android.graphics.ImageFormat ImageFormat} or
      *   {@link android.graphics.PixelFormat PixelFormat}</td>
-     *   <td>{@link HardwareBuffer#USAGE0_CPU_READ} or
-     *   {@link HardwareBuffer#USAGE0_CPU_READ_OFTEN}</td>
+     *   <td>{@link HardwareBuffer#USAGE_CPU_READ_RARELY} or
+     *   {@link HardwareBuffer#USAGE_CPU_READ_OFTEN}</td>
      * </tr>
      * <tr>
      *   <td>{@link android.graphics.ImageFormat#PRIVATE}</td>
-     *   <td>{@link HardwareBuffer#USAGE0_VIDEO_ENCODE} or
-     *   {@link HardwareBuffer#USAGE0_GPU_SAMPLED_IMAGE}, or combined</td>
+     *   <td>{@link HardwareBuffer#USAGE_VIDEO_ENCODE} or
+     *   {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE}, or combined</td>
      * </tr>
      * </table>
      * Using other combinations may result in {@link IllegalArgumentException}.
@@ -207,19 +210,27 @@ public class ImageReader implements AutoCloseable {
      *            obtained by the user, one of them has to be released before a new Image will
      *            become available for access through {@link #acquireLatestImage()} or
      *            {@link #acquireNextImage()}. Must be greater than 0.
-     * @param usage The intended usage of the images produced by this ImageReader. It needs
-     *            to be one of the Usage0 defined by {@link HardwareBuffer}, or an
-     *            {@link IllegalArgumentException} will be thrown.
+     * @param usage The intended usage of the images produced by this ImageReader. See the usages
+     *              on {@link HardwareBuffer} for a list of valid usage bits. See also
+     *              {@link HardwareBuffer#isSupported(int, int, int, int, long)} for checking
+     *              if a combination is supported. If it's not supported this will throw
+     *              an {@link IllegalArgumentException}.
      * @see Image
      * @see HardwareBuffer
-     * @hide
      */
-    public static ImageReader newInstance(int width, int height, int format, int maxImages,
-            long usage) {
-        if (!isFormatUsageCombinationAllowed(format, usage)) {
-            throw new IllegalArgumentException("Format usage combination is not supported:"
-                    + " format = " + format + ", usage = " + usage);
-        }
+    public static @NonNull ImageReader newInstance(
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @Format             int format,
+            @IntRange(from = 1) int maxImages,
+            @Usage              long usage) {
+        // TODO: Check this - can't do it just yet because format support is different
+        // Unify formats! The only reliable way to validate usage is to just try it and see.
+
+//        if (!HardwareBuffer.isSupported(width, height, format, 1, usage)) {
+//            throw new IllegalArgumentException("The given format=" + Integer.toHexString(format)
+//                + " & usage=" + Long.toHexString(usage) + " is not supported");
+//        }
         return new ImageReader(width, height, format, maxImages, usage);
     }
 
@@ -717,19 +728,6 @@ public class ImageReader implements AutoCloseable {
         return si.getReader() == this;
     }
 
-    private static boolean isFormatUsageCombinationAllowed(int format, long usage) {
-        if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
-            return false;
-        }
-
-        // Valid usage needs to be provided.
-        if (usage == BUFFER_USAGE_UNKNOWN) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * Called from Native code when an Event happens.
      *
@@ -834,6 +832,8 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
+                case ImageFormat.DEPTH_JPEG:
+                case ImageFormat.HEIC:
                     width = ImageReader.this.getWidth();
                     break;
                 default:
@@ -850,6 +850,8 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
                 case ImageFormat.RAW_PRIVATE:
+                case ImageFormat.DEPTH_JPEG:
+                case ImageFormat.HEIC:
                     height = ImageReader.this.getHeight();
                     break;
                 default:

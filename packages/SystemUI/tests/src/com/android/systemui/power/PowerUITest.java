@@ -14,15 +14,13 @@
 
 package com.android.systemui.power;
 
-import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_SHUTDOWN;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_THROTTLING;
 import static android.provider.Settings.Global.SHOW_TEMPERATURE_WARNING;
+import static android.provider.Settings.Global.SHOW_USB_TEMPERATURE_ALARM;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,32 +28,32 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.BatteryManager;
-import android.os.HardwarePropertiesManager;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.PowerManager;
+import android.os.Temperature;
 import android.provider.Settings;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.settingslib.utils.ThreadUtils;
+import com.android.settingslib.fuelgauge.Estimate;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -68,532 +66,643 @@ public class PowerUITest extends SysuiTestCase {
     private static final long ONE_HOUR_MILLIS = Duration.ofHours(1).toMillis();
     public static final int BELOW_WARNING_BUCKET = -1;
     public static final long BELOW_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(2);
+    public static final long BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(30);
     public static final long ABOVE_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(4);
     private static final long ABOVE_CHARGE_CYCLE_THRESHOLD = Duration.ofHours(8).toMillis();
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
-    private static final int DEFAULT_OVERHEAT_ALARM_THRESHOLD = 58;
-    private HardwarePropertiesManager mHardProps;
+    private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
+    public static final int BATTERY_LEVEL_10 = 10;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
     private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
+    @Mock private IThermalService mThermalServiceMock;
+    private IThermalEventListener mUsbThermalEventListener;
+    private IThermalEventListener mSkinThermalEventListener;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
-        mHardProps = mock(HardwarePropertiesManager.class);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.addMockSystemService(Context.HARDWARE_PROPERTIES_SERVICE, mHardProps);
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
-        setUnderThreshold();
         createPowerUi();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mPowerUI = null;
+        mSkinThermalEventListener = mPowerUI.new SkinThermalEventListener();
+        mUsbThermalEventListener = mPowerUI.new UsbThermalEventListener();
     }
 
     @Test
-    public void testNoConfig_NoWarnings() {
-        setOverThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
-
+    public void testSkinWarning_throttlingCritical() throws Exception {
         mPowerUI.start();
+
+        final Temperature temp = getCriticalStatusTemp(Temperature.TYPE_SKIN, "skin1");
+        mSkinThermalEventListener.notifyThrottling(temp);
+
+        // dismiss skin high temperature warning when throttling status is critical
+        TestableLooper.get(this).processAllMessages();
         verify(mMockWarnings, never()).showHighTemperatureWarning();
+        verify(mMockWarnings, times(1)).dismissHighTemperatureWarning();
     }
 
     @Test
-    public void testConfig_NoWarnings() {
-        setUnderThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
-
+    public void testSkinWarning_throttlingEmergency() throws Exception {
         mPowerUI.start();
-        verify(mMockWarnings, never()).showHighTemperatureWarning();
+
+        final Temperature temp = getEmergencyStatusTemp(Temperature.TYPE_SKIN, "skin2");
+        mSkinThermalEventListener.notifyThrottling(temp);
+
+        // show skin high temperature warning when throttling status is emergency
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, times(1)).showHighTemperatureWarning();
+        verify(mMockWarnings, never()).dismissHighTemperatureWarning();
     }
 
     @Test
-    public void testConfig_Warnings() {
-        setOverThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
-
+    public void testUsbAlarm_throttlingCritical() throws Exception {
         mPowerUI.start();
-        verify(mMockWarnings).showHighTemperatureWarning();
+
+        final Temperature temp = getCriticalStatusTemp(Temperature.TYPE_USB_PORT, "usb1");
+        mUsbThermalEventListener.notifyThrottling(temp);
+
+        // not show usb high temperature alarm when throttling status is critical
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, never()).showUsbHighTemperatureAlarm();
     }
 
     @Test
-    public void testSettingOverrideConfig() {
-        setOverThreshold();
+    public void testUsbAlarm_throttlingEmergency() throws Exception {
+        mPowerUI.start();
+
+        final Temperature temp = getEmergencyStatusTemp(Temperature.TYPE_USB_PORT, "usb2");
+        mUsbThermalEventListener.notifyThrottling(temp);
+
+        // show usb high temperature alarm when throttling status is emergency
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, times(1)).showUsbHighTemperatureAlarm();
+    }
+
+    @Test
+    public void testSettingOverrideConfig_enableSkinTemperatureWarning() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
 
         mPowerUI.start();
-        verify(mMockWarnings).showHighTemperatureWarning();
+
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
-    public void testShutdownBasedThreshold() {
-        int tolerance = 2;
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
+    public void testSettingOverrideConfig_enableUsbTemperatureAlarm() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showUsbPortAlarm, 0);
+
+        mPowerUI.start();
+
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+    }
+
+    @Test
+    public void testSettingOverrideConfig_disableSkinTemperatureWarning() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 0);
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, -1);
-        resources.addOverride(R.integer.config_warningTemperatureTolerance, tolerance);
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_SHUTDOWN))
-                .thenReturn(new float[] { 55 + tolerance });
 
-        setCurrentTemp(54); // Below threshold.
         mPowerUI.start();
-        verify(mMockWarnings, never()).showHighTemperatureWarning();
 
-        setCurrentTemp(56); // Above threshold.
-        mPowerUI.updateTemperature();
-        verify(mMockWarnings).showHighTemperatureWarning();
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(0))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
-    public void testNoConfig_noAlarms() {
-        setOverThreshold();
-        final Boolean overheat = false;
-        final Boolean shouldBeepSound = false;
+    public void testSettingOverrideConfig_disableUsbTemperatureAlarm() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 0);
         TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_alarmTemperature, 55);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+        resources.addOverride(R.integer.config_showUsbPortAlarm, 1);
 
         mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(0))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test
-    public void testConfig_noAlarms() {
-        setUnderThreshold();
-        final Boolean overheat = false;
-        final Boolean shouldBeepSound = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.integer.config_alarmTemperature, 58);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+    public void testThermalEventListenerRegistration_success_skinType() throws Exception {
+        // Settings SHOW_TEMPERATURE_WARNING is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
 
-        mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        // success registering skin thermal event listener
+        when(mThermalServiceMock.registerThermalEventListenerWithType(
+                anyObject(), eq(Temperature.TYPE_SKIN))).thenReturn(true);
+
+        mPowerUI.doSkinThermalEventListenerRegistration();
+
+        // verify registering skin thermal event listener, return true (success)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+
+        // Settings SHOW_TEMPERATURE_WARNING is set to 0
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 0);
+
+        mPowerUI.doSkinThermalEventListenerRegistration();
+
+        // verify unregistering skin thermal event listener
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(anyObject());
     }
 
     @Test
-    public void testConfig_alarms() {
-        setOverThreshold();
-        final Boolean overheat = true;
-        final Boolean shouldBeepSound = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.integer.config_alarmTemperature, 58);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+    public void testThermalEventListenerRegistration_fail_skinType() throws Exception {
+        // Settings SHOW_TEMPERATURE_WARNING is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
 
-        mPowerUI.start();
-        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        // fail registering skin thermal event listener
+        when(mThermalServiceMock.registerThermalEventListenerWithType(
+                anyObject(), eq(Temperature.TYPE_SKIN))).thenReturn(false);
+
+        mPowerUI.doSkinThermalEventListenerRegistration();
+
+        // verify registering skin thermal event listener, return false (fail)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
+
+        // Settings SHOW_TEMPERATURE_WARNING is set to 0
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 0);
+
+        mPowerUI.doSkinThermalEventListenerRegistration();
+
+        // verify that cannot unregister listener (current state is unregistered)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(anyObject());
+
+        // Settings SHOW_TEMPERATURE_WARNING is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
+
+        mPowerUI.doSkinThermalEventListenerRegistration();
+
+        // verify that can register listener (current state is unregistered)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(2))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
-    public void testHardPropsThrottlingThreshold_alarms() {
-        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
-        setOverThreshold();
-        final Boolean overheat = true;
-        final Boolean shouldBeepSound = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+    public void testThermalEventListenerRegistration_success_usbType() throws Exception {
+        // Settings SHOW_USB_TEMPERATURE_ALARM is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
 
-        mPowerUI.start();
-        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        // success registering usb thermal event listener
+        when(mThermalServiceMock.registerThermalEventListenerWithType(
+                anyObject(), eq(Temperature.TYPE_USB_PORT))).thenReturn(true);
+
+        mPowerUI.doUsbThermalEventListenerRegistration();
+
+        // verify registering usb thermal event listener, return true (success)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+
+        // Settings SHOW_USB_TEMPERATURE_ALARM is set to 0
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 0);
+
+        // verify unregistering usb thermal event listener
+        mPowerUI.doUsbThermalEventListenerRegistration();
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1)).unregisterThermalEventListener(anyObject());
     }
 
     @Test
-    public void testHardPropsThrottlingThreshold_noAlarms() {
-        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
-        setUnderThreshold();
-        final Boolean overheat = false;
-        final Boolean shouldBeepSound = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+    public void testThermalEventListenerRegistration_fail_usbType() throws Exception {
+        // Settings SHOW_USB_TEMPERATURE_ALARM is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
 
-        mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        // fail registering usb thermal event listener
+        when(mThermalServiceMock.registerThermalEventListenerWithType(
+                anyObject(), eq(Temperature.TYPE_USB_PORT))).thenReturn(false);
+
+        mPowerUI.doUsbThermalEventListenerRegistration();
+
+        // verify registering usb thermal event listener, return false (fail)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
+
+        // Settings SHOW_USB_TEMPERATURE_ALARM is set to 0
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 0);
+
+        mPowerUI.doUsbThermalEventListenerRegistration();
+
+        // verify that cannot unregister listener (current state is unregistered)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(0)).unregisterThermalEventListener(anyObject());
+
+        // Settings SHOW_USB_TEMPERATURE_ALARM is set to 1
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
+
+        mPowerUI.doUsbThermalEventListenerRegistration();
+
+        // verify that can register listener (current state is unregistered)
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(2)).registerThermalEventListenerWithType(
+                anyObject(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test
-    public void testShouldShowLowBatteryWarning_showHybridOnly_overrideThresholdHigh_returnsNoShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold())
-                .thenReturn(Duration.ofHours(1).toMillis());
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+    public void testMaybeShowHybridWarning() {
         mPowerUI.start();
 
-        // unplugged device that would not show the non-hybrid notification but would show the
-        // hybrid but the threshold has been overriden to be too low
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertFalse(shouldShow);
+        // verify low warning shown this cycle noticed
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
+        BatteryStateSnapshot lastState = state.get();
+        state.mTimeRemainingMillis = Duration.ofHours(2).toMillis();
+        state.mBatteryLevel = 15;
+
+        mPowerUI.maybeShowHybridWarning(state.get(), lastState);
+
+        assertThat(mPowerUI.mLowWarningShownThisChargeCycle).isTrue();
+        assertThat(mPowerUI.mSevereWarningShownThisChargeCycle).isFalse();
+
+        // verify severe warning noticed this cycle
+        lastState = state.get();
+        state.mBatteryLevel = 1;
+        state.mTimeRemainingMillis = Duration.ofMinutes(10).toMillis();
+
+        mPowerUI.maybeShowHybridWarning(state.get(), lastState);
+
+        assertThat(mPowerUI.mLowWarningShownThisChargeCycle).isTrue();
+        assertThat(mPowerUI.mSevereWarningShownThisChargeCycle).isTrue();
+
+        // verify getting past threshold resets values
+        lastState = state.get();
+        state.mBatteryLevel = 100;
+        state.mTimeRemainingMillis = Duration.ofDays(1).toMillis();
+
+        mPowerUI.maybeShowHybridWarning(state.get(), lastState);
+
+        assertThat(mPowerUI.mLowWarningShownThisChargeCycle).isFalse();
+        assertThat(mPowerUI.mSevereWarningShownThisChargeCycle).isFalse();
     }
 
     @Test
-    public void testShouldShowLowBatteryWarning_showHybridOnly_overrideThresholdHigh_returnsShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold())
-                .thenReturn(Duration.ofHours(5).toMillis());
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+    public void testShouldShowHybridWarning_lowLevelWarning() {
         mPowerUI.start();
+        mPowerUI.mLowWarningShownThisChargeCycle = false;
+        mPowerUI.mSevereWarningShownThisChargeCycle = false;
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
 
-        // unplugged device that would not show the non-hybrid notification but would show the
-        // hybrid since the threshold has been overriden to be much higher
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertTrue(shouldShow);
+        // sanity check to make sure we can show for a valid config
+        state.mBatteryLevel = 10;
+        state.mTimeRemainingMillis = Duration.ofHours(2).toMillis();
+        boolean shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Shouldn't show if plugged in
+        state.mPlugged = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Shouldn't show if battery is unknown
+        state.mPlugged = false;
+        state.mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        state.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+        // Already shown both warnings
+        mPowerUI.mLowWarningShownThisChargeCycle = true;
+        mPowerUI.mSevereWarningShownThisChargeCycle = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Can show low warning
+        mPowerUI.mLowWarningShownThisChargeCycle = false;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Can't show if above the threshold for time & battery
+        state.mTimeRemainingMillis = Duration.ofHours(1000).toMillis();
+        state.mBatteryLevel = 100;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Battery under low percentage threshold but not time
+        state.mBatteryLevel = 10;
+        state.mLowLevelThreshold = 50;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Should also trigger if both level and time remaining under low threshold
+        state.mTimeRemainingMillis = Duration.ofHours(2).toMillis();
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // battery saver should block the low level warning though
+        state.mIsPowerSaver = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        state.mIsPowerSaver = false;
+        // if disabled we should not show the low warning.
+        state.mIsLowLevelWarningEnabled = false;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
     }
 
     @Test
-    public void testShouldShowLowBatteryWarning_showHybridOnly_returnsShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+    public void testShouldShowHybridWarning_severeLevelWarning() {
         mPowerUI.start();
+        mPowerUI.mLowWarningShownThisChargeCycle = false;
+        mPowerUI.mSevereWarningShownThisChargeCycle = false;
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
 
-        // unplugged device that would not show the non-hybrid notification but would show the
-        // hybrid
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertTrue(shouldShow);
+        // sanity check to make sure we can show for a valid config
+        state.mBatteryLevel = 1;
+        state.mTimeRemainingMillis = Duration.ofMinutes(1).toMillis();
+        boolean shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Shouldn't show if plugged in
+        state.mPlugged = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Shouldn't show if battery is unknown
+        state.mPlugged = false;
+        state.mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        state.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+        // Already shown both warnings
+        mPowerUI.mLowWarningShownThisChargeCycle = true;
+        mPowerUI.mSevereWarningShownThisChargeCycle = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Can show severe warning
+        mPowerUI.mSevereWarningShownThisChargeCycle = false;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Can't show if above the threshold for time & battery
+        state.mTimeRemainingMillis = Duration.ofHours(1000).toMillis();
+        state.mBatteryLevel = 100;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
+
+        // Battery under low percentage threshold but not time
+        state.mBatteryLevel = 1;
+        state.mSevereLevelThreshold = 5;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // Should also trigger if both level and time remaining under low threshold
+        state.mTimeRemainingMillis = Duration.ofHours(2).toMillis();
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
+
+        // battery saver should not block the severe level warning though
+        state.mIsPowerSaver = true;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isTrue();
     }
 
     @Test
-    public void testShouldShowLowBatteryWarning_showHybrid_showStandard_returnsShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.mBatteryLevel = 10;
+    public void testShouldDismissHybridWarning() {
         mPowerUI.start();
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
 
-        // unplugged device that would show the non-hybrid notification and the hybrid
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertTrue(shouldShow);
+        // We should dismiss if the device is plugged in
+        state.mPlugged = true;
+        state.mTimeRemainingMillis = Duration.ofHours(1).toMillis();
+        state.mLowThresholdMillis = Duration.ofHours(2).toMillis();
+        boolean shouldDismiss = mPowerUI.shouldDismissHybridWarning(state.get());
+        assertThat(shouldDismiss).isTrue();
+
+        // If not plugged in and below the threshold we should not dismiss
+        state.mPlugged = false;
+        shouldDismiss = mPowerUI.shouldDismissHybridWarning(state.get());
+        assertThat(shouldDismiss).isFalse();
+
+        // If we go over the low warning threshold we should dismiss
+        state.mTimeRemainingMillis = Duration.ofHours(3).toMillis();
+        shouldDismiss = mPowerUI.shouldDismissHybridWarning(state.get());
+        assertThat(shouldDismiss).isTrue();
     }
 
     @Test
-    public void testShouldShowLowBatteryWarning_showStandardOnly_returnsShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.mBatteryLevel = 10;
+    public void testRefreshEstimateIfNeeded_onlyQueriesEstimateOnBatteryLevelChangeOrNull() {
         mPowerUI.start();
-
-        // unplugged device that would show the non-hybrid but not the hybrid
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertTrue(shouldShow);
-    }
-
-    @Test
-    public void testShouldShowLowBatteryWarning_deviceHighBattery_returnsNoShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.start();
-
-        // unplugged device that would show the neither due to battery level being good
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertFalse(shouldShow);
-    }
-
-    @Test
-    public void testShouldShowLowBatteryWarning_devicePlugged_returnsNoShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.start();
-
-        // plugged device that would show the neither due to being plugged
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(!UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertFalse(shouldShow);
-   }
-
-    @Test
-    public void testShouldShowLowBatteryWarning_deviceBatteryStatusUnknown_returnsNoShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.start();
-
-        // Unknown battery status device that would show the neither due to the battery status being
-        // unknown
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        !POWER_SAVER_OFF, BatteryManager.BATTERY_STATUS_UNKNOWN);
-        assertFalse(shouldShow);
-    }
-
-    @Test
-    public void testShouldShowLowBatteryWarning_batterySaverEnabled_returnsNoShow() {
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        mPowerUI.start();
-
-        // BatterySaverEnabled device that would show the neither due to battery saver
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        !POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertFalse(shouldShow);
-    }
-
-    @Test
-    public void testShouldShowLowBatteryWarning_onlyShowsOncePerChargeCycle() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-        when(mEnhancedEstimates.getEstimate())
-                .thenReturn(new Estimate(BELOW_HYBRID_THRESHOLD, true));
-        mPowerUI.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
-
-        mPowerUI.maybeShowBatteryWarning(OLD_BATTERY_LEVEL_NINE, UNPLUGGED, UNPLUGGED,
-                ABOVE_WARNING_BUCKET, ABOVE_WARNING_BUCKET);
-
-        // reduce battery level to handle time based trigger -> level trigger interactions
-        mPowerUI.mBatteryLevel = 10;
-        boolean shouldShow =
-                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
-                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
-        assertFalse(shouldShow);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_dismissWhenPowerSaverEnabledLegacy() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(false);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // device that gets power saver turned on should dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, !POWER_SAVER_OFF);
-        assertTrue(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldNotDismissLowBatteryWarning_dismissWhenPowerSaverEnabledHybrid() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // device that gets power saver turned on should dismiss
-        boolean shouldDismiss =
-            mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, !POWER_SAVER_OFF);
-        assertFalse(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_dismissWhenPlugged() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // device that gets plugged in should dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(!UNPLUGGED, BELOW_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertTrue(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_dismissHybridSignal_showStandardSignal_shouldShow() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // would dismiss hybrid but not non-hybrid should not dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertFalse(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_showHybridSignal_dismissStandardSignal_shouldShow() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // would dismiss non-hybrid but not hybrid should not dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertFalse(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_showBothSignal_shouldShow() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // should not dismiss when both would not dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertFalse(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_dismissBothSignal_shouldDismiss() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        //should dismiss if both would dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertTrue(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_dismissStandardSignal_hybridDisabled_shouldDismiss() {
-        mPowerUI.start();
-        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(false);
-        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
-        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
-
-        // would dismiss non-hybrid with hybrid disabled should dismiss
-        boolean shouldDismiss =
-                mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, POWER_SAVER_OFF);
-        assertTrue(shouldDismiss);
-    }
-
-    @Test
-    public void testShouldDismissLowBatteryWarning_powerSaverModeEnabled()
-            throws InterruptedException {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
-
-        mPowerUI.start();
-        mPowerUI.mReceiver.onReceive(mContext,
-                new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
-
-        CountDownLatch latch = new CountDownLatch(1);
-        ThreadUtils.postOnBackgroundThread(() -> latch.countDown());
-        latch.await(5, TimeUnit.SECONDS);
-
-        verify(mMockWarnings).dismissLowBatteryWarning();
-    }
-
-    @Test
-    public void testShouldNotDismissLowBatteryWarning_powerSaverModeDisabled()
-            throws InterruptedException {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
-
-        mPowerUI.start();
-        mPowerUI.mReceiver.onReceive(mContext,
-                new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
-
-        CountDownLatch latch = new CountDownLatch(1);
-        ThreadUtils.postOnBackgroundThread(() -> latch.countDown());
-        latch.await(5, TimeUnit.SECONDS);
-
-        verify(mMockWarnings, never()).dismissLowBatteryWarning();
-    }
-
-    @Test
-    public void testMaybeShowBatteryWarning_onlyQueriesEstimateOnBatteryLevelChangeOrNull() {
-        mPowerUI.start();
-        Estimate estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true);
+        Estimate estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true, 0);
         when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         when(mEnhancedEstimates.getEstimate()).thenReturn(estimate);
-        mPowerUI.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+        mPowerUI.mBatteryLevel = 10;
 
-        // we expect that the first time it will query even if the level is the same
+        // we expect that the first time it will query since there is no last battery snapshot.
+        // However an invalid estimate (-1) is returned.
+        Estimate refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
+        assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_HYBRID_THRESHOLD);
+        BatteryStateSnapshot snapshot = new BatteryStateSnapshot(
+                BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD,
+                0, 0, -1, 0, 0, 0, false, true);
+        mPowerUI.mLastBatteryStateSnapshot = snapshot;
+
+        // query again since the estimate was -1
+        estimate = new Estimate(BELOW_SEVERE_HYBRID_THRESHOLD, true, 0);
+        when(mEnhancedEstimates.getEstimate()).thenReturn(estimate);
+        refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
+        assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_SEVERE_HYBRID_THRESHOLD);
+        snapshot = new BatteryStateSnapshot(
+                BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD, 0,
+                0, BELOW_SEVERE_HYBRID_THRESHOLD, 0, 0, 0, false, true);
+        mPowerUI.mLastBatteryStateSnapshot = snapshot;
+
+        // Battery level hasn't changed, so we don't query again
+        estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true, 0);
+        when(mEnhancedEstimates.getEstimate()).thenReturn(estimate);
+        refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
+        assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_SEVERE_HYBRID_THRESHOLD);
+
+        // Battery level changes so we update again
         mPowerUI.mBatteryLevel = 9;
-        mPowerUI.maybeShowBatteryWarning(OLD_BATTERY_LEVEL_NINE, UNPLUGGED, UNPLUGGED,
-                ABOVE_WARNING_BUCKET, ABOVE_WARNING_BUCKET);
-        verify(mEnhancedEstimates, times(1)).getEstimate();
-
-        // We should NOT query again if the battery level hasn't changed
-        mPowerUI.maybeShowBatteryWarning(OLD_BATTERY_LEVEL_NINE, UNPLUGGED, UNPLUGGED,
-                ABOVE_WARNING_BUCKET, ABOVE_WARNING_BUCKET);
-        verify(mEnhancedEstimates, times(1)).getEstimate();
-
-        // Battery level has changed, so we should query again
-        mPowerUI.maybeShowBatteryWarning(OLD_BATTERY_LEVEL_10, UNPLUGGED, UNPLUGGED,
-                ABOVE_WARNING_BUCKET, ABOVE_WARNING_BUCKET);
-        verify(mEnhancedEstimates, times(2)).getEstimate();
+        refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
+        assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_HYBRID_THRESHOLD);
     }
 
-    private void setCurrentTemp(float temp) {
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_CURRENT))
-                .thenReturn(new float[] { temp, temp });
+    @Test
+    public void testShouldShowStandardWarning() {
+        mPowerUI.start();
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
+        state.mIsHybrid = false;
+        BatteryStateSnapshot lastState = state.get();
+
+        // sanity check to make sure we can show for a valid config
+        state.mBatteryLevel = 10;
+        state.mBucket = -1;
+        boolean shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isTrue();
+        lastState = state.get();
+
+        // Shouldn't show if plugged in
+        state.mPlugged = true;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isFalse();
+
+        state.mPlugged = false;
+        // Shouldn't show if battery saver
+        state.mIsPowerSaver = true;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isFalse();
+
+        state.mIsPowerSaver = false;
+        // Shouldn't show if battery is unknown
+        state.mPlugged = false;
+        state.mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isFalse();
+
+        state.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+        // show if plugged -> unplugged, bucket -1 -> -1
+        state.mPlugged = true;
+        state.mBucket = -1;
+        lastState = state.get();
+        state.mPlugged = false;
+        state.mBucket = -1;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isTrue();
+
+        // don't show if plugged -> unplugged, bucket 0 -> 0
+        state.mPlugged = true;
+        state.mBucket = 0;
+        lastState = state.get();
+        state.mPlugged = false;
+        state.mBucket = 0;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isFalse();
+
+        // show if unplugged -> unplugged, bucket 0 -> -1
+        state.mPlugged = false;
+        state.mBucket = 0;
+        lastState = state.get();
+        state.mPlugged = false;
+        state.mBucket = -1;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isTrue();
+
+        // don't show if unplugged -> unplugged, bucket -1 -> 1
+        state.mPlugged = false;
+        state.mBucket = -1;
+        lastState = state.get();
+        state.mPlugged = false;
+        state.mBucket = 1;
+        shouldShow = mPowerUI.shouldShowLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldShow).isFalse();
     }
 
-    private void setThrottlingThreshold(float temp) {
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_THROTTLING))
-                .thenReturn(new float[] { temp, temp });
+    @Test
+    public void testShouldDismissStandardWarning() {
+        mPowerUI.start();
+        BatteryStateSnapshotWrapper state = new BatteryStateSnapshotWrapper();
+        state.mIsHybrid = false;
+        BatteryStateSnapshot lastState = state.get();
+
+        // should dismiss if battery saver
+        state.mIsPowerSaver = true;
+        boolean shouldDismiss = mPowerUI.shouldDismissLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldDismiss).isTrue();
+
+        state.mIsPowerSaver = false;
+        // should dismiss if plugged
+        state.mPlugged = true;
+        shouldDismiss = mPowerUI.shouldDismissLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldDismiss).isTrue();
+
+        state.mPlugged = false;
+        // should dismiss if bucket 0 -> 1
+        state.mBucket = 0;
+        lastState = state.get();
+        state.mBucket = 1;
+        shouldDismiss = mPowerUI.shouldDismissLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldDismiss).isTrue();
+
+        // shouldn't dismiss if bucket -1 -> 0
+        state.mBucket = -1;
+        lastState = state.get();
+        state.mBucket = 0;
+        shouldDismiss = mPowerUI.shouldDismissLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldDismiss).isFalse();
+
+        // should dismiss if powersaver & bucket 0 -> 1
+        state.mIsPowerSaver = true;
+        state.mBucket = 0;
+        lastState = state.get();
+        state.mBucket = 1;
+        shouldDismiss = mPowerUI.shouldDismissLowBatteryWarning(state.get(), lastState);
+        assertThat(shouldDismiss).isTrue();
     }
 
-    private void setOverThreshold() {
-        setCurrentTemp(50000);
+    private Temperature getEmergencyStatusTemp(int type, String name) {
+        final float value = 65;
+        return new Temperature(value, type, name, Temperature.THROTTLING_EMERGENCY);
     }
 
-    private void setUnderThreshold() {
-        setCurrentTemp(5);
+    private Temperature getCriticalStatusTemp(int type, String name) {
+        final float value = 60;
+        return new Temperature(value, type, name, Temperature.THROTTLING_CRITICAL);
     }
 
     private void createPowerUi() {
         mPowerUI = new PowerUI();
         mPowerUI.mContext = mContext;
         mPowerUI.mComponents = mContext.getComponents();
+        mPowerUI.mThermalService = mThermalServiceMock;
+    }
+
+    /**
+     * A simple wrapper class that sets values by default and makes them not final to improve
+     * test clarity.
+     */
+    private class BatteryStateSnapshotWrapper {
+        public int mBatteryLevel = 100;
+        public boolean mIsPowerSaver = false;
+        public boolean mPlugged = false;
+        public long mSevereThresholdMillis = Duration.ofHours(1).toMillis();
+        public long mLowThresholdMillis = Duration.ofHours(3).toMillis();
+        public int mSevereLevelThreshold = 5;
+        public int mLowLevelThreshold = 15;
+        public int mBucket = 1;
+        public int mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+        public long mTimeRemainingMillis = Duration.ofHours(24).toMillis();
+        public boolean mIsBasedOnUsage = true;
+        public boolean mIsHybrid = true;
+        public boolean mIsLowLevelWarningEnabled = true;
+        private long mAverageTimeToDischargeMillis = Duration.ofHours(24).toMillis();
+
+        public BatteryStateSnapshot get() {
+            if (mIsHybrid) {
+                return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
+                        mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold,
+                        mTimeRemainingMillis, mAverageTimeToDischargeMillis, mSevereThresholdMillis,
+                        mLowThresholdMillis, mIsBasedOnUsage, mIsLowLevelWarningEnabled);
+            } else {
+                return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
+                        mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold);
+            }
+        }
     }
 }

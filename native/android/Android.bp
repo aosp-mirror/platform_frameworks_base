@@ -49,11 +49,14 @@ cc_library_shared {
         "sharedmem.cpp",
         "storage_manager.cpp",
         "surface_texture.cpp",
+        "surface_control.cpp",
+        "system_fonts.cpp",
         "trace.cpp",
     ],
 
     shared_libs: [
         "liblog",
+        "libhidlbase",
         "libcutils",
         "libandroidfw",
         "libinput",
@@ -61,9 +64,15 @@ cc_library_shared {
         "libbinder",
         "libui",
         "libgui",
+        "libharfbuzz_ng",  // Only for including hb.h via minikin
         "libsensor",
         "libandroid_runtime",
+        "libminikin",
         "libnetd_client",
+        "libhwui",
+        "libxml2",
+        "android.hardware.configstore@1.0",
+        "android.hardware.configstore-utils",
     ],
 
     static_libs: [

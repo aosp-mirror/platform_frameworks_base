@@ -22,7 +22,7 @@
 #include <binder/IServiceManager.h>
 
 #include "external/Perfetto.h"
-#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
+#include "external/Perfprofd.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
 
@@ -30,9 +30,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-void triggerSubscribers(const int64_t rule_id,
-                        const MetricDimensionKey& dimensionKey,
-                        const ConfigKey& configKey,
+void triggerSubscribers(int64_t ruleId, int64_t metricId, const MetricDimensionKey& dimensionKey,
+                        int64_t metricValue, const ConfigKey& configKey,
                         const std::vector<Subscription>& subscriptions) {
     VLOG("informSubscribers called.");
     if (subscriptions.empty()) {
@@ -50,13 +49,14 @@ void triggerSubscribers(const int64_t rule_id,
         }
         switch (subscription.subscriber_information_case()) {
             case Subscription::SubscriberInformationCase::kIncidentdDetails:
-                if (!GenerateIncidentReport(subscription.incidentd_details(), rule_id, configKey)) {
+                if (!GenerateIncidentReport(subscription.incidentd_details(), ruleId, metricId,
+                                            dimensionKey, metricValue, configKey)) {
                     ALOGW("Failed to generate incident report.");
                 }
                 break;
             case Subscription::SubscriberInformationCase::kPerfettoDetails:
                 if (!CollectPerfettoTraceAndUploadToDropbox(subscription.perfetto_details(),
-                                                            rule_id, configKey)) {
+                                                            subscription.id(), ruleId, configKey)) {
                     ALOGW("Failed to generate perfetto traces.");
                 }
                 break;
@@ -64,12 +64,17 @@ void triggerSubscribers(const int64_t rule_id,
                 SubscriberReporter::getInstance().alertBroadcastSubscriber(configKey, subscription,
                                                                            dimensionKey);
                 break;
+            case Subscription::SubscriberInformationCase::kPerfprofdDetails:
+                if (!CollectPerfprofdTraceAndUploadToDropbox(subscription.perfprofd_details(),
+                                                             ruleId, configKey)) {
+                    ALOGW("Failed to generate perfprofd traces.");
+                }
+                break;
             default:
                 break;
         }
     }
 }
-
 
 }  // namespace statsd
 }  // namespace os

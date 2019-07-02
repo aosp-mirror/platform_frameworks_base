@@ -17,11 +17,15 @@
 #define LOG_TAG "Zygote"
 
 #include <EGL/egl.h>
+#include <Properties.h>
 #include <ui/GraphicBufferMapper.h>
 
 #include "core_jni_helpers.h"
 
 namespace {
+
+using android::uirenderer::Properties;
+using android::uirenderer::RenderPipelineType;
 
 // Shadow call stack (SCS) is a security mitigation that uses a separate stack
 // (the SCS) for return addresses. In versions of Android newer than P, the
@@ -58,16 +62,18 @@ void android_internal_os_ZygoteInit_nativePreloadAppProcessHALs(JNIEnv* env, jcl
     // (b) loaded by most app processes.
 }
 
-void android_internal_os_ZygoteInit_nativePreloadOpenGL(JNIEnv* env, jclass) {
+void android_internal_os_ZygoteInit_nativePreloadGraphicsDriver(JNIEnv* env, jclass) {
     ScopedSCSExit x;
-    eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (Properties::peekRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    }
 }
 
 const JNINativeMethod gMethods[] = {
     { "nativePreloadAppProcessHALs", "()V",
       (void*)android_internal_os_ZygoteInit_nativePreloadAppProcessHALs },
-    { "nativePreloadOpenGL", "()V",
-      (void*)android_internal_os_ZygoteInit_nativePreloadOpenGL },
+    { "nativePreloadGraphicsDriver", "()V",
+      (void*)android_internal_os_ZygoteInit_nativePreloadGraphicsDriver },
 };
 
 }  // anonymous namespace

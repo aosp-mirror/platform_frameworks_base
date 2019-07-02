@@ -35,10 +35,12 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
     private FakeGateKeeperService mGateKeeper;
     private IWeaver mWeaverService;
+    private PasswordSlotManagerTestable mPasswordSlotManager;
 
     public MockSyntheticPasswordManager(Context context, LockSettingsStorage storage,
-            FakeGateKeeperService gatekeeper, UserManager userManager) {
-        super(context, storage, userManager);
+            FakeGateKeeperService gatekeeper, UserManager userManager,
+            PasswordSlotManager passwordSlotManager) {
+        super(context, storage, userManager, passwordSlotManager);
         mGateKeeper = gatekeeper;
     }
 
@@ -93,9 +95,13 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
     }
 
     @Override
-    protected byte[] scrypt(String password, byte[] salt, int N, int r, int p, int outLen) {
+    protected byte[] scrypt(byte[] password, byte[] salt, int n, int r, int p, int outLen) {
         try {
-            PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10, outLen * 8);
+            char[] passwordChars = new char[password.length];
+            for (int i = 0; i < password.length; i++) {
+                passwordChars[i] = (char) password[i];
+            }
+            PBEKeySpec spec = new PBEKeySpec(passwordChars, salt, 10, outLen * 8);
             SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             return f.generateSecret(spec).getEncoded();
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -113,5 +119,4 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
         mWeaverService = new MockWeaverService();
         initWeaverService();
     }
-
 }

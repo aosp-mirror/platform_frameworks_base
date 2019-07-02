@@ -40,37 +40,12 @@ class Section {
 public:
     const int id;
     const int64_t timeoutMs;  // each section must have a timeout
-    const bool userdebugAndEngOnly;
-    const bool deviceSpecific;
     String8 name;
 
-    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false,
-            bool deviceSpecific = false);
+    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~Section();
 
-    virtual status_t Execute(ReportRequestSet* requests) const = 0;
-};
-
-/**
- * Section that generates incident headers.
- */
-class HeaderSection : public Section {
-public:
-    HeaderSection();
-    virtual ~HeaderSection();
-
-    virtual status_t Execute(ReportRequestSet* requests) const;
-};
-
-/**
- * Section that generates incident metadata.
- */
-class MetadataSection : public Section {
-public:
-    MetadataSection();
-    virtual ~MetadataSection();
-
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const = 0;
 };
 
 /**
@@ -78,11 +53,11 @@ public:
  */
 class FileSection : public Section {
 public:
-    FileSection(int id, const char* filename, bool deviceSpecific = false,
+    FileSection(int id, const char* filename,
                 int64_t timeoutMs = 5000 /* 5 seconds */);
     virtual ~FileSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     const char* mFilename;
@@ -97,7 +72,7 @@ public:
     GZipSection(int id, const char* filename, ...);
     virtual ~GZipSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     // It looks up the content from multiple files and stops when the first one is available.
@@ -109,11 +84,10 @@ private:
  */
 class WorkerThreadSection : public Section {
 public:
-    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS,
-                        bool userdebugAndEngOnly = false);
+    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~WorkerThreadSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
     virtual status_t BlockingCall(int pipeWriteFd) const = 0;
 };
@@ -129,7 +103,7 @@ public:
 
     virtual ~CommandSection();
 
-    virtual status_t Execute(ReportRequestSet* requests) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     const char** mCommand;
@@ -140,8 +114,23 @@ private:
  */
 class DumpsysSection : public WorkerThreadSection {
 public:
-    DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...);
+    DumpsysSection(int id, const char* service, ...);
     virtual ~DumpsysSection();
+
+    virtual status_t BlockingCall(int pipeWriteFd) const;
+
+private:
+    String16 mService;
+    Vector<String16> mArgs;
+};
+
+/**
+ * Section that calls dumpsys on a system service.
+ */
+class SystemPropertyDumpsysSection : public WorkerThreadSection {
+public:
+    SystemPropertyDumpsysSection(int id, const char* service, ...);
+    virtual ~SystemPropertyDumpsysSection();
 
     virtual status_t BlockingCall(int pipeWriteFd) const;
 
@@ -181,6 +170,13 @@ public:
 private:
     std::string mType;
 };
+
+
+/**
+ * These sections will not be generated when doing an 'all' report, either
+ * for size, speed of collection, or privacy.
+ */
+bool section_requires_specific_mention(int sectionId);
 
 }  // namespace incidentd
 }  // namespace os

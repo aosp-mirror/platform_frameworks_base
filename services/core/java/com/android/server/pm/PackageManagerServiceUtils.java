@@ -18,23 +18,22 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDWR;
+
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
-import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
-
-import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.util.FastPrintWriter;
-import com.android.server.EventLogTags;
-import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.PackageDexUsage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
@@ -53,9 +52,16 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.content.PackageHelper;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastPrintWriter;
+import com.android.server.EventLogTags;
+import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.PackageDexUsage;
 
 import dalvik.system.VMRuntime;
 
@@ -63,6 +69,7 @@ import libcore.io.IoUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -71,8 +78,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -539,14 +544,31 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    /** Returns true if APK Verity is enabled. */
+    /** Default is to not use fs-verity since it depends on kernel support. */
+    private static final int FSVERITY_DISABLED = 0;
+
+    /**
+     * Experimental implementation targeting priv apps, with Android specific kernel patches to
+     * extend fs-verity.
+     */
+    private static final int FSVERITY_LEGACY = 1;
+
+    /** Standard fs-verity. */
+    private static final int FSVERITY_ENABLED = 2;
+
+    /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
-        return SystemProperties.getInt("ro.apk_verity.mode", 0) != 0;
+        return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_ENABLED;
+    }
+
+    static boolean isLegacyApkVerityEnabled() {
+        return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_LEGACY;
     }
 
     /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
     static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
-        return disabledPs != null && disabledPs.isPrivileged() && isApkVerityEnabled();
+        return disabledPs != null && disabledPs.isPrivileged() && (
+                isApkVerityEnabled() || isLegacyApkVerityEnabled());
     }
 
     /**
@@ -707,5 +729,160 @@ public class PackageManagerServiceUtils {
     public static boolean compressedFileExists(String codePath) {
         final File[] compressedFiles = getCompressedFiles(codePath);
         return compressedFiles != null && compressedFiles.length > 0;
+    }
+
+    /**
+     * Parse given package and return minimal details.
+     */
+    public static PackageInfoLite getMinimalPackageInfo(Context context, String packagePath,
+            int flags, String abiOverride) {
+        final PackageInfoLite ret = new PackageInfoLite();
+        if (packagePath == null) {
+            Slog.i(TAG, "Invalid package file " + packagePath);
+            ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            return ret;
+        }
+
+        final File packageFile = new File(packagePath);
+        final PackageParser.PackageLite pkg;
+        final long sizeBytes;
+        try {
+            pkg = PackageParser.parsePackageLite(packageFile, 0);
+            sizeBytes = PackageHelper.calculateInstalledSize(pkg, abiOverride);
+        } catch (PackageParserException | IOException e) {
+            Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
+
+            if (!packageFile.exists()) {
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+            } else {
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            }
+
+            return ret;
+        }
+
+        final int recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
+                pkg.packageName, pkg.installLocation, sizeBytes, flags);
+
+        ret.packageName = pkg.packageName;
+        ret.splitNames = pkg.splitNames;
+        ret.versionCode = pkg.versionCode;
+        ret.versionCodeMajor = pkg.versionCodeMajor;
+        ret.baseRevisionCode = pkg.baseRevisionCode;
+        ret.splitRevisionCodes = pkg.splitRevisionCodes;
+        ret.installLocation = pkg.installLocation;
+        ret.verifiers = pkg.verifiers;
+        ret.recommendedInstallLocation = recommendedInstallLocation;
+        ret.multiArch = pkg.multiArch;
+
+        return ret;
+    }
+
+    /**
+     * Calculate estimated footprint of given package post-installation.
+     *
+     * @return -1 if there's some error calculating the size, otherwise installed size of the
+     *         package.
+     */
+    public static long calculateInstalledSize(String packagePath, String abiOverride) {
+        final File packageFile = new File(packagePath);
+        final PackageParser.PackageLite pkg;
+        try {
+            pkg = PackageParser.parsePackageLite(packageFile, 0);
+            return PackageHelper.calculateInstalledSize(pkg, abiOverride);
+        } catch (PackageParserException | IOException e) {
+            Slog.w(TAG, "Failed to calculate installed size: " + e);
+            return -1;
+        }
+    }
+
+    /**
+     * Checks whenever downgrade of an app is permitted.
+     *
+     * @param installFlags flags of the current install.
+     * @param applicationFlags flags of the currently installed version of the app.
+     * @return {@code true} if downgrade is permitted according to the {@code installFlags} and
+     *         {@code applicationFlags}.
+     */
+    public static boolean isDowngradePermitted(int installFlags, int applicationFlags) {
+        // If installed, the package will get access to data left on the device by its
+        // predecessor. As a security measure, this is permitted only if this is not a
+        // version downgrade or if the predecessor package is marked as debuggable and
+        // a downgrade is explicitly requested.
+        //
+        // On debuggable platform builds, downgrades are permitted even for
+        // non-debuggable packages to make testing easier. Debuggable platform builds do
+        // not offer security guarantees and thus it's OK to disable some security
+        // mechanisms to make debugging/testing easier on those builds. However, even on
+        // debuggable builds downgrades of packages are permitted only if requested via
+        // installFlags. This is because we aim to keep the behavior of debuggable
+        // platform builds as close as possible to the behavior of non-debuggable
+        // platform builds.
+        //
+        // In case of user builds, downgrade is permitted only for the system server initiated
+        // sessions. This is enforced by INSTALL_ALLOW_DOWNGRADE flag parameter.
+        final boolean downgradeRequested =
+                (installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0;
+        if (!downgradeRequested) {
+            return false;
+        }
+        final boolean isDebuggable =
+                Build.IS_DEBUGGABLE || ((applicationFlags
+                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        if (isDebuggable) {
+            return true;
+        }
+        return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+    }
+
+    /**
+     * Copy package to the target location.
+     *
+     * @param packagePath absolute path to the package to be copied. Can be
+     *                    a single monolithic APK file or a cluster directory
+     *                    containing one or more APKs.
+     * @return returns status code according to those in
+     *         {@link PackageManager}
+     */
+    public static int copyPackage(String packagePath, File targetDir) {
+        if (packagePath == null) {
+            return PackageManager.INSTALL_FAILED_INVALID_URI;
+        }
+
+        try {
+            final File packageFile = new File(packagePath);
+            final PackageParser.PackageLite pkg = PackageParser.parsePackageLite(packageFile, 0);
+            copyFile(pkg.baseCodePath, targetDir, "base.apk");
+            if (!ArrayUtils.isEmpty(pkg.splitNames)) {
+                for (int i = 0; i < pkg.splitNames.length; i++) {
+                    copyFile(pkg.splitCodePaths[i], targetDir,
+                            "split_" + pkg.splitNames[i] + ".apk");
+                }
+            }
+            return PackageManager.INSTALL_SUCCEEDED;
+        } catch (PackageParserException | IOException | ErrnoException e) {
+            Slog.w(TAG, "Failed to copy package at " + packagePath + ": " + e);
+            return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+        }
+    }
+
+    private static void copyFile(String sourcePath, File targetDir, String targetName)
+            throws ErrnoException, IOException {
+        if (!FileUtils.isValidExtFilename(targetName)) {
+            throw new IllegalArgumentException("Invalid filename: " + targetName);
+        }
+        Slog.d(TAG, "Copying " + sourcePath + " to " + targetName);
+
+        final File targetFile = new File(targetDir, targetName);
+        final FileDescriptor targetFd = Os.open(targetFile.getAbsolutePath(),
+                O_RDWR | O_CREAT, 0644);
+        Os.chmod(targetFile.getAbsolutePath(), 0644);
+        FileInputStream source = null;
+        try {
+            source = new FileInputStream(sourcePath);
+            FileUtils.copy(source.getFD(), targetFd);
+        } finally {
+            IoUtils.closeQuietly(source);
+        }
     }
 }

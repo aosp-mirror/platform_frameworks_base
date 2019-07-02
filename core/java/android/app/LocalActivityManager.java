@@ -144,7 +144,7 @@ public class LocalActivityManager {
                 r.activityInfo = mActivityThread.resolveActivityInfo(r.intent);
             }
             r.activity = mActivityThread.startActivityNow(
-                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState, instance);
+                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState, instance, r);
             if (r.activity == null) {
                 return;
             }
@@ -339,7 +339,7 @@ public class LocalActivityManager {
                     ArrayList<ReferrerIntent> intents = new ArrayList<>(1);
                     intents.add(new ReferrerIntent(intent, mParent.getPackageName()));
                     if (localLOGV) Log.v(TAG, r.id + ": new intent");
-                    mActivityThread.performNewIntents(r, intents, false /* andPause */);
+                    mActivityThread.handleNewIntent(r, intents);
                     r.intent = intent;
                     moveToState(r, mCurState);
                     if (mSingleMode) {

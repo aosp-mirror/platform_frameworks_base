@@ -16,12 +16,7 @@
 
 package android.webkit;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.net.Uri;
-
-import java.security.KeyPair;
 
 /**
  * Enables the token binding procotol, and provides access to the keys. See
@@ -30,86 +25,9 @@ import java.security.KeyPair;
  * All methods are required to be called on the UI thread where WebView is
  * attached to the View hierarchy.
  * @hide
+ * @deprecated this is no longer supported.
  */
 @SystemApi
+@Deprecated
 public abstract class TokenBindingService {
-
-    public static final String KEY_ALGORITHM_RSA2048_PKCS_1_5 = "RSA2048_PKCS_1.5";
-    public static final String KEY_ALGORITHM_RSA2048_PSS = "RSA2048PSS";
-    public static final String KEY_ALGORITHM_ECDSAP256 = "ECDSAP256";
-
-    /**
-     * Provides the KeyPair information.
-     */
-    public static abstract class TokenBindingKey {
-        /**
-         * The public, private key pair.
-         */
-        public abstract KeyPair getKeyPair();
-
-        /**
-         * The algorithm that is used to generate the key pair.
-         */
-        public abstract String getAlgorithm();
-    }
-
-    /**
-     * Returns the default TokenBinding service instance. At present there is
-     * only one token binding service instance for all WebView instances,
-     * however this restriction may be relaxed in the future.
-     *
-     * @return The default TokenBindingService instance.
-     */
-    public static TokenBindingService getInstance() {
-        return WebViewFactory.getProvider().getTokenBindingService();
-    }
-
-    /**
-     * Enables the token binding protocol. The token binding protocol
-     * has to be enabled before creating any WebViews.
-     *
-     * @throws IllegalStateException if a WebView was already created.
-     */
-    public abstract void enableTokenBinding();
-
-    /**
-     * Retrieves the key pair for a given origin from the internal
-     * TokenBinding key store asynchronously.
-     *
-     * The user can provide a list of acceptable algorithms for the retrieved
-     * key pair. If a key pair exists and it is in the list of algorithms, then
-     * the key is returned. If it is not in the list, no key is returned.
-     *
-     * If no key pair exists, WebView chooses an algorithm from the list, in
-     * the order given, to generate a key.
-     *
-     * The user can pass {@code null} if any algorithm is acceptable.
-     *
-     * @param origin The origin for the server.
-     * @param algorithm The list of algorithms. An IllegalArgumentException is thrown if array is
-     *                  empty.
-     * @param callback The callback that will be called when key is available.
-     */
-    public abstract void getKey(Uri origin,
-                                @Nullable String[] algorithm,
-                                @NonNull ValueCallback<TokenBindingKey> callback);
-    /**
-     * Deletes specified key (for use when associated cookie is cleared).
-     *
-     * @param origin The origin of the server.
-     * @param callback The callback that will be called when key is deleted. The
-     *        callback parameter (Boolean) will indicate if operation is
-     *        successful or if failed.
-     */
-    public abstract void deleteKey(Uri origin,
-                                   @Nullable ValueCallback<Boolean> callback);
-
-     /**
-      * Deletes all the keys (for use when cookies are cleared).
-      *
-      * @param callback The callback that will be called when keys are deleted.
-      *        The callback parameter (Boolean) will indicate if operation is
-      *        successful or if failed.
-      */
-    public abstract void deleteAllKeys(@Nullable ValueCallback<Boolean> callback);
 }

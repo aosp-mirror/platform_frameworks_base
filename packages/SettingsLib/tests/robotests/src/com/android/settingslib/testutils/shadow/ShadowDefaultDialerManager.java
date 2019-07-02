@@ -26,19 +26,19 @@ import org.robolectric.annotation.Resetter;
 @Implements(DefaultDialerManager.class)
 public class ShadowDefaultDialerManager {
 
-    private static String sDefaultDailer;
+    private static String sDefaultDialer;
 
     @Resetter
     public void reset() {
-        sDefaultDailer = null;
+        sDefaultDialer = null;
     }
 
     @Implementation
-    public static String getDefaultDialerApplication(Context context) {
-        return sDefaultDailer;
+    protected static String getDefaultDialerApplication(Context context) {
+        return sDefaultDialer;
     }
 
     public static void setDefaultDialerApplication(String dialer) {
-        sDefaultDailer = dialer;
+        sDefaultDialer = dialer;
     }
 }

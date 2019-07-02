@@ -29,18 +29,30 @@ struct Module
     vector<string> classes;
     vector<string> paths;
     vector<string> installed;
+
+    bool HasClass(const string& cl);
 };
 
-string get_build_var(const string& name, bool quiet);
-
 /**
- * Poke around in the out directory and try to find a device name that matches
- * our product. This is faster than running get_build_var and good enough for
- * tab completion.
- *
- * Returns the empty string if we can't find one.
+ * Class to encapsulate getting build variables. Caches the
+ * results if possible.
  */
-string sniff_device_name(const string& buildOut, const string& product);
+class BuildVars
+{
+public:
+    BuildVars(const string& outDir, const string& buildProduct,
+            const string& buildVariant, const string& buildType);
+    ~BuildVars();
+
+    string GetBuildVar(const string& name, bool quiet);
+
+private:
+    void save();
+
+    string m_filename;
+
+    map<string,string> m_cache;
+};
 
 void read_modules(const string& buildOut, const string& buildDevice,
         map<string,Module>* modules, bool quiet);

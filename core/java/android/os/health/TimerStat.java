@@ -34,7 +34,7 @@ public final class TimerStat implements Parcelable {
     /**
      * The CREATOR instance for use by aidl Binder interfaces.
      */
-    public static final Parcelable.Creator<TimerStat> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<TimerStat> CREATOR
             = new Parcelable.Creator<TimerStat>() {
         public TimerStat createFromParcel(Parcel in) {
             return new TimerStat(in);

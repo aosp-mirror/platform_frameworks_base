@@ -207,8 +207,10 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
            getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key) {
-    // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
+void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, int64_t metricId,
+                                    const MetricDimensionKey& key, int64_t metricValue) {
+    // TODO(b/110563466): Why receive timestamp? RefractoryPeriod should always be based on
+    // real time right now.
     if (isInRefractoryPeriod(timestampNs, key)) {
         VLOG("Skipping anomaly declaration since within refractory period");
         return;
@@ -216,31 +218,32 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDime
     if (mAlert.has_refractory_period_secs()) {
         mRefractoryPeriodEndsSec[key] = ((timestampNs + NS_PER_SEC - 1) / NS_PER_SEC) // round up
                                         + mAlert.refractory_period_secs();
-        // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
+        // TODO(b/110563466): If we had access to the bucket_size_millis, consider
+        // calling resetStorage()
         // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) {resetStorage();}
     }
 
     if (!mSubscriptions.empty()) {
         ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.",
                 mAlert.id(), key.toString().c_str());
-        informSubscribers(key);
+        informSubscribers(key, metricId, metricValue);
     } else {
         ALOGI("An anomaly has occurred! (But no subscriber for that alert.)");
     }
 
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
-    // TODO: This should also take in the const MetricDimensionKey& key?
+    // TODO(b/110564268): This should also take in the const MetricDimensionKey& key?
     android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
                                mConfigKey.GetId(), mAlert.id());
 }
 
 void AnomalyTracker::detectAndDeclareAnomaly(const int64_t& timestampNs,
-                                             const int64_t& currBucketNum,
+                                             const int64_t& currBucketNum, int64_t metricId,
                                              const MetricDimensionKey& key,
                                              const int64_t& currentBucketValue) {
     if (detectAnomaly(currBucketNum, key, currentBucketValue)) {
-        declareAnomaly(timestampNs, key);
+        declareAnomaly(timestampNs, metricId, key, currentBucketValue);
     }
 }
 
@@ -253,8 +256,9 @@ bool AnomalyTracker::isInRefractoryPeriod(const int64_t& timestampNs,
     return false;
 }
 
-void AnomalyTracker::informSubscribers(const MetricDimensionKey& key) {
-    triggerSubscribers(mAlert.id(), key, mConfigKey, mSubscriptions);
+void AnomalyTracker::informSubscribers(const MetricDimensionKey& key, int64_t metric_id,
+                                       int64_t metricValue) {
+    triggerSubscribers(mAlert.id(), metric_id, key, metricValue, mConfigKey, mSubscriptions);
 }
 
 }  // namespace statsd

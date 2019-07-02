@@ -16,11 +16,11 @@
 
 package android.text.style;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Parcel;
@@ -30,7 +30,6 @@ import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -71,9 +70,37 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      */
     public static final int FLAG_AUTO_CORRECTION = 0x0004;
 
+    /**
+     * This action is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
+     *
+     * @deprecated For IMEs to receive this kind of user interaction signals, implement IMEs' own
+     *             suggestion picker UI instead of relying on {@link SuggestionSpan}. To retrieve
+     *             bounding boxes for each character of the composing text, use
+     *             {@link android.view.inputmethod.CursorAnchorInfo}.
+     */
+    @Deprecated
     public static final String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
+
+    /**
+     * This is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
+     *
+     * @deprecated See {@link #ACTION_SUGGESTION_PICKED}.
+     */
+    @Deprecated
     public static final String SUGGESTION_SPAN_PICKED_AFTER = "after";
+    /**
+     * This is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
+     *
+     * @deprecated See {@link #ACTION_SUGGESTION_PICKED}.
+     */
+    @Deprecated
     public static final String SUGGESTION_SPAN_PICKED_BEFORE = "before";
+    /**
+     * This is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
+     *
+     * @deprecated See {@link #ACTION_SUGGESTION_PICKED}.
+     */
+    @Deprecated
     public static final String SUGGESTION_SPAN_PICKED_HASHCODE = "hashcode";
 
     public static final int SUGGESTIONS_MAX_SIZE = 5;
@@ -96,8 +123,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String mLocaleStringForCompatibility;
     @NonNull
     private final String mLanguageTag;
-    private final String mNotificationTargetClassName;
-    private final String mNotificationTargetPackageName;
     private final int mHashCode;
 
     @UnsupportedAppUsage
@@ -136,7 +161,9 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      * {@link SuggestionSpan#SUGGESTIONS_MAX_SIZE} will be considered. Null values not permitted.
      * @param flags Additional flags indicating how this span is handled in TextView
      * @param notificationTargetClass if not null, this class will get notified when the user
-     * selects one of the suggestions.
+     *                                selects one of the suggestions.  On Android
+     *                                {@link android.os.Build.VERSION_CODES#Q} and later this
+     *                                parameter is always ignored.
      */
     public SuggestionSpan(Context context, Locale locale, String[] suggestions, int flags,
             Class<?> notificationTargetClass) {
@@ -155,20 +182,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         }
         mLocaleStringForCompatibility = sourceLocale == null ? "" : sourceLocale.toString();
         mLanguageTag = sourceLocale == null ? "" : sourceLocale.toLanguageTag();
-
-        if (context != null) {
-            mNotificationTargetPackageName = context.getPackageName();
-        } else {
-            mNotificationTargetPackageName = null;
-        }
-
-        if (notificationTargetClass != null) {
-            mNotificationTargetClassName = notificationTargetClass.getCanonicalName();
-        } else {
-            mNotificationTargetClassName = "";
-        }
-        mHashCode = hashCodeInternal(mSuggestions, mLanguageTag, mLocaleStringForCompatibility,
-                mNotificationTargetClassName);
+        mHashCode = hashCodeInternal(mSuggestions, mLanguageTag, mLocaleStringForCompatibility);
 
         initStyle(context);
     }
@@ -214,8 +228,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mFlags = src.readInt();
         mLocaleStringForCompatibility = src.readString();
         mLanguageTag = src.readString();
-        mNotificationTargetClassName = src.readString();
-        mNotificationTargetPackageName = src.readString();
         mHashCode = src.readInt();
         mEasyCorrectUnderlineColor = src.readInt();
         mEasyCorrectUnderlineThickness = src.readFloat();
@@ -259,17 +271,15 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     /**
-     * @return The name of the class to notify. The class of the original IME package will receive
-     * a notification when the user selects one of the suggestions. The notification will include
-     * the original string, the suggested replacement string as well as the hashCode of this span.
-     * The class will get notified by an intent that has those information.
-     * This is an internal API because only the framework should know the class name.
+     * @return {@code null}.
      *
      * @hide
+     * @deprecated Do not use. Always returns {@code null}.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public String getNotificationTargetClassName() {
-        return mNotificationTargetClassName;
+        return null;
     }
 
     public int getFlags() {
@@ -296,8 +306,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         dest.writeInt(mFlags);
         dest.writeString(mLocaleStringForCompatibility);
         dest.writeString(mLanguageTag);
-        dest.writeString(mNotificationTargetClassName);
-        dest.writeString(mNotificationTargetPackageName);
         dest.writeInt(mHashCode);
         dest.writeInt(mEasyCorrectUnderlineColor);
         dest.writeFloat(mEasyCorrectUnderlineThickness);
@@ -331,12 +339,12 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     private static int hashCodeInternal(String[] suggestions, @NonNull String languageTag,
-            @NonNull String localeStringForCompatibility, String notificationTargetClassName) {
+            @NonNull String localeStringForCompatibility) {
         return Arrays.hashCode(new Object[] {Long.valueOf(SystemClock.uptimeMillis()), suggestions,
-                languageTag, localeStringForCompatibility, notificationTargetClassName});
+                languageTag, localeStringForCompatibility});
     }
 
-    public static final Parcelable.Creator<SuggestionSpan> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SuggestionSpan> CREATOR =
             new Parcelable.Creator<SuggestionSpan>() {
         @Override
         public SuggestionSpan createFromParcel(Parcel source) {
@@ -369,10 +377,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
     /**
      * @return The color of the underline for that span, or 0 if there is no underline
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
+    @ColorInt
     public int getUnderlineColor() {
         // The order here should match what is used in updateDrawState
         final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
@@ -391,39 +397,14 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     /**
-     * Notifies a suggestion selection.
+     * Does nothing.
      *
+     * @deprecated this is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
      * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public void notifySelection(Context context, String original, int index) {
-        final Intent intent = new Intent();
-
-        if (context == null || mNotificationTargetClassName == null) {
-            return;
-        }
-        // Ensures that only a class in the original IME package will receive the
-        // notification.
-        if (mSuggestions == null || index < 0 || index >= mSuggestions.length) {
-            Log.w(TAG, "Unable to notify the suggestion as the index is out of range index=" + index
-                    + " length=" + mSuggestions.length);
-            return;
-        }
-
-        // The package name is not mandatory (legacy from JB), and if the package name
-        // is missing, we try to notify the suggestion through the input method manager.
-        if (mNotificationTargetPackageName != null) {
-            intent.setClassName(mNotificationTargetPackageName, mNotificationTargetClassName);
-            intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
-            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, original);
-            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, mSuggestions[index]);
-            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, hashCode());
-            context.sendBroadcast(intent);
-        } else {
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                imm.notifySuggestionPicked(this, original, index);
-            }
-        }
+        Log.w(TAG, "notifySelection() is deprecated.  Does nothing.");
     }
 }

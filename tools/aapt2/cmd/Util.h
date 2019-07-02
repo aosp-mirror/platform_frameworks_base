@@ -17,6 +17,8 @@
 #ifndef AAPT_SPLIT_UTIL_H
 #define AAPT_SPLIT_UTIL_H
 
+#include <regex>
+
 #include "androidfw/StringPiece.h"
 
 #include "AppInfo.h"
@@ -59,6 +61,21 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
 // Extracts relevant info from the AndroidManifest.xml.
 Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
                                                 IDiagnostics* diag);
+
+// Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
+// replacing nonconforming characters with underscores.
+//
+// See frameworks/base/core/java/android/content/pm/PackageParser.java which
+// checks this at runtime.
+std::string MakePackageSafeName(const std::string &name);
+
+// Sets the versionCode and versionCodeMajor attributes to the version code. Attempts to encode the
+// version code using the versionCode attribute only, and encodes using both versionCode and
+// versionCodeMajor if the version code requires more than 32 bits.
+void SetLongVersionCode(xml::Element* manifest, uint64_t version_code);
+
+// Returns a case insensitive regular expression based on the input.
+std::regex GetRegularExpression(const std::string &input);
 
 }  // namespace aapt
 

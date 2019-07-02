@@ -48,6 +48,7 @@ const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
 const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
+const int FIELD_ID_IS_ACTIVE = 14;
 // for DurationMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for DurationMetricData
@@ -68,17 +69,14 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const FieldMatcher& internalDimensions,
-                                               const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
+                                               const int64_t timeBaseNs, const int64_t startTimeNs)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
       mStopAllIndex(stopAllIndex),
       mNested(nesting),
       mContainANYPositionInInternalDimensions(false) {
-    // TODO: The following boiler plate code appears in all MetricProducers, but we can't abstract
-    // them in the base class, because the proto generated CountMetric, and DurationMetric are
-    // not related. Maybe we should add a template in the future??
     if (metric.has_bucket()) {
         mBucketSizeNs =
                 TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
@@ -131,6 +129,9 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                mMetric2ConditionLinks.begin()->conditionFields);
         }
     }
+    flushIfNeededLocked(startTimeNs);
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
@@ -219,7 +220,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool conditio
                     trueConditionDimensions.end()) {
                 for (auto& condIt : whatIt.second) {
                     condIt.second->onConditionChanged(
-                        currentUnSlicedPartCondition, eventTime);
+                            currentUnSlicedPartCondition, eventTime);
                 }
             }
         }
@@ -313,7 +314,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool conditio
                 auto condIt = whatIt.second.find(trueDim);
                 if (condIt != whatIt.second.end()) {
                     condIt->second->onConditionChanged(
-                        currentUnSlicedPartCondition, eventTime);
+                            currentUnSlicedPartCondition, eventTime);
                 } else {
                     if (mMetric2ConditionLinks.size() == 0 ||
                         trueDim.contains(linkedConditionDimensionKey)) {
@@ -337,32 +338,25 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool conditio
     }
 }
 
-void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                              const int64_t eventTime) {
-    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
-    flushIfNeededLocked(eventTime);
-
-    if (!mConditionSliced) {
-        return;
-    }
-
+void DurationMetricProducer::onSlicedConditionMayChangeInternalLocked(bool overallCondition,
+        const int64_t eventTimeNs) {
     bool changeDimTrackable = mWizard->IsChangedDimensionTrackable(mConditionTrackerIndex);
     if (changeDimTrackable && mHasLinksToAllConditionDimensionsInTracker &&
         mDimensionsInCondition.empty()) {
-        onSlicedConditionMayChangeLocked_opt1(overallCondition, eventTime);
+        onSlicedConditionMayChangeLocked_opt1(overallCondition, eventTimeNs);
         return;
     }
 
     if (changeDimTrackable && mSameConditionDimensionsInTracker &&
         mMetric2ConditionLinks.size() <= 1) {
-        onSlicedConditionMayChangeLocked_opt2(overallCondition, eventTime);
+        onSlicedConditionMayChangeLocked_opt2(overallCondition, eventTimeNs);
         return;
     }
 
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
-            pair.second->onSlicedConditionMayChange(overallCondition, eventTime);
+            pair.second->onSlicedConditionMayChange(overallCondition, eventTimeNs);
         }
     }
 
@@ -388,10 +382,10 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondit
                         continue;
                     }
                     unique_ptr<DurationTracker> newTracker =
-                        whatIt.second.begin()->second->clone(eventTime);
+                        whatIt.second.begin()->second->clone(eventTimeNs);
                     if (newTracker != nullptr) {
                         newTracker->setEventKey(MetricDimensionKey(newEventKey));
-                        newTracker->onSlicedConditionMayChange(overallCondition, eventTime);
+                        newTracker->onSlicedConditionMayChange(overallCondition, eventTimeNs);
                         whatIt.second[conditionDimension] = std::move(newTracker);
                     }
                 }
@@ -417,10 +411,10 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondit
                     if (hitGuardRailLocked(newEventKey)) {
                         continue;
                     }
-                    auto newTracker = whatIt.second.begin()->second->clone(eventTime);
+                    auto newTracker = whatIt.second.begin()->second->clone(eventTimeNs);
                     if (newTracker != nullptr) {
                         newTracker->setEventKey(newEventKey);
-                        newTracker->onSlicedConditionMayChange(overallCondition, eventTime);
+                        newTracker->onSlicedConditionMayChange(overallCondition, eventTimeNs);
                         whatIt.second[conditionDimension] = std::move(newTracker);
                     }
                 }
@@ -429,13 +423,62 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondit
     }
 }
 
+void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                              const int64_t eventTime) {
+    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
+
+    if (!mIsActive) {
+        return;
+    }
+
+    flushIfNeededLocked(eventTime);
+
+    if (!mConditionSliced) {
+        return;
+    }
+
+    onSlicedConditionMayChangeInternalLocked(overallCondition, eventTime);
+}
+
+void DurationMetricProducer::onActiveStateChangedLocked(const int64_t& eventTimeNs) {
+    MetricProducer::onActiveStateChangedLocked(eventTimeNs);
+
+    if (!mConditionSliced) {
+        if (ConditionState::kTrue != mCondition) {
+            return;
+        }
+
+        if (mIsActive) {
+            flushIfNeededLocked(eventTimeNs);
+        }
+
+        for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
+            for (auto& pair : whatIt.second) {
+                pair.second->onConditionChanged(mIsActive, eventTimeNs);
+            }
+        }
+    } else if (mIsActive) {
+        flushIfNeededLocked(eventTimeNs);
+        onSlicedConditionMayChangeInternalLocked(mIsActive, eventTimeNs);
+    } else { // mConditionSliced == true && !mIsActive
+        for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
+            for (auto& pair : whatIt.second) {
+                pair.second->onConditionChanged(mIsActive, eventTimeNs);
+            }
+        }
+    }
+}
+
 void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                       const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
+
+    if (!mIsActive) {
+        return;
+    }
+
     flushIfNeededLocked(eventTime);
-    // TODO: need to populate the condition change time from the event which triggers the condition
-    // change, instead of using current time.
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
             pair.second->onConditionChanged(conditionMet, eventTime);
@@ -445,6 +488,7 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
 
 void DurationMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
     mPastBuckets.clear();
 }
 
@@ -455,6 +499,8 @@ void DurationMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 
 void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                                 const bool include_current_partial_bucket,
+                                                const bool erase_data,
+                                                const DumpLatency dumpLatency,
                                                 std::set<string> *str_set,
                                                 ProtoOutputStream* protoOutput) {
     if (include_current_partial_bucket) {
@@ -462,12 +508,14 @@ void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     } else {
         flushIfNeededLocked(dumpTimeNs);
     }
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
+
     if (mPastBuckets.empty()) {
         VLOG(" Duration metric, empty return");
         return;
     }
 
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TIME_BASE, (long long)mTimeBaseNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_SIZE, (long long)mBucketSizeNs);
 
@@ -543,7 +591,9 @@ void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 
     protoOutput->end(protoToken);
-    mPastBuckets.clear();
+    if (erase_data) {
+        mPastBuckets.clear();
+    }
 }
 
 void DurationMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
@@ -553,30 +603,15 @@ void DurationMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
     VLOG("flushing...........");
-    for (auto whatIt = mCurrentSlicedDurationTrackerMap.begin();
-            whatIt != mCurrentSlicedDurationTrackerMap.end();) {
-        for (auto it = whatIt->second.begin(); it != whatIt->second.end();) {
-            if (it->second->flushIfNeeded(eventTimeNs, &mPastBuckets)) {
-                VLOG("erase bucket for key %s %s",
-                     whatIt->first.toString().c_str(), it->first.toString().c_str());
-                it = whatIt->second.erase(it);
-            } else {
-                ++it;
-            }
-        }
-        if (whatIt->second.empty()) {
-            whatIt = mCurrentSlicedDurationTrackerMap.erase(whatIt);
-        } else {
-            whatIt++;
-        }
-    }
-
     int numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    int64_t nextBucketNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    flushCurrentBucketLocked(eventTimeNs, nextBucketNs);
+
     mCurrentBucketNum += numBucketsForward;
 }
 
-void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                      const int64_t& nextBucketStartTimeNs) {
     for (auto whatIt = mCurrentSlicedDurationTrackerMap.begin();
             whatIt != mCurrentSlicedDurationTrackerMap.end();) {
         for (auto it = whatIt->second.begin(); it != whatIt->second.end();) {
@@ -594,6 +629,8 @@ void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs
             whatIt++;
         }
     }
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
 }
 
 void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
@@ -703,7 +740,9 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
         return;
     }
 
-    flushIfNeededLocked(event.GetElapsedTimestampNs());
+    if (mIsActive) {
+        flushIfNeededLocked(event.GetElapsedTimestampNs());
+    }
 
     // Handles Stopall events.
     if (matcherIndex == mStopAllIndex) {
@@ -762,16 +801,19 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
                            !mSameConditionDimensionsInTracker,
                            !mHasLinksToAllConditionDimensionsInTracker,
                            &dimensionKeysInCondition);
-        condition = (conditionState == ConditionState::kTrue);
+        condition = conditionState == ConditionState::kTrue;
         if (mDimensionsInCondition.empty() && condition) {
             dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
         }
     } else {
-        condition = mCondition;
+        // TODO: The unknown condition state is not handled here, we should fix it.
+        condition = mCondition == ConditionState::kTrue;
         if (condition) {
             dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
         }
     }
+
+    condition = condition && mIsActive;
 
     if (dimensionKeysInCondition.empty()) {
         handleStartEvent(MetricDimensionKey(dimensionInWhat, DEFAULT_DIMENSION_KEY),
@@ -783,7 +825,7 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
         if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
             for (const auto& condIt : whatIt->second) {
                 const bool cond = dimensionKeysInCondition.find(condIt.first) !=
-                        dimensionKeysInCondition.end();
+                        dimensionKeysInCondition.end() && condition;
                 handleStartEvent(MetricDimensionKey(dimensionInWhat, condIt.first),
                     conditionKey, cond, event);
                 dimensionKeysInCondition.erase(condIt.first);

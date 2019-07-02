@@ -16,15 +16,16 @@
 
 package android.view;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.view.View;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.test.filters.SmallTest;
 
 public class CreateViewTest extends AndroidTestCase implements PerformanceTestCase {
 

@@ -560,7 +560,7 @@ public class NetworkInfo implements Parcelable {
         }
     }
 
-    public static final Creator<NetworkInfo> CREATOR = new Creator<NetworkInfo>() {
+    public static final @android.annotation.NonNull Creator<NetworkInfo> CREATOR = new Creator<NetworkInfo>() {
         @Override
         public NetworkInfo createFromParcel(Parcel in) {
             int netType = in.readInt();

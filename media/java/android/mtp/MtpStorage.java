@@ -18,6 +18,7 @@ package android.mtp;
 
 import android.annotation.UnsupportedAppUsage;
 import android.os.storage.StorageVolume;
+import android.provider.MediaStore;
 
 /**
  * This class represents a storage unit on an MTP device.
@@ -27,12 +28,12 @@ import android.os.storage.StorageVolume;
  * @hide
  */
 public class MtpStorage {
-
     private final int mStorageId;
     private final String mPath;
     private final String mDescription;
     private final boolean mRemovable;
     private final long mMaxFileSize;
+    private final String mVolumeName;
 
     public MtpStorage(StorageVolume volume, int storageId) {
         mStorageId = storageId;
@@ -40,6 +41,11 @@ public class MtpStorage {
         mDescription = volume.getDescription(null);
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
+        if (volume.isPrimary()) {
+            mVolumeName = MediaStore.VOLUME_EXTERNAL_PRIMARY;
+        } else {
+            mVolumeName = volume.getNormalizedUuid();
+        }
     }
 
     /**
@@ -87,5 +93,9 @@ public class MtpStorage {
      */
     public long getMaxFileSize() {
         return mMaxFileSize;
+    }
+
+    public String getVolumeName() {
+        return mVolumeName;
     }
 }

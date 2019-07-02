@@ -25,6 +25,7 @@ import static android.system.OsConstants.EPIPE;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
 import android.media.AudioFormat;
 import android.os.Handler;
 import android.os.Parcel;
@@ -140,7 +141,7 @@ public class SoundTrigger {
             this.returnsTriggerInEvent = returnsTriggerInEvent;
         }
 
-        public static final Parcelable.Creator<ModuleProperties> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<ModuleProperties> CREATOR
                 = new Parcelable.Creator<ModuleProperties>() {
             public ModuleProperties createFromParcel(Parcel in) {
                 return ModuleProperties.fromParcel(in);
@@ -326,7 +327,7 @@ public class SoundTrigger {
             this.users = users;
         }
 
-        public static final Parcelable.Creator<Keyphrase> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<Keyphrase> CREATOR
                 = new Parcelable.Creator<Keyphrase>() {
             public Keyphrase createFromParcel(Parcel in) {
                 return Keyphrase.fromParcel(in);
@@ -436,7 +437,7 @@ public class SoundTrigger {
             this.keyphrases = keyphrases;
         }
 
-        public static final Parcelable.Creator<KeyphraseSoundModel> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR
                 = new Parcelable.Creator<KeyphraseSoundModel>() {
             public KeyphraseSoundModel createFromParcel(Parcel in) {
                 return KeyphraseSoundModel.fromParcel(in);
@@ -516,7 +517,7 @@ public class SoundTrigger {
      ****************************************************************************/
     public static class GenericSoundModel extends SoundModel implements Parcelable {
 
-        public static final Parcelable.Creator<GenericSoundModel> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<GenericSoundModel> CREATOR
                 = new Parcelable.Creator<GenericSoundModel>() {
             public GenericSoundModel createFromParcel(Parcel in) {
                 return GenericSoundModel.fromParcel(in);
@@ -611,6 +612,13 @@ public class SoundTrigger {
      * @hide
      */
     public static final int RECOGNITION_STATUS_FAILURE = 2;
+    /**
+     * Recognition event was triggered by a getModelState request, not by the
+     * DSP.
+     *
+     * @hide
+     */
+    public static final int RECOGNITION_STATUS_GET_STATE_RESPONSE = 3;
 
     /**
      *  A RecognitionEvent is provided by the
@@ -739,7 +747,7 @@ public class SoundTrigger {
         }
 
         /** @hide */
-        public static final Parcelable.Creator<RecognitionEvent> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<RecognitionEvent> CREATOR
                 = new Parcelable.Creator<RecognitionEvent>() {
             public RecognitionEvent createFromParcel(Parcel in) {
                 return RecognitionEvent.fromParcel(in);
@@ -913,7 +921,7 @@ public class SoundTrigger {
             this.data = data;
         }
 
-        public static final Parcelable.Creator<RecognitionConfig> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<RecognitionConfig> CREATOR
                 = new Parcelable.Creator<RecognitionConfig>() {
             public RecognitionConfig createFromParcel(Parcel in) {
                 return RecognitionConfig.fromParcel(in);
@@ -976,7 +984,7 @@ public class SoundTrigger {
             this.confidenceLevel = confidenceLevel;
         }
 
-        public static final Parcelable.Creator<ConfidenceLevel> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<ConfidenceLevel> CREATOR
                 = new Parcelable.Creator<ConfidenceLevel>() {
             public ConfidenceLevel createFromParcel(Parcel in) {
                 return ConfidenceLevel.fromParcel(in);
@@ -1070,7 +1078,7 @@ public class SoundTrigger {
             this.confidenceLevels = confidenceLevels;
         }
 
-        public static final Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionExtra>() {
             public KeyphraseRecognitionExtra createFromParcel(Parcel in) {
                 return KeyphraseRecognitionExtra.fromParcel(in);
@@ -1162,7 +1170,7 @@ public class SoundTrigger {
             this.keyphraseExtras = keyphraseExtras;
         }
 
-        public static final Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
             public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
                 return KeyphraseRecognitionEvent.fromParcelForKeyphrase(in);
@@ -1283,7 +1291,7 @@ public class SoundTrigger {
                     data);
         }
 
-        public static final Parcelable.Creator<GenericRecognitionEvent> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<GenericRecognitionEvent> CREATOR
                 = new Parcelable.Creator<GenericRecognitionEvent>() {
             public GenericRecognitionEvent createFromParcel(Parcel in) {
                 return GenericRecognitionEvent.fromParcelForGeneric(in);
@@ -1350,7 +1358,7 @@ public class SoundTrigger {
             this.data = data;
         }
 
-        public static final Parcelable.Creator<SoundModelEvent> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SoundModelEvent> CREATOR
                 = new Parcelable.Creator<SoundModelEvent>() {
             public SoundModelEvent createFromParcel(Parcel in) {
                 return SoundModelEvent.fromParcel(in);
@@ -1433,6 +1441,17 @@ public class SoundTrigger {
     public static final int SERVICE_STATE_DISABLED = 1;
 
     /**
+     * @return returns current package name.
+     */
+    static String getCurrentOpPackageName() {
+        String packageName = ActivityThread.currentOpPackageName();
+        if (packageName == null) {
+            return "";
+        }
+        return packageName;
+    }
+
+    /**
      * Returns a list of descriptors for all hardware modules loaded.
      * @param modules A ModuleProperties array where the list will be returned.
      * @return - {@link #STATUS_OK} in case of success
@@ -1445,7 +1464,23 @@ public class SoundTrigger {
      * @hide
      */
     @UnsupportedAppUsage
-    public static native int listModules(ArrayList <ModuleProperties> modules);
+    public static int listModules(ArrayList<ModuleProperties> modules) {
+        return listModules(getCurrentOpPackageName(), modules);
+    }
+
+    /**
+     * Returns a list of descriptors for all hardware modules loaded.
+     * @param opPackageName
+     * @param modules A ModuleProperties array where the list will be returned.
+     * @return - {@link #STATUS_OK} in case of success
+     *         - {@link #STATUS_ERROR} in case of unspecified error
+     *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
+     *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link #STATUS_BAD_VALUE} if modules is null
+     *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
+     */
+    private static native int listModules(String opPackageName,
+                                          ArrayList<ModuleProperties> modules);
 
     /**
      * Get an interface on a hardware module to control sound models and recognition on

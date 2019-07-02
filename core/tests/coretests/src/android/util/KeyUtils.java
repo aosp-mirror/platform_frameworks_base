@@ -17,16 +17,10 @@
 package android.util;
 
 import android.app.Instrumentation;
-import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.InstrumentationTestCase;
-import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 
 /**
  * Reusable methods for generating key events.

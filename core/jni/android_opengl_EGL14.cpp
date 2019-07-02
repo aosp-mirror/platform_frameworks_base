@@ -35,8 +35,6 @@
 
 #include <ui/ANativeObjectBase.h>
 
-static int initialized = 0;
-
 static jclass egldisplayClass;
 static jclass eglcontextClass;
 static jclass eglsurfaceClass;
@@ -107,6 +105,7 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
     if (obj == NULL){
         jniThrowException(_env, "java/lang/IllegalArgumentException",
                           "Object is set to null.");
+        return nullptr;
     }
 
     jlong handle = _env->CallLongMethod(obj, mid);
@@ -238,6 +237,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -335,6 +335,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -454,6 +455,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -509,6 +511,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -582,6 +585,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
 }
@@ -664,6 +668,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
 }
@@ -721,6 +726,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
 }
@@ -731,7 +737,7 @@ android_eglCreatePixmapSurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jint pixmap, jintArray attrib_list_ref, jint offset) {
     jniThrowException(_env, "java/lang/UnsupportedOperationException",
         "eglCreatePixmapSurface");
-    return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, (EGLSurface) 0);
+    return nullptr;
 }
 
 /* EGLBoolean eglDestroySurface ( EGLDisplay dpy, EGLSurface surface ) */
@@ -800,6 +806,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -898,6 +905,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
 }
@@ -1034,6 +1042,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return nullptr;
     }
     return toEGLHandle(_env, eglcontextClass, eglcontextConstructor, _returnValue);
 }
@@ -1152,6 +1161,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -1197,7 +1207,7 @@ android_eglCopyBuffers
   (JNIEnv *_env, jobject _this, jobject dpy, jobject surface, jint target) {
     jniThrowException(_env, "java/lang/UnsupportedOperationException",
         "eglCopyBuffers");
-    return (EGLBoolean) 0;
+        return JNI_FALSE;
 }
 
 static const char *classPathName = "android/opengl/EGL14";

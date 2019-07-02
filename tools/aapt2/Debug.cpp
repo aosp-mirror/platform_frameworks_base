@@ -129,12 +129,20 @@ class ValueBodyPrinter : public ConstValueVisitor {
     constexpr uint32_t kMask = android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS;
     if (attr->type_mask & kMask) {
       for (const auto& symbol : attr->symbols) {
-        printer_->Print(symbol.symbol.name.value().entry);
-        if (symbol.symbol.id) {
-          printer_->Print("(");
+        if (symbol.symbol.name) {
+          printer_->Print(symbol.symbol.name.value().entry);
+
+          if (symbol.symbol.id) {
+            printer_->Print("(");
+            printer_->Print(symbol.symbol.id.value().to_string());
+            printer_->Print(")");
+          }
+        } else if (symbol.symbol.id) {
           printer_->Print(symbol.symbol.id.value().to_string());
-          printer_->Print(")");
+        } else {
+          printer_->Print("???");
         }
+
         printer_->Println(StringPrintf("=0x%08x", symbol.value));
       }
     }
@@ -306,10 +314,6 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
             break;
         }
 
-        if (entry->overlayable) {
-          printer->Print(" OVERLAYABLE");
-        }
-
         printer->Println();
 
         if (options.show_values) {
@@ -405,6 +409,41 @@ void Debug::DumpHex(const void* data, size_t len) {
 
   if (len - 1 % 8 != 7) {
     std::cerr << std::endl;
+  }
+}
+
+void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer* printer) {
+  using namespace android;
+
+  if (pool->getError() == NO_INIT) {
+    printer->Print("String pool is unitialized.\n");
+    return;
+  } else if (pool->getError() != NO_ERROR) {
+    printer->Print("String pool is corrupt/invalid.\n");
+    return;
+  }
+
+  SortedVector<const void*> uniqueStrings;
+  const size_t N = pool->size();
+  for (size_t i=0; i<N; i++) {
+    size_t len;
+    if (pool->isUTF8()) {
+      uniqueStrings.add(pool->string8At(i, &len));
+    } else {
+      uniqueStrings.add(pool->stringAt(i, &len));
+    }
+  }
+
+  printer->Print(StringPrintf("String pool of %zd unique %s %s strings, %zd entries and %zd styles "
+                              "using %zd bytes:\n", uniqueStrings.size(),
+                              pool->isUTF8() ? "UTF-8" : "UTF-16",
+                              pool->isSorted() ? "sorted" : "non-sorted", N, pool->styleCount(),
+                              pool->bytes()));
+
+  const size_t NS = pool->size();
+  for (size_t s=0; s<NS; s++) {
+    String8 str = pool->string8ObjectAt(s);
+    printer->Print(StringPrintf("String #%zd : %s\n", s, str.string()));
   }
 }
 

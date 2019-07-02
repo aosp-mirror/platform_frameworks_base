@@ -13,11 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
@@ -42,8 +44,6 @@ public class BatteryStatsCounterTest extends TestCase {
         counter.stepAtomic();
         counter.stepAtomic();
         assertEquals(0, counter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(0, counter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(0, counter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase on (i.e. unplugged)
         timeBase.setRunning(true, 2, 2);
@@ -52,8 +52,6 @@ public class BatteryStatsCounterTest extends TestCase {
         counter.stepAtomic();
         counter.stepAtomic();
         assertEquals(4, counter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(4, counter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(4, counter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase off (i.e. plugged in)
         timeBase.setRunning(false, 3, 3);
@@ -61,16 +59,12 @@ public class BatteryStatsCounterTest extends TestCase {
         counter.stepAtomic();
         counter.stepAtomic();
         assertEquals(4, counter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(4, counter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(4, counter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase on (i.e. unplugged)
         timeBase.setRunning(true, 4, 4);
         counter.stepAtomic();
         counter.stepAtomic();
         assertEquals(6, counter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(6, counter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(2, counter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
     }
 
 
@@ -86,8 +80,6 @@ public class BatteryStatsCounterTest extends TestCase {
         timeBase.setRunning(true, 1, 1);
         origCounter.stepAtomic(); origCounter.stepAtomic(); origCounter.stepAtomic(); // three times
         assertEquals(3, origCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(3, origCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(3, origCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // Test summary parcelling (from origCounter)
         final Parcel summaryParcel = Parcel.obtain();
@@ -100,22 +92,16 @@ public class BatteryStatsCounterTest extends TestCase {
         // timeBase still on (i.e. unplugged)
         summaryCounter.stepAtomic(); // once
         assertEquals(4, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(1, summaryCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(1, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase off (i.e. plugged in)
         timeBase.setRunning(false, 3, 3);
         summaryCounter.stepAtomic(); summaryCounter.stepAtomic(); // twice
         assertEquals(4, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(1, summaryCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(1, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase on (i.e. unplugged)
         timeBase.setRunning(true, 4, 4);
         summaryCounter.stepAtomic(); summaryCounter.stepAtomic(); // twice
         assertEquals(6, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(3, summaryCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(2, summaryCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
 
         // Test full parcelling (from summaryCounter)
@@ -128,21 +114,15 @@ public class BatteryStatsCounterTest extends TestCase {
         // timeBase still on (i.e. unplugged)
         fullParcelCounter.stepAtomic(); // once
         assertEquals(7, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(4, fullParcelCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(3, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase off (i.e. plugged in)
         timeBase.setRunning(false, 5, 5);
         fullParcelCounter.stepAtomic(); fullParcelCounter.stepAtomic(); // twice
         assertEquals(7, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(4, fullParcelCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(3, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
 
         // timeBase on (i.e. unplugged)
         timeBase.setRunning(true, 6, 6);
         fullParcelCounter.stepAtomic(); fullParcelCounter.stepAtomic(); // twice
         assertEquals(9, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(6, fullParcelCounter.getCountLocked(BatteryStats.STATS_CURRENT));
-        assertEquals(2, fullParcelCounter.getCountLocked(BatteryStats.STATS_SINCE_UNPLUGGED));
     }
 }

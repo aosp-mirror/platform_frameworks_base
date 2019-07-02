@@ -19,13 +19,14 @@ package android.transition;
 import android.animation.AnimatorSetActivity;
 import android.app.Activity;
 import android.graphics.Rect;
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
 import android.transition.Transition.EpicenterCallback;
 import android.util.ArrayMap;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.TextView;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 

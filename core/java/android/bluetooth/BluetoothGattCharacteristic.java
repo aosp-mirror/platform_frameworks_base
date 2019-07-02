@@ -302,7 +302,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
         out.writeTypedList(mDescriptors);
     }
 
-    public static final Parcelable.Creator<BluetoothGattCharacteristic> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothGattCharacteristic> CREATOR =
             new Parcelable.Creator<BluetoothGattCharacteristic>() {
         public BluetoothGattCharacteristic createFromParcel(Parcel in) {
             return new BluetoothGattCharacteristic(in);

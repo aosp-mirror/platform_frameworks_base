@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.system.Os;
@@ -197,15 +199,38 @@ public class Process {
     public static final int LAST_APPLICATION_UID = 19999;
 
     /**
+     * First uid used for fully isolated sandboxed processes spawned from an app zygote
+     * @hide
+     */
+    @TestApi
+    public static final int FIRST_APP_ZYGOTE_ISOLATED_UID = 90000;
+
+    /**
+     * Number of UIDs we allocate per application zygote
+     * @hide
+     */
+    @TestApi
+    public static final int NUM_UIDS_PER_APP_ZYGOTE = 100;
+
+    /**
+     * Last uid used for fully isolated sandboxed processes spawned from an app zygote
+     * @hide
+     */
+    @TestApi
+    public static final int LAST_APP_ZYGOTE_ISOLATED_UID = 98999;
+
+    /**
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @TestApi
     public static final int FIRST_ISOLATED_UID = 99000;
 
     /**
      * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @TestApi
     public static final int LAST_ISOLATED_UID = 99999;
 
     /**
@@ -485,46 +510,51 @@ public class Process {
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
+     * @param packageName null-ok the name of the package this process belongs to.
+     *
      * @param zygoteArgs Additional arguments to supply to the zygote process.
-     * 
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
      * 
      * {@hide}
      */
-    public static final ProcessStartResult start(final String processClass,
-                                  final String niceName,
-                                  int uid, int gid, int[] gids,
-                                  int runtimeFlags, int mountExternal,
-                                  int targetSdkVersion,
-                                  String seInfo,
-                                  String abi,
-                                  String instructionSet,
-                                  String appDataDir,
-                                  String invokeWith,
-                                  String[] zygoteArgs) {
+    public static ProcessStartResult start(@NonNull final String processClass,
+                                           @Nullable final String niceName,
+                                           int uid, int gid, @Nullable int[] gids,
+                                           int runtimeFlags,
+                                           int mountExternal,
+                                           int targetSdkVersion,
+                                           @Nullable String seInfo,
+                                           @NonNull String abi,
+                                           @Nullable String instructionSet,
+                                           @Nullable String appDataDir,
+                                           @Nullable String invokeWith,
+                                           @Nullable String packageName,
+                                           @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith,
-                    /*useBlastulaPool=*/ true, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith, packageName,
+                    /*useUsapPool=*/ true, zygoteArgs);
     }
 
     /** @hide */
-    public static final ProcessStartResult startWebView(final String processClass,
-                                  final String niceName,
-                                  int uid, int gid, int[] gids,
-                                  int runtimeFlags, int mountExternal,
-                                  int targetSdkVersion,
-                                  String seInfo,
-                                  String abi,
-                                  String instructionSet,
-                                  String appDataDir,
-                                  String invokeWith,
-                                  String[] zygoteArgs) {
+    public static ProcessStartResult startWebView(@NonNull final String processClass,
+                                                  @Nullable final String niceName,
+                                                  int uid, int gid, @Nullable int[] gids,
+                                                  int runtimeFlags,
+                                                  int mountExternal,
+                                                  int targetSdkVersion,
+                                                  @Nullable String seInfo,
+                                                  @NonNull String abi,
+                                                  @Nullable String instructionSet,
+                                                  @Nullable String appDataDir,
+                                                  @Nullable String invokeWith,
+                                                  @Nullable String packageName,
+                                                  @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith,
-                    /*useBlastulaPool=*/ false, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith, packageName,
+                    /*useUsapPool=*/ false, zygoteArgs);
     }
 
     /**
@@ -634,7 +664,8 @@ public class Process {
     @UnsupportedAppUsage
     public static final boolean isIsolated(int uid) {
         uid = UserHandle.getAppId(uid);
-        return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
+        return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
+                || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
     }
 
     /**
@@ -998,6 +1029,8 @@ public class Process {
     @UnsupportedAppUsage
     public static final int PROC_TAB_TERM = (int)'\t';
     /** @hide */
+    public static final int PROC_NEWLINE_TERM = (int) '\n';
+    /** @hide */
     @UnsupportedAppUsage
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
@@ -1017,12 +1050,40 @@ public class Process {
     /** @hide */
     @UnsupportedAppUsage
     public static final int PROC_OUT_FLOAT = 0x4000;
-    
-    /** @hide */
+
+    /**
+     * Read and parse a {@code proc} file in the given format.
+     *
+     * <p>The format is a list of integers, where every integer describes a variable in the file. It
+     * specifies how the variable is syntactically terminated (e.g. {@link Process#PROC_SPACE_TERM},
+     * {@link Process#PROC_TAB_TERM}, {@link Process#PROC_ZERO_TERM}, {@link
+     * Process#PROC_NEWLINE_TERM}).
+     *
+     * <p>If the variable should be parsed and returned to the caller, the termination type should
+     * be binary OR'd with the type of output (e.g. {@link Process#PROC_OUT_STRING}, {@link
+     * Process#PROC_OUT_LONG}, {@link Process#PROC_OUT_FLOAT}.
+     *
+     * <p>If the variable is wrapped in quotation marks it should be binary OR'd with {@link
+     * Process#PROC_QUOTES}. If the variable is wrapped in parentheses it should be binary OR'd with
+     * {@link Process#PROC_PARENS}.
+     *
+     * <p>If the variable is not formatted as a string and should be cast directly from characters
+     * to a long, the {@link Process#PROC_CHAR} integer should be binary OR'd.
+     *
+     * <p>If the terminating character can be repeated, the {@link Process#PROC_COMBINE} integer
+     * should be binary OR'd.
+     *
+     * @param file the path of the {@code proc} file to read
+     * @param format the format of the file
+     * @param outStrings the parsed {@code String}s from the file
+     * @param outLongs the parsed {@code long}s from the file
+     * @param outFloats the parsed {@code float}s from the file
+     * @hide
+     */
     @UnsupportedAppUsage
     public static final native boolean readProcFile(String file, int[] format,
             String[] outStrings, long[] outLongs, float[] outFloats);
-    
+
     /** @hide */
     @UnsupportedAppUsage
     public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
@@ -1042,6 +1103,9 @@ public class Process {
      */
     @UnsupportedAppUsage
     public static final native long getPss(int pid);
+
+    /** @hide */
+    public static final native long[] getRss(int pid);
 
     /**
      * Specifies the outcome of having started a process.

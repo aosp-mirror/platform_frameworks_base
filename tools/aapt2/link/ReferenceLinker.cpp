@@ -27,6 +27,7 @@
 #include "link/Linkers.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
@@ -353,6 +354,7 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
 }
 
 bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("ReferenceLinker::Consume");
   EmptyDeclStack decl_stack;
   bool error = false;
   for (auto& package : table->packages) {
@@ -368,7 +370,16 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
         // Symbol state information may be lost if there is no value for the resource.
         if (entry->visibility.level != Visibility::Level::kUndefined && entry->values.empty()) {
           context->GetDiagnostics()->Error(DiagMessage(entry->visibility.source)
-                                           << "no definition for declared symbol '" << name << "'");
+                                               << "no definition for declared symbol '" << name
+                                               << "'");
+          error = true;
+        }
+
+        // Ensure that definitions for values declared as overlayable exist
+        if (entry->overlayable_item && entry->values.empty()) {
+          context->GetDiagnostics()->Error(DiagMessage(entry->overlayable_item.value().source)
+                                           << "no definition for overlayable symbol '"
+                                           << name << "'");
           error = true;
         }
 

@@ -186,8 +186,13 @@ final class ConnectionServiceAdapterServant {
                     break;
                 }
                 case MSG_QUERY_REMOTE_CALL_SERVICES:
-                    mDelegate.queryRemoteConnectionServices((RemoteServiceCallback) msg.obj,
-                            null /*Session.Info*/);
+                    SomeArgs args2 = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.queryRemoteConnectionServices((RemoteServiceCallback) args2.arg1,
+                                (String) args2.arg2, null /*Session.Info*/);
+                    } finally {
+                        args2.recycle();
+                    }
                     break;
                 case MSG_SET_VIDEO_STATE:
                     mDelegate.setVideoState((String) msg.obj, msg.arg1, null /*Session.Info*/);
@@ -468,8 +473,11 @@ final class ConnectionServiceAdapterServant {
 
         @Override
         public void queryRemoteConnectionServices(RemoteServiceCallback callback,
-                Session.Info sessionInfo) {
-            mHandler.obtainMessage(MSG_QUERY_REMOTE_CALL_SERVICES, callback).sendToTarget();
+                String callingPackage, Session.Info sessionInfo) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callback;
+            args.arg2 = callingPackage;
+            mHandler.obtainMessage(MSG_QUERY_REMOTE_CALL_SERVICES, args).sendToTarget();
         }
 
         @Override

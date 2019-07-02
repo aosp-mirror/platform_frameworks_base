@@ -98,6 +98,12 @@ import java.util.ArrayList;
  * href="{@docRoot}guide/topics/resources/index.html">Application Resources</a>.</p>
  */
 public class Resources {
+    /**
+     * The {@code null} resource ID. This denotes an invalid resource ID that is returned by the
+     * system when a resource is not found or the value is set to {@code @null} in XML.
+     */
+    public static final @AnyRes int ID_NULL = 0;
+
     static final String TAG = "Resources";
 
     private static final Object sSync = new Object();
@@ -168,7 +174,7 @@ public class Resources {
     /** @hide */
     public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo,
             int dark, int deviceDefault) {
-        if (curTheme != ResourceId.ID_NULL) {
+        if (curTheme != ID_NULL) {
             return curTheme;
         }
         if (targetSdkVersion < Build.VERSION_CODES.HONEYCOMB) {
@@ -185,9 +191,9 @@ public class Resources {
 
     /**
      * Return a global shared Resources object that provides access to only
-     * system resources (no application resources), and is not configured for
-     * the current screen (can not use dimension units, does not change based
-     * on orientation, etc).
+     * system resources (no application resources), is not configured for the
+     * current screen (can not use dimension units, does not change based on
+     * orientation, etc), and is not affected by Runtime Resource Overlay.
      */
     public static Resources getSystem() {
         synchronized (sSync) {
@@ -655,8 +661,7 @@ public class Resources {
      *           tool. This integer encodes the package, type, and resource
      *           entry. The value 0 is an invalid identifier.
      * 
-     * @return Resource dimension value multiplied by the appropriate 
-     * metric.
+     * @return Resource dimension value multiplied by the appropriate metric to convert to pixels.
      * 
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
@@ -917,8 +922,10 @@ public class Resources {
      *           tool. This integer encodes the package, type, and resource
      *           entry. The value 0 is an invalid identifier.
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
+     *
+     * @deprecated Prefer {@link android.graphics.drawable.AnimatedImageDrawable}.
      */
+    @Deprecated
     public Movie getMovie(@RawRes int id) throws NotFoundException {
         final InputStream is = openRawResource(id);
         final Movie movie = Movie.decodeStream(is);
@@ -1128,10 +1135,8 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist or is not a floating-point value.
-     * @hide Pending API council approval.
      */
-    @UnsupportedAppUsage
-    public float getFloat(int id) {
+    public float getFloat(@DimenRes int id) {
         final TypedValue value = obtainTempTypedValue();
         try {
             mResourcesImpl.getValue(id, value, true);
@@ -1389,6 +1394,19 @@ public class Resources {
         mResourcesImpl.getValue(name, outValue, resolveRefs);
     }
 
+
+    /**
+     * Returns the resource ID of the resource that was used to create this AttributeSet.
+     *
+     * @param set AttributeSet for which we want to find the source.
+     * @return The resource ID for the source that is backing the given AttributeSet or
+     * {@link Resources#ID_NULL} if the AttributeSet is {@code null}.
+     */
+    @AnyRes
+    public static int getAttributeSetSourceResId(@Nullable AttributeSet set) {
+        return ResourcesImpl.getAttributeSetSourceResId(set);
+    }
+
     /**
      * This class holds the current attribute values for a particular theme.
      * In other words, a Theme is a set of values for resource attributes;
@@ -1469,7 +1487,8 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
+        @NonNull
+        public TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
             return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, 0);
         }
 
@@ -1494,7 +1513,9 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(@StyleRes int resId, @StyleableRes int[] attrs)
+        @NonNull
+        public TypedArray obtainStyledAttributes(@StyleRes int resId,
+                @NonNull @StyleableRes int[] attrs)
                 throws NotFoundException {
             return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, resId);
         }
@@ -1548,8 +1569,10 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(int, int[])
          */
-        public TypedArray obtainStyledAttributes(AttributeSet set,
-                @StyleableRes int[] attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+        @NonNull
+        public TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
+                @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes) {
             return mThemeImpl.obtainStyledAttributes(this, set, attrs, defStyleAttr, defStyleRes);
         }
 
@@ -1698,11 +1721,77 @@ public class Resources {
          * Rebases the theme against the parent Resource object's current
          * configuration by re-applying the styles passed to
          * {@link #applyStyle(int, boolean)}.
-         *
-         * @hide
          */
         public void rebase() {
             mThemeImpl.rebase();
+        }
+
+        /**
+         * Returns the resource ID for the style specified using {@code style="..."} in the
+         * {@link AttributeSet}'s backing XML element or {@link Resources#ID_NULL} otherwise if not
+         * specified or otherwise not applicable.
+         * <p>
+         * Each {@link android.view.View} can have an explicit style specified in the layout file.
+         * This style is used first during the {@link android.view.View} attribute resolution, then
+         * if an attribute is not defined there the resource system looks at default style and theme
+         * as fallbacks.
+         *
+         * @param set The base set of attribute values.
+         *
+         * @return The resource ID for the style specified using {@code style="..."} in the
+         *      {@link AttributeSet}'s backing XML element or {@link Resources#ID_NULL} otherwise
+         *      if not specified or otherwise not applicable.
+         */
+        @StyleRes
+        public int getExplicitStyle(@Nullable AttributeSet set) {
+            if (set == null) {
+                return ID_NULL;
+            }
+            int styleAttr = set.getStyleAttribute();
+            if (styleAttr == ID_NULL) {
+                return ID_NULL;
+            }
+            String styleAttrType = getResources().getResourceTypeName(styleAttr);
+            if ("attr".equals(styleAttrType)) {
+                TypedValue explicitStyle = new TypedValue();
+                boolean resolved = resolveAttribute(styleAttr, explicitStyle, true);
+                if (resolved) {
+                    return explicitStyle.resourceId;
+                }
+            } else if ("style".equals(styleAttrType)) {
+                return styleAttr;
+            }
+            return ID_NULL;
+        }
+
+        /**
+         * Returns the ordered list of resource ID that are considered when resolving attribute
+         * values when making an equivalent call to
+         * {@link #obtainStyledAttributes(AttributeSet, int[], int, int)} . The list will include
+         * a set of explicit styles ({@code explicitStyleRes} and it will include the default styles
+         * ({@code defStyleAttr} and {@code defStyleRes}).
+         *
+         * @param defStyleAttr An attribute in the current theme that contains a
+         *                     reference to a style resource that supplies
+         *                     defaults values for the TypedArray.  Can be
+         *                     0 to not look for defaults.
+         * @param defStyleRes A resource identifier of a style resource that
+         *                    supplies default values for the TypedArray,
+         *                    used only if defStyleAttr is 0 or can not be found
+         *                    in the theme.  Can be 0 to not look for defaults.
+         * @param explicitStyleRes A resource identifier of an explicit style resource.
+         * @return ordered list of resource ID that are considered when resolving attribute values.
+         */
+        @NonNull
+        public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
+            int[] stack = mThemeImpl.getAttributeResolutionStack(
+                    defStyleAttr, defStyleRes, explicitStyleRes);
+            if (stack == null) {
+                return new int[0];
+            } else {
+                return stack;
+            }
         }
     }
 
@@ -2006,21 +2095,35 @@ public class Resources {
     public String getResourceTypeName(@AnyRes int resid) throws NotFoundException {
         return mResourcesImpl.getResourceTypeName(resid);
     }
-    
+
     /**
      * Return the entry name for a given resource identifier.
-     * 
+     *
      * @param resid The resource identifier whose entry name is to be
      * retrieved.
-     * 
+     *
      * @return A string holding the entry name of the resource.
-     * 
+     *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
+     *
      * @see #getResourceName
      */
     public String getResourceEntryName(@AnyRes int resid) throws NotFoundException {
         return mResourcesImpl.getResourceEntryName(resid);
+    }
+
+    /**
+     * Return formatted log of the last retrieved resource's resolution path.
+     *
+     * @return A string holding a formatted log of the steps taken to resolve the last resource.
+     *
+     * @throws NotFoundException Throws NotFoundException if there hasn't been a resource
+     * resolved yet.
+     *
+     * @hide
+     */
+    public String getLastResourceResolution() throws NotFoundException {
+        return mResourcesImpl.getLastResourceResolution();
     }
     
     /**

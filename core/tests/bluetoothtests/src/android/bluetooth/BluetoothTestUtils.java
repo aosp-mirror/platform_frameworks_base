@@ -446,7 +446,10 @@ public class BluetoothTestUtils extends Assert {
 
         final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         mContext.registerReceiver(receiver, filter);
-        assertTrue(adapter.enable());
+        // Note: for Wear Local Edition builds, which have Permission Review Mode enabled to
+        // obey China CMIIT, BluetoothAdapter may not startup immediately on methods enable/disable.
+        // So no assertion applied here.
+        adapter.enable();
         boolean success = false;
         try {
             success = completionSemaphore.tryAcquire(ENABLE_DISABLE_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -489,7 +492,10 @@ public class BluetoothTestUtils extends Assert {
 
         final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         mContext.registerReceiver(receiver, filter);
-        assertTrue(adapter.disable());
+        // Note: for Wear Local Edition builds, which have Permission Review Mode enabled to
+        // obey China CMIIT, BluetoothAdapter may not startup immediately on methods enable/disable.
+        // So no assertion applied here.
+        adapter.disable();
         boolean success = false;
         try {
             success = completionSemaphore.tryAcquire(ENABLE_DISABLE_TIMEOUT, TimeUnit.MILLISECONDS);

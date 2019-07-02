@@ -239,7 +239,6 @@ interface ISub {
 
     int[] getSubId(int slotIndex);
 
-    @UnsupportedAppUsage
     int getDefaultSubId();
 
     int clearSubInfo();
@@ -250,10 +249,8 @@ interface ISub {
      * Get the default data subscription
      * @return Id of the data subscription
      */
-    @UnsupportedAppUsage
     int getDefaultDataSubId();
 
-    @UnsupportedAppUsage
     void setDefaultDataSubId(int subId);
 
     int getDefaultVoiceSubId();
@@ -264,7 +261,6 @@ interface ISub {
 
     void setDefaultSmsSubId(int subId);
 
-    @UnsupportedAppUsage
     int[] getActiveSubIdList(boolean visibleOnly);
 
     int setSubscriptionProperty(int subId, String propKey, String propValue);

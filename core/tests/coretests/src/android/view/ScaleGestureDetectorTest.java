@@ -16,52 +16,43 @@
 
 package android.view;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
-import android.support.test.filters.LargeTest;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.ActivityInstrumentationTestCase2;
 import android.util.DisplayMetrics;
-import android.view.PinchZoomAction;
-import android.view.ScaleGesture;
-import android.view.WindowManager;
 import android.widget.TextView;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import com.android.frameworks.coretests.R;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.Espresso.onView;
 
 @LargeTest
-public class ScaleGestureDetectorTest extends ActivityInstrumentationTestCase2<ScaleGesture> {
-    private ScaleGesture mScaleGestureActivity;
+public class ScaleGestureDetectorTest {
 
-    public ScaleGestureDetectorTest() {
-        super("com.android.frameworks.coretests", ScaleGesture.class);
-    }
+    @Rule
+    public final ActivityTestRule<ScaleGesture> mActivityRule =
+            new ActivityTestRule<>(ScaleGesture.class);
+    private ScaleGesture mScaleGestureActivity;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        mScaleGestureActivity = getActivity();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
+        mScaleGestureActivity = mActivityRule.getActivity();
     }
 
     @Test
     public void testScaleGestureDetector() {
         // No scaling should have occurred prior to performing pinch zoom action.
         final float initialScaleFactor = 1.0f;
-        assertEquals(initialScaleFactor, mScaleGestureActivity.getScaleFactor());
+        assertEquals(initialScaleFactor, mScaleGestureActivity.getScaleFactor(), 0f);
 
         // Specify start and end coordinates, irrespective of device display size.
         final DisplayMetrics dm = new DisplayMetrics();

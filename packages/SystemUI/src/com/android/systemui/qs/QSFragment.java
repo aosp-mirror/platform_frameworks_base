@@ -18,13 +18,10 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -35,7 +32,9 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
 
-import com.android.systemui.Dependency;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
@@ -43,11 +42,15 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.LifecycleFragment;
 
-public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
+import javax.inject.Inject;
+
+public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -74,13 +77,27 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private float mLastQSExpansion = -1;
     private boolean mQsDisabled;
 
-    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
-            Dependency.get(RemoteInputQuickSettingsDisabler.class);
+    private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
+    private final InjectionInflationController mInjectionInflater;
+    private final QSTileHost mHost;
+
+    @Inject
+    public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
+            InjectionInflationController injectionInflater,
+            Context context,
+            QSTileHost qsTileHost) {
+        mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
+        mInjectionInflater = injectionInflater;
+        SysUiServiceProvider.getComponent(context, CommandQueue.class)
+                .observe(getLifecycle(), this);
+        mHost = qsTileHost;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
+        inflater = mInjectionInflater.injectable(
+                inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme)));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
@@ -102,21 +119,13 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         if (savedInstanceState != null) {
             setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
-            int[] loc = new int[2];
-            View edit = view.findViewById(android.R.id.edit);
-            edit.getLocationInWindow(loc);
-            int x = loc[0] + edit.getWidth() / 2;
-            int y = loc[1] + edit.getHeight() / 2;
-            mQSCustomizer.setEditLocation(x, y);
+            setEditLocation(view);
             mQSCustomizer.restoreInstanceState(savedInstanceState);
+            if (mQsExpanded) {
+                mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
+            }
         }
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
-    }
-
-    @Override
-    public void onDestroyView() {
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
-        super.onDestroyView();
+        setHost(mHost);
     }
 
     @Override
@@ -133,6 +142,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
         mQSCustomizer.saveInstanceState(outState);
+        if (mQsExpanded) {
+            mQSPanel.getTileLayout().saveInstanceState(outState);
+        }
     }
 
     @VisibleForTesting
@@ -162,13 +174,21 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        setEditLocation(getView());
         if (newConfig.getLayoutDirection() != mLayoutDirection) {
             mLayoutDirection = newConfig.getLayoutDirection();
-
             if (mQSAnimator != null) {
                 mQSAnimator.onRtlChanged();
             }
         }
+    }
+
+    private void setEditLocation(View view) {
+        View edit = view.findViewById(android.R.id.edit);
+        int[] loc = edit.getLocationOnScreen();
+        int x = loc[0] + edit.getWidth() / 2;
+        int y = loc[1] + edit.getHeight() / 2;
+        mQSCustomizer.setEditLocation(x, y);
     }
 
     @Override
@@ -195,7 +215,10 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     }
 
     @Override
-    public void disable(int state1, int state2, boolean animate) {
+    public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (displayId != getContext().getDisplayId()) {
+            return;
+        }
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
 
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
@@ -253,7 +276,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     public void setExpanded(boolean expanded) {
         if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
         mQsExpanded = expanded;
-        mQSPanel.setListening(mListening && mQsExpanded);
+        mQSPanel.setListening(mListening, mQsExpanded);
         updateQsState();
     }
 
@@ -284,7 +307,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mListening = listening;
         mHeader.setListening(listening);
         mFooter.setListening(listening);
-        mQSPanel.setListening(mListening && mQsExpanded);
+        mQSPanel.setListening(mListening, mQsExpanded);
     }
 
     @Override
@@ -361,7 +384,11 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        getView().animate().setListener(null);
+                        if (getView() != null) {
+                            // The view could be destroyed before the animation completes when
+                            // switching users.
+                            getView().animate().setListener(null);
+                        }
                         mHeaderAnimating = false;
                         updateQsState();
                     }

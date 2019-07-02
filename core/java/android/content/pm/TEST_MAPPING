@@ -1,0 +1,13 @@
+{
+  "imports": [
+    {
+      "path": "cts/tests/tests/packageinstaller"
+    },
+    {
+      "path": "cts/hostsidetests/stagedinstall"
+    },
+    {
+      "path": "system/apex/tests"
+    }
+  ]
+}

@@ -207,7 +207,7 @@ public final class DisconnectCause implements Parcelable {
         return mToneToPlay;
     }
 
-    public static final Creator<DisconnectCause> CREATOR = new Creator<DisconnectCause>() {
+    public static final @android.annotation.NonNull Creator<DisconnectCause> CREATOR = new Creator<DisconnectCause>() {
         @Override
         public DisconnectCause createFromParcel(Parcel source) {
             int code = source.readInt();

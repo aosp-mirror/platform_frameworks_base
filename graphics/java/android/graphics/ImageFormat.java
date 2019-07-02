@@ -16,9 +16,43 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class ImageFormat {
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(value = {
+             UNKNOWN,
+             RGB_565,
+             YV12,
+             Y8,
+             Y16,
+             NV16,
+             NV21,
+             YUY2,
+             JPEG,
+             DEPTH_JPEG,
+             YUV_420_888,
+             YUV_422_888,
+             YUV_444_888,
+             FLEX_RGB_888,
+             FLEX_RGBA_8888,
+             RAW_SENSOR,
+             RAW_PRIVATE,
+             RAW10,
+             RAW12,
+             DEPTH16,
+             DEPTH_POINT_CLOUD,
+             RAW_DEPTH,
+             PRIVATE,
+             HEIC
+     })
+     public @interface Format {
+     }
+
     /*
      * these constants are chosen to be binary compatible with their previous
      * location in PixelFormat.java
@@ -92,20 +126,21 @@ public class ImageFormat {
      * </ul>
      * </p>
      *
-     * <pre> y_size = stride * height </pre>
+     * <pre> size = stride * height </pre>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.camera2.CameraDevice}
-     * through a {@link android.media.ImageReader} object if this format is
-     * supported by {@link android.hardware.camera2.CameraDevice}.</p>
+     * in this format from a {@link android.hardware.camera2.CameraDevice} (if
+     * supported) through a {@link android.media.ImageReader} object. The
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} will return a
+     * single plane containing the pixel data. The pixel stride is always 1 in
+     * {@link android.media.Image.Plane#getPixelStride()}, and the
+     * {@link android.media.Image.Plane#getRowStride()} describes the vertical
+     * neighboring pixel distance (in bytes) between adjacent rows.</p>
      *
      * @see android.media.Image
      * @see android.media.ImageReader
      * @see android.hardware.camera2.CameraDevice
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public static final int Y8 = 0x20203859;
 
     /**
@@ -182,6 +217,14 @@ public class ImageFormat {
      * {@link android.hardware.Camera} API</p>
      */
     public static final int JPEG = 0x100;
+
+    /**
+     * Depth augmented compressed JPEG format.
+     *
+     * <p>JPEG compressed main image along with XMP embedded depth metadata
+     * following ISO 16684-1:2011(E).</p>
+     */
+    public static final int DEPTH_JPEG = 0x69656963;
 
     /**
      * <p>Multi-plane Android YUV 420 format</p>
@@ -709,6 +752,14 @@ public class ImageFormat {
     public static final int PRIVATE = 0x22;
 
     /**
+     * Compressed HEIC format.
+     *
+     * <p>This format defines the HEIC brand of High Efficiency Image File
+     * Format as described in ISO/IEC 23008-12.</p>
+     */
+    public static final int HEIC = 0x48454946;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -716,7 +767,7 @@ public class ImageFormat {
      * @return the number of bits per pixel of the given format or -1 if the
      *         format doesn't exist or is not supported.
      */
-    public static int getBitsPerPixel(int format) {
+    public static int getBitsPerPixel(@Format int format) {
         switch (format) {
             case RGB_565:
                 return 16;
@@ -766,7 +817,7 @@ public class ImageFormat {
      *
      * @hide
      */
-    public static boolean isPublicFormat(int format) {
+    public static boolean isPublicFormat(@Format int format) {
         switch (format) {
             case RGB_565:
             case NV16:
@@ -787,6 +838,9 @@ public class ImageFormat {
             case DEPTH_POINT_CLOUD:
             case PRIVATE:
             case RAW_DEPTH:
+            case Y8:
+            case DEPTH_JPEG:
+            case HEIC:
                 return true;
         }
 

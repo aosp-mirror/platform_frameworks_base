@@ -22,7 +22,9 @@
 #include "../JankTracker.h"
 #include "CacheManager.h"
 #include "TimeLord.h"
+#include "WebViewFunctorManager.h"
 #include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
 
 #include <GrContext.h>
 #include <SkBitmap.h>
@@ -39,12 +41,17 @@
 namespace android {
 
 class Bitmap;
+class AutoBackendTextureRelease;
 
 namespace uirenderer {
 
 class Readback;
 class RenderState;
 class TestUtils;
+
+namespace skiapipeline {
+class VkFunctorDrawHandler;
+}
 
 namespace renderthread {
 
@@ -70,12 +77,15 @@ struct VsyncSource {
 
 class DummyVsyncSource;
 
+typedef void (*JVMAttachHook)(const char* name);
+
 class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
 
 public:
-    // Sets a callback that fires before any RenderThread setup has occured.
-    ANDROID_API static void setOnStartHook(void (*onStartHook)());
+    // Sets a callback that fires before any RenderThread setup has occurred.
+    ANDROID_API static void setOnStartHook(JVMAttachHook onStartHook);
+    static JVMAttachHook getOnStartHook();
 
     WorkQueue& queue() { return ThreadBase::queue(); }
 
@@ -92,8 +102,6 @@ public:
     ProfileDataContainer& globalProfileData() { return mGlobalProfileData; }
     Readback& readback();
 
-    const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
-
     GrContext* getGrContext() const { return mGrContext.get(); }
     void setGrContext(sk_sp<GrContext> cxt);
 
@@ -103,6 +111,12 @@ public:
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
     void dumpGraphicsMemory(int fd);
 
+    void requireGlContext();
+    void requireVkContext();
+    void destroyRenderingContext();
+
+    void preload();
+
     /**
      * isCurrent provides a way to query, if the caller is running on
      * the render thread.
@@ -111,6 +125,8 @@ public:
      */
     static bool isCurrent();
 
+    static void initGrContextOptions(GrContextOptions& options);
+
 protected:
     virtual bool threadLoop() override;
 
@@ -118,7 +134,10 @@ private:
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
     friend class DummyVsyncSource;
+    friend class android::AutoBackendTextureRelease;
     friend class android::uirenderer::TestUtils;
+    friend class android::uirenderer::WebViewFunctor;
+    friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
 
     RenderThread();
     virtual ~RenderThread();
@@ -128,12 +147,11 @@ private:
 
     void initThreadLocals();
     void initializeDisplayEventReceiver();
+    void setupFrameInterval();
     static int displayEventReceiverCallback(int fd, int events, void* data);
     void drainDisplayEventQueue();
     void dispatchFrameCallbacks();
     void requestVsync();
-
-    DisplayInfo mDisplayInfo;
 
     VsyncSource* mVsyncSource;
     bool mVsyncRequested;
@@ -146,8 +164,10 @@ private:
     bool mFrameCallbackTaskPending;
 
     TimeLord mTimeLord;
+    nsecs_t mDispatchFrameDelay = 4_ms;
     RenderState* mRenderState;
     EglManager* mEglManager;
+    WebViewFunctorManager& mFunctorManager;
 
     ProfileDataContainer mGlobalProfileData;
     Readback* mReadback = nullptr;

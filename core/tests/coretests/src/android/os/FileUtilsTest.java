@@ -17,6 +17,27 @@
 package android.os;
 
 import static android.os.FileUtils.roundStorageSize;
+import static android.os.FileUtils.translateModeAccessToPosix;
+import static android.os.FileUtils.translateModePfdToPosix;
+import static android.os.FileUtils.translateModePosixToPfd;
+import static android.os.FileUtils.translateModePosixToString;
+import static android.os.FileUtils.translateModeStringToPosix;
+import static android.os.ParcelFileDescriptor.MODE_APPEND;
+import static android.os.ParcelFileDescriptor.MODE_CREATE;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
+import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
+import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.F_OK;
+import static android.system.OsConstants.O_APPEND;
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_RDONLY;
+import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.O_TRUNC;
+import static android.system.OsConstants.O_WRONLY;
+import static android.system.OsConstants.R_OK;
+import static android.system.OsConstants.W_OK;
+import static android.system.OsConstants.X_OK;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
@@ -25,12 +46,14 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.os.FileUtils.MemoryPipe;
 import android.provider.DocumentsContract.Document;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.io.Streams;
 
@@ -192,7 +215,7 @@ public class FileUtilsTest {
 
             try (MemoryPipe in = MemoryPipe.createSource(source);
                     FileOutputStream out = new FileOutputStream(dest)) {
-                FileUtils.copy(in.getFD(), out.getFD(), null, null, size);
+                FileUtils.copy(in.getFD(), out.getFD(), size, null, null, null);
             }
 
             actual = readFile(dest);
@@ -473,6 +496,77 @@ public class FileUtilsTest {
         assertEquals(G32, roundStorageSize(G32 - 1));
         assertEquals(G32, roundStorageSize(G32));
         assertEquals(G64, roundStorageSize(G32 + 1));
+    }
+
+    @Test
+    public void testTranslateMode() throws Exception {
+        assertTranslate("r", O_RDONLY, MODE_READ_ONLY);
+
+        assertTranslate("rw", O_RDWR | O_CREAT,
+                MODE_READ_WRITE | MODE_CREATE);
+        assertTranslate("rwt", O_RDWR | O_CREAT | O_TRUNC,
+                MODE_READ_WRITE | MODE_CREATE | MODE_TRUNCATE);
+        assertTranslate("rwa", O_RDWR | O_CREAT | O_APPEND,
+                MODE_READ_WRITE | MODE_CREATE | MODE_APPEND);
+
+        assertTranslate("w", O_WRONLY | O_CREAT,
+                MODE_WRITE_ONLY | MODE_CREATE | MODE_CREATE);
+        assertTranslate("wt", O_WRONLY | O_CREAT | O_TRUNC,
+                MODE_WRITE_ONLY | MODE_CREATE | MODE_TRUNCATE);
+        assertTranslate("wa", O_WRONLY | O_CREAT | O_APPEND,
+                MODE_WRITE_ONLY | MODE_CREATE | MODE_APPEND);
+    }
+
+    @Test
+    public void testMalformedTransate_int() throws Exception {
+        try {
+            // The non-standard Linux access mode 3 should throw
+            // an IllegalArgumentException.
+            translateModePosixToPfd(O_RDWR | O_WRONLY);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testMalformedTransate_string() throws Exception {
+        try {
+            // The non-standard Linux access mode 3 should throw
+            // an IllegalArgumentException.
+            translateModePosixToString(O_RDWR | O_WRONLY);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testTranslateMode_Invalid() throws Exception {
+        try {
+            translateModeStringToPosix("rwx");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            translateModeStringToPosix("");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testTranslateMode_Access() throws Exception {
+        assertEquals(O_RDONLY, translateModeAccessToPosix(F_OK));
+        assertEquals(O_RDONLY, translateModeAccessToPosix(R_OK));
+        assertEquals(O_WRONLY, translateModeAccessToPosix(W_OK));
+        assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK));
+        assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK | X_OK));
+    }
+
+    private static void assertTranslate(String string, int posix, int pfd) {
+        assertEquals(posix, translateModeStringToPosix(string));
+        assertEquals(string, translateModePosixToString(posix));
+        assertEquals(pfd, translateModePosixToPfd(posix));
+        assertEquals(posix, translateModePfdToPosix(pfd));
     }
 
     private static void assertNameEquals(String expected, File actual) {

@@ -16,7 +16,7 @@
 
 package android.os.health;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -36,11 +36,12 @@ import java.util.Map;
  * reuse them.
  * @hide
  */
+@TestApi
 public class HealthStatsParceler implements Parcelable {
     private HealthStatsWriter mWriter;
     private HealthStats mHealthStats;
 
-    public static final Parcelable.Creator<HealthStatsParceler> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<HealthStatsParceler> CREATOR
             = new Parcelable.Creator<HealthStatsParceler>() {
         public HealthStatsParceler createFromParcel(Parcel in) {
             return new HealthStatsParceler(in);
@@ -51,12 +52,10 @@ public class HealthStatsParceler implements Parcelable {
         }
     };
 
-    @UnsupportedAppUsage
     public HealthStatsParceler(HealthStatsWriter writer) {
         mWriter = writer;
     }
 
-    @UnsupportedAppUsage
     public HealthStatsParceler(Parcel in) {
         mHealthStats = new HealthStats(in);
     }
@@ -75,7 +74,6 @@ public class HealthStatsParceler implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
     public HealthStats getHealthStats() {
         if (mWriter != null) {
             final Parcel parcel = Parcel.obtain();

@@ -79,14 +79,14 @@ interface IBackupTransport {
     Intent dataManagementIntent();
 
     /**
-     * On demand, supply a short string that can be shown to the user as the label
-     * on an overflow menu item used to invoked the data management UI.
+     * On demand, supply a short {@link CharSequence} that can be shown to the user as the label on
+     * an overflow menu item used to invoke the data management UI.
      *
-     * @return A string to be used as the label for the transport's data management
+     * @return A {@link CharSequence} to be used as the label for the transport's data management
      *         affordance.  If the transport supplies a data management intent, this
      *         method must not return {@code null}.
      */
-    String dataManagementLabel();
+    CharSequence dataManagementIntentLabel();
 
     /**
      * Ask the transport where, on local device storage, to keep backup state blobs.

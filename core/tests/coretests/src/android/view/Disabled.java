@@ -16,13 +16,12 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-
-import android.os.Bundle;
-import android.widget.Button;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.app.Activity;
+import android.os.Bundle;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercise View's disabled state.

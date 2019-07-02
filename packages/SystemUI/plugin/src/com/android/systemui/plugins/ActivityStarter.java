@@ -14,8 +14,10 @@
 
 package com.android.systemui.plugins;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.view.View;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
@@ -26,9 +28,28 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
  */
 @ProvidesInterface(version = ActivityStarter.VERSION)
 public interface ActivityStarter {
-    int VERSION = 1;
+    int VERSION = 2;
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
+
+    /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent)}, but allows
+     * you to specify the callback that is executed on the UI thread after the intent is sent.
+     */
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback);
+
+    /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but also
+     * specifies an associated view that should be used for the activity launch animation.
+     */
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback, View associatedView);
+
+    /**
+     * The intent flag can be specified in startActivity().
+     */
+    void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
@@ -36,7 +57,17 @@ public interface ActivityStarter {
     void postStartActivityDismissingKeyguard(PendingIntent intent);
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
+    void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
+            boolean afterKeyguardGone);
+
     interface Callback {
         void onActivityStarted(int resultCode);
+    }
+
+    interface OnDismissAction {
+        /**
+         * @return {@code true} if the dismiss should be deferred
+         */
+        boolean onDismiss();
     }
 }

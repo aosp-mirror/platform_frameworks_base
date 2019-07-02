@@ -16,10 +16,10 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.android.frameworks.coretests.R;
 
 public class Longpress extends Activity {
     @Override

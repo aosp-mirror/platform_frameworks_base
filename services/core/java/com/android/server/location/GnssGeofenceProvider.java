@@ -1,17 +1,11 @@
 package com.android.server.location;
 
 import android.location.IGpsGeofenceHardware;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 /**
  * Manages GNSS Geofence operations.
@@ -34,26 +28,26 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
         public boolean paused;
     }
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
     private final GnssGeofenceProviderNative mNative;
+    @GuardedBy("mLock")
     private final SparseArray<GeofenceEntry> mGeofenceEntries = new SparseArray<>();
-    private final Handler mHandler;
 
-    GnssGeofenceProvider(Looper looper) {
-        this(looper, new GnssGeofenceProviderNative());
+    GnssGeofenceProvider() {
+        this(new GnssGeofenceProviderNative());
     }
 
     @VisibleForTesting
-    GnssGeofenceProvider(Looper looper, GnssGeofenceProviderNative gnssGeofenceProviderNative) {
-        mHandler = new Handler(looper);
+    GnssGeofenceProvider(GnssGeofenceProviderNative gnssGeofenceProviderNative) {
         mNative = gnssGeofenceProviderNative;
     }
 
-    // TODO(b/37460011): use this method in HAL death recovery.
     void resumeIfStarted() {
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
         }
-        mHandler.post(() -> {
+        synchronized (mLock) {
             for (int i = 0; i < mGeofenceEntries.size(); i++) {
                 GeofenceEntry entry = mGeofenceEntries.valueAt(i);
                 boolean added = mNative.addGeofence(entry.geofenceId, entry.latitude,
@@ -65,30 +59,21 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
                     mNative.pauseGeofence(entry.geofenceId);
                 }
             }
-        });
-    }
-
-    private boolean runOnHandlerThread(Callable<Boolean> callable) {
-        FutureTask<Boolean> futureTask = new FutureTask<>(callable);
-        mHandler.post(futureTask);
-        try {
-            return futureTask.get();
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Failed running callable.", e);
         }
-        return false;
     }
 
     @Override
     public boolean isHardwareGeofenceSupported() {
-        return runOnHandlerThread(mNative::isGeofenceSupported);
+        synchronized (mLock) {
+            return mNative.isGeofenceSupported();
+        }
     }
 
     @Override
     public boolean addCircularHardwareGeofence(int geofenceId, double latitude,
             double longitude, double radius, int lastTransition, int monitorTransitions,
             int notificationResponsiveness, int unknownTimer) {
-        return runOnHandlerThread(() -> {
+        synchronized (mLock) {
             boolean added = mNative.addGeofence(geofenceId, latitude, longitude, radius,
                     lastTransition, monitorTransitions, notificationResponsiveness,
                     unknownTimer);
@@ -105,23 +90,23 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
                 mGeofenceEntries.put(geofenceId, entry);
             }
             return added;
-        });
+        }
     }
 
     @Override
     public boolean removeHardwareGeofence(int geofenceId) {
-        return runOnHandlerThread(() -> {
+        synchronized (mLock) {
             boolean removed = mNative.removeGeofence(geofenceId);
             if (removed) {
                 mGeofenceEntries.remove(geofenceId);
             }
             return removed;
-        });
+        }
     }
 
     @Override
     public boolean pauseHardwareGeofence(int geofenceId) {
-        return runOnHandlerThread(() -> {
+        synchronized (mLock) {
             boolean paused = mNative.pauseGeofence(geofenceId);
             if (paused) {
                 GeofenceEntry entry = mGeofenceEntries.get(geofenceId);
@@ -130,12 +115,12 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
                 }
             }
             return paused;
-        });
+        }
     }
 
     @Override
     public boolean resumeHardwareGeofence(int geofenceId, int monitorTransitions) {
-        return runOnHandlerThread(() -> {
+        synchronized (mLock) {
             boolean resumed = mNative.resumeGeofence(geofenceId, monitorTransitions);
             if (resumed) {
                 GeofenceEntry entry = mGeofenceEntries.get(geofenceId);
@@ -145,7 +130,7 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
                 }
             }
             return resumed;
-        });
+        }
     }
 
     @VisibleForTesting

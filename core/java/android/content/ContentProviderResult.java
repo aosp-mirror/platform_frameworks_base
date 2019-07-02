@@ -16,10 +16,11 @@
 
 package android.content;
 
-import android.content.ContentProvider;
 import android.net.Uri;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Contains the result of the application of a {@link ContentProviderOperation}. It is guaranteed
@@ -28,26 +29,44 @@ import android.os.Parcel;
 public class ContentProviderResult implements Parcelable {
     public final Uri uri;
     public final Integer count;
+    /** {@hide} */
+    public final String failure;
 
     public ContentProviderResult(Uri uri) {
-        if (uri == null) throw new IllegalArgumentException("uri must not be null");
-        this.uri = uri;
-        this.count = null;
+        this(Preconditions.checkNotNull(uri), null, null);
     }
 
     public ContentProviderResult(int count) {
+        this(null, count, null);
+    }
+
+    /** {@hide} */
+    public ContentProviderResult(String failure) {
+        this(null, null, failure);
+    }
+
+    /** {@hide} */
+    public ContentProviderResult(Uri uri, Integer count, String failure) {
+        this.uri = uri;
         this.count = count;
-        this.uri = null;
+        this.failure = failure;
     }
 
     public ContentProviderResult(Parcel source) {
-        int type = source.readInt();
-        if (type == 1) {
-            count = source.readInt();
+        if (source.readInt() != 0) {
+            uri = Uri.CREATOR.createFromParcel(source);
+        } else {
             uri = null;
+        }
+        if (source.readInt() != 0) {
+            count = source.readInt();
         } else {
             count = null;
-            uri = Uri.CREATOR.createFromParcel(source);
+        }
+        if (source.readInt() != 0) {
+            failure = source.readString();
+        } else {
+            failure = null;
         }
     }
 
@@ -55,37 +74,63 @@ public class ContentProviderResult implements Parcelable {
     public ContentProviderResult(ContentProviderResult cpr, int userId) {
         uri = ContentProvider.maybeAddUserId(cpr.uri, userId);
         count = cpr.count;
+        failure = cpr.failure;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (uri == null) {
+        if (uri != null) {
+            dest.writeInt(1);
+            uri.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
+        if (count != null) {
             dest.writeInt(1);
             dest.writeInt(count);
         } else {
-            dest.writeInt(2);
-            uri.writeToParcel(dest, 0);
+            dest.writeInt(0);
+        }
+        if (failure != null) {
+            dest.writeInt(1);
+            dest.writeString(failure);
+        } else {
+            dest.writeInt(0);
         }
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public static final Creator<ContentProviderResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<ContentProviderResult> CREATOR =
             new Creator<ContentProviderResult>() {
+        @Override
         public ContentProviderResult createFromParcel(Parcel source) {
             return new ContentProviderResult(source);
         }
 
+        @Override
         public ContentProviderResult[] newArray(int size) {
             return new ContentProviderResult[size];
         }
     };
 
+    @Override
     public String toString() {
+        final StringBuilder sb = new StringBuilder("ContentProviderResult(");
         if (uri != null) {
-            return "ContentProviderResult(uri=" + uri.toString() + ")";
+            sb.append("uri=" + uri + " ");
         }
-        return "ContentProviderResult(count=" + count + ")";
+        if (count != null) {
+            sb.append("count=" + count + " ");
+        }
+        if (uri != null) {
+            sb.append("failure=" + failure + " ");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        return sb.toString();
     }
 }

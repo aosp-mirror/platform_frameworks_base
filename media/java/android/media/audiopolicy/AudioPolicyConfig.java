@@ -18,8 +18,6 @@ package android.media.audiopolicy;
 
 import android.annotation.NonNull;
 import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioPatch;
 import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -98,6 +96,8 @@ public class AudioPolicyConfig implements Parcelable {
             dest.writeInt(mix.getFormat().getSampleRate());
             dest.writeInt(mix.getFormat().getEncoding());
             dest.writeInt(mix.getFormat().getChannelMask());
+            // write opt-out respect
+            dest.writeBoolean(mix.getRule().allowPrivilegedPlaybackCapture());
             // write mix rules
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             dest.writeInt(criteria.size());
@@ -126,9 +126,12 @@ public class AudioPolicyConfig implements Parcelable {
             final AudioFormat format = new AudioFormat.Builder().setSampleRate(sampleRate)
                     .setChannelMask(channelMask).setEncoding(encoding).build();
             mixBuilder.setFormat(format);
+
+            AudioMixingRule.Builder ruleBuilder = new AudioMixingRule.Builder();
+            // write opt-out respect
+            ruleBuilder.allowPrivilegedPlaybackCapture(in.readBoolean());
             // read mix rules
             int nbRules = in.readInt();
-            AudioMixingRule.Builder ruleBuilder = new AudioMixingRule.Builder();
             for (int j = 0 ; j < nbRules ; j++) {
                 // read the matching rules
                 ruleBuilder.addRuleFromParcel(in);
@@ -138,7 +141,7 @@ public class AudioPolicyConfig implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AudioPolicyConfig> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioPolicyConfig> CREATOR
             = new Parcelable.Creator<AudioPolicyConfig>() {
         /**
          * Rebuilds an AudioPolicyConfig previously stored with writeToParcel().
@@ -163,7 +166,9 @@ public class AudioPolicyConfig implements Parcelable {
             textDump += "  rate=" + mix.getFormat().getSampleRate() + "Hz\n";
             textDump += "  encoding=" + mix.getFormat().getEncoding() + "\n";
             textDump += "  channels=0x";
-            textDump += Integer.toHexString(mix.getFormat().getChannelMask()).toUpperCase() +"\n";
+            textDump += Integer.toHexString(mix.getFormat().getChannelMask()).toUpperCase() + "\n";
+            textDump += "  ignore playback capture opt out="
+                    + mix.getRule().allowPrivilegedPlaybackCapture() + "\n";
             // write mix rules
             final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             for (AudioMixMatchCriterion criterion : criteria) {

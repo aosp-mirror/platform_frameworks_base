@@ -47,7 +47,14 @@ import java.util.List;
  * {@link PreferenceActivity#addPreferencesFromResource(int)}.
  *
  * @see PreferenceActivity
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 public class PreferenceManager {
 
     private static final String TAG = "PreferenceManager";
@@ -543,7 +550,6 @@ public class PreferenceManager {
      * Returns the name used for storing default shared preferences.
      *
      * @see #getDefaultSharedPreferences(Context)
-     * @see Context#getSharedPreferencesPath(String)
      */
     public static String getDefaultSharedPreferencesName(Context context) {
         return context.getPackageName() + "_preferences";
@@ -1005,7 +1011,14 @@ public class PreferenceManager {
      * clicked.
      *
      * @hide
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnPreferenceTreeClickListener {
         /**
          * Called when a preference in the tree rooted at this
@@ -1022,7 +1035,14 @@ public class PreferenceManager {
     /**
      * Interface definition for a class that will be called when the container's activity
      * receives an activity result.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnActivityResultListener {
 
         /**
@@ -1037,7 +1057,14 @@ public class PreferenceManager {
     /**
      * Interface definition for a class that will be called when the container's activity
      * is stopped.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnActivityStopListener {
 
         /**
@@ -1049,7 +1076,14 @@ public class PreferenceManager {
     /**
      * Interface definition for a class that will be called when the container's activity
      * is destroyed.
+     *
+     * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+     *      Preference Library</a> for consistent behavior across all devices.
+     *      For more information on using the AndroidX Preference Library see
+     *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
      */
+    @Deprecated
     public interface OnActivityDestroyListener {
 
         /**

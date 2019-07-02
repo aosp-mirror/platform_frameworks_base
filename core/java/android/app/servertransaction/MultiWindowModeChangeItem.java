@@ -81,7 +81,7 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
         mOverrideConfig = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<MultiWindowModeChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<MultiWindowModeChangeItem> CREATOR =
             new Creator<MultiWindowModeChangeItem>() {
         public MultiWindowModeChangeItem createFromParcel(Parcel in) {
             return new MultiWindowModeChangeItem(in);

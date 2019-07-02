@@ -65,7 +65,7 @@ public final class IpSecSpiResponse implements Parcelable {
         spi = in.readInt();
     }
 
-    public static final Parcelable.Creator<IpSecSpiResponse> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<IpSecSpiResponse> CREATOR =
             new Parcelable.Creator<IpSecSpiResponse>() {
                 public IpSecSpiResponse createFromParcel(Parcel in) {
                     return new IpSecSpiResponse(in);

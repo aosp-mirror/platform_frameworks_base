@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
@@ -34,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -319,7 +321,7 @@ public final class SQLiteConnectionPool implements Closeable {
             // We should do in-place switching when transitioning from compatibility WAL
             // to rollback journal. Otherwise transient connection state will be lost
             boolean onlyCompatWalChanged = (mConfiguration.openFlags ^ configuration.openFlags)
-                    == SQLiteDatabase.DISABLE_COMPATIBILITY_WAL;
+                    == SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL;
 
             if (!onlyCompatWalChanged && mConfiguration.openFlags != configuration.openFlags) {
                 // If we are changing open flags and WAL mode at the same time, then
@@ -1105,22 +1107,24 @@ public final class SQLiteConnectionPool implements Closeable {
      * @param printer The printer to receive the dump, not null.
      * @param verbose True to dump more verbose information.
      */
-    public void dump(Printer printer, boolean verbose) {
+    public void dump(Printer printer, boolean verbose, ArraySet<String> directories) {
         Printer indentedPrinter = PrefixPrinter.create(printer, "    ");
         synchronized (mLock) {
+            if (directories != null) {
+                directories.add(new File(mConfiguration.path).getParent());
+            }
+            boolean isCompatibilityWalEnabled = mConfiguration.isLegacyCompatibilityWalEnabled();
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
             printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
             printer.println("  Configuration: openFlags=" + mConfiguration.openFlags
-                    + ", useCompatibilityWal=" + mConfiguration.useCompatibilityWal()
+                    + ", isLegacyCompatibilityWalEnabled=" + isCompatibilityWalEnabled
                     + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.journalMode)
                     + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.syncMode));
 
-            if (SQLiteCompatibilityWalFlags.areFlagsSet()) {
-                printer.println("  Compatibility WAL settings: compatibility_wal_supported="
-                        + SQLiteCompatibilityWalFlags
-                        .isCompatibilityWalSupported() + ", wal_syncmode="
+            if (isCompatibilityWalEnabled) {
+                printer.println("  Compatibility WAL enabled: wal_syncmode="
                         + SQLiteCompatibilityWalFlags.getWALSyncMode());
             }
             if (mConfiguration.isLookasideConfigSet()) {
@@ -1181,6 +1185,10 @@ public final class SQLiteConnectionPool implements Closeable {
     @Override
     public String toString() {
         return "SQLiteConnectionPool: " + mConfiguration.path;
+    }
+
+    public String getPath() {
+        return mConfiguration.path;
     }
 
     private static final class ConnectionWaiter {

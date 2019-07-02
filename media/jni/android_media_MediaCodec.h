@@ -17,6 +17,8 @@
 #ifndef _ANDROID_MEDIA_MEDIACODEC_H_
 #define _ANDROID_MEDIA_MEDIACODEC_H_
 
+#include <mutex>
+
 #include "jni.h"
 
 #include <media/MediaAnalyticsItem.h>
@@ -128,6 +130,8 @@ struct JMediaCodec : public AHandler {
 
     void setVideoScalingMode(int mode);
 
+    void selectAudioPresentation(const int32_t presentationId, const int32_t programId);
+
 protected:
     virtual ~JMediaCodec();
 
@@ -153,6 +157,8 @@ private:
 
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
+    AString mNameAtCreation;
+    std::once_flag mReleaseFlag;
 
     sp<AMessage> mCallbackNotification;
     sp<AMessage> mOnFrameRenderedNotification;

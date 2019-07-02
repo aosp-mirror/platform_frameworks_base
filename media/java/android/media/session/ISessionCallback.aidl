@@ -33,19 +33,19 @@ oneway interface ISessionCallback {
     void onMediaButtonFromController(String packageName, int pid, int uid,
             ISessionControllerCallback caller, in Intent mediaButtonIntent);
 
-    // These callbacks are for the TransportPerformer
+    // These callbacks are for the TransportControls
     void onPrepare(String packageName, int pid, int uid, ISessionControllerCallback caller);
     void onPrepareFromMediaId(String packageName, int pid, int uid,
             ISessionControllerCallback caller, String mediaId, in Bundle extras);
     void onPrepareFromSearch(String packageName, int pid, int uid,
             ISessionControllerCallback caller, String query, in Bundle extras);
-    void onPrepareFromUri(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            in Uri uri, in Bundle extras);
+    void onPrepareFromUri(String packageName, int pid, int uid,
+            ISessionControllerCallback caller, in Uri uri, in Bundle extras);
     void onPlay(String packageName, int pid, int uid, ISessionControllerCallback caller);
-    void onPlayFromMediaId(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            String mediaId, in Bundle extras);
-    void onPlayFromSearch(String packageName, int pid, int uid, ISessionControllerCallback caller,
-            String query, in Bundle extras);
+    void onPlayFromMediaId(String packageName, int pid, int uid,
+            ISessionControllerCallback caller, String mediaId, in Bundle extras);
+    void onPlayFromSearch(String packageName, int pid, int uid,
+            ISessionControllerCallback caller, String query, in Bundle extras);
     void onPlayFromUri(String packageName, int pid, int uid, ISessionControllerCallback caller,
             in Uri uri, in Bundle extras);
     void onSkipToTrack(String packageName, int pid, int uid, ISessionControllerCallback caller,
@@ -60,6 +60,8 @@ oneway interface ISessionCallback {
             long pos);
     void onRate(String packageName, int pid, int uid, ISessionControllerCallback caller,
             in Rating rating);
+    void onSetPlaybackSpeed(String packageName, int pid, int uid,
+            ISessionControllerCallback caller, float speed);
     void onCustomAction(String packageName, int pid, int uid, ISessionControllerCallback caller,
             String action, in Bundle args);
 

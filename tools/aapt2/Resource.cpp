@@ -96,6 +96,8 @@ StringPiece to_string(ResourceType type) {
       return "styleable";
     case ResourceType::kTransition:
       return "transition";
+    case ResourceType::kUnknown:
+      return "unknown";
     case ResourceType::kXml:
       return "xml";
   }

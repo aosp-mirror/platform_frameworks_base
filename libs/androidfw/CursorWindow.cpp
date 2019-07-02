@@ -49,15 +49,21 @@ status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** o
     int ashmemFd = ashmem_create_region(ashmemName.string(), size);
     if (ashmemFd < 0) {
         result = -errno;
+        ALOGE("CursorWindow: ashmem_create_region() failed: errno=%d.", errno);
     } else {
         result = ashmem_set_prot_region(ashmemFd, PROT_READ | PROT_WRITE);
-        if (result >= 0) {
+        if (result < 0) {
+            ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d",errno);
+        } else {
             void* data = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, ashmemFd, 0);
             if (data == MAP_FAILED) {
                 result = -errno;
+                ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
             } else {
                 result = ashmem_set_prot_region(ashmemFd, PROT_READ);
-                if (result >= 0) {
+                if (result < 0) {
+                    ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d.", errno);
+                } else {
                     CursorWindow* window = new CursorWindow(name, ashmemFd,
                             data, size, false /*readOnly*/);
                     result = window->clear();
@@ -86,26 +92,34 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
     String8 name = parcel->readString8();
 
     status_t result;
+    int actualSize;
     int ashmemFd = parcel->readFileDescriptor();
     if (ashmemFd == int(BAD_TYPE)) {
         result = BAD_TYPE;
+        ALOGE("CursorWindow: readFileDescriptor() failed");
     } else {
         ssize_t size = ashmem_get_size_region(ashmemFd);
         if (size < 0) {
             result = UNKNOWN_ERROR;
+            ALOGE("CursorWindow: ashmem_get_size_region() failed: errno=%d.", errno);
         } else {
             int dupAshmemFd = ::fcntl(ashmemFd, F_DUPFD_CLOEXEC, 0);
             if (dupAshmemFd < 0) {
                 result = -errno;
+                ALOGE("CursorWindow: fcntl() failed: errno=%d.", errno);
             } else {
                 // the size of the ashmem descriptor can be modified between ashmem_get_size_region
                 // call and mmap, so we'll check again immediately after memory is mapped
                 void* data = ::mmap(NULL, size, PROT_READ, MAP_SHARED, dupAshmemFd, 0);
                 if (data == MAP_FAILED) {
                     result = -errno;
-                } else if (ashmem_get_size_region(dupAshmemFd) != size) {
+                    ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
+                } else if ((actualSize = ashmem_get_size_region(dupAshmemFd)) != size) {
                     ::munmap(data, size);
                     result = BAD_VALUE;
+                    ALOGE("CursorWindow: ashmem_get_size_region() returned %d, expected %d"
+                            " errno=%d",
+                            actualSize, (int) size, errno);
                 } else {
                     CursorWindow* window = new CursorWindow(name, dupAshmemFd,
                             data, size, true /*readOnly*/);

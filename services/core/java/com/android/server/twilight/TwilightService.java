@@ -162,9 +162,6 @@ public final class TwilightService extends SystemService
             if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 mLocationManager.requestSingleUpdate(
                         LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
-            } else if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                mLocationManager.requestSingleUpdate(
-                        LocationManager.GPS_PROVIDER, this, Looper.getMainLooper());
             }
         }
 

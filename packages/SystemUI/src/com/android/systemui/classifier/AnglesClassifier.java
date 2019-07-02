@@ -18,7 +18,6 @@ package com.android.systemui.classifier;
 
 import android.os.Build;
 import android.os.SystemProperties;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;

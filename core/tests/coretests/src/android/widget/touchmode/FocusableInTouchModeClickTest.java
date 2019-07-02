@@ -16,12 +16,12 @@
 
 package android.widget.touchmode;
 
-import android.widget.layout.linear.LLOfTwoFocusableInTouchMode;
-
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.widget.layout.linear.LLOfTwoFocusableInTouchMode;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class FocusableInTouchModeClickTest extends ActivityInstrumentationTestCase2<LLOfTwoFocusableInTouchMode> {
 

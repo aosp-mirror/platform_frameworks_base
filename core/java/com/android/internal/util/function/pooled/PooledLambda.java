@@ -21,8 +21,14 @@ import static com.android.internal.util.function.pooled.PooledLambdaImpl.acquire
 
 import android.os.Message;
 
+import com.android.internal.util.function.HeptConsumer;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaConsumer;
+import com.android.internal.util.function.NonaFunction;
+import com.android.internal.util.function.OctConsumer;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadConsumer;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintConsumer;
@@ -174,7 +180,8 @@ public interface PooledLambda {
             Consumer<? super A> function,
             A arg1) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 1, 0, ReturnType.VOID, arg1, null, null, null, null, null);
+                function, 1, 0, ReturnType.VOID, arg1, null, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -190,7 +197,8 @@ public interface PooledLambda {
             Predicate<? super A> function,
             A arg1) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 1, 0, ReturnType.BOOLEAN, arg1, null, null, null, null, null);
+                function, 1, 0, ReturnType.BOOLEAN, arg1, null, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -206,7 +214,8 @@ public interface PooledLambda {
             Function<? super A, ? extends R> function,
             A arg1) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 1, 0, ReturnType.OBJECT, arg1, null, null, null, null, null);
+                function, 1, 0, ReturnType.OBJECT, arg1, null, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -236,7 +245,8 @@ public interface PooledLambda {
             A arg1) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 1, 0, ReturnType.VOID, arg1, null, null, null, null, null);
+                    function, 1, 0, ReturnType.VOID, arg1, null, null, null, null, null, null, null,
+                    null);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }
@@ -255,7 +265,8 @@ public interface PooledLambda {
             BiConsumer<? super A, ? super B> function,
             A arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 0, ReturnType.VOID, arg1, arg2, null, null, null, null);
+                function, 2, 0, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -272,7 +283,8 @@ public interface PooledLambda {
             BiPredicate<? super A, ? super B> function,
             A arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 0, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null);
+                function, 2, 0, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -289,7 +301,8 @@ public interface PooledLambda {
             BiFunction<? super A, ? super B, ? extends R> function,
             A arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 0, ReturnType.OBJECT, arg1, arg2, null, null, null, null);
+                function, 2, 0, ReturnType.OBJECT, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -306,7 +319,8 @@ public interface PooledLambda {
             BiConsumer<? super A, ? super B> function,
             ArgumentPlaceholder<A> arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -323,7 +337,8 @@ public interface PooledLambda {
             BiPredicate<? super A, ? super B> function,
             ArgumentPlaceholder<A> arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -340,7 +355,8 @@ public interface PooledLambda {
             BiFunction<? super A, ? super B, ? extends R> function,
             ArgumentPlaceholder<A> arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.OBJECT, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.OBJECT, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -357,7 +373,8 @@ public interface PooledLambda {
             BiConsumer<? super A, ? super B> function,
             A arg1, ArgumentPlaceholder<B> arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -374,7 +391,8 @@ public interface PooledLambda {
             BiPredicate<? super A, ? super B> function,
             A arg1, ArgumentPlaceholder<B> arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -391,7 +409,8 @@ public interface PooledLambda {
             BiFunction<? super A, ? super B, ? extends R> function,
             A arg1, ArgumentPlaceholder<B> arg2) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 2, 1, ReturnType.OBJECT, arg1, arg2, null, null, null, null);
+                function, 2, 1, ReturnType.OBJECT, arg1, arg2, null, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -422,7 +441,8 @@ public interface PooledLambda {
             A arg1, B arg2) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 2, 0, ReturnType.VOID, arg1, arg2, null, null, null, null);
+                    function, 2, 0, ReturnType.VOID, arg1, arg2, null, null, null, null, null, null,
+                    null);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }
@@ -442,7 +462,8 @@ public interface PooledLambda {
             TriConsumer<? super A, ? super B, ? super C> function,
             A arg1, B arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 0, ReturnType.VOID, arg1, arg2, arg3, null, null, null);
+                function, 3, 0, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -460,7 +481,8 @@ public interface PooledLambda {
             TriFunction<? super A, ? super B, ? super C, ? extends R> function,
             A arg1, B arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 0, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null);
+                function, 3, 0, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -478,7 +500,8 @@ public interface PooledLambda {
             TriConsumer<? super A, ? super B, ? super C> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -496,7 +519,8 @@ public interface PooledLambda {
             TriFunction<? super A, ? super B, ? super C, ? extends R> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -514,7 +538,8 @@ public interface PooledLambda {
             TriConsumer<? super A, ? super B, ? super C> function,
             A arg1, ArgumentPlaceholder<B> arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -532,7 +557,8 @@ public interface PooledLambda {
             TriFunction<? super A, ? super B, ? super C, ? extends R> function,
             A arg1, ArgumentPlaceholder<B> arg2, C arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -550,7 +576,8 @@ public interface PooledLambda {
             TriConsumer<? super A, ? super B, ? super C> function,
             A arg1, B arg2, ArgumentPlaceholder<C> arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -568,7 +595,8 @@ public interface PooledLambda {
             TriFunction<? super A, ? super B, ? super C, ? extends R> function,
             A arg1, B arg2, ArgumentPlaceholder<C> arg3) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null);
+                function, 3, 1, ReturnType.OBJECT, arg1, arg2, arg3, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -600,7 +628,8 @@ public interface PooledLambda {
             A arg1, B arg2, C arg3) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 3, 0, ReturnType.VOID, arg1, arg2, arg3, null, null, null);
+                    function, 3, 0, ReturnType.VOID, arg1, arg2, arg3, null, null, null, null, null,
+                    null);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }
@@ -621,7 +650,8 @@ public interface PooledLambda {
             QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
             A arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -640,7 +670,8 @@ public interface PooledLambda {
             QuadFunction<? super A, ? super B, ? super C, ? super D, ? extends R> function,
             A arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -659,7 +690,8 @@ public interface PooledLambda {
             QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -678,7 +710,8 @@ public interface PooledLambda {
             QuadFunction<? super A, ? super B, ? super C, ? super D, ? extends R> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -697,7 +730,8 @@ public interface PooledLambda {
             QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
             A arg1, ArgumentPlaceholder<B> arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -716,7 +750,8 @@ public interface PooledLambda {
             QuadFunction<? super A, ? super B, ? super C, ? super D, ? extends R> function,
             A arg1, ArgumentPlaceholder<B> arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -735,7 +770,8 @@ public interface PooledLambda {
             QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
             A arg1, B arg2, ArgumentPlaceholder<C> arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -754,7 +790,8 @@ public interface PooledLambda {
             QuadFunction<? super A, ? super B, ? super C, ? super D, ? extends R> function,
             A arg1, B arg2, ArgumentPlaceholder<C> arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -773,7 +810,8 @@ public interface PooledLambda {
             QuadConsumer<? super A, ? super B, ? super C, ? super D> function,
             A arg1, B arg2, C arg3, ArgumentPlaceholder<D> arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -792,7 +830,8 @@ public interface PooledLambda {
             QuadFunction<? super A, ? super B, ? super C, ? super D, ? extends R> function,
             A arg1, B arg2, C arg3, ArgumentPlaceholder<D> arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null);
+                function, 4, 1, ReturnType.OBJECT, arg1, arg2, arg3, arg4, null, null, null, null,
+                null);
     }
 
     /**
@@ -825,7 +864,8 @@ public interface PooledLambda {
             A arg1, B arg2, C arg3, D arg4) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 4, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null);
+                    function, 4, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, null, null, null, null,
+                    null);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }
@@ -847,7 +887,8 @@ public interface PooledLambda {
             QuintConsumer<? super A, ? super B, ? super C, ? super D, ? super E> function,
             A arg1, B arg2, C arg3, D arg4, E arg5) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 5, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, null);
+                function, 5, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, null, null, null,
+                null);
     }
 
     /**
@@ -867,7 +908,8 @@ public interface PooledLambda {
             QuintFunction<? super A, ? super B, ? super C, ? super D, ? super E, ? extends R>
                     function, A arg1, B arg2, C arg3, D arg4, E arg5) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 5, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, null);
+                function, 5, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, null, null, null,
+                null);
     }
 
     /**
@@ -902,7 +944,8 @@ public interface PooledLambda {
             A arg1, B arg2, C arg3, D arg4, E arg5) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 5, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, null);
+                    function, 5, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, null, null, null,
+                    null);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }
@@ -925,7 +968,8 @@ public interface PooledLambda {
             HexConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F> function,
             A arg1, B arg2, C arg3, D arg4, E arg5, F arg6) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 6, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6);
+                function, 6, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, null, null,
+                null);
     }
 
     /**
@@ -946,7 +990,8 @@ public interface PooledLambda {
             HexFunction<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
                     ? extends R> function, A arg1, B arg2, C arg3, D arg4, E arg5, F arg6) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 6, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, arg6);
+                function, 6, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, arg6, null, null,
+                null);
     }
 
     /**
@@ -982,7 +1027,282 @@ public interface PooledLambda {
             A arg1, B arg2, C arg3, D arg4, E arg5, F arg6) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 6, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6);
+                    function, 6, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, null, null,
+                    null);
+            return Message.obtain().setCallback(callback.recycleOnUse());
+        }
+    }
+
+    /**
+     * {@link PooledRunnable} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @return a {@link PooledRunnable}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7) }
+     */
+    static <A, B, C, D, E, F, G> PooledRunnable obtainRunnable(
+            HeptConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                    ? super G> function, A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 7, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, null,
+                null);
+    }
+
+    /**
+     * {@link PooledSupplier} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @return a {@link PooledSupplier}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7) }
+     */
+    static <A, B, C, D, E, F, G, R> PooledSupplier<R> obtainSupplier(
+            HeptFunction<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                    ? super G, ? extends R> function,
+            A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 7, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, arg6, arg7, null,
+                null);
+    }
+
+    /**
+     * Factory of {@link Message}s that contain an
+     * ({@link PooledLambda#recycleOnUse auto-recycling}) {@link PooledRunnable} as its
+     * {@link Message#getCallback internal callback}.
+     *
+     * The callback is equivalent to one obtainable via
+     * {@link #obtainRunnable(QuintConsumer, Object, Object, Object, Object, Object)}
+     *
+     * Note that using this method with {@link android.os.Handler#handleMessage}
+     * is more efficient than the alternative of {@link android.os.Handler#post}
+     * with a {@link PooledRunnable} due to the lack of 2 separate synchronization points
+     * when obtaining {@link Message} and {@link PooledRunnable} from pools separately
+     *
+     * You may optionally set a {@link Message#what} for the message if you want to be
+     * able to cancel it via {@link android.os.Handler#removeMessages}, but otherwise
+     * there's no need to do so
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @return a {@link Message} invoking {@code function(arg1, arg2, arg3, arg4, arg5, arg6,
+     * arg7) } when handled
+     */
+    static <A, B, C, D, E, F, G> Message obtainMessage(
+            HeptConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                    ? super G> function, A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7) {
+        synchronized (Message.sPoolSync) {
+            PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
+                    function, 7, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, null,
+                    null);
+            return Message.obtain().setCallback(callback.recycleOnUse());
+        }
+    }
+
+    /**
+     * {@link PooledRunnable} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @return a {@link PooledRunnable}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) }
+     */
+    static <A, B, C, D, E, F, G, H> PooledRunnable obtainRunnable(
+            OctConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F, ? super G,
+                    ? super H> function, A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7,
+            H arg8) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 8, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                null);
+    }
+
+    /**
+     * {@link PooledSupplier} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @return a {@link PooledSupplier}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) }
+     */
+    static <A, B, C, D, E, F, G, H, R> PooledSupplier<R> obtainSupplier(
+            OctFunction<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                                ? super G, ? super H, ? extends R> function,
+            A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7, H arg8) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 8, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                null);
+    }
+
+    /**
+     * Factory of {@link Message}s that contain an
+     * ({@link PooledLambda#recycleOnUse auto-recycling}) {@link PooledRunnable} as its
+     * {@link Message#getCallback internal callback}.
+     *
+     * The callback is equivalent to one obtainable via
+     * {@link #obtainRunnable(QuintConsumer, Object, Object, Object, Object, Object)}
+     *
+     * Note that using this method with {@link android.os.Handler#handleMessage}
+     * is more efficient than the alternative of {@link android.os.Handler#post}
+     * with a {@link PooledRunnable} due to the lack of 2 separate synchronization points
+     * when obtaining {@link Message} and {@link PooledRunnable} from pools separately
+     *
+     * You may optionally set a {@link Message#what} for the message if you want to be
+     * able to cancel it via {@link android.os.Handler#removeMessages}, but otherwise
+     * there's no need to do so
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @return a {@link Message} invoking {@code function(arg1, arg2, arg3, arg4, arg5, arg6,
+     * arg7, arg8) } when handled
+     */
+    static <A, B, C, D, E, F, G, H> Message obtainMessage(
+            OctConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F, ? super G,
+                    ? super H> function, A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7,
+            H arg8) {
+        synchronized (Message.sPoolSync) {
+            PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
+                    function, 8, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                    null);
+            return Message.obtain().setCallback(callback.recycleOnUse());
+        }
+    }
+
+    /**
+     * {@link PooledRunnable} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @param arg9 parameter supplied to {@code function} on call
+     * @return a {@link PooledRunnable}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) }
+     */
+    static <A, B, C, D, E, F, G, H, I> PooledRunnable obtainRunnable(
+            NonaConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                    ? super G, ? super H, ? super I> function, A arg1, B arg2, C arg3, D arg4,
+            E arg5, F arg6, G arg7, H arg8, I arg9) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 9, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                arg9);
+    }
+
+    /**
+     * {@link PooledSupplier} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @param arg9 parameter supplied to {@code function} on call
+     * @return a {@link PooledSupplier}, equivalent to lambda:
+     *         {@code () -> function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) }
+     */
+    static <A, B, C, D, E, F, G, H, I, R> PooledSupplier<R> obtainSupplier(
+            NonaFunction<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                                ? super G, ? super H, ? super I, ? extends R> function,
+            A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7, H arg8, I arg9) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 9, 0, ReturnType.OBJECT, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                arg9);
+    }
+
+    /**
+     * Factory of {@link Message}s that contain an
+     * ({@link PooledLambda#recycleOnUse auto-recycling}) {@link PooledRunnable} as its
+     * {@link Message#getCallback internal callback}.
+     *
+     * The callback is equivalent to one obtainable via
+     * {@link #obtainRunnable(QuintConsumer, Object, Object, Object, Object, Object)}
+     *
+     * Note that using this method with {@link android.os.Handler#handleMessage}
+     * is more efficient than the alternative of {@link android.os.Handler#post}
+     * with a {@link PooledRunnable} due to the lack of 2 separate synchronization points
+     * when obtaining {@link Message} and {@link PooledRunnable} from pools separately
+     *
+     * You may optionally set a {@link Message#what} for the message if you want to be
+     * able to cancel it via {@link android.os.Handler#removeMessages}, but otherwise
+     * there's no need to do so
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 parameter supplied to {@code function} on call
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @param arg6 parameter supplied to {@code function} on call
+     * @param arg7 parameter supplied to {@code function} on call
+     * @param arg8 parameter supplied to {@code function} on call
+     * @param arg9 parameter supplied to {@code function} on call
+     * @return a {@link Message} invoking {@code function(arg1, arg2, arg3, arg4, arg5, arg6,
+     * arg7, arg8, arg9) } when handled
+     */
+    static <A, B, C, D, E, F, G, H, I> Message obtainMessage(
+            NonaConsumer<? super A, ? super B, ? super C, ? super D, ? super E, ? super F,
+                    ? super G, ? super H, ? super I> function, A arg1, B arg2, C arg3, D arg4,
+            E arg5, F arg6, G arg7, H arg8, I arg9) {
+        synchronized (Message.sPoolSync) {
+            PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
+                    function, 9, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+                    arg9);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }
     }

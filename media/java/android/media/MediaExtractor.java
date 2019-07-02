@@ -272,10 +272,12 @@ final public class MediaExtractor {
     public static final class CasInfo {
         private final int mSystemId;
         private final MediaCas.Session mSession;
+        private final byte[] mPrivateData;
 
-        CasInfo(int systemId, @Nullable MediaCas.Session session) {
+        CasInfo(int systemId, @Nullable MediaCas.Session session, @Nullable byte[] privateData) {
             mSystemId = systemId;
             mSession = session;
+            mPrivateData = privateData;
         }
 
         /**
@@ -288,10 +290,30 @@ final public class MediaExtractor {
         }
 
         /**
+         * Retrieves the private data in the CA_Descriptor associated with a track.
+         * Some CAS systems may need this to initialize the CAS plugin object. This
+         * private data can only be retrieved before a valid {@link MediaCas} object
+         * is set on the extractor.
+         * <p>
+         * @see MediaExtractor#setMediaCas
+         * <p>
+         * @return a byte array containing the private data. A null return value
+         *         indicates that the private data is unavailable. An empty array,
+         *         on the other hand, indicates that the private data is empty
+         *         (zero in length).
+         */
+        @Nullable
+        public byte[] getPrivateData() {
+            return mPrivateData;
+        }
+
+        /**
          * Retrieves the {@link MediaCas.Session} associated with a track. The
          * session is needed to initialize a descrambler in order to decode the
-         * scrambled track.
+         * scrambled track. The session object can only be retrieved after a valid
+         * {@link MediaCas} object is set on the extractor.
          * <p>
+         * @see MediaExtractor#setMediaCas
          * @see MediaDescrambler#setMediaCasSession
          * <p>
          * @return a {@link MediaCas.Session} object associated with a track.
@@ -321,6 +343,13 @@ final public class MediaExtractor {
         if (formatMap.containsKey(MediaFormat.KEY_CA_SYSTEM_ID)) {
             int systemId = ((Integer)formatMap.get(MediaFormat.KEY_CA_SYSTEM_ID)).intValue();
             MediaCas.Session session = null;
+            byte[] privateData = null;
+            if (formatMap.containsKey(MediaFormat.KEY_CA_PRIVATE_DATA)) {
+                ByteBuffer buf = (ByteBuffer) formatMap.get(MediaFormat.KEY_CA_PRIVATE_DATA);
+                buf.rewind();
+                privateData = new byte[buf.remaining()];
+                buf.get(privateData);
+            }
             if (mMediaCas != null && formatMap.containsKey(MediaFormat.KEY_CA_SESSION_ID)) {
                 ByteBuffer buf = (ByteBuffer) formatMap.get(MediaFormat.KEY_CA_SESSION_ID);
                 buf.rewind();
@@ -328,7 +357,7 @@ final public class MediaExtractor {
                 buf.get(sessionId);
                 session = mMediaCas.createFromSessionId(toByteArray(sessionId));
             }
-            return new CasInfo(systemId, session);
+            return new CasInfo(systemId, session, privateData);
         }
         return null;
     }
@@ -405,8 +434,11 @@ final public class MediaExtractor {
      */
     @NonNull
     public List<AudioPresentation> getAudioPresentations(int trackIndex) {
-        return new ArrayList<AudioPresentation>();
+        return native_getAudioPresentations(trackIndex);
     }
+
+    @NonNull
+    private native List<AudioPresentation> native_getAudioPresentations(int trackIndex);
 
     /**
      * Get the PSSH info if present.

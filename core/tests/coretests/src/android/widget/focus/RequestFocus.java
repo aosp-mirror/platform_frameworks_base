@@ -16,12 +16,12 @@
 
 package android.widget.focus;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises cases where elements of the UI are requestFocus()ed.

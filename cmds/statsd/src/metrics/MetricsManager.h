@@ -21,6 +21,7 @@
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTracker.h"
 #include "config/ConfigKey.h"
+#include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
@@ -36,15 +37,20 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager : public PackageInfoListener {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config,
-                   const int64_t timeBaseNs, const int64_t currentTimeNs,
-                   const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const int64_t timeBaseNs,
+                   const int64_t currentTimeNs, const sp<UidMap>& uidMap,
+                   const sp<StatsPullerManager>& pullerManager,
+                   const sp<AlarmMonitor>& anomalyAlarmMonitor,
                    const sp<AlarmMonitor>& periodicAlarmMonitor);
 
     virtual ~MetricsManager();
 
     // Return whether the configuration is valid.
     bool isConfigValid() const;
+
+    bool checkLogCredentials(const LogEvent& event);
+
+    bool eventSanityCheck(const LogEvent& event);
 
     void onLogEvent(const LogEvent& event);
 
@@ -71,6 +77,10 @@ public:
         return mNoReportMetricIds.size() != mAllMetricProducers.size();
     }
 
+    bool shouldPersistLocalHistory() const {
+        return mShouldPersistHistory;
+    }
+
     void dumpStates(FILE* out, bool verbose);
 
     inline bool isInTtl(const int64_t timestampNs) const {
@@ -79,6 +89,14 @@ public:
 
     inline bool hashStringInReport() const {
         return mHashStringsInReport;
+    };
+
+    inline bool versionStringsInReport() const {
+        return mVersionStringsInReport;
+    };
+
+    inline bool installerInReport() const {
+        return mInstallerInReport;
     };
 
     void refreshTtl(const int64_t currentTimestampNs) {
@@ -105,12 +123,25 @@ public:
 
     virtual void onDumpReport(const int64_t dumpTimeNs,
                               const bool include_current_partial_bucket,
+                              const bool erase_data,
+                              const DumpLatency dumpLatency,
                               std::set<string> *str_set,
                               android::util::ProtoOutputStream* protoOutput);
 
     // Computes the total byte size of all metrics managed by a single config source.
     // Does not change the state.
     virtual size_t byteSize();
+
+    // Returns whether or not this config is active.
+    // The config is active if any metric in the config is active.
+    inline bool isActive() const {
+        return mIsActive;
+    }
+
+    void loadActiveConfig(const ActiveConfig& config, int64_t currentTimeNs);
+
+    void writeActiveConfigToProtoOutputStream(
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
 private:
     // For test only.
@@ -123,6 +154,8 @@ private:
     bool mConfigValid = false;
 
     bool mHashStringsInReport = false;
+    bool mVersionStringsInReport = false;
+    bool mInstallerInReport = false;
 
     const int64_t mTtlNs;
     int64_t mTtlEndNs;
@@ -142,6 +175,8 @@ private:
 
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
+
+    const bool mShouldPersistHistory;
 
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;
@@ -184,19 +219,33 @@ private:
 
     // The following map is initialized from the statsd_config.
 
-    // maps from the index of the LogMatchingTracker to index of MetricProducer.
+    // Maps from the index of the LogMatchingTracker to index of MetricProducer.
     std::unordered_map<int, std::vector<int>> mTrackerToMetricMap;
 
-    // maps from LogMatchingTracker to ConditionTracker
+    // Maps from LogMatchingTracker to ConditionTracker
     std::unordered_map<int, std::vector<int>> mTrackerToConditionMap;
 
-    // maps from ConditionTracker to MetricProducer
+    // Maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
+
+    // Maps from life span triggering event to MetricProducers.
+    std::unordered_map<int, std::vector<int>> mActivationAtomTrackerToMetricMap;
+
+    // Maps deactivation triggering event to MetricProducers.
+    std::unordered_map<int, std::vector<int>> mDeactivationAtomTrackerToMetricMap;
+
+    std::vector<int> mMetricIndexesWithActivation;
 
     void initLogSourceWhiteList();
 
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
+
+   // The config is active if any metric in the config is active.
+    bool mIsActive;
+
+    // The config is always active if any metric in the config does not have an activation signal.
+    bool mIsAlwaysActive;
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
@@ -205,9 +254,12 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
-    FRIEND_TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition);
+    FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);
@@ -228,6 +280,25 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
+
+    FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
+    FRIEND_TEST(StatsLogProcessorTest,
+            TestActivationOnBootMultipleActivationsDifferentActivationTypes);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
+
+    FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
+    FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
 };
 
 }  // namespace statsd

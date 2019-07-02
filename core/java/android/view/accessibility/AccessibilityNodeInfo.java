@@ -23,10 +23,12 @@ import static java.util.Collections.EMPTY_LIST;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -39,18 +41,22 @@ import android.text.style.AccessibilityClickableSpan;
 import android.text.style.AccessibilityURLSpan;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
+import android.view.TouchDelegate;
 import android.view.View;
 
 import com.android.internal.R;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -581,7 +587,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Integer argument specifying the start index of the requested text location data. Must be
      * valid inside the CharSequence returned by {@link #getText()}.
      *
-     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
@@ -590,7 +596,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Integer argument specifying the end index of the requested text location data. Must be
      * positive.
      *
-     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
@@ -645,6 +651,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IS_HEADING = 0x0200000;
 
+    private static final int BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY = 0x0400000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -656,6 +664,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
 
+    // TODO(b/129300068): Remove sNumInstancesInUse.
     private static AtomicInteger sNumInstancesInUse;
 
     /**
@@ -759,11 +768,18 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CollectionInfo mCollectionInfo;
     private CollectionItemInfo mCollectionItemInfo;
 
+    private TouchDelegateInfo mTouchDelegateInfo;
+
     /**
      * Hide constructor from clients.
      */
     private AccessibilityNodeInfo() {
         /* do nothing */
+    }
+
+    /** @hide */
+    AccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        init(info);
     }
 
     /**
@@ -821,7 +837,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public AccessibilityNodeInfo findFocus(int focus) {
         enforceSealed();
         enforceValidFocusType(focus);
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return null;
         }
         return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId, mWindowId,
@@ -845,7 +861,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public AccessibilityNodeInfo focusSearch(int direction) {
         enforceSealed();
         enforceValidFocusDirection(direction);
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return null;
         }
         return AccessibilityInteractionClient.getInstance().focusSearch(mConnectionId, mWindowId,
@@ -877,7 +893,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     @UnsupportedAppUsage
     public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -978,7 +994,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mChildNodeIds == null) {
             return null;
         }
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return null;
         }
         final long childId = mChildNodeIds.get(index);
@@ -1279,7 +1295,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getTraversalBefore() {
         enforceSealed();
-        return getNodeForAccessibilityId(mTraversalBefore);
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mTraversalBefore);
     }
 
     /**
@@ -1340,7 +1356,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getTraversalAfter() {
         enforceSealed();
-        return getNodeForAccessibilityId(mTraversalAfter);
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mTraversalAfter);
     }
 
     /**
@@ -1497,7 +1513,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean performAction(int action) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -1520,7 +1536,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean performAction(int action, Bundle arguments) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -1544,7 +1560,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return Collections.emptyList();
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -1575,7 +1591,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String viewId) {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return Collections.emptyList();
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -1592,7 +1608,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityWindowInfo getWindow() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+        if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
@@ -1611,7 +1627,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
-        return getNodeForAccessibilityId(mParentNodeId);
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mParentNodeId);
     }
 
     /**
@@ -1666,17 +1682,29 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets the node bounds in parent coordinates.
+     * Gets the node bounds in the viewParent's coordinates.
+     * {@link #getParent()} does not represent the source's viewParent.
+     * Instead it represents the result of {@link View#getParentForAccessibility()},
+     * which returns the closest ancestor where {@link View#isImportantForAccessibility()} is true.
+     * So this method is not reliable.
      *
      * @param outBounds The output node bounds.
+     * @deprecated Use {@link #getBoundsInScreen(Rect)} instead.
+     *
      */
+    @Deprecated
     public void getBoundsInParent(Rect outBounds) {
         outBounds.set(mBoundsInParent.left, mBoundsInParent.top,
                 mBoundsInParent.right, mBoundsInParent.bottom);
     }
 
     /**
-     * Sets the node bounds in parent coordinates.
+     * Sets the node bounds in the viewParent's coordinates.
+     * {@link #getParent()} does not represent the source's viewParent.
+     * Instead it represents the result of {@link View#getParentForAccessibility()},
+     * which returns the closest ancestor where {@link View#isImportantForAccessibility()} is true.
+     * So this method is not reliable.
+     *
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
@@ -1686,7 +1714,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param bounds The node bounds.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Accessibility services should not care about these bounds.
      */
+    @Deprecated
     public void setBoundsInParent(Rect bounds) {
         enforceNotSealed();
         mBoundsInParent.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -2458,6 +2488,30 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns whether node represents a text entry key that is part of a keyboard or keypad.
+     *
+     * @return {@code true} if the node is a text entry key., {@code false} otherwise.
+     */
+    public boolean isTextEntryKey() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY);
+    }
+
+    /**
+     * Sets whether the node represents a text entry key that is part of a keyboard or keypad.
+     *
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param isTextEntryKey {@code true} if the node is a text entry key, {@code false} otherwise.
+     */
+    public void setTextEntryKey(boolean isTextEntryKey) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY, isTextEntryKey);
+    }
+
+    /**
      * Gets the package this node comes from.
      *
      * @return The package name.
@@ -2754,7 +2808,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getLabelFor() {
         enforceSealed();
-        return getNodeForAccessibilityId(mLabelForId);
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabelForId);
     }
 
     /**
@@ -2806,7 +2860,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getLabeledBy() {
         enforceSealed();
-        return getNodeForAccessibilityId(mLabeledById);
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabeledById);
     }
 
     /**
@@ -2943,6 +2997,43 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean hasExtras() {
         return mExtras != null;
+    }
+
+    /**
+     * Get the {@link TouchDelegateInfo} for touch delegate behavior with the represented view.
+     * It is possible for the same node to be pointed to by several regions. Use
+     * {@link TouchDelegateInfo#getRegionAt(int)} to get touch delegate target {@link Region}, and
+     * {@link TouchDelegateInfo#getTargetForRegion(Region)} for {@link AccessibilityNodeInfo} from
+     * the given region.
+     *
+     * @return {@link TouchDelegateInfo} or {@code null} if there are no touch delegates.
+     */
+    @Nullable
+    public TouchDelegateInfo getTouchDelegateInfo() {
+        if (mTouchDelegateInfo != null) {
+            mTouchDelegateInfo.setConnectionId(mConnectionId);
+            mTouchDelegateInfo.setWindowId(mWindowId);
+        }
+        return mTouchDelegateInfo;
+    }
+
+    /**
+     * Set touch delegate info if the represented view has a {@link TouchDelegate}.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an
+     *   AccessibilityService.
+     * </p>
+     *
+     * @param delegatedInfo {@link TouchDelegateInfo} returned from
+     *         {@link TouchDelegate#getTouchDelegateInfo()}.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setTouchDelegateInfo(@NonNull TouchDelegateInfo delegatedInfo) {
+        enforceNotSealed();
+        mTouchDelegateInfo = delegatedInfo;
     }
 
     /**
@@ -3311,6 +3402,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!Objects.equals(mCollectionItemInfo, DEFAULT.mCollectionItemInfo)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        fieldIndex++;
+        if (!Objects.equals(mTouchDelegateInfo, DEFAULT.mTouchDelegateInfo)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
         int totalFields = fieldIndex;
         parcel.writeLong(nonDefaultFields);
 
@@ -3433,6 +3528,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(mCollectionItemInfo.isSelected() ? 1 : 0);
         }
 
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mTouchDelegateInfo.writeToParcel(parcel, flags);
+        }
+
         if (DEBUG) {
             fieldIndex--;
             if (totalFields != fieldIndex) {
@@ -3514,6 +3613,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mCollectionItemInfo != null) mCollectionItemInfo.recycle();
         mCollectionItemInfo =  (other.mCollectionItemInfo != null)
                 ? CollectionItemInfo.obtain(other.mCollectionItemInfo) : null;
+
+        final TouchDelegateInfo otherInfo = other.mTouchDelegateInfo;
+        mTouchDelegateInfo = (otherInfo != null)
+                ? new TouchDelegateInfo(otherInfo.mTargetMap, true) : null;
     }
 
     /**
@@ -3636,6 +3739,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                         parcel.readInt() == 1)
                 : null;
 
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mTouchDelegateInfo = TouchDelegateInfo.CREATOR.createFromParcel(parcel);
+        }
+
         mSealed = sealed;
     }
 
@@ -3748,6 +3855,14 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SCROLL_DOWN";
             case R.id.accessibilityActionScrollRight:
                 return "ACTION_SCROLL_RIGHT";
+            case R.id.accessibilityActionPageDown:
+                return "ACTION_PAGE_DOWN";
+            case R.id.accessibilityActionPageUp:
+                return "ACTION_PAGE_UP";
+            case R.id.accessibilityActionPageLeft:
+                return "ACTION_PAGE_LEFT";
+            case R.id.accessibilityActionPageRight:
+                return "ACTION_PAGE_RIGHT";
             case R.id.accessibilityActionSetProgress:
                 return "ACTION_SET_PROGRESS";
             case R.id.accessibilityActionContextClick:
@@ -3784,10 +3899,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
-    private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
-        return ((mWindowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
+    private static boolean canPerformRequestOverConnection(int connectionId,
+            int windowId, long accessibilityNodeId) {
+        return ((windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 && (getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID)
-                && (mConnectionId != UNDEFINED_CONNECTION_ID));
+                && (connectionId != UNDEFINED_CONNECTION_ID));
     }
 
     @Override
@@ -3890,13 +4006,14 @@ public class AccessibilityNodeInfo implements Parcelable {
         return builder.toString();
     }
 
-    private AccessibilityNodeInfo getNodeForAccessibilityId(long accessibilityId) {
-        if (!canPerformRequestOverConnection(accessibilityId)) {
+    private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
+            int windowId, long accessibilityId) {
+        if (!canPerformRequestOverConnection(connectionId, windowId, accessibilityId)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
+        return client.findAccessibilityNodeInfoByAccessibilityId(connectionId,
+                windowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
                         | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
     }
 
@@ -3935,7 +4052,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </li>
      * <li><strong>Overriden standard actions</strong> - These are actions that override
      * standard actions to customize them. For example, an app may add a label to the
-     * standard {@link #ACTION_CLICK} action to announce that this action clears browsing history.
+     * standard {@link #ACTION_CLICK} action to indicate to the user that this action clears
+     * browsing history.
      * </ul>
      * </p>
      * <p>
@@ -4273,6 +4391,30 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight);
+
+        /**
+         * Action to move to the page above.
+         */
+        public static final AccessibilityAction ACTION_PAGE_UP =
+                new AccessibilityAction(R.id.accessibilityActionPageUp);
+
+        /**
+         * Action to move to the page below.
+         */
+        public static final AccessibilityAction ACTION_PAGE_DOWN =
+                new AccessibilityAction(R.id.accessibilityActionPageDown);
+
+        /**
+         * Action to move to the page left.
+         */
+        public static final AccessibilityAction ACTION_PAGE_LEFT =
+                new AccessibilityAction(R.id.accessibilityActionPageLeft);
+
+        /**
+         * Action to move to the page right.
+         */
+        public static final AccessibilityAction ACTION_PAGE_RIGHT =
+                new AccessibilityAction(R.id.accessibilityActionPageRight);
 
         /**
          * Action that context clicks the node.
@@ -4866,9 +5008,179 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Class with information of touch delegated views and regions from {@link TouchDelegate} for
+     * the {@link AccessibilityNodeInfo}.
+     *
+     * @see AccessibilityNodeInfo#setTouchDelegateInfo(TouchDelegateInfo)
+     */
+    public static final class TouchDelegateInfo implements Parcelable {
+        private ArrayMap<Region, Long> mTargetMap;
+        // Two ids are initialized lazily in AccessibilityNodeInfo#getTouchDelegateInfo
+        private int mConnectionId;
+        private int mWindowId;
+
+        /**
+         * Create a new instance of {@link TouchDelegateInfo}.
+         *
+         * @param targetMap A map from regions (in view coordinates) to delegated views.
+         * @throws IllegalArgumentException if targetMap is empty or {@code null} in
+         * Regions or Views.
+         */
+        public TouchDelegateInfo(@NonNull Map<Region, View> targetMap) {
+            Preconditions.checkArgument(!targetMap.isEmpty()
+                    && !targetMap.containsKey(null) && !targetMap.containsValue(null));
+            mTargetMap = new ArrayMap<>(targetMap.size());
+            for (final Region region : targetMap.keySet()) {
+                final View view = targetMap.get(region);
+                mTargetMap.put(region, (long) view.getAccessibilityViewId());
+            }
+        }
+
+        /**
+         * Create a new instance from target map.
+         *
+         * @param targetMap A map from regions (in view coordinates) to delegated views'
+         *                  accessibility id.
+         * @param doCopy True if shallow copy targetMap.
+         * @throws IllegalArgumentException if targetMap is empty or {@code null} in
+         * Regions or Views.
+         */
+        TouchDelegateInfo(@NonNull ArrayMap<Region, Long> targetMap, boolean doCopy) {
+            Preconditions.checkArgument(!targetMap.isEmpty()
+                    && !targetMap.containsKey(null) && !targetMap.containsValue(null));
+            if (doCopy) {
+                mTargetMap = new ArrayMap<>(targetMap.size());
+                mTargetMap.putAll(targetMap);
+            } else {
+                mTargetMap = targetMap;
+            }
+        }
+
+        /**
+         * Set the connection ID.
+         *
+         * @param connectionId The connection id.
+         */
+        private void setConnectionId(int connectionId) {
+            mConnectionId = connectionId;
+        }
+
+        /**
+         * Set the window ID.
+         *
+         * @param windowId The window id.
+         */
+        private void setWindowId(int windowId) {
+            mWindowId = windowId;
+        }
+
+        /**
+         * Returns the number of touch delegate target region.
+         *
+         * @return Number of touch delegate target region.
+         */
+        public int getRegionCount() {
+            return mTargetMap.size();
+        }
+
+        /**
+         * Return the {@link Region} at the given index in the {@link TouchDelegateInfo}.
+         *
+         * @param index The desired index, must be between 0 and {@link #getRegionCount()}-1.
+         * @return Returns the {@link Region} stored at the given index.
+         */
+        @NonNull
+        public Region getRegionAt(int index) {
+            return mTargetMap.keyAt(index);
+        }
+
+        /**
+         * Return the target {@link AccessibilityNodeInfo} for the given {@link Region}.
+         * <p>
+         *   <strong>Note:</strong> This api can only be called from {@link AccessibilityService}.
+         * </p>
+         * <p>
+         *   <strong>Note:</strong> It is a client responsibility to recycle the
+         *     received info by calling {@link AccessibilityNodeInfo#recycle()}
+         *     to avoid creating of multiple instances.
+         * </p>
+         *
+         * @param region The region retrieved from {@link #getRegionAt(int)}.
+         * @return The target node associates with the given region.
+         */
+        @Nullable
+        public AccessibilityNodeInfo getTargetForRegion(@NonNull Region region) {
+            return getNodeForAccessibilityId(mConnectionId, mWindowId, mTargetMap.get(region));
+        }
+
+        /**
+         * Return the accessibility id of target node.
+         *
+         * @param region The region retrieved from {@link #getRegionAt(int)}.
+         * @return The accessibility id of target node.
+         *
+         * @hide
+         */
+        @TestApi
+        public long getAccessibilityIdForRegion(@NonNull Region region) {
+            return mTargetMap.get(region);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mTargetMap.size());
+            for (int i = 0; i < mTargetMap.size(); i++) {
+                final Region region = mTargetMap.keyAt(i);
+                final Long accessibilityId = mTargetMap.valueAt(i);
+                region.writeToParcel(dest, flags);
+                dest.writeLong(accessibilityId);
+            }
+        }
+
+        /**
+         * @see android.os.Parcelable.Creator
+         */
+        public static final @android.annotation.NonNull Parcelable.Creator<TouchDelegateInfo> CREATOR =
+                new Parcelable.Creator<TouchDelegateInfo>() {
+            @Override
+            public TouchDelegateInfo createFromParcel(Parcel parcel) {
+                final int size = parcel.readInt();
+                if (size == 0) {
+                    return null;
+                }
+                final ArrayMap<Region, Long> targetMap = new ArrayMap<>(size);
+                for (int i = 0; i < size; i++) {
+                    final Region region = Region.CREATOR.createFromParcel(parcel);
+                    final long accessibilityId = parcel.readLong();
+                    targetMap.put(region, accessibilityId);
+                }
+                final TouchDelegateInfo touchDelegateInfo = new TouchDelegateInfo(
+                        targetMap, false);
+                return touchDelegateInfo;
+            }
+
+            @Override
+            public TouchDelegateInfo[] newArray(int size) {
+                return new TouchDelegateInfo[size];
+            }
+        };
+    }
+
+    /**
      * @see android.os.Parcelable.Creator
      */
-    public static final Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
             new Parcelable.Creator<AccessibilityNodeInfo>() {
         @Override
         public AccessibilityNodeInfo createFromParcel(Parcel parcel) {

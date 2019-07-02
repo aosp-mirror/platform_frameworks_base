@@ -33,11 +33,11 @@ message WifiLog {
   // Number of open networks in the saved networks.
   optional int32 num_open_networks = 3;
 
-  // Number of personal networks.
-  optional int32 num_personal_networks = 4;
+  // Number of legacy personal networks.
+  optional int32 num_legacy_personal_networks = 4;
 
-  // Number of enterprise networks.
-  optional int32 num_enterprise_networks = 5;
+  // Number of legacy enterprise networks.
+  optional int32 num_legacy_enterprise_networks = 5;
 
   // Does the user have location setting enabled.
   optional bool is_location_enabled = 6;
@@ -96,11 +96,11 @@ message WifiLog {
 
   message ScanReturnEntry {
 
-     // Return code of the scan.
-     optional ScanReturnCode scan_return_code = 1;
+    // Return code of the scan.
+    optional ScanReturnCode scan_return_code = 1;
 
-     // Number of entries that were found in the scan.
-     optional int32 scan_results_count = 2;
+    // Number of entries that were found in the scan.
+    optional int32 scan_results_count = 2;
   }
 
   // State of the Wifi.
@@ -125,14 +125,14 @@ message WifiLog {
 
   message WifiSystemStateEntry {
 
-     // Current WiFi state.
-     optional WifiState wifi_state = 1;
+    // Current WiFi state.
+    optional WifiState wifi_state = 1;
 
-     // Count of scans in state.
-     optional int32 wifi_state_count = 2;
+    // Count of scans in state.
+    optional int32 wifi_state_count = 2;
 
-     // Is screen on.
-     optional bool is_screen_on = 3;
+    // Is screen on.
+    optional bool is_screen_on = 3;
   }
 
   // Mapping of Error/Success codes to the number of background scans that resulted in it
@@ -206,11 +206,11 @@ message WifiLog {
   // Total number of scan results for open networks
   optional int32 num_open_network_scan_results = 40;
 
-  // Total number of scan results for personal networks
-  optional int32 num_personal_network_scan_results = 41;
+  // Total number of scan results for legacy personal networks
+  optional int32 num_legacy_personal_network_scan_results = 41;
 
-  // Total number of scan results for enterprise networks
-  optional int32 num_enterprise_network_scan_results = 42;
+  // Total number of scan results for legacy enterprise networks
+  optional int32 num_legacy_enterprise_network_scan_results = 42;
 
   // Total number of scan results for hidden networks
   optional int32 num_hidden_network_scan_results = 43;
@@ -457,14 +457,100 @@ message WifiLog {
   // Identifier for experimental scoring parameter settings.
   optional string score_experiment_id = 117;
 
-  // Histogram of the EAP method type of all installed Passpoint profiles
-  repeated PasspointProfileTypeCount installed_passpoint_profile_type = 123;
+  // Data on wifi radio usage
+  optional WifiRadioUsage wifi_radio_usage = 118;
+
+  // Stores settings values used for metrics testing.
+  optional ExperimentValues experiment_values = 119;
+
+  // List of WifiIsUnusableEvents which get logged when we notice that WiFi is unusable.
+  // Collected only when WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED Settings is enabled.
+  repeated WifiIsUnusableEvent wifi_is_unusable_event_list = 120;
+
+  // Counts the occurrences of each link speed (Mbps) level
+  // with rssi (dBm) and rssi^2 sums (dBm^2)
+  repeated LinkSpeedCount link_speed_counts = 121;
+
+  // Number of times the SarManager failed to register SAR sensor listener
+  optional int32 num_sar_sensor_registration_failures = 122;
 
   // Hardware revision (EVT, DVT, PVT etc.)
   optional string hardware_revision = 124;
 
   // Total wifi link layer usage data over the logging duration in ms.
   optional WifiLinkLayerUsageStats wifi_link_layer_usage_stats = 125;
+
+  // Multiple lists of timestamped link layer stats with labels to represent whether wifi is usable
+  repeated WifiUsabilityStats wifi_usability_stats_list = 126;
+
+  // Counts the occurrences of each Wifi usability score provided by external app
+  repeated WifiUsabilityScoreCount wifi_usability_score_count = 127;
+
+  // List of PNO scan stats, one element for each mobility state
+  repeated DeviceMobilityStatePnoScanStats mobility_state_pno_stats_list = 128;
+
+  // Wifi p2p statistics
+  optional WifiP2pStats wifi_p2p_stats = 129;
+
+  // Easy Connect (DPP) metrics
+  optional WifiDppLog wifi_dpp_log = 130;
+
+  // Number of Enhanced Open (OWE) networks in the saved networks.
+  optional int32 num_enhanced_open_networks = 131;
+
+  // Number of WPA3-Personal networks.
+  optional int32 num_wpa3_personal_networks = 132;
+
+  // Number of WPA3-Enterprise networks.
+  optional int32 num_wpa3_enterprise_networks = 133;
+
+  // Total number of scan results for Enhanced open networks
+  optional int32 num_enhanced_open_network_scan_results = 134;
+
+  // Total number of scan results for WPA3-Personal networks
+  optional int32 num_wpa3_personal_network_scan_results = 135;
+
+  // Total number of scan results for WPA3-Enterprise networks
+  optional int32 num_wpa3_enterprise_network_scan_results = 136;
+
+  // WifiConfigStore read/write metrics.
+  optional WifiConfigStoreIO wifi_config_store_io = 137;
+
+  // Total number of saved networks with mac randomization enabled.
+  optional int32 num_saved_networks_with_mac_randomization = 138;
+
+  // Link Probe metrics
+  optional LinkProbeStats link_probe_stats = 139;
+
+  // List of NetworkSelectionExperimentDecisions stats for each experiment
+  repeated NetworkSelectionExperimentDecisions network_selection_experiment_decisions_list = 140;
+
+  // Network Request API surface metrics.
+  optional WifiNetworkRequestApiLog wifi_network_request_api_log = 141;
+
+  // Network Suggestion API surface metrics.
+  optional WifiNetworkSuggestionApiLog wifi_network_suggestion_api_log = 142;
+
+  // WifiLock statistics
+  optional WifiLockStats wifi_lock_stats = 143;
+
+  // Stats on number of times Wi-Fi is turned on/off though the WifiManager#setWifiEnabled API
+  optional WifiToggleStats wifi_toggle_stats = 144;
+
+  // Number of times WifiManager#addOrUpdateNetwork is called.
+  optional int32 num_add_or_update_network_calls = 145;
+
+  // Number of times WifiManager#enableNetwork is called.
+  optional int32 num_enable_network_calls = 146;
+
+  // Passpoint provison metrics
+  optional PasspointProvisionStats passpoint_provision_stats = 147;
+
+  // Histogram of the EAP method type of all installed Passpoint profiles for R1
+  repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r1 = 123;
+
+  // Histogram of the EAP method type of all installed Passpoint profiles for R2
+  repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r2 = 148;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -558,7 +644,7 @@ message ConnectionEvent {
     ROAM_UNKNOWN = 0;
 
     // No roaming.
-    ROAM_NONE  = 1;
+    ROAM_NONE = 1;
 
     // DBDC roaming.
     ROAM_DBDC = 2;
@@ -592,6 +678,59 @@ message ConnectionEvent {
     HLF_UNWANTED = 4;
   }
 
+  // Level 2 failure reason.
+  enum Level2FailureReason {
+
+    // Unknown default
+    FAILURE_REASON_UNKNOWN = 0;
+
+    // The reason code if there is no error during authentication. It could
+    // also imply that there no authentication in progress.
+    AUTH_FAILURE_NONE = 1;
+
+    // The reason code if there was a timeout authenticating.
+    AUTH_FAILURE_TIMEOUT = 2;
+
+    // The reason code if there was a wrong password while authenticating.
+    AUTH_FAILURE_WRONG_PSWD = 3;
+
+    // The reason code if there was EAP failure while authenticating.
+    AUTH_FAILURE_EAP_FAILURE = 4;
+  }
+
+  // Entity that recommended connecting to this network.
+  enum ConnectionNominator {
+    // Unknown nominator
+    NOMINATOR_UNKNOWN = 0;
+
+    // User selected network manually
+    NOMINATOR_MANUAL = 1;
+
+    // Saved network
+    NOMINATOR_SAVED = 2;
+
+    // Suggestion API
+    NOMINATOR_SUGGESTION = 3;
+
+    // Passpoint
+    NOMINATOR_PASSPOINT = 4;
+
+    // Carrier suggestion
+    NOMINATOR_CARRIER = 5;
+
+    // External scorer
+    NOMINATOR_EXTERNAL_SCORED = 6;
+
+    // Network Specifier
+    NOMINATOR_SPECIFIER = 7;
+
+    // User connected choice override
+    NOMINATOR_SAVED_USER_CONNECT_CHOICE = 8;
+
+    // Open Network Available Pop-up
+    NOMINATOR_OPEN_NETWORK_AVAILABLE = 9;
+  }
+
   // Start time of the connection.
   optional int64 start_time_millis = 1;// [(datapol.semantic_type) = ST_TIMESTAMP];
 
@@ -618,6 +757,19 @@ message ConnectionEvent {
 
   // Has bug report been taken.
   optional bool automatic_bug_report_taken = 9;
+
+  // Connection is using locally generated random MAC address.
+  optional bool use_randomized_mac = 10 [default = false];
+
+  // Who chose to connect.
+  optional ConnectionNominator connection_nominator = 11;
+
+  // The currently running network selector when this connection event occurred.
+  optional int32 network_selector_experiment_id = 12;
+
+  // Breakdown of level_2_failure_code with more detailed reason.
+  optional Level2FailureReason level_2_failure_reason = 13
+          [default = FAILURE_REASON_UNKNOWN];
 }
 
 // Number of occurrences of a specific RSSI poll rssi value
@@ -648,6 +800,31 @@ message WifiScoreCount {
 
   // Number of Wifi score reports with this score
   optional int32 count = 2;
+}
+
+// Counts the number of instances of a specific Wifi Usability Score
+message WifiUsabilityScoreCount {
+  // Wifi Usability Score
+  optional int32 score = 1;
+
+  // Number of Wifi score reports with this score
+  optional int32 count = 2;
+}
+
+// Number of occurrences of a specific link speed (Mbps)
+// and sum of rssi (dBm) and rssi^2 (dBm^2)
+message LinkSpeedCount {
+  // Link speed (Mbps)
+  optional int32 link_speed_mbps = 1;
+
+  // Number of RSSI polls with link_speed
+  optional int32 count = 2;
+
+  // Sum of absolute values of rssi values (dBm)
+  optional int32 rssi_sum_dbm = 3;
+
+  // Sum of squares of rssi values (dBm^2)
+  optional int64 rssi_sum_of_squares_dbm_sq = 4;
 }
 
 // Number of occurrences of Soft AP session durations
@@ -790,6 +967,13 @@ message StaEvent {
 
     // Wifi is turned off
     TYPE_WIFI_DISABLED = 19;
+
+    // The NetworkAgent Wifi usability score has changed in a way that may
+    // impact connectivity
+    TYPE_WIFI_USABILITY_SCORE_BREACH = 20;
+
+    // Link probe was performed
+    TYPE_LINK_PROBE = 21;
   }
 
   enum FrameworkDisconnectReason {
@@ -888,7 +1072,7 @@ message StaEvent {
     STATE_INVALID = 12;
   }
 
-  // Bit mask of all supplicant state changes that occured since the last event
+  // Bit mask of all supplicant state changes that occurred since the last event
   optional uint32 supplicant_state_changes_bitmask = 9 [default = 0];
 
   // The number of milliseconds that have elapsed since the device booted
@@ -896,7 +1080,7 @@ message StaEvent {
 
   optional FrameworkDisconnectReason framework_disconnect_reason = 11 [default = DISCONNECT_UNKNOWN];
 
-  // Flag which indicates if an association rejection event occured due to a timeout
+  // Flag which indicates if an association rejection event occurred due to a timeout
   optional bool association_timed_out = 12 [default = false];
 
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
@@ -904,6 +1088,25 @@ message StaEvent {
 
   // NetworkAgent score of connected wifi
   optional int32 last_score = 14 [default = -1];
+
+  // NetworkAgent Wifi usability score of connected wifi
+  optional int32 last_wifi_usability_score = 15 [default = -1];
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 last_prediction_horizon_sec = 16 [default = -1];
+
+  // Only valid if event type == TYPE_LINK_PROBE.
+  // true if link probe succeeded, false otherwise.
+  optional bool link_probe_was_success = 17;
+
+  // Only valid if event type == TYPE_LINK_PROBE and link_probe_was_success == true.
+  // Elapsed time, in milliseconds, of a successful link probe.
+  optional int32 link_probe_success_elapsed_time_ms = 18;
+
+  // Only valid if event type == TYPE_LINK_PROBE and link_probe_was_success == false.
+  // Failure reason for an unsuccessful link probe.
+  optional LinkProbeStats.LinkProbeFailureReason link_probe_failure_reason = 19;
 }
 
 // Wi-Fi Aware metrics
@@ -1308,6 +1511,30 @@ message WifiPowerStats {
 
   // Amount of time wifi is in tx (ms)
   optional int64 tx_time_ms = 5;
+
+  // Amount of time kernel is active because of wifi data (ms)
+  optional int64 wifi_kernel_active_time_ms = 6;
+
+  // Number of packets sent (tx)
+  optional int64 num_packets_tx = 7;
+
+  // Number of bytes sent (tx)
+  optional int64 num_bytes_tx = 8;
+
+  // Number of packets received (rx)
+  optional int64 num_packets_rx = 9;
+
+  // Number of bytes sent (rx)
+  optional int64 num_bytes_rx = 10;
+
+  // Amount of time wifi is in sleep (ms)
+  optional int64 sleep_time_ms = 11;
+
+  // Amount of time wifi is scanning (ms)
+  optional int64 scan_time_ms = 12;
+
+  // Actual monitored rail energy consumed by wifi (mAh)
+  optional double monitored_rail_energy_consumed_mah = 13;
 }
 
 // Metrics for Wifi Wake
@@ -1400,7 +1627,7 @@ message WifiRttLog {
     repeated HistogramBucket histogram_request_interval_ms = 8;
   }
 
-    // Histogram bucket for Wi-Fi RTT logs. Range is [start, end)
+  // Histogram bucket for Wi-Fi RTT logs. Range is [start, end)
   message HistogramBucket {
     // lower range of the bucket (inclusive)
     optional int64 start = 1;
@@ -1518,6 +1745,100 @@ message WifiRttLog {
   }
 }
 
+// Usage data for the wifi radio while device is running on battery.
+message WifiRadioUsage {
+  // Duration of log (ms)
+  optional int64 logging_duration_ms = 1;
+
+  // Total time for which the radio is awake due to scan.
+  optional int64 scan_time_ms = 2;
+}
+
+message ExperimentValues {
+  // Indicates if we are logging WifiIsUnusableEvent in metrics
+  optional bool wifi_is_unusable_logging_enabled = 1;
+
+  // Minimum number of txBad to trigger a data stall
+  optional int32 wifi_data_stall_min_tx_bad = 2;
+
+  // Minimum number of txSuccess to trigger a data stall
+  // when rxSuccess is 0
+  optional int32 wifi_data_stall_min_tx_success_without_rx = 3;
+
+  // Indicates if we are logging LinkSpeedCount in metrics
+  optional bool link_speed_counts_logging_enabled = 4;
+}
+
+message WifiIsUnusableEvent {
+  enum TriggerType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // There is a data stall from tx failures
+    TYPE_DATA_STALL_BAD_TX = 1;
+
+    // There is a data stall from rx failures
+    TYPE_DATA_STALL_TX_WITHOUT_RX = 2;
+
+    // There is a data stall from both tx and rx failures
+    TYPE_DATA_STALL_BOTH = 3;
+
+    // Firmware generated an alert
+    TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
+  }
+
+  // What event triggered WifiIsUnusableEvent.
+  optional TriggerType type = 1;
+
+  // The timestamp at which this event occurred.
+  // Measured in milliseconds that have elapsed since the device booted.
+  optional int64 start_time_millis = 2;
+
+  // NetworkAgent score of connected wifi.
+  // Defaults to -1 if the score was never set.
+  optional int32 last_score = 3 [default = -1];
+
+  // Delta of successfully transmitted (ACKed) unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_success_delta = 4;
+
+  // Delta of transmitted unicast data retry packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_retries_delta = 5;
+
+  // Delta of lost (not ACKed) transmitted unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_bad_delta = 6;
+
+  // Delta of received unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 rx_success_delta = 7;
+
+  // Time in millisecond between the last two WifiLinkLayerStats.
+  optional int64 packet_update_time_delta = 8;
+
+  // The timestamp at which the last WifiLinkLayerStats was updated.
+  // Measured in milliseconds that have elapsed since the device booted.
+  optional int64 last_link_layer_stats_update_time = 9;
+
+  // Firmware alert code. Only valid when the event was triggered by a firmware alert, otherwise -1.
+  optional int32 firmware_alert_code = 10 [default = -1];
+
+  // NetworkAgent wifi usability score of connected wifi.
+  // Defaults to -1 if the score was never set.
+  optional int32 last_wifi_usability_score = 11 [default = -1];
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 last_prediction_horizon_sec = 12 [default = -1];
+
+  // Whether screen status is on when WifiIsUnusableEvent happens.
+  optional bool screen_on = 13 [default = false];
+}
+
 message PasspointProfileTypeCount {
   enum EapMethod {
     // Unknown Type
@@ -1561,4 +1882,779 @@ message WifiLinkLayerUsageStats {
 
   // Total time the wifi radio is scanning in ms over the logging duration.
   optional int64 radio_scan_time_ms = 5;
+
+  // Total time the wifi radio spent doing nan scans in ms over the logging duration.
+  optional int64 radio_nan_scan_time_ms = 6;
+
+  // Total time the wifi radio spent doing background scans in ms over the logging duration.
+  optional int64 radio_background_scan_time_ms = 7;
+
+  // Total time the wifi radio spent doing roam scans in ms over the logging duration.
+  optional int64 radio_roam_scan_time_ms = 8;
+
+  // Total time the wifi radio spent doing pno scans in ms over the logging duration.
+  optional int64 radio_pno_scan_time_ms = 9;
+
+  // Total time the wifi radio spent doing hotspot 2.0 scans and GAS exchange
+  // in ms over the logging duration.
+  optional int64 radio_hs20_scan_time_ms = 10;
+}
+
+message WifiUsabilityStatsEntry {
+  // Status codes for link probe status
+  enum LinkProbeStatus {
+    // Link probe status is unknown
+    PROBE_STATUS_UNKNOWN = 0;
+
+    // Link probe is not triggered
+    PROBE_STATUS_NO_PROBE = 1;
+
+    // Link probe is triggered and the result is success
+    PROBE_STATUS_SUCCESS = 2;
+
+    // Link probe is triggered and the result is failure
+    PROBE_STATUS_FAILURE = 3;
+  }
+
+  // Codes for cellular data network type
+  enum CellularDataNetworkType {
+    // Unknown network
+    NETWORK_TYPE_UNKNOWN = 0;
+
+    // GSM network
+    NETWORK_TYPE_GSM = 1;
+
+    // CDMA network
+    NETWORK_TYPE_CDMA = 2;
+
+    // CDMA EVDO network
+    NETWORK_TYPE_EVDO_0 = 3;
+
+    // WCDMA network
+    NETWORK_TYPE_UMTS = 4;
+
+    // TDSCDMA network
+    NETWORK_TYPE_TD_SCDMA = 5;
+
+    // LTE network
+    NETWORK_TYPE_LTE = 6;
+
+    // NR network
+    NETWORK_TYPE_NR = 7;
+  }
+
+  // Absolute milliseconds from device boot when these stats were sampled
+  optional int64 time_stamp_ms = 1;
+
+  // The RSSI at the sample time
+  optional int32 rssi = 2;
+
+  // Link speed at the sample time in Mbps
+  optional int32 link_speed_mbps = 3;
+
+  // The total number of tx success counted from the last radio chip reset
+  optional int64 total_tx_success = 4;
+
+  // The total number of MPDU data packet retries counted from the last radio chip reset
+  optional int64 total_tx_retries = 5;
+
+  // The total number of tx bad counted from the last radio chip reset
+  optional int64 total_tx_bad = 6;
+
+  // The total number of rx success counted from the last radio chip reset
+  optional int64 total_rx_success = 7;
+
+  // The total time the wifi radio is on in ms counted from the last radio chip reset
+  optional int64 total_radio_on_time_ms = 8;
+
+  // The total time the wifi radio is doing tx in ms counted from the last radio chip reset
+  optional int64 total_radio_tx_time_ms = 9;
+
+  // The total time the wifi radio is doing rx in ms counted from the last radio chip reset
+  optional int64 total_radio_rx_time_ms = 10;
+
+  // The total time spent on all types of scans in ms counted from the last radio chip reset
+  optional int64 total_scan_time_ms = 11;
+
+  // The total time spent on nan scans in ms counted from the last radio chip reset
+  optional int64 total_nan_scan_time_ms = 12;
+
+  // The total time spent on background scans in ms counted from the last radio chip reset
+  optional int64 total_background_scan_time_ms = 13;
+
+  // The total time spent on roam scans in ms counted from the last radio chip reset
+  optional int64 total_roam_scan_time_ms = 14;
+
+  // The total time spent on pno scans in ms counted from the last radio chip reset
+  optional int64 total_pno_scan_time_ms = 15;
+
+  // The total time spent on hotspot2.0 scans and GAS exchange in ms counted from the last radio
+  // chip reset
+  optional int64 total_hotspot_2_scan_time_ms = 16;
+
+  // Internal framework Wifi score
+  optional int32 wifi_score = 17;
+
+  // Wifi usability score provided by external system app
+  optional int32 wifi_usability_score = 18;
+
+  // Sequence number from external system app to framework
+  optional int32 seq_num_to_framework = 19;
+
+  // The total time CCA is on busy status on the current frequency in ms
+  // counted from the last radio chip reset
+  optional int64 total_cca_busy_freq_time_ms = 20;
+
+  // The total radio on time of the current frequency from the last radio
+  // chip reset
+  optional int64 total_radio_on_freq_time_ms = 21;
+
+  // The total number of beacons received from the last radio chip reset
+  optional int64 total_beacon_rx = 22;
+
+  // Prediction horizon (in second) of Wifi usability score provided by external
+  // system app
+  optional int32 prediction_horizon_sec = 23;
+
+  // The link probe status since last stats update
+  optional LinkProbeStatus probe_status_since_last_update = 24;
+
+  // The elapsed time of the most recent link probe since last stats update;
+  optional int32 probe_elapsed_time_since_last_update_ms = 25;
+
+  // The MCS rate of the most recent link probe since last stats update
+  optional int32 probe_mcs_rate_since_last_update = 26;
+
+  // Rx link speed at the sample time in Mbps
+  optional int32 rx_link_speed_mbps = 27;
+
+  // Sequence number generated by framework
+  optional int32 seq_num_inside_framework = 28;
+
+  // Whether current entry is for the same BSSID on the same frequency compared
+  // to last entry
+  optional bool is_same_bssid_and_freq = 29;
+
+  // Cellular data network type currently in use on the device for data transmission
+  optional CellularDataNetworkType cellular_data_network_type = 30;
+
+  // Cellular signal strength in dBm, NR: CsiRsrp, LTE: Rsrp, WCDMA/TDSCDMA: Rscp,
+  // CDMA: Rssi, EVDO: Rssi, GSM: Rssi
+  optional int32 cellular_signal_strength_dbm = 31;
+
+  // Cellular signal strength in dB, NR: CsiSinr, LTE: Rsrq, WCDMA: EcNo, TDSCDMA: invalid,
+  // CDMA: Ecio, EVDO: SNR, GSM: invalid */
+  optional int32 cellular_signal_strength_db = 32;
+
+  // Whether the primary registered cell of current entry is same as that of previous entry
+  optional bool is_same_registered_cell = 33;
+
+  // The device mobility state
+  optional DeviceMobilityStatePnoScanStats.DeviceMobilityState
+          device_mobility_state = 34;
+}
+
+message WifiUsabilityStats {
+  enum Label {
+    // Default label
+    LABEL_UNKNOWN = 0;
+
+    // Wifi is usable
+    LABEL_GOOD = 1;
+
+    // Wifi is unusable
+    LABEL_BAD = 2;
+  }
+
+  enum UsabilityStatsTriggerType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // There is a data stall from tx failures
+    TYPE_DATA_STALL_BAD_TX = 1;
+
+    // There is a data stall from rx failures
+    TYPE_DATA_STALL_TX_WITHOUT_RX = 2;
+
+    // There is a data stall from both tx and rx failures
+    TYPE_DATA_STALL_BOTH = 3;
+
+    // Firmware generated an alert
+    TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
+  }
+
+  // The current wifi usability state
+  optional Label label = 1;
+
+  // The list of timestamped wifi usability stats
+  repeated WifiUsabilityStatsEntry stats = 2;
+
+  // What event triggered WifiUsabilityStats.
+  optional UsabilityStatsTriggerType trigger_type = 3;
+
+  // Firmware alert code. Only valid when the stats was triggered by a firmware
+  // alert, otherwise -1.
+  optional int32 firmware_alert_code = 4 [default = -1];
+
+  // Absolute milliseconds from device boot when these stats were sampled
+  optional int64 time_stamp_ms = 5;
+}
+
+message DeviceMobilityStatePnoScanStats {
+  // see WifiManager.DEVICE_MOBILITY_STATE_* constants
+  enum DeviceMobilityState {
+    // Unknown mobility
+    UNKNOWN = 0;
+
+    // High movement
+    HIGH_MVMT = 1;
+
+    // Low movement
+    LOW_MVMT = 2;
+
+    // Stationary
+    STATIONARY = 3;
+  }
+
+  // The device mobility state
+  optional DeviceMobilityState device_mobility_state = 1;
+
+  // The number of times that this state was entered
+  optional int32 num_times_entered_state = 2;
+
+  // The total duration elapsed while in this mobility state, in ms
+  optional int64 total_duration_ms = 3;
+
+  // the total duration elapsed while in this mobility state with PNO scans running, in ms
+  optional int64 pno_duration_ms = 4;
+}
+
+// The information about the Wifi P2p events.
+message WifiP2pStats {
+
+  // Group event list tracking sessions and client counts in tethered mode.
+  repeated GroupEvent group_event = 1;
+
+  // Session information that gets logged for every Wifi P2p connection.
+  repeated P2pConnectionEvent connection_event = 2;
+
+  // Number of persistent group in the user profile.
+  optional int32 num_persistent_group = 3;
+
+  // Number of peer scan.
+  optional int32 num_total_peer_scans = 4;
+
+  // Number of service scan.
+  optional int32 num_total_service_scans = 5;
+}
+
+message P2pConnectionEvent {
+
+  enum ConnectionType {
+
+    // fresh new connection.
+    CONNECTION_FRESH = 0;
+
+    // reinvoke a group.
+    CONNECTION_REINVOKE = 1;
+
+    // create a group with the current device as the group owner locally.
+    CONNECTION_LOCAL = 2;
+
+    // create a group or join a group with config.
+    CONNECTION_FAST = 3;
+  }
+
+  enum ConnectivityLevelFailure {
+
+    // Failure is unknown.
+    CLF_UNKNOWN = 0;
+
+    // No failure.
+    CLF_NONE = 1;
+
+    // Timeout for current connecting request.
+    CLF_TIMEOUT = 2;
+
+    // The connecting request is canceled by the user.
+    CLF_CANCEL = 3;
+
+    // Provision discovery failure, e.g. no pin code, timeout, rejected by the peer.
+    CLF_PROV_DISC_FAIL = 4;
+
+    // Invitation failure, e.g. rejected by the peer.
+    CLF_INVITATION_FAIL = 5;
+
+    // Incoming request is rejected by the user.
+    CLF_USER_REJECT = 6;
+
+    // New connection request is issued before ending previous connecting request.
+    CLF_NEW_CONNECTION_ATTEMPT = 7;
+  }
+
+  // WPS method.
+  enum WpsMethod {
+    // WPS is skipped for Group Reinvoke.
+    WPS_NA = -1;
+
+    // Push button configuration.
+    WPS_PBC = 0;
+
+    // Display pin method configuration - pin is generated and displayed on device.
+    WPS_DISPLAY = 1;
+
+    // Keypad pin method configuration - pin is entered on device.
+    WPS_KEYPAD = 2;
+
+    // Label pin method configuration - pin is labelled on device.
+    WPS_LABEL = 3;
+  }
+
+  // Start time of the connection.
+  optional int64 start_time_millis = 1;
+
+  // Type of the connection.
+  optional ConnectionType connection_type = 2;
+
+  // WPS method.
+  optional WpsMethod wps_method = 3 [default = WPS_NA];
+
+  // Duration to connect.
+  optional int32 duration_taken_to_connect_millis = 4;
+
+  // Failures that happen at the connectivity layer.
+  optional ConnectivityLevelFailure connectivity_level_failure_code = 5;
+}
+
+// GroupEvent tracking group information from GroupStarted to GroupRemoved.
+message GroupEvent {
+
+  enum GroupRole {
+
+    GROUP_OWNER = 0;
+
+    GROUP_CLIENT = 1;
+  }
+
+  // The ID of network in supplicant for this group.
+  optional int32 net_id = 1;
+
+  // Start time of the group.
+  optional int64 start_time_millis = 2;
+
+  // Channel frequency used for Group.
+  optional int32 channel_frequency = 3;
+
+  // Is group owner or group client.
+  optional GroupRole group_role = 5;
+
+  // Number of connected clients.
+  optional int32 num_connected_clients = 6;
+
+  // Cumulative number of connected clients.
+  optional int32 num_cumulative_clients = 7;
+
+  // The session duration.
+  optional int32 session_duration_millis = 8;
+
+  // The idle duration. A group without any client is in idle.
+  optional int32 idle_duration_millis = 9;
+}
+
+// Easy Connect (DPP)
+message WifiDppLog {
+  reserved 6;
+
+  // Number of Configurator-Initiator requests
+  optional int32 num_dpp_configurator_initiator_requests = 1;
+
+  // Number of Enrollee-Initiator requests
+  optional int32 num_dpp_enrollee_initiator_requests = 2;
+
+  // Easy Connect (DPP) Enrollee success
+  optional int32 num_dpp_enrollee_success = 3;
+
+  // Easy Connect (DPP) Configurator success code bucket
+  repeated DppConfiguratorSuccessStatusHistogramBucket dpp_configurator_success_code = 4;
+
+  // Easy Connect (DPP) failure code bucket
+  repeated DppFailureStatusHistogramBucket dpp_failure_code = 5;
+
+  // Easy Connect (DPP) operation time bucket
+  repeated HistogramBucketInt32 dpp_operation_time = 7;
+
+  // Histogram bucket for Wi-Fi DPP configurator success
+  message DppConfiguratorSuccessStatusHistogramBucket {
+    // status type defining the bucket
+    optional DppConfiguratorSuccessCode dpp_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+
+  // Histogram bucket for Wi-Fi DPP failures
+  message DppFailureStatusHistogramBucket {
+    // status type defining the bucket
+    optional DppFailureCode dpp_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+
+  enum DppConfiguratorSuccessCode {
+    // Unknown success code
+    EASY_CONNECT_EVENT_SUCCESS_UNKNOWN = 0;
+
+    // Easy Connect Configurator success event: Configuration sent to enrollee
+    EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 1;
+  }
+
+  enum DppFailureCode {
+    // Unknown failure
+    EASY_CONNECT_EVENT_FAILURE_UNKNOWN = 0;
+
+    // Easy Connect Failure event: Scanned QR code is either not a Easy Connect URI, or the Easy
+    // Connect URI has errors.
+    EASY_CONNECT_EVENT_FAILURE_INVALID_URI = 1;
+
+    // Easy Connect Failure event: Bootstrapping/Authentication initialization process failure.
+    EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = 2;
+
+    // Easy Connect Failure event: Both devices are implementing the same role and are
+    // incompatible.
+    EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = 3;
+
+    // Easy Connect Failure event: Configuration process has failed due to malformed message.
+    EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = 4;
+
+    // Easy Connect Failure event: Easy Connect request while in another Easy Connect exchange.
+    EASY_CONNECT_EVENT_FAILURE_BUSY = 5;
+
+    // Easy Connect Failure event: No response from the peer.
+    EASY_CONNECT_EVENT_FAILURE_TIMEOUT = 6;
+
+    // Easy Connect Failure event: General protocol failure.
+    EASY_CONNECT_EVENT_FAILURE_GENERIC = 7;
+
+    // Easy Connect Failure event: Feature or option is not supported.
+    EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = 8;
+
+    // Easy Connect Failure event: Invalid network provided to Easy Connect configurator.
+    // Network must either be WPA3-Personal (SAE) or WPA2-Personal (PSK).
+    EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = 9;
+  }
+}
+
+// WifiConfigStore read/write metrics.
+message WifiConfigStoreIO {
+  // Histogram of config store read durations.
+  repeated DurationBucket read_durations = 1;
+
+  // Histogram of config store write durations.
+  repeated DurationBucket write_durations = 2;
+
+  // Total Number of instances of write/read duration in this duration bucket.
+  message DurationBucket {
+    // Bucket covers duration : [range_start_ms, range_end_ms)
+    // The (inclusive) lower bound of read/write duration represented by this bucket
+    optional int32 range_start_ms = 1;
+
+    // The (exclusive) upper bound of read/write duration represented by this bucket
+    optional int32 range_end_ms = 2;
+
+    // Number of read/write durations that fit into this bucket
+    optional int32 count = 3;
+  }
+}
+
+// Histogram bucket counting with int32. Range is [start, end)
+message HistogramBucketInt32 {
+  // lower range of the bucket (inclusive)
+  optional int32 start = 1;
+
+  // upper range of the bucket (exclusive)
+  optional int32 end = 2;
+
+  // number of samples in the bucket
+  optional int32 count = 3;
+}
+
+// Counts occurrences of a int32 key
+message Int32Count {
+  // the key
+  optional int32 key = 1;
+
+  // the count
+  optional int32 count = 2;
+}
+
+message LinkProbeStats {
+  enum LinkProbeFailureReason {
+    // unknown reason
+    LINK_PROBE_FAILURE_REASON_UNKNOWN = 0;
+
+    // Specified MCS rate when it is unsupported by the driver.
+    LINK_PROBE_FAILURE_REASON_MCS_UNSUPPORTED = 1;
+
+    // Driver reported that no ACK was received for the transmitted probe.
+    LINK_PROBE_FAILURE_REASON_NO_ACK = 2;
+
+    // Driver failed to report on the status of the transmitted probe within the timeout.
+    LINK_PROBE_FAILURE_REASON_TIMEOUT = 3;
+
+    // An existing link probe is in progress.
+    LINK_PROBE_FAILURE_REASON_ALREADY_STARTED = 4;
+  }
+
+  // Counts the number of failures for each failure reason.
+  message LinkProbeFailureReasonCount {
+    // The failure reason.
+    optional LinkProbeFailureReason failure_reason = 1;
+
+    // The number of occurrences for this failure reason.
+    optional int32 count = 2;
+  }
+
+  // Counts the number of link probes for each experiment.
+  message ExperimentProbeCounts {
+    // The experiment ID.
+    optional string experiment_id = 1;
+
+    // The number of link probes triggered for this experiment.
+    optional int32 probe_count = 2;
+  }
+
+  // Counts the occurrences of RSSI values when a link probe succeeds.
+  repeated Int32Count success_rssi_counts = 1;
+
+  // Counts the occurrences of RSSI values when a link probe fails.
+  repeated Int32Count failure_rssi_counts = 2;
+
+  // Counts the occurrences of Link Speed values when a link probe succeeds.
+  repeated Int32Count success_link_speed_counts = 3;
+
+  // Counts the occurrences of Link Speed values when a link probe fails.
+  repeated Int32Count failure_link_speed_counts = 4;
+
+  // Histogram for the number of seconds since the last TX success when a link probe succeeds.
+  repeated HistogramBucketInt32 success_seconds_since_last_tx_success_histogram = 5;
+
+  // Histogram for the number of seconds since the last TX success when a link probe fails.
+  repeated HistogramBucketInt32 failure_seconds_since_last_tx_success_histogram = 6;
+
+  // Histogram for the elapsed time of successful link probes, in ms.
+  repeated HistogramBucketInt32 success_elapsed_time_ms_histogram = 7;
+
+  // Counts the occurrences of error codes for failed link probes.
+  repeated LinkProbeFailureReasonCount failure_reason_counts = 8;
+
+  // Counts the number of link probes for each experiment.
+  repeated ExperimentProbeCounts experiment_probe_counts = 9;
+}
+
+// Stores the decisions that were made by a experiment when compared against another experiment
+message NetworkSelectionExperimentDecisions {
+  // the id of one experiment
+  optional int32 experiment1_id = 1;
+
+  // the id of the other experiment
+  optional int32 experiment2_id = 2;
+
+  // Counts occurrences of the number of network choices there were when experiment1 makes the
+  // same network selection as experiment2.
+  // The keys are the number of network choices, and the values are the number of occurrences of
+  // this number of network choices when exp1 and exp2 make the same network selection.
+  repeated Int32Count same_selection_num_choices_counter = 3;
+
+  // Counts occurrences of the number of network choices there were when experiment1 makes the
+  // same network selection as experiment2.
+  // The keys are the number of network choices, and the values are the number of occurrences of
+  // this number of network choices when exp1 and exp2 make different network selections.
+  // Note that it is possible for the network selection to be different even when there only exists
+  // a single network choice, since choosing not to connect to that network is a valid choice.
+  repeated Int32Count different_selection_num_choices_counter = 4;
+}
+
+// NetworkRequest API metrics.
+message WifiNetworkRequestApiLog {
+  // Number of requests via this API surface.
+  optional int32 num_request = 1;
+
+  // Histogram of requests via this API surface to number of networks matched in scan results.
+  repeated HistogramBucketInt32 network_match_size_histogram = 2;
+
+  // Number of successful network connection from this API.
+  optional int32 num_connect_success = 3;
+
+  // Number of requests via this API surface that bypassed user approval.
+  optional int32 num_user_approval_bypass = 4;
+
+  // Number of requests via this API surface that was rejected by the user.
+  optional int32 num_user_reject = 5;
+
+  // Number of unique apps using this API surface.
+  optional int32 num_apps = 6;
+}
+
+// NetworkSuggestion API metrics.
+message WifiNetworkSuggestionApiLog {
+  // Number of modifications to their suggestions by apps.
+  optional int32 num_modification = 1;
+
+  // Number of successful network connection from app suggestions.
+  optional int32 num_connect_success = 2;
+
+  // Number of network connection failures from app suggestions.
+  optional int32 num_connect_failure = 3;
+
+  // Histogram for size of the network lists provided by various apps on the device.
+  repeated HistogramBucketInt32 network_list_size_histogram = 4;
+}
+
+// WifiLock metrics
+message WifiLockStats {
+    // Amount of time wifi is actively in HIGH_PERF mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 high_perf_active_time_ms = 1;
+
+    // Amount of time wifi is actively in LOW_LATENCY mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 low_latency_active_time_ms = 2;
+
+    // Histogram of HIGH_PERF lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 high_perf_lock_acq_duration_sec_histogram = 3;
+
+    // Histogram of LOW_LATENCY lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 low_latency_lock_acq_duration_sec_histogram = 4;
+
+    // Histogram of HIGH_PERF active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 high_perf_active_session_duration_sec_histogram = 5;
+
+    // Histogram of LOW_LATENCY active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 low_latency_active_session_duration_sec_histogram = 6;
+}
+
+// Stats on number of times Wi-Fi is turned on/off though the WifiManager#setWifiEnabled API
+message WifiToggleStats {
+  // Number of time Wi-Fi is turned on by privileged apps
+  optional int32 num_toggle_on_privileged = 1;
+
+  // Number of time Wi-Fi is turned off by privileged apps
+  optional int32 num_toggle_off_privileged = 2;
+
+  // Number of time Wi-Fi is turned on by normal apps
+  optional int32 num_toggle_on_normal = 3;
+
+  // Number of time Wi-Fi is turned off by normal apps
+  optional int32 num_toggle_off_normal = 4;
+}
+
+// Information about the Passpoint provision metrics.
+message PasspointProvisionStats {
+  enum ProvisionFailureCode {
+    // provisioning failure for unknown reason.
+    OSU_FAILURE_UNKNOWN = 0;
+
+    // The reason code for Provisioning Failure due to connection failure to OSU AP.
+    OSU_FAILURE_AP_CONNECTION = 1;
+
+    // The reason code for invalid server URL address.
+    OSU_FAILURE_SERVER_URL_INVALID = 2;
+
+    // The reason code for provisioning failure due to connection failure to the server.
+    OSU_FAILURE_SERVER_CONNECTION = 3;
+
+    // The reason code for provisioning failure due to invalid server certificate.
+    OSU_FAILURE_SERVER_VALIDATION = 4;
+
+    // The reason code for provisioning failure due to invalid service provider.
+    OSU_FAILURE_SERVICE_PROVIDER_VERIFICATION = 5;
+
+    // The reason code for provisioning failure when a provisioning flow is aborted.
+    OSU_FAILURE_PROVISIONING_ABORTED = 6;
+
+    // The reason code for provisioning failure when a provisioning flow is not possible.
+    OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7;
+
+    // The reason code for provisioning failure due to invalid web url format for an OSU web page.
+    OSU_FAILURE_INVALID_URL_FORMAT_FOR_OSU = 8;
+
+    // The reason code for provisioning failure when a command received is not the expected command
+    // type.
+    OSU_FAILURE_UNEXPECTED_COMMAND_TYPE = 9;
+
+    // The reason code for provisioning failure when a SOAP message is not the expected message
+    // type.
+    OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_TYPE = 10;
+
+    // The reason code for provisioning failure when a SOAP message exchange fails.
+    OSU_FAILURE_SOAP_MESSAGE_EXCHANGE = 11;
+
+    // The reason code for provisioning failure when a redirect listener fails to start.
+    OSU_FAILURE_START_REDIRECT_LISTENER = 12;
+
+    // The reason code for provisioning failure when a redirect listener timed out to receive a HTTP
+    // redirect response.
+    OSU_FAILURE_TIMED_OUT_REDIRECT_LISTENER = 13;
+
+    // The reason code for provisioning failure when there is no OSU activity to listen to intent.
+    OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 14;
+
+    // The reason code for provisioning failure when the status of a SOAP message is not the
+    // expected message status.
+    OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_STATUS = 15;
+
+    // The reason code for provisioning failure when there is no PPS MO.
+    OSU_FAILURE_NO_PPS_MO = 16;
+
+    // The reason code for provisioning failure when there is no AAAServerTrustRoot node in a PPS
+    // MO.
+    OSU_FAILURE_NO_AAA_SERVER_TRUST_ROOT_NODE = 17;
+
+    // The reason code for provisioning failure when there is no TrustRoot node for remediation
+    // server in a PPS MO.
+    OSU_FAILURE_NO_REMEDIATION_SERVER_TRUST_ROOT_NODE = 18;
+
+    // The reason code for provisioning failure when there is no TrustRoot node for policy server in
+    // a PPS MO.
+    OSU_FAILURE_NO_POLICY_SERVER_TRUST_ROOT_NODE = 19;
+
+    // The reason code for provisioning failure when failing to retrieve trust root certificates
+    // used for validating server certificate for AAA, Remediation and Policy server.
+    OSU_FAILURE_RETRIEVE_TRUST_ROOT_CERTIFICATES = 20;
+
+    // The reason code for provisioning failure when there is no trust root certificate for AAA
+    // server.
+    OSU_FAILURE_NO_AAA_TRUST_ROOT_CERTIFICATE = 21;
+
+    // The reason code for provisioning failure when a {@link PasspointConfiguration} is failed to
+    // install.
+    OSU_FAILURE_ADD_PASSPOINT_CONFIGURATION = 22;
+
+    // The reason code for provisioning failure when an {@link OsuProvider} is not found for
+    // provisioning.
+    OSU_FAILURE_OSU_PROVIDER_NOT_FOUND = 23;
+  }
+
+  // Number of passpoint provisioning success
+  optional int32 num_provision_success = 1;
+
+  // Count for passpoint provisioning failure
+  repeated ProvisionFailureCount provision_failure_count = 2;
+
+  // Number of occurrences of a specific passpoint provision failure code
+  message ProvisionFailureCount {
+    // Failure code
+    optional ProvisionFailureCode failure_code = 1;
+
+    // Number of failure for the failure_code.
+    optional int32 count = 2;
+  }
 }

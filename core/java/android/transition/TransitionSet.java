@@ -53,11 +53,30 @@ import java.util.ArrayList;
  * </pre>
  */
 public class TransitionSet extends Transition {
+    /**
+     * Flag indicating the the interpolator changed.
+     */
+    private static final int FLAG_CHANGE_INTERPOLATOR = 0x01;
+    /**
+     * Flag indicating the the propagation changed.
+     */
+    private static final int FLAG_CHANGE_PROPAGATION = 0x02;
+    /**
+     * Flag indicating the the path motion changed.
+     */
+    private static final int FLAG_CHANGE_PATH_MOTION = 0x04;
+    /**
+     * Flag indicating the the epicentera callback changed.
+     */
+    static final int FLAG_CHANGE_EPICENTER = 0x08;
 
     ArrayList<Transition> mTransitions = new ArrayList<Transition>();
     private boolean mPlayTogether = true;
     int mCurrentListeners;
     boolean mStarted = false;
+    // Flags to know whether or not the interpolator, path motion, epicenter, propagation
+    // have changed
+    private int mChangeFlags = 0;
 
     /**
      * A flag used to indicate that the child transitions of this set
@@ -132,22 +151,41 @@ public class TransitionSet extends Transition {
      * the {@link #getOrdering() ordering} property, determines the
      * order in which the transitions are started.
      *
-     * <p>If this transitionSet has a {@link #getDuration() duration} set on it, the
-     * child transition will inherit that duration. Transitions are assumed to have
-     * a maximum of one transitionSet parent.</p>
+     * <p>If this transitionSet has a {@link #getDuration() duration},
+     * {@link #getInterpolator() interpolator}, {@link #getPropagation() propagation delay},
+     * {@link #getPathMotion() path motion}, or
+     * {@link #setEpicenterCallback(EpicenterCallback) epicenter callback}
+     * set on it, the child transition will inherit the values that are set.
+     * Transitions are assumed to have a maximum of one transitionSet parent.</p>
      *
      * @param transition A non-null child transition to be added to this set.
      * @return This transitionSet object.
      */
     public TransitionSet addTransition(Transition transition) {
         if (transition != null) {
-            mTransitions.add(transition);
-            transition.mParent = this;
+            addTransitionInternal(transition);
             if (mDuration >= 0) {
                 transition.setDuration(mDuration);
             }
+            if ((mChangeFlags & FLAG_CHANGE_INTERPOLATOR) != 0) {
+                transition.setInterpolator(getInterpolator());
+            }
+            if ((mChangeFlags & FLAG_CHANGE_PROPAGATION) != 0) {
+                transition.setPropagation(getPropagation());
+            }
+            if ((mChangeFlags & FLAG_CHANGE_PATH_MOTION) != 0) {
+                transition.setPathMotion(getPathMotion());
+            }
+            if ((mChangeFlags & FLAG_CHANGE_EPICENTER) != 0) {
+                transition.setEpicenterCallback(getEpicenterCallback());
+            }
         }
         return this;
+    }
+
+    private void addTransitionInternal(Transition transition) {
+        mTransitions.add(transition);
+        transition.mParent = this;
     }
 
     /**
@@ -201,6 +239,13 @@ public class TransitionSet extends Transition {
 
     @Override
     public TransitionSet setInterpolator(TimeInterpolator interpolator) {
+        mChangeFlags |= FLAG_CHANGE_INTERPOLATOR;
+        if (mTransitions != null) {
+            int numTransitions = mTransitions.size();
+            for (int i = 0; i < numTransitions; ++i) {
+                mTransitions.get(i).setInterpolator(interpolator);
+            }
+        }
         return (TransitionSet) super.setInterpolator(interpolator);
     }
 
@@ -313,8 +358,11 @@ public class TransitionSet extends Transition {
     @Override
     public void setPathMotion(PathMotion pathMotion) {
         super.setPathMotion(pathMotion);
-        for (int i = 0; i < mTransitions.size(); i++) {
-            mTransitions.get(i).setPathMotion(pathMotion);
+        mChangeFlags |= FLAG_CHANGE_PATH_MOTION;
+        if (mTransitions != null) {
+            for (int i = 0; i < mTransitions.size(); i++) {
+                mTransitions.get(i).setPathMotion(pathMotion);
+            }
         }
     }
 
@@ -530,6 +578,7 @@ public class TransitionSet extends Transition {
     @Override
     public void setPropagation(TransitionPropagation propagation) {
         super.setPropagation(propagation);
+        mChangeFlags |= FLAG_CHANGE_PROPAGATION;
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
             mTransitions.get(i).setPropagation(propagation);
@@ -539,6 +588,7 @@ public class TransitionSet extends Transition {
     @Override
     public void setEpicenterCallback(EpicenterCallback epicenterCallback) {
         super.setEpicenterCallback(epicenterCallback);
+        mChangeFlags |= FLAG_CHANGE_EPICENTER;
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
             mTransitions.get(i).setEpicenterCallback(epicenterCallback);
@@ -560,7 +610,7 @@ public class TransitionSet extends Transition {
         clone.mTransitions = new ArrayList<Transition>();
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            clone.addTransition((Transition) mTransitions.get(i).clone());
+            clone.addTransitionInternal((Transition) mTransitions.get(i).clone());
         }
         return clone;
     }

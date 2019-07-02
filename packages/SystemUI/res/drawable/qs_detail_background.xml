@@ -14,6 +14,20 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <transition xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/qs_detail_transition" />
-    <item android:drawable="?android:attr/colorPrimary" />
+    <item>
+        <inset>
+            <shape>
+                <solid android:color="@color/qs_detail_transition"/>
+                <corners android:radius="?android:attr/dialogCornerRadius" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset>
+            <shape>
+                <solid android:color="?android:attr/colorPrimary"/>
+                <corners android:radius="?android:attr/dialogCornerRadius" />
+            </shape>
+        </inset>
+    </item>
 </transition>

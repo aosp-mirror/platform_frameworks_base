@@ -23,15 +23,17 @@
 namespace android {
 
 // Offsets into the outValues array populated by the methods below. outValues is a uint32_t
-// array, but each logical element takes up 6 uint32_t-sized physical elements.
+// array, but each logical element takes up 7 uint32_t-sized physical elements.
+// Keep these in sync with android.content.res.TypedArray java class
 enum {
-  STYLE_NUM_ENTRIES = 6,
+  STYLE_NUM_ENTRIES = 7,
   STYLE_TYPE = 0,
   STYLE_DATA = 1,
   STYLE_ASSET_COOKIE = 2,
   STYLE_RESOURCE_ID = 3,
   STYLE_CHANGING_CONFIGURATIONS = 4,
-  STYLE_DENSITY = 5
+  STYLE_DENSITY = 5,
+  STYLE_SOURCE_RESOURCE_ID = 6
 };
 
 // These are all variations of the same method. They each perform the exact same operation,

@@ -39,7 +39,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class KeyguardPinBasedInputViewTest extends SysuiTestCase {
 
     @Mock

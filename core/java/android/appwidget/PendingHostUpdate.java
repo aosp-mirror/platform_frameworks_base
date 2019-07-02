@@ -112,7 +112,7 @@ public class PendingHostUpdate implements Parcelable {
     /**
      * Parcelable.Creator that instantiates PendingHostUpdate objects
      */
-    public static final Parcelable.Creator<PendingHostUpdate> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PendingHostUpdate> CREATOR
             = new Parcelable.Creator<PendingHostUpdate>() {
         public PendingHostUpdate createFromParcel(Parcel parcel) {
             return new PendingHostUpdate(parcel);

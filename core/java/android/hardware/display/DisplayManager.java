@@ -167,8 +167,7 @@ public final class DisplayManager {
      * reasonable measures, such as over-the-air encryption, to prevent the contents
      * of the display from being intercepted or recorded on a persistent medium.
      * </p><p>
-     * Creating a secure virtual display requires the
-     * {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * Creating a secure virtual display requires the CAPTURE_SECURE_VIDEO_OUTPUT permission.
      * This permission is reserved for use by system components and is not available to
      * third-party applications.
      * </p>
@@ -228,9 +227,8 @@ public final class DisplayManager {
      * </p>
      *
      * <p>
-     * Creating an auto-mirroing virtual display requires the
-     * {@link android.Manifest.permission#CAPTURE_VIDEO_OUTPUT}
-     * or {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * Creating an auto-mirroing virtual display requires the CAPTURE_VIDEO_OUTPUT
+     * or CAPTURE_SECURE_VIDEO_OUTPUT permission.
      * These permissions are reserved for use by system components and are not available to
      * third-party applications.
      *
@@ -265,6 +263,7 @@ public final class DisplayManager {
      * @see KeyguardManager#isDeviceLocked()
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#shouldShowWithInsecureKeyguard
     // TODO: Update name and documentation and un-hide the flag. Don't change the value before that.
     public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
@@ -297,7 +296,18 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
+
+    /**
+     * Virtual display flag: Indicates that the display should support system decorations. Virtual
+     * displays without this flag shouldn't show home, IME or any other system decorations.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
+    public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -390,7 +400,7 @@ public final class DisplayManager {
         if (display == null) {
             // TODO: We cannot currently provide any override configurations for metrics on displays
             // other than the display the context is associated with.
-            final Context context = mContext.getDisplay().getDisplayId() == displayId
+            final Context context = mContext.getDisplayId() == displayId
                     ? mContext : mContext.getApplicationContext();
 
             display = mGlobal.getCompatibleDisplay(displayId, context.getResources());
@@ -553,11 +563,17 @@ public final class DisplayManager {
      * 0 produces a grayscale image, 1 is normal.
      *
      * @hide
+     * @deprecated use {@link ColorDisplayManager#setSaturationLevel(int)} instead. The level passed
+     * as a parameter here will be rounded to the nearest hundredth.
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)
     public void setSaturationLevel(float level) {
-        mGlobal.setSaturationLevel(level);
+        if (level < 0f || level > 1f) {
+            throw new IllegalArgumentException("Saturation level must be between 0 and 1");
+        }
+        final ColorDisplayManager cdm = mContext.getSystemService(ColorDisplayManager.class);
+        cdm.setSaturationLevel(Math.round(level * 100f));
     }
 
     /**
@@ -797,7 +813,8 @@ public final class DisplayManager {
         void onDisplayRemoved(int displayId);
 
         /**
-         * Called whenever the properties of a logical display have changed.
+         * Called whenever the properties of a logical {@link android.view.Display},
+         * such as size and density, have changed.
          *
          * @param displayId The id of the logical display that changed.
          */

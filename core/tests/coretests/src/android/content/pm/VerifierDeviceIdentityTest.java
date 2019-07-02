@@ -17,7 +17,8 @@
 package android.content.pm;
 
 import android.os.Parcel;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import java.util.Random;
 

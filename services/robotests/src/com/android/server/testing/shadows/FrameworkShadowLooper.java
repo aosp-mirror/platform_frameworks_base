@@ -25,7 +25,7 @@ import org.robolectric.shadows.ShadowLooper;
 
 import java.util.Optional;
 
-@Implements(value = Looper.class, inheritImplementationMethods = true)
+@Implements(value = Looper.class)
 public class FrameworkShadowLooper extends ShadowLooper {
     @RealObject private Looper mLooper;
     private Optional<Boolean> mIsCurrentThread = Optional.empty();
@@ -39,7 +39,7 @@ public class FrameworkShadowLooper extends ShadowLooper {
     }
 
     @Implementation
-    public boolean isCurrentThread() {
+    protected boolean isCurrentThread() {
         if (mIsCurrentThread.isPresent()) {
             return mIsCurrentThread.get();
         }

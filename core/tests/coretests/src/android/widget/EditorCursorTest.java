@@ -16,10 +16,11 @@
 
 package android.widget;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnLeft;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnRight;
+
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 
 import static junit.framework.Assert.fail;
 
@@ -31,10 +32,11 @@ import static org.hamcrest.Matchers.sameInstance;
 
 import android.app.Activity;
 import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

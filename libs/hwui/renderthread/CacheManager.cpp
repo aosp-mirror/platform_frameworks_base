@@ -22,10 +22,12 @@
 #include "pipeline/skia/ShaderCache.h"
 #include "pipeline/skia/SkiaMemoryTracer.h"
 #include "renderstate/RenderState.h"
+#include "thread/CommonPool.h"
 
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
 #include <SkGraphics.h>
+#include <SkMathPriv.h>
 #include <gui/Surface.h>
 #include <math.h>
 #include <set>
@@ -41,18 +43,24 @@ namespace renderthread {
 #define SURFACE_SIZE_MULTIPLIER (12.0f * 4.0f)
 #define BACKGROUND_RETENTION_PERCENTAGE (0.5f)
 
-// for super large fonts we will draw them as paths so no need to keep linearly
-// increasing the font cache size.
-#define FONT_CACHE_MIN_MB (0.5f)
-#define FONT_CACHE_MAX_MB (4.0f)
+CacheManager::CacheManager(const DisplayInfo& display)
+        : mMaxSurfaceArea(display.w * display.h)
+        , mMaxResourceBytes(mMaxSurfaceArea * SURFACE_SIZE_MULTIPLIER)
+        , mBackgroundResourceBytes(mMaxResourceBytes * BACKGROUND_RETENTION_PERCENTAGE)
+        // This sets the maximum size for a single texture atlas in the GPU font cache. If
+        // necessary, the cache can allocate additional textures that are counted against the
+        // total cache limits provided to Skia.
+        , mMaxGpuFontAtlasBytes(GrNextSizePow2(mMaxSurfaceArea))
+        // This sets the maximum size of the CPU font cache to be at least the same size as the
+        // total number of GPU font caches (i.e. 4 separate GPU atlases).
+        , mMaxCpuFontCacheBytes(std::max(mMaxGpuFontAtlasBytes*4, SkGraphics::GetFontCacheLimit()))
+        , mBackgroundCpuFontCacheBytes(mMaxCpuFontCacheBytes * BACKGROUND_RETENTION_PERCENTAGE) {
 
-CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display.w * display.h) {
+    SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
+
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
             mMaxSurfaceArea / 2,
             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
-    if (Properties::isSkiaEnabled()) {
-        skiapipeline::ShaderCache::get().initShaderDiskCache();
-    }
 }
 
 void CacheManager::reset(sk_sp<GrContext> context) {
@@ -63,7 +71,7 @@ void CacheManager::reset(sk_sp<GrContext> context) {
     if (context) {
         mGrContext = std::move(context);
         mGrContext->getResourceCacheLimits(&mMaxResources, nullptr);
-        updateContextCacheSizes();
+        mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
     }
 }
 
@@ -75,67 +83,23 @@ void CacheManager::destroy() {
             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
-void CacheManager::updateContextCacheSizes() {
-    mMaxResourceBytes = mMaxSurfaceArea * SURFACE_SIZE_MULTIPLIER;
-    mBackgroundResourceBytes = mMaxResourceBytes * BACKGROUND_RETENTION_PERCENTAGE;
-
-    mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
-}
-
-class CacheManager::SkiaTaskProcessor : public TaskProcessor<bool>, public SkExecutor {
+class CommonPoolExecutor : public SkExecutor {
 public:
-    explicit SkiaTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
-
-    // This is really a Task<void> but that doesn't really work when Future<>
-    // expects to be able to get/set a value
-    struct SkiaTask : public Task<bool> {
-        std::function<void()> func;
-    };
-
-    virtual void add(std::function<void(void)> func) override {
-        sp<SkiaTask> task(new SkiaTask());
-        task->func = func;
-        TaskProcessor<bool>::add(task);
-    }
-
-    virtual void onProcess(const sp<Task<bool> >& task) override {
-        SkiaTask* t = static_cast<SkiaTask*>(task.get());
-        t->func();
-        task->setResult(true);
-    }
+    virtual void add(std::function<void(void)> func) override { CommonPool::post(std::move(func)); }
 };
 
-void CacheManager::configureContext(GrContextOptions* contextOptions) {
+static CommonPoolExecutor sDefaultExecutor;
+
+void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity,
+                                    ssize_t size) {
     contextOptions->fAllowPathMaskCaching = true;
+    contextOptions->fGlyphCacheTextureMaximumBytes = mMaxGpuFontAtlasBytes;
+    contextOptions->fExecutor = &sDefaultExecutor;
 
-    float screenMP = mMaxSurfaceArea / 1024.0f / 1024.0f;
-    float fontCacheMB = 0;
-    float decimalVal = std::modf(screenMP, &fontCacheMB);
-
-    // This is a basic heuristic to size the cache to a multiple of 512 KB
-    if (decimalVal > 0.8f) {
-        fontCacheMB += 1.0f;
-    } else if (decimalVal > 0.5f) {
-        fontCacheMB += 0.5f;
-    }
-
-    // set limits on min/max size of the cache
-    fontCacheMB = std::max(FONT_CACHE_MIN_MB, std::min(FONT_CACHE_MAX_MB, fontCacheMB));
-
-    // We must currently set the size of the text cache based on the size of the
-    // display even though we like to  be dynamicallysizing it to the size of the window.
-    // Skia's implementation doesn't provide a mechanism to resize the font cache due to
-    // the potential cost of recreating the glyphs.
-    contextOptions->fGlyphCacheTextureMaximumBytes = fontCacheMB * 1024 * 1024;
-
-    if (mTaskManager.canRunTasks()) {
-        if (!mTaskProcessor.get()) {
-            mTaskProcessor = new SkiaTaskProcessor(&mTaskManager);
-        }
-        contextOptions->fExecutor = mTaskProcessor.get();
-    }
-
-    contextOptions->fPersistentCache = &skiapipeline::ShaderCache::get();
+    auto& cache = skiapipeline::ShaderCache::get();
+    cache.initShaderDiskCache(identity, size);
+    contextOptions->fPersistentCache = &cache;
+    contextOptions->fGpuPathRenderers &= ~GpuPathRenderers::kCoverageCounting;
 }
 
 void CacheManager::trimMemory(TrimMemoryMode mode) {
@@ -149,6 +113,7 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
         case TrimMemoryMode::Complete:
             mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea / 2);
             mGrContext->freeGpuResources();
+            SkGraphics::PurgeAllCaches();
             break;
         case TrimMemoryMode::UiHidden:
             // Here we purge all the unlocked scratch resources and then toggle the resources cache
@@ -157,8 +122,14 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             mGrContext->purgeUnlockedResources(true);
             mGrContext->setResourceCacheLimits(mMaxResources, mBackgroundResourceBytes);
             mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
+            SkGraphics::SetFontCacheLimit(mBackgroundCpuFontCacheBytes);
+            SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;
     }
+
+    // We must sync the cpu to make sure deletions of resources still queued up on the GPU actually
+    // happen.
+    mGrContext->flush(kSyncCpu_GrFlushFlag, 0, nullptr);
 }
 
 void CacheManager::trimStaleResources() {
@@ -215,11 +186,13 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
             log.appendFormat("  Layer Info:\n");
         }
 
+        const char* layerType = Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL
+                                        ? "GlLayer"
+                                        : "VkLayer";
         size_t layerMemoryTotal = 0;
         for (std::set<Layer*>::iterator it = renderState->mActiveLayers.begin();
              it != renderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
-            const char* layerType = layer->getApi() == Layer::Api::OpenGL ? "GlLayer" : "VkLayer";
             log.appendFormat("    %s size %dx%d\n", layerType, layer->getWidth(),
                              layer->getHeight());
             layerMemoryTotal += layer->getWidth() * layer->getHeight() * 4;

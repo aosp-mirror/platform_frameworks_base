@@ -16,33 +16,39 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.internal.annotations.GuardedBy;
+import java.util.concurrent.Executor;
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -86,7 +92,10 @@ import com.android.internal.annotations.GuardedBy;
  * <a href="{@docRoot}guide/topics/media/audio-capture.html">Audio Capture</a> developer guide.</p>
  * </div>
  */
-public class MediaRecorder implements AudioRouting
+public class MediaRecorder implements AudioRouting,
+                                      AudioRecordingMonitor,
+                                      AudioRecordingMonitorClient,
+                                      MicrophoneDirection
 {
     static {
         System.loadLibrary("media_jni");
@@ -298,6 +307,34 @@ public class MediaRecorder implements AudioRouting
          *  {@link #DEFAULT} otherwise. */
         public static final int UNPROCESSED = 9;
 
+
+        /**
+         * Source for capturing audio meant to be processed in real time and played back for live
+         * performance (e.g karaoke).
+         * <p>
+         * The capture path will minimize latency and coupling with
+         * playback path.
+         * </p>
+         */
+        public static final int VOICE_PERFORMANCE = 10;
+
+        /**
+         * Source for an echo canceller to capture the reference signal to be cancelled.
+         * <p>
+         * The echo reference signal will be captured as close as possible to the DAC in order
+         * to include all post processing applied to the playback path.
+         * </p><p>
+         * Capturing the echo reference requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+        public static final int ECHO_REFERENCE = 1997;
+
         /**
          * Audio source for capturing broadcast radio tuner output.
          * @hide
@@ -307,7 +344,7 @@ public class MediaRecorder implements AudioRouting
 
         /**
          * Audio source for preemptible, low-priority software hotword detection
-         * It presents the same gain and pre processing tuning as {@link #VOICE_RECOGNITION}.
+         * It presents the same gain and pre-processing tuning as {@link #VOICE_RECOGNITION}.
          * <p>
          * An application should use this audio source when it wishes to do
          * always-on software hotword detection, while gracefully giving in to any other application
@@ -320,6 +357,22 @@ public class MediaRecorder implements AudioRouting
         @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
         public static final int HOTWORD = 1999;
     }
+
+    /** @hide */
+    @IntDef({
+        AudioSource.DEFAULT,
+        AudioSource.MIC,
+        AudioSource.VOICE_UPLINK,
+        AudioSource.VOICE_DOWNLINK,
+        AudioSource.VOICE_CALL,
+        AudioSource.CAMCORDER,
+        AudioSource.VOICE_RECOGNITION,
+        AudioSource.VOICE_COMMUNICATION,
+        AudioSource.UNPROCESSED,
+        AudioSource.VOICE_PERFORMANCE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Source {}
 
     // TODO make AudioSource static (API change) and move this method inside the AudioSource class
     /**
@@ -339,6 +392,7 @@ public class MediaRecorder implements AudioRouting
         case AudioSource.VOICE_COMMUNICATION:
         //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
         case AudioSource.UNPROCESSED:
+        case AudioSource.VOICE_PERFORMANCE:
             return false;
         default:
             return true;
@@ -368,6 +422,10 @@ public class MediaRecorder implements AudioRouting
             return "REMOTE_SUBMIX";
         case AudioSource.UNPROCESSED:
             return "UNPROCESSED";
+        case AudioSource.ECHO_REFERENCE:
+            return "ECHO_REFERENCE";
+        case AudioSource.VOICE_PERFORMANCE:
+            return "VOICE_PERFORMANCE";
         case AudioSource.RADIO_TUNER:
             return "RADIO_TUNER";
         case AudioSource.HOTWORD:
@@ -451,6 +509,12 @@ public class MediaRecorder implements AudioRouting
 
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
+
+        /** @hide HEIC data in a HEIF container */
+        public static final int HEIF = 10;
+
+        /** Opus data in a Ogg container */
+        public static final int OGG = 11;
     };
 
     /**
@@ -473,8 +537,10 @@ public class MediaRecorder implements AudioRouting
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
-        /** Ogg Vorbis audio codec */
+        /** Ogg Vorbis audio codec (Support is optional) */
         public static final int VORBIS = 6;
+        /** Opus audio codec */
+        public static final int OPUS = 7;
     }
 
     /**
@@ -500,11 +566,11 @@ public class MediaRecorder implements AudioRouting
      * to be specified before setting recording-parameters or encoders. Call
      * this only before setOutputFormat().
      *
-     * @param audio_source the audio source to use
+     * @param audioSource the audio source to use
      * @throws IllegalStateException if it is called after setOutputFormat()
      * @see android.media.MediaRecorder.AudioSource
      */
-    public native void setAudioSource(int audio_source)
+    public native void setAudioSource(@Source int audioSource)
             throws IllegalStateException;
 
     /**
@@ -512,7 +578,7 @@ public class MediaRecorder implements AudioRouting
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.UNPROCESSED;
+        return AudioSource.VOICE_PERFORMANCE;
     }
 
     /**
@@ -690,6 +756,12 @@ public class MediaRecorder implements AudioRouting
      * is no guarantee that the recorder will have stopped by the time the
      * listener is notified.
      *
+     * <p>When using MPEG-4 container ({@link #setOutputFormat(int)} with
+     * {@link OutputFormat#MPEG_4}), it is recommended to set maximum duration that fits the use
+     * case. Setting a larger than required duration may result in a larger than needed output file
+     * because of space reserved for MOOV box expecting large movie data in this recording session.
+     *  Unused space of MOOV box is turned into FREE box in the output file.</p>
+     *
      * @param max_duration_ms the maximum duration in ms (if zero or negative, disables the duration limit)
      *
      */
@@ -704,6 +776,12 @@ public class MediaRecorder implements AudioRouting
      * and recording will be stopped. Stopping happens asynchronously, there
      * is no guarantee that the recorder will have stopped by the time the
      * listener is notified.
+     *
+     * <p>When using MPEG-4 container ({@link #setOutputFormat(int)} with
+     * {@link OutputFormat#MPEG_4}), it is recommended to set maximum filesize that fits the use
+     * case. Setting a larger than required filesize may result in a larger than needed output file
+     * because of space reserved for MOOV box expecting large movie data in this recording session.
+     * Unused space of MOOV box is turned into FREE box in the output file.</p>
      *
      * @param max_filesize_bytes the maximum filesize in bytes (if zero or negative, disables the limit)
      *
@@ -1468,6 +1546,88 @@ public class MediaRecorder implements AudioRouting
 
     private native final int native_getActiveMicrophones(
             ArrayList<MicrophoneInfo> activeMicrophones);
+
+    //--------------------------------------------------------------------------
+    // MicrophoneDirection
+    //--------------------
+    /**
+     * Specifies the logical microphone (for processing).
+     *
+     * @param direction Direction constant.
+     * @return true if sucessful.
+     */
+    public boolean setPreferredMicrophoneDirection(@DirectionMode int direction) {
+        return native_setPreferredMicrophoneDirection(direction) == 0;
+    }
+
+    /**
+     * Specifies the zoom factor (i.e. the field dimension) for the selected microphone
+     * (for processing). The selected microphone is determined by the use-case for the stream.
+     *
+     * @param zoom the desired field dimension of microphone capture. Range is from -1 (wide angle),
+     * though 0 (no zoom) to 1 (maximum zoom).
+     * @return true if sucessful.
+     */
+    public boolean setPreferredMicrophoneFieldDimension(
+                            @FloatRange(from = -1.0, to = 1.0) float zoom) {
+        Preconditions.checkArgument(
+                zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
+        return native_setPreferredMicrophoneFieldDimension(zoom) == 0;
+    }
+
+    private native int native_setPreferredMicrophoneDirection(int direction);
+    private native int native_setPreferredMicrophoneFieldDimension(float zoom);
+
+    //--------------------------------------------------------------------------
+    // Implementation of AudioRecordingMonitor interface
+    //--------------------
+
+    AudioRecordingMonitorImpl mRecordingInfoImpl =
+            new AudioRecordingMonitorImpl((AudioRecordingMonitorClient) this);
+
+    /**
+     * Register a callback to be notified of audio capture changes via a
+     * {@link AudioManager.AudioRecordingCallback}. A callback is received when the capture path
+     * configuration changes (pre-processing, format, sampling rate...) or capture is
+     * silenced/unsilenced by the system.
+     * @param executor {@link Executor} to handle the callbacks.
+     * @param cb non-null callback to register
+     */
+    public void registerAudioRecordingCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull AudioManager.AudioRecordingCallback cb) {
+        mRecordingInfoImpl.registerAudioRecordingCallback(executor, cb);
+    }
+
+    /**
+     * Unregister an audio recording callback previously registered with
+     * {@link #registerAudioRecordingCallback(Executor, AudioManager.AudioRecordingCallback)}.
+     * @param cb non-null callback to unregister
+     */
+    public void unregisterAudioRecordingCallback(@NonNull AudioManager.AudioRecordingCallback cb) {
+        mRecordingInfoImpl.unregisterAudioRecordingCallback(cb);
+    }
+
+    /**
+     * Returns the current active audio recording for this audio recorder.
+     * @return a valid {@link AudioRecordingConfiguration} if this recorder is active
+     * or null otherwise.
+     * @see AudioRecordingConfiguration
+     */
+    public @Nullable AudioRecordingConfiguration getActiveRecordingConfiguration() {
+        return mRecordingInfoImpl.getActiveRecordingConfiguration();
+    }
+
+    //---------------------------------------------------------
+    // Implementation of AudioRecordingMonitorClient interface
+    //--------------------
+    /**
+     * @hide
+     */
+    public int getPortId() {
+        return native_getPortId();
+    }
+
+    private native int native_getPortId();
 
     /**
      * Called from native code when an interesting event happens.  This method

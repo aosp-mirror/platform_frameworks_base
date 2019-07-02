@@ -19,17 +19,21 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -73,7 +77,7 @@ public final class Display {
     private final int mLayerStack;
     private final int mFlags;
     private final int mType;
-    private final String mAddress;
+    private final DisplayAddress mAddress;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
     private final Resources mResources;
@@ -217,7 +221,20 @@ public final class Display {
      * @see #getFlags
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#shouldShowWithInsecureKeyguard
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
+
+    /**
+     * Display flag: Indicates that the display should show system decorations.
+     * <p>
+     * This flag identifies secondary displays that should show system decorations, such as status
+     * bar, navigation bar, home activity or IME.
+     * </p>
+     *
+     * @hide
+     */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
+    public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
@@ -371,6 +388,7 @@ public final class Display {
      *
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
     public static final int REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY = 0;
     /**
      * Indicates that when display is removed, all its stacks and tasks will be removed, all
@@ -378,6 +396,7 @@ public final class Display {
      *
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
 
     /**
@@ -438,6 +457,19 @@ public final class Display {
     }
 
     /**
+     * Gets the display unique id.
+     * <p>
+     * Unique id is different from display id because physical displays have stable unique id across
+     * reboots.
+     *
+     * @see com.android.service.display.DisplayDevice#hasStableUniqueId().
+     * @hide
+     */
+    public String getUniqueId() {
+        return mDisplayInfo.uniqueId;
+    }
+
+    /**
      * Returns true if this display is still valid, false if the display has been removed.
      *
      * If the display is invalid, then the methods of this class will
@@ -464,7 +496,7 @@ public final class Display {
      * @return True if the display is still valid.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean getDisplayInfo(DisplayInfo outDisplayInfo) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -525,7 +557,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
-    public String getAddress() {
+    public DisplayAddress getAddress() {
         return mAddress;
     }
 
@@ -765,6 +797,20 @@ public final class Display {
         return getRotation();
     }
 
+
+    /**
+     * Returns the {@link DisplayCutout}, or {@code null} if there is none.
+     *
+     * @see DisplayCutout
+     */
+    @Nullable
+    public DisplayCutout getCutout() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.displayCutout;
+        }
+    }
+
     /**
      * Gets the pixel format of the display.
      * @return One of the constants defined in {@link android.graphics.PixelFormat}.
@@ -854,6 +900,7 @@ public final class Display {
      * @see #REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY
      * @see #REMOVE_MODE_DESTROY_CONTENT
      */
+    // TODO (b/114338689): Remove the method and use IWindowManager#getRemoveContentMode
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
     }
@@ -893,6 +940,24 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             return mDisplayInfo.isWideColorGamut();
+        }
+    }
+
+    /**
+     * Returns the preferred wide color space of the Display.
+     * The returned wide gamut color space is based on hardware capability and
+     * is preferred by the composition pipeline.
+     * Returns null if the display doesn't support wide color gamut.
+     * {@link Display#isWideColorGamut()}.
+     */
+    @Nullable
+    public ColorSpace getPreferredWideGamutColorSpace() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            if (mDisplayInfo.isWideColorGamut()) {
+                return mGlobal.getPreferredWideGamutColorSpace();
+            }
+            return null;
         }
     }
 
@@ -1032,16 +1097,19 @@ public final class Display {
      * Returns true if the specified UID has access to this display.
      * @hide
      */
+    @TestApi
     public boolean hasAccess(int uid) {
-        return Display.hasAccess(uid, mFlags, mOwnerUid);
+        return hasAccess(uid, mFlags, mOwnerUid, mDisplayId);
     }
 
     /** @hide */
-    public static boolean hasAccess(int uid, int flags, int ownerUid) {
+    public static boolean hasAccess(int uid, int flags, int ownerUid, int displayId) {
         return (flags & Display.FLAG_PRIVATE) == 0
                 || uid == ownerUid
                 || uid == Process.SYSTEM_UID
-                || uid == 0;
+                || uid == 0
+                // Check if the UID is present on given display.
+                || DisplayManagerGlobal.getInstance().isUidPresentOnDisplay(uid, displayId);
     }
 
     /**
@@ -1297,7 +1365,7 @@ public final class Display {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<Mode> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<Mode> CREATOR
                 = new Parcelable.Creator<Mode>() {
             @Override
             public Mode createFromParcel(Parcel in) {
@@ -1335,11 +1403,17 @@ public final class Display {
          */
         public static final int HDR_TYPE_HLG = 3;
 
+        /**
+         * HDR10+ display.
+         */
+        public static final int HDR_TYPE_HDR10_PLUS = 4;
+
         /** @hide */
         @IntDef(prefix = { "HDR_TYPE_" }, value = {
                 HDR_TYPE_DOLBY_VISION,
                 HDR_TYPE_HDR10,
                 HDR_TYPE_HLG,
+                HDR_TYPE_HDR10_PLUS,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface HdrType {}
@@ -1420,7 +1494,7 @@ public final class Display {
             return hash;
         }
 
-        public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
+        public static final @android.annotation.NonNull Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
             @Override
             public HdrCapabilities createFromParcel(Parcel source) {
                 return new HdrCapabilities(source);

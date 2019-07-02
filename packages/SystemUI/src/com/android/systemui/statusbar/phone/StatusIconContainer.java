@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,15 +28,17 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.util.Log;
-
 import android.view.View;
+
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusIconDisplayable;
-import com.android.systemui.statusbar.stack.AnimationFilter;
-import com.android.systemui.statusbar.stack.AnimationProperties;
-import com.android.systemui.statusbar.stack.ViewState;
+import com.android.systemui.statusbar.notification.stack.AnimationFilter;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.ViewState;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A container for Status bar system icons. Limits the number of system icons and handles overflow
@@ -66,6 +68,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private ArrayList<StatusIconState> mLayoutStates = new ArrayList<>();
     // So we can count and measure properly
     private ArrayList<View> mMeasureViews = new ArrayList<>();
+    // Any ignored icon will never be added as a child
+    private ArrayList<String> mIgnoredSlots = new ArrayList<>();
 
     public StatusIconContainer(Context context) {
         this(context, null);
@@ -145,7 +149,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         // Collect all of the views which want to be laid out
         for (int i = 0; i < count; i++) {
             StatusIconDisplayable icon = (StatusIconDisplayable) getChildAt(i);
-            if (icon.isIconVisible() && !icon.isIconBlocked()) {
+            if (icon.isIconVisible() && !icon.isIconBlocked()
+                    && !mIgnoredSlots.contains(icon.getSlot())) {
                 mMeasureViews.add((View) icon);
             }
         }
@@ -204,6 +209,56 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     }
 
     /**
+     * Add a name of an icon slot to be ignored. It will not show up nor be measured
+     * @param slotName name of the icon as it exists in
+     * frameworks/base/core/res/res/values/config.xml
+     */
+    public void addIgnoredSlot(String slotName) {
+        addIgnoredSlotInternal(slotName);
+        requestLayout();
+    }
+
+    /**
+     * Add a list of slots to be ignored
+     * @param slots names of the icons to ignore
+     */
+    public void addIgnoredSlots(List<String> slots) {
+        for (String slot : slots) {
+            addIgnoredSlotInternal(slot);
+        }
+
+        requestLayout();
+    }
+
+    private void addIgnoredSlotInternal(String slotName) {
+        if (!mIgnoredSlots.contains(slotName)) {
+            mIgnoredSlots.add(slotName);
+        }
+    }
+
+    /**
+     * Remove a slot from the list of ignored icon slots. It will then be shown when set to visible
+     * by the {@link StatusBarIconController}.
+     * @param slotName name of the icon slot to remove from the ignored list
+     */
+    public void removeIgnoredSlot(String slotName) {
+        if (mIgnoredSlots.contains(slotName)) {
+            mIgnoredSlots.remove(slotName);
+        }
+
+        requestLayout();
+    }
+
+    /**
+     * Sets the list of ignored icon slots clearing the current list.
+     * @param slots names of the icons to ignore
+     */
+    public void setIgnoredSlots(List<String> slots) {
+        mIgnoredSlots.clear();
+        addIgnoredSlots(slots);
+    }
+
+    /**
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
@@ -222,7 +277,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             StatusIconDisplayable iconView = (StatusIconDisplayable) child;
             StatusIconState childState = getViewStateFromChild(child);
 
-            if (!iconView.isIconVisible() || iconView.isIconBlocked()) {
+            if (!iconView.isIconVisible() || iconView.isIconBlocked()
+                    || mIgnoredSlots.contains(iconView.getSlot())) {
                 childState.visibleState = STATE_HIDDEN;
                 if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") not visible");
                 continue;
@@ -301,11 +357,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
             vs.initFrom(child);
             vs.alpha = 1.0f;
-            if (child instanceof StatusIconDisplayable) {
-                vs.hidden = !((StatusIconDisplayable)child).isIconVisible();
-            } else {
-                vs.hidden = false;
-            }
+            vs.hidden = false;
         }
     }
 
@@ -326,33 +378,56 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         public int visibleState = STATE_ICON;
         public boolean justAdded = true;
 
+        // How far we are from the end of the view actually is the most relevant for animation
+        float distanceToViewEnd = -1;
+
         @Override
         public void applyToView(View view) {
+            float parentWidth = 0;
+            if (view.getParent() instanceof View) {
+                parentWidth = ((View) view.getParent()).getWidth();
+            }
+
+            float currentDistanceToEnd = parentWidth - xTranslation;
+
             if (!(view instanceof StatusIconDisplayable)) {
                 return;
             }
             StatusIconDisplayable icon = (StatusIconDisplayable) view;
             AnimationProperties animationProperties = null;
-            boolean animate = false;
+            boolean animateVisibility = true;
 
-            if (justAdded) {
+            // Figure out which properties of the state transition (if any) we need to animate
+            if (justAdded
+                    || icon.getVisibleState() == STATE_HIDDEN && visibleState == STATE_ICON) {
+                // Icon is appearing, fade it in by putting it where it will be and animating alpha
                 super.applyToView(view);
+                view.setAlpha(0.f);
+                icon.setVisibleState(STATE_HIDDEN);
                 animationProperties = ADD_ICON_PROPERTIES;
-                animate = true;
             } else if (icon.getVisibleState() != visibleState) {
-                animationProperties = DOT_ANIMATION_PROPERTIES;
-                animate = true;
+                if (icon.getVisibleState() == STATE_ICON && visibleState == STATE_HIDDEN) {
+                    // Disappearing, don't do anything fancy
+                    animateVisibility = false;
+                } else {
+                    // all other transitions (to/from dot, etc)
+                    animationProperties = ANIMATE_ALL_PROPERTIES;
+                }
+            } else if (visibleState != STATE_HIDDEN && distanceToViewEnd != currentDistanceToEnd) {
+                // Visibility isn't changing, just animate position
+                animationProperties = X_ANIMATION_PROPERTIES;
             }
 
-            if (animate) {
+            icon.setVisibleState(visibleState, animateVisibility);
+            if (animationProperties != null) {
                 animateTo(view, animationProperties);
-                icon.setVisibleState(visibleState);
             } else {
-                icon.setVisibleState(visibleState);
                 super.applyToView(view);
             }
 
             justAdded = false;
+            distanceToViewEnd = currentDistanceToEnd;
+
         }
     }
 
@@ -365,8 +440,18 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         }
     }.setDuration(200).setDelay(50);
 
-    private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
+    private static final AnimationProperties X_ANIMATION_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(200);
+
+    private static final AnimationProperties ANIMATE_ALL_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX().animateY()
+                .animateAlpha().animateScale();
 
         @Override
         public AnimationFilter getAnimationFilter() {

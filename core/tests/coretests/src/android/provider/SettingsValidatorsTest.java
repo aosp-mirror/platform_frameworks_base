@@ -16,15 +16,20 @@
 
 package android.provider;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
 import android.provider.SettingsValidators.Validator;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -73,7 +78,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testComponentNameValidator() {
         assertTrue(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(
-                "android/com.android.internal.backup.LocalTransport"));
+                "com.android.localtransport/.LocalTransport"));
         assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate("rectangle"));
     }
 
@@ -90,7 +95,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testNullableComponentNameValidator_onValidComponentName_returnsTrue() {
         assertTrue(SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR.validate(
-                "android/com.android.internal.backup.LocalTransport"));
+                "com.android.localtransport/.LocalTransport"));
     }
 
     @Test
@@ -185,7 +190,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testComponentNameListValidator() {
         Validator v = new SettingsValidators.ComponentNameListValidator(",");
-        assertTrue(v.validate("android/com.android.internal.backup.LocalTransport,"
+        assertTrue(v.validate("com.android.localtransport/.LocalTransport,"
                 + "com.google.android.gms/.backup.migrate.service.D2dTransport"));
         assertFalse(v.validate("com.google.5android,android"));
     }
@@ -200,7 +205,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testPackageNameListValidator() {
         Validator v = new SettingsValidators.PackageNameListValidator(",");
-        assertTrue(v.validate("com.android.internal.backup.LocalTransport,com.google.android.gms"));
+        assertTrue(v.validate("com.android.localtransport.LocalTransport,com.google.android.gms"));
         assertFalse(v.validate("5com.android.internal.backup.LocalTransport,android"));
     }
 
@@ -214,6 +219,31 @@ public class SettingsValidatorsTest {
     @Test
     public void dateFormatValidator_onNullValue_returnsFalse() {
         assertFalse(Settings.System.DATE_FORMAT_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testJSONObjectValidator() throws JSONException {
+        Validator v = SettingsValidators.JSON_OBJECT_VALIDATOR;
+
+        assertThat(v.validate(new JSONObject().toString())).isTrue();
+        assertThat(v.validate("{}")).isTrue();
+        assertThat(v.validate(new JSONObject().put("foo", "bar").toString()))
+                .isTrue();
+        assertThat(v.validate("{\"foo\": \"bar\"}")).isTrue();
+
+        assertThat(v.validate("random string")).isFalse();
+        assertThat(v.validate("random: string")).isFalse();
+        assertThat(v.validate("{random: }")).isFalse();
+    }
+
+    @Test
+    public void testJSONObjectValidator_onNullValue_returnsFalse() {
+        assertThat(SettingsValidators.JSON_OBJECT_VALIDATOR.validate(null)).isFalse();
+    }
+
+    @Test
+    public void testJSONObjectValidator_onEmptyString_returnsFalse() {
+        assertThat(SettingsValidators.JSON_OBJECT_VALIDATOR.validate("")).isFalse();
     }
 
     @Test

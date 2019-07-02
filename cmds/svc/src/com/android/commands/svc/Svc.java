@@ -98,5 +98,6 @@ public class Svc {
             new UsbCommand(),
             new NfcCommand(),
             new BluetoothCommand(),
+            new SystemServerCommand(),
     };
 }

@@ -22,7 +22,9 @@
 #include "hwui/Canvas.h"
 
 #include <SkCanvas.h>
-#include <SkTLazy.h>
+
+#include <cassert>
+#include <optional>
 
 namespace android {
 
@@ -67,11 +69,13 @@ public:
     virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
+    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
                           SaveFlags::Flags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
                                SaveFlags::Flags flags) override;
+    virtual int saveUnclippedLayer(int left, int top, int right, int bottom) override;
 
     virtual void getMatrix(SkMatrix* outMatrix) const override;
     virtual void setMatrix(const SkMatrix& matrix) override;
@@ -87,8 +91,8 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom, SkClipOp op) override;
     virtual bool clipPath(const SkPath* path, SkClipOp op) override;
 
-    virtual SkDrawFilter* getDrawFilter() override;
-    virtual void setDrawFilter(SkDrawFilter* drawFilter) override;
+    virtual PaintFilter* getPaintFilter() override;
+    virtual void setPaintFilter(sk_sp<PaintFilter> paintFilter) override;
 
     virtual SkCanvasState* captureCanvasState() const override;
 
@@ -105,6 +109,10 @@ public:
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const SkPaint& paint) override;
+
+   virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                               const SkPaint& paint) override;
+
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
                           const SkPaint& paint) override;
@@ -151,12 +159,52 @@ protected:
     void reset(SkCanvas* skiaCanvas);
     void drawDrawable(SkDrawable* drawable) { mCanvas->drawDrawable(drawable); }
 
-    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& paint, float x,
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) override;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
-                                  const SkPaint& paint, const SkPath& path, size_t start,
+                                  const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) override;
+
+    /** This class acts as a copy on write SkPaint.
+     *
+     *  Initially this will be the SkPaint passed to the contructor.
+     *  The first time writable() is called this will become a copy of the
+     *  initial SkPaint (or a default SkPaint if nullptr).
+     */
+    struct PaintCoW {
+        PaintCoW(const SkPaint& that) : mPtr(&that) {}
+        PaintCoW(const SkPaint* ptr) : mPtr(ptr) {}
+        PaintCoW(const PaintCoW&) = delete;
+        PaintCoW(PaintCoW&&) = delete;
+        PaintCoW& operator=(const PaintCoW&) = delete;
+        PaintCoW& operator=(PaintCoW&&) = delete;
+        SkPaint& writeable() {
+            if (!mStorage) {
+                if (!mPtr) {
+                    mStorage.emplace();
+                } else {
+                    mStorage.emplace(*mPtr);
+                }
+                mPtr = &*mStorage;
+            }
+            return *mStorage;
+        }
+        operator const SkPaint*() const { return mPtr; }
+        const SkPaint* operator->() const { assert(mPtr); return mPtr; }
+        const SkPaint& operator*() const { assert(mPtr); return *mPtr; }
+        explicit operator bool() { return mPtr != nullptr; }
+    private:
+        const SkPaint* mPtr;
+        std::optional<SkPaint> mStorage;
+    };
+
+    /** Filters the paint using the current paint filter.
+     *
+     *  @param paint the paint to filter. Will be initialized with the default
+     *      SkPaint before filtering if filtering is required.
+     */
+    PaintCoW&& filterPaint(PaintCoW&& paint) const;
 
 private:
     struct SaveRec {
@@ -174,17 +222,24 @@ private:
 
     void drawPoints(const float* points, int count, const SkPaint& paint, SkCanvas::PointMode mode);
 
-    const SkPaint* addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
-                             sk_sp<SkColorFilter> colorSpaceFilter);
+    /** Filters the paint for bitmap drawing.
+     *
+     *  After filtering the paint for bitmap drawing,
+     *  also calls filterPaint on the paint.
+     *
+     *  @param paint the paint to filter. Will be initialized with the default
+     *      SkPaint before filtering if filtering is required.
+     */
+    PaintCoW&& filterBitmap(PaintCoW&& paint, sk_sp<SkColorFilter> colorSpaceFilter) const;
 
     class Clip;
 
-    std::unique_ptr<SkCanvas> mCanvasWrapper;  // might own a wrapper on the canvas
     std::unique_ptr<SkCanvas> mCanvasOwned;    // might own a canvas we allocated
     SkCanvas* mCanvas;                         // we do NOT own this canvas, it must survive us
                                                // unless it is the same as mCanvasOwned.get()
     std::unique_ptr<SkDeque> mSaveStack;       // lazily allocated, tracks partial saves.
     std::vector<Clip> mClipStack;              // tracks persistent clips.
+    sk_sp<PaintFilter> mPaintFilter;
 };
 
 }  // namespace android

@@ -35,13 +35,14 @@ import android.print.test.services.AddPrintersActivity;
 import android.print.test.services.FirstPrintService;
 import android.print.test.services.PrinterDiscoverySessionCallbacks;
 import android.print.test.services.StubbablePrinterDiscoverySession;
-import android.support.test.filters.LargeTest;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

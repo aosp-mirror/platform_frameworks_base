@@ -20,7 +20,7 @@ package android.service;
 option java_multiple_files = true;
 option java_outer_classname = "GraphicsStatsServiceProto";
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // This file is based on frameworks/base/libs/hwui/protos/graphicsstats.proto.
 // Please try to keep the two files in sync.
@@ -46,10 +46,10 @@ message GraphicsStatsProto {
     optional int64 stats_start = 3;
     optional int64 stats_end = 4;
 
-    // The aggregated statistics for the package
+    // The aggregated statistics for the package.
     optional GraphicsStatsJankSummaryProto summary = 5;
 
-    // The frame time histogram for the package
+    // The frame time histogram for the package.
     repeated GraphicsStatsHistogramBucketProto histogram = 6;
 }
 

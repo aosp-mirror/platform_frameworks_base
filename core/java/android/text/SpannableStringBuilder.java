@@ -1551,7 +1551,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      *
      * @param contextStart the start index of the context
      * @param contextEnd the (non-inclusive) end index of the context
-     * @param dir either DIRECTION_RTL or DIRECTION_LTR
+     * @param dir 1 if the run is RTL, otherwise 0
      * @param offset the cursor position to move from
      * @param cursorOpt how to move the cursor, one of CURSOR_AFTER,
      * CURSOR_AT_OR_AFTER, CURSOR_BEFORE,
@@ -1563,21 +1563,28 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     @Deprecated
     public int getTextRunCursor(int contextStart, int contextEnd, int dir, int offset,
             int cursorOpt, Paint p) {
+        return getTextRunCursor(contextStart, contextEnd, dir == 1, offset, cursorOpt, p);
+    }
+
+    /** @hide */
+    @Override
+    public int getTextRunCursor(int contextStart, int contextEnd, boolean isRtl, int offset,
+            int cursorOpt, Paint p) {
 
         int ret;
 
         int contextLen = contextEnd - contextStart;
         if (contextEnd <= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart, contextLen,
-                    dir, offset, cursorOpt);
+                    isRtl, offset, cursorOpt);
         } else if (contextStart >= mGapStart) {
             ret = p.getTextRunCursor(mText, contextStart + mGapLength, contextLen,
-                    dir, offset + mGapLength, cursorOpt) - mGapLength;
+                    isRtl, offset + mGapLength, cursorOpt) - mGapLength;
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
             ret = p.getTextRunCursor(buf, 0, contextLen,
-                    dir, offset - contextStart, cursorOpt) + contextStart;
+                    isRtl, offset - contextStart, cursorOpt) + contextStart;
             TextUtils.recycle(buf);
         }
 
@@ -1603,13 +1610,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     public boolean equals(Object o) {
         if (o instanceof Spanned &&
                 toString().equals(o.toString())) {
-            Spanned other = (Spanned) o;
+            final Spanned other = (Spanned) o;
             // Check span data
-            Object[] otherSpans = other.getSpans(0, other.length(), Object.class);
+            final Object[] otherSpans = other.getSpans(0, other.length(), Object.class);
+            final Object[] thisSpans = getSpans(0, length(), Object.class);
             if (mSpanCount == otherSpans.length) {
                 for (int i = 0; i < mSpanCount; ++i) {
-                    Object thisSpan = mSpans[i];
-                    Object otherSpan = otherSpans[i];
+                    final Object thisSpan = thisSpans[i];
+                    final Object otherSpan = otherSpans[i];
                     if (thisSpan == this) {
                         if (other != otherSpan ||
                                 getSpanStart(thisSpan) != other.getSpanStart(otherSpan) ||

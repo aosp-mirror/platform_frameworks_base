@@ -55,4 +55,17 @@ interface IUsageStatsManager {
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);
     void unregisterAppUsageObserver(int observerId, String callingPackage);
+    void registerUsageSessionObserver(int sessionObserverId, in String[] observed, long timeLimitMs,
+            long sessionThresholdTimeMs, in PendingIntent limitReachedCallbackIntent,
+            in PendingIntent sessionEndCallbackIntent, String callingPackage);
+    void unregisterUsageSessionObserver(int sessionObserverId, String callingPackage);
+    void registerAppUsageLimitObserver(int observerId, in String[] packages, long timeLimitMs,
+            long timeUsedMs, in PendingIntent callback, String callingPackage);
+    void unregisterAppUsageLimitObserver(int observerId, String callingPackage);
+    void reportUsageStart(in IBinder activity, String token, String callingPackage);
+    void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,
+            String callingPackage);
+    void reportUsageStop(in IBinder activity, String token, String callingPackage);
+    int getUsageSource();
+    void forceUsageSourceSettingRead();
 }

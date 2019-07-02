@@ -16,16 +16,17 @@
 
 package com.android.settingslib.core.instrumentation;
 
+import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
+
 import android.app.Activity;
+import android.content.Intent;
+import android.os.SystemClock;
+
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
-import android.content.Intent;
 
-import android.os.SystemClock;
 import com.android.internal.logging.nano.MetricsProto;
-
-import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
 
 /**
  * Logs visibility change of a fragment.
@@ -39,15 +40,6 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
     private MetricsFeatureProvider mMetricsFeature;
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     private long mVisibleTimestamp;
-
-    /**
-     * The metrics category constant for logging source when a setting fragment is opened.
-     */
-    public static final String EXTRA_SOURCE_METRICS_CATEGORY = ":settings:source_metrics";
-
-    private VisibilityLoggerMixin() {
-        mMetricsCategory = METRICS_CATEGORY_UNKNOWN;
-    }
 
     public VisibilityLoggerMixin(int metricsCategory, MetricsFeatureProvider metricsFeature) {
         mMetricsCategory = metricsCategory;
@@ -81,15 +73,8 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
         if (intent == null) {
             return;
         }
-        mSourceMetricsCategory = intent.getIntExtra(EXTRA_SOURCE_METRICS_CATEGORY,
+        mSourceMetricsCategory = intent.getIntExtra(
+                MetricsFeatureProvider.EXTRA_SOURCE_METRICS_CATEGORY,
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN);
-    }
-
-    /** Returns elapsed time since onResume() */
-    public long elapsedTimeSinceVisible() {
-        if (mVisibleTimestamp == 0) {
-            return 0;
-        }
-        return SystemClock.elapsedRealtime() - mVisibleTimestamp;
     }
 }

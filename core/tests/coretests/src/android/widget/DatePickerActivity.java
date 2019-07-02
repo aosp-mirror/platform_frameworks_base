@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.Activity;
 import android.os.Bundle;
+
 import com.android.frameworks.coretests.R;
 
 /**

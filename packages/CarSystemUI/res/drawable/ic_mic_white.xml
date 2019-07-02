@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:viewportWidth="44"
+    android:viewportHeight="44"
+    android:width="44dp"
+    android:height="44dp">
+    <path
+        android:pathData="M22 25.6666667C25.0433333 25.6666667 27.4816667 23.21 27.4816667 20.1666667L27.5 9.16666667C27.5 6.12333333 25.0433333 3.66666667 22 3.66666667C18.9566667 3.66666667 16.5 6.12333333 16.5 9.16666667L16.5 20.1666667C16.5 23.21 18.9566667 25.6666667 22 25.6666667ZM31.7166667 20.1666667C31.7166667 25.6666667 27.06 29.5166667 22 29.5166667C16.94 29.5166667 12.2833333 25.6666667 12.2833333 20.1666667L9.16666667 20.1666667C9.16666667 26.4183333 14.1533333 31.5883333 20.1666667 32.4866667L20.1666667 38.5L23.8333333 38.5L23.8333333 32.4866667C29.8466667 31.6066667 34.8333333 26.4366667 34.8333333 20.1666667L31.7166667 20.1666667Z"
+        android:fillColor="@color/car_nav_icon_fill_color" />
+</vector>

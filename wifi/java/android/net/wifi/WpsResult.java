@@ -74,7 +74,7 @@ public class WpsResult implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<WpsResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<WpsResult> CREATOR =
         new Creator<WpsResult>() {
             public WpsResult createFromParcel(Parcel in) {
                 WpsResult result = new WpsResult();

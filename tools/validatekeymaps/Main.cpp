@@ -18,7 +18,6 @@
 #include <input/KeyLayoutMap.h>
 #include <input/VirtualKeyMap.h>
 #include <utils/PropertyMap.h>
-#include <utils/String8.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -98,7 +97,7 @@ static bool validateFile(const char* filename) {
 
     case FILETYPE_KEYLAYOUT: {
         sp<KeyLayoutMap> map;
-        status_t status = KeyLayoutMap::load(String8(filename), &map);
+        status_t status = KeyLayoutMap::load(filename, &map);
         if (status) {
             error("Error %d parsing key layout file.\n\n", status);
             return false;
@@ -108,7 +107,7 @@ static bool validateFile(const char* filename) {
 
     case FILETYPE_KEYCHARACTERMAP: {
         sp<KeyCharacterMap> map;
-        status_t status = KeyCharacterMap::load(String8(filename),
+        status_t status = KeyCharacterMap::load(filename,
                 KeyCharacterMap::FORMAT_ANY, &map);
         if (status) {
             error("Error %d parsing key character map file.\n\n", status);
@@ -129,13 +128,11 @@ static bool validateFile(const char* filename) {
     }
 
     case FILETYPE_VIRTUALKEYDEFINITION: {
-        VirtualKeyMap* map;
-        status_t status = VirtualKeyMap::load(String8(filename), &map);
-        if (status) {
-            error("Error %d parsing virtual key definition file.\n\n", status);
+        std::unique_ptr<VirtualKeyMap> map = VirtualKeyMap::load(filename);
+        if (!map) {
+            error("Error while parsing virtual key definition file.\n\n");
             return false;
         }
-        delete map;
         break;
     }
     }

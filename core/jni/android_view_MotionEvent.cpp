@@ -333,8 +333,8 @@ static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* po
 
 static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz,
         jlong nativePtr,
-        jint deviceId, jint source, jint action, jint flags, jint edgeFlags,
-        jint metaState, jint buttonState,
+        jint deviceId, jint source, jint displayId, jint action, jint flags, jint edgeFlags,
+        jint metaState, jint buttonState, jint classification,
         jfloat xOffset, jfloat yOffset, jfloat xPrecision, jfloat yPrecision,
         jlong downTimeNanos, jlong eventTimeNanos,
         jint pointerCount, jobjectArray pointerPropertiesObjArray,
@@ -372,7 +372,8 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, action, 0, flags, edgeFlags, metaState, buttonState,
+    event->initialize(deviceId, source, displayId, action, 0, flags, edgeFlags, metaState,
+            buttonState, static_cast<MotionClassification>(classification),
             xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
@@ -598,6 +599,16 @@ static void android_view_MotionEvent_nativeSetSource(jlong nativePtr, jint sourc
     event->setSource(source);
 }
 
+static jint android_view_MotionEvent_nativeGetDisplayId(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getDisplayId();
+}
+
+static void android_view_MotionEvent_nativeSetDisplayId(jlong nativePtr, jint displayId) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->setDisplayId(displayId);
+}
+
 static jint android_view_MotionEvent_nativeGetAction(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getAction();
@@ -656,6 +667,11 @@ static jint android_view_MotionEvent_nativeGetButtonState(jlong nativePtr) {
 static void android_view_MotionEvent_nativeSetButtonState(jlong nativePtr, jint buttonState) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     event->setButtonState(buttonState);
+}
+
+static jint android_view_MotionEvent_nativeGetClassification(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return static_cast<jint>(event->getClassification());
 }
 
 static void android_view_MotionEvent_nativeOffsetLocation(jlong nativePtr, jfloat deltaX,
@@ -737,7 +753,7 @@ static void android_view_MotionEvent_nativeTransform(jlong nativePtr, jlong matr
 static const JNINativeMethod gMotionEventMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
-            "(JIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
+            "(JIIIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
                     "[Landroid/view/MotionEvent$PointerCoords;)J",
             (void*)android_view_MotionEvent_nativeInitialize },
     { "nativeDispose",
@@ -792,8 +808,14 @@ static const JNINativeMethod gMotionEventMethods[] = {
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetSource },
     { "nativeSetSource",
-            "(JI)I",
+            "(JI)V",
             (void*)android_view_MotionEvent_nativeSetSource },
+    { "nativeGetDisplayId",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetDisplayId },
+    { "nativeSetDisplayId",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetDisplayId },
     { "nativeGetAction",
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetAction },
@@ -830,6 +852,9 @@ static const JNINativeMethod gMotionEventMethods[] = {
     { "nativeSetButtonState",
             "(JI)V",
             (void*)android_view_MotionEvent_nativeSetButtonState },
+    { "nativeGetClassification",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetClassification },
     { "nativeOffsetLocation",
             "(JFF)V",
             (void*)android_view_MotionEvent_nativeOffsetLocation },

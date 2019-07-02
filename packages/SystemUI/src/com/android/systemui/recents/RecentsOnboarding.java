@@ -18,17 +18,19 @@ package com.android.systemui.recents;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.systemui.Prefs.Key.HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE;
 import static com.android.systemui.Prefs.Key.DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT;
+import static com.android.systemui.Prefs.Key.HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE;
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING;
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
-import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
 import static com.android.systemui.shared.system.LauncherEventUtil.DISMISS;
-import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
+import static com.android.systemui.shared.system.LauncherEventUtil
+        .RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE_UP_ONBOARDING_TIP;
+import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
 
 import android.annotation.StringRes;
 import android.annotation.TargetApi;
@@ -45,9 +47,9 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserManager;
-import android.os.RemoteException;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -59,12 +61,12 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -110,6 +112,7 @@ public class RecentsOnboarding {
     private final int mOnboardingToastColor;
     private final int mOnboardingToastArrowRadius;
     private int mNavBarHeight;
+    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
     private boolean mOverviewProxyListenerRegistered;
     private boolean mTaskListenerRegistered;
@@ -119,7 +122,7 @@ public class RecentsOnboarding {
     private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
     private int mOverviewOpenedCountSinceQuickScrubTipDismiss;
 
-    private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
+    private final TaskStackChangeListener mTaskListener = new TaskStackChangeListener() {
         private String mLastPackageName;
 
         @Override
@@ -338,8 +341,12 @@ public class RecentsOnboarding {
         } catch (RemoteException e) {}
     }
 
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+    }
+
     public void onConnectedToLauncher() {
-        if (!ONBOARDING_ENABLED) {
+        if (!ONBOARDING_ENABLED || QuickStepContract.isGesturalMode(mNavBarMode)) {
             return;
         }
 

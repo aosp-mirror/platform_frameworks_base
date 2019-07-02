@@ -16,21 +16,25 @@
 
 package com.android.server.media.projection;
 
-import com.android.server.Watchdog;
-
 import android.Manifest;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.IProcessObserver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
-import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -40,7 +44,9 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.Watchdog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -56,6 +62,7 @@ import java.util.Map;
  */
 public final class MediaProjectionManagerService extends SystemService
         implements Watchdog.Monitor {
+    private static final boolean REQUIRE_FG_SERVICE_FOR_PROJECTION = true;
     private static final String TAG = "MediaProjectionManagerService";
 
     private final Object mLock = new Object(); // Protects the list of media projections
@@ -64,6 +71,8 @@ public final class MediaProjectionManagerService extends SystemService
 
     private final Context mContext;
     private final AppOpsManager mAppOps;
+    private final ActivityManagerInternal mActivityManagerInternal;
+    private final PackageManager mPackageManager;
 
     private final MediaRouter mMediaRouter;
     private final MediaRouterCallback mMediaRouterCallback;
@@ -78,6 +87,8 @@ public final class MediaProjectionManagerService extends SystemService
         mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
         mCallbackDelegate = new CallbackDelegate();
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mPackageManager = mContext.getPackageManager();
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouterCallback = new MediaRouterCallback();
         Watchdog.getInstance().addMonitor(this);
@@ -89,6 +100,23 @@ public final class MediaProjectionManagerService extends SystemService
                 false /*allowIsolated*/);
         mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+        if (REQUIRE_FG_SERVICE_FOR_PROJECTION) {
+            mActivityManagerInternal.registerProcessObserver(new IProcessObserver.Stub() {
+                @Override
+                public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
+                }
+
+                @Override
+                public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+                    MediaProjectionManagerService.this.handleForegroundServicesChanged(pid, uid,
+                            serviceTypes);
+                }
+
+                @Override
+                public void onProcessDied(int pid, int uid) {
+                }
+            });
+        }
     }
 
     @Override
@@ -104,6 +132,29 @@ public final class MediaProjectionManagerService extends SystemService
     @Override
     public void monitor() {
         synchronized (mLock) { /* check for deadlock */ }
+    }
+
+    /**
+     * Called when the set of active foreground service types for a given {@code uid / pid} changes.
+     * We will stop the active projection grant if its owner targets {@code Q} or higher and has no
+     * started foreground services of type {@code FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
+     */
+    private void handleForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+        synchronized (mLock) {
+            if (mProjectionGrant == null || mProjectionGrant.uid != uid) {
+                return;
+            }
+
+            if (!mProjectionGrant.requiresForegroundService()) {
+                return;
+            }
+
+            if ((serviceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION) != 0) {
+                return;
+            }
+
+            mProjectionGrant.stop();
+        }
     }
 
     private void startProjectionLocked(final MediaProjection projection) {
@@ -230,10 +281,21 @@ public final class MediaProjectionManagerService extends SystemService
             if (packageName == null || packageName.isEmpty()) {
                 throw new IllegalArgumentException("package name must not be empty");
             }
+
+            final UserHandle callingUser = Binder.getCallingUserHandle();
             long callingToken = Binder.clearCallingIdentity();
+
             MediaProjection projection;
             try {
-                projection = new MediaProjection(type, uid, packageName);
+                ApplicationInfo ai;
+                try {
+                    ai = mPackageManager.getApplicationInfoAsUser(packageName, 0, callingUser);
+                } catch (NameNotFoundException e) {
+                    throw new IllegalArgumentException("No package matching :" + packageName);
+                }
+
+                projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
+                        ai.isPrivilegedApp());
                 if (isPermanentGrant) {
                     mAppOps.setMode(AppOpsManager.OP_PROJECT_MEDIA,
                             projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
@@ -335,17 +397,22 @@ public final class MediaProjectionManagerService extends SystemService
         public final int uid;
         public final String packageName;
         public final UserHandle userHandle;
+        private final int mTargetSdkVersion;
+        private final boolean mIsPrivileged;
 
         private IMediaProjectionCallback mCallback;
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private int mType;
 
-        public MediaProjection(int type, int uid, String packageName) {
+        MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
+                boolean isPrivileged) {
             mType = type;
             this.uid = uid;
             this.packageName = packageName;
             userHandle = new UserHandle(UserHandle.getUserId(uid));
+            mTargetSdkVersion = targetSdkVersion;
+            mIsPrivileged = isPrivileged;
         }
 
         @Override // Binder call
@@ -361,8 +428,9 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public boolean canProjectAudio() {
-            return mType == MediaProjectionManager.TYPE_MIRRORING ||
-                    mType == MediaProjectionManager.TYPE_PRESENTATION;
+            return mType == MediaProjectionManager.TYPE_MIRRORING
+                || mType == MediaProjectionManager.TYPE_PRESENTATION
+                || mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE;
         }
 
         @Override // Binder call
@@ -396,9 +464,19 @@ public final class MediaProjectionManagerService extends SystemService
             }
             synchronized (mLock) {
                 if (isValidMediaProjection(asBinder())) {
-                    throw new IllegalStateException(
-                            "Cannot start already started MediaProjection");
+                    Slog.w(TAG, "UID " + Binder.getCallingUid()
+                            + " attempted to start already started MediaProjection");
+                    return;
                 }
+
+                if (REQUIRE_FG_SERVICE_FOR_PROJECTION
+                        && requiresForegroundService()
+                        && !mActivityManagerInternal.hasRunningForegroundService(
+                                uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
+                    throw new SecurityException("Media projections require a foreground service"
+                            + " of type ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION");
+                }
+
                 mCallback = callback;
                 registerCallback(mCallback);
                 try {
@@ -455,6 +533,10 @@ public final class MediaProjectionManagerService extends SystemService
 
         public MediaProjectionInfo getProjectionInfo() {
             return new MediaProjectionInfo(packageName, userHandle);
+        }
+
+        boolean requiresForegroundService() {
+            return mTargetSdkVersion >= Build.VERSION_CODES.Q && !mIsPrivileged;
         }
 
         public void dump(PrintWriter pw) {

@@ -159,10 +159,11 @@ int
 inspect_apk(Apk* apk, const string& filename)
 {
     // Load the manifest xml
-    Command cmd("aapt");
+    Command cmd("aapt2");
     cmd.AddArg("dump");
     cmd.AddArg("xmltree");
     cmd.AddArg(filename);
+    cmd.AddArg("--file");
     cmd.AddArg("AndroidManifest.xml");
 
     int err;
@@ -217,11 +218,11 @@ inspect_apk(Apk* apk, const string& filename)
             if (current != NULL) {
                 Attribute attr;
                 string str = match[2];
-                size_t colon = str.find(':');
+                size_t colon = str.rfind(':');
                 if (colon == string::npos) {
                     attr.name = str;
                 } else {
-                    attr.ns = scope->namespaces[string(str, 0, colon)];
+                    attr.ns.assign(str, 0, colon);
                     attr.name.assign(str, colon+1, string::npos);
                 }
                 attr.value = match[3];

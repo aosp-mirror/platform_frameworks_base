@@ -15,6 +15,9 @@
  */
 package com.android.keyguard;
 
+import android.content.res.ColorStateList;
+import android.view.MotionEvent;
+
 import com.android.internal.widget.LockPatternUtils;
 
 public interface KeyguardSecurityView {
@@ -104,9 +107,9 @@ public interface KeyguardSecurityView {
      * Show a message on the security view with a specified color
      *
      * @param message the message to show
-     * @param color the color to use
+     * @param colorState the color to use
      */
-    void showMessage(CharSequence message, int color);
+    void showMessage(CharSequence message, ColorStateList colorState);
 
     /**
      * Instruct the view to show usability hints, if any.
@@ -135,4 +138,14 @@ public interface KeyguardSecurityView {
      * @return The View's title.
      */
     CharSequence getTitle();
+
+    /**
+     * If the parent should not be allowed to intercept touch events.
+     * @param event A touch event.
+     * @return {@code true} if touch should be passed forward.
+     * @see android.view.ViewGroup#requestDisallowInterceptTouchEvent(boolean)
+     */
+    default boolean disallowInterceptTouch(MotionEvent event) {
+        return false;
+    }
 }

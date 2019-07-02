@@ -17,7 +17,6 @@
 package com.android.server.backup;
 
 import static com.android.server.testutils.TestUtils.assertExpectException;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyString;

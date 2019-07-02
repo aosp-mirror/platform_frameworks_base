@@ -23,17 +23,15 @@ import android.os.ParcelFileDescriptor;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
-import android.system.Os;
-import android.support.test.filters.LargeTest;
-import android.support.test.InstrumentationRegistry;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import libcore.io.IoUtils;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.Test;
+
+import java.io.IOException;
 
 @RunWith(JUnit4.class)
 public class AppFusePerfTest {

@@ -17,7 +17,9 @@
 package com.android.server.search;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -307,7 +309,7 @@ public class SearchManagerService extends ISearchManager.Stub {
             Intent intent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
             intent.setComponent(comp);
 
-            IActivityManager am = ActivityManager.getService();
+            IActivityTaskManager am = ActivityTaskManager.getService();
             if (args != null) {
                 args.putInt(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.KEYCODE_ASSIST);
             }

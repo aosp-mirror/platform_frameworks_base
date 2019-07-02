@@ -115,8 +115,11 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     private static final boolean DEBUG_PANNING_SCALING = false || DEBUG_ALL;
     private static final boolean DEBUG_EVENT_STREAM = false || DEBUG_ALL;
 
+    // The MIN_SCALE is different from MagnificationController.MIN_SCALE due
+    // to AccessibilityService.MagnificationController#setScale() has
+    // different scale range
     private static final float MIN_SCALE = 2.0f;
-    private static final float MAX_SCALE = 5.0f;
+    private static final float MAX_SCALE = MagnificationController.MAX_SCALE;
 
     @VisibleForTesting final MagnificationController mMagnificationController;
 
@@ -145,6 +148,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     private PointerCoords[] mTempPointerCoords;
     private PointerProperties[] mTempPointerProperties;
 
+    private final int mDisplayId;
+
     private final Queue<MotionEvent> mDebugInputEventHistory;
     private final Queue<MotionEvent> mDebugOutputEventHistory;
 
@@ -158,11 +163,13 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
      * @param detectShortcutTrigger {@code true} if this detector should be "triggerable" by some
      *                           external shortcut invoking {@link #notifyShortcutTriggered},
      *                           {@code false} if it should ignore such triggers.
+     * @param displayId The logical display id.
      */
     public MagnificationGestureHandler(Context context,
             MagnificationController magnificationController,
             boolean detectTripleTap,
-            boolean detectShortcutTrigger) {
+            boolean detectShortcutTrigger,
+            int displayId) {
         if (DEBUG_ALL) {
             Log.i(LOG_TAG,
                     "MagnificationGestureHandler(detectTripleTap = " + detectTripleTap
@@ -170,6 +177,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         }
 
         mMagnificationController = magnificationController;
+        mDisplayId = displayId;
 
         mDelegatingState = new DelegatingState();
         mDetectingState = new DetectingState(context);
@@ -247,12 +255,16 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
         }
+        // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
+        mMagnificationController.resetAllIfNeeded(
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         clearAndTransitionToStateDetecting();
     }
 
     void notifyShortcutTriggered() {
         if (mDetectShortcutTrigger) {
-            boolean wasMagnifying = mMagnificationController.resetIfNeeded(/* animate */ true);
+            boolean wasMagnifying = mMagnificationController.resetIfNeeded(mDisplayId,
+                    /* animate */ true);
             if (wasMagnifying) {
                 clearAndTransitionToStateDetecting();
             } else {
@@ -270,33 +282,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     private void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
-        if (DEBUG_ALL) Slog.i(LOG_TAG, "dispatchTransformedEvent(event = " + event + ")");
-
-        // If the touchscreen event is within the magnified portion of the screen we have
-        // to change its location to be where the user thinks he is poking the
-        // UI which may have been magnified and panned.
-        if (mMagnificationController.isMagnifying()
-                && event.isFromSource(SOURCE_TOUCHSCREEN)
-                && mMagnificationController.magnificationRegionContains(
-                        event.getX(), event.getY())) {
-            final float scale = mMagnificationController.getScale();
-            final float scaledOffsetX = mMagnificationController.getOffsetX();
-            final float scaledOffsetY = mMagnificationController.getOffsetY();
-            final int pointerCount = event.getPointerCount();
-            PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
-            PointerProperties[] properties = getTempPointerPropertiesWithMinSize(
-                    pointerCount);
-            for (int i = 0; i < pointerCount; i++) {
-                event.getPointerCoords(i, coords[i]);
-                coords[i].x = (coords[i].x - scaledOffsetX) / scale;
-                coords[i].y = (coords[i].y - scaledOffsetY) / scale;
-                event.getPointerProperties(i, properties[i]);
-            }
-            event = MotionEvent.obtain(event.getDownTime(),
-                    event.getEventTime(), event.getAction(), pointerCount, properties,
-                    coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
-                    event.getFlags());
-        }
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugOutputEventHistory, event);
             try {
@@ -440,8 +425,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + distanceX
                         + " scrollY: " + distanceY);
             }
-            mMagnificationController.offsetMagnifiedRegion(distanceX, distanceY,
-                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            mMagnificationController.offsetMagnifiedRegion(mDisplayId, distanceX,
+                    distanceY, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return /* event consumed: */ true;
         }
 
@@ -457,7 +442,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                 return mScaling;
             }
 
-            final float initialScale = mMagnificationController.getScale();
+            final float initialScale = mMagnificationController.getScale(mDisplayId);
             final float targetScale = initialScale * detector.getScaleFactor();
 
             // Don't allow a gesture to move the user further outside the
@@ -479,7 +464,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             final float pivotX = detector.getFocusX();
             final float pivotY = detector.getFocusY();
             if (DEBUG_PANNING_SCALING) Slog.i(LOG_TAG, "Scaled content to: " + scale + "x");
-            mMagnificationController.setScale(scale, pivotX, pivotY, false,
+            mMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return /* handled: */ true;
         }
@@ -539,8 +524,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     }
                     final float eventX = event.getX();
                     final float eventY = event.getY();
-                    if (mMagnificationController.magnificationRegionContains(eventX, eventY)) {
-                        mMagnificationController.setCenter(eventX, eventY,
+                    if (mMagnificationController.magnificationRegionContains(
+                            mDisplayId, eventX, eventY)) {
+                        mMagnificationController.setCenter(mDisplayId, eventX, eventY,
                                 /* animate */ mLastMoveOutsideMagnifiedRegion,
                                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
                         mLastMoveOutsideMagnifiedRegion = false;
@@ -679,7 +665,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
 
                     if (!mMagnificationController.magnificationRegionContains(
-                            event.getX(), event.getY())) {
+                            mDisplayId, event.getX(), event.getY())) {
 
                         transitionToDelegatingStateAndClear();
 
@@ -688,11 +674,15 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                         // 3tap and hold
                         afterLongTapTimeoutTransitionToDraggingState(event);
 
+                    } else if (isTapOutOfDistanceSlop()) {
+
+                        transitionToDelegatingStateAndClear();
+
                     } else if (mDetectTripleTap
                             // If magnified, delay an ACTION_DOWN for mMultiTapMaxDelay
                             // to ensure reachability of
                             // STATE_PANNING_SCALING(triggerable with ACTION_POINTER_DOWN)
-                            || mMagnificationController.isMagnifying()) {
+                            || mMagnificationController.isMagnifying(mDisplayId)) {
 
                         afterMultiTapTimeoutTransitionToDelegatingState();
 
@@ -704,7 +694,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                 }
                 break;
                 case ACTION_POINTER_DOWN: {
-                    if (mMagnificationController.isMagnifying()) {
+                    if (mMagnificationController.isMagnifying(mDisplayId)) {
                         transitionTo(mPanningScalingState);
                         clear();
                     } else {
@@ -734,7 +724,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
 
                     if (!mMagnificationController.magnificationRegionContains(
-                            event.getX(), event.getY())) {
+                            mDisplayId, event.getX(), event.getY())) {
 
                         transitionToDelegatingStateAndClear();
 
@@ -885,7 +875,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             clear();
 
             // Toggle zoom
-            if (mMagnificationController.isMagnifying()) {
+            if (mMagnificationController.isMagnifying(mDisplayId)) {
                 zoomOff();
             } else {
                 zoomOn(up.getX(), up.getY());
@@ -898,7 +888,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             clear();
 
             mViewportDraggingState.mZoomedInBeforeDrag =
-                    mMagnificationController.isMagnifying();
+                    mMagnificationController.isMagnifying(mDisplayId);
 
             zoomOn(down.getX(), down.getY());
 
@@ -925,7 +915,32 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             if (DEBUG_DETECTING) Slog.i(LOG_TAG, "setShortcutTriggered(" + state + ")");
 
             mShortcutTriggered = state;
-            mMagnificationController.setForceShowMagnifiableBounds(state);
+            mMagnificationController.setForceShowMagnifiableBounds(mDisplayId, state);
+        }
+
+        /**
+         * Detects if last action down is out of distance slop between with previous
+         * one, when triple tap is enabled.
+         *
+         * @return true if tap is out of distance slop
+         */
+        boolean isTapOutOfDistanceSlop() {
+            if (!mDetectTripleTap) return false;
+            if (mPreLastDown == null || mLastDown == null) {
+                return false;
+            }
+            final boolean outOfDistanceSlop =
+                    GestureUtils.distance(mPreLastDown, mLastDown) > mMultiTapMaxDistance;
+            if (tapCount() > 0) {
+                return outOfDistanceSlop;
+            }
+            // There's no tap in the queue here. We still need to check if this is the case that
+            // user tap screen quickly and out of distance slop.
+            if (outOfDistanceSlop
+                    && !GestureUtils.isTimedOut(mPreLastDown, mLastDown, mMultiTapMaxDelay)) {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -935,7 +950,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         final float scale = MathUtils.constrain(
                 mMagnificationController.getPersistedScale(),
                 MIN_SCALE, MAX_SCALE);
-        mMagnificationController.setScaleAndCenter(
+        mMagnificationController.setScaleAndCenter(mDisplayId,
                 scale, centerX, centerY,
                 /* animate */ true,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
@@ -943,8 +958,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     private void zoomOff() {
         if (DEBUG_DETECTING) Slog.i(LOG_TAG, "zoomOff()");
-
-        mMagnificationController.reset(/* animate */ true);
+        mMagnificationController.reset(mDisplayId, /* animate */ true);
     }
 
     private static MotionEvent recycleAndNullify(@Nullable MotionEvent event) {
@@ -966,6 +980,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                 ", mCurrentState=" + State.nameOf(mCurrentState) +
                 ", mPreviousState=" + State.nameOf(mPreviousState) +
                 ", mMagnificationController=" + mMagnificationController +
+                ", mDisplayId=" + mDisplayId +
                 '}';
     }
 

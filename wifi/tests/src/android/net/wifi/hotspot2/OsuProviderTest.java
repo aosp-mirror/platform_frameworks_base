@@ -23,14 +23,16 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.net.wifi.WifiSsid;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.OsuProvider}.
@@ -40,6 +42,15 @@ public class OsuProviderTest {
     private static final WifiSsid TEST_SSID =
             WifiSsid.createFromByteArray("TEST SSID".getBytes(StandardCharsets.UTF_8));
     private static final String TEST_FRIENDLY_NAME = "Friendly Name";
+    private static final Map<String, String> TEST_FRIENDLY_NAMES =
+            new HashMap<String, String>() {
+                {
+                    put("en", TEST_FRIENDLY_NAME);
+                    put("kr", TEST_FRIENDLY_NAME + 2);
+                    put("jp", TEST_FRIENDLY_NAME + 3);
+                }
+            };
+
     private static final String TEST_SERVICE_DESCRIPTION = "Dummy Service";
     private static final Uri TEST_SERVER_URI = Uri.parse("https://test.com");
     private static final String TEST_NAI = "test.access.com";
@@ -59,7 +70,9 @@ public class OsuProviderTest {
 
         parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
         OsuProvider readInfo = OsuProvider.CREATOR.createFromParcel(parcel);
+
         assertEquals(writeInfo, readInfo);
+        assertEquals(writeInfo.hashCode(), readInfo.hashCode());
     }
 
     /**
@@ -79,8 +92,8 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyParcelWithFullProviderInfo() throws Exception {
-        verifyParcel(new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAME, TEST_SERVICE_DESCRIPTION,
-                TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON));
+        verifyParcel(new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
+                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON));
     }
 
     /**
@@ -100,8 +113,8 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyCopyConstructorWithValidSource() throws Exception {
-        OsuProvider source = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAME, TEST_SERVICE_DESCRIPTION,
-                TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON);
+        OsuProvider source = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
+                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON);
         assertEquals(source, new OsuProvider(source));
     }
 
@@ -112,10 +125,12 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyGetters() throws Exception {
-        OsuProvider provider = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAME,
+        OsuProvider provider = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
                 TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON);
+
         assertTrue(TEST_SSID.equals(provider.getOsuSsid()));
         assertTrue(TEST_FRIENDLY_NAME.equals(provider.getFriendlyName()));
+        assertTrue(TEST_FRIENDLY_NAMES.equals(provider.getFriendlyNameList()));
         assertTrue(TEST_SERVICE_DESCRIPTION.equals(provider.getServiceDescription()));
         assertTrue(TEST_SERVER_URI.equals(provider.getServerUri()));
         assertTrue(TEST_NAI.equals(provider.getNetworkAccessIdentifier()));

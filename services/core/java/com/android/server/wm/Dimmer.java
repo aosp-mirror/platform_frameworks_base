@@ -41,7 +41,7 @@ class Dimmer {
     private static final int DEFAULT_DIM_ANIM_DURATION = 200;
 
     private class DimAnimatable implements SurfaceAnimator.Animatable {
-        private final SurfaceControl mDimLayer;
+        private SurfaceControl mDimLayer;
 
         private DimAnimatable(SurfaceControl dimLayer) {
             mDimLayer = dimLayer;
@@ -62,7 +62,7 @@ class Dimmer {
         }
 
         @Override
-        public void onAnimationLeashDestroyed(SurfaceControl.Transaction t) {
+        public void onAnimationLeashLost(SurfaceControl.Transaction t) {
         }
 
         @Override
@@ -100,6 +100,13 @@ class Dimmer {
             // See getSurfaceWidth() above for explanation.
             return mHost.getSurfaceHeight();
         }
+
+        void removeSurface() {
+            if (mDimLayer != null && mDimLayer.isValid()) {
+                getPendingTransaction().remove(mDimLayer);
+            }
+            mDimLayer = null;
+        }
     }
 
     @VisibleForTesting
@@ -126,11 +133,12 @@ class Dimmer {
         DimState(SurfaceControl dimLayer) {
             mDimLayer = dimLayer;
             mDimming = true;
-            mSurfaceAnimator = new SurfaceAnimator(new DimAnimatable(dimLayer), () -> {
+            final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
+            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
                 if (!mDimming) {
-                    mDimLayer.destroy();
+                    dimAnimatable.removeSurface();
                 }
-            }, mHost.mService);
+            }, mHost.mWmService);
         }
     }
 
@@ -163,7 +171,7 @@ class Dimmer {
     private SurfaceControl makeDimLayer() {
         return mHost.makeChildSurface(null)
                 .setParent(mHost.getSurfaceControl())
-                .setColorLayer(true)
+                .setColorLayer()
                 .setName("Dim Layer for - " + mHost.getName())
                 .build();
     }
@@ -299,7 +307,9 @@ class Dimmer {
 
         if (!mDimState.mDimming) {
             if (!mDimState.mAnimateExit) {
-                t.destroy(mDimState.mDimLayer);
+                if (mDimState.mDimLayer.isValid()) {
+                    t.remove(mDimState.mDimLayer);
+                }
             } else {
                 startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
             }
@@ -307,8 +317,8 @@ class Dimmer {
             return false;
         } else {
             // TODO: Once we use geometry from hierarchy this falls away.
-            t.setSize(mDimState.mDimLayer, bounds.width(), bounds.height());
             t.setPosition(mDimState.mDimLayer, bounds.left, bounds.top);
+            t.setWindowCrop(mDimState.mDimLayer, bounds.width(), bounds.height());
             if (!mDimState.isVisible) {
                 mDimState.isVisible = true;
                 t.show(mDimState.mDimLayer);
@@ -332,7 +342,7 @@ class Dimmer {
             SurfaceControl.Transaction t, float startAlpha, float endAlpha) {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
-                mHost.mService.mSurfaceAnimationRunner), false /* hidden */);
+                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */);
     }
 
     private long getDimDuration(WindowContainer container) {

@@ -1,0 +1,80 @@
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<resources>
+  <!-- overlayable_icons references all of the drawables in this package
+       that are being overlayed by resource overlays. If you remove/rename
+       any of these resources, you must also change the resource overlay icons.-->
+  <array name="overlayable_icons">
+    <item>@*android:drawable/ic_audio_alarm</item>
+    <item>@*android:drawable/ic_audio_alarm_mute</item>
+    <item>@*android:drawable/ic_bluetooth_share_icon</item>
+    <item>@*android:drawable/ic_bt_headphones_a2dp</item>
+    <item>@*android:drawable/ic_bt_headset_hfp</item>
+    <item>@*android:drawable/ic_bt_hearing_aid</item>
+    <item>@*android:drawable/ic_bt_laptop</item>
+    <item>@*android:drawable/ic_bt_network_pan</item>
+    <item>@*android:drawable/ic_bt_pointing_hid</item>
+    <item>@*android:drawable/ic_corp_badge</item>
+    <item>@*android:drawable/ic_expand_more</item>
+    <item>@*android:drawable/ic_file_copy</item>
+    <item>@*android:drawable/ic_lock</item>
+    <item>@*android:drawable/ic_lock_bugreport</item>
+    <item>@*android:drawable/ic_lock_open</item>
+    <item>@*android:drawable/ic_lock_power_off</item>
+    <item>@*android:drawable/ic_lockscreen_ime</item>
+    <item>@*android:drawable/ic_mode_edit</item>
+    <item>@*android:drawable/ic_phone</item>
+    <item>@*android:drawable/ic_qs_airplane</item>
+    <item>@*android:drawable/ic_qs_auto_rotate</item>
+    <item>@*android:drawable/ic_qs_battery_saver</item>
+    <item>@*android:drawable/ic_qs_bluetooth</item>
+    <item>@*android:drawable/ic_qs_dnd</item>
+    <item>@*android:drawable/ic_qs_flashlight</item>
+    <item>@*android:drawable/ic_qs_night_display_on</item>
+    <item>@*android:drawable/ic_restart</item>
+    <item>@*android:drawable/ic_screenshot</item>
+    <item>@*android:drawable/ic_settings_bluetooth</item>
+    <item>@*android:drawable/ic_signal_cellular_0_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_0_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_1_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_1_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_2_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_2_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_3_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_3_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_4_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_4_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_5_5_bar</item>
+    <item>@*android:drawable/ic_signal_location</item>
+    <item>@*android:drawable/ic_wifi_signal_0</item>
+    <item>@*android:drawable/ic_wifi_signal_1</item>
+    <item>@*android:drawable/ic_wifi_signal_2</item>
+    <item>@*android:drawable/ic_wifi_signal_3</item>
+    <item>@*android:drawable/ic_wifi_signal_4</item>
+    <item>@*android:drawable/perm_group_activity_recognition</item>
+    <item>@*android:drawable/perm_group_calendar</item>
+    <item>@*android:drawable/perm_group_call_log</item>
+    <item>@*android:drawable/perm_group_camera</item>
+    <item>@*android:drawable/perm_group_contacts</item>
+    <item>@*android:drawable/perm_group_location</item>
+    <item>@*android:drawable/perm_group_microphone</item>
+    <item>@*android:drawable/perm_group_phone_calls</item>
+    <item>@*android:drawable/perm_group_sensors</item>
+    <item>@*android:drawable/perm_group_sms</item>
+    <item>@*android:drawable/perm_group_storage</item>
+    <item>@*android:drawable/perm_group_visual</item>
+  </array>
+</resources>

@@ -16,6 +16,7 @@
 package android.app;
 
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Defines operations that a {@link android.app.servertransaction.ClientTransaction} or its items
@@ -64,6 +66,8 @@ public abstract class ClientTransactionHandler {
 
     abstract void sendMessage(int what, Object obj);
 
+    /** Get activity instance for the token. */
+    public abstract Activity getActivity(IBinder token);
 
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.
@@ -74,9 +78,14 @@ public abstract class ClientTransactionHandler {
     /** Set current process state. */
     public abstract void updateProcessState(int processState, boolean fromIpc);
 
+    /** Count how many activities are launching. */
+    public abstract void countLaunchingActivities(int num);
 
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.
+
+    /** Get activity and its corresponding transaction item which are going to destroy. */
+    public abstract Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed();
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,
@@ -98,6 +107,16 @@ public abstract class ClientTransactionHandler {
             boolean isForward, String reason);
 
     /**
+     * Notify the activity about top resumed state change.
+     * @param token Target activity token.
+     * @param isTopResumedActivity Current state of the activity, {@code true} if it's the
+     *                             topmost resumed activity in the system, {@code false} otherwise.
+     * @param reason Reason for performing this operation.
+     */
+    public abstract void handleTopResumedActivityChanged(IBinder token,
+            boolean isTopResumedActivity, String reason);
+
+    /**
      * Stop the activity.
      * @param token Target activity token.
      * @param show Flag indicating whether activity is still shown.
@@ -117,6 +136,10 @@ public abstract class ClientTransactionHandler {
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(IBinder token, boolean start);
 
+    /** Set pending activity configuration in case it will be updated by other transaction item. */
+    public abstract void updatePendingActivityConfiguration(IBinder activityToken,
+            Configuration overrideConfig);
+
     /** Deliver activity (override) configuration change. */
     public abstract void handleActivityConfigurationChanged(IBinder activityToken,
             Configuration overrideConfig, int displayId);
@@ -129,8 +152,7 @@ public abstract class ClientTransactionHandler {
             Configuration overrideConfig);
 
     /** Deliver new intent. */
-    public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents,
-            boolean andPause);
+    public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents);
 
     /** Deliver picture-in-picture mode change notification. */
     public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,

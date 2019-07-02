@@ -165,7 +165,7 @@ public class UsbConfiguration implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<UsbConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbConfiguration> CREATOR =
         new Parcelable.Creator<UsbConfiguration>() {
         public UsbConfiguration createFromParcel(Parcel in) {
             int id = in.readInt();

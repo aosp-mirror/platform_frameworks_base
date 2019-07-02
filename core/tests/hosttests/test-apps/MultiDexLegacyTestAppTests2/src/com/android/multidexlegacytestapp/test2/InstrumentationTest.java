@@ -15,10 +15,13 @@
  */
 package com.android.multidexlegacytestapp.test2;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.multidexlegacytestapp.manymethods.Big001;
 import com.android.multidexlegacytestapp.manymethods.Big079;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

@@ -15,9 +15,6 @@
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
 
-#include <Caches.h>
-#include <TextureCache.h>
-
 using namespace android;
 
 void doThrowNPE(JNIEnv* env) {
@@ -181,27 +178,17 @@ static jclass    gVMRuntime_class;
 static jmethodID gVMRuntime_newNonMovableArray;
 static jmethodID gVMRuntime_addressOf;
 
-static jfieldID gTransferParams_aFieldID;
-static jfieldID gTransferParams_bFieldID;
-static jfieldID gTransferParams_cFieldID;
-static jfieldID gTransferParams_dFieldID;
-static jfieldID gTransferParams_eFieldID;
-static jfieldID gTransferParams_fFieldID;
-static jfieldID gTransferParams_gFieldID;
-
 static jclass gColorSpace_class;
-static jfieldID gColorSpace_IlluminantD50FieldID;
-static jmethodID gColorSpace_adaptMethodID;
 static jmethodID gColorSpace_getMethodID;
 static jmethodID gColorSpace_matchMethodID;
 
 static jclass gColorSpaceRGB_class;
-static jmethodID gColorSpaceRGB_getTransferParametersMethodID;
-static jmethodID gColorSpaceRGB_getTransformMethodID;
 static jmethodID gColorSpaceRGB_constructorMethodID;
 
 static jclass gColorSpace_Named_class;
 static jfieldID gColorSpace_Named_sRGBFieldID;
+static jfieldID gColorSpace_Named_ExtendedSRGBFieldID;
+static jfieldID gColorSpace_Named_LinearSRGBFieldID;
 static jfieldID gColorSpace_Named_LinearExtendedSRGBFieldID;
 
 static jclass gTransferParameters_class;
@@ -358,11 +345,6 @@ void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) 
     bitmap::toBitmap(env, bitmap).getSkBitmap(outBitmap);
 }
 
-SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject jbitmap) {
-    android::Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
-    bitmap.ref();
-    return &bitmap;
-}
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
     ALOG_ASSERT(env);
     if (NULL == jconfig) {
@@ -432,177 +414,78 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-        int fd, void* addr, size_t size, bool readOnly) {
-    const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        doThrowIAE(env, "unknown bitmap configuration");
+jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
+        SkColorType decodeColorType) {
+    if (!decodeColorSpace || decodeColorType == kAlpha_8_SkColorType) {
         return nullptr;
     }
 
-    if (!addr) {
-        // Map existing ashmem region if not already mapped.
-        int flags = readOnly ? (PROT_READ) : (PROT_READ | PROT_WRITE);
-        size = ashmem_get_size_region(fd);
-        addr = mmap(NULL, size, flags, MAP_SHARED, fd, 0);
-        if (addr == MAP_FAILED) {
-            return nullptr;
-        }
-    }
-
-    // we must respect the rowBytes value already set on the bitmap instead of
-    // attempting to compute our own.
-    const size_t rowBytes = bitmap->rowBytes();
-
-    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes);
-    wrapper->getSkBitmap(bitmap);
-    if (readOnly) {
-        bitmap->pixelRef()->setImmutable();
-    }
-    return wrapper;
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    return SkColorSpace::MakeSRGB();
-#else
-    return nullptr;
-#endif
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::linearColorSpace() {
-    return SkColorSpace::MakeSRGBLinear();
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {
-    switch (type) {
-        case kRGBA_F16_SkColorType:
-            return linearColorSpace();
-        default:
-            return defaultColorSpace();
-    }
-}
-
-bool GraphicsJNI::isColorSpaceSRGB(SkColorSpace* colorSpace) {
-    return colorSpace == nullptr || colorSpace->isSRGB();
-}
-
-SkColorSpaceTransferFn GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
-    SkColorSpaceTransferFn p;
-    p.fA = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);
-    p.fB = (float) env->GetDoubleField(transferParams, gTransferParams_bFieldID);
-    p.fC = (float) env->GetDoubleField(transferParams, gTransferParams_cFieldID);
-    p.fD = (float) env->GetDoubleField(transferParams, gTransferParams_dFieldID);
-    p.fE = (float) env->GetDoubleField(transferParams, gTransferParams_eFieldID);
-    p.fF = (float) env->GetDoubleField(transferParams, gTransferParams_fFieldID);
-    p.fG = (float) env->GetDoubleField(transferParams, gTransferParams_gFieldID);
-    return p;
-}
-
-SkMatrix44 GraphicsJNI::getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
-    SkMatrix44 xyzMatrix(SkMatrix44::kIdentity_Constructor);
-    jfloat* array = env->GetFloatArrayElements(xyzD50, NULL);
-    xyzMatrix.setFloat(0, 0, array[0]);
-    xyzMatrix.setFloat(1, 0, array[1]);
-    xyzMatrix.setFloat(2, 0, array[2]);
-    xyzMatrix.setFloat(0, 1, array[3]);
-    xyzMatrix.setFloat(1, 1, array[4]);
-    xyzMatrix.setFloat(2, 1, array[5]);
-    xyzMatrix.setFloat(0, 2, array[6]);
-    xyzMatrix.setFloat(1, 2, array[7]);
-    xyzMatrix.setFloat(2, 2, array[8]);
-    env->ReleaseFloatArrayElements(xyzD50, array, 0);
-    return xyzMatrix;
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::getNativeColorSpace(JNIEnv* env, jobject colorSpace) {
-    if (colorSpace == nullptr) return nullptr;
-    if (!env->IsInstanceOf(colorSpace, gColorSpaceRGB_class)) {
-        doThrowIAE(env, "The color space must be an RGB color space");
-    }
-
-    jobject transferParams = env->CallObjectMethod(colorSpace,
-            gColorSpaceRGB_getTransferParametersMethodID);
-    if (transferParams == nullptr) {
-        doThrowIAE(env, "The color space must use an ICC parametric transfer function");
-    }
-
-    jfloatArray illuminantD50 = (jfloatArray) env->GetStaticObjectField(gColorSpace_class,
-            gColorSpace_IlluminantD50FieldID);
-    jobject colorSpaceD50 = env->CallStaticObjectMethod(gColorSpace_class,
-            gColorSpace_adaptMethodID, colorSpace, illuminantD50);
-
-    jfloatArray xyzD50 = (jfloatArray) env->CallObjectMethod(colorSpaceD50,
-            gColorSpaceRGB_getTransformMethodID);
-
-    SkMatrix44 xyzMatrix = getNativeXYZMatrix(env, xyzD50);
-    SkColorSpaceTransferFn transferFunction = getNativeTransferParameters(env, transferParams);
-
-    return SkColorSpace::MakeRGB(transferFunction, xyzMatrix);
-}
-
-
-jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
-        SkColorType decodeColorType) {
-    jobject colorSpace = nullptr;
-
-    // No need to match, we know what the output color space will be
+    // Special checks for the common sRGB cases and their extended variants.
+    jobject namedCS = nullptr;
+    sk_sp<SkColorSpace> srgbLinear = SkColorSpace::MakeSRGBLinear();
     if (decodeColorType == kRGBA_F16_SkColorType) {
-        jobject linearExtendedSRGB = env->GetStaticObjectField(
-                gColorSpace_Named_class, gColorSpace_Named_LinearExtendedSRGBFieldID);
-        colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                gColorSpace_getMethodID, linearExtendedSRGB);
-    } else {
-        // Same here, no need to match
+        // An F16 Bitmap will always report that it is EXTENDED if
+        // it matches a ColorSpace that has an EXTENDED variant.
         if (decodeColorSpace->isSRGB()) {
-            jobject sRGB = env->GetStaticObjectField(
-                    gColorSpace_Named_class, gColorSpace_Named_sRGBFieldID);
-            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                    gColorSpace_getMethodID, sRGB);
-        } else if (decodeColorSpace.get() != nullptr) {
-            // Try to match against known RGB color spaces using the CIE XYZ D50
-            // conversion matrix and numerical transfer function parameters
-            SkMatrix44 xyzMatrix(SkMatrix44::kUninitialized_Constructor);
-            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
-
-            SkColorSpaceTransferFn transferParams;
-            // We can only handle numerical transfer functions at the moment
-            LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
-
-            jobject params = env->NewObject(gTransferParameters_class,
-                    gTransferParameters_constructorMethodID,
-                    transferParams.fA, transferParams.fB, transferParams.fC,
-                    transferParams.fD, transferParams.fE, transferParams.fF,
-                    transferParams.fG);
-
-            jfloatArray xyzArray = env->NewFloatArray(9);
-            jfloat xyz[9] = {
-                    xyzMatrix.getFloat(0, 0),
-                    xyzMatrix.getFloat(1, 0),
-                    xyzMatrix.getFloat(2, 0),
-                    xyzMatrix.getFloat(0, 1),
-                    xyzMatrix.getFloat(1, 1),
-                    xyzMatrix.getFloat(2, 1),
-                    xyzMatrix.getFloat(0, 2),
-                    xyzMatrix.getFloat(1, 2),
-                    xyzMatrix.getFloat(2, 2)
-            };
-            env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
-
-            colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
-                    gColorSpace_matchMethodID, xyzArray, params);
-
-            if (colorSpace == nullptr) {
-                // We couldn't find an exact match, let's create a new color space
-                // instance with the 3x3 conversion matrix and transfer function
-                colorSpace = env->NewObject(gColorSpaceRGB_class,
-                        gColorSpaceRGB_constructorMethodID,
-                        env->NewStringUTF("Unknown"), xyzArray, params);
-            }
-
-            env->DeleteLocalRef(xyzArray);
+            namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                                gColorSpace_Named_ExtendedSRGBFieldID);
+        } else if (decodeColorSpace == srgbLinear.get()) {
+            namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                                gColorSpace_Named_LinearExtendedSRGBFieldID);
         }
+    } else if (decodeColorSpace->isSRGB()) {
+        namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                            gColorSpace_Named_sRGBFieldID);
+    } else if (decodeColorSpace == srgbLinear.get()) {
+        namedCS = env->GetStaticObjectField(gColorSpace_Named_class,
+                                            gColorSpace_Named_LinearSRGBFieldID);
     }
+
+    if (namedCS) {
+        return env->CallStaticObjectMethod(gColorSpace_class, gColorSpace_getMethodID, namedCS);
+    }
+
+    // Try to match against known RGB color spaces using the CIE XYZ D50
+    // conversion matrix and numerical transfer function parameters
+    skcms_Matrix3x3 xyzMatrix;
+    LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
+
+    skcms_TransferFunction transferParams;
+    // We can only handle numerical transfer functions at the moment
+    LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
+
+    jobject params = env->NewObject(gTransferParameters_class,
+            gTransferParameters_constructorMethodID,
+            transferParams.a, transferParams.b, transferParams.c,
+            transferParams.d, transferParams.e, transferParams.f,
+            transferParams.g);
+
+    jfloatArray xyzArray = env->NewFloatArray(9);
+    jfloat xyz[9] = {
+            xyzMatrix.vals[0][0],
+            xyzMatrix.vals[1][0],
+            xyzMatrix.vals[2][0],
+            xyzMatrix.vals[0][1],
+            xyzMatrix.vals[1][1],
+            xyzMatrix.vals[2][1],
+            xyzMatrix.vals[0][2],
+            xyzMatrix.vals[1][2],
+            xyzMatrix.vals[2][2]
+    };
+    env->SetFloatArrayRegion(xyzArray, 0, 9, xyz);
+
+    jobject colorSpace = env->CallStaticObjectMethod(gColorSpace_class,
+            gColorSpace_matchMethodID, xyzArray, params);
+
+    if (colorSpace == nullptr) {
+        // We couldn't find an exact match, let's create a new color space
+        // instance with the 3x3 conversion matrix and transfer function
+        colorSpace = env->NewObject(gColorSpaceRGB_class,
+                gColorSpaceRGB_constructorMethodID,
+                env->NewStringUTF("Unknown"), xyzArray, params);
+    }
+
+    env->DeleteLocalRef(xyzArray);
     return colorSpace;
 }
 
@@ -773,20 +656,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
                                                      "(Ljava/lang/Class;I)Ljava/lang/Object;");
     gVMRuntime_addressOf = GetMethodIDOrDie(env, gVMRuntime_class, "addressOf", "(Ljava/lang/Object;)J");
 
-    jclass transfer_params_class = FindClassOrDie(env, "android/graphics/ColorSpace$Rgb$TransferParameters");
-    gTransferParams_aFieldID = GetFieldIDOrDie(env, transfer_params_class, "a", "D");
-    gTransferParams_bFieldID = GetFieldIDOrDie(env, transfer_params_class, "b", "D");
-    gTransferParams_cFieldID = GetFieldIDOrDie(env, transfer_params_class, "c", "D");
-    gTransferParams_dFieldID = GetFieldIDOrDie(env, transfer_params_class, "d", "D");
-    gTransferParams_eFieldID = GetFieldIDOrDie(env, transfer_params_class, "e", "D");
-    gTransferParams_fFieldID = GetFieldIDOrDie(env, transfer_params_class, "f", "D");
-    gTransferParams_gFieldID = GetFieldIDOrDie(env, transfer_params_class, "g", "D");
-
     gColorSpace_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ColorSpace"));
-    gColorSpace_IlluminantD50FieldID = GetStaticFieldIDOrDie(env,
-            gColorSpace_class, "ILLUMINANT_D50", "[F");
-    gColorSpace_adaptMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class, "adapt",
-            "(Landroid/graphics/ColorSpace;[F)Landroid/graphics/ColorSpace;");
     gColorSpace_getMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class,
             "get", "(Landroid/graphics/ColorSpace$Named;)Landroid/graphics/ColorSpace;");
     gColorSpace_matchMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class, "match",
@@ -796,15 +666,15 @@ int register_android_graphics_Graphics(JNIEnv* env)
             FindClassOrDie(env, "android/graphics/ColorSpace$Rgb"));
     gColorSpaceRGB_constructorMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
             "<init>", "(Ljava/lang/String;[FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)V");
-    gColorSpaceRGB_getTransferParametersMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
-            "getTransferParameters", "()Landroid/graphics/ColorSpace$Rgb$TransferParameters;");
-    gColorSpaceRGB_getTransformMethodID = GetMethodIDOrDie(env, gColorSpaceRGB_class,
-            "getTransform", "()[F");
 
     gColorSpace_Named_class = MakeGlobalRefOrDie(env,
             FindClassOrDie(env, "android/graphics/ColorSpace$Named"));
     gColorSpace_Named_sRGBFieldID = GetStaticFieldIDOrDie(env,
             gColorSpace_Named_class, "SRGB", "Landroid/graphics/ColorSpace$Named;");
+    gColorSpace_Named_ExtendedSRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "EXTENDED_SRGB", "Landroid/graphics/ColorSpace$Named;");
+    gColorSpace_Named_LinearSRGBFieldID = GetStaticFieldIDOrDie(env,
+            gColorSpace_Named_class, "LINEAR_SRGB", "Landroid/graphics/ColorSpace$Named;");
     gColorSpace_Named_LinearExtendedSRGBFieldID = GetStaticFieldIDOrDie(env,
             gColorSpace_Named_class, "LINEAR_EXTENDED_SRGB", "Landroid/graphics/ColorSpace$Named;");
 

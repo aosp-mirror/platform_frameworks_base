@@ -15,8 +15,8 @@
  */
 package com.android.settingslib.utils;
 
-
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -30,11 +30,7 @@ public class ThreadUtilsTest {
     @Test
     public void testMainThread() throws InterruptedException {
         assertThat(ThreadUtils.isMainThread()).isTrue();
-        Thread background = new Thread(new Runnable() {
-            public void run() {
-                assertThat(ThreadUtils.isMainThread()).isFalse();
-            }
-        });
+        Thread background = new Thread(() -> assertThat(ThreadUtils.isMainThread()).isFalse());
         background.start();
         background.join();
     }
@@ -42,13 +38,11 @@ public class ThreadUtilsTest {
     @Test
     public void testEnsureMainThread() throws InterruptedException {
         ThreadUtils.ensureMainThread();
-        Thread background = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    ThreadUtils.ensureMainThread();
-                    fail("Should not pass ensureMainThread in a background thread");
-                } catch (RuntimeException e) {
-                }
+        Thread background = new Thread(() -> {
+            try {
+                ThreadUtils.ensureMainThread();
+                fail("Should not pass ensureMainThread in a background thread");
+            } catch (RuntimeException expected) {
             }
         });
         background.start();
@@ -56,7 +50,7 @@ public class ThreadUtilsTest {
     }
 
     @Test
-    public void testPostOnMainThread_shouldRunOnMainTread() throws Exception {
+    public void testPostOnMainThread_shouldRunOnMainTread() {
         TestRunnable cr = new TestRunnable();
         ShadowLooper.pauseMainLooper();
         ThreadUtils.postOnMainThread(cr);

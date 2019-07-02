@@ -16,87 +16,85 @@
 
 package com.android.server.location;
 
-import android.location.ILocationManager;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.WorkSource;
-import android.util.Log;
-import android.util.PrintWriterPrinter;
-
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * A mock location provider used by LocationManagerService to implement test providers.
  *
  * {@hide}
  */
-public class MockProvider implements LocationProviderInterface {
-    private final String mName;
-    private final ProviderProperties mProperties;
-    private final ILocationManager mLocationManager;
+public class MockProvider extends AbstractLocationProvider {
 
-    private final Location mLocation;
-    private final Bundle mExtras = new Bundle();
-
+    private boolean mEnabled;
+    @Nullable private Location mLocation;
     private int mStatus;
     private long mStatusUpdateTime;
-    private boolean mHasLocation;
-    private boolean mHasStatus;
-    private boolean mEnabled;
+    private Bundle mExtras;
 
-    private static final String TAG = "MockProvider";
+    public MockProvider(Context context,
+            LocationProviderManager locationProviderManager, ProviderProperties properties) {
+        super(context, locationProviderManager);
 
-    public MockProvider(String name, ILocationManager locationManager,
-            ProviderProperties properties) {
-        if (properties == null) throw new NullPointerException("properties is null");
-
-        mName = name;
-        mLocationManager = locationManager;
-        mProperties = properties;
-        mLocation = new Location(name);
-    }
-
-    @Override
-    public String getName() {
-        return mName;
-    }
-
-    @Override
-    public ProviderProperties getProperties() {
-        return mProperties;
-    }
-
-    @Override
-    public void disable() {
-        mEnabled = false;
-    }
-
-    @Override
-    public void enable() {
         mEnabled = true;
+        mLocation = null;
+        mStatus = LocationProvider.AVAILABLE;
+        mStatusUpdateTime = 0;
+        mExtras = null;
+
+        setProperties(properties);
+    }
+
+    /** Sets the enabled state of this mock provider. */
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+        super.setEnabled(enabled);
+    }
+
+    /** Sets the location to report for this mock provider. */
+    public void setLocation(Location l) {
+        mLocation = new Location(l);
+        if (!mLocation.isFromMockProvider()) {
+            mLocation.setIsFromMockProvider(true);
+        }
+        if (mEnabled) {
+            reportLocation(mLocation);
+        }
+    }
+
+    /** Sets the status for this mock provider. */
+    public void setStatus(int status, Bundle extras, long updateTime) {
+        mStatus = status;
+        mStatusUpdateTime = updateTime;
+        mExtras = extras;
     }
 
     @Override
-    public boolean isEnabled() {
-        return mEnabled;
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(" last location=" + mLocation);
     }
+
+    @Override
+    public void setRequest(ProviderRequest request, WorkSource source) {}
 
     @Override
     public int getStatus(Bundle extras) {
-        if (mHasStatus) {
+        if (mExtras != null) {
             extras.clear();
             extras.putAll(mExtras);
-            return mStatus;
-        } else {
-            return LocationProvider.AVAILABLE;
         }
+
+        return mStatus;
     }
 
     @Override
@@ -104,58 +102,6 @@ public class MockProvider implements LocationProviderInterface {
         return mStatusUpdateTime;
     }
 
-    public void setLocation(Location l) {
-        mLocation.set(l);
-        mHasLocation = true;
-        if (mEnabled) {
-            try {
-                mLocationManager.reportLocation(mLocation, false);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException calling reportLocation");
-            }
-        }
-    }
-
-    public void clearLocation() {
-        mHasLocation = false;
-    }
-
-    public void setStatus(int status, Bundle extras, long updateTime) {
-        mStatus = status;
-        mStatusUpdateTime = updateTime;
-        mExtras.clear();
-        if (extras != null) {
-            mExtras.putAll(extras);
-        }
-        mHasStatus = true;
-    }
-
-    public void clearStatus() {
-        mHasStatus = false;
-        mStatusUpdateTime = 0;
-    }
-
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        dump(pw, "");
-    }
-
-    public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + mName);
-        pw.println(prefix + "mHasLocation=" + mHasLocation);
-        pw.println(prefix + "mLocation:");
-        mLocation.dump(new PrintWriterPrinter(pw), prefix + "  ");
-        pw.println(prefix + "mHasStatus=" + mHasStatus);
-        pw.println(prefix + "mStatus=" + mStatus);
-        pw.println(prefix + "mStatusUpdateTime=" + mStatusUpdateTime);
-        pw.println(prefix + "mExtras=" + mExtras);
-    }
-
-    @Override
-    public void setRequest(ProviderRequest request, WorkSource source) { }
-
-    @Override
-    public boolean sendExtraCommand(String command, Bundle extras) {
-        return false;
-    }
+    public void sendExtraCommand(String command, Bundle extras) {}
 }

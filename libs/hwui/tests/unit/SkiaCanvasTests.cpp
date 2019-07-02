@@ -16,7 +16,6 @@
 
 #include "tests/common/TestUtils.h"
 
-#include <RecordingCanvas.h>
 #include <SkBlurDrawLooper.h>
 #include <SkCanvasStateUtils.h>
 #include <SkPicture.h>
@@ -25,41 +24,6 @@
 
 using namespace android;
 using namespace android::uirenderer;
-
-/**
- * Verify that we get the same culling bounds for text for (1) drawing glyphs
- * directly to a Canvas or (2) going through a SkPicture as an intermediate step.
- */
-OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        // setup test variables
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setTextSize(20);
-        static const char* text = "testing text bounds";
-
-        // draw text directly into Recording canvas
-        TestUtils::drawUtf8ToCanvas(&canvas, text, paint, 25, 25);
-
-        // record the same text draw into a SkPicture and replay it into a Recording canvas
-        SkPictureRecorder recorder;
-        SkCanvas* skCanvas = recorder.beginRecording(200, 200, NULL, 0);
-        std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas));
-        TestUtils::drawUtf8ToCanvas(pictCanvas.get(), text, paint, 25, 25);
-        sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
-
-        canvas.asSkCanvas()->drawPicture(picture);
-    });
-
-    // verify that the text bounds and matrices match
-    ASSERT_EQ(2U, dl->getOps().size());
-    auto directOp = dl->getOps()[0];
-    auto pictureOp = dl->getOps()[1];
-    ASSERT_EQ(RecordedOpId::TextOp, directOp->opId);
-    EXPECT_EQ(directOp->opId, pictureOp->opId);
-    EXPECT_EQ(directOp->unmappedBounds, pictureOp->unmappedBounds);
-    EXPECT_EQ(directOp->localMatrix, pictureOp->localMatrix);
-}
 
 TEST(SkiaCanvas, drawShadowLayer) {
     auto surface = SkSurface::MakeRasterN32Premul(10, 10);
@@ -80,8 +44,8 @@ TEST(SkiaCanvas, drawShadowLayer) {
 }
 
 TEST(SkiaCanvas, colorSpaceXform) {
-    sk_sp<SkColorSpace> adobe = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
-                                                      SkColorSpace::kAdobeRGB_Gamut);
+    sk_sp<SkColorSpace> adobe = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                      SkNamedGamut::kAdobeRGB);
 
     SkImageInfo adobeInfo = SkImageInfo::Make(1, 1, kN32_SkColorType, kOpaque_SkAlphaType, adobe);
     sk_sp<Bitmap> adobeBitmap = Bitmap::allocateHeapBitmap(adobeInfo);
@@ -89,12 +53,12 @@ TEST(SkiaCanvas, colorSpaceXform) {
     adobeBitmap->getSkBitmap(&adobeSkBitmap);
     *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0;  // Opaque, almost fully-red
 
-    SkImageInfo info = adobeInfo.makeColorSpace(nullptr);
+    SkImageInfo info = adobeInfo.makeColorSpace(SkColorSpace::MakeSRGB());
     sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
     SkBitmap skBitmap;
     bitmap->getSkBitmap(&skBitmap);
 
-    // Create a software canvas.
+    // Create a software sRGB canvas.
     SkiaCanvas canvas(skBitmap);
     canvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     // The result should be fully red, since we convert to sRGB at draw time.
@@ -113,7 +77,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
-    // Playback to an software canvas.  The result should be fully red.
+    // Playback to a software sRGB canvas.  The result should be fully red.
     canvas.asSkCanvas()->drawPicture(picture);
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 }

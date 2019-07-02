@@ -124,7 +124,7 @@ public class PhoneCapability implements Parcelable {
         dest.writeList(logicalModemList);
     }
 
-    public static final Parcelable.Creator<PhoneCapability> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<PhoneCapability> CREATOR = new Parcelable.Creator() {
         public PhoneCapability createFromParcel(Parcel in) {
             return new PhoneCapability(in);
         }

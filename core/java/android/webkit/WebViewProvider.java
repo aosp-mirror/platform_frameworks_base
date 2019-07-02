@@ -54,6 +54,7 @@ import android.webkit.WebView.VisualStateCallback;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * WebView backend provider interface: this interface is the abstract backend to a WebView
@@ -237,6 +238,16 @@ public interface WebViewProvider {
 
     public WebViewClient getWebViewClient();
 
+    @Nullable
+    public WebViewRenderProcess getWebViewRenderProcess();
+
+    public void setWebViewRenderProcessClient(
+            @Nullable Executor executor,
+            @Nullable WebViewRenderProcessClient client);
+
+    @Nullable
+    public WebViewRenderProcessClient getWebViewRenderProcessClient();
+
     public void setDownloadListener(DownloadListener listener);
 
     public void setWebChromeClient(WebChromeClient client);
@@ -339,6 +350,11 @@ public interface WebViewProvider {
 
         default boolean isVisibleToUserForAutofill(@SuppressWarnings("unused") int virtualId) {
             return true; // true is the default value returned by View.isVisibleToUserForAutofill()
+        }
+
+        default void onProvideContentCaptureStructure(
+                @NonNull @SuppressWarnings("unused") android.view.ViewStructure structure,
+                @SuppressWarnings("unused") int flags) {
         }
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();

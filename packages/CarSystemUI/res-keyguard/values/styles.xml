@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2017, The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License")
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The style for the volume icons in the volume dialog. This style makes the icon scale to
+         fit its container since auto wants the icon to be larger. The padding is added to make it
+         so the icon does not press along the edges of the dialog. -->
+    <style name="NumPadKeyButton">
+        <item name="android:layout_width">@dimen/num_pad_key_width</item>
+        <item name="android:layout_height">@dimen/num_pad_key_height</item>
+        <item name="android:layout_marginBottom">@dimen/num_pad_key_margin_bottom</item>
+        <item name="textView">@id/pinEntry</item>
+    </style>
+
+    <style name="NumPadKeyButton.MiddleColumn">
+        <item name="android:layout_marginStart">@dimen/num_pad_key_margin_horizontal</item>
+        <item name="android:layout_marginEnd">@dimen/num_pad_key_margin_horizontal</item>
+    </style>
+
+    <style name="NumPadKeyButton.LastRow">
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="NumPadKeyButton.LastRow.MiddleColumn">
+        <item name="android:layout_marginStart">@dimen/num_pad_key_margin_horizontal</item>
+        <item name="android:layout_marginEnd">@dimen/num_pad_key_margin_horizontal</item>
+    </style>
+
+    <style name="KeyguardButton" parent="@android:style/Widget.DeviceDefault.Button">
+        <item name="android:background">@drawable/keyguard_button_background</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Widget.TextView.NumPadKey" parent="@android:style/Widget.TextView">
+        <!-- Only replaces the text size. -->
+        <item name="android:textSize">@*android:dimen/car_body1_size</item>
+    </style>
+</resources>

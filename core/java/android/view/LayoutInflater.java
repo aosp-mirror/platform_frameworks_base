@@ -23,14 +23,18 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -40,14 +44,16 @@ import android.widget.FrameLayout;
 import com.android.internal.R;
 
 import dalvik.system.PathClassLoader;
-import java.io.File;
-import java.lang.reflect.Method;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Instantiates a layout XML file into its corresponding {@link android.view.View}
@@ -76,9 +82,11 @@ public abstract class LayoutInflater {
     private static final String TAG = LayoutInflater.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private static final String USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY
-        = "view.precompiled_layout_enabled";
     private static final String COMPILED_VIEW_DEX_FILE_NAME = "/compiled_view.dex";
+    /**
+     * Whether or not we use the precompiled layout.
+     */
+    private static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
 
     /** Empty stack trace used to avoid log spam in re-throw exceptions. */
     private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
@@ -87,11 +95,16 @@ public abstract class LayoutInflater {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected final Context mContext;
 
     // these are optional, set by the caller
-    @UnsupportedAppUsage
+    /**
+     * If any developer has desire to change this value, they should instead use
+     * {@link #cloneInContext(Context)} and set the new factory in thew newly-created
+     * LayoutInflater.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mFactorySet;
     @UnsupportedAppUsage
     private Factory mFactory;
@@ -108,14 +121,19 @@ public abstract class LayoutInflater {
     // The classloader includes the generated compiled_view.dex file.
     private ClassLoader mPrecompiledClassLoader;
 
-    @UnsupportedAppUsage
+    /**
+     * This is not a public API. Two APIs are now available to alleviate the need to access
+     * this directly: {@link #createView(Context, String, String, AttributeSet)} and
+     * {@link #onCreateView(Context, View, String, AttributeSet)}.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final Object[] mConstructorArgs = new Object[2];
 
     @UnsupportedAppUsage
     static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769490)
     private static final HashMap<String, Constructor<? extends View>> sConstructorMap =
             new HashMap<String, Constructor<? extends View>>();
 
@@ -171,7 +189,9 @@ public abstract class LayoutInflater {
          * @return View Newly created view. Return null for the default
          *         behavior.
          */
-        public View onCreateView(String name, Context context, AttributeSet attrs);
+        @Nullable
+        View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs);
     }
 
     public interface Factory2 extends Factory {
@@ -189,7 +209,9 @@ public abstract class LayoutInflater {
          * @return View Newly created view. Return null for the default
          *         behavior.
          */
-        public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
+        @Nullable
+        View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs);
     }
 
     private static class FactoryMerger implements Factory2 {
@@ -203,13 +225,17 @@ public abstract class LayoutInflater {
             mF22 = f22;
         }
 
-        public View onCreateView(String name, Context context, AttributeSet attrs) {
+        @Nullable
+        public View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs) {
             View v = mF1.onCreateView(name, context, attrs);
             if (v != null) return v;
             return mF2.onCreateView(name, context, attrs);
         }
 
-        public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        @Nullable
+        public View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs) {
             View v = mF12 != null ? mF12.onCreateView(parent, name, context, attrs)
                     : mF1.onCreateView(name, context, attrs);
             if (v != null) return v;
@@ -390,23 +416,36 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
-        initPrecompiledViews(
-                SystemProperties.getBoolean(USE_PRECOMPILED_LAYOUT_SYSTEM_PROPERTY, false));
+        // Precompiled layouts are not supported in this release.
+        boolean enabled = false;
+        initPrecompiledViews(enabled);
     }
 
     private void initPrecompiledViews(boolean enablePrecompiledViews) {
         mUseCompiledView = enablePrecompiledViews;
+
+        if (!mUseCompiledView) {
+            mPrecompiledClassLoader = null;
+            return;
+        }
+
+        // Make sure the application allows code generation
+        ApplicationInfo appInfo = mContext.getApplicationInfo();
+        if (appInfo.isEmbeddedDexUsed() || appInfo.isPrivilegedApp()) {
+            mUseCompiledView = false;
+            return;
+        }
+
+        // Try to load the precompiled layout file.
         try {
-            if (mUseCompiledView) {
-                mPrecompiledClassLoader = mContext.getClassLoader();
-                String dexFile = mContext.getCodeCacheDir() + COMPILED_VIEW_DEX_FILE_NAME;
-                if (new File(dexFile).exists()) {
-                    mPrecompiledClassLoader = new PathClassLoader(dexFile, mPrecompiledClassLoader);
-                } else {
-                    // If the precompiled layout file doesn't exist, then disable precompiled
-                    // layouts.
-                    mUseCompiledView = false;
-                }
+            mPrecompiledClassLoader = mContext.getClassLoader();
+            String dexFile = mContext.getCodeCacheDir() + COMPILED_VIEW_DEX_FILE_NAME;
+            if (new File(dexFile).exists()) {
+                mPrecompiledClassLoader = new PathClassLoader(dexFile, mPrecompiledClassLoader);
+            } else {
+                // If the precompiled layout file doesn't exist, then disable precompiled
+                // layouts.
+                mUseCompiledView = false;
             }
         } catch (Throwable e) {
             if (DEBUG) {
@@ -664,7 +703,8 @@ public abstract class LayoutInflater {
                 ie.setStackTrace(EMPTY_STACK_TRACE);
                 throw ie;
             } catch (Exception e) {
-                final InflateException ie = new InflateException(parser.getPositionDescription()
+                final InflateException ie = new InflateException(
+                        getParserStateDescription(inflaterContext, attrs)
                         + ": " + e.getMessage(), e);
                 ie.setStackTrace(EMPTY_STACK_TRACE);
                 throw ie;
@@ -677,6 +717,16 @@ public abstract class LayoutInflater {
             }
 
             return result;
+        }
+    }
+
+    private static String getParserStateDescription(Context context, AttributeSet attrs) {
+        int sourceResId = Resources.getAttributeSetSourceResId(attrs);
+        if (sourceResId == Resources.ID_NULL) {
+            return attrs.getPositionDescription();
+        } else {
+            return attrs.getPositionDescription() + " in "
+                    + context.getResources().getResourceName(sourceResId);
         }
     }
 
@@ -699,11 +749,11 @@ public abstract class LayoutInflater {
         } while (cl != null);
         return false;
     }
-
     /**
      * Low-level function for instantiating a view by name. This attempts to
      * instantiate a view class of the given <var>name</var> found in this
-     * LayoutInflater's ClassLoader.
+     * LayoutInflater's ClassLoader. To use an explicit Context in the View
+     * constructor, use {@link #createView(Context, String, String, AttributeSet)} instead.
      *
      * <p>
      * There are two things that can happen in an error case: either the
@@ -719,6 +769,37 @@ public abstract class LayoutInflater {
      */
     public final View createView(String name, String prefix, AttributeSet attrs)
             throws ClassNotFoundException, InflateException {
+        Context context = (Context) mConstructorArgs[0];
+        if (context == null) {
+            context = mContext;
+        }
+        return createView(context, name, prefix, attrs);
+    }
+
+    /**
+     * Low-level function for instantiating a view by name. This attempts to
+     * instantiate a view class of the given <var>name</var> found in this
+     * LayoutInflater's ClassLoader.
+     *
+     * <p>
+     * There are two things that can happen in an error case: either the
+     * exception describing the error will be thrown, or a null will be
+     * returned. You must deal with both possibilities -- the former will happen
+     * the first time createView() is called for a class of a particular name,
+     * the latter every time there-after for that class name.
+     *
+     * @param viewContext The context used as the context parameter of the View constructor
+     * @param name The full name of the class to be instantiated.
+     * @param attrs The XML attributes supplied for this instance.
+     *
+     * @return View The newly instantiated view, or null.
+     */
+    @Nullable
+    public final View createView(@NonNull Context viewContext, @NonNull String name,
+            @Nullable String prefix, @Nullable AttributeSet attrs)
+            throws ClassNotFoundException, InflateException {
+        Objects.requireNonNull(viewContext);
+        Objects.requireNonNull(name);
         Constructor<? extends View> constructor = sConstructorMap.get(name);
         if (constructor != null && !verifyClassLoader(constructor)) {
             constructor = null;
@@ -737,7 +818,7 @@ public abstract class LayoutInflater {
                 if (mFilter != null && clazz != null) {
                     boolean allowed = mFilter.onLoadClass(clazz);
                     if (!allowed) {
-                        failNotAllowed(name, prefix, attrs);
+                        failNotAllowed(name, prefix, viewContext, attrs);
                     }
                 }
                 constructor = clazz.getConstructor(mConstructorSignature);
@@ -756,40 +837,41 @@ public abstract class LayoutInflater {
                         boolean allowed = clazz != null && mFilter.onLoadClass(clazz);
                         mFilterMap.put(name, allowed);
                         if (!allowed) {
-                            failNotAllowed(name, prefix, attrs);
+                            failNotAllowed(name, prefix, viewContext, attrs);
                         }
                     } else if (allowedState.equals(Boolean.FALSE)) {
-                        failNotAllowed(name, prefix, attrs);
+                        failNotAllowed(name, prefix, viewContext, attrs);
                     }
                 }
             }
 
             Object lastContext = mConstructorArgs[0];
-            if (mConstructorArgs[0] == null) {
-                // Fill in the context if not already within inflation.
-                mConstructorArgs[0] = mContext;
-            }
+            mConstructorArgs[0] = viewContext;
             Object[] args = mConstructorArgs;
             args[1] = attrs;
 
-            final View view = constructor.newInstance(args);
-            if (view instanceof ViewStub) {
-                // Use the same context when inflating ViewStub later.
-                final ViewStub viewStub = (ViewStub) view;
-                viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
+            try {
+                final View view = constructor.newInstance(args);
+                if (view instanceof ViewStub) {
+                    // Use the same context when inflating ViewStub later.
+                    final ViewStub viewStub = (ViewStub) view;
+                    viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
+                }
+                return view;
+            } finally {
+                mConstructorArgs[0] = lastContext;
             }
-            mConstructorArgs[0] = lastContext;
-            return view;
-
         } catch (NoSuchMethodException e) {
-            final InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(
+                    getParserStateDescription(viewContext, attrs)
                     + ": Error inflating class " + (prefix != null ? (prefix + name) : name), e);
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
 
         } catch (ClassCastException e) {
             // If loaded class is not a View subclass
-            final InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(
+                    getParserStateDescription(viewContext, attrs)
                     + ": Class is not a View " + (prefix != null ? (prefix + name) : name), e);
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
@@ -798,7 +880,7 @@ public abstract class LayoutInflater {
             throw e;
         } catch (Exception e) {
             final InflateException ie = new InflateException(
-                    attrs.getPositionDescription() + ": Error inflating class "
+                    getParserStateDescription(viewContext, attrs) + ": Error inflating class "
                             + (clazz == null ? "<unknown>" : clazz.getName()), e);
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
@@ -810,8 +892,8 @@ public abstract class LayoutInflater {
     /**
      * Throw an exception because the specified class is not allowed to be inflated.
      */
-    private void failNotAllowed(String name, String prefix, AttributeSet attrs) {
-        throw new InflateException(attrs.getPositionDescription()
+    private void failNotAllowed(String name, String prefix, Context context, AttributeSet attrs) {
+        throw new InflateException(getParserStateDescription(context, attrs)
                 + ": Class not allowed to be inflated "+ (prefix != null ? (prefix + name) : name));
     }
 
@@ -846,6 +928,26 @@ public abstract class LayoutInflater {
     protected View onCreateView(View parent, String name, AttributeSet attrs)
             throws ClassNotFoundException {
         return onCreateView(name, attrs);
+    }
+
+    /**
+     * Version of {@link #onCreateView(View, String, AttributeSet)} that also
+     * takes the inflation context.  The default
+     * implementation simply calls {@link #onCreateView(View, String, AttributeSet)}.
+     *
+     * @param viewContext The Context to be used as a constructor parameter for the View
+     * @param parent The future parent of the returned view.  <em>Note that
+     * this may be null.</em>
+     * @param name The fully qualified class name of the View to be create.
+     * @param attrs An AttributeSet of attributes to apply to the View.
+     *
+     * @return View The View created.
+     */
+    @Nullable
+    public View onCreateView(@NonNull Context viewContext, @Nullable View parent,
+            @NonNull String name, @Nullable AttributeSet attrs)
+            throws ClassNotFoundException {
+        return onCreateView(parent, name, attrs);
     }
 
     /**
@@ -899,9 +1001,9 @@ public abstract class LayoutInflater {
                 mConstructorArgs[0] = context;
                 try {
                     if (-1 == name.indexOf('.')) {
-                        view = onCreateView(parent, name, attrs);
+                        view = onCreateView(context, parent, name, attrs);
                     } else {
-                        view = createView(name, null, attrs);
+                        view = createView(context, name, null, attrs);
                     }
                 } finally {
                     mConstructorArgs[0] = lastContext;
@@ -913,13 +1015,15 @@ public abstract class LayoutInflater {
             throw e;
 
         } catch (ClassNotFoundException e) {
-            final InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(
+                    getParserStateDescription(context, attrs)
                     + ": Error inflating class " + name, e);
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
 
         } catch (Exception e) {
-            final InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(
+                    getParserStateDescription(context, attrs)
                     + ": Error inflating class " + name, e);
             ie.setStackTrace(EMPTY_STACK_TRACE);
             throw ie;
@@ -1115,8 +1219,8 @@ public abstract class LayoutInflater {
                 }
 
                 if (type != XmlPullParser.START_TAG) {
-                    throw new InflateException(childParser.getPositionDescription() +
-                        ": No start tag found!");
+                    throw new InflateException(getParserStateDescription(context, childAttrs)
+                            + ": No start tag found!");
                 }
 
                 final String childName = childParser.getName();

@@ -16,15 +16,15 @@
 
 package android.widget.focus;
 
-import android.widget.focus.FocusAfterRemoval;
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * {@link FocusAfterRemoval} is set up to exercise cases where the views that

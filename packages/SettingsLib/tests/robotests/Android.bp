@@ -26,15 +26,28 @@ android_app {
     resource_dirs: ["res"],
 }
 
-//############################################
-// SettingsLib Robolectric test target.      #
-//############################################
+//###########################################################
+// SettingsLib Robolectric test target.                     #
+//###########################################################
 android_robolectric_test {
     name: "SettingsLibRoboTests",
     srcs: ["src/**/*.java"],
     java_resource_dirs: ["config"],
     instrumentation_for: "SettingsLibShell",
+    coverage_libs: ["SettingsLib"],
     test_options: {
         timeout: 36000,
     },
+}
+
+java_library {
+    name: "SettingsLib-robo-testutils",
+    srcs: [
+        "src/com/android/settingslib/testutils/**/*.java",
+    ],
+
+    libs: [
+        "Robolectric_all-target",
+        "truth-prebuilt",
+    ],
 }

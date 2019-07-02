@@ -21,7 +21,6 @@ import static android.app.ActivityManager.TaskDescription;
 import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -32,9 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,7 +53,9 @@ public class WorkLockActivity extends Activity {
      */
     static final String EXTRA_TASK_DESCRIPTION =
             "com.android.systemui.keyguard.extra.TASK_DESCRIPTION";
-  
+
+    private static final int REQUEST_CODE_CONFIRM_CREDENTIALS = 1;
+
     /**
      * Cached keyguard manager instance populated by {@link #getKeyguardManager}.
      * @see KeyguardManager
@@ -111,7 +110,6 @@ public class WorkLockActivity extends Activity {
     @Override
     public void onBackPressed() {
         // Ignore back presses.
-        return;
     }
 
     @Override
@@ -151,26 +149,26 @@ public class WorkLockActivity extends Activity {
                 PendingIntent.FLAG_ONE_SHOT |
                 PendingIntent.FLAG_IMMUTABLE, options.toBundle());
 
-        credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
-        try {
-            ActivityManager.getService().startConfirmDeviceCredentialIntent(credential,
-                    getChallengeOptions().toBundle());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to start confirm credential intent", e);
+        if (target != null) {
+            credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
+        }
+
+        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_CONFIRM_CREDENTIALS &&  resultCode != RESULT_OK) {
+            // The user dismissed the challenge, don't show it again.
+            goToHomeScreen();
         }
     }
 
-    private ActivityOptions getChallengeOptions() {
-        // If we are taking up the whole screen, just use the default animation of clipping the
-        // credentials activity into the entire foreground.
-        if (!isInMultiWindowMode()) {
-            return ActivityOptions.makeBasic();
-        }
-
-        // Otherwise, animate the transition from this part of the screen to fullscreen
-        // using our own decor as the starting position.
-        final View view = getWindow().getDecorView();
-        return ActivityOptions.makeScaleUpAnimation(view, 0, 0, view.getWidth(), view.getHeight());
+    private void goToHomeScreen() {
+        final Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(homeIntent);
     }
 
     private KeyguardManager getKeyguardManager() {

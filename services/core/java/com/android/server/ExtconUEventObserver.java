@@ -22,8 +22,11 @@ import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * A specialized UEventObserver that receives UEvents from the kernel for devices in the {@code
@@ -40,13 +43,14 @@ import java.util.Map;
  * time in that process. Once started the UEvent thread will not stop (although it can stop
  * notifying UEventObserver's via stopObserving()).
  *
- * <p>
- *
  * @hide
  */
 public abstract class ExtconUEventObserver extends UEventObserver {
     private static final String TAG = "ExtconUEventObserver";
     private static final boolean LOG = false;
+    private static final String SELINUX_POLICIES_NEED_TO_BE_CHANGED =
+            "This probably means the selinux policies need to be changed.";
+
     private final Map<String, ExtconInfo> mExtconInfos = new ArrayMap<>();
 
     @Override
@@ -64,20 +68,55 @@ public abstract class ExtconUEventObserver extends UEventObserver {
      * Subclasses of ExtconUEventObserver should override this method to handle UEvents.
      *
      * @param extconInfo that matches the {@code DEVPATH} of {@code event}
-     * @param event the event
+     * @param event      the event
      */
     protected abstract void onUEvent(ExtconInfo extconInfo, UEvent event);
 
     /** Starts observing {@link ExtconInfo#getDevicePath()}. */
     public void startObserving(ExtconInfo extconInfo) {
-        mExtconInfos.put(extconInfo.getDevicePath(), extconInfo);
-        if (LOG) Slog.v(TAG, "Observing  " + extconInfo.getDevicePath());
-        startObserving("DEVPATH=" + extconInfo.getDevicePath());
+        String devicePath = extconInfo.getDevicePath();
+        if (devicePath == null) {
+            Slog.wtf(TAG, "Unable to start observing  " + extconInfo.getName()
+                    + " because the device path is null. " + SELINUX_POLICIES_NEED_TO_BE_CHANGED);
+        } else {
+            mExtconInfos.put(devicePath, extconInfo);
+            if (LOG) Slog.v(TAG, "Observing  " + devicePath);
+            startObserving("DEVPATH=" + devicePath);
+        }
     }
 
     /** An External Connection to watch. */
     public static final class ExtconInfo {
         private static final String TAG = "ExtconInfo";
+
+        /** Returns a new list of all external connections whose name matches {@code regex}. */
+        public static List<ExtconInfo> getExtconInfos(@Nullable String regex) {
+            if (!extconExists()) {
+                return new ArrayList<>(0);  // Always return a new list.
+            }
+            Pattern p = regex == null ? null : Pattern.compile(regex);
+            File file = new File("/sys/class/extcon");
+            File[] files = file.listFiles();
+            if (files == null) {
+                Slog.wtf(TAG, file + " exists " + file.exists() + " isDir " + file.isDirectory()
+                        + " but listFiles returns null. "
+                        + SELINUX_POLICIES_NEED_TO_BE_CHANGED);
+                return new ArrayList<>(0);  // Always return a new list.
+            } else {
+                ArrayList list = new ArrayList(files.length);
+                for (File f : files) {
+                    String name = f.getName();
+                    if (p == null || p.matcher(name).matches()) {
+                        ExtconInfo uei = new ExtconInfo(name);
+                        list.add(uei);
+                        if (LOG) Slog.d(TAG, name + " matches " + regex);
+                    } else {
+                        if (LOG) Slog.d(TAG, name + " does not match " + regex);
+                    }
+                }
+                return list;
+            }
+        }
 
         private final String mName;
 
@@ -120,7 +159,13 @@ public abstract class ExtconUEventObserver extends UEventObserver {
         }
     }
 
-    /** Does the {@link /sys/class/extcon} directory exist */
+    /** Does the {@code /sys/class/extcon/<name>} directory exist */
+    public static boolean namedExtconDirExists(String name) {
+        File extconDir = new File("/sys/class/extcon/" + name);
+        return extconDir.exists() && extconDir.isDirectory();
+    }
+
+    /** Does the {@code /sys/class/extcon} directory exist */
     public static boolean extconExists() {
         File extconDir = new File("/sys/class/extcon");
         return extconDir.exists() && extconDir.isDirectory();

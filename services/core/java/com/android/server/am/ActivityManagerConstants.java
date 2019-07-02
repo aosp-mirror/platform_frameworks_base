@@ -16,25 +16,32 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
+
+import android.app.ActivityThread;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.OnPropertiesChangedListener;
+import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
 import java.io.PrintWriter;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
-
 /**
  * Settings constants that can modify the activity manager's behavior.
  */
 final class ActivityManagerConstants extends ContentObserver {
+    private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
@@ -64,9 +71,11 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_SERVICE_MIN_RESTART_TIME_BETWEEN = "service_min_restart_time_between";
     static final String KEY_MAX_SERVICE_INACTIVITY = "service_max_inactivity";
     static final String KEY_BG_START_TIMEOUT = "service_bg_start_timeout";
+    static final String KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT = "service_bg_activity_start_timeout";
     static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
     static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
+    static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -93,10 +102,27 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_SERVICE_MIN_RESTART_TIME_BETWEEN = 10*1000;
     private static final long DEFAULT_MAX_SERVICE_INACTIVITY = 30*60*1000;
     private static final long DEFAULT_BG_START_TIMEOUT = 15*1000;
+    private static final long DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT = 10_000;
     private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
     private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
+    private static final long DEFAULT_MEMORY_INFO_THROTTLE_TIME = 5*60*1000;
     private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
+
+    // Flag stored in the DeviceConfig API.
+    /**
+     * Maximum number of cached processes.
+     */
+    private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+
+    /**
+     * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
+     * Settings.Global. This allows it to be set experimentally unless it has been
+     * enabled/disabled in developer options. Defaults to false.
+     */
+    private static final String KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED =
+            "default_background_activity_starts_enabled";
+
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -199,6 +225,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // allowing the next pending start to run.
     public long BG_START_TIMEOUT = DEFAULT_BG_START_TIMEOUT;
 
+    // For how long after a whitelisted service's start its process can start a background activity
+    public long SERVICE_BG_ACTIVITY_START_TIMEOUT = DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT;
+
     // Initial backoff delay for retrying bound foreground services
     public long BOUND_SERVICE_CRASH_RESTART_DURATION = DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION;
 
@@ -208,13 +237,22 @@ final class ActivityManagerConstants extends ContentObserver {
     // Indicates if the processes need to be started asynchronously.
     public boolean FLAG_PROCESS_START_ASYNC = DEFAULT_PROCESS_START_ASYNC;
 
+    // The minimum time we allow between requests for the MemoryInfo of a process to
+    // throttle requests from apps.
+    public long MEMORY_INFO_THROTTLE_TIME = DEFAULT_MEMORY_INFO_THROTTLE_TIME;
+
     // Allow app just moving from TOP to FOREGROUND_SERVICE to stay in a higher adj value for
     // this long.
     public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
-    boolean mFlagActivityStartsLoggingEnabled;
+    volatile boolean mFlagActivityStartsLoggingEnabled;
+
+    // Indicates whether the background activity starts is enabled.
+    // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
+    // If not set explicitly the default is controlled by DeviceConfig.
+    volatile boolean mFlagBackgroundActivityStartsEnabled;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -244,24 +282,78 @@ final class ActivityManagerConstants extends ContentObserver {
     // memory trimming.
     public int CUR_TRIM_CACHED_PROCESSES;
 
+    private static final long MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES = 100 * 1024; // 100 KB
+
+    private final boolean mSystemServerAutomaticHeapDumpEnabled;
+
+    /** Package to report to when the memory usage exceeds the limit. */
+    private final String mSystemServerAutomaticHeapDumpPackageName;
+
+    /** Byte limit for dump heap monitoring. */
+    private long mSystemServerAutomaticHeapDumpPssThresholdBytes;
+
     private static final Uri ACTIVITY_MANAGER_CONSTANTS_URI = Settings.Global.getUriFor(
                 Settings.Global.ACTIVITY_MANAGER_CONSTANTS);
 
     private static final Uri ACTIVITY_STARTS_LOGGING_ENABLED_URI = Settings.Global.getUriFor(
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED);
 
-    public ActivityManagerConstants(ActivityManagerService service, Handler handler) {
+    private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
+            Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
+
+    private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
+            new OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(Properties properties) {
+                    for (String name : properties.getKeyset()) {
+                        if (name == null) {
+                            return;
+                        }
+                        switch (name) {
+                            case KEY_MAX_CACHED_PROCESSES:
+                                updateMaxCachedProcesses();
+                                break;
+                            case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
+                                updateBackgroundActivityStarts();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            };
+
+    ActivityManagerConstants(Context context, ActivityManagerService service, Handler handler) {
         super(handler);
         mService = service;
-        updateMaxCachedProcesses();
+        mSystemServerAutomaticHeapDumpEnabled = Build.IS_DEBUGGABLE
+                && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_debugEnableAutomaticSystemServerHeapDumps);
+        mSystemServerAutomaticHeapDumpPackageName = context.getPackageName();
+        mSystemServerAutomaticHeapDumpPssThresholdBytes = Math.max(
+                MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES,
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_debugSystemServerPssThresholdBytes));
     }
 
     public void start(ContentResolver resolver) {
         mResolver = resolver;
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
+        if (mSystemServerAutomaticHeapDumpEnabled) {
+            mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
+                    false, this);
+        }
         updateConstants();
+        if (mSystemServerAutomaticHeapDumpEnabled) {
+            updateEnableAutomaticSystemServerHeapDumps();
+        }
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mOnDeviceConfigChangedListener);
+        updateMaxCachedProcesses();
         updateActivityStartsLoggingEnabled();
+        updateBackgroundActivityStarts();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -284,6 +376,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateConstants();
         } else if (ACTIVITY_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
             updateActivityStartsLoggingEnabled();
+        } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
+            updateEnableAutomaticSystemServerHeapDumps();
         }
     }
 
@@ -298,8 +392,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 // with defaults.
                 Slog.e("ActivityManagerConstants", "Bad activity manager config settings", e);
             }
-            MAX_CACHED_PROCESSES = mParser.getInt(KEY_MAX_CACHED_PROCESSES,
-                    DEFAULT_MAX_CACHED_PROCESSES);
             BACKGROUND_SETTLE_TIME = mParser.getLong(KEY_BACKGROUND_SETTLE_TIME,
                     DEFAULT_BACKGROUND_SETTLE_TIME);
             FGSERVICE_MIN_SHOWN_TIME = mParser.getLong(KEY_FGSERVICE_MIN_SHOWN_TIME,
@@ -346,6 +438,9 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MAX_SERVICE_INACTIVITY);
             BG_START_TIMEOUT = mParser.getLong(KEY_BG_START_TIMEOUT,
                     DEFAULT_BG_START_TIMEOUT);
+            SERVICE_BG_ACTIVITY_START_TIMEOUT = mParser.getLong(
+                    KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT,
+                    DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT);
             BOUND_SERVICE_CRASH_RESTART_DURATION = mParser.getLong(
                 KEY_BOUND_SERVICE_CRASH_RESTART_DURATION,
                 DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION);
@@ -353,8 +448,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY);
             FLAG_PROCESS_START_ASYNC = mParser.getBoolean(KEY_PROCESS_START_ASYNC,
                     DEFAULT_PROCESS_START_ASYNC);
+            MEMORY_INFO_THROTTLE_TIME = mParser.getLong(KEY_MEMORY_INFO_THROTTLE_TIME,
+                    DEFAULT_MEMORY_INFO_THROTTLE_TIME);
             TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
                     DEFAULT_TOP_TO_FGS_GRACE_DURATION);
+
+            // For new flags that are intended for server-side experiments, please use the new
+            // DeviceConfig package.
 
             updateMaxCachedProcesses();
         }
@@ -362,12 +462,48 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private void updateActivityStartsLoggingEnabled() {
         mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
-                Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 0) == 1;
+                Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
+    }
+
+    private void updateBackgroundActivityStarts() {
+        mFlagBackgroundActivityStartsEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED,
+                /*defaultValue*/ false);
+    }
+
+    private void updateEnableAutomaticSystemServerHeapDumps() {
+        if (!mSystemServerAutomaticHeapDumpEnabled) {
+            Slog.wtf(TAG,
+                    "updateEnableAutomaticSystemServerHeapDumps called when leak detection "
+                            + "disabled");
+            return;
+        }
+        // Monitoring is on by default, so if the setting hasn't been set by the user,
+        // monitoring should be on.
+        final boolean enabled = Settings.Global.getInt(mResolver,
+                Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS, 1) == 1;
+
+        // Setting the threshold to 0 stops the checking.
+        final long threshold = enabled ? mSystemServerAutomaticHeapDumpPssThresholdBytes : 0;
+        mService.setDumpHeapDebugLimit(null, 0, threshold,
+                mSystemServerAutomaticHeapDumpPackageName);
     }
 
     private void updateMaxCachedProcesses() {
-        CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
-                ? MAX_CACHED_PROCESSES : mOverrideMaxCachedProcesses;
+        String maxCachedProcessesFlag = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MAX_CACHED_PROCESSES);
+        try {
+            CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
+                    ? (TextUtils.isEmpty(maxCachedProcessesFlag)
+                    ? DEFAULT_MAX_CACHED_PROCESSES : Integer.parseInt(maxCachedProcessesFlag))
+                    : mOverrideMaxCachedProcesses;
+        } catch (NumberFormatException e) {
+            // Bad flag value from Phenotype, revert to default.
+            Slog.e(TAG,
+                    "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
+            CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+        }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
         // Note the trim levels do NOT depend on the override process limit, we want
@@ -430,6 +566,16 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_SERVICE_INACTIVITY);
         pw.print("  "); pw.print(KEY_BG_START_TIMEOUT); pw.print("=");
         pw.println(BG_START_TIMEOUT);
+        pw.print("  "); pw.print(KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT); pw.print("=");
+        pw.println(SERVICE_BG_ACTIVITY_START_TIMEOUT);
+        pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_RESTART_DURATION); pw.print("=");
+        pw.println(BOUND_SERVICE_CRASH_RESTART_DURATION);
+        pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_MAX_RETRY); pw.print("=");
+        pw.println(BOUND_SERVICE_MAX_CRASH_RETRY);
+        pw.print("  "); pw.print(KEY_PROCESS_START_ASYNC); pw.print("=");
+        pw.println(FLAG_PROCESS_START_ASYNC);
+        pw.print("  "); pw.print(KEY_MEMORY_INFO_THROTTLE_TIME); pw.print("=");
+        pw.println(MEMORY_INFO_THROTTLE_TIME);
         pw.print("  "); pw.print(KEY_TOP_TO_FGS_GRACE_DURATION); pw.print("=");
         pw.println(TOP_TO_FGS_GRACE_DURATION);
 

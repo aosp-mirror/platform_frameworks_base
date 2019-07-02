@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
+
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.os.Handler;
@@ -24,6 +26,7 @@ import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.KeyValueSettingObserver;
 import android.util.Slog;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -32,7 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * <p>The backup manager constants are encoded as a key value list separated by commas and stored as
  * a Settings.Secure.
  */
-class BackupManagerConstants extends KeyValueSettingObserver {
+public class BackupManagerConstants extends KeyValueSettingObserver {
     private static final String TAG = "BackupManagerConstants";
     private static final String SETTING = Settings.Secure.BACKUP_MANAGER_CONSTANTS;
 
@@ -151,7 +154,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     // group the calls of these methods in a block syncrhonized on
     // a reference of this object.
     public synchronized long getKeyValueBackupIntervalMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getKeyValueBackupIntervalMilliseconds(...) returns "
@@ -161,7 +164,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public synchronized long getKeyValueBackupFuzzMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getKeyValueBackupFuzzMilliseconds(...) returns "
@@ -171,7 +174,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public synchronized boolean getKeyValueBackupRequireCharging() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getKeyValueBackupRequireCharging(...) returns "
@@ -181,7 +184,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public synchronized int getKeyValueBackupRequiredNetworkType() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getKeyValueBackupRequiredNetworkType(...) returns "
@@ -191,7 +194,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public synchronized long getFullBackupIntervalMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getFullBackupIntervalMilliseconds(...) returns "
@@ -201,14 +204,14 @@ class BackupManagerConstants extends KeyValueSettingObserver {
     }
 
     public synchronized boolean getFullBackupRequireCharging() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(TAG, "getFullBackupRequireCharging(...) returns " + mFullBackupRequireCharging);
         }
         return mFullBackupRequireCharging;
     }
 
     public synchronized int getFullBackupRequiredNetworkType() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getFullBackupRequiredNetworkType(...) returns "
@@ -219,7 +222,7 @@ class BackupManagerConstants extends KeyValueSettingObserver {
 
     /** Returns an array of package names that should be notified whenever a backup finishes. */
     public synchronized String[] getBackupFinishedNotificationReceivers() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (DEBUG_SCHEDULING) {
             Slog.v(
                     TAG,
                     "getBackupFinishedNotificationReceivers(...) returns "

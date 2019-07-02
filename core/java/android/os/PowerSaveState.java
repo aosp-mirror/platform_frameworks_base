@@ -19,7 +19,7 @@ package android.os;
  * Data class for battery saver state. It contains the data
  * <p>
  * 1. Whether battery saver mode is enabled
- * 2. Specific parameters to use in battery saver mode(i.e. screen brightness, gps mode)
+ * 2. Specific parameters to use in battery saver mode (i.e. screen brightness, location mode)
  *
  * @hide
  */
@@ -27,7 +27,7 @@ public class PowerSaveState implements Parcelable {
     /**
      * Whether we should enable battery saver for this service.
      *
-     * @see com.android.server.power.BatterySaverPolicy
+     * @see com.android.server.power.batterysaver.BatterySaverPolicy
      */
     public final boolean batterySaverEnabled;
     /**
@@ -35,12 +35,12 @@ public class PowerSaveState implements Parcelable {
      * {@link PowerManager#isPowerSaveMode()}
      */
     public final boolean globalBatterySaverEnabled;
-    public final int gpsMode;
+    public final int locationMode;
     public final float brightnessFactor;
 
     public PowerSaveState(Builder builder) {
         batterySaverEnabled = builder.mBatterySaverEnabled;
-        gpsMode = builder.mGpsMode;
+        locationMode = builder.mLocationMode;
         brightnessFactor = builder.mBrightnessFactor;
         globalBatterySaverEnabled = builder.mGlobalBatterySaverEnabled;
     }
@@ -48,7 +48,7 @@ public class PowerSaveState implements Parcelable {
     public PowerSaveState(Parcel in) {
         batterySaverEnabled = in.readByte() != 0;
         globalBatterySaverEnabled = in.readByte() != 0;
-        gpsMode = in.readInt();
+        locationMode = in.readInt();
         brightnessFactor = in.readFloat();
     }
 
@@ -61,14 +61,14 @@ public class PowerSaveState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (batterySaverEnabled ? 1 : 0));
         dest.writeByte((byte) (globalBatterySaverEnabled ? 1 : 0));
-        dest.writeInt(gpsMode);
+        dest.writeInt(locationMode);
         dest.writeFloat(brightnessFactor);
     }
 
     public static final class Builder {
         private boolean mBatterySaverEnabled = false;
         private boolean mGlobalBatterySaverEnabled = false;
-        private int mGpsMode = 0;
+        private int mLocationMode = 0;
         private float mBrightnessFactor = 0.5f;
 
         public Builder() {}
@@ -83,8 +83,8 @@ public class PowerSaveState implements Parcelable {
             return this;
         }
 
-        public Builder setGpsMode(int mode) {
-            mGpsMode = mode;
+        public Builder setLocationMode(int mode) {
+            mLocationMode = mode;
             return this;
         }
 

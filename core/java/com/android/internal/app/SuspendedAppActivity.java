@@ -16,12 +16,17 @@
 
 package com.android.internal.app;
 
+import static android.content.res.Resources.ID_NULL;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SuspendDialogInfo;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -31,16 +36,19 @@ import com.android.internal.R;
 
 public class SuspendedAppActivity extends AlertActivity
         implements DialogInterface.OnClickListener {
-    private static final String TAG = "SuspendedAppActivity";
-    public static final String EXTRA_SUSPENDED_PACKAGE =
-            "SuspendedAppActivity.extra.SUSPENDED_PACKAGE";
+    private static final String TAG = SuspendedAppActivity.class.getSimpleName();
+    private static final String PACKAGE_NAME = "com.android.internal.app";
+
+    public static final String EXTRA_SUSPENDED_PACKAGE = PACKAGE_NAME + ".extra.SUSPENDED_PACKAGE";
     public static final String EXTRA_SUSPENDING_PACKAGE =
-            "SuspendedAppActivity.extra.SUSPENDING_PACKAGE";
-    public static final String EXTRA_DIALOG_MESSAGE = "SuspendedAppActivity.extra.DIALOG_MESSAGE";
+            PACKAGE_NAME + ".extra.SUSPENDING_PACKAGE";
+    public static final String EXTRA_DIALOG_INFO = PACKAGE_NAME + ".extra.DIALOG_INFO";
 
     private Intent mMoreDetailsIntent;
     private int mUserId;
     private PackageManager mPm;
+    private Resources mSuspendingAppResources;
+    private SuspendDialogInfo mSuppliedDialogInfo;
 
     private CharSequence getAppLabel(String packageName) {
         try {
@@ -66,6 +74,65 @@ public class SuspendedAppActivity extends AlertActivity
         return null;
     }
 
+    private Drawable resolveIcon() {
+        final int iconId = (mSuppliedDialogInfo != null) ? mSuppliedDialogInfo.getIconResId()
+                : ID_NULL;
+        if (iconId != ID_NULL && mSuspendingAppResources != null) {
+            try {
+                return mSuspendingAppResources.getDrawable(iconId, getTheme());
+            } catch (Resources.NotFoundException nfe) {
+                Slog.e(TAG, "Could not resolve drawable resource id " + iconId);
+            }
+        }
+        return null;
+    }
+
+    private String resolveTitle() {
+        final int titleId = (mSuppliedDialogInfo != null) ? mSuppliedDialogInfo.getTitleResId()
+                : ID_NULL;
+        if (titleId != ID_NULL && mSuspendingAppResources != null) {
+            try {
+                return mSuspendingAppResources.getString(titleId);
+            } catch (Resources.NotFoundException nfe) {
+                Slog.e(TAG, "Could not resolve string resource id " + titleId);
+            }
+        }
+        return getString(R.string.app_suspended_title);
+    }
+
+    private String resolveDialogMessage(String suspendingPkg, String suspendedPkg) {
+        final CharSequence suspendedAppLabel = getAppLabel(suspendedPkg);
+        if (mSuppliedDialogInfo != null) {
+            final int messageId = mSuppliedDialogInfo.getDialogMessageResId();
+            final String message = mSuppliedDialogInfo.getDialogMessage();
+            if (messageId != ID_NULL && mSuspendingAppResources != null) {
+                try {
+                    return mSuspendingAppResources.getString(messageId, suspendedAppLabel);
+                } catch (Resources.NotFoundException nfe) {
+                    Slog.e(TAG, "Could not resolve string resource id " + messageId);
+                }
+            } else if (message != null) {
+                return String.format(getResources().getConfiguration().getLocales().get(0), message,
+                        suspendedAppLabel);
+            }
+        }
+        return getString(R.string.app_suspended_default_message, suspendedAppLabel,
+                getAppLabel(suspendingPkg));
+    }
+
+    private String resolveNeutralButtonText() {
+        final int buttonTextId = (mSuppliedDialogInfo != null)
+                ? mSuppliedDialogInfo.getNeutralButtonTextResId() : ID_NULL;
+        if (buttonTextId != ID_NULL && mSuspendingAppResources != null) {
+            try {
+                return mSuspendingAppResources.getString(buttonTextId);
+            } catch (Resources.NotFoundException nfe) {
+                Slog.e(TAG, "Could not resolve string resource id " + buttonTextId);
+            }
+        }
+        return getString(R.string.app_suspended_more_details);
+    }
+
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -79,26 +146,26 @@ public class SuspendedAppActivity extends AlertActivity
             finish();
             return;
         }
-        final String suppliedMessage = intent.getStringExtra(EXTRA_DIALOG_MESSAGE);
         final String suspendedPackage = intent.getStringExtra(EXTRA_SUSPENDED_PACKAGE);
         final String suspendingPackage = intent.getStringExtra(EXTRA_SUSPENDING_PACKAGE);
-        final CharSequence suspendedAppLabel = getAppLabel(suspendedPackage);
-        final CharSequence dialogMessage;
-        if (suppliedMessage == null) {
-            dialogMessage = getString(R.string.app_suspended_default_message, suspendedAppLabel,
-                    getAppLabel(suspendingPackage));
-        } else {
-            dialogMessage = String.format(getResources().getConfiguration().getLocales().get(0),
-                    suppliedMessage, suspendedAppLabel);
+        mSuppliedDialogInfo = intent.getParcelableExtra(EXTRA_DIALOG_INFO);
+        if (mSuppliedDialogInfo != null) {
+            try {
+                mSuspendingAppResources = mPm.getResourcesForApplicationAsUser(suspendingPackage,
+                        mUserId);
+            } catch (PackageManager.NameNotFoundException ne) {
+                Slog.e(TAG, "Could not find resources for " + suspendingPackage, ne);
+            }
         }
 
         final AlertController.AlertParams ap = mAlertParams;
-        ap.mTitle = getString(R.string.app_suspended_title);
-        ap.mMessage = dialogMessage;
+        ap.mIcon = resolveIcon();
+        ap.mTitle = resolveTitle();
+        ap.mMessage = resolveDialogMessage(suspendingPackage, suspendedPackage);
         ap.mPositiveButtonText = getString(android.R.string.ok);
         mMoreDetailsIntent = getMoreDetailsActivity(suspendingPackage, suspendedPackage, mUserId);
         if (mMoreDetailsIntent != null) {
-            ap.mNeutralButtonText = getString(R.string.app_suspended_more_details);
+            ap.mNeutralButtonText = resolveNeutralButtonText();
         }
         ap.mPositiveButtonListener = ap.mNeutralButtonListener = this;
         setupAlert();
@@ -116,11 +183,11 @@ public class SuspendedAppActivity extends AlertActivity
     }
 
     public static Intent createSuspendedAppInterceptIntent(String suspendedPackage,
-            String suspendingPackage, String dialogMessage, int userId) {
+            String suspendingPackage, SuspendDialogInfo dialogInfo, int userId) {
         return new Intent()
                 .setClassName("android", SuspendedAppActivity.class.getName())
                 .putExtra(EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
-                .putExtra(EXTRA_DIALOG_MESSAGE, dialogMessage)
+                .putExtra(EXTRA_DIALOG_INFO, dialogInfo)
                 .putExtra(EXTRA_SUSPENDING_PACKAGE, suspendingPackage)
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK

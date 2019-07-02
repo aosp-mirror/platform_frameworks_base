@@ -16,6 +16,10 @@
 
 package com.android.internal.accessibility;
 
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+
+import static com.android.internal.util.ArrayUtils.convertToLongArray;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -34,22 +38,22 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-
 import android.widget.Toast;
+
 import com.android.internal.R;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
-
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-
-import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
 /**
  * Class to help manage the accessibility shortcut
@@ -70,6 +74,7 @@ public class AccessibilityShortcutController {
     private static Map<ComponentName, ToggleableFrameworkFeatureInfo> sFrameworkShortcutFeaturesMap;
 
     private final Context mContext;
+    private final Handler mHandler;
     private AlertDialog mAlertDialog;
     private boolean mIsShortcutEnabled;
     private boolean mEnabledOnLockScreen;
@@ -123,6 +128,7 @@ public class AccessibilityShortcutController {
 
     public AccessibilityShortcutController(Context context, Handler handler, int initialUserId) {
         mContext = context;
+        mHandler = handler;
         mUserId = initialUserId;
 
         // Keep track of state of shortcut settings
@@ -189,22 +195,6 @@ public class AccessibilityShortcutController {
         final int userId = ActivityManager.getCurrentUser();
         final int dialogAlreadyShown = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId);
-        // Use USAGE_ASSISTANCE_ACCESSIBILITY for TVs to ensure that TVs play the ringtone as they
-        // have less ways of providing feedback like vibration.
-        final int audioAttributesUsage = hasFeatureLeanback()
-                ? AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
-                : AudioAttributes.USAGE_NOTIFICATION_EVENT;
-
-        // Play a notification tone
-        final Ringtone tone =
-                RingtoneManager.getRingtone(mContext, Settings.System.DEFAULT_NOTIFICATION_URI);
-        if (tone != null) {
-            tone.setAudioAttributes(new AudioAttributes.Builder()
-                .setUsage(audioAttributesUsage)
-                .build());
-            tone.play();
-        }
-
         // Play a notification vibration
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         if ((vibrator != null) && vibrator.hasVibrator()) {
@@ -223,6 +213,9 @@ public class AccessibilityShortcutController {
             if (mAlertDialog == null) {
                 return;
             }
+            if (!performTtsPrompt(mAlertDialog)) {
+                playNotificationTone();
+            }
             Window w = mAlertDialog.getWindow();
             WindowManager.LayoutParams attr = w.getAttributes();
             attr.type = TYPE_KEYGUARD_DIALOG;
@@ -231,6 +224,7 @@ public class AccessibilityShortcutController {
             Settings.Secure.putIntForUser(
                     cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1, userId);
         } else {
+            playNotificationTone();
             if (mAlertDialog != null) {
                 mAlertDialog.dismiss();
                 mAlertDialog = null;
@@ -344,6 +338,104 @@ public class AccessibilityShortcutController {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
+    private void playNotificationTone() {
+        // Use USAGE_ASSISTANCE_ACCESSIBILITY for TVs to ensure that TVs play the ringtone as they
+        // have less ways of providing feedback like vibration.
+        final int audioAttributesUsage = hasFeatureLeanback()
+                ? AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
+                : AudioAttributes.USAGE_NOTIFICATION_EVENT;
+
+        // Play a notification tone
+        final Ringtone tone = mFrameworkObjectProvider.getRingtone(mContext,
+                Settings.System.DEFAULT_NOTIFICATION_URI);
+        if (tone != null) {
+            tone.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(audioAttributesUsage)
+                    .build());
+            tone.play();
+        }
+    }
+
+    private boolean performTtsPrompt(AlertDialog alertDialog) {
+        final String serviceName = getShortcutFeatureDescription(false /* no summary */);
+        final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
+        if (TextUtils.isEmpty(serviceName) || serviceInfo == null) {
+            return false;
+        }
+        if ((serviceInfo.flags & AccessibilityServiceInfo
+                .FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK) == 0) {
+            return false;
+        }
+        final TtsPrompt tts = new TtsPrompt(serviceName);
+        alertDialog.setOnDismissListener(dialog -> tts.dismiss());
+        return true;
+    }
+
+    /**
+     * Class to wrap TextToSpeech for shortcut dialog spoken feedback.
+     */
+    private class TtsPrompt implements TextToSpeech.OnInitListener {
+        private final CharSequence mText;
+        private boolean mDismiss;
+        private TextToSpeech mTts;
+
+        TtsPrompt(String serviceName) {
+            mText = mContext.getString(R.string.accessibility_shortcut_spoken_feedback,
+                    serviceName);
+            mTts = mFrameworkObjectProvider.getTextToSpeech(mContext, this);
+        }
+
+        /**
+         * Releases the resources used by the TextToSpeech, when dialog dismiss.
+         */
+        public void dismiss() {
+            mDismiss = true;
+            mHandler.sendMessage(PooledLambda.obtainMessage(TextToSpeech::shutdown, mTts));
+        }
+
+        @Override
+        public void onInit(int status) {
+            if (status != TextToSpeech.SUCCESS) {
+                Slog.d(TAG, "Tts init fail, status=" + Integer.toString(status));
+                playNotificationTone();
+                return;
+            }
+            mHandler.sendMessage(PooledLambda.obtainMessage(TtsPrompt::play, this));
+        }
+
+        private void play() {
+            if (mDismiss) {
+                return;
+            }
+            int status = TextToSpeech.ERROR;
+            if (setLanguage(Locale.getDefault())) {
+                status = mTts.speak(mText, TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            if (status != TextToSpeech.SUCCESS) {
+                Slog.d(TAG, "Tts play fail");
+                playNotificationTone();
+            }
+        }
+
+        /**
+         * @return false if tts language is not available
+         */
+        private boolean setLanguage(final Locale locale) {
+            int status = mTts.isLanguageAvailable(locale);
+            if (status == TextToSpeech.LANG_MISSING_DATA
+                    || status == TextToSpeech.LANG_NOT_SUPPORTED) {
+                return false;
+            }
+            mTts.setLanguage(locale);
+            Voice voice = mTts.getVoice();
+            if (voice == null || (voice.getFeatures() != null && voice.getFeatures()
+                    .contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED))) {
+                return false;
+            }
+            return true;
+        }
+    }
+
     /**
      * Immutable class to hold info about framework features that can be controlled by shortcut
      */
@@ -405,6 +497,24 @@ public class AccessibilityShortcutController {
 
         public Context getSystemUiContext() {
             return ActivityThread.currentActivityThread().getSystemUiContext();
+        }
+
+        /**
+         * @param ctx A context for TextToSpeech
+         * @param listener TextToSpeech initialization callback
+         * @return TextToSpeech instance
+         */
+        public TextToSpeech getTextToSpeech(Context ctx, TextToSpeech.OnInitListener listener) {
+            return new TextToSpeech(ctx, listener);
+        }
+
+        /**
+         * @param ctx context for ringtone
+         * @param uri ringtone uri
+         * @return Ringtone instance
+         */
+        public Ringtone getRingtone(Context ctx, Uri uri) {
+            return RingtoneManager.getRingtone(ctx, uri);
         }
     }
 }

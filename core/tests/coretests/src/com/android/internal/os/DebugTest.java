@@ -18,7 +18,8 @@ package com.android.internal.os;
 
 import android.os.Debug;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 @SmallTest

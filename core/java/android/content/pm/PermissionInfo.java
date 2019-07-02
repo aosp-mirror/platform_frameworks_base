@@ -17,6 +17,9 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -157,6 +160,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int PROTECTION_FLAG_OEM = 0x4000;
 
     /**
@@ -180,6 +184,59 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @TestApi
     public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 0x10000;
 
+    /**
+     * Additional flag for {${link #protectionLevel}, corresponding
+     * to the <code>wellbeing</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_WELLBEING = 0x20000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding to the
+     * {@code documenter} value of {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_DOCUMENTER = 0x40000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding to the
+     * {@code configurator} value of {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_CONFIGURATOR = 0x80000;
+
+    /**
+     * Additional flag for {${link #protectionLevel}, corresponding
+     * to the <code>incident_report_approver</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 0x100000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>app_predictor</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_APP_PREDICTOR = 0x200000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -196,6 +253,11 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_OEM,
             PROTECTION_FLAG_VENDOR_PRIVILEGED,
             PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER,
+            PROTECTION_FLAG_WELLBEING,
+            PROTECTION_FLAG_DOCUMENTER,
+            PROTECTION_FLAG_CONFIGURATOR,
+            PROTECTION_FLAG_INCIDENT_REPORT_APPROVER,
+            PROTECTION_FLAG_APP_PREDICTOR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -241,7 +303,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * The group this permission is a part of, as per
      * {@link android.R.attr#permissionGroup}.
      */
-    public String group;
+    public @Nullable String group;
 
     /**
      * Flag for {@link #flags}, corresponding to <code>costsMoney</code>
@@ -254,8 +316,41 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * value of {@link android.R.attr#permissionFlags}.
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int FLAG_REMOVED = 1<<1;
+
+    /**
+     * Flag for {@link #flags}, corresponding to <code>hardRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p> This permission is restricted by the platform and it would be
+     * grantable only to apps that meet special criteria per platform
+     * policy.
+     */
+    public static final int FLAG_HARD_RESTRICTED = 1<<2;
+
+    /**
+     * Flag for {@link #flags}, corresponding to <code>softRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p>This permission is restricted by the platform and it would be
+     * grantable in its full form to apps that meet special criteria
+     * per platform policy. Otherwise, a weaker form of the permission
+     * would be granted. The weak grant depends on the permission.
+     */
+    public static final int FLAG_SOFT_RESTRICTED = 1<<3;
+
+    /**
+     * Flag for {@link #flags}, corresponding to <code>immutablyRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p>This permission is restricted immutably which means that its
+     * restriction state may be specified only on the first install of
+     * the app and will stay in this initial whitelist state until
+     * the app is uninstalled.
+     */
+    public static final int FLAG_IMMUTABLY_RESTRICTED = 1<<4;
 
     /**
      * Flag for {@link #flags}, indicating that this permission has been
@@ -263,18 +358,30 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int FLAG_INSTALLED = 1<<30;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_COSTS_MONEY,
+            FLAG_REMOVED,
+            FLAG_HARD_RESTRICTED,
+            FLAG_SOFT_RESTRICTED,
+            FLAG_IMMUTABLY_RESTRICTED,
+            FLAG_INSTALLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
     /**
      * Additional flags about this permission as given by
      * {@link android.R.attr#permissionFlags}.
      */
-    public int flags;
+    public @Flags int flags;
 
     /**
      * A string resource identifier (in the package's resources) of this
      * permission's description.  From the "description" attribute or,
      * if not set, 0.
      */
-    public int descriptionRes;
+    public @StringRes int descriptionRes;
 
     /**
      * A string resource identifier (in the package's resources) used to request the permissions.
@@ -283,7 +390,22 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    public int requestRes;
+    public @StringRes int requestRes;
+
+    /**
+     * Some permissions only grant access while the app is in foreground. Some of these permissions
+     * allow to add background capabilities by adding another permission.
+     *
+     * If this is such a permission, this is the name of the permission adding the background
+     * access.
+     *
+     * From the "backgroundPermission" attribute or, if not set null
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public final @Nullable String backgroundPermission;
 
     /**
      * The description string provided in the AndroidManifest file, if any.  You
@@ -291,7 +413,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * is in a resource.  You probably want
      * {@link PermissionInfo#loadDescription} instead.
      */
-    public CharSequence nonLocalizedDescription;
+    public @Nullable CharSequence nonLocalizedDescription;
 
     /** @hide */
     public static int fixProtectionLevel(int level) {
@@ -309,7 +431,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public static String protectionToString(int level) {
+    public static @NonNull String protectionToString(int level) {
         String protLevel = "????";
         switch (level & PROTECTION_MASK_BASE) {
             case PermissionInfo.PROTECTION_DANGEROUS:
@@ -364,17 +486,49 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         if ((level & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0) {
             protLevel += "|textClassifier";
         }
+        if ((level & PermissionInfo.PROTECTION_FLAG_WELLBEING) != 0) {
+            protLevel += "|wellbeing";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0) {
+            protLevel += "|documenter";
+        }
+        if ((level & PROTECTION_FLAG_CONFIGURATOR) != 0) {
+            protLevel += "|configurator";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER) != 0) {
+            protLevel += "|incidentReportApprover";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0) {
+            protLevel += "|appPredictor";
+        }
         return protLevel;
     }
 
-    public PermissionInfo() {
+    /**
+     * @hide
+     */
+    public PermissionInfo(@Nullable String backgroundPermission) {
+        this.backgroundPermission = backgroundPermission;
     }
 
-    public PermissionInfo(PermissionInfo orig) {
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionInfo() {
+        this((String) null);
+    }
+
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionInfo(@NonNull PermissionInfo orig) {
         super(orig);
         protectionLevel = orig.protectionLevel;
         flags = orig.flags;
         group = orig.group;
+        backgroundPermission = orig.backgroundPermission;
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
@@ -391,7 +545,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the permission's description.
      * If there is no description, null is returned.
      */
-    public CharSequence loadDescription(PackageManager pm) {
+    public @Nullable CharSequence loadDescription(@NonNull PackageManager pm) {
         if (nonLocalizedDescription != null) {
             return nonLocalizedDescription;
         }
@@ -438,6 +592,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(protectionLevel);
         dest.writeInt(flags);
         dest.writeString(group);
+        dest.writeString(backgroundPermission);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
@@ -456,11 +611,31 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
+    public boolean isHardRestricted() {
+        return (flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
+    }
+
+    /** @hide */
+    public boolean isSoftRestricted() {
+        return (flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0;
+    }
+
+    /** @hide */
+    public boolean isRestricted() {
+        return isHardRestricted() || isSoftRestricted();
+    }
+
+    /** @hide */
     public boolean isAppOp() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
     }
 
-    public static final Creator<PermissionInfo> CREATOR =
+    /** @hide */
+    public boolean isRuntime() {
+        return getProtection() == PROTECTION_DANGEROUS;
+    }
+
+    public static final @NonNull Creator<PermissionInfo> CREATOR =
         new Creator<PermissionInfo>() {
         @Override
         public PermissionInfo createFromParcel(Parcel source) {
@@ -477,6 +652,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         protectionLevel = source.readInt();
         flags = source.readInt();
         group = source.readString();
+        backgroundPermission = source.readString();
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

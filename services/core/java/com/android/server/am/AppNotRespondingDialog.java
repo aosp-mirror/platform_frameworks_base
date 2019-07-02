@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.content.pm.ApplicationInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 
@@ -58,8 +59,8 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
         setCancelable(false);
 
         int resid;
-        CharSequence name1 = data.activity != null
-                ? data.activity.info.loadLabel(context.getPackageManager())
+        CharSequence name1 = data.aInfo != null
+                ? data.aInfo.loadLabel(context.getPackageManager())
                 : null;
         CharSequence name2 = null;
         if ((mProc.pkgList.size() == 1) &&
@@ -157,7 +158,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                                     System.currentTimeMillis(), null);
                         }
 
-                        app.notResponding = false;
+                        app.setNotResponding(false);
                         app.notRespondingReport = null;
                         if (app.anrDialog == AppNotRespondingDialog.this) {
                             app.anrDialog = null;
@@ -181,12 +182,12 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
     static class Data {
         final ProcessRecord proc;
-        final ActivityRecord activity;
+        final ApplicationInfo aInfo;
         final boolean aboveSystem;
 
-        Data(ProcessRecord proc, ActivityRecord activity, boolean aboveSystem) {
+        Data(ProcessRecord proc, ApplicationInfo aInfo, boolean aboveSystem) {
             this.proc = proc;
-            this.activity = activity;
+            this.aInfo = aInfo;
             this.aboveSystem = aboveSystem;
         }
     }

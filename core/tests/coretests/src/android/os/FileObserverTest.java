@@ -16,12 +16,13 @@
 
 package android.os;
 
+import android.test.AndroidTestCase;
+import android.util.Log;
+
+import androidx.test.filters.MediumTest;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;

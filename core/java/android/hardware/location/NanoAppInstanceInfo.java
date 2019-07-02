@@ -208,7 +208,7 @@ public class NanoAppInstanceInfo implements Parcelable {
         out.writeIntArray(mOutputEvents);
     }
 
-    public static final Parcelable.Creator<NanoAppInstanceInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NanoAppInstanceInfo> CREATOR
             = new Parcelable.Creator<NanoAppInstanceInfo>() {
         public NanoAppInstanceInfo createFromParcel(Parcel in) {
             return new NanoAppInstanceInfo(in);

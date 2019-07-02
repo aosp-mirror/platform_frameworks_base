@@ -16,27 +16,28 @@
 
 package com.android.server.pm.dex;
 
-import android.content.ContentResolver;
+import static android.provider.DeviceConfig.NAMESPACE_DEX_BOOT;
+
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
+import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
-import android.database.ContentObserver;
-import android.os.Build;
 import android.os.FileUtils;
 import android.os.RemoteException;
-import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.provider.Settings.Global;
+import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageDexOptimizer;
@@ -48,17 +49,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
-import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
 /**
  * This class keeps track of how dex files are used.
@@ -75,6 +72,10 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
 
+    // flags for Device Config API
+    private static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
+    private static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
+
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
@@ -89,12 +90,17 @@ public class DexManager {
     // encode and save the dex usage data.
     private final PackageDexUsage mPackageDexUsage;
 
+    // DynamicCodeLogger handles recording of dynamic code loading - which is similar to
+    // PackageDexUsage but records a different aspect of the data.
+    // (It additionally includes DEX files loaded with unsupported class loaders, and doesn't
+    // record class loaders or ISAs.)
+    private final DynamicCodeLogger mDynamicCodeLogger;
+
     private final IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
     private final Installer mInstaller;
-    private final Listener mListener;
 
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
@@ -115,29 +121,20 @@ public class DexManager {
      */
     private final static PackageUseInfo DEFAULT_USE_INFO = new PackageUseInfo();
 
-    public interface Listener {
-        /**
-         * Invoked just before the secondary dex file {@code dexPath} for the specified application
-         * is reconciled.
-         */
-        void onReconcileSecondaryDexFile(ApplicationInfo appInfo, DexUseInfo dexUseInfo,
-                String dexPath, int storageFlags);
-    }
-
     public DexManager(Context context, IPackageManager pms, PackageDexOptimizer pdo,
-            Installer installer, Object installLock, Listener listener) {
-      mContext = context;
-      mPackageCodeLocationsCache = new HashMap<>();
-      mPackageDexUsage = new PackageDexUsage();
-      mPackageManager = pms;
-      mPackageDexOptimizer = pdo;
-      mInstaller = installer;
-      mInstallLock = installLock;
-      mListener = listener;
+            Installer installer, Object installLock) {
+        mContext = context;
+        mPackageCodeLocationsCache = new HashMap<>();
+        mPackageDexUsage = new PackageDexUsage();
+        mPackageManager = pms;
+        mPackageDexOptimizer = pdo;
+        mInstaller = installer;
+        mInstallLock = installLock;
+        mDynamicCodeLogger = new DynamicCodeLogger(pms, installer);
     }
 
-    public void systemReady() {
-        registerSettingObserver();
+    public DynamicCodeLogger getDynamicCodeLogger() {
+        return mDynamicCodeLogger;
     }
 
     /**
@@ -207,7 +204,6 @@ public class DexManager {
                 Slog.i(TAG, loadingAppInfo.packageName +
                         " uses unsupported class loader in " + classLoaderNames);
             }
-            return;
         }
 
         int dexPathIndex = 0;
@@ -236,15 +232,24 @@ public class DexManager {
                     continue;
                 }
 
-                // Record dex file usage. If the current usage is a new pattern (e.g. new secondary,
-                // or UsedByOtherApps), record will return true and we trigger an async write
-                // to disk to make sure we don't loose the data in case of a reboot.
+                if (!primaryOrSplit) {
+                    // Record loading of a DEX file from an app data directory.
+                    mDynamicCodeLogger.recordDex(loaderUserId, dexPath,
+                            searchResult.mOwningPackageName, loadingAppInfo.packageName);
+                }
 
-                String classLoaderContext = classLoaderContexts[dexPathIndex];
-                if (mPackageDexUsage.record(searchResult.mOwningPackageName,
-                        dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
-                        loadingAppInfo.packageName, classLoaderContext)) {
-                    mPackageDexUsage.maybeWriteAsync();
+                if (classLoaderContexts != null) {
+
+                    // Record dex file usage. If the current usage is a new pattern (e.g. new
+                    // secondary, or UsedByOtherApps), record will return true and we trigger an
+                    // async write to disk to make sure we don't loose the data in case of a reboot.
+
+                    String classLoaderContext = classLoaderContexts[dexPathIndex];
+                    if (mPackageDexUsage.record(searchResult.mOwningPackageName,
+                            dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
+                            loadingAppInfo.packageName, classLoaderContext)) {
+                        mPackageDexUsage.maybeWriteAsync();
+                    }
                 }
             } else {
                 // If we can't find the owner of the dex we simply do not track it. The impact is
@@ -268,8 +273,8 @@ public class DexManager {
             loadInternal(existingPackages);
         } catch (Exception e) {
             mPackageDexUsage.clear();
-            Slog.w(TAG, "Exception while loading package dex usage. " +
-                    "Starting with a fresh state.", e);
+            mDynamicCodeLogger.clear();
+            Slog.w(TAG, "Exception while loading. Starting with a fresh state.", e);
         }
     }
 
@@ -311,15 +316,20 @@ public class DexManager {
      * all usage information for the package will be removed.
      */
     public void notifyPackageDataDestroyed(String packageName, int userId) {
-        boolean updated = userId == UserHandle.USER_ALL
-            ? mPackageDexUsage.removePackage(packageName)
-            : mPackageDexUsage.removeUserPackage(packageName, userId);
         // In case there was an update, write the package use info to disk async.
-        // Note that we do the writing here and not in PackageDexUsage in order to be
+        // Note that we do the writing here and not in the lower level classes in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
         // multiple updates in PackageDexUsage before writing it).
-        if (updated) {
-            mPackageDexUsage.maybeWriteAsync();
+        if (userId == UserHandle.USER_ALL) {
+            if (mPackageDexUsage.removePackage(packageName)) {
+                mPackageDexUsage.maybeWriteAsync();
+            }
+            mDynamicCodeLogger.removePackage(packageName);
+        } else {
+            if (mPackageDexUsage.removeUserPackage(packageName, userId)) {
+                mPackageDexUsage.maybeWriteAsync();
+            }
+            mDynamicCodeLogger.removeUserPackage(packageName, userId);
         }
     }
 
@@ -388,8 +398,22 @@ public class DexManager {
             }
         }
 
-        mPackageDexUsage.read();
-        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        try {
+            mPackageDexUsage.read();
+            mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
+        } catch (Exception e) {
+            mPackageDexUsage.clear();
+            Slog.w(TAG, "Exception while loading package dex usage. "
+                    + "Starting with a fresh state.", e);
+        }
+
+        try {
+            mDynamicCodeLogger.readAndSync(packageToUsersMap);
+        } catch (Exception e) {
+            mDynamicCodeLogger.clear();
+            Slog.w(TAG, "Exception while loading package dynamic code usage. "
+                    + "Starting with a fresh state.", e);
+        }
     }
 
     /**
@@ -415,6 +439,7 @@ public class DexManager {
      * TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
      * to access the package use.
      */
+    @VisibleForTesting
     /*package*/ boolean hasInfoOnPackage(String packageName) {
         return mPackageDexUsage.getPackageUseInfo(packageName) != null;
     }
@@ -526,10 +551,6 @@ public class DexManager {
                 updated = mPackageDexUsage.removeDexFile(
                         packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
-            }
-
-            if (mListener != null) {
-                mListener.onReconcileSecondaryDexFile(info, dexUseInfo, dexPath, flags);
             }
 
             boolean dexStillExists = true;
@@ -652,7 +673,7 @@ public class DexManager {
             // to load dex files through it.
             try {
                 String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
-                if (dexPathReal != dexPath) {
+                if (!dexPath.equals(dexPathReal)) {
                     Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
                             dexPath + " dexPathReal=" + dexPathReal);
                 }
@@ -675,49 +696,13 @@ public class DexManager {
      */
     public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
-    }
-
-    private void registerSettingObserver() {
-        final ContentResolver resolver = mContext.getContentResolver();
-
-        // This observer provides a one directional mapping from Global.PRIV_APP_OOB_ENABLED to
-        // pm.dexopt.priv-apps-oob property. This is only for experiment and should be removed once
-        // it is done.
-        ContentObserver privAppOobObserver = new ContentObserver(null) {
-            @Override
-            public void onChange(boolean selfChange) {
-                int oobEnabled = Global.getInt(resolver, Global.PRIV_APP_OOB_ENABLED, 0);
-                SystemProperties.set(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB,
-                        oobEnabled == 1 ? "true" : "false");
-            }
-        };
-        resolver.registerContentObserver(
-                Global.getUriFor(Global.PRIV_APP_OOB_ENABLED), false, privAppOobObserver,
-                UserHandle.USER_SYSTEM);
-        // At boot, restore the value from the setting, which persists across reboot.
-        privAppOobObserver.onChange(true);
-
-        ContentObserver privAppOobListObserver = new ContentObserver(null) {
-            @Override
-            public void onChange(boolean selfChange) {
-                String oobList = Global.getString(resolver, Global.PRIV_APP_OOB_LIST);
-                if (oobList == null) {
-                    oobList = "ALL";
-                }
-                SystemProperties.set(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, oobList);
-            }
-        };
-        resolver.registerContentObserver(
-                Global.getUriFor(Global.PRIV_APP_OOB_LIST), false, privAppOobListObserver,
-                UserHandle.USER_SYSTEM);
-        // At boot, restore the value from the setting, which persists across reboot.
-        privAppOobListObserver.onChange(true);
+        mDynamicCodeLogger.writeNow();
     }
 
     /**
      * Returns whether the given package is in the list of privilaged apps that should run out of
-     * box. This only makes sense if PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB is true. Note that when
-     * the the OOB list is empty, all priv apps will run in OOB mode.
+     * box. This only makes sense if the feature is enabled. Note that when the the OOB list is
+     * empty, all priv apps will run in OOB mode.
      */
     public static boolean isPackageSelectedToRunOob(String packageName) {
         return isPackageSelectedToRunOob(Arrays.asList(packageName));
@@ -725,19 +710,35 @@ public class DexManager {
 
     /**
      * Returns whether any of the given packages are in the list of privilaged apps that should run
-     * out of box. This only makes sense if PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB is true. Note that
-     * when the the OOB list is empty, all priv apps will run in OOB mode.
+     * out of box. This only makes sense if the feature is enabled. Note that when the the OOB list
+     * is empty, all priv apps will run in OOB mode.
      */
     public static boolean isPackageSelectedToRunOob(Collection<String> packageNamesInSameProcess) {
-        if (!SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false)) {
+        return isPackageSelectedToRunOobInternal(
+                SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
+                SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
+                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_ENABLED),
+                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_WHITELIST),
+                packageNamesInSameProcess);
+    }
+
+    @VisibleForTesting
+    /* package */ static boolean isPackageSelectedToRunOobInternal(
+            boolean isDefaultEnabled, String defaultWhitelist, String overrideEnabled,
+            String overrideWhitelist, Collection<String> packageNamesInSameProcess) {
+        // Allow experiment (if exists) to override device configuration.
+        boolean enabled = overrideEnabled != null ? overrideEnabled.equals("true")
+                : isDefaultEnabled;
+        if (!enabled) {
             return false;
         }
-        String oobListProperty = SystemProperties.get(
-                PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL");
-        if ("ALL".equals(oobListProperty)) {
+
+        // Similarly, experiment flag can override the whitelist.
+        String whitelist = overrideWhitelist != null ? overrideWhitelist : defaultWhitelist;
+        if ("ALL".equals(whitelist)) {
             return true;
         }
-        for (String oobPkgName : oobListProperty.split(",")) {
+        for (String oobPkgName : whitelist.split(",")) {
             if (packageNamesInSameProcess.contains(oobPkgName)) {
                 return true;
             }
@@ -746,63 +747,34 @@ public class DexManager {
     }
 
     /**
-     * Generates package related log if the package has code stored in unexpected way.
+     * Generates log if the archive located at {@code fileName} has uncompressed dex file that can
+     * be direclty mapped.
      */
-    public static void maybeLogUnexpectedPackageDetails(PackageParser.Package pkg) {
-        if (!Build.IS_DEBUGGABLE) {
-            return;
-        }
-
-        if (pkg.isPrivileged() && isPackageSelectedToRunOob(pkg.packageName)) {
-            logIfPackageHasUncompressedCode(pkg);
-        }
-    }
-
-    /**
-     * Generates log if the APKs in the given package have uncompressed dex file and so
-     * files that can be direclty mapped.
-     */
-    private static void logIfPackageHasUncompressedCode(PackageParser.Package pkg) {
-        logIfApkHasUncompressedCode(pkg.baseCodePath);
-        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                logIfApkHasUncompressedCode(pkg.splitCodePaths[i]);
-            }
-        }
-    }
-
-    /**
-     * Generates log if the archive located at {@code fileName} has uncompressed dex file and so
-     * files that can be direclty mapped.
-     */
-    private static void logIfApkHasUncompressedCode(String fileName) {
+    public static boolean auditUncompressedDexInApk(String fileName) {
         StrictJarFile jarFile = null;
         try {
             jarFile = new StrictJarFile(fileName,
                     false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
             Iterator<ZipEntry> it = jarFile.iterator();
+            boolean allCorrect = true;
             while (it.hasNext()) {
                 ZipEntry entry = it.next();
                 if (entry.getName().endsWith(".dex")) {
                     if (entry.getMethod() != ZipEntry.STORED) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has compressed dex code " +
                                 entry.getName());
                     } else if ((entry.getDataOffset() & 0x3) != 0) {
+                        allCorrect = false;
                         Slog.w(TAG, "APK " + fileName + " has unaligned dex code " +
-                                entry.getName());
-                    }
-                } else if (entry.getName().endsWith(".so")) {
-                    if (entry.getMethod() != ZipEntry.STORED) {
-                        Slog.w(TAG, "APK " + fileName + " has compressed native code " +
-                                entry.getName());
-                    } else if ((entry.getDataOffset() & (0x1000 - 1)) != 0) {
-                        Slog.w(TAG, "APK " + fileName + " has unaligned native code " +
                                 entry.getName());
                     }
                 }
             }
+            return allCorrect;
         } catch (IOException ignore) {
             Slog.wtf(TAG, "Error when parsing APK " + fileName);
+            return false;
         } finally {
             try {
                 if (jarFile != null) {

@@ -33,6 +33,7 @@ void print_status(const char* format, ...);
 void print_command(const Command& command);
 void print_error(const char* format, ...);
 void print_warning(const char* format, ...);
+void print_info(const char* format, ...);
 void print_one_line(const char* format, ...);
 void check_error(int err);
 

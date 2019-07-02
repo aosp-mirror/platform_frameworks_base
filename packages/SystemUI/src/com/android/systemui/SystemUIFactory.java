@@ -16,61 +16,76 @@
 
 package com.android.systemui;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
+
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
-import android.util.ArrayMap;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.Dependency.DependencyProvider;
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.statusbar.KeyguardIndicationController;
-import com.android.systemui.statusbar.NotificationBlockingHelperManager;
-import com.android.systemui.statusbar.NotificationEntryManager;
-import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationLogger;
+import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * Class factory to provide customizable SystemUI components.
  */
+@Module
 public class SystemUIFactory {
     private static final String TAG = "SystemUIFactory";
 
     static SystemUIFactory mFactory;
+    private SystemUIRootComponent mRootComponent;
 
-    public static SystemUIFactory getInstance() {
-        return mFactory;
+    public static <T extends SystemUIFactory> T getInstance() {
+        return (T) mFactory;
     }
 
     public static void createFromConfig(Context context) {
@@ -83,6 +98,7 @@ public class SystemUIFactory {
             Class<?> cls = null;
             cls = context.getClassLoader().loadClass(clsName);
             mFactory = (SystemUIFactory) cls.newInstance();
+            mFactory.init(context);
         } catch (Throwable t) {
             Log.w(TAG, "Error creating SystemUIFactory component: " + clsName, t);
             throw new RuntimeException(t);
@@ -90,6 +106,18 @@ public class SystemUIFactory {
     }
 
     public SystemUIFactory() {}
+
+    protected void init(Context context) {
+        mRootComponent = DaggerSystemUIFactory_SystemUIRootComponent.builder()
+                .systemUIFactory(this)
+                .dependencyProvider(new com.android.systemui.DependencyProvider())
+                .contextHolder(new ContextHolder(context))
+                .build();
+    }
+
+    public SystemUIRootComponent getRootComponent() {
+        return mRootComponent;
+    }
 
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
             ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
@@ -101,7 +129,9 @@ public class SystemUIFactory {
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManager.getInstance(context), expansionCallback);
+                dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
+                expansionCallback, KeyguardUpdateMonitor.getInstance(context),
+                new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
@@ -114,8 +144,9 @@ public class SystemUIFactory {
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar) {
-        return new NotificationIconAreaController(context, statusBar);
+            StatusBar statusBar, StatusBarStateController statusBarStateController) {
+        return new NotificationIconAreaController(context, statusBar, statusBarStateController,
+                Dependency.get(NotificationMediaManager.class));
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,
@@ -123,33 +154,119 @@ public class SystemUIFactory {
         return new KeyguardIndicationController(context, indicationArea, lockIcon);
     }
 
-    public QSTileHost createQSTileHost(Context context, StatusBar statusBar,
-            StatusBarIconController iconController) {
-        return new QSTileHost(context, statusBar, iconController);
+    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
+        return new VolumeDialogComponent(systemUi, context);
     }
 
-    public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
+    @Singleton
+    @Provides
+    public NotificationData.KeyguardEnvironment provideKeyguardEnvironment(Context context) {
+        return new KeyguardEnvironmentImpl();
+    }
+
+    @Singleton
+    @Provides
+    public NotificationLockscreenUserManager provideNotificationLockscreenUserManager(
             Context context) {
-        providers.put(NotificationLockscreenUserManager.class,
-                () -> new NotificationLockscreenUserManager(context));
-        providers.put(VisualStabilityManager.class, VisualStabilityManager::new);
-        providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
-        providers.put(NotificationMediaManager.class, () -> new NotificationMediaManager(context));
-        providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(context));
-        providers.put(NotificationBlockingHelperManager.class,
-                () -> new NotificationBlockingHelperManager(context));
-        providers.put(NotificationRemoteInputManager.class,
-                () -> new NotificationRemoteInputManager(context));
-        providers.put(SmartReplyConstants.class,
-                () -> new SmartReplyConstants(Dependency.get(Dependency.MAIN_HANDLER), context));
-        providers.put(NotificationListener.class, () -> new NotificationListener(context));
-        providers.put(NotificationLogger.class, NotificationLogger::new);
-        providers.put(NotificationViewHierarchyManager.class,
-                () -> new NotificationViewHierarchyManager(context));
-        providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
-        providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
-        providers.put(SmartReplyController.class, () -> new SmartReplyController());
-        providers.put(RemoteInputQuickSettingsDisabler.class,
-                () -> new RemoteInputQuickSettingsDisabler(context));
+        return new NotificationLockscreenUserManagerImpl(context);
+    }
+
+    @Singleton
+    @Provides
+    public AssistManager provideAssistManager(DeviceProvisionedController controller,
+            Context context) {
+        return new AssistManager(controller, context);
+    }
+
+    @Singleton
+    @Provides
+    @Nullable
+    public DockManager provideDockManager(Context context) {
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public NotificationEntryManager provideNotificationEntryManager(Context context) {
+        return new NotificationEntryManager(context);
+    }
+
+    @Singleton
+    @Provides
+    public EnhancedEstimates provideEnhancedEstimates(Context context) {
+        return new EnhancedEstimatesImpl();
+    }
+
+    @Singleton
+    @Provides
+    @Named(LEAK_REPORT_EMAIL_NAME)
+    @Nullable
+    public String provideLeakReportEmail() {
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public NotificationListener provideNotificationListener(Context context) {
+        return new NotificationListener(context);
+    }
+
+    @Singleton
+    @Provides
+    public NotificationInterruptionStateProvider provideNotificationInterruptionStateProvider(
+            Context context) {
+        return new NotificationInterruptionStateProvider(context);
+    }
+
+    @Singleton
+    @Provides
+    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
+    public boolean provideAllowNotificationLongPress() {
+        return true;
+    }
+
+    @Singleton
+    @Provides
+    public ShadeController provideShadeController(Context context) {
+        return SysUiServiceProvider.getComponent(context, StatusBar.class);
+    }
+
+    @Module
+    protected static class ContextHolder {
+        private Context mContext;
+
+        public ContextHolder(Context context) {
+            mContext = context;
+        }
+
+        @Provides
+        public Context provideContext() {
+            return mContext;
+        }
+    }
+
+    @Singleton
+    @Component(modules = {SystemUIFactory.class, DependencyProvider.class, DependencyBinder.class,
+            ContextHolder.class})
+    public interface SystemUIRootComponent {
+        @Singleton
+        Dependency.DependencyInjector createDependency();
+
+        @Singleton
+        StatusBar.StatusBarInjector getStatusBarInjector();
+
+        /**
+         * FragmentCreator generates all Fragments that need injection.
+         */
+        @Singleton
+        FragmentService.FragmentCreator createFragmentCreator();
+
+        /**
+         * ViewCreator generates all Views that need injection.
+         */
+        InjectionInflationController.ViewCreator createViewCreator();
+
+        @Singleton
+        GarbageMonitor createGarbageMonitor();
     }
 }

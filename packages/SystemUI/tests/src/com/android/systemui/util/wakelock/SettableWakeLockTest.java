@@ -40,7 +40,7 @@ public class SettableWakeLockTest extends SysuiTestCase {
     @Before
     public void setup() {
         mFake = new WakeLockFake();
-        mSettable = new SettableWakeLock(mFake);
+        mSettable = new SettableWakeLock(mFake, "Fake");
     }
 
     @Test

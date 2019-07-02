@@ -36,6 +36,7 @@ import static com.android.internal.util.Preconditions.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class for describing camera output, which contains a {@link Surface} and its specific
@@ -58,7 +59,7 @@ import java.util.List;
  * execute in parallel with any {@link Surface} initialization, such as waiting for a
  * {@link android.view.SurfaceView} to be ready as part of the UI initialization.</li>
  *
- * <li>The third and most complex usage pattern inlvolves surface sharing. Once instantiated an
+ * <li>The third and most complex usage pattern involves surface sharing. Once instantiated an
  * OutputConfiguration can be enabled for surface sharing via {@link #enableSurfaceSharing}. This
  * must be done before creating a new capture session and enables calls to
  * {@link CameraCaptureSession#updateOutputConfiguration}. An OutputConfiguration with enabled
@@ -626,7 +627,7 @@ public final class OutputConfiguration implements Parcelable {
         return mSurfaceGroupId;
     }
 
-    public static final Parcelable.Creator<OutputConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<OutputConfiguration> CREATOR =
             new Parcelable.Creator<OutputConfiguration>() {
         @Override
         public OutputConfiguration createFromParcel(Parcel source) {
@@ -692,7 +693,8 @@ public final class OutputConfiguration implements Parcelable {
                     mIsShared != other.mIsShared ||
                     mConfiguredFormat != other.mConfiguredFormat ||
                     mConfiguredDataspace != other.mConfiguredDataspace ||
-                    mConfiguredGenerationId != other.mConfiguredGenerationId)
+                    mConfiguredGenerationId != other.mConfiguredGenerationId ||
+                    !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId))
                 return false;
 
             int minLen = Math.min(mSurfaces.size(), other.mSurfaces.size());

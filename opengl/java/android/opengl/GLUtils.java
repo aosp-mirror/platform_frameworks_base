@@ -44,7 +44,7 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        int result = native_getInternalFormat(bitmap);
+        int result = native_getInternalFormat(bitmap.getNativeInstance());
         if (result < 0) {
             throw new IllegalArgumentException("Unknown internalformat");
         }
@@ -66,7 +66,7 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        int result = native_getType(bitmap);
+        int result = native_getType(bitmap.getNativeInstance());
         if (result < 0) {
             throw new IllegalArgumentException("Unknown type");
         }
@@ -103,7 +103,8 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        if (native_texImage2D(target, level, internalformat, bitmap, -1, border)!=0) {
+        if (native_texImage2D(target, level, internalformat, bitmap.getNativeInstance(), -1,
+                border) != 0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -129,7 +130,8 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        if (native_texImage2D(target, level, internalformat, bitmap, type, border)!=0) {
+        if (native_texImage2D(target, level, internalformat, bitmap.getNativeInstance(), type,
+              border) != 0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -151,7 +153,7 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        if (native_texImage2D(target, level, -1, bitmap, -1, border)!=0) {
+        if (native_texImage2D(target, level, -1, bitmap.getNativeInstance(), -1, border) != 0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -187,7 +189,8 @@ public final class GLUtils {
             throw new IllegalArgumentException("bitmap is recycled");
         }
         int type = getType(bitmap);
-        if (native_texSubImage2D(target, level, xoffset, yoffset, bitmap, -1, type)!=0) {
+        if (native_texSubImage2D(target, level, xoffset, yoffset, bitmap.getNativeInstance(), -1,
+                type) != 0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -211,7 +214,8 @@ public final class GLUtils {
         if (bitmap.isRecycled()) {
             throw new IllegalArgumentException("bitmap is recycled");
         }
-        if (native_texSubImage2D(target, level, xoffset, yoffset, bitmap, format, type)!=0) {
+        if (native_texSubImage2D(target, level, xoffset, yoffset, bitmap.getNativeInstance(),
+                format, type) != 0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -261,10 +265,10 @@ public final class GLUtils {
         }
     }
 
-    native private static int native_getInternalFormat(Bitmap bitmap);
-    native private static int native_getType(Bitmap bitmap);
+    native private static int native_getInternalFormat(long bitmapHandle);
+    native private static int native_getType(long bitmapHandle);
     native private static int native_texImage2D(int target, int level, int internalformat,
-            Bitmap bitmap, int type, int border);
+            long bitmapHandle, int type, int border);
     native private static int native_texSubImage2D(int target, int level, int xoffset, int yoffset,
-            Bitmap bitmap, int format, int type);
+            long bitmapHandle, int format, int type);
 }

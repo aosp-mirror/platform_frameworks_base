@@ -18,15 +18,21 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.RemoteException;
+import android.security.GateKeeper;
 import android.security.keystore.AndroidKeyStoreSecretKey;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.service.gatekeeper.IGateKeeperService;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -34,9 +40,11 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Locale;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.security.auth.DestroyFailedException;
+import javax.crypto.spec.GCMParameterSpec;
 
 /**
  * Manages creating and checking the validity of the platform key.
@@ -67,6 +75,10 @@ public class PlatformKeyManager {
     private static final String ENCRYPT_KEY_ALIAS_SUFFIX = "encrypt";
     private static final String DECRYPT_KEY_ALIAS_SUFFIX = "decrypt";
     private static final int USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS = 15;
+    private static final String KEY_WRAP_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
+    private static final int GCM_TAG_LENGTH_BITS = 128;
+    // Only used for checking if a key is usable
+    private static final byte[] GCM_INSECURE_NONCE_BYTES = new byte[12];
 
     private final Context mContext;
     private final KeyStoreProxy mKeyStore;
@@ -158,12 +170,14 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there is an error in AndroidKeyStore.
      * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
+     * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
      * @hide
      */
     @VisibleForTesting
     void regenerate(int userId)
-            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException, IOException {
+            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException, IOException,
+                    RemoteException {
         if (!isAvailable(userId)) {
             throw new InsecureUserException(String.format(
                     Locale.US, "%d does not have a lock screen set.", userId));
@@ -190,11 +204,13 @@ public class PlatformKeyManager {
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
      * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
+     * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
      * @hide
      */
-    public PlatformEncryptionKey getEncryptKey(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException, IOException {
+    public PlatformEncryptionKey getEncryptKey(int userId)
+            throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
+                    InsecureUserException, IOException, RemoteException {
         init(userId);
         try {
             // Try to see if the decryption key is still accessible before using the encryption key.
@@ -243,14 +259,18 @@ public class PlatformKeyManager {
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
      * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
+     * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
      * @hide
      */
-    public PlatformDecryptionKey getDecryptKey(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException, IOException {
+    public PlatformDecryptionKey getDecryptKey(int userId)
+            throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
+                    InsecureUserException, IOException, RemoteException {
         init(userId);
         try {
-            return getDecryptKeyInternal(userId);
+            PlatformDecryptionKey decryptionKey = getDecryptKeyInternal(userId);
+            ensureDecryptionKeyIsValid(userId, decryptionKey);
+            return decryptionKey;
         } catch (UnrecoverableKeyException e) {
             Log.i(TAG, String.format(Locale.US,
                     "Regenerating permanently invalid Platform key for user %d.",
@@ -284,6 +304,29 @@ public class PlatformKeyManager {
     }
 
     /**
+     * Tries to use the decryption key to make sure it is not permanently invalidated. The exception
+     * {@code KeyPermanentlyInvalidatedException} is thrown only when the key is in use.
+     *
+     * <p>Note that we ignore all other InvalidKeyException exceptions, because such an exception
+     * may be thrown for auth-bound keys if there's no recent unlock event.
+     */
+    private void ensureDecryptionKeyIsValid(int userId, PlatformDecryptionKey decryptionKey)
+            throws UnrecoverableKeyException {
+        try {
+            Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM).init(Cipher.UNWRAP_MODE,
+                    decryptionKey.getKey(),
+                    new GCMParameterSpec(GCM_TAG_LENGTH_BITS, GCM_INSECURE_NONCE_BYTES));
+        } catch (KeyPermanentlyInvalidatedException e) {
+            Log.e(TAG, String.format(Locale.US, "The platform key for user %d became invalid.",
+                    userId));
+            throw new UnrecoverableKeyException(e.getMessage());
+        } catch (NoSuchAlgorithmException | InvalidKeyException
+                | InvalidAlgorithmParameterException | NoSuchPaddingException e) {
+            // Ignore all other exceptions
+        }
+    }
+
+    /**
      * Initializes the class. If there is no current platform key, and the user has a lock screen
      * set, will create the platform key and set the generation ID.
      *
@@ -291,11 +334,13 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was an error in AndroidKeyStore.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      * @throws IOException if there was an issue with local database update.
+     * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
      * @hide
      */
     void init(int userId)
-            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException, IOException {
+            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException, IOException,
+                    RemoteException {
         if (!isAvailable(userId)) {
             throw new InsecureUserException(String.format(
                     Locale.US, "%d does not have a lock screen set.", userId));
@@ -355,10 +400,7 @@ public class PlatformKeyManager {
      * @throws IOException if there was an issue with local database update.
      */
     private void setGenerationId(int userId, int generationId) throws IOException {
-        long updatedRows = mDatabase.setPlatformKeyGenerationId(userId, generationId);
-        if (updatedRows < 0) {
-            throw new IOException("Failed to set the platform key in the local DB.");
-        }
+        mDatabase.setPlatformKeyGenerationId(userId, generationId);
     }
 
     /**
@@ -372,6 +414,11 @@ public class PlatformKeyManager {
                 && mKeyStore.containsAlias(getDecryptAlias(userId, generationId));
     }
 
+    @VisibleForTesting
+    IGateKeeperService getGateKeeperService() {
+        return GateKeeper.getService();
+    }
+
     /**
      * Generates a new 256-bit AES key, and loads it into AndroidKeyStore with the given
      * {@code generationId} determining its aliases.
@@ -380,14 +427,22 @@ public class PlatformKeyManager {
      *     available since API version 1.
      * @throws KeyStoreException if there was an issue loading the keys into AndroidKeyStore.
      * @throws IOException if there was an issue with local database update.
+     * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      */
     private void generateAndLoadKey(int userId, int generationId)
-            throws NoSuchAlgorithmException, KeyStoreException, IOException {
+            throws NoSuchAlgorithmException, KeyStoreException, IOException, RemoteException {
         String encryptAlias = getEncryptAlias(userId, generationId);
         String decryptAlias = getDecryptAlias(userId, generationId);
         // SecretKey implementation doesn't provide reliable way to destroy the secret
         // so it may live in memory for some time.
         SecretKey secretKey = generateAesKey();
+
+        long secureUserId = getGateKeeperService().getSecureUserId(userId);
+        // TODO(b/124095438): Propagate this failure instead of silently failing.
+        if (secureUserId == GateKeeper.INVALID_SECURE_USER_ID) {
+            Log.e(TAG, "No SID available for user " + userId);
+            return;
+        }
 
         // Store decryption key first since it is more likely to fail.
         mKeyStore.setEntry(
@@ -399,7 +454,7 @@ public class PlatformKeyManager {
                             USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .setBoundToSpecificSecureUserId(userId)
+                    .setBoundToSpecificSecureUserId(secureUserId)
                     .build());
         mKeyStore.setEntry(
                 encryptAlias,

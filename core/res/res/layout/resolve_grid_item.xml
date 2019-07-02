@@ -18,59 +18,47 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:layout_width="76dp"
+              android:layout_width="@dimen/chooser_target_width"
               android:layout_height="wrap_content"
               android:minHeight="100dp"
               android:gravity="center"
-              android:paddingTop="8dp"
-              android:paddingBottom="8dp"
+              android:paddingTop="24dp"
+              android:paddingBottom="12dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
               android:focusable="true"
               android:background="?attr/selectableItemBackgroundBorderless">
 
-    <FrameLayout android:layout_width="wrap_content"
-                 android:layout_height="wrap_content">
-        <ImageView android:id="@+id/icon"
-                   android:layout_width="48dp"
-                   android:layout_height="48dp"
-                   android:layout_marginLeft="3dp"
-                   android:layout_marginRight="3dp"
-                   android:layout_marginBottom="3dp"
-                   android:scaleType="fitCenter" />
-        <ImageView android:id="@+id/target_badge"
-                   android:layout_width="16dp"
-                   android:layout_height="16dp"
-                   android:layout_gravity="end|bottom"
-                   android:visibility="gone"
-                   android:scaleType="fitCenter" />
-    </FrameLayout>
+    <ImageView android:id="@+id/icon"
+               android:layout_width="@dimen/resolver_icon_size"
+               android:layout_height="@dimen/resolver_icon_size"
+               android:scaleType="fitCenter" />
 
-    <!-- Activity name -->
+    <!-- Size manually tuned to match specs -->
+    <Space android:layout_width="1dp"
+           android:layout_height="7dp"/>
+
+    <!-- App name or Direct Share target name, DS set to 2 lines -->
     <TextView android:id="@android:id/text1"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="4dp"
-              android:layout_marginLeft="4dp"
-              android:layout_marginRight="4dp"
               android:textAppearance="?attr/textAppearanceSmall"
               android:textColor="?attr/textColorPrimary"
-              android:textSize="12sp"
-              android:fontFamily="sans-serif-condensed"
+              android:textSize="14sp"
               android:gravity="top|center_horizontal"
-              android:minLines="2"
-              android:maxLines="2"
-              android:ellipsize="marquee" />
-    <!-- Extended activity info to distinguish between duplicate activity names -->
+              android:lines="1"
+              android:ellipsize="end" />
+
+    <!-- Activity name if set, gone for Direct Share targets -->
     <TextView android:id="@android:id/text2"
               android:textAppearance="?android:attr/textAppearanceSmall"
               android:textSize="12sp"
+              android:textColor="?attr/textColorSecondary"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="4dp"
-              android:layout_marginRight="4dp"
-              android:minLines="2"
-              android:maxLines="2"
+              android:lines="1"
               android:gravity="top|center_horizontal"
-              android:ellipsize="marquee"
-              android:visibility="gone" />
+              android:ellipsize="end"/>
+
 </LinearLayout>
 

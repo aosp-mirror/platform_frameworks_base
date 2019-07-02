@@ -237,7 +237,7 @@ public final class NanoAppBinary implements Parcelable {
         out.writeByteArray(mNanoAppBinary);
     }
 
-    public static final Creator<NanoAppBinary> CREATOR =
+    public static final @android.annotation.NonNull Creator<NanoAppBinary> CREATOR =
             new Creator<NanoAppBinary>() {
                 @Override
                 public NanoAppBinary createFromParcel(Parcel in) {

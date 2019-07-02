@@ -78,7 +78,7 @@ public class CaptivePortal implements Parcelable {
         out.writeStrongBinder(mBinder);
     }
 
-    public static final Parcelable.Creator<CaptivePortal> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<CaptivePortal> CREATOR
             = new Parcelable.Creator<CaptivePortal>() {
         @Override
         public CaptivePortal createFromParcel(Parcel in) {

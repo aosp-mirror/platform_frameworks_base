@@ -618,7 +618,7 @@ public abstract class AutofillService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
-        Log.w(TAG, "Tried to bind to wrong intent: " + intent);
+        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
     }
 
@@ -651,14 +651,11 @@ public abstract class AutofillService extends Service {
     /**
      * Called when the user requests the service to save the contents of a screen.
      *
-     * <p>Service must call one of the {@link SaveCallback} methods (like
-     * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
-     * to notify the Android System of the result of the request.
-     *
      * <p>If the service could not handle the request right away&mdash;for example, because it must
      * launch an activity asking the user to authenticate first or because the network is
      * down&mdash;the service could keep the {@link SaveRequest request} and reuse it later,
-     * but the service must call {@link SaveCallback#onSuccess()} right away.
+     * but the service <b>must always</b> call {@link SaveCallback#onSuccess()} or
+     * {@link SaveCallback#onSuccess(android.content.IntentSender)} right away.
      *
      * <p><b>Note:</b> To retrieve the actual value of fields input by the user, the service
      * should call
@@ -677,6 +674,8 @@ public abstract class AutofillService extends Service {
      * Called when the Android system disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AutofillService}.
+     * It should not make calls on {@link AutofillManager} that requires the caller to be
+     * the current service.
      */
     public void onDisconnected() {
     }
@@ -698,6 +697,8 @@ public abstract class AutofillService extends Service {
      * finishing the {@link FillCallback}.
      *
      * @return The history or {@code null} if there are no events.
+     *
+     * @throws RuntimeException if the event history could not be retrieved.
      */
     @Nullable public final FillEventHistory getFillEventHistory() {
         final AutofillManager afm = getSystemService(AutofillManager.class);

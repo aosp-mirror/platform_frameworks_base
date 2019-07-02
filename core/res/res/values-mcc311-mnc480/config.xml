@@ -40,4 +40,7 @@
 
     <bool name="config_use_sim_language_file">true</bool>
 
+    <!-- Enable 5 bar signal strength icon -->
+    <bool name="config_inflateSignalStrength">true</bool>
+
 </resources>

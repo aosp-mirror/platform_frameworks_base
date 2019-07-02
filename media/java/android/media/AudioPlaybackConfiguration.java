@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL;
+import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_NONE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -42,8 +45,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /** @hide */
     public static final int PLAYER_PIID_INVALID = -1;
-    /** @hide */
-    public static final int PLAYER_PIID_UNASSIGNED = 0;
     /** @hide */
     public static final int PLAYER_UPID_INVALID = -1;
 
@@ -237,6 +238,9 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 .setUsage(in.mPlayerAttr.getUsage())
                 .setContentType(in.mPlayerAttr.getContentType())
                 .setFlags(in.mPlayerAttr.getFlags())
+                .setAllowedCapturePolicy(
+                        in.mPlayerAttr.getAllowedCapturePolicy() == ALLOW_CAPTURE_BY_ALL
+                        ? ALLOW_CAPTURE_BY_ALL : ALLOW_CAPTURE_BY_NONE)
                 .build();
         // anonymized data
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
@@ -430,7 +434,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 + " -- attr:" + apc.mPlayerAttr);
     }
 
-    public static final Parcelable.Creator<AudioPlaybackConfiguration> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioPlaybackConfiguration> CREATOR
             = new Parcelable.Creator<AudioPlaybackConfiguration>() {
         /**
          * Rebuilds an AudioPlaybackConfiguration previously stored with writeToParcel().

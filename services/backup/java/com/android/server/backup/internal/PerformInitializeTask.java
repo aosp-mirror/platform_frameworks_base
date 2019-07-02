@@ -30,8 +30,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.transport.TransportClient;
 
 import java.io.File;
@@ -49,7 +49,7 @@ import java.util.List;
  * operation was successful then it's {@link BackupTransport#TRANSPORT_OK}.
  */
 public class PerformInitializeTask implements Runnable {
-    private final BackupManagerService mBackupManagerService;
+    private final UserBackupManagerService mBackupManagerService;
     private final TransportManager mTransportManager;
     private final String[] mQueue;
     private final File mBaseStateDir;
@@ -57,7 +57,7 @@ public class PerformInitializeTask implements Runnable {
     @Nullable private IBackupObserver mObserver;
 
     public PerformInitializeTask(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             String[] transportNames,
             @Nullable IBackupObserver observer,
             OnTaskFinishedListener listener) {
@@ -72,7 +72,7 @@ public class PerformInitializeTask implements Runnable {
 
     @VisibleForTesting
     PerformInitializeTask(
-            BackupManagerService backupManagerService,
+            UserBackupManagerService backupManagerService,
             TransportManager transportManager,
             String[] transportNames,
             @Nullable IBackupObserver observer,
@@ -130,9 +130,13 @@ public class PerformInitializeTask implements Runnable {
 
                 IBackupTransport transport = transportClient.connectOrThrow(callerLogString);
                 int status = transport.initializeDevice();
-
-                if (status == BackupTransport.TRANSPORT_OK) {
+                if (status != BackupTransport.TRANSPORT_OK) {
+                    Slog.e(TAG, "Transport error in initializeDevice()");
+                } else {
                     status = transport.finishBackup();
+                    if (status != BackupTransport.TRANSPORT_OK) {
+                        Slog.e(TAG, "Transport error in finishBackup()");
+                    }
                 }
 
                 // Okay, the wipe really happened.  Clean up our local bookkeeping.
@@ -148,7 +152,6 @@ public class PerformInitializeTask implements Runnable {
                 } else {
                     // If this didn't work, requeue this one and try again
                     // after a suitable interval
-                    Slog.e(TAG, "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                     mBackupManagerService.recordInitPending(true, transportName, transportDirName);
                     notifyResult(transportName, status);

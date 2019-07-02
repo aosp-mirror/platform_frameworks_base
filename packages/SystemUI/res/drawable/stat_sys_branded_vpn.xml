@@ -13,6 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- This icon is statically overlayed - do not remove.-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="17.0dp"
         android:height="17.0dp"

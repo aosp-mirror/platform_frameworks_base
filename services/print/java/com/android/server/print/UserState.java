@@ -243,7 +243,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             intent.setData(Uri.fromParts("printjob", printJob.getId().flattenToString(), null));
             intent.putExtra(PrintManager.EXTRA_PRINT_DOCUMENT_ADAPTER, adapter.asBinder());
             intent.putExtra(PrintManager.EXTRA_PRINT_JOB, printJob);
-            intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, packageName);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
 
             IntentSender intentSender = PendingIntent.getActivityAsUser(
                     mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT

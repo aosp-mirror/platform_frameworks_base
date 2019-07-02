@@ -58,6 +58,11 @@
     <item msgid="3878793616631049349">"DRM सामग्रीको लागि मात्र HDCP जाँचको प्रयोग गर्नुहोस्"</item>
     <item msgid="45075631231212732">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
   </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"असक्षम पारिएको छ"</item>
+    <item msgid="1969681323976948639">"फिल्टर सक्षम पारियो"</item>
+    <item msgid="8719029132154020716">"सक्षम पारिएको छ"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP १.४ (पूर्वनिर्धारित)"</item>
     <item msgid="2809759619990248160">"AVRCP १.३"</item>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"सन्तुलित अडियो र जडान गुणस्तर"</item>
     <item msgid="4681409244565426925">"जडानको गुणस्तर सुधार्न अनुकूलन गरिएको"</item>
     <item msgid="364670732877872677">"उत्कृष्ट प्रयास (अनुकूलनीय बिट दर)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", सक्रिय"</item>
+    <item msgid="8962366465966010158">", सक्रिय (मिडिया)"</item>
+    <item msgid="4046665544396189228">", सक्रिय (फोन)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"निष्क्रिय गर्नुहोस्"</item>

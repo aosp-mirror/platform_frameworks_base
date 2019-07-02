@@ -33,7 +33,6 @@ namespace statsd {
 
 class EventMetricProducer : public MetricProducer {
 public:
-    // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     EventMetricProducer(const ConfigKey& key, const EventMetric& eventMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
                         const int64_t startTimeNs);
@@ -48,6 +47,8 @@ private:
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
+                            const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
     void clearPastBucketsLocked(const int64_t dumpTimeNs) override;

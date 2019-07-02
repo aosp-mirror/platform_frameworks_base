@@ -15,11 +15,12 @@
  */
 package com.android.systemui;
 
+import static android.widget.Toast.Duration;
+
 import android.annotation.StringRes;
 import android.content.Context;
 import android.view.WindowManager;
 import android.widget.Toast;
-import static android.widget.Toast.Duration;
 
 public class SysUIToast {
 

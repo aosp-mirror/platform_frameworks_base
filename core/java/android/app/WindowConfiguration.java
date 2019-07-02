@@ -19,7 +19,9 @@ package android.app;
 import static android.app.ActivityThread.isSystem;
 import static android.app.WindowConfigurationProto.ACTIVITY_TYPE;
 import static android.app.WindowConfigurationProto.APP_BOUNDS;
+import static android.app.WindowConfigurationProto.BOUNDS;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
+import static android.view.Surface.rotationToString;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -28,8 +30,12 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 import android.view.DisplayInfo;
+
+import java.io.IOException;
 
 /**
  * Class that contains windowing configuration/state for other objects that contain windows directly
@@ -56,8 +62,22 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      */
     private Rect mAppBounds;
 
+    /**
+     * The current rotation of this window container relative to the default
+     * orientation of the display it is on (regardless of how deep in the hierarchy
+     * it is). It is used by the configuration hierarchy to apply rotation-dependent
+     * policy during bounds calculation.
+     */
+    private int mRotation = ROTATION_UNDEFINED;
+
+    /** Rotation is not defined, use the parent containers rotation. */
+    public static final int ROTATION_UNDEFINED = -1;
+
     /** The current windowing mode of the configuration. */
     private @WindowingMode int mWindowingMode;
+
+    /** The display windowing mode of the configuration */
+    private @WindowingMode int mDisplayWindowingMode;
 
     /** Windowing mode is currently not defined. */
     public static final int WINDOWING_MODE_UNDEFINED = 0;
@@ -124,6 +144,24 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface ActivityType {}
 
+    /** The current always on top status of the configuration. */
+    private @AlwaysOnTop int mAlwaysOnTop;
+
+    /** Always on top is currently not defined. */
+    private static final int ALWAYS_ON_TOP_UNDEFINED = 0;
+    /** Always on top is currently on for this configuration. */
+    private static final int ALWAYS_ON_TOP_ON = 1;
+    /** Always on top is currently off for this configuration. */
+    private static final int ALWAYS_ON_TOP_OFF = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "ALWAYS_ON_TOP_" }, value = {
+            ALWAYS_ON_TOP_UNDEFINED,
+            ALWAYS_ON_TOP_ON,
+            ALWAYS_ON_TOP_OFF,
+    })
+    private @interface AlwaysOnTop {}
+
     /** Bit that indicates that the {@link #mBounds} changed.
      * @hide */
     public static final int WINDOW_CONFIG_BOUNDS = 1 << 0;
@@ -136,13 +174,25 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Bit that indicates that the {@link #mActivityType} changed.
      * @hide */
     public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 3;
+    /** Bit that indicates that the {@link #mAlwaysOnTop} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_ALWAYS_ON_TOP = 1 << 4;
+    /** Bit that indicates that the {@link #mRotation} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_ROTATION = 1 << 5;
+    /** Bit that indicates that the {@link #mDisplayWindowingMode} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_DISPLAY_WINDOWING_MODE = 1 << 6;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "WINDOW_CONFIG_" }, value = {
             WINDOW_CONFIG_BOUNDS,
             WINDOW_CONFIG_APP_BOUNDS,
             WINDOW_CONFIG_WINDOWING_MODE,
-            WINDOW_CONFIG_ACTIVITY_TYPE
+            WINDOW_CONFIG_ACTIVITY_TYPE,
+            WINDOW_CONFIG_ALWAYS_ON_TOP,
+            WINDOW_CONFIG_ROTATION,
+            WINDOW_CONFIG_DISPLAY_WINDOWING_MODE,
     })
     public @interface WindowConfig {}
 
@@ -168,6 +218,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         dest.writeParcelable(mAppBounds, flags);
         dest.writeInt(mWindowingMode);
         dest.writeInt(mActivityType);
+        dest.writeInt(mAlwaysOnTop);
+        dest.writeInt(mRotation);
+        dest.writeInt(mDisplayWindowingMode);
     }
 
     private void readFromParcel(Parcel source) {
@@ -175,6 +228,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mAppBounds = source.readParcelable(Rect.class.getClassLoader());
         mWindowingMode = source.readInt();
         mActivityType = source.readInt();
+        mAlwaysOnTop = source.readInt();
+        mRotation = source.readInt();
+        mDisplayWindowingMode = source.readInt();
     }
 
     @Override
@@ -183,7 +239,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /** @hide */
-    public static final Creator<WindowConfiguration> CREATOR = new Creator<WindowConfiguration>() {
+    public static final @android.annotation.NonNull Creator<WindowConfiguration> CREATOR = new Creator<WindowConfiguration>() {
         @Override
         public WindowConfiguration createFromParcel(Parcel in) {
             return new WindowConfiguration(in);
@@ -222,6 +278,21 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
     }
 
+
+
+    /**
+     * Sets whether this window should be always on top.
+     * @param alwaysOnTop {@code true} to set window always on top, otherwise {@code false}
+     * @hide
+     */
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        mAlwaysOnTop = alwaysOnTop ? ALWAYS_ON_TOP_ON : ALWAYS_ON_TOP_OFF;
+    }
+
+    private void setAlwaysOnTop(@AlwaysOnTop int alwaysOnTop) {
+        mAlwaysOnTop = alwaysOnTop;
+    }
+
     /**
      * @see #setAppBounds(Rect)
      * @see #getAppBounds()
@@ -245,6 +316,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mBounds;
     }
 
+    public int getRotation() {
+        return mRotation;
+    }
+
+    public void setRotation(int rotation) {
+        mRotation = rotation;
+    }
+
     public void setWindowingMode(@WindowingMode int windowingMode) {
         mWindowingMode = windowingMode;
     }
@@ -253,6 +332,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public int getWindowingMode() {
         return mWindowingMode;
     }
+
+    /** @hide */
+    public void setDisplayWindowingMode(@WindowingMode int windowingMode) {
+        mDisplayWindowingMode = windowingMode;
+    }
+
 
     public void setActivityType(@ActivityType int activityType) {
         if (mActivityType == activityType) {
@@ -281,6 +366,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setAppBounds(other.mAppBounds);
         setWindowingMode(other.mWindowingMode);
         setActivityType(other.mActivityType);
+        setAlwaysOnTop(other.mAlwaysOnTop);
+        setRotation(other.mRotation);
+        setDisplayWindowingMode(other.mDisplayWindowingMode);
     }
 
     /** Set this object to completely undefined.
@@ -295,6 +383,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setBounds(null);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
         setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        setAlwaysOnTop(ALWAYS_ON_TOP_UNDEFINED);
+        setRotation(ROTATION_UNDEFINED);
+        setDisplayWindowingMode(WINDOWING_MODE_UNDEFINED);
     }
 
     /**
@@ -325,6 +416,20 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                 && mActivityType != delta.mActivityType) {
             changed |= WINDOW_CONFIG_ACTIVITY_TYPE;
             setActivityType(delta.mActivityType);
+        }
+        if (delta.mAlwaysOnTop != ALWAYS_ON_TOP_UNDEFINED
+                && mAlwaysOnTop != delta.mAlwaysOnTop) {
+            changed |= WINDOW_CONFIG_ALWAYS_ON_TOP;
+            setAlwaysOnTop(delta.mAlwaysOnTop);
+        }
+        if (delta.mRotation != ROTATION_UNDEFINED && delta.mRotation != mRotation) {
+            changed |= WINDOW_CONFIG_ROTATION;
+            setRotation(delta.mRotation);
+        }
+        if (delta.mDisplayWindowingMode != WINDOWING_MODE_UNDEFINED
+                && mDisplayWindowingMode != delta.mDisplayWindowingMode) {
+            changed |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
+            setDisplayWindowingMode(delta.mDisplayWindowingMode);
         }
         return changed;
     }
@@ -364,6 +469,21 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changes |= WINDOW_CONFIG_ACTIVITY_TYPE;
         }
 
+        if ((compareUndefined || other.mAlwaysOnTop != ALWAYS_ON_TOP_UNDEFINED)
+                && mAlwaysOnTop != other.mAlwaysOnTop) {
+            changes |= WINDOW_CONFIG_ALWAYS_ON_TOP;
+        }
+
+        if ((compareUndefined || other.mRotation != ROTATION_UNDEFINED)
+                && mRotation != other.mRotation) {
+            changes |= WINDOW_CONFIG_ROTATION;
+        }
+
+        if ((compareUndefined || other.mDisplayWindowingMode != WINDOWING_MODE_UNDEFINED)
+                && mDisplayWindowingMode != other.mDisplayWindowingMode) {
+            changes |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
+        }
+
         return changes;
     }
 
@@ -398,6 +518,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (n != 0) return n;
         n = mActivityType - that.mActivityType;
         if (n != 0) return n;
+        n = mAlwaysOnTop - that.mAlwaysOnTop;
+        if (n != 0) return n;
+        n = mRotation - that.mRotation;
+        if (n != 0) return n;
+        n = mDisplayWindowingMode - that.mDisplayWindowingMode;
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -425,6 +551,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
         result = 31 * result + mWindowingMode;
         result = 31 * result + mActivityType;
+        result = 31 * result + mAlwaysOnTop;
+        result = 31 * result + mRotation;
+        result = 31 * result + mDisplayWindowingMode;
         return result;
     }
 
@@ -434,7 +563,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return "{ mBounds=" + mBounds
                 + " mAppBounds=" + mAppBounds
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
-                + " mActivityType=" + activityTypeToString(mActivityType) + "}";
+                + " mDisplayWindowingMode=" + windowingModeToString(mDisplayWindowingMode)
+                + " mActivityType=" + activityTypeToString(mActivityType)
+                + " mAlwaysOnTop=" + alwaysOnTopToString(mAlwaysOnTop)
+                + " mRotation=" + (mRotation == ROTATION_UNDEFINED
+                        ? "undefined" : rotationToString(mRotation))
+                + "}";
     }
 
     /**
@@ -452,7 +586,46 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
         protoOutputStream.write(WINDOWING_MODE, mWindowingMode);
         protoOutputStream.write(ACTIVITY_TYPE, mActivityType);
+        if (mBounds != null) {
+            mBounds.writeToProto(protoOutputStream, BOUNDS);
+        }
         protoOutputStream.end(token);
+    }
+
+    /**
+     * Read from a protocol buffer input stream.
+     * Protocol buffer message definition at {@link android.app.WindowConfigurationProto}
+     *
+     * @param proto   Stream to read the WindowConfiguration object from.
+     * @param fieldId Field Id of the WindowConfiguration as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(ProtoInputStream proto, long fieldId)
+            throws IOException, WireTypeMismatchException {
+        final long token = proto.start(fieldId);
+        try {
+            while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                switch (proto.getFieldNumber()) {
+                    case (int) APP_BOUNDS:
+                        mAppBounds = new Rect();
+                        mAppBounds.readFromProto(proto, APP_BOUNDS);
+                        break;
+                    case (int) BOUNDS:
+                        mBounds = new Rect();
+                        mBounds.readFromProto(proto, BOUNDS);
+                        break;
+                    case (int) WINDOWING_MODE:
+                        mWindowingMode = proto.readInt(WINDOWING_MODE);
+                        break;
+                    case (int) ACTIVITY_TYPE:
+                        mActivityType = proto.readInt(ACTIVITY_TYPE);
+                        break;
+                }
+            }
+        } finally {
+            // Let caller handle any exceptions
+            proto.end(token);
+        }
     }
 
     /**
@@ -470,7 +643,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean hasWindowDecorCaption() {
-        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+        return mActivityType == ACTIVITY_TYPE_STANDARD && (mWindowingMode == WINDOWING_MODE_FREEFORM
+                || mDisplayWindowingMode == WINDOWING_MODE_FREEFORM);
     }
 
     /**
@@ -507,6 +681,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
+     * Returns true if the windowingMode represents a split window.
+     * @hide
+     */
+    public static boolean isSplitScreenWindowingMode(int windowingMode) {
+        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    }
+
+    /**
      * Returns true if the windows associated with this window configuration can receive input keys.
      * @hide
      */
@@ -520,7 +703,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean isAlwaysOnTop() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
+        return mWindowingMode == WINDOWING_MODE_PINNED
+                || (mWindowingMode == WINDOWING_MODE_FREEFORM && mAlwaysOnTop == ALWAYS_ON_TOP_ON);
     }
 
     /**
@@ -596,5 +780,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             case ACTIVITY_TYPE_ASSISTANT: return "assistant";
         }
         return String.valueOf(applicationType);
+    }
+
+    /** @hide */
+    public static String alwaysOnTopToString(@AlwaysOnTop int alwaysOnTop) {
+        switch (alwaysOnTop) {
+            case ALWAYS_ON_TOP_UNDEFINED: return "undefined";
+            case ALWAYS_ON_TOP_ON: return "on";
+            case ALWAYS_ON_TOP_OFF: return "off";
+        }
+        return String.valueOf(alwaysOnTop);
     }
 }

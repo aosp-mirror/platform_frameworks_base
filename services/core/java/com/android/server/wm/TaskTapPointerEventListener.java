@@ -16,6 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_NOT_SPECIFIED;
+import static android.view.PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
+
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -24,16 +30,13 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.PointerIcon.TYPE_NOT_SPECIFIED;
-import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
-
+/**
+ * 1. Adjust the top most focus display if touch down on some display.
+ * 2. Adjust the pointer icon when cursor moves to the task bounds.
+ */
 public class TaskTapPointerEventListener implements PointerEventListener {
 
-    final private Region mTouchExcludeRegion = new Region();
+    private final Region mTouchExcludeRegion = new Region();
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final Rect mTmpRect = new Rect();
@@ -46,16 +49,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     }
 
     @Override
-    public void onPointerEvent(MotionEvent motionEvent, int displayId) {
-        if (displayId == getDisplayId()) {
-            onPointerEvent(motionEvent);
-        }
-    }
-
-    @Override
     public void onPointerEvent(MotionEvent motionEvent) {
-        final int action = motionEvent.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
+        switch (motionEvent.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
@@ -68,7 +63,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 }
             }
             break;
-
+            case MotionEvent.ACTION_HOVER_ENTER:
             case MotionEvent.ACTION_HOVER_MOVE: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
@@ -96,11 +91,24 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     mPointerIconType = iconType;
                     if (mPointerIconType == TYPE_NOT_SPECIFIED) {
                         // Find the underlying window and ask it restore the pointer icon.
+                        mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
                         mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
                                 x, y, mDisplayContent).sendToTarget();
                     } else {
                         InputManager.getInstance().setPointerIconType(mPointerIconType);
                     }
+                }
+            }
+            break;
+            case MotionEvent.ACTION_HOVER_EXIT: {
+                final int x = (int) motionEvent.getX();
+                final int y = (int) motionEvent.getY();
+                if (mPointerIconType != TYPE_NOT_SPECIFIED) {
+                    mPointerIconType = TYPE_NOT_SPECIFIED;
+                    // Find the underlying window and ask it to restore the pointer icon.
+                    mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
+                    mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
+                            x, y, mDisplayContent).sendToTarget();
                 }
             }
             break;
@@ -111,9 +119,5 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         synchronized (this) {
            mTouchExcludeRegion.set(newRegion);
         }
-    }
-
-    private int getDisplayId() {
-        return mDisplayContent.getDisplayId();
     }
 }

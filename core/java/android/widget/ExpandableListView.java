@@ -242,6 +242,8 @@ public class ExpandableListView extends ListView {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ExpandableListView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.ExpandableListView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mGroupIndicator = a.getDrawable(
                 com.android.internal.R.styleable.ExpandableListView_groupIndicator);
@@ -1316,7 +1318,7 @@ public class ExpandableListView extends ListView {
             out.writeList(expandedGroupMetadataList);
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

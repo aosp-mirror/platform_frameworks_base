@@ -63,7 +63,7 @@ public class ExtractedTextRequest implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<ExtractedTextRequest> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ExtractedTextRequest> CREATOR
             = new Parcelable.Creator<ExtractedTextRequest>() {
         public ExtractedTextRequest createFromParcel(Parcel source) {
             ExtractedTextRequest res = new ExtractedTextRequest();

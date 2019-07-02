@@ -18,8 +18,8 @@ package android.security;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.WorkerThread;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -39,8 +38,11 @@ import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 
+import com.android.org.conscrypt.TrustedCertificateStore;
+
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.Principal;
 import java.security.PrivateKey;
@@ -56,7 +58,7 @@ import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.android.org.conscrypt.TrustedCertificateStore;
+import javax.security.auth.x500.X500Principal;
 
 /**
  * The {@code KeyChain} class provides access to private keys and
@@ -143,6 +145,18 @@ public final class KeyChain {
     public static final String EXTRA_SENDER = "sender";
 
     /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_KEY_TYPES = "key_types";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_ISSUERS = "issuers";
+
+    /**
      * Action to bring up the CertInstaller.
      */
     private static final String ACTION_INSTALL = "android.credentials.INSTALL";
@@ -200,8 +214,8 @@ public final class KeyChain {
      *
      * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_TRUST_STORE_CHANGED} or
      * {@link #ACTION_KEY_ACCESS_CHANGED}. Apps that target a version higher than
-     * {@link Build.VERSION_CODES#N_MR1} will only receive this broadcast if they register for it
-     * at runtime.
+     * {@link android.os.Build.VERSION_CODES#N_MR1} will only receive this broadcast if they
+     * register for it at runtime.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
@@ -284,10 +298,16 @@ public final class KeyChain {
     public static final int KEY_GEN_NO_KEYSTORE_PROVIDER = 5;
 
     /**
+     * StrongBox unavailable when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_STRONGBOX_UNAVAILABLE = 6;
+
+    /**
      * General failure while calling {@link #generateKeyPair}
      * @hide
      */
-    public static final int KEY_GEN_FAILURE = 6;
+    public static final int KEY_GEN_FAILURE = 7;
 
     /**
      * Successful call to {@link #attestKey}
@@ -360,9 +380,10 @@ public final class KeyChain {
      * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
-     * highlight suggested choices to the user, although to cope with
-     * sometimes erroneous values provided by servers, the user may be
-     * able to override these suggestions.
+     * narrow down suggested choices to the user. If either {@code keyTypes}
+     * or {@code issuers} is specified and non-empty, and there are no
+     * matching certificates in the KeyChain, then the certificate
+     * selection prompt would be suppressed entirely.
      *
      * <p>{@code host} and {@code port} may be used to give the user
      * more context about the server requesting the credentials.
@@ -377,7 +398,7 @@ public final class KeyChain {
      * @param response Callback to invoke when the request completes;
      *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "RSA" or "DSA", or null.
+     *     "RSA", "EC" or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param host The host name of the server requesting the
@@ -414,9 +435,10 @@ public final class KeyChain {
      * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
-     * highlight suggested choices to the user, although to cope with
-     * sometimes erroneous values provided by servers, the user may be
-     * able to override these suggestions.
+     * narrow down suggested choices to the user. If either {@code keyTypes}
+     * or {@code issuers} is specified and non-empty, and there are no
+     * matching certificates in the KeyChain, then the certificate
+     * selection prompt would be suppressed entirely.
      *
      * <p>{@code uri} may be used to give the user more context about
      * the server requesting the credentials.
@@ -431,13 +453,15 @@ public final class KeyChain {
      * @param response Callback to invoke when the request completes;
      *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "EC" or "RSA", or null.
+     *     "RSA", "EC" or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param uri The full URI the server is requesting the certificate
      *     for, or null if unavailable.
      * @param alias The alias to preselect if available, or null if
      *     unavailable.
+     * @throws IllegalArgumentException if the specified issuers are not
+     *     of type {@code X500Principal}.
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
@@ -445,20 +469,21 @@ public final class KeyChain {
             @Nullable Principal[] issuers,
             @Nullable Uri uri, @Nullable String alias) {
         /*
-         * TODO currently keyTypes, issuers are unused. They are meant
-         * to follow the semantics and purpose of X509KeyManager
-         * method arguments.
+         * Specifying keyTypes excludes certificates with different key types
+         * from the list of certificates presented to the user.
+         * In practice today, most servers would require RSA or EC
+         * certificates.
          *
-         * keyTypes would allow the list to be filtered and typically
-         * will be set correctly by the server. In practice today,
-         * most all users will want only RSA or EC, and usually
-         * only a small number of certs will be available.
-         *
-         * issuers is typically not useful. Some servers historically
-         * will send the entire list of public CAs known to the
-         * server. Others will send none. If this is used, if there
-         * are no matches after applying the constraint, it should be
-         * ignored.
+         * Specifying issuers narrows down the list by filtering out
+         * certificates with issuers which are not matching the provided ones.
+         * This has been reported to Chrome several times (crbug.com/731769).
+         * There's no concrete description on what to do when the client has no
+         * certificates that match the provided issuers.
+         * To be conservative, Android will not present the user with any
+         * certificates to choose from.
+         * If the list of issuers is empty then the client may send any
+         * certificate, see:
+         * https://tools.ietf.org/html/rfc5246#section-7.4.4
          */
         if (activity == null) {
             throw new NullPointerException("activity == null");
@@ -471,6 +496,26 @@ public final class KeyChain {
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_URI, uri);
         intent.putExtra(EXTRA_ALIAS, alias);
+        intent.putExtra(EXTRA_KEY_TYPES, keyTypes);
+        ArrayList<byte[]> issuersList = new ArrayList();
+        if (issuers != null) {
+            for (Principal issuer: issuers) {
+                // In a TLS client context (like Chrome), issuers would only
+                // be specified as X500Principals. No other use cases for
+                // specifying principals have been brought up. Under these
+                // circumstances, only allow issuers specified as
+                // X500Principals.
+                if (!(issuer instanceof X500Principal)) {
+                    throw new IllegalArgumentException(String.format(
+                            "Issuer %s is of type %s, not X500Principal",
+                            issuer.toString(), issuer.getClass()));
+                }
+                // Pass the DER-encoded issuer as that's the most accurate
+                // representation and what is sent over the wire.
+                issuersList.add(((X500Principal) issuer).getEncoded());
+            }
+        }
+        intent.putExtra(EXTRA_ISSUERS, (Serializable) issuersList);
         // the PendingIntent is used to get calling package name
         intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
         activity.startActivity(intent);
@@ -487,14 +532,23 @@ public final class KeyChain {
     }
 
     /**
-     * Returns the {@code PrivateKey} for the requested alias, or null
-     * if there is no result.
+     * Returns the {@code PrivateKey} for the requested alias, or null if the alias does not exist
+     * or the caller has no permission to access it (see note on exceptions below).
      *
      * <p> This method may block while waiting for a connection to another process, and must never
      * be called from the main thread.
      * <p> As {@link Activity} and {@link Service} contexts are short-lived and can be destroyed
      * at any time from the main thread, it is safer to rely on a long-lived context such as one
      * returned from {@link Context#getApplicationContext()}.
+     *
+     * <p> If the caller provides a valid alias to which it was not granted access, then the
+     * caller must invoke {@link #choosePrivateKeyAlias} again to get another valid alias
+     * or a grant to access the same alias.
+     * <p>On Android versions prior to Q, when a key associated with the specified alias is
+     * unavailable, the method will throw a {@code KeyChainException} rather than return null.
+     * If the exception's cause (as obtained by calling {@code KeyChainException.getCause()})
+     * is a throwable of type {@code IllegalStateException} then the caller lacks a grant
+     * to access the key and certificates associated with this alias.
      *
      * @param alias The alias of the desired private key, typically returned via
      *              {@link KeyChainAliasCallback#alias}.
@@ -546,8 +600,10 @@ public final class KeyChain {
     }
 
     /**
-     * Returns the {@code X509Certificate} chain for the requested
-     * alias, or null if there is no result.
+     * Returns the {@code X509Certificate} chain for the requested alias, or null if the alias
+     * does not exist or the caller has no permission to access it (see note on exceptions
+     * in {@link #getPrivateKey}).
+     *
      * <p>
      * <strong>Note:</strong> If a certificate chain was explicitly specified when the alias was
      * installed, this method will return that chain. If only the client certificate was specified
@@ -559,6 +615,9 @@ public final class KeyChain {
      * <p> As {@link Activity} and {@link Service} contexts are short-lived and can be destroyed
      * at any time from the main thread, it is safer to rely on a long-lived context such as one
      * returned from {@link Context#getApplicationContext()}.
+     * <p> In case the caller specifies an alias for which it lacks a grant, it must call
+     * {@link #choosePrivateKeyAlias} again. See {@link #getPrivateKey} for more details on
+     * coping with this scenario.
      *
      * @param alias The alias of the desired certificate chain, typically
      * returned via {@link KeyChainAliasCallback#alias}.

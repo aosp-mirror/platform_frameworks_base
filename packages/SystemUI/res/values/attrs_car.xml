@@ -15,16 +15,23 @@
 -->
 
 <resources>
+    <attr name="icon" format="reference"/>
+    <attr name="selectedIcon" format="reference"/>
+    <attr name="intent" format="string"/>
+    <attr name="longIntent" format="string"/>
+    <attr name="selectedAlpha" format="float" />
+    <attr name="unselectedAlpha" format="float" />
+
     <!-- Allow for custom attribs to be added to a facet button -->
     <declare-styleable name="CarFacetButton">
         <!-- icon to be rendered (drawable) -->
-        <attr name="icon" format="reference"/>
+        <attr name="icon"/>
         <!-- icon to be rendered when in selected state -->
-        <attr name="selectedIcon" format="reference"/>
+        <attr name="selectedIcon"/>
         <!-- intent to start when button is click -->
-        <attr name="intent" format="string"/>
+        <attr name="intent"/>
         <!-- intent to start when a long press has happened -->
-        <attr name="longIntent" format="string"/>
+        <attr name="longIntent"/>
         <!-- categories that will be added as extras to the fired intents -->
         <attr name="categories" format="string"/>
         <!-- package names that will be added as extras to the fired intents -->
@@ -32,9 +39,9 @@
         <!-- componentName names that will be used for detecting selected state -->
         <attr name="componentNames" format="string" />
         <!-- Alpha value to used when in selected state.  Defaults 1f  -->
-        <attr name="selectedAlpha" format="float" />
+        <attr name="selectedAlpha" />
         <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
-        <attr name="unselectedAlpha" format="float" />
+        <attr name="unselectedAlpha" />
         <!-- Render a "more" icon. Defaults true  -->
         <attr name="useMoreIcon" format="boolean" />
 
@@ -44,17 +51,17 @@
     <!-- Allow for custom attribs to be added to a nav button -->
     <declare-styleable name="CarNavigationButton">
         <!-- intent to start when button is click -->
-        <attr name="intent" format="string"/>
+        <attr name="intent" />
         <!-- intent to start when a long press has happened -->
-        <attr name="longIntent" format="string"/>
+        <attr name="longIntent" />
         <!-- start the intent as a broad cast instead of an activity if true-->
         <attr name="broadcast" format="boolean"/>
         <!-- Alpha value to used when in selected state.  Defaults 1f  -->
-        <attr name="selectedAlpha" format="float" />
+        <attr name="selectedAlpha" />
         <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
-        <attr name="unselectedAlpha" format="float" />
+        <attr name="unselectedAlpha" />
         <!-- icon to be rendered when in selected state -->
-        <attr name="selectedIcon" format="reference"/>
+        <attr name="selectedIcon" />
     </declare-styleable>
 
     <!-- Custom attributes to configure hvac values -->
@@ -89,6 +96,6 @@
         </attr>
 
         <!-- Icon resource ids to render on UI -->
-        <attr name="icon" format="reference"/>
+        <attr name="icon" />
     </declare-styleable>
 </resources>

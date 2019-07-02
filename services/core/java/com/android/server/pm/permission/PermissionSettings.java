@@ -47,8 +47,6 @@ import java.util.Set;
  */
 public class PermissionSettings {
 
-    public final boolean mPermissionReviewRequired;
-
     /**
      * All of the permissions known to the system. The mapping is from permission
      * name to permission object.
@@ -82,9 +80,7 @@ public class PermissionSettings {
 
     private final Object mLock;
 
-    PermissionSettings(@NonNull Context context, @NonNull Object lock) {
-        mPermissionReviewRequired =
-                context.getResources().getBoolean(R.bool.config_permissionReviewRequired);
+    PermissionSettings(@NonNull Object lock) {
         mLock = lock;
     }
 

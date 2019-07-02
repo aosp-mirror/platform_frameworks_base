@@ -41,7 +41,7 @@ public:
                          int32_t width, int32_t height);
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
 #endif  // ANDROID_HWUI_BLUR_H

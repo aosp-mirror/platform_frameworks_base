@@ -1,0 +1,67 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.debug;
+
+option java_outer_classname = "AdbProtoEnums";
+option java_multiple_files = true;
+
+/**
+ * adb connection state used to track adb connection changes in AdbDebuggingManager.java.
+ */
+enum AdbConnectionStateEnum {
+    UNKNOWN = 0;
+
+    /**
+     * The adb connection is waiting for approval from the user.
+     */
+    AWAITING_USER_APPROVAL = 1;
+
+    /**
+     * The user allowed the adb connection from the system.
+     */
+    USER_ALLOWED = 2;
+
+    /**
+     * The user denied the adb connection from the system.
+     */
+    USER_DENIED = 3;
+
+    /**
+     * The adb connection was automatically allowed without user interaction due to the system
+     * being previously allowed by the user with the 'always allow' option selected, and the adb
+     * grant has not yet expired.
+     */
+    AUTOMATICALLY_ALLOWED = 4;
+
+    /**
+     * An empty or invalid base64 encoded key was provided to the framework; the connection was
+     * automatically denied.
+     */
+    DENIED_INVALID_KEY = 5;
+
+    /**
+     * vold decrypt has not yet occurred; the connection was automatically denied.
+     */
+    DENIED_VOLD_DECRYPT = 6;
+
+    /**
+     * The adb session has been disconnected.
+     */
+    DISCONNECTED = 7;
+}
+

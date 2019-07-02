@@ -182,7 +182,7 @@ public final class RecommendationInfo implements Parcelable {
      *
      * @see #RecommendationInfo(Parcel)
      */
-    public static final Creator<RecommendationInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<RecommendationInfo> CREATOR =
             new Creator<RecommendationInfo>() {
                 @Override
                 public RecommendationInfo createFromParcel(Parcel in) {

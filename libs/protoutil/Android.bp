@@ -12,9 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-cc_library {
-    name: "libprotoutil",
+cc_defaults {
+    name: "libprotoutil_defaults",
 
     cflags: [
         "-Wall",
@@ -26,31 +25,46 @@ cc_library {
 
     srcs: [
         "src/EncodedBuffer.cpp",
+        "src/ProtoFileReader.cpp",
         "src/ProtoOutputStream.cpp",
+        "src/ProtoReader.cpp",
         "src/protobuf.cpp",
     ],
 
-    export_include_dirs: ["include"],
-
     shared_libs: [
+        "libbase",
+        "libutils",
         "libcutils",
         "liblog",
     ],
 }
 
+cc_library {
+    name: "libprotoutil",
+
+    defaults: ["libprotoutil_defaults"],
+
+    export_include_dirs: ["include"],
+}
+
 cc_test {
     name: "libprotoutil_test",
 
-    srcs: [
-        "tests/EncodedBuffer_test.cpp",
-    ],
+    defaults: ["libprotoutil_defaults"],
+
+    local_include_dirs: ["include"],
+
+    srcs: ["tests/*"],
 
     shared_libs: [
-        "libcutils",
-        "libprotoutil",
+        "libprotobuf-cpp-full",
     ],
 
     static_libs: [
         "libgmock",
     ],
+
+    proto: {
+        type: "full",
+    }
 }

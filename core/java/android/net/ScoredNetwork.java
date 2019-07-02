@@ -302,7 +302,7 @@ public class ScoredNetwork implements Parcelable {
         return NetworkBadging.BADGING_NONE;
     }
 
-    public static final Parcelable.Creator<ScoredNetwork> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ScoredNetwork> CREATOR =
             new Parcelable.Creator<ScoredNetwork>() {
                 @Override
                 public ScoredNetwork createFromParcel(Parcel in) {

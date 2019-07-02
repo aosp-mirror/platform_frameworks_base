@@ -8,8 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ଇଂରାଜୀ (ୟୁଏସ୍‍), ଇଣ୍ଟରନେସନାଲ୍‍ ଷ୍ଟାଇଲ୍‍"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ଇଂରାଜୀ (ୟୁଏସ୍‍), କୋଲେମକ୍‍ ଷ୍ଟାଇଲ୍‍"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ଇଂରାଜୀ (ୟୁଏସ୍‍), ଡଭୋରାକ୍‌ ଷ୍ଟାଇଲ୍‍"</string>
-    <!-- no translation found for keyboard_layout_english_us_workman_label (2944541595262173111) -->
-    <skip />
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ଇଂରାଜୀ (ୟୁଏସ୍‍), ୱର୍କମ୍ୟାନ୍‍ ଷ୍ଟାଇଲ୍‍"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"ଜର୍ମାନ୍‌"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"ଫ୍ରେଞ୍ଚ"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ଫ୍ରେଞ୍ଚ (କାନାଡ଼ା)"</string>
@@ -42,8 +41,7 @@
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"ଲିଥୁଆନିଆନ୍"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"ସ୍ପାନିଶ୍‍ (ଲାଟିନ୍‌)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"ଲାଟିଭିଆନ୍‍"</string>
-    <!-- no translation found for keyboard_layout_persian (3920643161015888527) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_azerbaijani (7315895417176467567) -->
-    <skip />
+    <string name="keyboard_layout_persian" msgid="3920643161015888527">"ପାର୍ସିଆନ୍‌"</string>
+    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ଆଜେର୍‌ବୈଜାନି"</string>
+    <string name="keyboard_layout_polish" msgid="1121588624094925325">"ପଲିଶ୍"</string>
 </resources>

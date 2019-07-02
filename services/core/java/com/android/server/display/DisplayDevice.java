@@ -19,7 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
-import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -138,9 +138,19 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Sets the mode, if supported.
+     * Sets the display modes the system is allowed to switch between, roughly ordered by
+     * preference.
+     *
+     * Not all display devices will automatically switch between modes, so it's important that the
+     * most-desired modes are at the beginning of the allowed array.
      */
-    public void requestDisplayModesLocked(int colorMode, int modeId) {
+    public void setAllowedDisplayModesLocked(int[] modes) {
+    }
+
+    /**
+     * Sets the requested color mode.
+     */
+    public void setRequestedColorModeLocked(int colorMode) {
     }
 
     public void onOverlayChangedLocked() {
@@ -224,6 +234,14 @@ abstract class DisplayDevice {
         DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
         viewport.deviceWidth = isRotated ? info.height : info.width;
         viewport.deviceHeight = isRotated ? info.width : info.height;
+
+        viewport.uniqueId = info.uniqueId;
+
+        if (info.address instanceof DisplayAddress.Physical) {
+            viewport.physicalPort = ((DisplayAddress.Physical) info.address).getPort();
+        } else {
+            viewport.physicalPort = null;
+        }
     }
 
     /**

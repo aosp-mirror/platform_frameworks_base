@@ -24,8 +24,12 @@
 #include <sys/system_properties.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
+
+#include <sstream>
+#include <string>
 
 #include "android-base/logging.h"
 #include "android-base/properties.h"
@@ -38,7 +42,10 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
+#include "androidfw/PosixUtils.h"
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/ResourceUtils.h"
+
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/JNIHelp.h"
@@ -54,6 +61,7 @@ extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 using ::android::base::StringPrintf;
+using ::android::util::ExecuteBinary;
 
 namespace android {
 
@@ -95,6 +103,12 @@ static struct configuration_offsets_t {
   jfieldID mScreenWidthDpOffset;
   jfieldID mScreenHeightDpOffset;
 } gConfigurationOffsets;
+
+static struct arraymap_offsets_t {
+  jclass classObject;
+  jmethodID constructor;
+  jmethodID put;
+} gArrayMapOffsets;
 
 jclass g_stringClass = nullptr;
 
@@ -149,7 +163,7 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
       }
 
       // Generic idmap parameters
-      const char* argv[8];
+      const char* argv[10];
       int argc = 0;
       struct stat st;
 
@@ -161,22 +175,36 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
       argv[argc++] = AssetManager::IDMAP_DIR;
 
       // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
-      // use OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to OVERLAY_DIR.
+      // use VENDOR_OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in
+      // addition to VENDOR_OVERLAY_DIR.
       std::string overlay_theme_path = base::GetProperty(AssetManager::OVERLAY_THEME_DIR_PROPERTY,
                                                          "");
       if (!overlay_theme_path.empty()) {
-        overlay_theme_path = std::string(AssetManager::OVERLAY_DIR) + "/" + overlay_theme_path;
+        overlay_theme_path =
+          std::string(AssetManager::VENDOR_OVERLAY_DIR) + "/" + overlay_theme_path;
         if (stat(overlay_theme_path.c_str(), &st) == 0) {
           argv[argc++] = overlay_theme_path.c_str();
         }
       }
 
-      if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::OVERLAY_DIR;
+      if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::VENDOR_OVERLAY_DIR;
       }
 
       if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
         argv[argc++] = AssetManager::PRODUCT_OVERLAY_DIR;
+      }
+
+      if (stat(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::PRODUCT_SERVICES_OVERLAY_DIR;
+      }
+
+      if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::ODM_OVERLAY_DIR;
+      }
+
+      if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::OEM_OVERLAY_DIR;
       }
 
       // Finally, invoke idmap (if any overlay directory exists)
@@ -194,6 +222,88 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
     waitpid(pid, nullptr, 0);
     break;
   }
+}
+
+static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* env,
+                                                                        jclass /*clazz*/) {
+  // --input-directory can be given multiple times, but idmap2 expects the directory to exist
+  std::vector<std::string> input_dirs;
+  struct stat st;
+  if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::VENDOR_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::PRODUCT_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::ODM_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::OEM_OVERLAY_DIR);
+  }
+
+  if (input_dirs.empty()) {
+    LOG(WARNING) << "no directories for idmap2 to scan";
+    return env->NewObjectArray(0, g_stringClass, nullptr);
+  }
+
+  if (access("/system/bin/idmap2", X_OK) == -1) {
+    PLOG(WARNING) << "unable to execute idmap2";
+    return nullptr;
+  }
+
+  std::vector<std::string> argv{"/system/bin/idmap2",
+    "scan",
+    "--recursive",
+    "--target-package-name", "android",
+    "--target-apk-path", "/system/framework/framework-res.apk",
+    "--output-directory", "/data/resource-cache"};
+
+  for (const auto& dir : input_dirs) {
+    argv.push_back("--input-directory");
+    argv.push_back(dir);
+  }
+
+  const auto result = ExecuteBinary(argv);
+
+  if (!result) {
+      LOG(ERROR) << "failed to execute idmap2";
+      return nullptr;
+  }
+
+  if (result->status != 0) {
+    LOG(ERROR) << "idmap2: " << result->stderr;
+    return nullptr;
+  }
+
+  std::vector<std::string> idmap_paths;
+  std::istringstream input(result->stdout);
+  std::string path;
+  while (std::getline(input, path)) {
+    idmap_paths.push_back(path);
+  }
+
+  jobjectArray array = env->NewObjectArray(idmap_paths.size(), g_stringClass, nullptr);
+  if (array == nullptr) {
+    return nullptr;
+  }
+  for (size_t i = 0; i < idmap_paths.size(); i++) {
+    const std::string path = idmap_paths[i];
+    jstring java_string = env->NewStringUTF(path.c_str());
+    if (env->ExceptionCheck()) {
+      return nullptr;
+    }
+    env->SetObjectArrayElement(array, i, java_string);
+    env->DeleteLocalRef(java_string);
+  }
+  return array;
 }
 
 static jint CopyValue(JNIEnv* env, ApkAssetsCookie cookie, const Res_value& value, uint32_t ref,
@@ -241,6 +351,52 @@ Guarded<AssetManager2>* AssetManagerForJavaObject(JNIEnv* env, jobject jassetman
 
 static Guarded<AssetManager2>& AssetManagerFromLong(jlong ptr) {
   return *AssetManagerForNdkAssetManager(reinterpret_cast<AAssetManager*>(ptr));
+}
+
+static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                        jstring package_name) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  const ScopedUtfChars package_name_utf8(env, package_name);
+  CHECK(package_name_utf8.c_str() != nullptr);
+  const std::string std_package_name(package_name_utf8.c_str());
+  const std::unordered_map<std::string, std::string>* map = nullptr;
+
+  assetmanager->ForEachPackage([&](const std::string& this_package_name, uint8_t package_id) {
+    if (this_package_name == std_package_name) {
+      map = assetmanager->GetOverlayableMapForPackage(package_id);
+      return false;
+    }
+    return true;
+  });
+
+  if (map == nullptr) {
+    return nullptr;
+  }
+
+  jobject array_map = env->NewObject(gArrayMapOffsets.classObject, gArrayMapOffsets.constructor);
+  if (array_map == nullptr) {
+    return nullptr;
+  }
+
+  for (const auto& iter : *map) {
+    jstring name = env->NewStringUTF(iter.first.c_str());
+    if (env->ExceptionCheck()) {
+      return nullptr;
+    }
+
+    jstring actor = env->NewStringUTF(iter.second.c_str());
+    if (env->ExceptionCheck()) {
+      env->DeleteLocalRef(name);
+      return nullptr;
+    }
+
+    env->CallObjectMethod(array_map, gArrayMapOffsets.put, name, actor);
+
+    env->DeleteLocalRef(name);
+    env->DeleteLocalRef(actor);
+  }
+
+  return array_map;
 }
 
 static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
@@ -388,15 +544,16 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     return nullptr;
   }
 
-  assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) {
+  assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) -> bool {
     jstring jpackage_name = env->NewStringUTF(package_name.c_str());
     if (jpackage_name == nullptr) {
       // An exception is pending.
-      return;
+      return false;
     }
 
     env->CallVoidMethod(sparse_array, gSparseArrayOffsets.put, static_cast<jint>(package_id),
                         jpackage_name);
+    return true;
   });
   return sparse_array;
 }
@@ -894,34 +1051,7 @@ static jstring NativeGetResourceName(JNIEnv* env, jclass /*clazz*/, jlong ptr, j
     return nullptr;
   }
 
-  std::string result;
-  if (name.package != nullptr) {
-    result.append(name.package, name.package_len);
-  }
-
-  if (name.type != nullptr || name.type16 != nullptr) {
-    if (!result.empty()) {
-      result += ":";
-    }
-
-    if (name.type != nullptr) {
-      result.append(name.type, name.type_len);
-    } else {
-      result += util::Utf16ToUtf8(StringPiece16(name.type16, name.type_len));
-    }
-  }
-
-  if (name.entry != nullptr || name.entry16 != nullptr) {
-    if (!result.empty()) {
-      result += "/";
-    }
-
-    if (name.entry != nullptr) {
-      result.append(name.entry, name.entry_len);
-    } else {
-      result += util::Utf16ToUtf8(StringPiece16(name.entry16, name.entry_len));
-    }
-  }
+  std::string result = ToFormattedResourceString(&name);
   return env->NewStringUTF(result.c_str());
 }
 
@@ -966,6 +1096,26 @@ static jstring NativeGetResourceEntryName(JNIEnv* env, jclass /*clazz*/, jlong p
     return env->NewString(reinterpret_cast<const jchar*>(name.entry16), name.entry_len);
   }
   return nullptr;
+}
+
+static void NativeSetResourceResolutionLoggingEnabled(JNIEnv* /*env*/,
+                                                      jclass /*clazz*/,
+                                                      jlong ptr,
+                                                      jboolean enabled) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  assetmanager->SetResourceResolutionLoggingEnabled(enabled);
+}
+
+static jstring NativeGetLastResourceResolution(JNIEnv* env,
+                                               jclass /*clazz*/,
+                                               jlong ptr) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  std::string resolution = assetmanager->GetLastResourceResolution();
+  if (resolution.empty()) {
+    return nullptr;
+  } else {
+    return env->NewStringUTF(resolution.c_str());
+  }
 }
 
 static jobjectArray NativeGetLocales(JNIEnv* env, jclass /*class*/, jlong ptr,
@@ -1025,6 +1175,46 @@ static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, j
 
     env->SetObjectArrayElement(array, idx++, java_configuration);
     env->DeleteLocalRef(java_configuration);
+  }
+  return array;
+}
+
+static jintArray NativeAttributeResolutionStack(
+    JNIEnv* env, jclass /*clazz*/, jlong ptr,
+    jlong theme_ptr, jint xml_style_res,
+    jint def_style_attr, jint def_style_resid) {
+
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  Theme* theme = reinterpret_cast<Theme*>(theme_ptr);
+  CHECK(theme->GetAssetManager() == &(*assetmanager));
+  (void) assetmanager;
+
+  // Load default style from attribute, if specified...
+  uint32_t def_style_flags = 0u;
+  if (def_style_attr != 0) {
+    Res_value value;
+    if (theme->GetAttribute(def_style_attr, &value, &def_style_flags) != kInvalidCookie) {
+      if (value.dataType == Res_value::TYPE_REFERENCE) {
+        def_style_resid = value.data;
+      }
+    }
+  }
+
+  auto style_stack = assetmanager->GetBagResIdStack(xml_style_res);
+  auto def_style_stack = assetmanager->GetBagResIdStack(def_style_resid);
+
+  jintArray array = env->NewIntArray(style_stack.size() + def_style_stack.size());
+  if (env->ExceptionCheck()) {
+    return nullptr;
+  }
+
+  for (uint32_t i = 0; i < style_stack.size(); i++) {
+    jint attr_resid = style_stack[i];
+    env->SetIntArrayRegion(array, i, 1, &attr_resid);
+  }
+  for (uint32_t i = 0; i < def_style_stack.size(); i++) {
+    jint attr_resid = def_style_stack[i];
+    env->SetIntArrayRegion(array, style_stack.size() + i, 1, &attr_resid);
   }
   return array;
 }
@@ -1204,13 +1394,23 @@ static void NativeThemeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlon
   // jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
 }
 
-static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_theme_ptr,
-                            jlong src_theme_ptr) {
+static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,
+                            jlong dst_theme_ptr, jlong src_asset_manager_ptr, jlong src_theme_ptr) {
   Theme* dst_theme = reinterpret_cast<Theme*>(dst_theme_ptr);
   Theme* src_theme = reinterpret_cast<Theme*>(src_theme_ptr);
-  if (!dst_theme->SetTo(*src_theme)) {
-    jniThrowException(env, "java/lang/IllegalArgumentException",
-                      "Themes are from different AssetManagers");
+
+  if (dst_asset_manager_ptr != src_asset_manager_ptr) {
+    ScopedLock<AssetManager2> dst_assetmanager(AssetManagerFromLong(dst_asset_manager_ptr));
+    CHECK(dst_theme->GetAssetManager() == &(*dst_assetmanager));
+    (void) dst_assetmanager;
+
+    ScopedLock <AssetManager2> src_assetmanager(AssetManagerFromLong(src_asset_manager_ptr));
+    CHECK(src_theme->GetAssetManager() == &(*src_assetmanager));
+    (void) src_assetmanager;
+
+    dst_theme->SetTo(*src_theme);
+  } else {
+    dst_theme->SetTo(*src_theme);
   }
 }
 
@@ -1251,10 +1451,11 @@ static void NativeThemeDump(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr, jlong 
   Theme* theme = reinterpret_cast<Theme*>(theme_ptr);
   CHECK(theme->GetAssetManager() == &(*assetmanager));
   (void) assetmanager;
-  (void) theme;
   (void) priority;
   (void) tag;
   (void) prefix;
+
+  theme->Dump();
 }
 
 static jint NativeThemeGetChangingConfigurations(JNIEnv* /*env*/, jclass /*clazz*/,
@@ -1360,11 +1561,16 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeGetResourcePackageName", "(JI)Ljava/lang/String;", (void*)NativeGetResourcePackageName},
     {"nativeGetResourceTypeName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceTypeName},
     {"nativeGetResourceEntryName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceEntryName},
+    {"nativeSetResourceResolutionLoggingEnabled", "(JZ)V",
+     (void*) NativeSetResourceResolutionLoggingEnabled},
+    {"nativeGetLastResourceResolution", "(J)Ljava/lang/String;",
+     (void*) NativeGetLastResourceResolution},
     {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
     {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
      (void*)NativeGetSizeConfigurations},
 
     // Style attribute related methods.
+    {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
     {"nativeApplyStyle", "(JJIIJ[IJJ)V", (void*)NativeApplyStyle},
     {"nativeResolveAttrs", "(JJII[I[I[I[I)Z", (void*)NativeResolveAttrs},
     {"nativeRetrieveAttributes", "(JJ[I[I[I)Z", (void*)NativeRetrieveAttributes},
@@ -1373,7 +1579,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
     {"nativeThemeDestroy", "(J)V", (void*)NativeThemeDestroy},
     {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
-    {"nativeThemeCopy", "(JJ)V", (void*)NativeThemeCopy},
+    {"nativeThemeCopy", "(JJJJ)V", (void*)NativeThemeCopy},
     {"nativeThemeClear", "(J)V", (void*)NativeThemeClear},
     {"nativeThemeGetAttributeValue", "(JJILandroid/util/TypedValue;Z)I",
      (void*)NativeThemeGetAttributeValue},
@@ -1390,6 +1596,10 @@ static const JNINativeMethod gAssetManagerMethods[] = {
 
     // System/idmap related methods.
     {"nativeVerifySystemIdmaps", "()V", (void*)NativeVerifySystemIdmaps},
+    {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
+     (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
+    {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
+     (void*)NativeGetOverlayableMap},
 
     // Global management/debug methods.
     {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
@@ -1440,6 +1650,14 @@ int register_android_content_AssetManager(JNIEnv* env) {
       GetFieldIDOrDie(env, configurationClass, "screenWidthDp", "I");
   gConfigurationOffsets.mScreenHeightDpOffset =
       GetFieldIDOrDie(env, configurationClass, "screenHeightDp", "I");
+
+  jclass arrayMapClass = FindClassOrDie(env, "android/util/ArrayMap");
+  gArrayMapOffsets.classObject = MakeGlobalRefOrDie(env, arrayMapClass);
+  gArrayMapOffsets.constructor =
+      GetMethodIDOrDie(env, gArrayMapOffsets.classObject, "<init>", "()V");
+  gArrayMapOffsets.put =
+      GetMethodIDOrDie(env, gArrayMapOffsets.classObject, "put",
+                       "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
   return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
                               NELEM(gAssetManagerMethods));

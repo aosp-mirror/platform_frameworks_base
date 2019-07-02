@@ -22,10 +22,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.util.EmptyArray;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

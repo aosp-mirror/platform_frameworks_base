@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -49,6 +49,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -83,23 +84,36 @@ final class AccessibilityController {
         mService = service;
     }
 
-    private DisplayMagnifier mDisplayMagnifier;
+    private SparseArray<DisplayMagnifier> mDisplayMagnifiers = new SparseArray<>();
 
     private WindowsForAccessibilityObserver mWindowsForAccessibilityObserver;
 
-    public void setMagnificationCallbacksLocked(MagnificationCallbacks callbacks) {
+    public boolean setMagnificationCallbacksLocked(int displayId,
+            MagnificationCallbacks callbacks) {
+        boolean result = false;
         if (callbacks != null) {
-            if (mDisplayMagnifier != null) {
+            if (mDisplayMagnifiers.get(displayId) != null) {
                 throw new IllegalStateException("Magnification callbacks already set!");
             }
-            mDisplayMagnifier = new DisplayMagnifier(mService, callbacks);
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc != null) {
+                final Display display = dc.getDisplay();
+                if (display != null && display.getType() != Display.TYPE_OVERLAY) {
+                    mDisplayMagnifiers.put(displayId, new DisplayMagnifier(
+                            mService, dc, display, callbacks));
+                    result = true;
+                }
+            }
         } else {
-            if  (mDisplayMagnifier == null) {
+            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+            if  (displayMagnifier == null) {
                 throw new IllegalStateException("Magnification callbacks already cleared!");
             }
-            mDisplayMagnifier.destroyLocked();
-            mDisplayMagnifier = null;
+            displayMagnifier.destroyLocked();
+            mDisplayMagnifiers.remove(displayId);
+            result = true;
         }
+        return result;
     }
 
     public void setWindowsForAccessibilityCallback(WindowsForAccessibilityCallback callback) {
@@ -119,68 +133,82 @@ final class AccessibilityController {
         }
     }
 
-    public void performComputeChangedWindowsNotLocked() {
+    public void performComputeChangedWindowsNotLocked(boolean forceSend) {
         WindowsForAccessibilityObserver observer = null;
         synchronized (mService) {
             observer = mWindowsForAccessibilityObserver;
         }
         if (observer != null) {
-            observer.performComputeChangedWindowsNotLocked();
+            observer.performComputeChangedWindowsNotLocked(forceSend);
         }
     }
 
-    public void setMagnificationSpecLocked(MagnificationSpec spec) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.setMagnificationSpecLocked(spec);
+    public void setMagnificationSpecLocked(int displayId, MagnificationSpec spec) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.setMagnificationSpecLocked(spec);
         }
-        if (mWindowsForAccessibilityObserver != null) {
+        // TODO: support multi-display for windows observer
+        if (mWindowsForAccessibilityObserver != null && displayId == Display.DEFAULT_DISPLAY) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
-    public void getMagnificationRegionLocked(Region outMagnificationRegion) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.getMagnificationRegionLocked(outMagnificationRegion);
+    public void getMagnificationRegionLocked(int displayId, Region outMagnificationRegion) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.getMagnificationRegionLocked(outMagnificationRegion);
         }
     }
 
-    public void onRectangleOnScreenRequestedLocked(Rect rectangle) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onRectangleOnScreenRequestedLocked(rectangle);
+    public void onRectangleOnScreenRequestedLocked(int displayId, Rect rectangle) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onRectangleOnScreenRequestedLocked(rectangle);
         }
         // Not relevant for the window observer.
     }
 
-    public void onWindowLayersChangedLocked() {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onWindowLayersChangedLocked();
+    public void onWindowLayersChangedLocked(int displayId) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onWindowLayersChangedLocked();
         }
-        if (mWindowsForAccessibilityObserver != null) {
+        // TODO: support multi-display for windows observer
+        if (mWindowsForAccessibilityObserver != null && displayId == Display.DEFAULT_DISPLAY) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
     public void onRotationChangedLocked(DisplayContent displayContent) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onRotationChangedLocked(displayContent);
+        final int displayId = displayContent.getDisplayId();
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onRotationChangedLocked(displayContent);
         }
-        if (mWindowsForAccessibilityObserver != null) {
+        // TODO: support multi-display for windows observer
+        if (mWindowsForAccessibilityObserver != null && displayId == Display.DEFAULT_DISPLAY) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
 
     public void onAppWindowTransitionLocked(WindowState windowState, int transition) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onAppWindowTransitionLocked(windowState, transition);
+        final int displayId = windowState.getDisplayId();
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onAppWindowTransitionLocked(windowState, transition);
         }
         // Not relevant for the window observer.
     }
 
     public void onWindowTransitionLocked(WindowState windowState, int transition) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onWindowTransitionLocked(windowState, transition);
+        final int displayId = windowState.getDisplayId();
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onWindowTransitionLocked(windowState, transition);
         }
-        if (mWindowsForAccessibilityObserver != null) {
+        // TODO: support multi-display for windows observer
+        if (mWindowsForAccessibilityObserver != null && displayId == Display.DEFAULT_DISPLAY) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
         }
     }
@@ -193,10 +221,9 @@ final class AccessibilityController {
             observer = mWindowsForAccessibilityObserver;
         }
         if (observer != null) {
-            observer.performComputeChangedWindowsNotLocked();
+            observer.performComputeChangedWindowsNotLocked(false);
         }
     }
-
 
     public void onSomeWindowResizedOrMovedLocked() {
         // Not relevant for the display magnifier.
@@ -207,29 +234,34 @@ final class AccessibilityController {
     }
 
     /** NOTE: This has to be called within a surface transaction. */
-    public void drawMagnifiedRegionBorderIfNeededLocked() {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
+    public void drawMagnifiedRegionBorderIfNeededLocked(int displayId) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
         }
         // Not relevant for the window observer.
     }
 
     public MagnificationSpec getMagnificationSpecForWindowLocked(WindowState windowState) {
-        if (mDisplayMagnifier != null) {
-            return mDisplayMagnifier.getMagnificationSpecForWindowLocked(windowState);
+        final int displayId = windowState.getDisplayId();
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            return displayMagnifier.getMagnificationSpecForWindowLocked(windowState);
         }
         return null;
     }
 
     public boolean hasCallbacksLocked() {
-        return (mDisplayMagnifier != null
+        // TODO: support multi-display for windows observer
+        return (mDisplayMagnifiers.size() > 0
                 || mWindowsForAccessibilityObserver != null);
     }
 
-    public void setForceShowMagnifiableBoundsLocked(boolean show) {
-        if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.setForceShowMagnifiableBoundsLocked(show);
-            mDisplayMagnifier.showMagnificationBoundsIfNeeded();
+    public void setForceShowMagnifiableBoundsLocked(int displayId, boolean show) {
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.setForceShowMagnifiableBoundsLocked(show);
+            displayMagnifier.showMagnificationBoundsIfNeeded();
         }
     }
 
@@ -263,6 +295,8 @@ final class AccessibilityController {
         private final WindowManagerService mService;
         private final MagnifiedViewport mMagnifedViewport;
         private final Handler mHandler;
+        private final DisplayContent mDisplayContent;
+        private final Display mDisplay;
 
         private final MagnificationCallbacks mCallbacks;
 
@@ -271,10 +305,14 @@ final class AccessibilityController {
         private boolean mForceShowMagnifiableBounds = false;
 
         public DisplayMagnifier(WindowManagerService windowManagerService,
+                DisplayContent displayContent,
+                Display display,
                 MagnificationCallbacks callbacks) {
             mContext = windowManagerService.mContext;
             mService = windowManagerService;
             mCallbacks = callbacks;
+            mDisplayContent = displayContent;
+            mDisplay = display;
             mHandler = new MyHandler(mService.mH.getLooper());
             mMagnifedViewport = new MagnifiedViewport();
             mLongAnimationDuration = mContext.getResources().getInteger(
@@ -285,7 +323,7 @@ final class AccessibilityController {
             mMagnifedViewport.updateMagnificationSpecLocked(spec);
             mMagnifedViewport.recomputeBoundsLocked();
 
-            mService.applyMagnificationSpec(spec);
+            mService.applyMagnificationSpecLocked(mDisplay.getDisplayId(), spec);
             mService.scheduleAnimationLocked();
         }
 
@@ -482,7 +520,7 @@ final class AccessibilityController {
 
                 if (mContext.getResources().getConfiguration().isScreenRound()) {
                     mCircularPath = new Path();
-                    mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
+                    mDisplay.getRealSize(mTempPoint);
                     final int centerXY = mTempPoint.x / 2;
                     mCircularPath.addCircle(centerXY, centerXY, centerXY, Path.Direction.CW);
                 } else {
@@ -512,7 +550,7 @@ final class AccessibilityController {
             }
 
             public void recomputeBoundsLocked() {
-                mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
+                mDisplay.getRealSize(mTempPoint);
                 final int screenWidth = mTempPoint.x;
                 final int screenHeight = mTempPoint.y;
 
@@ -549,7 +587,8 @@ final class AccessibilityController {
                     touchableRegion.getBounds(touchableFrame);
                     RectF windowFrame = mTempRectF;
                     windowFrame.set(touchableFrame);
-                    windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+                    windowFrame.offset(-windowState.getFrameLw().left,
+                            -windowState.getFrameLw().top);
                     matrix.mapRect(windowFrame);
                     Region windowBounds = mTempRegion2;
                     windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
@@ -566,6 +605,13 @@ final class AccessibilityController {
                     } else {
                         nonMagnifiedBounds.op(windowBounds, Region.Op.UNION);
                         availableBounds.op(windowBounds, Region.Op.DIFFERENCE);
+                    }
+
+                    // Count letterbox into nonMagnifiedBounds
+                    if (windowState.isLetterboxedForDisplayCutoutLw()) {
+                        Region letterboxBounds = getLetterboxBounds(windowState);
+                        nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
+                        availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
                     }
 
                     // Update accounted bounds
@@ -619,6 +665,25 @@ final class AccessibilityController {
                 }
             }
 
+            private Region getLetterboxBounds(WindowState windowState) {
+                final AppWindowToken appToken = windowState.mAppToken;
+                if (appToken == null) {
+                    return new Region();
+                }
+
+                mDisplay.getRealSize(mTempPoint);
+                final Rect letterboxInsets = appToken.getLetterboxInsets();
+                final int screenWidth = mTempPoint.x;
+                final int screenHeight = mTempPoint.y;
+                final Rect nonLetterboxRect = mTempRect1;
+                final Region letterboxBounds = mTempRegion3;
+                nonLetterboxRect.set(0, 0, screenWidth, screenHeight);
+                nonLetterboxRect.inset(letterboxInsets);
+                letterboxBounds.set(0, 0, screenWidth, screenHeight);
+                letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
+                return letterboxBounds;
+            }
+
             public void onRotationChangedLocked() {
                 // If we are showing the magnification border, hide it immediately so
                 // the user does not see strange artifacts during rotation. The screenshot
@@ -670,9 +735,8 @@ final class AccessibilityController {
             }
 
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-                final DisplayContent dc = mService.getDefaultDisplayContentLocked();
                 mTempLayer = 0;
-                dc.forAllWindows((w) -> {
+                mDisplayContent.forAllWindows((w) -> {
                     if (w.isOnScreen() && w.isVisibleLw()
                             && (w.mAttrs.alpha != 0)
                             && !w.mWinAnimator.mEnterAnimationPending) {
@@ -702,10 +766,11 @@ final class AccessibilityController {
                 public ViewportWindow(Context context) {
                     SurfaceControl surfaceControl = null;
                     try {
-                        mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                        surfaceControl = mService.getDefaultDisplayContentLocked().makeOverlay()
+                        mDisplay.getRealSize(mTempPoint);
+                        surfaceControl = mDisplayContent
+                                .makeOverlay()
                                 .setName(SURFACE_TITLE)
-                                .setSize(mTempPoint.x, mTempPoint.y) // not a typo
+                                .setBufferSize(mTempPoint.x, mTempPoint.y) // not a typo
                                 .setFormat(PixelFormat.TRANSLUCENT)
                                 .build();
                     } catch (OutOfResourcesException oore) {
@@ -734,7 +799,7 @@ final class AccessibilityController {
                 }
 
                 public void setShown(boolean shown, boolean animate) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mShown == shown) {
                             return;
                         }
@@ -749,13 +814,13 @@ final class AccessibilityController {
                 @SuppressWarnings("unused")
                 // Called reflectively from an animator.
                 public int getAlpha() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         return mAlpha;
                     }
                 }
 
                 public void setAlpha(int alpha) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mAlpha == alpha) {
                             return;
                         }
@@ -768,7 +833,7 @@ final class AccessibilityController {
                 }
 
                 public void setBounds(Region bounds) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mBounds.equals(bounds)) {
                             return;
                         }
@@ -781,9 +846,9 @@ final class AccessibilityController {
                 }
 
                 public void updateSize() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                        mSurfaceControl.setSize(mTempPoint.x, mTempPoint.y);
+                        mSurfaceControl.setBufferSize(mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
                     }
                 }
@@ -800,7 +865,7 @@ final class AccessibilityController {
 
                 /** NOTE: This has to be called within a surface transaction. */
                 public void drawIfNeeded() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (!mInvalidated) {
                             return;
                         }
@@ -842,7 +907,7 @@ final class AccessibilityController {
                 }
 
                 public void releaseSurface() {
-                    mSurfaceControl.release();
+                    mSurfaceControl.remove();
                     mSurface.release();
                 }
 
@@ -947,7 +1012,7 @@ final class AccessibilityController {
                     } break;
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
-                        synchronized (mService.mWindowMap) {
+                        synchronized (mService.mGlobalLock) {
                             if (mMagnifedViewport.isMagnifyingLocked()
                                     || isForceShowingMagnifiableBoundsLocked()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShownLocked(true, true);
@@ -1010,12 +1075,12 @@ final class AccessibilityController {
             mHandler = new MyHandler(mService.mH.getLooper());
             mRecurringAccessibilityEventsIntervalMillis = ViewConfiguration
                     .getSendRecurringAccessibilityEventsInterval();
-            computeChangedWindows();
+            computeChangedWindows(true);
         }
 
-        public void performComputeChangedWindowsNotLocked() {
+        public void performComputeChangedWindowsNotLocked(boolean forceSend) {
             mHandler.removeMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS);
-            computeChangedWindows();
+            computeChangedWindows(forceSend);
         }
 
         public void scheduleComputeChangedWindowsLocked() {
@@ -1025,7 +1090,12 @@ final class AccessibilityController {
             }
         }
 
-        public void computeChangedWindows() {
+        /**
+         * Check if windows have changed, and send them to the accessibilty subsystem if they have.
+         *
+         * @param forceSend Send the windows the accessibility even if they haven't changed.
+         */
+        public void computeChangedWindows(boolean forceSend) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
@@ -1033,11 +1103,13 @@ final class AccessibilityController {
             boolean windowsChanged = false;
             List<WindowInfo> windows = new ArrayList<WindowInfo>();
 
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 // Do not send the windows if there is no current focus as
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
-                if (mService.mCurrentFocus == null) {
+                // TODO(b/112273690): Support multiple displays
+                // TODO(b/129098348): Support embedded displays
+                if (mService.getDefaultDisplayContentLocked().mCurrentFocus == null) {
                     return;
                 }
 
@@ -1059,93 +1131,24 @@ final class AccessibilityController {
 
                 final int visibleWindowCount = visibleWindows.size();
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
+
+                // Iterate until we figure out what is touchable for the entire screen.
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
-                    final int flags = windowState.mAttrs.flags;
-                    final Task task = windowState.getTask();
 
-                    // If the window is part of a task that we're finished with - ignore.
-                    if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
-                        continue;
-                    }
-
-                    // Ignore non-touchable windows, except the split-screen divider, which is
-                    // occasionally non-touchable but still useful for identifying split-screen
-                    // mode.
-                    if (((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
-                            && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)) {
-                        continue;
-                    }
-
-                    // Compute the bounds in the screen.
                     final Rect boundsInScreen = mTempRect;
                     computeWindowBoundsInScreen(windowState, boundsInScreen);
 
-                    // If the window is completely covered by other windows - ignore.
-                    if (unaccountedSpace.quickReject(boundsInScreen)) {
-                        continue;
-                    }
-
-                    // Add windows of certain types not covered by modal windows.
-                    if (isReportedWindowType(windowState.mAttrs.type)) {
-                        // Add the window to the ones to be reported.
+                    if (windowMattersToAccessibility(windowState, boundsInScreen, unaccountedSpace,
+                            skipRemainingWindowsForTasks)) {
                         addPopulatedWindowInfo(windowState, boundsInScreen, windows, addedWindows);
-                        if (windowState.isFocused()) {
-                            focusedWindowAdded = true;
-                        }
+                        updateUnaccountedSpace(windowState, boundsInScreen, unaccountedSpace,
+                                skipRemainingWindowsForTasks);
+                        focusedWindowAdded |= windowState.isFocused();
                     }
 
-                    if (windowState.mAttrs.type !=
-                            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
-
-                        // Account for the space this window takes if the window
-                        // is not an accessibility overlay which does not change
-                        // the reported windows.
-                        unaccountedSpace.op(boundsInScreen, unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-
-                        // If a window is modal it prevents other windows from being touched
-                        if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                            // Account for all space in the task, whether the windows in it are
-                            // touchable or not. The modal window blocks all touches from the task's
-                            // area.
-                            unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
-                                    Region.Op.REVERSE_DIFFERENCE);
-
-                            if (task != null) {
-                                // If the window is associated with a particular task, we can skip the
-                                // rest of the windows for that task.
-                                skipRemainingWindowsForTasks.add(task.mTaskId);
-                                continue;
-                            } else {
-                                // If the window is not associated with a particular task, then it is
-                                // globally modal. In this case we can skip all remaining windows.
-                                break;
-                            }
-                        }
-                    }
-
-                    // We figured out what is touchable for the entire screen - done.
-                    if (unaccountedSpace.isEmpty()) {
+                    if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
                         break;
-                    }
-                }
-
-                // Always report the focused window.
-                if (!focusedWindowAdded) {
-                    for (int i = visibleWindowCount - 1; i >= 0; i--) {
-                        WindowState windowState = visibleWindows.valueAt(i);
-                        if (windowState.isFocused()) {
-                            // Compute the bounds in the screen.
-                            Rect boundsInScreen = mTempRect;
-                            computeWindowBoundsInScreen(windowState, boundsInScreen);
-
-                            // Add the window to the ones to be reported.
-                            addPopulatedWindowInfo(
-                                    windowState, boundsInScreen, windows, addedWindows);
-                            break;
-                        }
                     }
                 }
 
@@ -1170,36 +1173,38 @@ final class AccessibilityController {
                 visibleWindows.clear();
                 addedWindows.clear();
 
-                // We computed the windows and if they changed notify the client.
-                if (mOldWindows.size() != windows.size()) {
-                    // Different size means something changed.
-                    windowsChanged = true;
-                } else if (!mOldWindows.isEmpty() || !windows.isEmpty()) {
-                    // Since we always traverse windows from high to low layer
-                    // the old and new windows at the same index should be the
-                    // same, otherwise something changed.
-                    for (int i = 0; i < windowCount; i++) {
-                        WindowInfo oldWindow = mOldWindows.get(i);
-                        WindowInfo newWindow = windows.get(i);
-                        // We do not care for layer changes given the window
-                        // order does not change. This brings no new information
-                        // to the clients.
-                        if (windowChangedNoLayer(oldWindow, newWindow)) {
-                            windowsChanged = true;
-                            break;
+                if (!forceSend) {
+                    // We computed the windows and if they changed notify the client.
+                    if (mOldWindows.size() != windows.size()) {
+                        // Different size means something changed.
+                        windowsChanged = true;
+                    } else if (!mOldWindows.isEmpty() || !windows.isEmpty()) {
+                        // Since we always traverse windows from high to low layer
+                        // the old and new windows at the same index should be the
+                        // same, otherwise something changed.
+                        for (int i = 0; i < windowCount; i++) {
+                            WindowInfo oldWindow = mOldWindows.get(i);
+                            WindowInfo newWindow = windows.get(i);
+                            // We do not care for layer changes given the window
+                            // order does not change. This brings no new information
+                            // to the clients.
+                            if (windowChangedNoLayer(oldWindow, newWindow)) {
+                                windowsChanged = true;
+                                break;
+                            }
                         }
                     }
                 }
 
-                if (windowsChanged) {
+                if (forceSend || windowsChanged) {
                     cacheWindows(windows);
                 }
             }
 
             // Now we do not hold the lock, so send the windows over.
-            if (windowsChanged) {
+            if (forceSend || windowsChanged) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "Windows changed:" + windows);
+                    Log.i(LOG_TAG, "Windows changed or force sending:" + windows);
                 }
                 mCallback.onWindowsForAccessibilityChanged(windows);
             } else {
@@ -1212,6 +1217,73 @@ final class AccessibilityController {
             clearAndRecycleWindows(windows);
         }
 
+        private boolean windowMattersToAccessibility(WindowState windowState, Rect boundsInScreen,
+                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+            if (windowState.isFocused()) {
+                return true;
+            }
+
+            // If the window is part of a task that we're finished with - ignore.
+            final Task task = windowState.getTask();
+            if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
+                return false;
+            }
+
+            // Ignore non-touchable windows, except the split-screen divider, which is
+            // occasionally non-touchable but still useful for identifying split-screen
+            // mode.
+            if (((windowState.mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+                    && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)) {
+                return false;
+            }
+
+            // If the window is completely covered by other windows - ignore.
+            if (unaccountedSpace.quickReject(boundsInScreen)) {
+                return false;
+            }
+
+            // Add windows of certain types not covered by modal windows.
+            if (isReportedWindowType(windowState.mAttrs.type)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void updateUnaccountedSpace(WindowState windowState, Rect boundsInScreen,
+                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+            if (windowState.mAttrs.type
+                    != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+
+                // Account for the space this window takes if the window
+                // is not an accessibility overlay which does not change
+                // the reported windows.
+                unaccountedSpace.op(boundsInScreen, unaccountedSpace,
+                        Region.Op.REVERSE_DIFFERENCE);
+
+                // If a window is modal it prevents other windows from being touched
+                if ((windowState.mAttrs.flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
+                    // Account for all space in the task, whether the windows in it are
+                    // touchable or not. The modal window blocks all touches from the task's
+                    // area.
+                    unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
+
+                    final Task task = windowState.getTask();
+                    if (task != null) {
+                        // If the window is associated with a particular task, we can skip the
+                        // rest of the windows for that task.
+                        skipRemainingWindowsForTasks.add(task.mTaskId);
+                    } else {
+                        // If the window is not associated with a particular task, then it is
+                        // globally modal. In this case we can skip all remaining windows.
+                        unaccountedSpace.setEmpty();
+                    }
+                }
+            }
+        }
+
         private void computeWindowBoundsInScreen(WindowState windowState, Rect outBounds) {
             // Get the touchable frame.
             Region touchableRegion = mTempRegion1;
@@ -1222,7 +1294,7 @@ final class AccessibilityController {
             // Move to origin as all transforms are captured by the matrix.
             RectF windowFrame = mTempRectF;
             windowFrame.set(touchableFrame);
-            windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+            windowFrame.offset(-windowState.getFrameLw().left, -windowState.getFrameLw().top);
 
             // Map the frame to get what appears on the screen.
             Matrix matrix = mTempMatrix;
@@ -1329,7 +1401,28 @@ final class AccessibilityController {
                 if (w.isVisibleLw()) {
                     outWindows.put(mTempLayer++, w);
                 }
-            }, false /* traverseTopToBottom */ );
+            }, false /* traverseTopToBottom */);
+            mService.mRoot.forAllWindows(w -> {
+                final WindowState win = findRootDisplayParentWindow(w);
+                if (win != null && win.getDisplayContent().isDefaultDisplay && w.isVisibleLw()) {
+                    // TODO(b/129098348): insert windows on child displays into outWindows based on
+                    // root-display-parent window.
+                    outWindows.put(mTempLayer++, w);
+                }
+            }, false /* traverseTopToBottom */);
+        }
+
+        private WindowState findRootDisplayParentWindow(WindowState win) {
+            WindowState displayParentWindow = win.getDisplayContent().getParentWindow();
+            if (displayParentWindow == null) {
+                return null;
+            }
+            WindowState candidate = displayParentWindow;
+            while (candidate != null) {
+                displayParentWindow = candidate;
+                candidate = displayParentWindow.getDisplayContent().getParentWindow();
+            }
+            return displayParentWindow;
         }
 
         private class MyHandler extends Handler {
@@ -1344,7 +1437,7 @@ final class AccessibilityController {
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MESSAGE_COMPUTE_CHANGED_WINDOWS: {
-                        computeChangedWindows();
+                        computeChangedWindows(false);
                     } break;
                 }
             }

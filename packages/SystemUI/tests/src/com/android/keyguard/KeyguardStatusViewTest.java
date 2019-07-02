@@ -20,11 +20,14 @@ import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
-import android.widget.TextClock;
 
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,20 +36,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardStatusViewTest extends SysuiTestCase {
 
     @Mock
     KeyguardSliceView mKeyguardSlice;
     @Mock
-    TextClock mClockView;
+    KeyguardClockSwitch mClockView;
     @InjectMocks
     KeyguardStatusView mKeyguardStatusView;
 
     @Before
     public void setUp() {
-        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater layoutInflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
         mKeyguardStatusView =
                 (KeyguardStatusView) layoutInflater.inflate(R.layout.keyguard_status_view, null);
         org.mockito.MockitoAnnotations.initMocks(this);

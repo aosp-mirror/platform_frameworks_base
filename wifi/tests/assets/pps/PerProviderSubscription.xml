@@ -368,7 +368,7 @@
         </Node>
       </Node>
       <Node>
-        <NodeName>SubscriptionParameter</NodeName>
+        <NodeName>SubscriptionParameters</NodeName>
         <Node>
           <NodeName>CreationDate</NodeName>
           <Value>2016-02-01T10:00:00Z</Value>

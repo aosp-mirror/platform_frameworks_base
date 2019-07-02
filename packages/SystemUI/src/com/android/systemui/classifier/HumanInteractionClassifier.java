@@ -24,13 +24,11 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.android.systemui.R;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 
 /**
  * An classifier trying to determine whether it is a human interacting with the phone or not.
@@ -130,7 +128,8 @@ public class HumanInteractionClassifier extends Classifier {
         // sent to the classifiers until the finger moves far enough. When the finger if lifted
         // up, the last MotionEvent which was far enough from the finger is set as the final
         // MotionEvent and sent to the Classifiers.
-        if (mCurrentType == Classifier.NOTIFICATION_DRAG_DOWN) {
+        if (mCurrentType == Classifier.NOTIFICATION_DRAG_DOWN
+                || mCurrentType == Classifier.PULSE_EXPAND) {
             mBufferedEvents.add(MotionEvent.obtain(event));
             Point pointEnd = new Point(event.getX() / mDpi, event.getY() / mDpi);
 
@@ -152,7 +151,9 @@ public class HumanInteractionClassifier extends Classifier {
     }
 
     private void addTouchEvent(MotionEvent event) {
-        mClassifierData.update(event);
+        if (!mClassifierData.update(event)) {
+            return;
+        }
 
         for (StrokeClassifier c : mStrokeClassifiers) {
             c.onTouchEvent(event);

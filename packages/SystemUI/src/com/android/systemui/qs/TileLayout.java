@@ -24,10 +24,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mCellMarginHorizontal;
     protected int mCellMarginVertical;
     protected int mSidePadding;
+    protected int mRows = 1;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;
     private boolean mListening;
+    protected int mMaxAllowedRows = 3;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -56,6 +58,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public void addTile(TileRecord tile) {
         mRecords.add(tile);
         tile.tile.setListening(this, mListening);
+        addTileView(tile);
+    }
+
+    protected void addTileView(TileRecord tile) {
         addView(tile.tileView);
     }
 
@@ -82,6 +88,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mSidePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_layout_margin_side);
+        mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
         if (mColumns != columns) {
             mColumns = columns;
             requestLayout();
@@ -92,11 +99,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // If called with AT_MOST, it will limit the number of rows. If called with UNSPECIFIED
+        // it will show all its tiles. In this case, the tiles have to be entered before the
+        // container is measured. Any change in the tiles, should trigger a remeasure.
         final int numTiles = mRecords.size();
-        final int width = MeasureSpec.getSize(widthMeasureSpec)
-                - getPaddingStart() - getPaddingEnd();
-        final int numRows = (numTiles + mColumns - 1) / mColumns;
-        mCellWidth = (width - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int availableWidth = width - getPaddingStart() - getPaddingEnd();
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        if (heightMode == MeasureSpec.UNSPECIFIED) {
+            mRows = (numTiles + mColumns - 1) / mColumns;
+        }
+        mCellWidth =
+                (availableWidth - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
 
         // Measure each QS tile.
         View previousView = this;
@@ -108,11 +122,34 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
         // Only include the top margin in our measurement if we have more than 1 row to show.
         // Otherwise, don't add the extra margin buffer at top.
-        int height = (mCellHeight + mCellMarginVertical) * numRows +
-                (numRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
+        int height = (mCellHeight + mCellMarginVertical) * mRows +
+                (mRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
         if (height < 0) height = 0;
 
         setMeasuredDimension(width, height);
+    }
+
+    /**
+     * Determines the maximum number of rows that can be shown based on height. Clips at a minimum
+     * of 1 and a maximum of mMaxAllowedRows.
+     *
+     * @param heightMeasureSpec Available height.
+     * @param tilesCount Upper limit on the number of tiles to show. to prevent empty rows.
+     */
+    public boolean updateMaxRows(int heightMeasureSpec, int tilesCount) {
+        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mCellMarginTop
+                + mCellMarginVertical;
+        final int previousRows = mRows;
+        mRows = availableHeight / (mCellHeight + mCellMarginVertical);
+        if (mRows >= mMaxAllowedRows) {
+            mRows = mMaxAllowedRows;
+        } else if (mRows <= 1) {
+            mRows = 1;
+        }
+        if (mRows > (tilesCount + mColumns - 1) / mColumns) {
+            mRows = (tilesCount + mColumns - 1) / mColumns;
+        }
+        return previousRows != mRows;
     }
 
     @Override
@@ -120,19 +157,19 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return false;
     }
 
-    private static int exactly(int size) {
+    protected static int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        final int w = getWidth();
+
+    protected void layoutTileRecords(int numRecords) {
         final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
 
         // Layout each QS tile.
-        for (int i = 0; i < mRecords.size(); i++, column++) {
+        final int tilesToLayout = Math.min(numRecords, mRows * mColumns);
+        for (int i = 0; i < tilesToLayout; i++, column++) {
             // If we reached the last column available to layout a tile, wrap back to the next row.
             if (column == mColumns) {
                 column = 0;
@@ -147,12 +184,22 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        layoutTileRecords(mRecords.size());
+    }
+
     private int getRowTop(int row) {
         return row * (mCellHeight + mCellMarginVertical) + mCellMarginTop;
     }
 
-    private int getColumnStart(int column) {
+    protected int getColumnStart(int column) {
         return getPaddingStart() + mSidePadding + mCellMarginHorizontal / 2 +
                 column *  (mCellWidth + mCellMarginHorizontal);
+    }
+
+    @Override
+    public int getNumVisibleTiles() {
+        return mRecords.size();
     }
 }

@@ -16,7 +16,10 @@
 
 package android.media;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.graphics.ImageFormat;
+import android.graphics.ImageFormat.Format;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -124,7 +127,8 @@ public class ImageWriter implements AutoCloseable {
      *            {@link #dequeueInputImage()}.
      * @return a new ImageWriter instance.
      */
-    public static ImageWriter newInstance(Surface surface, int maxImages) {
+    public static @NonNull ImageWriter newInstance(@NonNull Surface surface,
+            @IntRange(from = 1) int maxImages) {
         return new ImageWriter(surface, maxImages, ImageFormat.UNKNOWN);
     }
 
@@ -168,9 +172,9 @@ public class ImageWriter implements AutoCloseable {
      *            {@link ImageFormat} or {@link PixelFormat}.
      *
      * @return a new ImageWriter instance.
-     * @hide
      */
-    public static ImageWriter newInstance(Surface surface, int maxImages, int format) {
+    public static @NonNull ImageWriter newInstance(@NonNull Surface surface,
+            @IntRange(from = 1) int maxImages, @Format int format) {
         if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
             throw new IllegalArgumentException("Invalid format is specified: " + format);
         }

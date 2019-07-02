@@ -1,0 +1,2404 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app.settings;
+option java_multiple_files = true;
+
+/**
+ * The action performed in this event
+ */
+enum Action {
+    ACTION_UNKNOWN = 0;
+    PAGE_VISIBLE = 1;
+    PAGE_HIDE = 2;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Connect to network
+    //   SUBTYPE: true if connecting to a saved network, false if not
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_WIFI_CONNECT = 135;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Forget network
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_WIFI_FORGET = 137;
+
+    // ACTION: Settings > Wi-Fi > Toggle off
+    //   SUBTYPE: true if connected to network before toggle, false if not
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_WIFI_OFF = 138;
+
+    // ACTION: Settings > Wi-Fi > Toggle on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_WIFI_ON = 139;
+
+    // ACTION: Settings > Bluetooth > Overflow > Rename this device
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_BLUETOOTH_RENAME = 161;
+
+    // ACTION: Settings > Bluetooth > Overflow > Show received files
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_BLUETOOTH_FILES = 162;
+
+    // ACTION: DND Settings > Priority only allows > Reminder toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_ALLOW_REMINDERS = 167;
+
+    // ACTION: DND Settings > Priority only allows > Event toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_ALLOW_EVENTS = 168;
+
+    // ACTION: DND Settings > Priority only allows > Messages
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_ALLOW_MESSAGES = 169;
+
+    // ACTION: DND Settings > Priority only allows > Calls
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_ALLOW_CALLS = 170;
+
+    // ACTION: DND Settings > Priority only allows > Repeat callers toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_ALLOW_REPEAT_CALLS = 171;
+
+    // ACTION: DND Settings > Automatic rules > [Rule] > Delete rule > Delete
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_DELETE_RULE_OK = 175;
+
+    // ACTION: Settings > More > Airplane mode toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_AIRPLANE_TOGGLE = 177;
+
+    // ACTION: Settings > Data usage > Cellular data toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_CELL_DATA_TOGGLE = 178;
+
+    // ACTION: Settings > Display > When device is rotated
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ROTATION_LOCK = 203;
+
+    // OPEN: Settings > Search > Perform search
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_SEARCH_RESULTS = 226;
+
+    // ACTION: Settings > Security > Nexus Imprint > [Fingerprint] > Delete
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_FINGERPRINT_DELETE = 253;
+
+    // ACTION: Settings > Security > Nexus Imprint > [Fingerprint] > Rename
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_FINGERPRINT_RENAME = 254;
+
+    // ACTION: Settings -> Developer Options -> Take bug report -> Interactive report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // Interactive bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_INTERACTIVE = 294;
+
+    // ACTION: Settings -> Developer Options -> Take bug report -> Full report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // Interactive bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_FULL = 295;
+
+    // click on collapsed conditional or clicks expand button
+    ACTION_SETTINGS_CONDITION_EXPAND = 373;
+
+    // click main area of expanded conditional
+    ACTION_SETTINGS_CONDITION_CLICK = 375;
+
+    // click a direct button on expanded conditional
+    ACTION_SETTINGS_CONDITION_BUTTON = 376;
+
+    // Action: user enable / disabled data saver using Settings
+    // OPEN: Settings -> Data Usage -> Data saver -> On/off toggle
+    // VALUE: 1 for enabled, 0 for disabled
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_DATA_SAVER_MODE = 394;
+
+    // User whitelisted an app for Data Saver mode; action pass package name of app
+    // Action: user enable / disabled data saver using Settings
+    // OPEN: Settings -> Data Usage -> Data saver -> Unrestricted data access > APP toggle turned on
+    //       or
+    //       Settings -> Apps -> APP -> Data usage -> Unrestricted data usage toggle turned on
+    // VALUE: package name of APP
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_DATA_SAVER_WHITELIST = 395;
+
+    // User blacklisted an app for Data Saver mode; action pass package name of app
+    // OPEN: Settings -> Apps -> APP -> Data usage -> Background data toggle turned off
+    // VALUE: package name of APP
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACTION_DATA_SAVER_BLACKLIST = 396;
+
+    // ACTION: Settings -> Storage -> Manage storage -> Click Storage Manager
+    //   SUBTYPE: false is off, true is on
+    ACTION_TOGGLE_STORAGE_MANAGER = 489;
+
+    // OPEN: Settings > Display -> Ambient Display
+    // CATEGORY: SETTINGS
+    ACTION_AMBIENT_DISPLAY = 495;
+
+    // ACTION: Allow Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_ALLOW = 764;
+
+    // ACTION: Deny Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_DENY = 765;
+
+    // ACTION: Enable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_ALLOW = 766;
+
+    // ACTION: Disable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_DENY = 767;
+
+    // ACTION: Allow "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_ALLOW = 768;
+
+    // ACTION: Deny "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_DENY = 769;
+
+    // ACTION: Allow "Draw over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_ALLOW = 770;
+
+    // ACTION: Deny "Display over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_DENY = 771;
+
+    // ACTION: Allow "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_ALLOW = 772;
+
+    // ACTION: Deny "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_DENY = 773;
+
+    // ACTION: Allow "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_ALLOW = 774;
+
+    // ACTION: Deny "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_DENY = 775;
+
+    // ACTION: Allow "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_ALLOW = 776;
+
+    // ACTION: Deny "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_DENY = 777;
+
+    // ACTION: "Premium SMS access" for an app - "ask user" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ASK = 778;
+
+    // ACTION: "Premium SMS access" for an app - "never allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_DENY = 779;
+
+    // ACTION: "Premium SMS access" for an app - "always allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ALWAYS_ALLOW = 780;
+
+    // ACTION: Allow "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_ALLOW = 781;
+
+    // ACTION: Deny "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_DENY = 782;
+
+    // ACTION: Allow "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_ALLOW = 783;
+
+    // ACTION: Deny "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_DENY = 784;
+
+    // ACTION: "Force stop" action on an app
+    ACTION_APP_FORCE_STOP = 807;
+
+    // ACTION: Allow "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_ALLOW = 813;
+
+    // ACTION: Create a Settings shortcut item.
+    ACTION_SETTINGS_CREATE_SHORTCUT = 829;
+
+    // ACTION: Settings advanced button is expanded
+    ACTION_SETTINGS_ADVANCED_BUTTON_EXPAND = 834;
+
+    // ACTION: Deny "Enable picture-in-picture" for an app
+    APP_PICTURE_IN_PICTURE_DENY = 814;
+
+    // ACTION: Settings -> Display -> Theme
+    ACTION_THEME = 816;
+
+    // ACTION: Settings > About device > Build number
+    ACTION_SETTINGS_BUILD_NUMBER_PREF = 847;
+
+    // ACTION: Settings > Battery > Menu > Optimization
+    ACTION_SETTINGS_MENU_BATTERY_OPTIMIZATION = 851;
+
+    // ACTION: Settings > Battery > Menu > Apps Toggle
+    ACTION_SETTINGS_MENU_BATTERY_APPS_TOGGLE = 852;
+
+    // ACTION: Settings > Any preference is changed
+    ACTION_SETTINGS_PREFERENCE_CHANGE = 853;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Available devices
+    ACTION_SETTINGS_BLUETOOTH_PAIR = 866;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Paired devices
+    ACTION_SETTINGS_BLUETOOTH_CONNECT = 867;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Connected device
+    ACTION_SETTINGS_BLUETOOTH_DISCONNECT = 868;
+
+    // ACTION: Settings > Connected devices > Bluetooth -> Error dialog
+    ACTION_SETTINGS_BLUETOOTH_CONNECT_ERROR = 869;
+
+    // ACTION: Settings > Connected devices > Bluetooth master switch Toggle
+    ACTION_SETTINGS_MASTER_SWITCH_BLUETOOTH_TOGGLE = 870;
+
+    // ACTION: Settings > App detail > Uninstall
+    ACTION_SETTINGS_UNINSTALL_APP = 872;
+
+    // ACTION: Settings > App detail > Uninstall Device admin app
+    ACTION_SETTINGS_UNINSTALL_DEVICE_ADMIN = 873;
+
+    // ACTION: Settings > App detail > Disable app
+    ACTION_SETTINGS_DISABLE_APP = 874;
+
+    // ACTION: Settings > App detail > Enable app
+    ACTION_SETTINGS_ENABLE_APP = 875;
+
+    // ACTION: Settings > App detail > Clear data
+    ACTION_SETTINGS_CLEAR_APP_DATA = 876;
+
+    // ACTION: Settings > App detail > Clear cache
+    ACTION_SETTINGS_CLEAR_APP_CACHE = 877;
+
+    // ACTION: Logs pressing the "Clear app" button in the app info settings page for an instant
+    // app.
+    // VALUE: The package name of the app
+    ACTION_SETTINGS_CLEAR_INSTANT_APP = 923;
+
+    // OPEN: Assist Gesture training intro in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_INTRO = 991;
+
+    // OPEN: Assist Gesture training enrolling in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_ENROLLING = 992;
+
+    // OPEN: Assist Gesture training finished in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_TRAINING_FINISHED = 993;
+
+    // ACTION: Update default app from Settings
+    ACTION_SETTINGS_UPDATE_DEFAULT_APP = 1000;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Sign in to network
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_WIFI_SIGNIN = 1008;
+
+    // ACTION: Settings > Notification Settings > Open application notification
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_OPEN_APP_NOTIFICATION_SETTING = 1016;
+
+    // ACTION: Settings > App Info > Open app settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_OPEN_APP_SETTING = 1017;
+
+    // ACTION: Collect PSD Signals
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_PSD_LOADER = 1019;
+
+    // OPEN: Settings > Trampoline Intent > Settings page
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    TRAMPOLINE_SETTINGS_EVENT = 1033;
+
+    // ACTION: Logged when user tries to pair a Bluetooth device without name from Settings app
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1096;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Network
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
+
+    // ACTION: DND Settings > Priority only allows > Alarms toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_ALARMS = 1226;
+
+    // ACTION: DND Settings > Priority only allows > Media toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_MEDIA = 1227;
+
+    // ACTION: A private dns mode been selected by user
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_PRIVATE_DNS_MODE = 1249;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name > OK
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_MODE_RULE_NAME_CHANGE_OK = 1267;
+
+    // OPEN: Settings > Sound > Do Not Disturb > TURN ON NOW/TURN OFF NOW
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_TOGGLE_DND_BUTTON = 1268;
+
+    // ACTION: DND Settings > What to block > full screen intents
+    //   SUBTYPE: false is allowed, true is blocked
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_BLOCK_FULL_SCREEN_INTENTS = 1332;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_LIGHT = 1333;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_PEEK = 1334;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_STATUS = 1335;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_BADGE = 1336;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_AMBIENT = 1337;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_NOTIFICATION_LIST = 1338;
+
+    // ACTION: DND Settings > Priority only allows > System toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_SYSTEM = 1340;
+
+    // ACTION: Settings > Battery settings > Battery tip > App restriction tip
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP = 1347;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage tip
+    // OS: P
+    ACTION_HIGH_USAGE_TIP = 1348;
+
+    // ACTION: Settings > Battery settings > Battery tip > Summary tip
+    // OS: P
+    ACTION_SUMMARY_TIP = 1349;
+
+    // ACTION: Settings > Battery settings > Battery tip > Smart battery tip
+    // OS: P
+    ACTION_SMART_BATTERY_TIP = 1350;
+
+    // ACTION: Settings > Battery settings > Battery tip > Early warning tip
+    // OS: P
+    ACTION_EARLY_WARNING_TIP = 1351;
+
+    // ACTION: Settings > Battery settings > Battery tip > Low battery tip
+    // OS: P
+    ACTION_LOW_BATTERY_TIP = 1352;
+
+    // ACTION: Settings > Battery settings > Battery tip > App restriction list shown
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP_LIST = 1353;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage list shown
+    // OS: P
+    ACTION_HIGH_USAGE_TIP_LIST = 1354;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open app restriction page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_APP_RESTRICTION_PAGE = 1361;
+
+    // ACTION: Settings > Battery settings > Battery tip > Restrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_RESTRICT_APP = 1362;
+
+    // ACTION: Settings > Battery settings > Battery tip > Unrestrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_UNRESTRICT_APP = 1363;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open smart battery page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_SMART_BATTERY = 1364;
+
+    // ACTION: Settings > Battery settings > Battery tip > Turn on battery saver
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_TURN_ON_BATTERY_SAVER = 1365;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly received
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_TRIGGERED = 1367;
+
+    // ACTION: A Settings Slice is requested
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_REQUESTED = 1371;
+
+    // ACTION: A Settings Slice is updated with new value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_CHANGED = 1372;
+
+    // OPEN: DND onboarding activity > Ok button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_OK = 1378;
+
+    // OPEN: DND onboarding activity > Settings link
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SETTINGS = 1379;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly ignored, don't show up in battery settings
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_IGNORED = 1387;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open battery saver page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_BATTERY_SAVER_PAGE = 1388;
+
+    // ACTION: DND Settings > What to block
+    // OS: P
+    ACTION_ZEN_SOUND_ONLY = 1396;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SOUND_AND_VIS_EFFECTS = 1397;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SHOW_CUSTOM = 1398;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_CUSTOM = 1399;
+
+    // OPEN: DND onboarding activity > don't update button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_KEEP_CURRENT_SETTINGS = 1406;
+
+    // ACTION: Storage initialization wizard initialization choice of external/portable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_EXTERNAL = 1407;
+
+    // ACTION: Storage initialization wizard initialization choice of internal/adoptable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_INTERNAL = 1408;
+
+    // ACTION: Storage initialization wizard benchmark fast choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_FAST_CONTINUE = 1409;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_CONTINUE = 1410;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of abort
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_ABORT = 1411;
+
+    // ACTION: Storage initialization wizard migration choice of now
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_NOW = 1412;
+
+    // ACTION: Storage initialization wizard migration choice of later
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_LATER = 1413;
+
+    // OPEN: Settings > Sound > Switch a2dp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_A2DP_DEVICES = 1415;
+
+
+    // OPEN: Settings > Sound > Switch hfp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_HFP_DEVICES = 1416;
+
+    // OPEN: QS Sensor Privacy Mode tile shown
+    // ACTION: QS Sensor Privacy Mode tile tapped
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    QS_SENSOR_PRIVACY = 1598;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
+    ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
+
+    // ACTION: Tap & Pay -> Default Application Setting -> Use Default
+    ACTION_NFC_PAYMENT_ALWAYS_SETTING = 1623;
+
+    // ACTION: Settings > Search Bar > Avatar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    CLICK_ACCOUNT_AVATAR = 1643;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PASSWORD = 1645;
+
+    // ACTION: Set new password (action intent android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = 1646;
+
+    // ACTION: An interaction with a Slice or other component in the Panel.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_PANEL_INTERACTION = 1658;
+
+    // ACTION: Show Contextual homepage. Log total loading latency.
+    ACTION_CONTEXTUAL_HOME_SHOW = 1662;
+
+    // ACTION: Contextual card displays
+    ACTION_CONTEXTUAL_CARD_SHOW = 1663;
+
+    // ACTION: Contextual cards are eligible to be shown, but don't rank high
+    ACTION_CONTEXTUAL_CARD_NOT_SHOW = 1664;
+
+    // ACTION: Settings > long press a card, and click dismiss
+    // Contextual card is dismissed
+    ACTION_CONTEXTUAL_CARD_DISMISS = 1665;
+
+    // ACTION: Settings > click a card
+    // Contextual card is clicked
+    ACTION_CONTEXTUAL_CARD_CLICK = 1666;
+
+    // Mapping: go/at-mapping
+    ACTION_ATSG = 1674;
+
+    ACTION_ATPG = 1675;
+
+    ACTION_ATCLPB = 1676;
+
+    ACTION_ATCGIB = 1677;
+
+    ACTION_ATCPAB = 1678;
+
+    ACTION_ATCSAUC = 1679;
+
+    ACTION_ATCSCUC = 1680;
+
+    ACTION_ATCHNUC = 1681;
+
+    // ACTION: Individual contextual card loading time
+    ACTION_CONTEXTUAL_CARD_LOAD = 1684;
+
+    //ACTION: Contextual card loading timeout
+    ACTION_CONTEXTUAL_CARD_LOAD_TIMEOUT = 1685;
+
+    //ACTION: Log result for each card's eligibility check
+    ACTION_CONTEXTUAL_CARD_ELIGIBILITY = 1686;
+
+    // ACTION: Display white balance setting enabled or disabled.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
+
+    // ACTION: Share a Wi-Fi network by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_QR_CODE = 1710;
+
+    // ACTION: Connect to a Wi-Fi network by scanning a QR code
+    ACTION_SETTINGS_ENROLL_WIFI_QR_CODE = 1711;
+
+    // ACTION: Share Wi-Fi hotspot by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_HOTSPOT_QR_CODE = 1712;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Invalid data
+    ACTION_VERIFY_SLICE_ERROR_INVALID_DATA = 1725;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Parsing error
+    ACTION_VERIFY_SLICE_PARSING_ERROR = 1726;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
+    ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
+}
+
+/**
+ * Id for Settings pages. Each page must have its own unique Id.
+ */
+enum PageId {
+    // Unknown page. Should not be used in production code.
+    PAGE_UNKNOWN = 0;
+
+    // OPEN: Settings > Accessibility
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY = 2;
+
+    // OPEN: Settings > Accessibility > Captions
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY_CAPTION_PROPERTIES = 3;
+
+    // OPEN: Settings > Accessibility > [Service]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY_SERVICE = 4;
+
+    // OPEN: Settings > Accessibility > Color correction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY_TOGGLE_DALTONIZER = 5;
+
+    // OPEN: Settings > Accessibility > Accessibility shortcut
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY_TOGGLE_GLOBAL_GESTURE = 6;
+
+    // OPEN: Settings > Accessibility > Magnification gestures (Renamed in O)
+    // OPEN: Settings > Accessibility > Magnification > Magnify with triple-tap
+    // OPEN: Settings > Accessibility > Magnification > Magnify with button
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 7;
+
+    // OPEN: Settings > Accounts
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCOUNT = 8;
+
+    // OPEN: Settings > Accounts > [Single Account Sync Settings]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCOUNTS_ACCOUNT_SYNC = 9;
+
+    // OPEN: Settings > Accounts > Add an account
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACCOUNTS_CHOOSE_ACCOUNT_ACTIVITY = 10;
+
+    // OPEN: Settings > Cellular network settings > APNs
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APN = 12;
+
+    // OPEN: Settings > More > Cellular network settings > APNs > [Edit APN]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APN_EDITOR = 13;
+
+    // OPEN: Settings > Apps > Configure apps > App links > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_APP_LAUNCH = 17;
+
+    // OPEN: Settings > Internal storage > Apps storage > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_APP_STORAGE = 19;
+
+    // OPEN: Settings > Apps > [App info]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_INSTALLED_APP_DETAILS = 20;
+
+    // OPEN: Settings > Memory > App usage > [App Memory usage]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_PROCESS_STATS_DETAIL = 21;
+
+    // OPEN: Settings > Memory > App usage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_PROCESS_STATS_UI = 23;
+
+    // OPEN: Choose Bluetooth device (ex: when sharing)
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    BLUETOOTH_DEVICE_PICKER = 25;
+
+    // OPEN: Settings > Security > Choose screen lock
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CHOOSE_LOCK_GENERIC = 27;
+
+    // OPEN: Settings > Security > Choose screen lock > Choose your password
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CHOOSE_LOCK_PASSWORD = 28;
+
+    // OPEN: Settings > Security > Choose screen lock > Choose your pattern
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CHOOSE_LOCK_PATTERN = 29;
+
+    // OPEN: Settings > Security > Choose screen lock > Confirm your password
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CONFIRM_LOCK_PASSWORD = 30;
+
+    // OPEN: Settings > Security > Choose screen lock > Confirm your pattern
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CONFIRM_LOCK_PATTERN = 31;
+
+    // OPEN: Settings > Security > Encrypt phone
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CRYPT_KEEPER = 32;
+
+    // OPEN: Settings > Security > Encrypt phone > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    CRYPT_KEEPER_CONFIRM = 33;
+
+    // OPEN: Settings (Root page)
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DASHBOARD_SUMMARY = 35;
+
+    // OPEN: Settings > Data usage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DATA_USAGE_SUMMARY = 37;
+
+    // OPEN: Settings > Date & time
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DATE_TIME = 38;
+
+    // OPEN: Settings > Developer options
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DEVELOPMENT = 39;
+
+    // OPEN: Settings > About phone
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DEVICEINFO = 40;
+
+    // OPEN: Settings > Internal storage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DEVICEINFO_STORAGE = 42;
+
+    // OPEN: Settings > Display
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DISPLAY = 46;
+
+    // OPEN: Settings > Display > Daydream
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    DREAM = 47;
+
+    // OPEN: Settings > Security > Screen lock > Secure start-up
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ENCRYPTION = 48;
+
+    // OPEN: Settings > Security > Nexus Imprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT = 49;
+
+    // OPEN: Settings > Battery > History details
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FUELGAUGE_BATTERY_HISTORY_DETAIL = 51;
+
+    // OPEN: Settings > Battery > Battery saver
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FUELGAUGE_BATTERY_SAVER = 52;
+
+    // OPEN: Settings > Battery > [App Use details]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FUELGAUGE_POWER_USAGE_DETAIL = 53;
+
+    // OPEN: Settings > Security > SIM card lock settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ICC_LOCK = 56;
+
+    // OPEN: Settings > Language & input > Physical keyboard
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    INPUTMETHOD_KEYBOARD = 58;
+
+    // OPEN: Settings > Language & input > Spell checker
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    INPUTMETHOD_SPELL_CHECKERS = 59;
+
+    // OBSOLETE
+    INPUTMETHOD_SUBTYPE_ENABLER = 60;
+
+    // OPEN: Settings > Language & input > Personal dictionary
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    INPUTMETHOD_USER_DICTIONARY = 61;
+
+    // OPEN: Settings > Language & input > Add word
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    INPUTMETHOD_USER_DICTIONARY_ADD_WORD = 62;
+
+    // OPEN: Settings > Location
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    LOCATION = 63;
+
+    // OPEN: Settings > Apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    MANAGE_APPLICATIONS = 65;
+
+    // OPEN: Settings > Backup & reset > Factory data reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    MASTER_CLEAR = 66;
+
+    // OPEN: Settings > Backup & reset > Factory data reset > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    MASTER_CLEAR_CONFIRM = 67;
+
+    // OPEN: Settings > More > Android Beam
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NFC_BEAM = 69;
+
+    // OPEN: Settings > Tap & pay
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NFC_PAYMENT = 70;
+
+    // OPEN: Settings > Sound & notification > App notifications > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_APP_NOTIFICATION = 72;
+
+    // OBSOLETE
+    NOTIFICATION_REDACTION = 74;
+
+    // OPEN: Settings Widget > Notification log
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_STATION = 75;
+
+    // OPEN: Settings > Sound & notification > Do not disturb
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE = 76;
+
+
+    // OPEN: Print job notification > Print job settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    PRINT_JOB_SETTINGS = 78;
+
+    // OPEN: Settings > Printing > [Print Service]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    PRINT_SERVICE_SETTINGS = 79;
+
+    // OPEN: Settings > Printing
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    PRINT_SETTINGS = 80;
+
+    // OPEN: Settings > Backup & reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    PRIVACY = 81;
+
+    //OBSOLETE
+    PROXY_SELECTOR = 82;
+
+    // OPEN: Settings > Backup & reset > Network settings reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    RESET_NETWORK = 83;
+
+    // OPEN: Settings > Backup & reset > Network settings reset > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    RESET_NETWORK_CONFIRM = 84;
+
+    // OPEN: Settings > Developer Options > Running Services
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    RUNNING_SERVICE_DETAILS = 85;
+
+    // OPEN: Settings > Security > Screen pinning
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    SCREEN_PINNING = 86;
+
+    // OPEN: Settings > Security
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    SECURITY = 87;
+
+    // OPEN: Settings > SIM cards
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    SIM = 88;
+
+    // OBSOLETE
+    TESTING = 89;
+
+    // OPEN: Settings > More > Tethering & portable hotspot
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    TETHER = 90;
+
+    // OPEN: Settings > Security > Trust agents
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    TRUST_AGENT = 91;
+
+    // OPEN: Settings > Security > Trusted credentials
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    TRUSTED_CREDENTIALS = 92;
+
+    // OPEN: Settings > Language & input > TTS output > [Engine] > Settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    TTS_ENGINE_SETTINGS = 93;
+
+    // OPEN: Settings > Language & input > Text-to-speech output
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    TTS_TEXT_TO_SPEECH = 94;
+
+    // OPEN: Settings > Security > Apps with usage access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    USAGE_ACCESS = 95;
+
+    // OPEN: Settings > Users
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    USER = 96;
+
+    // OPEN: Settings > Users > [Restricted profile app & content access]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    USERS_APP_RESTRICTIONS = 97;
+
+    // OPEN: Settings > Users > [User settings]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    USER_DETAILS = 98;
+
+    // OPEN: Settings > More > VPN
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    VPN = 100;
+
+    // OPEN: Settings > Display > Choose wallpaper from
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WALLPAPER_TYPE = 101;
+
+    // OPEN: Settings > Display > Cast
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WFD_WIFI_DISPLAY = 102;
+
+    // OPEN: Settings > Wi-Fi
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WIFI = 103;
+
+    // OPEN: Settings > More > Wi-Fi Calling
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WIFI_CALLING = 105;
+
+    // OPEN: Settings > Wi-Fi > Saved networks
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WIFI_SAVED_ACCESS_POINTS = 106;
+
+    // OPEN: Settings > Wi-Fi > Advanced Wi-Fi > Wi-Fi Direct
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    WIFI_P2P = 109;
+
+    // OPEN: Settings > Apps > Configure apps > App permissions
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_ADVANCED = 130;
+
+    // OPEN: Settings > Location > Scanning
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    LOCATION_SCANNING = 131;
+
+    // OPEN: Settings > Sound & notification > App notifications
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    MANAGE_APPLICATIONS_NOTIFICATIONS = 133;
+
+    // OPEN: Settings > Sound & notification > DND > Priority only allows
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE_PRIORITY = 141;
+
+    // OPEN: Settings > Sound & notification > DND > Automatic rules
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE_AUTOMATION = 142;
+
+    // OPEN: Settings > Sound & notification > DND > [Time based rule]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE_SCHEDULE_RULE = 144;
+
+    // OPEN: Settings > Apps > Configure apps > App links
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    MANAGE_DOMAIN_URLS = 143;
+
+    // OPEN: Settings > Sound & notification > DND > [Event rule]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE_EVENT_RULE = 146;
+
+    // OPEN: Settings > Sound & notification > Notification access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ACCESS = 179;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    NOTIFICATION_ZEN_MODE_ACCESS = 180;
+
+    // OPEN: Settings > Internal storage > Apps storage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_STORAGE_APPS = 182;
+
+    // OPEN: Settings > Security > Usage access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_USAGE_ACCESS_DETAIL = 183;
+
+    // OPEN: Settings > Battery > Battery optimization
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_HIGH_POWER_APPS = 184;
+
+    // OPEN: Settings > Apps > Configure > Default apps > Assist & voice input
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    APPLICATIONS_MANAGE_ASSIST = 201;
+
+    // OPEN: Settings > Memory
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    PROCESS_STATS_SUMMARY = 202;
+
+    // OPEN: Settings > Apps > Configure Apps > Display over other apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    SYSTEM_ALERT_WINDOW_APPS = 221;
+
+    // OPEN: Settings > About phone > Legal information
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ABOUT_LEGAL_SETTINGS = 225;
+
+
+    // OPEN: Settings > Developer options > Inactive apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FUELGAUGE_INACTIVE_APPS = 238;
+
+    // OPEN: Settings > Security > Nexus Imprint > Add Fingerprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLLING = 240;
+    // OPEN: Fingerprint Enroll > Find Sensor
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_FIND_SENSOR = 241;
+
+    // OPEN: Fingerprint Enroll > Fingerprint Enrolled!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLL_FINISH = 242;
+
+    // OPEN: Fingerprint Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLL_INTRO = 243;
+
+    // OPEN: Fingerprint Enroll > Let's Start!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLL_SIDECAR = 245;
+
+    // OPEN: Fingerprint Enroll SUW > Let's Start!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLLING_SETUP = 246;
+
+    // OPEN: Fingerprint Enroll SUW > Find Sensor
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_FIND_SENSOR_SETUP = 247;
+
+    // OPEN: Fingerprint Enroll SUW > Fingerprint Enrolled!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLL_FINISH_SETUP = 248;
+
+    // OPEN: Fingerprint Enroll SUW introduction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    FINGERPRINT_ENROLL_INTRO_SETUP = 249;
+
+    // OPEN: Settings > Developer Options > Background Check
+    // CATEGORY: SETTINGS
+    // OS: N
+    BACKGROUND_CHECK_SUMMARY = 258;
+
+    // OPEN: Settings > Notifications > [App] > Channel Notifications
+    // CATEGORY: SETTINGS
+    // OS: N
+    NOTIFICATION_TOPIC_NOTIFICATION = 265;
+
+    // OPEN: Settings > Security > User credentials
+    // CATEGORY: Settings
+    // OS: N
+    USER_CREDENTIALS = 285;
+
+    // Logs that the user has edited the enabled VR listeners.
+    // CATEGORY: SETTINGS
+    // OS: N
+    VR_MANAGE_LISTENERS = 334;
+
+    // Settings -> Accessibility -> Click after pointer stops moving
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACCESSIBILITY_TOGGLE_AUTOCLICK = 335;
+
+    // Settings -> Sound
+    // CATEGORY: SETTINGS
+    // OS: N
+    SOUND = 336;
+
+    // Settings -> Notifications -> Gear
+    // CATEGORY: SETTINGS
+    // OS: N
+    CONFIGURE_NOTIFICATION = 337;
+
+    // Settings -> Wi-Fi -> Gear
+    // CATEGORY: SETTINGS
+    // OS: N
+    CONFIGURE_WIFI = 338;
+
+    // Settings -> Display -> Display size
+    // OS: N
+    DISPLAY_SCREEN_ZOOM = 339;
+
+    // Settings -> Display -> Font size
+    // CATEGORY: SETTINGS
+    // OS: N
+    ACCESSIBILITY_FONT_SIZE = 340;
+
+    // Settings -> Data usage -> Cellular/Wi-Fi data usage
+    // CATEGORY: SETTINGS
+    // OS: N
+    DATA_USAGE_LIST = 341;
+
+    // Settings -> Data usage -> Billing cycle or DATA_USAGE_LIST -> Gear
+    // CATEGORY: SETTINGS
+    // OS: N
+    BILLING_CYCLE = 342;
+
+    // DATA_USAGE_LIST -> Any item or App info -> Data usage
+    // CATEGORY: SETTINGS
+    // OS: N
+    APP_DATA_USAGE = 343;
+
+    // Settings -> Language & input -> Language
+    // CATEGORY: SETTINGS
+    // OS: N
+    USER_LOCALE_LIST = 344;
+
+    // Settings -> Language & input -> Virtual keyboard
+    // CATEGORY: SETTINGS
+    // OS: N
+    VIRTUAL_KEYBOARDS = 345;
+
+    // Settings -> Language & input -> Physical keyboard
+    // CATEGORY: SETTINGS
+    // OS: N
+    PHYSICAL_KEYBOARDS = 346;
+
+    // Settings -> Language & input -> Virtual keyboard -> Add a virtual keyboard
+    // CATEGORY: SETTINGS
+    // OS: N
+    ENABLE_VIRTUAL_KEYBOARDS = 347;
+
+    // Settings -> Data usage -> Data Saver
+    // CATEGORY: SETTINGS
+    // OS: N
+    DATA_SAVER_SUMMARY = 348;
+
+    // Settings -> Data usage -> Data Saver -> Unrestricted data access
+    // CATEGORY: SETTINGS
+    // OS: N
+    DATA_USAGE_UNRESTRICTED_ACCESS = 349;
+
+    // Settings -> Apps -> Gear -> Special access
+    SPECIAL_ACCESS = 351;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY = 367;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gestures (Renamed in O)
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with triple-tap
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification -> Magnify with button
+    // ACTION: New magnification gesture configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 368;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Font size
+    // ACTION: New font size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_FONT_SIZE = 369;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Display size
+    // ACTION: New display size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is larger, 4 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_DISPLAY_SIZE = 370;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> TalkBack
+    // ACTION: New screen reader configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_READER = 371;
+
+    // Airplane mode on
+    SETTINGS_CONDITION_AIRPLANE_MODE = 377;
+    // AKA Data saver on
+    SETTINGS_CONDITION_BACKGROUND_DATA = 378;
+    // Battery saver on
+    SETTINGS_CONDITION_BATTERY_SAVER = 379;
+    // Cellular data off
+    SETTINGS_CONDITION_CELLULAR_DATA = 380;
+    // Do not disturb on
+    SETTINGS_CONDITION_DND = 381;
+    // Hotspot on
+    SETTINGS_CONDITION_HOTSPOT = 382;
+    // Work profile off
+    SETTINGS_CONDITION_WORK_MODE = 383;
+
+    // Settings > Apps > Gear > Special Access > Premium SMS access
+    PREMIUM_SMS_ACCESS = 388;
+
+    // OPEN: Settings > Accounts > Work profile settings
+    // CATEGORY: SETTINGS
+    ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
+
+    // Settings -> Dev options -> Convert to file encryption
+    CONVERT_FBE = 402;
+
+    // Settings -> Dev options -> Convert to file encryption -> WIPE AND CONVERT...
+    CONVERT_FBE_CONFIRM = 403;
+
+    // Settings -> Dev options -> Running services
+    RUNNING_SERVICES = 404;
+
+    // The dialog shown by 3P intent to change current webview implementation.
+    WEBVIEW_IMPLEMENTATION = 405;
+
+    // OPEN: Settings > Internal storage > Storage manager
+    // CATEGORY: SETTINGS
+    STORAGE_MANAGER_SETTINGS = 458;
+
+    // OPEN: Settings -> Gestures
+    // CATEGORY: SETTINGS
+    SETTINGS_GESTURES = 459;
+
+    // OPEN: Settings > Display > Night Light
+    // CATEGORY: SETTINGS
+    NIGHT_DISPLAY_SETTINGS = 488;
+
+    // Night Light on
+    SETTINGS_CONDITION_NIGHT_DISPLAY = 492;
+
+    // OPEN: Settings > Language & input > Personal dictionary (single locale)
+    USER_DICTIONARY_SETTINGS = 514;
+
+    // OPEN: Settings > Date & time > Select time zone
+    ZONE_PICKER = 515;
+
+    // OPEN: Settings > Security > Device administrators
+    DEVICE_ADMIN_SETTINGS = 516;
+
+    // OPEN: Settings > Security > Factory Reset Protection dialog
+    DIALOG_FRP = 528;
+
+    // OPEN: Settings > Custom list preference with confirmation message
+    DIALOG_CUSTOM_LIST_CONFIRMATION = 529;
+
+    // OPEN: Settings > APN Editor > Error dialog
+    DIALOG_APN_EDITOR_ERROR = 530;
+
+    // OPEN: Settings > Users > Edit owner info dialog
+    DIALOG_OWNER_INFO_SETTINGS = 531;
+
+    // OPEN: Settings > Security > Use one lock dialog
+    DIALOG_UNIFICATION_CONFIRMATION = 532;
+
+    // OPEN: Settings > Security > User Credential
+    DIALOG_USER_CREDENTIAL = 533;
+
+    // OPEN: Settings > Accounts > Remove account
+    DIALOG_REMOVE_USER = 534;
+
+    // OPEN: Settings > Accounts > Confirm auto sync dialog
+    DIALOG_CONFIRM_AUTO_SYNC_CHANGE = 535;
+
+    // OPEN: Settings > Apps > Dialog for running service details
+    DIALOG_RUNNIGN_SERVICE = 536;
+
+    // OPEN: Settings > Bluetooth > Rename this device
+    DIALOG_BLUETOOTH_RENAME = 538;
+
+    // OPEN: Settings > Battery optimization > details for app
+    DIALOG_HIGH_POWER_DETAILS = 540;
+
+    // OPEN: Settings > Keyboard > Show keyboard layout dialog
+    DIALOG_KEYBOARD_LAYOUT = 541;
+
+    // OPEN: Settings > WIFI Scan permission dialog
+    DIALOG_WIFI_SCAN_MODE = 543;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog
+    DIALOG_LEGACY_VPN_CONFIG = 545;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog for app
+    DIALOG_VPN_APP_CONFIG = 546;
+
+    // OPEN: Settings > Wireless > VPN > Cannot connect dialog
+    DIALOG_VPN_CANNOT_CONNECT = 547;
+
+    // OPEN: Settings > Wireless > VPN > Replace existing VPN dialog
+    DIALOG_VPN_REPLACE_EXISTING = 548;
+
+    // OPEN: Settings > Billing cycle > Edit billing cycle dates dialog
+    DIALOG_BILLING_CYCLE = 549;
+
+    // OPEN: Settings > Billing cycle > Edit data limit/warning dialog
+    DIALOG_BILLING_BYTE_LIMIT = 550;
+
+    // OPEN: Settings > Billing cycle > turn on data limit dialog
+    DIALOG_BILLING_CONFIRM_LIMIT = 551;
+
+    // OPEN: Settings > Service > Turn off notification access dialog
+    DIALOG_DISABLE_NOTIFICATION_ACCESS = 552;
+
+    // OPEN: Settings > Sound > Use personal sound for work profile dialog
+    DIALOG_UNIFY_SOUND_SETTINGS = 553;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being granted.
+    DIALOG_ZEN_ACCESS_GRANT = 554;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being revoked.
+    DIALOG_ZEN_ACCESS_REVOKE = 555;
+
+    // OPEN: Settings > Zen mode > Dialog that picks time for zen mode.
+    DIALOG_ZEN_TIMEPICKER = 556;
+
+    // OPEN: Settings > Apps > Dialog that informs user to allow service access for app.
+    DIALOG_SERVICE_ACCESS_WARNING = 557;
+
+    // OPEN: Settings > Apps > Dialog for app actions (such as force stop/clear data)
+    DIALOG_APP_INFO_ACTION = 558;
+
+    // OPEN: Settings > Storage > Dialog for forgetting a storage device
+    DIALOG_VOLUME_FORGET = 559;
+
+    // OPEN: Settings > Storage > Dialog for initializing a volume
+    DIALOG_VOLUME_INIT = 561;
+
+    // OPEN: Settings > Storage > Dialog for unmounting a volume
+    DIALOG_VOLUME_UNMOUNT = 562;
+
+    // OPEN: Settings > Storage > Dialog for renaming a volume
+    DIALOG_VOLUME_RENAME = 563;
+
+    // OPEN: Settings > Storage > Dialog for clear cache
+    DIALOG_STORAGE_CLEAR_CACHE = 564;
+
+    // OPEN: Settings > Storage > Dialog for system info
+    DIALOG_STORAGE_SYSTEM_INFO = 565;
+
+    // OPEN: Settings > Storage > Dialog for other info
+    DIALOG_STORAGE_OTHER_INFO = 566;
+
+    // OPEN: Settings > Storage > Dialog for user info
+    DIALOG_STORAGE_USER_INFO = 567;
+    // OPEN: Settings > Add fingerprint > Dialog when user touches fingerprint icon.
+    DIALOG_FINGERPRINT_ICON_TOUCH = 568;
+
+    // OPEN: Settings > Add fingerprint > Error dialog
+    DIALOG_FINGERPINT_ERROR = 569;
+
+    // OPEN: Settings > Fingerprint > Rename or delete dialog
+    DIALOG_FINGERPINT_EDIT = 570;
+
+    // OPEN: Settings > Fingerprint > Dialog for deleting last fingerprint
+    DIALOG_FINGERPINT_DELETE_LAST = 571;
+
+    // OPEN: SUW > Fingerprint > Dialog to confirm skip fingerprint setup entirely.
+    DIALOG_FINGERPRINT_SKIP_SETUP = 573;
+
+    // OPEN: Settings > Proxy Selector error dialog
+    DIALOG_PROXY_SELECTOR_ERROR = 574;
+
+    // OPEN: Settings > Wifi > P2P Settings > Disconnect dialog
+    DIALOG_WIFI_P2P_DISCONNECT = 575;
+
+    // OPEN: Settings > Wifi > P2P Settings > Cancel connection dialog
+    DIALOG_WIFI_P2P_CANCEL_CONNECT = 576;
+
+    // OPEN: Settings > Wifi > P2P Settings > Rename dialog
+    DIALOG_WIFI_P2P_RENAME = 577;
+
+    // OPEN: Settings > Wifi > P2P Settings > Forget group dialog
+    DIALOG_WIFI_P2P_DELETE_GROUP = 578;
+
+    // OPEN: Settings > APN > Restore default dialog
+    DIALOG_APN_RESTORE_DEFAULT = 579;
+
+    // OPEN: Settings > Encryption interstitial accessibility warning dialog
+    DIALOG_ENCRYPTION_INTERSTITIAL_ACCESSIBILITY = 581;
+
+    // OPEN: Settings > Acessibility > Enable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_ENABLE = 583;
+
+    // OPEN: Settings > Acessibility > Disable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_DISABLE = 584;
+
+    // OPEN: Settings > Account > Remove account dialog
+    DIALOG_ACCOUNT_SYNC_REMOVE = 585;
+
+    // OPEN: Settings > Account > Remove account failed dialog
+    DIALOG_ACCOUNT_SYNC_FAILED_REMOVAL = 586;
+
+    // OPEN: Settings > Account > Cannot do onetime sync dialog
+    DIALOG_ACCOUNT_SYNC_CANNOT_ONETIME_SYNC = 587;
+
+    // OPEN: Settings > Display > Night light > Set start time dialog
+    DIALOG_NIGHT_DISPLAY_SET_START_TIME = 588;
+
+    // OPEN: Settings > Display > Night light > Set end time dialog
+    DIALOG_NIGHT_DISPLAY_SET_END_TIME = 589;
+
+
+
+        // OPEN: Settings > User > Edit info dialog
+        DIALOG_USER_EDIT = 590;
+
+        // OPEN: Settings > User > Confirm remove dialog
+        DIALOG_USER_REMOVE = 591;
+
+        // OPEN: Settings > User > Enable calling dialog
+        DIALOG_USER_ENABLE_CALLING = 592;
+
+        // OPEN: Settings > User > Enable calling and sms dialog
+        DIALOG_USER_ENABLE_CALLING_AND_SMS = 593;
+
+        // OPEN: Settings > User > Cannot manage device message dialog
+        DIALOG_USER_CANNOT_MANAGE = 594;
+
+        // OPEN: Settings > User > Add user dialog
+        DIALOG_USER_ADD = 595;
+
+        // OPEN: Settings > User > Setup user dialog
+        DIALOG_USER_SETUP = 596;
+
+        // OPEN: Settings > User > Setup profile dialog
+        DIALOG_USER_SETUP_PROFILE = 597;
+
+        // OPEN: Settings > User > Choose user type dialog
+        DIALOG_USER_CHOOSE_TYPE = 598;
+
+        // OPEN: Settings > User > Need lockscreen dialog
+        DIALOG_USER_NEED_LOCKSCREEN = 599;
+
+        // OPEN: Settings > User > Confirm exit guest mode dialog
+        DIALOG_USER_CONFIRM_EXIT_GUEST = 600;
+
+        // OPEN: Settings > User > Edit user profile dialog
+        DIALOG_USER_EDIT_PROFILE = 601;
+
+
+    // OPEN: Settings > Wifi > Saved AP > Edit dialog
+    DIALOG_WIFI_SAVED_AP_EDIT = 602;
+
+    // OPEN: Settings > Wifi > Edit AP dialog
+    DIALOG_WIFI_AP_EDIT = 603;
+
+    // OPEN: Settings > Wifi > Write config to NFC dialog
+    DIALOG_WIFI_WRITE_NFC = 606;
+
+    // OPEN: Settings > Date > Date picker dialog
+    DIALOG_DATE_PICKER = 607;
+
+    // OPEN: Settings > Date > Time picker dialog
+    DIALOG_TIME_PICKER = 608;
+
+    // OPEN: Settings > Wireless > Manage wireless plan dialog
+    DIALOG_MANAGE_MOBILE_PLAN = 609;
+
+    // OPEN Settings > Bluetooth > Attempt to connect to device that shows dialog
+    BLUETOOTH_DIALOG_FRAGMENT = 613;
+
+    // OPEN: Settings > Security
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_SETTINGS = 628;
+
+    // OPEN: Settings > System
+    SETTINGS_SYSTEM_CATEGORY = 744;
+
+    // OPEN: Settings > Storage
+    SETTINGS_STORAGE_CATEGORY = 745;
+
+    // OPEN: Settings > Network & Internet
+    SETTINGS_NETWORK_CATEGORY = 746;
+
+    // OPEN: Settings > Connected Device
+    SETTINGS_CONNECTED_DEVICE_CATEGORY = 747;
+
+    // OPEN: Settings > App & Notification
+    SETTINGS_APP_NOTIF_CATEGORY = 748;
+
+    // OPEN: Settings > System > Language & Region
+    SETTINGS_LANGUAGE_CATEGORY = 750;
+
+    // OPEN: Settings > System > Input & Gesture > Swipe to notification gesture
+    SETTINGS_GESTURE_SWIPE_TO_NOTIFICATION = 751;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap power button gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_POWER = 752;
+
+    // OPEN: Settings > System > Input & Gesture > Pick up gesture
+    SETTINGS_GESTURE_PICKUP = 753;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap screen gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_SCREEN = 754;
+
+    // OPEN: Settings > System > Input & Gesture > Double twist gesture
+    SETTINGS_GESTURE_DOUBLE_TWIST = 755;
+
+    // OPEN: Settings > Apps > Default Apps > Default browser
+    DEFAULT_BROWSER_PICKER = 785;
+    // OPEN: Settings > Apps > Default Apps > Default emergency app
+    DEFAULT_EMERGENCY_APP_PICKER = 786;
+
+    // OPEN: Settings > Apps > Default Apps > Default home
+    DEFAULT_HOME_PICKER = 787;
+
+    // OPEN: Settings > Apps > Default Apps > Default phone
+    DEFAULT_PHONE_PICKER = 788;
+
+    // OPEN: Settings > Apps > Default Apps > Default sms
+    DEFAULT_SMS_PICKER = 789;
+
+    // OPEN: Settings > Apps > Notification > Notification Assistant
+    DEFAULT_NOTIFICATION_ASSISTANT = 790;
+
+
+    // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
+    DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
+
+    // OPEN: Settings > Apps > Default Apps > Default autofill app
+    DEFAULT_AUTOFILL_PICKER = 792;
+
+    // OPEN: Settings > Apps > Gear > Special Access > Install other apps
+    // CATEGORY: SETTINGS
+    // OS: 8.0
+    MANAGE_EXTERNAL_SOURCES = 808;
+
+    // Logs that the user has edited the picture-in-picture settings.
+    // CATEGORY: SETTINGS
+    SETTINGS_MANAGE_PICTURE_IN_PICTURE = 812;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Select to Speak
+    // ACTION: Select to Speak configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SELECT_TO_SPEAK = 817;
+
+    // OPEN: Settings > System > Backup
+    // CATEGORY: SETTINGS
+    // OS: O
+    BACKUP_SETTINGS = 818;
+
+    // OPEN: Settings > Storage > Games
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_GAMES = 838;
+
+    // OPEN: Settings > Storage > Audio and Music
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MUSIC = 839;
+
+    // ACTION: Settings > Storage > Free Up Space to launch Deletion Helper
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FREE_UP_SPACE_NOW = 840;
+
+    // ACTION: Settings > Storage > Files to open the File Manager
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FILES = 841;
+
+    // OPEN: Settings > Apps > Default Apps > Assist >  Default assist
+    DEFAULT_ASSIST_PICKER = 843;
+
+    // OPEN: Settings > Apps > Default Apps > Assist >  Default voice input
+    DEFAULT_VOICE_INPUT_PICKER = 844;
+
+    // OPEN: Settings > Storage > [Profile]
+    SETTINGS_STORAGE_PROFILE = 845;
+
+    // OPEN: Settings > Security & screen lock -> Encryption & crendentials
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENCRYPTION_AND_CREDENTIAL = 846;
+
+    // OPEN: Settings > Wi-Fi > Network Details (click on Access Point)
+    // CATEGORY: SETTINGS
+    // OS: O
+    WIFI_NETWORK_DETAILS = 849;
+
+    // OPEN: Settings > Wi-Fi > Wifi Preferences -> Advanced -> Network Scorer
+    // CATEGORY: SETTINGS
+    // OS: O
+    SETTINGS_NETWORK_SCORER = 861;
+
+    // OPEN: Settings > About device > Model > Hardware info dialog
+    DIALOG_SETTINGS_HARDWARE_INFO = 862;
+
+    // OPEN: Settings > Security & screen lock -> Lock screen preferences
+    // CATEGORY: SETTINGS
+    SETTINGS_LOCK_SCREEN_PREFERENCES = 882;
+
+
+    // OPEN: Settings -> Display -> When in VR Mode
+    VR_DISPLAY_PREFERENCE = 921;
+
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: O
+    ACCESSIBILITY_SCREEN_MAGNIFICATION_SETTINGS = 922;
+
+    // OPEN: Settings -> System -> Reset options
+    RESET_DASHBOARD = 924;
+
+     // OPEN: Settings > Security > Nexus Imprint > [Fingerprint] > Delete
+    // CATEGORY: SETTINGS
+    // OS: O
+    FINGERPRINT_REMOVE_SIDECAR = 934;
+
+    // OPEN: Settings > Storage > Movies & TV
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MOVIES = 935;
+
+    // OPEN: Settings > Security > Managed Device Info > Apps installed
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_INSTALLED_APPS = 938;
+
+    // OPEN: Settings > Security > Managed Device Info > nnn permissions
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_PERMISSIONS = 939;
+
+
+    // OPEN: Settings > Security > Managed Device Info > Default apps
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_DEFAULT_APPS = 940;
+
+    // OPEN: Choose screen lock dialog in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_CHOOSE_LOCK_DIALOG = 990;
+
+    // OPEN: Settings > System > Languages & input > Assist gesture
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE = 996;
+
+    // OPEN: Settings > Connected Devices > Bluetooth > (click on details link for a paired device)
+    BLUETOOTH_DEVICE_DETAILS = 1009;
+
+    // OPEN: Settings > credential pages - prompt for key guard configuration confirmation
+    CONFIGURE_KEYGUARD_DIALOG = 1010;
+
+    // OPEN: Settings > Network > Tether > Wi-Fi hotspot
+    WIFI_TETHER_SETTINGS = 1014;
+
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // -> Edit name button.
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_RENAME = 1015;
+
+    // OPEN: Settings > Connected devices > Bluetooth > Pair new device
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    BLUETOOTH_PAIRING = 1018;
+
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // -> Forget button.
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_FORGET = 1031;
+
+    // OPEN: Settings > Storage > Photos & Videos
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    APPLICATIONS_STORAGE_PHOTOS = 1092;
+
+    // OPEN: Settings > Display > Colors
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    COLOR_MODE_SETTINGS = 1143;
+
+    // OPEN: Settings > Developer Options > Experiment dashboard
+    // CATEGORY: SETTINGS
+    SETTINGS_FEATURE_FLAGS_DASHBOARD = 1217;
+
+    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_CHANNEL_GROUP = 1218;
+
+    // OPEN: Settings > Developer options > Enable > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_DEVELOPMENT_OPTIONS = 1219;
+
+    // OPEN: Settings > Developer options > OEM unlocking > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_OEM_UNLOCKING = 1220;
+
+    // OPEN: Settings > Developer options > USB debugging > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_ADB = 1222;
+
+    // OPEN: Settings > Security > Nexus Imprint > [Fingerprint]
+    // CATEGORY: SETTINGS
+    // OS: P
+    FINGERPRINT_AUTHENTICATE_SIDECAR = 1221;
+
+    // OPEN: Settings > Developer options > Revoke USB debugging authorizations > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_CLEAR_ADB_KEYS = 1223;
+
+    // Open: Settings > Developer options > Quick setting tile config
+    // CATEGORY: SETTINGS
+    // OS: P
+    DEVELOPMENT_QS_TILE_CONFIG = 1224;
+
+    // OPEN: Settings > Developer options > Store logger data persistently on device > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_LOG_PERSIST = 1225;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_CALLING_FOR_SUB = 1230;
+
+    // Open: Settings > Dev options > Oem unlock > lock it > warning dialog.
+    // OS: P
+    DIALOG_OEM_LOCK_INFO = 1238;
+
+    // Open: Settings > System > About phone > IMEI
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_IMEI_INFO = 1240;
+
+    // OPEN: Settings > System > About Phone > Sim status
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SIM_STATUS = 1246;
+
+    // OPEN: Settings > System > About Phone > Android Version
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_FIRMWARE_VERSION = 1247;
+
+    // OPEN: Settings > Battery(version 2)
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_POWER_USAGE_SUMMARY_V2 = 1263;
+
+    // OPEN: Settings > Connected devices > Connection preferences
+    // CATEGORY: SETTINGS
+    // OS: P
+    CONNECTION_DEVICE_ADVANCED = 1264;
+
+    // OPEN: Settings > Security > Screen lock gear icon
+    // CATEGORY: SETTINGS
+    // OS: P
+    SCREEN_LOCK_SETTINGS = 1265;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Delete rule (trash can icon)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DELETE_RULE_DIALOG = 1266;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule > Event/Time
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_NAME_DIALOG = 1269;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_SELECTION_DIALOG = 1270;
+
+    // OPEN: Settings > Battery > Smart Battery
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_SMART_BATTERY = 1281;
+
+    // OPEN: Settings > Battery > Smart Battery > Restricted apps
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_RESTRICTED_APP_DETAILS = 1285;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Turn on now
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_ENABLE_DIALOG = 1286;
+
+    // OPEN: Settings->Connected Devices->USB->(click on details link)
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEVICE_DETAILS = 1291;
+
+    // OPEN: Settings > Accessibility > Vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION = 1292;
+
+    // OPEN: Settings > Accessibility > Vibration > Notification vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_NOTIFICATION = 1293;
+
+    // OPEN: Settings > Accessibility > Vibration > Touch vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_TOUCH = 1294;
+
+    // OPEN: Settings->Developer Options->Default USB
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEFAULT = 1312;
+
+    // OPEN: Settings > Battery > Battery tip > Battery tip Dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_BATTERY_TIP_DIALOG = 1323;
+
+    // OPEN: DND Settings > What to block
+    // OS: P
+    ZEN_WHAT_TO_BLOCK = 1339;
+
+    // OPEN: Settings > Sounds > Do Not Disturb > Duration
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_DIALOG = 1341;
+
+    // OPEN: Settings > Date & time > Select time zone -> Region
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_REGION = 1355;
+
+    // OPEN: Settings > Date & time > Select time zone -> Time Zone
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_TIME_ZONE = 1356;
+    // OPEN: Settings > Date & time > Select time zone -> Select UTC Offset
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_FIXED_OFFSET = 1357;
+
+    // OPEN: Settings > Gestures > Prevent Ringing
+    // OS: P
+    SETTINGS_PREVENT_RINGING = 1360;
+
+    // Settings > Condition > Device muted
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_CONDITION_DEVICE_MUTED = 1368;
+
+    // Settings > Condition > Device vibrate
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_CONDITION_DEVICE_VIBRATE = 1369;
+
+    // OPEN: Settings > Connected devices > previously connected devices
+    // CATEGORY: SETTINGS
+    // OS: P
+    PREVIOUSLY_CONNECTED_DEVICES = 1370;
+
+    // OPEN: Settings > Network & Internet > Wi-Fi > Wi-Fi Preferences > Turn on Wi-Fi automatically
+    //       note: Wifi Scanning must be off for this dialog to show
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_SCANNING_NEEDED_DIALOG = 1373;
+
+    // OPEN: Settings > System > Gestures > System navigation
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_GESTURE_SWIPE_UP = 1374;
+
+    // OPEN: Settings > Storage > Dialog to format a storage volume
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_VOLUME_FORMAT = 1375;
+
+    // OPEN: DND onboarding activity
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZEN_ONBOARDING = 1380;
+
+    // OPEN: Settings > Display > Auto brightness
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_AUTO_BRIGHTNESS = 1381;
+
+     // OPEN: Settings > Connected Devices > Bluetooth
+    // CATEGORY: SETTINGS
+    // OS: P
+    BLUETOOTH_FRAGMENT = 1390;
+
+    // Screen: DND Settings > Notifications
+    // OS: P
+    SETTINGS_ZEN_NOTIFICATIONS = 1400;
+
+    // An event category for slices.
+    // OPEN: Slice became visible.
+    // CLOSE: Slice became invisible.
+    // ACTION: Slice was tapped.
+    SLICE = 1401;
+
+    // OPEN: Settings -> Developer Options -> Disable Bluetooth A2DP hardware
+    // offload
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_BLUETOOTH_DISABLE_A2DP_HW_OFFLOAD = 1441;
+
+    // OPEN: Settings homepage
+    SETTINGS_HOMEPAGE = 1502;
+
+    // OPEN: Settings > Create shortcut(widget)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_CREATE_SHORTCUT = 1503;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_INTRO = 1506;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_ENROLLING = 1507;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_FINISHED = 1508;
+
+    // OPEN: Face Enroll sidecar
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_SIDECAR = 1509;
+
+    // OPEN: Settings > Add face > Error dialog
+    // OS: Q
+    DIALOG_FACE_ERROR = 1510;
+
+    // OPEN: Settings > Security > Face
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE = 1511;
+
+   // OPEN: Settings > Acessibility > HearingAid pairing instructions dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_ACCESSIBILITY_HEARINGAID = 1512;
+
+    // OPEN: Settings > Add face
+    // OS: Q
+    FACE_ENROLL_PREVIEW = 1554;
+
+    // OPEN: Settings > Network & Internet > Wi-Fi > Add network
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_WIFI_ADD_NETWORK = 1556;
+
+    // OPEN: Settings > System > Input & Gesture > Reach up gesture
+    // OS: Q
+    SETTINGS_GESTURE_WAKE_LOCK_SCREEN = 1557;
+
+    // OPEN: Settings > System > Input & Gesture > Wake screen
+    SETTINGS_GESTURE_WAKE_SCREEN = 1570;
+
+    // OPEN: Settings > Network & internet > Mobile network
+    MOBILE_NETWORK = 1571;
+
+    // OPEN: Settings > Network & internet > Mobile network > Choose network
+    MOBILE_NETWORK_SELECT = 1581;
+
+    // OPEN: Settings > Network & internet > Mobile network > Mobile Data > Dialog
+    MOBILE_DATA_DIALOG = 1582;
+
+    // OPEN: Settings > Network & internet > Mobile network > Data roaming > Dialog
+    MOBILE_ROAMING_DIALOG = 1583;
+
+    // Settings > Display > Lock screen display > On lock screen
+    LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
+
+    // ConfirmDeviceCredentials > BiometricPrompt
+    BIOMETRIC_FRAGMENT = 1585;
+
+    // OPEN: Biometric Enrollment (android.settings.BIOMETRIC_ENROLL action intent)
+    BIOMETRIC_ENROLL_ACTIVITY = 1586;
+
+    // OPEN: Settings > Privacy
+    TOP_LEVEL_PRIVACY = 1587;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > See all exceptions >
+    // Allow apps to override
+    // CATEGORY: SETTINGS
+    // OS: Q
+    NOTIFICATION_ZEN_MODE_OVERRIDING_APPS = 1588;
+
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > See all exceptions >
+    // Allow apps to override > Choose app
+    // CATEGORY: SETTINGS
+    // OS: Q
+    NOTIFICATION_ZEN_MODE_OVERRIDING_APP = 1589;
+
+    // OPEN: Settings > Developer options > Disable > Info dialog
+    DIALOG_DISABLE_DEVELOPMENT_OPTIONS = 1591;
+
+    // OPEN: WifiDppConfiguratorActivity (android.settings.WIFI_DPP_CONFIGURATOR_XXX action intents)
+    SETTINGS_WIFI_DPP_CONFIGURATOR = 1595;
+
+    // OPEN: WifiDppEnrolleeActivity (android.settings.WIFI_DPP_ENROLLEE_XXX action intents)
+    SETTINGS_WIFI_DPP_ENROLLEE = 1596;
+
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Financial Apps Sms Access
+    SETTINGS_FINANCIAL_APPS_SMS_ACCESS = 1597;
+
+
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_SETTINGS = 1604;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Custom
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_SOUND_SETTINGS = 1605;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_DEFAULT_SETTINGS = 1606;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_NOTIFICATION_RESTRICTIONS = 1608;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_VIS_EFFECTS = 1609;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom > Allow messages
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_MESSAGES = 1610;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Schedules > (Click on system rule)
+    // > Do Not Disturb behavior > Use default Do Not Disturb behavior
+    // > Notification restriction > Custom > Allow calls
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_RULE_CALLS = 1611;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Click footer link if custom settings applied
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ZEN_CUSTOM_SETTINGS_DIALOG = 1612;
+
+    // OPEN: Settings > Developer Options > Game Driver Preferences
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GAME_DRIVER_DASHBOARD = 1613;
+
+    // OPEN: Settings > Accessibility > Vibration > Ring vibration
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACCESSIBILITY_VIBRATION_RING = 1620;
+
+    // OPEN: Settings > System > Input & Gesture > Skip songs
+    SETTINGS_GESTURE_SKIP = 1624;
+
+    // OPEN: Settings > System > Input & Gesture > Silence alerts
+    SETTINGS_GESTURE_SILENCE = 1625;
+
+    // OPEN: Settings > System > Input & Gesture > Tap to check
+    SETTINGS_GESTURE_TAP_SCREEN = 1626;
+
+    // OPEN: Settings > Network & internet > Click Mobile network to land on a page with a list of
+    // SIM/eSIM subscriptions.
+    MOBILE_NETWORK_LIST = 1627;
+
+    // OPEN: Settings > Display > Adaptive sleep
+    // OS: Q
+    SETTINGS_ADAPTIVE_SLEEP = 1628;
+
+    // OPEN: Settings > System > Aware
+    SETTINGS_AWARE = 1632;
+
+    // OPEN: Settings > System > Aware > Disable > Dialog
+    DIALOG_AWARE_DISABLE = 1633;
+
+    // OPEN: Settings > Settings > Network & internet > Click Mobile network to land on page with
+    // details for a SIM/eSIM mobile network > Click edit icon to bring up a rename dialog.
+    // OS: Q
+    MOBILE_NETWORK_RENAME_DIALOG = 1642;
+
+    // OPEN: Set new password (android.app.action.SET_NEW_PASSWORD action intent)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SET_NEW_PASSWORD_ACTIVITY = 1644;
+
+    // Panel for Internet Connectivity
+    PANEL_INTERNET_CONNECTIVITY = 1654;
+
+    // Panel for Volume
+    PANEL_VOLUME = 1655;
+
+    // Panel for NFC
+    PANEL_NFC = 1656;
+
+    // Panel for Media Output
+    PANEL_MEDIA_OUTPUT = 1657;
+
+    // Mapping: go/at-mapping
+    PAGE_ATSSI = 1667;
+
+    PAGE_ATSII = 1668;
+
+    PAGE_ATUS = 1669;
+
+    PAGE_ATSSP = 1670;
+
+    PAGE_ATSAP = 1671;
+
+    PAGE_ATSCP = 1672;
+
+    PAGE_ATHNP = 1673;
+
+    // OPEN: Accessibility detail settings (android.settings.ACCESSIBILITY_DETAILS_SETTINGS intent)
+    ACCESSIBILITY_DETAILS_SETTINGS = 1682;
+
+    // Open: Settings will show the conditional when Grayscale mode is on
+    SETTINGS_CONDITION_GRAYSCALE_MODE = 1683;
+
+    // Panel for Wifi
+    PANEL_WIFI = 1687;
+
+    // Open: Settings > Special App Access > Do not disturb control for app
+    ZEN_ACCESS_DETAIL = 1692;
+
+    // OPEN: Settings > Face > Remove face
+    // OS: Q
+    DIALOG_FACE_REMOVE = 1693;
+
+    // Settings > Display > Theme
+    DARK_UI_SETTINGS = 1698;
+
+    // Settings > global bubble settings
+    BUBBLE_SETTINGS = 1699;
+
+    // Settings > app > bubble settings
+    APP_BUBBLE_SETTINGS = 1700;
+
+    // OPEN: Settings > System > Aware > Info dialog
+    DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
+
+    // OPEN: Settings > Pick SIM dialog
+    DIALOG_SIM_LIST = 1707;
+
+    // OPEN: Settings > Pick SIM (that supports calling) dialog
+    DIALOG_CALL_SIM_LIST = 1708;
+
+    // OPEN: Settings > Pick preferred SIM dialog
+    DIALOG_PREFERRED_SIM_PICKER = 1709;
+
+    // OPEN: Settings > Network & internet > Mobile network > Delete sim
+    DIALOG_DELETE_SIM_CONFIRMATION = 1713;
+
+    // OPEN: Settings >  Network & internet > Mobile network > Delete sim > (answer yes to
+    //       confirmation)
+    DIALOG_DELETE_SIM_PROGRESS = 1714;
+
+    // Settings > Apps and notifications > Notifications > Gentle notifications
+    GENTLE_NOTIFICATIONS_SCREEN = 1715;
+
+    // OPEN: Settings > System > Gestures > Global Actions Panel
+    // CATEGORY: SETTINGS
+    // OS: Q
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1728;
+
+    // OPEN: Settings > Display > Dark Theme
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Only shows up on first time toggle
+    DIALOG_DARK_UI_INFO = 1740;
+
+    // OPEN: Settings > About phone > Legal information > Google Play system update licenses
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MODULE_LICENSES_DASHBOARD = 1746;
+
+    // OPEN: Settings > System > Gestures > System navigation > Info icon
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Info icon is visible only when gesture navigation is not available and disabled
+    SETTINGS_GESTURE_NAV_NOT_AVAILABLE_DLG = 1747;
+
+    // OPEN: Settings > System > Gestures > System navigation > Gear icon
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Gear icon is shown next to gesture navigation preference and opens sensitivity dialog
+    SETTINGS_GESTURE_NAV_BACK_SENSITIVITY_DLG = 1748;
+}

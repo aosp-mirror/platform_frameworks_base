@@ -29,7 +29,11 @@ import android.os.Parcelable;
  * coarse and fine platform permissions.
  *
  * @hide
+ *
+ * @deprecated Not used anymore. Use {@link android.permission.RuntimePermissionPresentationInfo}
+ * instead
  */
+@Deprecated
 @SystemApi
 public final class RuntimePermissionPresentationInfo implements Parcelable {
     private static final int FLAG_GRANTED = 1 << 0;
@@ -97,7 +101,7 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final Creator<RuntimePermissionPresentationInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<RuntimePermissionPresentationInfo> CREATOR =
             new Creator<RuntimePermissionPresentationInfo>() {
         public RuntimePermissionPresentationInfo createFromParcel(Parcel source) {
             return new RuntimePermissionPresentationInfo(source);

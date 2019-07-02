@@ -121,6 +121,18 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_RIGHT}. -->
   <item type="id" name="accessibilityActionScrollRight" />
 
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PAGE_UP}. -->
+  <item type="id" name="accessibilityActionPageUp" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PAGE_DOWN}. -->
+  <item type="id" name="accessibilityActionPageDown" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PAGE_LEFT}. -->
+  <item type="id" name="accessibilityActionPageLeft" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PAGE_RIGHT}. -->
+  <item type="id" name="accessibilityActionPageRight" />
+
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SET_PROGRESS}. -->
   <item type="id" name="accessibilityActionSetProgress" />
 
@@ -172,4 +184,13 @@
 
     <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
     <item type="id" name="accessibilityActionHideTooltip" />
+
+  <!-- A tag used to save the view added to a transition overlay -->
+  <item type="id" name="transition_overlay_view_tag" />
+
+  <!-- A tag used to save the notification action object -->
+  <item type="id" name="notification_action_index_tag" />
+
+  <!-- A tag used to save the index where the custom view is stored -->
+  <item type="id" name="notification_custom_view_index_tag" />
 </resources>

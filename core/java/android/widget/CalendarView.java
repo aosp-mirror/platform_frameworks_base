@@ -34,6 +34,7 @@ import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -111,6 +112,8 @@ public class CalendarView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.CalendarView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.CalendarView,
+                attrs, a, defStyleAttr, defStyleRes);
         final int mode = a.getInt(R.styleable.CalendarView_calendarViewMode, MODE_HOLO);
         a.recycle();
 
@@ -149,6 +152,7 @@ public class CalendarView extends FrameLayout {
      * @attr ref android.R.styleable#CalendarView_shownWeekCount
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @Deprecated
     public int getShownWeekCount() {
         return mDelegate.getShownWeekCount();
@@ -175,6 +179,7 @@ public class CalendarView extends FrameLayout {
      * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @ColorInt
     @Deprecated
     public int getSelectedWeekBackgroundColor() {
@@ -202,6 +207,7 @@ public class CalendarView extends FrameLayout {
      * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @ColorInt
     @Deprecated
     public int getFocusedMonthDateColor() {
@@ -229,6 +235,7 @@ public class CalendarView extends FrameLayout {
      * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @ColorInt
     @Deprecated
     public int getUnfocusedMonthDateColor() {
@@ -256,6 +263,7 @@ public class CalendarView extends FrameLayout {
      * @attr ref android.R.styleable#CalendarView_weekNumberColor
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @ColorInt
     @Deprecated
     public int getWeekNumberColor() {
@@ -285,6 +293,7 @@ public class CalendarView extends FrameLayout {
      */
     @ColorInt
     @Deprecated
+    @InspectableProperty
     public int getWeekSeparatorLineColor() {
         return mDelegate.getWeekSeparatorLineColor();
     }
@@ -324,6 +333,7 @@ public class CalendarView extends FrameLayout {
      * @return The vertical bar drawable.
      * @deprecated No longer used by Material-style CalendarView.
      */
+    @InspectableProperty
     @Deprecated
     public Drawable getSelectedDateVerticalBar() {
         return mDelegate.getSelectedDateVerticalBar();
@@ -347,6 +357,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
      */
+    @InspectableProperty
     public @StyleRes int getWeekDayTextAppearance() {
         return mDelegate.getWeekDayTextAppearance();
     }
@@ -369,6 +380,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_dateTextAppearance
      */
+    @InspectableProperty
     public @StyleRes int getDateTextAppearance() {
         return mDelegate.getDateTextAppearance();
     }
@@ -385,6 +397,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_minDate
      */
+    @InspectableProperty
     public long getMinDate() {
         return mDelegate.getMinDate();
     }
@@ -414,6 +427,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_maxDate
      */
+    @InspectableProperty
     public long getMaxDate() {
         return mDelegate.getMaxDate();
     }
@@ -452,6 +466,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_showWeekNumber
      */
+    @InspectableProperty
     @Deprecated
     public boolean getShowWeekNumber() {
         return mDelegate.getShowWeekNumber();
@@ -472,6 +487,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
      */
+    @InspectableProperty
     public int getFirstDayOfWeek() {
         return mDelegate.getFirstDayOfWeek();
     }

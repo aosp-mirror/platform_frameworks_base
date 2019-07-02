@@ -33,16 +33,24 @@
         <item name="android:gravity">center_horizontal|center_vertical</item>
         <item name="android:background">@null</item>
         <item name="android:textSize">32sp</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
+    <style name="Keyguard.ImageButton.NumPadDelete" parent="@android:style/Widget.ImageButton">
+        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
+        <item name="android:paddingBottom">11sp</item>
+        <item name="android:tint">@color/pin_delete_color</item>
+        <item name="android:tintMode">src_in</item>
+        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
+    </style>
     <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.ImageButton">
-        <item name="android:tint">@color/background_protected</item>
+        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
+        <item name="android:paddingBottom">11sp</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
         <item name="android:textSize">12sp</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:paddingBottom">0dp</item>
     </style>
@@ -51,11 +59,32 @@
     <style name="widget_label">
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
-    <style name="widget_big_thin">
+    <style name="widget_big">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
         <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
+    </style>
+    <style name="widget_title_bold">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:paddingBottom">@dimen/widget_vertical_padding_clock</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
+    </style>
+    <style name="widget_small_bold">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/widget_small_font_size</item>
+        <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
     <style name="BouncerSecurityContainer">
@@ -74,17 +103,22 @@
         <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
     </style>
 
-    <style name="keyguard_presentation_theme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
-        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
-        <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+    <style name="Theme.SystemUI.KeyguardPresentation">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorBackground">@*android:color/background_material_dark</item>
     </style>
 
-    <style name="TextAppearance.Keyguard" parent="Theme.SystemUI">
+    <style name="TextAppearance.Keyguard">
         <item name="android:textSize">@dimen/widget_title_font_size</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
     <style name="TextAppearance.Keyguard.Secondary">
@@ -92,6 +126,14 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:lines">1</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
+    </style>
+
+    <style name="TextAppearance.Keyguard.BottomArea">
+        <item name="android:textSize">16sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
 </resources>

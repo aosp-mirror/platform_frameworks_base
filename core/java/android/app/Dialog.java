@@ -31,7 +31,7 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.content.res.ResourceId;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -183,7 +183,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     Dialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-            if (themeResId == ResourceId.ID_NULL) {
+            if (themeResId == Resources.ID_NULL) {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
                 themeResId = outValue.resourceId;
@@ -937,8 +937,8 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onPreparePanel(int, View, Menu)
      */
     @Override
-    public boolean onPreparePanel(int featureId, View view, Menu menu) {
-        if (featureId == Window.FEATURE_OPTIONS_PANEL && menu != null) {
+    public boolean onPreparePanel(int featureId, @Nullable View view, @NonNull Menu menu) {
+        if (featureId == Window.FEATURE_OPTIONS_PANEL) {
             return onPrepareOptionsMenu(menu) && menu.hasVisibleItems();
         }
         return true;
@@ -948,7 +948,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onMenuOpened(int, Menu)
      */
     @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
+    public boolean onMenuOpened(int featureId, @NonNull Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR) {
             mActionBar.dispatchMenuVisibilityChanged(true);
         }
@@ -959,7 +959,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onMenuItemSelected(int, MenuItem)
      */
     @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+    public boolean onMenuItemSelected(int featureId, @NonNull MenuItem item) {
         return false;
     }
 
@@ -967,7 +967,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#onPanelClosed(int, Menu)
      */
     @Override
-    public void onPanelClosed(int featureId, Menu menu) {
+    public void onPanelClosed(int featureId, @NonNull Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR) {
             mActionBar.dispatchMenuVisibilityChanged(false);
         }

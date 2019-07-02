@@ -29,8 +29,10 @@ import "frameworks/base/core/proto/android/net/networkrequest.proto";
 import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/server/job/enums.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
+// Next tag: 21
 message JobSchedulerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -41,6 +43,7 @@ message JobSchedulerServiceDumpProto {
     optional int64 last_heartbeat_time_millis = 16;
     optional int64 next_heartbeat_time_millis = 17;
     optional bool in_parole = 18;
+    optional bool in_thermal = 19;
 
     repeated int32 started_users = 2;
 
@@ -138,9 +141,13 @@ message JobSchedulerServiceDumpProto {
     // The current limit on the number of concurrent JobServiceContext entries
     // we want to keep actively running a job.
     optional int32 max_active_jobs = 13;
+
+    // Dump from JobConcurrencyManager.
+    optional JobConcurrencyManagerProto concurrency_manager = 20;
 }
 
 // A com.android.server.job.JobSchedulerService.Constants object.
+// Next tag: 29
 message ConstantsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -215,6 +222,116 @@ message ConstantsProto {
     // The fraction of a prefetch job's running window that must pass before
     // we consider matching it against a metered network.
     optional double conn_prefetch_relax_frac = 22;
+    // Whether to use heartbeats or rolling window for quota management. True
+    // will use heartbeats, false will use a rolling window.
+    optional bool use_heartbeats = 23;
+
+    message TimeController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
+        // ready now.
+        optional bool skip_not_ready_jobs = 1;
+    }
+    optional TimeController time_controller = 25;
+
+    message QuotaController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // How much time each app will have to run jobs within their standby bucket window.
+        optional int64 allowed_time_per_period_ms = 1;
+        // How much time the package should have before transitioning from out-of-quota to in-quota.
+        // This should not affect processing if the package is already in-quota.
+        optional int64 in_quota_buffer_ms = 2;
+        // The quota window size of the particular standby bucket. Apps in this standby bucket are
+        // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+        // WINDOW_SIZE_MS.
+        optional int64 active_window_size_ms = 3;
+        // The quota window size of the particular standby bucket. Apps in this standby bucket are
+        // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+        // WINDOW_SIZE_MS.
+        optional int64 working_window_size_ms = 4;
+        // The quota window size of the particular standby bucket. Apps in this standby bucket are
+        // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+        // WINDOW_SIZE_MS.
+        optional int64 frequent_window_size_ms = 5;
+        // The quota window size of the particular standby bucket. Apps in this standby bucket are
+        // expected to run only {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS} within the past
+        // WINDOW_SIZE_MS.
+        optional int64 rare_window_size_ms = 6;
+        // The maximum amount of time an app can have its jobs running within a 24 hour window.
+        optional int64 max_execution_time_ms = 7;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_active = 8;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_working = 9;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_frequent = 10;
+        // The maximum number of jobs an app can run within this particular standby bucket's
+        // window size.
+        optional int32 max_job_count_rare = 11;
+        // The period of time used to rate limit recently run jobs.
+        optional int32 rate_limiting_window_ms = 19;
+        // The maximum number of jobs that should be allowed to run in the past
+        // rate_limiting_window_ms.
+        optional int32 max_job_count_per_rate_limiting_window = 12;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_active = 13;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_working = 14;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_frequent = 15;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_rare = 16;
+        // The maximum number of timing sessions that should be allowed to run in the past
+        // rate_limiting_window_ms.
+        optional int32 max_session_count_per_rate_limiting_window = 17;
+        // Treat two distinct {@link TimingSession}s as the same if they start and end within this
+        // amount of time of each other.
+        optional int64 timing_session_coalescing_duration_ms = 18;
+    }
+    optional QuotaController quota_controller = 24;
+
+    // Max number of jobs, when screen is ON.
+    optional MaxJobCountsPerMemoryTrimLevelProto max_job_counts_screen_on = 26;
+
+    // Max number of jobs, when screen is OFF.
+    optional MaxJobCountsPerMemoryTrimLevelProto max_job_counts_screen_off = 27;
+
+    // In this time after screen turns on, we increase job concurrency.
+    optional int32 screen_off_job_concurrency_increase_delay_ms = 28;
+}
+
+// Next tag: 4
+message MaxJobCountsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Total number of jobs to run simultaneously.
+    optional int32 total_jobs = 1;
+
+    // Max number of BG (== owned by non-TOP apps) jobs to run simultaneously.
+    optional int32 max_bg = 2;
+
+    // We try to run at least this many BG (== owned by non-TOP apps) jobs, when there are any
+    // pending, rather than always running the TOTAL number of FG jobs.
+    optional int32 min_bg = 3;
+}
+
+// Next tag: 5
+message MaxJobCountsPerMemoryTrimLevelProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional MaxJobCountsProto normal = 1;
+    optional MaxJobCountsProto moderate = 2;
+    optional MaxJobCountsProto low = 3;
+    optional MaxJobCountsProto critical = 4;
 }
 
 message StateControllerProto {
@@ -357,6 +474,149 @@ message StateControllerProto {
         }
         repeated TrackedJob tracked_jobs = 2;
     }
+    message QuotaController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_charging = 1;
+        optional bool is_in_parole = 2;
+        optional int64 elapsed_realtime = 6;
+
+        // List of UIDs currently in the foreground.
+        repeated int32 foreground_uids = 3;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+            optional JobStatusDumpProto.Bucket effective_standby_bucket = 3;
+            // If the job started while the app was in the TOP state.
+            optional bool is_top_started_job = 4;
+            optional bool has_quota = 5;
+            // The amount of time that this job has remaining in its quota. This
+            // can be negative if the job is out of quota.
+            optional int64 remaining_quota_ms = 6;
+        }
+        repeated TrackedJob tracked_jobs = 4;
+
+        message AlarmListener {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            // Whether the listener is waiting for an alarm or not.
+            optional bool is_waiting = 1;
+            // The time at which the alarm should go off, in the elapsed realtime timebase. Only
+            // valid if is_waiting is true.
+            optional int64 trigger_time_elapsed = 2;
+        }
+
+        message ExecutionStats {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusDumpProto.Bucket standby_bucket = 1;
+
+            // The time after which this record should be considered invalid (out of date), in the
+            // elapsed realtime timebase.
+            optional int64 expiration_time_elapsed = 2;
+            optional int64 window_size_ms = 3;
+
+            optional int32 job_count_limit = 14;
+            optional int32 session_count_limit = 15;
+
+            // The total amount of time the app ran in its respective bucket window size.
+            optional int64 execution_time_in_window_ms = 4;
+            optional int32 bg_job_count_in_window = 5;
+
+            // The total amount of time the app ran in the last
+            // {@link QuotaController#MAX_PERIOD_MS}.
+            optional int64 execution_time_in_max_period_ms = 6;
+            optional int32 bg_job_count_in_max_period = 7;
+
+            // The number of {@link TimingSession}s within the bucket window size. This will include
+            // sessions that started before the window as long as they end within the window.
+            optional int32 session_count_in_window = 11;
+
+            // The time after which the app will be under the bucket quota. This is only valid if
+            // execution_time_in_window_ms >=
+            //   ConstantsProto.QuotaController.allowed_time_per_period_ms
+            // or
+            // execution_time_in_max_period_ms >=
+            //   ConstantsProto.QuotaController.max_execution_time_ms
+            // or
+            // bg_job_count_in_window >= job_count_limit
+            // or
+            // session_count_in_window >= session_count_limit.
+            optional int64 in_quota_time_elapsed = 8;
+
+            // The time after which job_count_in_rate_limiting_window should be considered invalid,
+            // in the elapsed realtime timebase.
+            optional int64 job_count_expiration_time_elapsed = 9;
+
+            // The number of jobs that ran in at least the last
+            // ConstantsProto.QuotaController.rate_limiting_window_ms.
+            // It may contain a few stale entries since cleanup won't happen exactly every
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. This should only be
+            // considered valid before elapsed realtime has reached
+            // job_count_expiration_time_elapsed.
+            optional int32 job_count_in_rate_limiting_window = 10;
+
+            // The time after which {@link #timingSessionCountInAllowedTime} should be considered
+            // invalid, in the elapsed realtime timebase.
+            optional int64 session_count_expiration_time_elapsed = 12;
+
+            // The number of {@link TimingSession}s that ran in at least the last
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. It may contain a few stale
+            // entries since cleanup won't happen exactly every
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. This should only be considered
+            // valid before elapsed realtime has reached session_count_expiration_time_elapsed.
+            optional int32 session_count_in_rate_limiting_window = 13;
+        }
+
+        message Package {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 user_id = 1;
+            optional string name = 2;
+        }
+
+        message TimingSession {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int64 start_time_elapsed = 1;
+            optional int64 end_time_elapsed = 2;
+            // The number of background jobs that ran during this session.
+            optional int32 bg_job_count = 3;
+        }
+
+        message Timer {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional Package pkg = 1;
+            // True if the Timer is actively tracking jobs.
+            optional bool is_active = 2;
+            // The time this timer last became active. Only valid if is_active is true.
+            optional int64 start_time_elapsed = 3;
+            // How many background jobs are currently running. Valid only if the device is_active
+            // is true.
+            optional int32 bg_job_count = 4;
+            // All of the jobs that the Timer is currently tracking.
+            repeated JobStatusShortInfoProto running_jobs = 5;
+        }
+
+        message PackageStats {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional Package pkg = 1;
+
+            optional Timer timer = 2;
+
+            repeated TimingSession saved_sessions = 3;
+
+            repeated ExecutionStats execution_stats = 4;
+
+            optional AlarmListener in_quota_alarm_listener = 5;
+        }
+        repeated PackageStats package_stats = 5;
+    }
     message StorageController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -403,8 +663,10 @@ message StateControllerProto {
         ContentObserverController content_observer = 4;
         DeviceIdleJobsController device_idle = 5;
         IdleController idle = 6;
+        QuotaController quota = 9;
         StorageController storage = 7;
         TimeController time = 8;
+        // Next tag: 10
     }
 }
 
@@ -593,21 +855,22 @@ message JobStatusDumpProto {
     }
     optional JobInfo job_info = 6;
 
-    enum Constraint {
-        CONSTRAINT_CHARGING = 1;
-        CONSTRAINT_BATTERY_NOT_LOW = 2;
-        CONSTRAINT_STORAGE_NOT_LOW = 3;
-        CONSTRAINT_TIMING_DELAY = 4;
-        CONSTRAINT_DEADLINE = 5;
-        CONSTRAINT_IDLE = 6;
-        CONSTRAINT_CONNECTIVITY = 7;
-        CONSTRAINT_CONTENT_TRIGGER = 8;
-        CONSTRAINT_DEVICE_NOT_DOZING = 9;
-    }
-    repeated Constraint required_constraints = 7;
-    repeated Constraint satisfied_constraints = 8;
-    repeated Constraint unsatisfied_constraints = 9;
+    repeated ConstraintEnum required_constraints = 7;
+    repeated ConstraintEnum satisfied_constraints = 8;
+    repeated ConstraintEnum unsatisfied_constraints = 9;
     optional bool is_doze_whitelisted = 10;
+    optional bool is_uid_active = 26;
+
+    message ImplicitConstraints {
+        // The device isn't Dozing or this job will be in the foreground. This
+        // implicit constraint must be satisfied for the job to run.
+        optional bool is_not_dozing = 1;
+        // The job is not restricted from running in the background (due to
+        // Battery Saver). This implicit constraint must be satisfied for the
+        // job to run.
+        optional bool is_not_restricted_in_bg = 2;
+    }
+    optional ImplicitConstraints implicit_constraints = 25;
 
     enum TrackingController {
         TRACKING_BATTERY = 0;
@@ -616,6 +879,7 @@ message JobStatusDumpProto {
         TRACKING_IDLE = 3;
         TRACKING_STORAGE = 4;
         TRACKING_TIME = 5;
+        TRACKING_QUOTA = 6;
     }
     // Controllers that are currently tracking the job.
     repeated TrackingController tracking_controllers = 11;
@@ -649,6 +913,7 @@ message JobStatusDumpProto {
         NEVER = 4;
     }
     optional Bucket standby_bucket = 17;
+    optional bool is_exempted_from_app_standby = 27;
 
     optional int64 enqueue_duration_ms = 18;
     // Can be negative if the earliest runtime deadline has passed.
@@ -662,4 +927,49 @@ message JobStatusDumpProto {
     optional int64 last_failed_run_time = 23;
 
     optional int64 internal_flags = 24;
+
+    // Next tag: 28
+}
+
+// Dump from com.android.server.job.JobConcurrencyManager.
+// Next tag: 7
+message JobConcurrencyManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Whether the device is interactive (== screen on) now or not.
+    optional bool current_interactive = 1;
+    // Similar to current_interactive, screen on or not, but it takes into account the off timeout.
+    optional bool effective_interactive = 2;
+    // How many milliseconds have passed since the last screen on. (i.e. 1000 == 1 sec ago)
+    optional int64 time_since_last_screen_on_ms = 3;
+    // How many milliseconds have passed since the last screen off. (i.e. 1000 == 1 sec ago)
+    optional int64 time_since_last_screen_off_ms = 4;
+    // Current max number of jobs.
+    optional JobCountTrackerProto job_count_tracker = 5;
+    // Current memory trim level.
+    optional int32 memory_trim_level = 6;
+}
+
+// Dump from com.android.server.job.JobConcurrencyManager.JobCountTracker.
+// Next tag: 8
+message JobCountTrackerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Number of total jos that can run simultaneously.
+    optional int32 config_num_max_total_jobs = 1;
+    // Number of background jos that can run simultaneously.
+    optional int32 config_num_max_bg_jobs = 2;
+    // Out of total jobs, this many background jobs should be guaranteed to be executed, even if
+    // there are the config_num_max_total_jobs count of foreground jobs pending.
+    optional int32 config_num_min_bg_jobs = 3;
+
+    // Number of running foreground jobs.
+    optional int32 num_running_fg_jobs = 4;
+    // Number of running background jobs.
+    optional int32 num_running_bg_jobs = 5;
+
+    // Number of pending foreground jobs.
+    optional int32 num_pending_fg_jobs = 6;
+    // Number of pending background jobs.
+    optional int32 num_pending_bg_jobs = 7;
 }

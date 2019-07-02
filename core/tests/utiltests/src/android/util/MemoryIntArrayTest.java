@@ -23,9 +23,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import libcore.io.IoUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,6 +35,8 @@ import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 @RunWith(AndroidJUnit4.class)
 public class MemoryIntArrayTest {
     static {
@@ -252,11 +256,13 @@ public class MemoryIntArrayTest {
                 // Create a MemoryIntArray to muck with
                 MemoryIntArray array = new MemoryIntArray(1);
 
-                // Grab the internal ashmem fd.
-                Field fdField = MemoryIntArray.class.getDeclaredField("mFd");
-                fdField.setAccessible(true);
-                int fd = ((ParcelFileDescriptor)fdField.get(array)).getFd();
-                assertTrue("fd must be valid", fd != -1);
+                // Create the fd to stuff in the MemoryIntArray
+                final int fd = nativeCreateAshmem("foo", 1);
+
+                // Replace the fd with our ahsmem region
+                Field fdFiled = MemoryIntArray.class.getDeclaredField("mFd");
+                fdFiled.setAccessible(true);
+                fdFiled.set(array, fd);
 
                 CountDownLatch countDownLatch = new CountDownLatch(2);
 
@@ -291,9 +297,10 @@ public class MemoryIntArrayTest {
         }
 
         if (!success) {
-            fail("MemoryIntArray should catch ashmem size changing under it");
+            fail("MemoryIntArray should catch ahshmem size changing under it");
         }
     }
 
+    private native int nativeCreateAshmem(String name, int size);
     private native void nativeSetAshmemSize(int fd, int size);
 }

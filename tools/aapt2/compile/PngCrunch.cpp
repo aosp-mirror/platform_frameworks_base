@@ -27,6 +27,8 @@
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 
+#include "trace/TraceBuffer.h"
+
 namespace aapt {
 
 // Custom deleter that destroys libpng read and info structs.
@@ -142,6 +144,7 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
 }
 
 std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in) {
+  TRACE_CALL();
   // Create a diagnostics that has the source information encoded.
   SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
 
@@ -480,6 +483,7 @@ static void WriteNinePatch(png_structp write_ptr, png_infop write_info_ptr,
 bool WritePng(IAaptContext* context, const Image* image,
               const NinePatch* nine_patch, io::OutputStream* out,
               const PngOptions& options) {
+  TRACE_CALL();
   // Create and initialize the write png_struct with the default error and
   // warning handlers.
   // The header version is also passed in to ensure that this was built against the same

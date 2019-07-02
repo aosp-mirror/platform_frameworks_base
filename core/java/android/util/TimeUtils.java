@@ -18,6 +18,7 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.SystemClock;
@@ -43,6 +44,9 @@ public class TimeUtils {
     /** {@hide} */
     private static SimpleDateFormat sLoggingFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    /** @hide */
+    public static final SimpleDateFormat sDumpDateFormat =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     /**
      * Tries to return a time zone that would have had the specified offset
      * and DST value at the specified moment in the specified country.
@@ -299,6 +303,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @TestApi
     public static String formatDuration(long duration) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, 0);
@@ -360,4 +365,28 @@ public class TimeUtils {
             return sLoggingFormat.format(new Date(millis));
         }
     }
-}
+
+    /**
+     * Dump a currentTimeMillis style timestamp for dumpsys.
+     *
+     * @hide
+     */
+    public static void dumpTime(PrintWriter pw, long time) {
+        pw.print(sDumpDateFormat.format(new Date(time)));
+    }
+
+    /**
+     * Dump a currentTimeMillis style timestamp for dumpsys, with the delta time from now.
+     *
+     * @hide
+     */
+    public static void dumpTimeWithDelta(PrintWriter pw, long time, long now) {
+        pw.print(sDumpDateFormat.format(new Date(time)));
+        if (time == now) {
+            pw.print(" (now)");
+        } else {
+            pw.print(" (");
+            TimeUtils.formatDuration(time, now, pw);
+            pw.print(")");
+        }
+    }}

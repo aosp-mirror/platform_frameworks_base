@@ -16,10 +16,14 @@
 
 package android.hardware.display;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * Data about a brightness settings change.
@@ -72,12 +76,37 @@ public final class BrightnessChangeEvent implements Parcelable {
     /** Whether brightness curve includes a user brightness point */
     public final boolean isUserSetBrightness;
 
+    /**
+     * Histogram counting how many times a pixel of a given value was displayed onscreen for the
+     * Value component of HSV if the device supports color sampling, if the device does not support
+     * color sampling the value will be null.
+     *
+     * The buckets of the histogram are evenly weighted, the number of buckets is device specific.
+     * The units are in pixels * milliseconds, with 1 pixel millisecond being 1 pixel displayed
+     * for 1 millisecond.
+     * For example if we had {100, 50, 30, 20}, value component was onscreen for 100 pixel
+     * milliseconds in range 0x00->0x3F, 30 pixel milliseconds in range 0x40->0x7F, etc.
+     *
+     * {@see #colorSampleDuration}
+     */
+    @Nullable
+    public final long[] colorValueBuckets;
+
+    /**
+     * How many milliseconds of data are contained in the colorValueBuckets, if the device does
+     * not support color sampling the value will be 0L.
+     *
+     * {@see #colorValueBuckets}
+     */
+    public final long colorSampleDuration;
+
 
     /** @hide */
     private BrightnessChangeEvent(float brightness, long timeStamp, String packageName,
             int userId, float[] luxValues, long[] luxTimestamps, float batteryLevel,
             float powerBrightnessFactor, boolean nightMode, int colorTemperature,
-            float lastBrightness, boolean isDefaultBrightnessConfig, boolean isUserSetBrightness) {
+            float lastBrightness, boolean isDefaultBrightnessConfig, boolean isUserSetBrightness,
+            long[] colorValueBuckets, long colorSampleDuration) {
         this.brightness = brightness;
         this.timeStamp = timeStamp;
         this.packageName = packageName;
@@ -91,6 +120,8 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.lastBrightness = lastBrightness;
         this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
         this.isUserSetBrightness = isUserSetBrightness;
+        this.colorValueBuckets = colorValueBuckets;
+        this.colorSampleDuration = colorSampleDuration;
     }
 
     /** @hide */
@@ -108,6 +139,8 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.lastBrightness = other.lastBrightness;
         this.isDefaultBrightnessConfig = other.isDefaultBrightnessConfig;
         this.isUserSetBrightness = other.isUserSetBrightness;
+        this.colorValueBuckets = other.colorValueBuckets;
+        this.colorSampleDuration = other.colorSampleDuration;
     }
 
     private BrightnessChangeEvent(Parcel source) {
@@ -124,9 +157,11 @@ public final class BrightnessChangeEvent implements Parcelable {
         lastBrightness = source.readFloat();
         isDefaultBrightnessConfig = source.readBoolean();
         isUserSetBrightness = source.readBoolean();
+        colorValueBuckets = source.createLongArray();
+        colorSampleDuration = source.readLong();
     }
 
-    public static final Creator<BrightnessChangeEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<BrightnessChangeEvent> CREATOR =
             new Creator<BrightnessChangeEvent>() {
                 public BrightnessChangeEvent createFromParcel(Parcel source) {
                     return new BrightnessChangeEvent(source);
@@ -156,6 +191,8 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeFloat(lastBrightness);
         dest.writeBoolean(isDefaultBrightnessConfig);
         dest.writeBoolean(isUserSetBrightness);
+        dest.writeLongArray(colorValueBuckets);
+        dest.writeLong(colorSampleDuration);
     }
 
     /** @hide */
@@ -173,6 +210,8 @@ public final class BrightnessChangeEvent implements Parcelable {
         private float mLastBrightness;
         private boolean mIsDefaultBrightnessConfig;
         private boolean mIsUserSetBrightness;
+        private long[] mColorValueBuckets;
+        private long mColorSampleDuration;
 
         /** {@see BrightnessChangeEvent#brightness} */
         public Builder setBrightness(float brightness) {
@@ -252,12 +291,22 @@ public final class BrightnessChangeEvent implements Parcelable {
             return this;
         }
 
+        /** {@see BrightnessChangeEvent#colorValueBuckets}
+         *  {@see BrightnessChangeEvent#colorSampleDuration} */
+        public Builder setColorValues(@NonNull long[] colorValueBuckets, long colorSampleDuration) {
+            Objects.requireNonNull(colorValueBuckets);
+            mColorValueBuckets = colorValueBuckets;
+            mColorSampleDuration = colorSampleDuration;
+            return this;
+        }
+
         /** Builds a BrightnessChangeEvent */
         public BrightnessChangeEvent build() {
             return new BrightnessChangeEvent(mBrightness, mTimeStamp,
                     mPackageName, mUserId, mLuxValues, mLuxTimestamps, mBatteryLevel,
                     mPowerBrightnessFactor, mNightMode, mColorTemperature, mLastBrightness,
-                    mIsDefaultBrightnessConfig, mIsUserSetBrightness);
+                    mIsDefaultBrightnessConfig, mIsUserSetBrightness, mColorValueBuckets,
+                    mColorSampleDuration);
         }
     }
 }

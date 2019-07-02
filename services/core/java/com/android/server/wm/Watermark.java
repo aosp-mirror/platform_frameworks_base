@@ -20,19 +20,18 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetricsInt;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Paint.FontMetricsInt;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 /**
  * Displays a watermark on top of the window manager's windows.
@@ -116,7 +115,7 @@ class Watermark {
         try {
             ctrl = dc.makeOverlay()
                     .setName("WatermarkSurface")
-                    .setSize(1, 1)
+                    .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
             ctrl.setLayerStack(mDisplay.getLayerStack());
@@ -133,7 +132,7 @@ class Watermark {
         if (mLastDW != dw || mLastDH != dh) {
             mLastDW = dw;
             mLastDH = dh;
-            mSurfaceControl.setSize(dw, dh);
+            mSurfaceControl.setBufferSize(dw, dh);
             mDrawNeeded = true;
         }
     }

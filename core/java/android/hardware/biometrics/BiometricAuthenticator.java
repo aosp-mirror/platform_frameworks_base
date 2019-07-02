@@ -30,10 +30,78 @@ import java.util.concurrent.Executor;
 public interface BiometricAuthenticator {
 
     /**
+     * No biometric methods or nothing has been enrolled.
+     * Move/expose these in BiometricPrompt if we ever want to allow applications to "blacklist"
+     * modalities when calling authenticate().
+     * @hide
+     */
+    int TYPE_NONE = 0;
+    /**
+     * Constant representing fingerprint.
+     * @hide
+     */
+    int TYPE_FINGERPRINT = 1 << 0;
+
+    /**
+     * Constant representing iris.
+     * @hide
+     */
+    int TYPE_IRIS = 1 << 1;
+
+    /**
+     * Constant representing face.
+     * @hide
+     */
+    int TYPE_FACE = 1 << 2;
+
+    /**
      * Container for biometric data
      * @hide
      */
-    abstract class BiometricIdentifier implements Parcelable {}
+    abstract class Identifier implements Parcelable {
+        private CharSequence mName;
+        private int mBiometricId;
+        private long mDeviceId; // physical device this is associated with
+
+        public Identifier() {}
+
+        public Identifier(CharSequence name, int biometricId, long deviceId) {
+            mName = name;
+            mBiometricId = biometricId;
+            mDeviceId = deviceId;
+        }
+
+        /**
+         * Gets the human-readable name for the given biometric.
+         * @return name given to the biometric
+         */
+        public CharSequence getName() {
+            return mName;
+        }
+
+        /**
+         * Gets the device-specific biometric id.  Used by Settings to map a name to a specific
+         * biometric template.
+         */
+        public int getBiometricId() {
+            return mBiometricId;
+        }
+
+        /**
+         * Device this biometric belongs to.
+         */
+        public long getDeviceId() {
+            return mDeviceId;
+        }
+
+        public void setName(CharSequence name) {
+            mName = name;
+        }
+
+        public void setDeviceId(long deviceId) {
+            mDeviceId = deviceId;
+        }
+    }
 
     /**
      * Container for callback data from {@link BiometricAuthenticator#authenticate(
@@ -42,7 +110,7 @@ public interface BiometricAuthenticator {
      * AuthenticationCallback)}
      */
     class AuthenticationResult {
-        private BiometricIdentifier mIdentifier;
+        private Identifier mIdentifier;
         private CryptoObject mCryptoObject;
         private int mUserId;
 
@@ -58,7 +126,7 @@ public interface BiometricAuthenticator {
          * @param userId
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, BiometricIdentifier identifier,
+        public AuthenticationResult(CryptoObject crypto, Identifier identifier,
                 int userId) {
             mCryptoObject = crypto;
             mIdentifier = identifier;
@@ -80,7 +148,7 @@ public interface BiometricAuthenticator {
          * operations.
          * @hide
          */
-        public BiometricIdentifier getId() {
+        public Identifier getId() {
             return mIdentifier;
         }
 
@@ -118,12 +186,6 @@ public interface BiometricAuthenticator {
         public void onAuthenticationHelp(int helpCode, CharSequence helpString) {}
 
         /**
-         * Called when a biometric is recognized.
-         * @param result An object containing authentication-related data
-         */
-        public void onAuthenticationSucceeded(AuthenticationResult result) {}
-
-        /**
          * Called when a biometric is valid but not recognized.
          */
         public void onAuthenticationFailed() {}
@@ -134,6 +196,35 @@ public interface BiometricAuthenticator {
          */
         public void onAuthenticationAcquired(int acquireInfo) {}
     };
+
+    /**
+     * @return true if the biometric hardware is detected.
+     */
+    default boolean isHardwareDetected() {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * @return true if the user has enrolled templates for this biometric.
+     */
+    default boolean hasEnrolledTemplates() {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * @return true if the user has enrolled templates for this biometric.
+     */
+    default boolean hasEnrolledTemplates(int userId) {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * Sets the active user. This is meant to be used to select the current profile
+     * to allow separate templates for work profile.
+     */
+    default void setActiveUser(int userId) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 
     /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
@@ -155,10 +246,12 @@ public interface BiometricAuthenticator {
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
      */
-    void authenticate(@NonNull CryptoObject crypto,
+    default void authenticate(@NonNull CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback);
+            @NonNull AuthenticationCallback callback) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 
     /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
@@ -178,7 +271,9 @@ public interface BiometricAuthenticator {
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
      */
-    void authenticate(@NonNull CancellationSignal cancel,
+    default void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback);
+            @NonNull AuthenticationCallback callback) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 }

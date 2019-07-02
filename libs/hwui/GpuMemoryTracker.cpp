@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "Texture.h"
 #include "utils/StringUtils.h"
 
 #include <GpuMemoryTracker.h>
@@ -116,22 +115,6 @@ void GpuMemoryTracker::onFrameCompleted() {
             snprintf(buf, 128, "hwui_%s_count", TYPE_NAMES[type]);
             ATRACE_INT(buf, stats.count);
         }
-    }
-
-    std::vector<const Texture*> freeList;
-    for (const auto& obj : gObjectSet) {
-        if (obj->objectType() == GpuObjectType::Texture) {
-            const Texture* texture = static_cast<Texture*>(obj);
-            if (texture->cleanup) {
-                ALOGE("Leaked texture marked for cleanup! id=%u, size %ux%u", texture->id(),
-                      texture->width(), texture->height());
-                freeList.push_back(texture);
-            }
-        }
-    }
-    for (auto& texture : freeList) {
-        const_cast<Texture*>(texture)->deleteTexture();
-        delete texture;
     }
 }
 

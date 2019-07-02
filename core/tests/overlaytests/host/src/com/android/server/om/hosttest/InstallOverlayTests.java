@@ -1,17 +1,17 @@
 /*
  * Copyright (C) 2018 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.android.server.om.hosttest;
 
@@ -67,10 +67,10 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void failToInstallNonPlatformSignedOverlay() throws Exception {
+    public void failToInstallNonPlatformSignedOverlayTargetPreQ() throws Exception {
         try {
-            installPackage("OverlayHostTests_BadSignatureOverlay.apk");
-            fail("installed a non-platform signed overlay");
+            installPackage("OverlayHostTests_NonPlatformSignatureOverlay.apk");
+            fail("installed a non-platform signed overlay with targetSdkVersion < Q");
         } catch (Exception e) {
             // Expected.
         }
@@ -155,15 +155,81 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
         }
     }
 
+    @Test
+    public void instantAppsNotVisibleToOMS() throws Exception {
+        installInstantPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertFalse(overlayManagerContainsPackage(APP_OVERLAY_PACKAGE_NAME));
+        installConvertExistingInstantPackageToFull(APP_OVERLAY_PACKAGE_NAME);
+        assertTrue(overlayManagerContainsPackage(APP_OVERLAY_PACKAGE_NAME));
+    }
+
+    @Test
+    public void changesPersistedWhenUninstallingDisabledOverlay() throws Exception {
+        getDevice().enableAdbRoot();
+        assertFalse(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+        installPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertTrue(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+        uninstallPackage(APP_OVERLAY_PACKAGE_NAME);
+        delay();
+        assertFalse(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+    }
+
+    @Test
+    public void testAdbShellOMSInterface() throws Exception {
+        installPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertTrue(shell("cmd overlay list " + DEVICE_TEST_PKG).contains(DEVICE_TEST_PKG));
+        assertTrue(shell("cmd overlay list " + DEVICE_TEST_PKG).contains(APP_OVERLAY_PACKAGE_NAME));
+        assertEquals("[ ] " + APP_OVERLAY_PACKAGE_NAME,
+                shell("cmd overlay list " + APP_OVERLAY_PACKAGE_NAME).trim());
+        assertEquals("STATE_DISABLED",
+                shell("cmd overlay dump state " + APP_OVERLAY_PACKAGE_NAME).trim());
+
+        setOverlayEnabled(APP_OVERLAY_PACKAGE_NAME, true);
+        assertEquals("[x] " + APP_OVERLAY_PACKAGE_NAME,
+                shell("cmd overlay list " + APP_OVERLAY_PACKAGE_NAME).trim());
+        assertEquals("STATE_ENABLED",
+                shell("cmd overlay dump state " + APP_OVERLAY_PACKAGE_NAME).trim());
+    }
+
+    private void delay() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    private void installPackage(String pkg) throws Exception {
+        super.installPackage(pkg);
+        delay();
+    }
+
+    private void installInstantPackage(String pkg) throws Exception {
+        super.installPackage(pkg, "--instant");
+        delay();
+    }
+
+    private void installConvertExistingInstantPackageToFull(String pkg) throws Exception {
+        shell("cmd package install-existing --wait --full " + pkg);
+    }
+
     private void setPackageEnabled(String pkg, boolean enabled) throws Exception {
-        getDevice().executeShellCommand("cmd package " + (enabled ? "enable " : "disable ") + pkg);
+        shell("cmd package " + (enabled ? "enable " : "disable ") + pkg);
+        delay();
     }
 
     private void setOverlayEnabled(String pkg, boolean enabled) throws Exception {
-        getDevice().executeShellCommand("cmd overlay " + (enabled ? "enable " : "disable ") + pkg);
+        shell("cmd overlay " + (enabled ? "enable " : "disable ") + pkg);
+        delay();
     }
 
     private boolean overlayManagerContainsPackage(String pkg) throws Exception {
-        return getDevice().executeShellCommand("cmd overlay list").contains(pkg);
+        return shell("cmd overlay list").contains(pkg);
+    }
+
+    private String shell(final String cmd) throws Exception {
+        return getDevice().executeShellCommand(cmd);
     }
 }

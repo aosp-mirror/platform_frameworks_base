@@ -17,5 +17,17 @@
 package com.android.server;
 
 public interface AlarmManagerInternal {
-    void removeAlarmsForUid(int uid);
+    // Some other components in the system server need to know about
+    // broadcast alarms currently in flight
+    public interface InFlightListener {
+        /** There is now an alarm pending delivery to the given app */
+        void broadcastAlarmPending(int recipientUid);
+        /** A broadcast alarm targeted to the given app has completed delivery */
+        void broadcastAlarmComplete(int recipientUid);
+    }
+
+    /** Returns true if AlarmManager is delaying alarms due to device idle. */
+    boolean isIdling();
+    public void removeAlarmsForUid(int uid);
+    public void registerInFlightListener(InFlightListener callback);
 }

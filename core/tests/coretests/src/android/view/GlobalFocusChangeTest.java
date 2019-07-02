@@ -17,13 +17,13 @@
 package android.view;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.FlakyTest;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.TouchUtils;
-import android.test.suitebuilder.annotation.Suppress;
-import android.view.View;
-import android.view.KeyEvent;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
+
 import com.android.frameworks.coretests.R;
 
 @Suppress // Flaky
@@ -50,7 +50,7 @@ public class GlobalFocusChangeTest extends ActivityInstrumentationTestCase<Globa
         super.tearDown();
     }
 
-    @FlakyTest(tolerance = 4)
+    @FlakyTest
     @LargeTest
     public void testFocusChange() throws Exception {
         sendKeys(KeyEvent.KEYCODE_DPAD_RIGHT);
@@ -62,7 +62,7 @@ public class GlobalFocusChangeTest extends ActivityInstrumentationTestCase<Globa
         assertSame(mRight, mActivity.mNewFocus);        
     }
 
-    @FlakyTest(tolerance = 4)
+    @FlakyTest
     @MediumTest
     public void testEnterTouchMode() throws Exception {
         assertTrue(mLeft.isFocused());
@@ -73,7 +73,7 @@ public class GlobalFocusChangeTest extends ActivityInstrumentationTestCase<Globa
         assertSame(null, mActivity.mNewFocus);        
     }
 
-    @FlakyTest(tolerance = 4)
+    @FlakyTest
     @MediumTest
     public void testLeaveTouchMode() throws Exception {
         assertTrue(mLeft.isFocused());

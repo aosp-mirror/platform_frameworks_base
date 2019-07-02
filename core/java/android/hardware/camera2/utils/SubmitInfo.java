@@ -43,7 +43,7 @@ public class SubmitInfo implements Parcelable {
         mLastFrameNumber = lastFrameNumber;
     }
 
-    public static final Parcelable.Creator<SubmitInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SubmitInfo> CREATOR =
             new Parcelable.Creator<SubmitInfo>() {
         @Override
         public SubmitInfo createFromParcel(Parcel in) {

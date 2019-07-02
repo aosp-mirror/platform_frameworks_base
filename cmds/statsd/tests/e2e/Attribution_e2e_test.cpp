@@ -69,8 +69,10 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     // Here it assumes that GMS core has two uids.
     processor->getUidMap()->updateMap(
             1, {222, 444, 111, 333}, {1, 1, 2, 2},
+            {String16("v1"), String16("v1"), String16("v2"), String16("v2")},
             {String16("com.android.gmscore"), String16("com.android.gmscore"), String16("app1"),
-             String16("APP3")});
+             String16("APP3")},
+            {String16(""), String16(""), String16(""), String16("")});
 
     // GMS core node is in the middle.
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
@@ -144,8 +146,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     }
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, ADB_DUMP,
-                            &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, true,
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
@@ -215,8 +217,10 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     // Here it assumes that GMS core has two uids.
     processor->getUidMap()->updateMap(
             1, {222, 444, 111, 333}, {1, 1, 2, 2},
+            {String16("v1"), String16("v1"), String16("v2"), String16("v2")},
             {String16("com.android.gmscore"), String16("com.android.gmscore"), String16("app1"),
-             String16("APP3")});
+             String16("APP3")},
+            {String16(""), String16(""), String16(""), String16("")});
 
     // GMS core node is in the middle.
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
@@ -290,8 +294,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     }
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, ADB_DUMP,
-                            &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, true,
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);

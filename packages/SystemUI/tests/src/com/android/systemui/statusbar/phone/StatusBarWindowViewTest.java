@@ -17,34 +17,44 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper
 @SmallTest
 public class StatusBarWindowViewTest extends SysuiTestCase {
 
     private StatusBarWindowView mView;
     private StatusBar mStatusBar;
     private DragDownHelper mDragDownHelper;
+    private NotificationStackScrollLayout mStackScrollLayout;
 
     @Before
     public void setUp() {
-        mView = new StatusBarWindowView(getContext(), null);
+        mDependency.injectMockDependency(StatusBarStateController.class);
+        mView = spy(new StatusBarWindowView(getContext(), null));
+        mStackScrollLayout = mock(NotificationStackScrollLayout.class);
+        when(mView.getStackScrollLayout()).thenReturn(mStackScrollLayout);
         mStatusBar = mock(StatusBar.class);
         mView.setService(mStatusBar);
         mDragDownHelper = mock(DragDownHelper.class);
@@ -53,7 +63,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
 
     @Test
     public void testDragDownHelperCalledWhenDraggingDown() throws Exception {
-        when(mStatusBar.getBarState()).thenReturn(StatusBarState.SHADE);
+        when(Dependency.get(StatusBarStateController.class).getState())
+                .thenReturn(StatusBarState.SHADE);
         when(mDragDownHelper.isDraggingDown()).thenReturn(true);
         long now = SystemClock.elapsedRealtime();
         MotionEvent ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0 /* x */, 0 /* y */,

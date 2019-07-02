@@ -63,9 +63,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private List<ReferrerIntent> mPendingNewIntents;
     private boolean mIsForward;
     private ProfilerInfo mProfilerInfo;
+    private IBinder mAssistToken;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
+        client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
     }
@@ -77,9 +79,15 @@ public class LaunchActivityItem extends ClientTransactionItem {
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mIsForward,
-                mProfilerInfo, client);
+                mProfilerInfo, client, mAssistToken);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        client.countLaunchingActivities(-1);
     }
 
 
@@ -92,14 +100,15 @@ public class LaunchActivityItem extends ClientTransactionItem {
             Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
             String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo) {
+            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo,
+            IBinder assistToken) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
         setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
-                pendingNewIntents, isForward, profilerInfo);
+                pendingNewIntents, isForward, profilerInfo, assistToken);
 
         return instance;
     }
@@ -107,7 +116,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                false, null);
+                false, null, null);
         ObjectPool.recycle(this);
     }
 
@@ -132,6 +141,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeTypedList(mPendingNewIntents, flags);
         dest.writeBoolean(mIsForward);
         dest.writeTypedObject(mProfilerInfo, flags);
+        dest.writeStrongBinder(mAssistToken);
     }
 
     /** Read from Parcel. */
@@ -145,10 +155,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readPersistableBundle(getClass().getClassLoader()),
                 in.createTypedArrayList(ResultInfo.CREATOR),
                 in.createTypedArrayList(ReferrerIntent.CREATOR), in.readBoolean(),
-                in.readTypedObject(ProfilerInfo.CREATOR));
+                in.readTypedObject(ProfilerInfo.CREATOR),
+                in.readStrongBinder());
     }
 
-    public static final Creator<LaunchActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<LaunchActivityItem> CREATOR =
             new Creator<LaunchActivityItem>() {
         public LaunchActivityItem createFromParcel(Parcel in) {
             return new LaunchActivityItem(in);
@@ -180,7 +191,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
                 && mIsForward == other.mIsForward
-                && Objects.equals(mProfilerInfo, other.mProfilerInfo);
+                && Objects.equals(mProfilerInfo, other.mProfilerInfo)
+                && Objects.equals(mAssistToken, other.mAssistToken);
     }
 
     @Override
@@ -199,6 +211,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mPendingNewIntents);
         result = 31 * result + (mIsForward ? 1 : 0);
         result = 31 * result + Objects.hashCode(mProfilerInfo);
+        result = 31 * result + Objects.hashCode(mAssistToken);
         return result;
     }
 
@@ -240,6 +253,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 + ",referrer=" + mReferrer + ",procState=" + mProcState + ",state=" + mState
                 + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
                 + ",pendingNewIntents=" + mPendingNewIntents + ",profilerInfo=" + mProfilerInfo
+                + " assistToken=" + mAssistToken
                 + "}";
     }
 
@@ -249,7 +263,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
             int procState, Bundle state, PersistableBundle persistentState,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            boolean isForward, ProfilerInfo profilerInfo) {
+            boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;
@@ -265,5 +279,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mPendingNewIntents = pendingNewIntents;
         instance.mIsForward = isForward;
         instance.mProfilerInfo = profilerInfo;
+        instance.mAssistToken = assistToken;
     }
 }

@@ -16,9 +16,9 @@
 
 package android.preference;
 
-import android.preference.ListPreference;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.LargeTest;
 
 @LargeTest
 public class ListPreferenceTest extends AndroidTestCase {

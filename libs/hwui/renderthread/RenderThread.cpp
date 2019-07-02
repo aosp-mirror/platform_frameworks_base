@@ -16,27 +16,34 @@
 
 #include "RenderThread.h"
 
+#include "../HardwareBitmapUploader.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
-#include "OpenGLReadback.h"
+#include "Readback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
 #include "hwui/Bitmap.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
-#include "pipeline/skia/SkiaOpenGLReadback.h"
-#include "pipeline/skia/SkiaVulkanReadback.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
-#include "renderthread/OpenGLPipeline.h"
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
+#include "utils/TraceUtils.h"
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
+
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
 
 #include <gui/DisplayEventReceiver.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
 #include <utils/Mutex.h>
+#include <thread>
 
 namespace android {
 namespace uirenderer {
@@ -47,17 +54,16 @@ namespace renderthread {
 // using just a few large reads.
 static const size_t EVENT_BUFFER_SIZE = 100;
 
-// Slight delay to give the UI time to push us a new frame before we replay
-static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanoseconds(4);
-
 static bool gHasRenderThreadInstance = false;
 
-static void (*gOnStartHook)() = nullptr;
+static JVMAttachHook gOnStartHook = nullptr;
 
 class DisplayEventReceiverWrapper : public VsyncSource {
 public:
-    DisplayEventReceiverWrapper(std::unique_ptr<DisplayEventReceiver>&& receiver)
-            : mDisplayEventReceiver(std::move(receiver)) {}
+    DisplayEventReceiverWrapper(std::unique_ptr<DisplayEventReceiver>&& receiver,
+            const std::function<void()>& onDisplayConfigChanged)
+            : mDisplayEventReceiver(std::move(receiver))
+            , mOnDisplayConfigChanged(onDisplayConfigChanged) {}
 
     virtual void requestNextVsync() override {
         status_t status = mDisplayEventReceiver->requestNextVsync();
@@ -75,6 +81,9 @@ public:
                     case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
                         latest = ev.header.timestamp;
                         break;
+                    case DisplayEventReceiver::DISPLAY_EVENT_CONFIG_CHANGED:
+                        mOnDisplayConfigChanged();
+                        break;
                 }
             }
         }
@@ -86,6 +95,7 @@ public:
 
 private:
     std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
+    std::function<void()> mOnDisplayConfigChanged;
 };
 
 class DummyVsyncSource : public VsyncSource {
@@ -93,14 +103,11 @@ public:
     DummyVsyncSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        mRenderThread->queue().postDelayed(16_ms, [this]() {
-            mRenderThread->drainDisplayEventQueue();
-        });
+        mRenderThread->queue().postDelayed(16_ms,
+                                           [this]() { mRenderThread->drainDisplayEventQueue(); });
     }
 
-    virtual nsecs_t latestVsyncEvent() override {
-        return systemTime(CLOCK_MONOTONIC);
-    }
+    virtual nsecs_t latestVsyncEvent() override { return systemTime(CLOCK_MONOTONIC); }
 
 private:
     RenderThread* mRenderThread;
@@ -110,9 +117,13 @@ bool RenderThread::hasInstance() {
     return gHasRenderThreadInstance;
 }
 
-void RenderThread::setOnStartHook(void (*onStartHook)()) {
+void RenderThread::setOnStartHook(JVMAttachHook onStartHook) {
     LOG_ALWAYS_FATAL_IF(hasInstance(), "can't set an onStartHook after we've started...");
     gOnStartHook = onStartHook;
+}
+
+JVMAttachHook RenderThread::getOnStartHook() {
+    return gOnStartHook;
 }
 
 RenderThread& RenderThread::getInstance() {
@@ -131,6 +142,7 @@ RenderThread::RenderThread()
         , mFrameCallbackTaskPending(false)
         , mRenderState(nullptr)
         , mEglManager(nullptr)
+        , mFunctorManager(WebViewFunctorManager::instance())
         , mVkManager(nullptr) {
     Properties::load();
     start("RenderThread");
@@ -147,28 +159,94 @@ void RenderThread::initializeDisplayEventReceiver() {
         auto receiver = std::make_unique<DisplayEventReceiver>();
         status_t status = receiver->initCheck();
         LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                "Initialization of DisplayEventReceiver "
-                        "failed with status: %d",
-                status);
+                            "Initialization of DisplayEventReceiver "
+                            "failed with status: %d",
+                            status);
 
         // Register the FD
         mLooper->addFd(receiver->getFd(), 0, Looper::EVENT_INPUT,
-                RenderThread::displayEventReceiverCallback, this);
-        mVsyncSource = new DisplayEventReceiverWrapper(std::move(receiver));
+                       RenderThread::displayEventReceiverCallback, this);
+        mVsyncSource = new DisplayEventReceiverWrapper(std::move(receiver), [this] {
+            DeviceInfo::get()->onDisplayConfigChanged();
+            setupFrameInterval();
+        });
     } else {
         mVsyncSource = new DummyVsyncSource(this);
     }
 }
 
 void RenderThread::initThreadLocals() {
-    mDisplayInfo = DeviceInfo::queryDisplayInfo();
-    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
-    mTimeLord.setFrameInterval(frameIntervalNanos);
+    setupFrameInterval();
     initializeDisplayEventReceiver();
-    mEglManager = new EglManager(*this);
+    mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
-    mVkManager = new VulkanManager(*this);
-    mCacheManager = new CacheManager(mDisplayInfo);
+    mVkManager = new VulkanManager();
+    mCacheManager = new CacheManager(DeviceInfo::get()->displayInfo());
+}
+
+void RenderThread::setupFrameInterval() {
+    auto& displayInfo = DeviceInfo::get()->displayInfo();
+    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / displayInfo.fps);
+    mTimeLord.setFrameInterval(frameIntervalNanos);
+    mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
+}
+
+void RenderThread::requireGlContext() {
+    if (mEglManager->hasEglContext()) {
+        return;
+    }
+    mEglManager->initialize();
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+    debug::GlesDriver* driver = debug::GlesDriver::get();
+    sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
+    sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
+    LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+    GrContextOptions options;
+    initGrContextOptions(options);
+    auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    auto size = glesVersion ? strlen(glesVersion) : -1;
+    cacheManager().configureContext(&options, glesVersion, size);
+    sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    setGrContext(grContext);
+}
+
+void RenderThread::requireVkContext() {
+    if (mVkManager->hasVkContext()) {
+        return;
+    }
+    mVkManager->initialize();
+    GrContextOptions options;
+    initGrContextOptions(options);
+    auto vkDriverVersion = mVkManager->getDriverVersion();
+    cacheManager().configureContext(&options, &vkDriverVersion, sizeof(vkDriverVersion));
+    sk_sp<GrContext> grContext = mVkManager->createContext(options);
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    setGrContext(grContext);
+}
+
+void RenderThread::initGrContextOptions(GrContextOptions& options) {
+    options.fPreferExternalImagesOverES3 = true;
+    options.fDisableDistanceFieldPaths = true;
+}
+
+void RenderThread::destroyRenderingContext() {
+    mFunctorManager.onContextDestroyed();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        if (mEglManager->hasEglContext()) {
+            setGrContext(nullptr);
+            mEglManager->destroy();
+        }
+    } else {
+        if (vulkanManager().hasVkContext()) {
+            setGrContext(nullptr);
+            vulkanManager().destroy();
+        }
+    }
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
@@ -178,16 +256,6 @@ void RenderThread::dumpGraphicsMemory(int fd) {
     String8 pipeline;
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::OpenGL: {
-            if (Caches::hasInstance()) {
-                cachesOutput.appendFormat("Caches:\n");
-                Caches::getInstance().dumpMemoryUsage(cachesOutput);
-            } else {
-                cachesOutput.appendFormat("No caches instance.");
-            }
-            pipeline.appendFormat("FrameBuilder");
-            break;
-        }
         case RenderPipelineType::SkiaGL: {
             mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
             pipeline.appendFormat("Skia (OpenGL)");
@@ -209,21 +277,7 @@ void RenderThread::dumpGraphicsMemory(int fd) {
 
 Readback& RenderThread::readback() {
     if (!mReadback) {
-        auto renderType = Properties::getRenderPipelineType();
-        switch (renderType) {
-            case RenderPipelineType::OpenGL:
-                mReadback = new OpenGLReadbackImpl(*this);
-                break;
-            case RenderPipelineType::SkiaGL:
-                mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
-                break;
-            case RenderPipelineType::SkiaVulkan:
-                mReadback = new skiapipeline::SkiaVulkanReadback(*this);
-                break;
-            default:
-                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-                break;
-        }
+        mReadback = new Readback(*this);
     }
 
     return *mReadback;
@@ -232,9 +286,14 @@ Readback& RenderThread::readback() {
 void RenderThread::setGrContext(sk_sp<GrContext> context) {
     mCacheManager->reset(context);
     if (mGrContext) {
+        mRenderState->onContextDestroyed();
         mGrContext->releaseResourcesAndAbandonContext();
     }
     mGrContext = std::move(context);
+    if (mGrContext) {
+        mRenderState->onContextCreated();
+        DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
+    }
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
@@ -265,7 +324,7 @@ void RenderThread::drainDisplayEventQueue() {
         if (mTimeLord.vsyncReceived(vsyncEvent) && !mFrameCallbackTaskPending) {
             ATRACE_NAME("queue mFrameCallbackTask");
             mFrameCallbackTaskPending = true;
-            nsecs_t runAt = (vsyncEvent + DISPATCH_FRAME_CALLBACKS_DELAY);
+            nsecs_t runAt = (vsyncEvent + mDispatchFrameDelay);
             queue().postAt(runAt, [this]() { dispatchFrameCallbacks(); });
         }
     }
@@ -298,8 +357,9 @@ void RenderThread::requestVsync() {
 
 bool RenderThread::threadLoop() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_DISPLAY);
+    Looper::setForThread(mLooper);
     if (gOnStartHook) {
-        gOnStartHook();
+        gOnStartHook("RenderThread");
     }
     initThreadLocals();
 
@@ -347,10 +407,6 @@ void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {
 sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            return OpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
-        case RenderPipelineType::SkiaGL:
-            return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
         case RenderPipelineType::SkiaVulkan:
             return skiapipeline::SkiaVulkanPipeline::allocateHardwareBitmap(*this, skBitmap);
         default:
@@ -362,6 +418,17 @@ sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
 
 bool RenderThread::isCurrent() {
     return gettid() == getInstance().getTid();
+}
+
+void RenderThread::preload() {
+    // EGL driver is always preloaded only if HWUI renders with GL.
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
+        eglInitThread.detach();
+    } else {
+        requireVkContext();
+    }
+    HardwareBitmapUploader::initialize();
 }
 
 } /* namespace renderthread */

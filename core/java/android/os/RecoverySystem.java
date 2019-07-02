@@ -854,6 +854,34 @@ public class RecoverySystem {
     /** {@hide} */
     public static void rebootPromptAndWipeUserData(Context context, String reason)
             throws IOException {
+        boolean checkpointing = false;
+        boolean needReboot = false;
+        IVold vold = null;
+        try {
+            vold = IVold.Stub.asInterface(ServiceManager.checkService("vold"));
+            if (vold != null) {
+                checkpointing = vold.needsCheckpoint();
+            } else  {
+                Log.w(TAG, "Failed to get vold");
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to check for checkpointing");
+        }
+
+        // If we are running in checkpointing mode, we should not prompt a wipe.
+        // Checkpointing may save us. If it doesn't, we will wind up here again.
+        if (checkpointing) {
+            try {
+                vold.abortChanges("rescueparty", false);
+                Log.i(TAG, "Rescue Party requested wipe. Aborting update");
+            } catch (Exception e) {
+                Log.i(TAG, "Rescue Party requested wipe. Rebooting instead.");
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                pm.reboot("rescueparty");
+            }
+            return;
+        }
+
         String reasonArg = null;
         if (!TextUtils.isEmpty(reason)) {
             reasonArg = "--reason=" + sanitizeArg(reason);

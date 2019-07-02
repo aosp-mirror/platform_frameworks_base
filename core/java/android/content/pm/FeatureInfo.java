@@ -126,7 +126,7 @@ public class FeatureInfo implements Parcelable {
         proto.end(token);
     }
 
-    public static final Creator<FeatureInfo> CREATOR = new Creator<FeatureInfo>() {
+    public static final @android.annotation.NonNull Creator<FeatureInfo> CREATOR = new Creator<FeatureInfo>() {
         @Override
         public FeatureInfo createFromParcel(Parcel source) {
             return new FeatureInfo(source);

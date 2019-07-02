@@ -20,10 +20,11 @@ import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 import com.android.frameworks.coretests.R;
 

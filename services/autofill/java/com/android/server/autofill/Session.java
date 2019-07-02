@@ -16,8 +16,6 @@
 
 package com.android.server.autofill;
 
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
@@ -25,19 +23,21 @@ import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
+import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
+import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
-import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
-import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.AutofillOverlay;
@@ -48,8 +48,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,9 +62,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.AutofillService;
+import android.service.autofill.CompositeUserData;
 import android.service.autofill.Dataset;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
+import android.service.autofill.FieldClassificationUserData;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -72,6 +76,7 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -81,6 +86,7 @@ import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
@@ -94,7 +100,6 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -130,11 +135,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private static AtomicInteger sIdCounter = new AtomicInteger();
 
-    /** Id of the session */
+    /**
+     * ID of the session.
+     *
+     * <p>It's always a positive number, to make it easier to embed it in a long.
+     */
     public final int id;
 
     /** uid the session is for */
     public final int uid;
+
+    /** ID of the task associated with this session's activity */
+    public final int taskId;
 
     /** Flags used to start the session */
     public final int mFlags;
@@ -170,6 +182,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private DeathRecipient mClientVulture;
 
+    /**
+     * Reference to the remote service.
+     *
+     * <p>Only {@code null} when the session is for augmented autofill only.
+     */
+    @Nullable
     private final RemoteFillService mRemoteFillService;
 
     @GuardedBy("mLock")
@@ -238,11 +256,51 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final SparseArray<LogMaker> mRequestLogs = new SparseArray<>(1);
 
     /**
+     * Destroys the augmented Autofill UI.
+     */
+    // TODO(b/123099468): this runnable is called when the Autofill session is destroyed, the
+    // main reason being the cases where user tap HOME.
+    // Right now it's completely destroying the UI, but we need to decide whether / how to
+    // properly recover it later (for example, if the user switches back to the activity,
+    // should it be restored? Right now it kind of is, because Autofill's Session trigger a
+    // new FillRequest, which in turn triggers the Augmented Autofill request again)
+    @GuardedBy("mLock")
+    @Nullable
+    private Runnable mAugmentedAutofillDestroyer;
+
+    /**
+     * List of {@link MetricsEvent#AUTOFILL_AUGMENTED_REQUEST} metrics.
+     */
+    @GuardedBy("mLock")
+    private ArrayList<LogMaker> mAugmentedRequestsLogs;
+
+
+    /**
+     * List of autofill ids of autofillable fields present in the AssistStructure that can be used
+     * to trigger new augmented autofill requests (because the "standard" service was not interested
+     * on autofilling the app.
+     */
+    @GuardedBy("mLock")
+    private ArrayList<AutofillId> mAugmentedAutofillableIds;
+
+    /**
+     * When {@code true}, the session was created only to handle Augmented Autofill requests (i.e.,
+     * the session would not have existed otherwsie).
+     */
+    @GuardedBy("mLock")
+    private boolean mForAugmentedAutofillOnly;
+
+    /**
      * Receiver of assist data from the app's {@link Activity}.
      */
     private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
         @Override
         public void onHandleAssistData(Bundle resultData) throws RemoteException {
+            if (mRemoteFillService == null) {
+                wtf(null, "onHandleAssistData() called without a remote service. "
+                        + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+                return;
+            }
             final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
@@ -276,18 +334,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                // Sanitize structure before it's sent to service.
-                final ComponentName componentNameFromApp = structure.getActivityComponent();
-                if (componentNameFromApp == null || !mComponentName.getPackageName()
-                        .equals(componentNameFromApp.getPackageName())) {
-                    Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
-                            + "AssistStructure: " + componentNameFromApp);
-                    structure.setActivityComponent(mComponentName);
-                    mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
-                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
-                                    componentNameFromApp == null ? "null"
-                                            : componentNameFromApp.flattenToShortString()));
+                final ArrayList<AutofillId> ids = Helper.getAutofillIds(structure,
+                        /* autofillableOnly= */false);
+                for (int i = 0; i < ids.size(); i++) {
+                    ids.get(i).setSessionId(Session.this.id);
                 }
+
+                // Flags used to start the session.
+                int flags = structure.getFlags();
+
                 if (mCompatMode) {
                     // Sanitize URL bar, if needed
                     final String[] urlBarIds = mService.getUrlBarResourceIdsForCompatMode(
@@ -303,21 +358,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 Slog.d(TAG, "Setting urlBar as id=" + urlBarId + " and domain "
                                         + mUrlBar.getWebDomain());
                             }
-                            final ViewState viewState = new ViewState(Session.this, urlBarId,
-                                    Session.this, ViewState.STATE_URL_BAR);
+                            final ViewState viewState = new ViewState(urlBarId, Session.this,
+                                    ViewState.STATE_URL_BAR);
                             mViewStates.put(urlBarId, viewState);
                         }
                     }
+                    flags |= FillRequest.FLAG_COMPATIBILITY_MODE_REQUEST;
                 }
                 structure.sanitizeForParceling(true);
-
-                // Flags used to start the session.
-                final int flags = structure.getFlags();
 
                 if (mContexts == null) {
                     mContexts = new ArrayList<>(1);
                 }
-                mContexts.add(new FillContext(requestId, structure));
+                mContexts.add(new FillContext(requestId, structure, mCurrentViewId));
 
                 cancelCurrentRequestLocked();
 
@@ -326,12 +379,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     fillContextWithAllowedValuesLocked(mContexts.get(i), flags);
                 }
 
-                // Dispatch a snapshot of the current contexts list since it may change
-                // until the dispatch happens. The items in the list don't need to be cloned
-                // since we don't hold on them anywhere else. The client state is not touched
-                // by us, so no need to copy.
-                request = new FillRequest(requestId, new ArrayList<>(mContexts),
-                        mClientState, flags);
+                final ArrayList<FillContext> contexts =
+                        mergePreviousSessionLocked(/* forSave= */ false);
+                request = new FillRequest(requestId, contexts, mClientState, flags);
             }
 
             mRemoteFillService.onFillRequest(request);
@@ -394,16 +444,45 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * or {@code null} when not found on either of them.
      */
     @GuardedBy("mLock")
-    private AutofillValue findValueLocked(@NonNull AutofillId id) {
-        final ViewState state = mViewStates.get(id);
+    @Nullable
+    private AutofillValue findValueLocked(@NonNull AutofillId autofillId) {
+        final AutofillValue value = findValueFromThisSessionOnlyLocked(autofillId);
+        if (value != null) {
+            return getSanitizedValue(createSanitizers(getSaveInfoLocked()), autofillId, value);
+        }
+
+        // TODO(b/113281366): rather than explicitly look for previous session, it might be better
+        // to merge the sessions when created (see note on mergePreviousSessionLocked())
+        final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
+        if (previousSessions != null) {
+            if (sDebug) {
+                Slog.d(TAG, "findValueLocked(): looking on " + previousSessions.size()
+                        + " previous sessions for autofillId " + autofillId);
+            }
+            for (int i = 0; i < previousSessions.size(); i++) {
+                final Session previousSession = previousSessions.get(i);
+                final AutofillValue previousValue = previousSession
+                        .findValueFromThisSessionOnlyLocked(autofillId);
+                if (previousValue != null) {
+                    return getSanitizedValue(createSanitizers(previousSession.getSaveInfoLocked()),
+                            autofillId, previousValue);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private AutofillValue findValueFromThisSessionOnlyLocked(@NonNull AutofillId autofillId) {
+        final ViewState state = mViewStates.get(autofillId);
         if (state == null) {
-            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + id);
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + autofillId);
             return null;
         }
         AutofillValue value = state.getCurrentValue();
         if (value == null) {
-            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + id);
-            value = getValueFromContextsLocked(id);
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + autofillId);
+            value = getValueFromContextsLocked(autofillId);
         }
         return value;
     }
@@ -462,28 +541,51 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private void cancelCurrentRequestLocked() {
-        final int canceledRequest = mRemoteFillService.cancelCurrentRequest();
+        if (mRemoteFillService == null) {
+            wtf(null, "cancelCurrentRequestLocked() called without a remote service. "
+                    + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+            return;
+        }
+        mRemoteFillService.cancelCurrentRequest().whenComplete((canceledRequest, err) -> {
+            if (err != null) {
+                Slog.e(TAG, "cancelCurrentRequest(): unexpected exception", err);
+                return;
+            }
 
-        // Remove the FillContext as there will never be a response for the service
-        if (canceledRequest != INVALID_REQUEST_ID && mContexts != null) {
-            final int numContexts = mContexts.size();
+            // Remove the FillContext as there will never be a response for the service
+            if (canceledRequest != INVALID_REQUEST_ID && mContexts != null) {
+                final int numContexts = mContexts.size();
 
-            // It is most likely the last context, hence search backwards
-            for (int i = numContexts - 1; i >= 0; i--) {
-                if (mContexts.get(i).getRequestId() == canceledRequest) {
-                    if (sDebug) Slog.d(TAG, "cancelCurrentRequest(): id = " + canceledRequest);
-                    mContexts.remove(i);
-                    break;
+                // It is most likely the last context, hence search backwards
+                for (int i = numContexts - 1; i >= 0; i--) {
+                    if (mContexts.get(i).getRequestId() == canceledRequest) {
+                        if (sDebug) Slog.d(TAG, "cancelCurrentRequest(): id = " + canceledRequest);
+                        mContexts.remove(i);
+                        break;
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
      * Reads a new structure and then request a new fill response from the fill service.
      */
     @GuardedBy("mLock")
-    private void requestNewFillResponseLocked(int flags) {
+    private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
+            int flags) {
+        if (mForAugmentedAutofillOnly || mRemoteFillService == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "requestNewFillResponse(): triggering augmented autofill instead "
+                        + "(mForAugmentedAutofillOnly=" + mForAugmentedAutofillOnly
+                        + ", flags=" + flags + ")");
+            }
+            mForAugmentedAutofillOnly = true;
+            triggerAugmentedAutofillLocked();
+            return;
+        }
+        viewState.setState(newState);
+
         int requestId;
 
         do {
@@ -500,8 +602,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mRequestLogs.put(requestId, log);
 
         if (sVerbose) {
-            Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId="
-                    + requestId + ", flags=" + flags);
+            Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId=" + requestId
+                    + ", flags=" + flags);
         }
 
         // If the focus changes very quickly before the first request is returned each focus change
@@ -516,7 +618,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             receiverExtras.putInt(EXTRA_REQUEST_ID, requestId);
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
+                if (!ActivityTaskManager.getService().requestAutofillData(mAssistReceiver,
                         receiverExtras, mActivityToken, flags)) {
                     Slog.w(TAG, "failed to request autofill data for " + mActivityToken);
                 }
@@ -529,28 +631,34 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     Session(@NonNull AutofillManagerServiceImpl service, @NonNull AutoFillUI ui,
-            @NonNull Context context, @NonNull Handler handler, int userId,
-            @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
+            @NonNull Context context, @NonNull Handler handler, int userId, @NonNull Object lock,
+            int sessionId, int taskId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull LocalLog wtfHistory,
-            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
-            boolean compatMode, boolean bindInstantServiceAllowed, int flags) {
+            @NonNull LocalLog wtfHistory, @Nullable ComponentName serviceComponentName,
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, boolean forAugmentedAutofillOnly, int flags) {
+        if (sessionId < 0) {
+            wtf(null, "Non-positive sessionId: %s", sessionId);
+        }
         id = sessionId;
         mFlags = flags;
+        this.taskId = taskId;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
         mService = service;
         mLock = lock;
         mUi = ui;
         mHandler = handler;
-        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this,
-                bindInstantServiceAllowed);
+        mRemoteFillService = serviceComponentName == null ? null
+                : new RemoteFillService(context, serviceComponentName, userId, this,
+                        bindInstantServiceAllowed);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
         mWtfHistory = wtfHistory;
         mComponentName = componentName;
         mCompatMode = compatMode;
+        mForAugmentedAutofillOnly = forAugmentedAutofillOnly;
         setClientLocked(client);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
@@ -606,6 +714,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mClient.asBinder().linkToDeath(mClientVulture, 0);
         } catch (RemoteException e) {
             Slog.w(TAG, "could not set binder death listener on autofill client: " + e);
+            mClientVulture = null;
         }
     }
 
@@ -616,6 +725,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (!unlinked) {
                 Slog.w(TAG, "unlinking vulture from death failed for " + mActivityToken);
             }
+            mClientVulture = null;
         }
     }
 
@@ -644,14 +754,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (requestLog != null) {
                     requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1);
                 }
-                processNullResponseLocked(requestFlags);
+                processNullResponseLocked(requestId, requestFlags);
                 return;
             }
 
             fieldClassificationIds = response.getFieldClassificationIds();
             if (fieldClassificationIds != null && !mService.isFieldClassificationEnabledLocked()) {
                 Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
-                processNullResponseLocked(requestFlags);
+                processNullResponseLocked(requestId, requestFlags);
                 return;
             }
         }
@@ -662,20 +772,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final long disableDuration = response.getDisableDuration();
         if (disableDuration > 0) {
             final int flags = response.getFlags();
-            if (sDebug) {
-                final StringBuilder message = new StringBuilder("Service disabled autofill for ")
-                        .append(mComponentName)
-                        .append(": flags=").append(flags)
-                        .append(", duration=");
-                TimeUtils.formatDuration(disableDuration, message);
-                Slog.d(TAG, message.toString());
-            }
             if ((flags & FillResponse.FLAG_DISABLE_ACTIVITY_ONLY) != 0) {
                 mService.disableAutofillForActivity(mComponentName, disableDuration,
                         id, mCompatMode);
             } else {
                 mService.disableAutofillForApp(mComponentName.getPackageName(), disableDuration,
                         id, mCompatMode);
+            }
+            // Although "standard" autofill is disabled, it might still trigger augmented autofill
+            if (triggerAugmentedAutofillLocked() != null) {
+                mForAugmentedAutofillOnly = true;
+                if (sDebug) {
+                    Slog.d(TAG, "Service disabled autofill for " + mComponentName
+                            + ", but session is kept for augmented autofill only");
+                }
+                return;
+            }
+            if (sDebug) {
+                final StringBuilder message = new StringBuilder("Service disabled autofill for ")
+                                .append(mComponentName)
+                                .append(": flags=").append(flags)
+                                .append(", duration=");
+                TimeUtils.formatDuration(disableDuration, message);
+                Slog.d(TAG, message.toString());
             }
             sessionFinishedState = AutofillManager.STATE_DISABLED_BY_SERVICE;
         }
@@ -684,7 +803,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         && response.getAuthentication() == null)
                 || disableDuration > 0) {
             // Response is "empty" from an UI point of view, need to notify client.
-            notifyUnavailableToClient(sessionFinishedState);
+            notifyUnavailableToClient(sessionFinishedState, /* autofillableIds= */ null);
         }
 
         if (requestLog != null) {
@@ -704,24 +823,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestFailure(int requestId, @Nullable CharSequence message,
-            @NonNull String servicePackageName) {
-        onFillRequestFailureOrTimeout(requestId, false, message, servicePackageName);
+    public void onFillRequestFailure(int requestId, @Nullable CharSequence message) {
+        onFillRequestFailureOrTimeout(requestId, false, message);
     }
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestTimeout(int requestId, @NonNull String servicePackageName) {
-        onFillRequestFailureOrTimeout(requestId, true, null, servicePackageName);
+    public void onFillRequestTimeout(int requestId) {
+        onFillRequestFailureOrTimeout(requestId, true, null);
     }
 
     private void onFillRequestFailureOrTimeout(int requestId, boolean timedOut,
-            @Nullable CharSequence message, @NonNull String servicePackageName) {
+            @Nullable CharSequence message) {
+        boolean showMessage = !TextUtils.isEmpty(message);
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestFailureOrTimeout(req=" + requestId
                         + ") rejected - session: " + id + " destroyed");
                 return;
+            }
+            if (sDebug) {
+                Slog.d(TAG, "finishing session due to service "
+                        + (timedOut ? "timeout" : "failure"));
             }
             mService.resetLastResponse();
             final LogMaker requestLog = mRequestLogs.get(requestId);
@@ -730,8 +853,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } else {
                 requestLog.setType(timedOut ? MetricsEvent.TYPE_CLOSE : MetricsEvent.TYPE_FAILURE);
             }
+            if (showMessage) {
+                final int targetSdk = mService.getTargedSdkLocked();
+                if (targetSdk >= Build.VERSION_CODES.Q) {
+                    showMessage = false;
+                    Slog.w(TAG, "onFillRequestFailureOrTimeout(): not showing '" + message
+                            + "' because service's targetting API " + targetSdk);
+                }
+                if (message != null) {
+                    requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_TEXT_LEN,
+                            message.length());
+                }
+            }
         }
-        if (message != null) {
+        notifyUnavailableToClient(AutofillManager.STATE_UNKNOWN_FAILED,
+                /* autofillableIds= */ null);
+        if (showMessage) {
             getUiForShowing().showError(message, this);
         }
         removeSelf();
@@ -766,6 +903,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onSaveRequestFailure(@Nullable CharSequence message,
             @NonNull String servicePackageName) {
+        boolean showMessage = !TextUtils.isEmpty(message);
         synchronized (mLock) {
             mIsSaving = false;
 
@@ -774,12 +912,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+            if (showMessage) {
+                final int targetSdk = mService.getTargedSdkLocked();
+                if (targetSdk >= Build.VERSION_CODES.Q) {
+                    showMessage = false;
+                    Slog.w(TAG, "onSaveRequestFailure(): not showing '" + message
+                            + "' because service's targetting API " + targetSdk);
+                }
+            }
         }
-        LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST, servicePackageName)
+        final LogMaker log =
+                newLogMaker(MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST, servicePackageName)
                 .setType(MetricsEvent.TYPE_FAILURE);
+        if (message != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_TEXT_LEN, message.length());
+        }
         mMetricsLogger.write(log);
 
-        getUiForShowing().showError(message, this);
+        if (showMessage) {
+            getUiForShowing().showError(message, this);
+        }
         removeSelf();
     }
 
@@ -837,10 +989,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 this, authenticationId, intent, fillInIntent));
     }
 
-    // FillServiceCallbacks
+    // VultureCallback
     @Override
-    public void onServiceDied(RemoteFillService service) {
-        // TODO(b/337565347): implement
+    public void onServiceDied(@NonNull RemoteFillService service) {
+        Slog.w(TAG, "removing session because service died");
+        forceRemoveSelfLocked();
     }
 
     // AutoFillUiCallback
@@ -994,6 +1147,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
+            Slog.w(TAG, "no authenticated response");
             removeSelf();
             return;
         }
@@ -1004,6 +1158,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
             final Dataset dataset = authenticatedResponse.getDatasets().get(datasetIdx);
             if (dataset == null) {
+                Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
                 removeSelf();
                 return;
             }
@@ -1013,7 +1168,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
         if (sDebug) {
             Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result
-                    + ", clientState=" + newClientState);
+                    + ", clientState=" + newClientState + ", authenticationId=" + authenticationId);
         }
         if (result instanceof FillResponse) {
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
@@ -1030,6 +1185,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 autoFill(requestId, datasetIdx, dataset, false);
             } else {
+                Slog.w(TAG, "invalid index (" + datasetIdx + ") for authentication id "
+                        + authenticationId);
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
             }
@@ -1039,7 +1196,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             logAuthenticationStatusLocked(requestId,
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
-            processNullResponseLocked(0);
+            processNullResponseLocked(requestId, 0);
         }
     }
 
@@ -1055,9 +1212,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     @Nullable
-    private FillResponse getLastResponseLocked(@Nullable String logPrefix) {
+    private FillResponse getLastResponseLocked(@Nullable String logPrefixFmt) {
+        final String logPrefix = sDebug && logPrefixFmt != null
+                ? String.format(logPrefixFmt, this.id)
+                : null;
         if (mContexts == null) {
-            if (sDebug && logPrefix != null) Slog.d(TAG, logPrefix + ": no contexts");
+            if (logPrefix != null) Slog.d(TAG, logPrefix + ": no contexts");
             return null;
         }
         if (mResponses == null) {
@@ -1093,24 +1253,67 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return response == null ? null : response.getSaveInfo();
     }
 
+    @GuardedBy("mLock")
+    int getSaveInfoFlagsLocked() {
+        final SaveInfo saveInfo = getSaveInfoLocked();
+        return saveInfo == null ? 0 : saveInfo.getFlags();
+    }
+
     /**
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
      */
     public void logContextCommitted() {
-        mHandler.sendMessage(obtainMessage(
-                Session::doLogContextCommitted, this));
+        mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this));
     }
 
-    private void doLogContextCommitted() {
+    private void handleLogContextCommitted() {
+        final FillResponse lastResponse;
         synchronized (mLock) {
-            logContextCommittedLocked();
+            lastResponse = getLastResponseLocked("logContextCommited(%s)");
+        }
+
+        if (lastResponse == null) {
+            Slog.w(TAG, "handleLogContextCommitted(): last response is null");
+            return;
+        }
+
+        // Merge UserData if necessary.
+        // Fields in packageUserData will override corresponding fields in genericUserData.
+        final UserData genericUserData = mService.getUserData();
+        final UserData packageUserData = lastResponse.getUserData();
+        final FieldClassificationUserData userData;
+        if (packageUserData == null && genericUserData == null) {
+            userData = null;
+        } else if (packageUserData != null && genericUserData != null) {
+            userData = new CompositeUserData(genericUserData, packageUserData);
+        } else if (packageUserData != null) {
+            userData = packageUserData;
+        } else {
+            userData = mService.getUserData();
+        }
+
+        final FieldClassificationStrategy fcStrategy = mService.getFieldClassificationStrategy();
+
+        // Sets field classification scores
+        if (userData != null && fcStrategy != null) {
+            logFieldClassificationScore(fcStrategy, userData);
+        } else {
+            logContextCommitted(null, null);
+        }
+    }
+
+    private void logContextCommitted(@Nullable ArrayList<AutofillId> detectedFieldIds,
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
+        synchronized (mLock) {
+            logContextCommittedLocked(detectedFieldIds, detectedFieldClassifications);
         }
     }
 
     @GuardedBy("mLock")
-    private void logContextCommittedLocked() {
-        final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
+    private void logContextCommittedLocked(@Nullable ArrayList<AutofillId> detectedFieldIds,
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
+        final FillResponse lastResponse = getLastResponseLocked("logContextCommited(%s)");
         if (lastResponse == null) return;
 
         final int flags = lastResponse.getFlags();
@@ -1163,8 +1366,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        final UserData userData = mService.getUserData();
-
         for (int i = 0; i < mViewStates.size(); i++) {
             final ViewState viewState = mViewStates.valueAt(i);
             final int state = viewState.getState();
@@ -1174,7 +1375,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // - not autofilled but matches a dataset value -> manuallyFilledIds
             if ((state & ViewState.STATE_CHANGED) != 0) {
                 // Check if autofilled value was changed
-                if ((state & ViewState.STATE_AUTOFILLED) != 0) {
+                if ((state & ViewState.STATE_AUTOFILLED_ONCE) != 0) {
                     final String datasetId = viewState.getDatasetId();
                     if (datasetId == null) {
                         // Sanity check - should never happen.
@@ -1289,35 +1490,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        // Sets field classification scores
-        final FieldClassificationStrategy fcStrategy = mService.getFieldClassificationStrategy();
-        if (userData != null && fcStrategy != null) {
-            logFieldClassificationScoreLocked(fcStrategy, ignoredDatasets, changedFieldIds,
-                    changedDatasetIds, manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    userData, mViewStates.values());
-        } else {
-            mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                    ignoredDatasets, changedFieldIds, changedDatasetIds,
-                    manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    mComponentName, mCompatMode);
-        }
+        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
+                ignoredDatasets, changedFieldIds, changedDatasetIds,
+                manuallyFilledFieldIds, manuallyFilledDatasetIds, detectedFieldIds,
+                detectedFieldClassifications, mComponentName, mCompatMode);
     }
 
     /**
      * Adds the matches to {@code detectedFieldsIds} and {@code detectedFieldClassifications} for
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
-    private void logFieldClassificationScoreLocked(
-            @NonNull FieldClassificationStrategy fcStrategy,
-            @NonNull ArraySet<String> ignoredDatasets,
-            @NonNull ArrayList<AutofillId> changedFieldIds,
-            @NonNull ArrayList<String> changedDatasetIds,
-            @NonNull ArrayList<AutofillId> manuallyFilledFieldIds,
-            @NonNull ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull UserData userData, @NonNull Collection<ViewState> viewStates) {
+    private void logFieldClassificationScore(@NonNull FieldClassificationStrategy fcStrategy,
+            @NonNull FieldClassificationUserData userData) {
 
         final String[] userValues = userData.getValues();
         final String[] categoryIds = userData.getCategoryIds();
+
+        final String defaultAlgorithm = userData.getFieldClassificationAlgorithm();
+        final Bundle defaultArgs = userData.getDefaultFieldClassificationArgs();
+
+        final ArrayMap<String, String> algorithms = userData.getFieldClassificationAlgorithms();
+        final ArrayMap<String, Bundle> args = userData.getFieldClassificationArgs();
 
         // Sanity check
         if (userValues == null || categoryIds == null || userValues.length != categoryIds.length) {
@@ -1334,8 +1527,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayList<FieldClassification> detectedFieldClassifications = new ArrayList<>(
                 maxFieldsSize);
 
-        final String algorithm = userData.getFieldClassificationAlgorithm();
-        final Bundle algorithmArgs = userData.getAlgorithmArgs();
+        final Collection<ViewState> viewStates;
+        synchronized (mLock) {
+            viewStates = mViewStates.values();
+        }
+
         final int viewsSize = viewStates.size();
 
         // First, we get all scores.
@@ -1351,10 +1547,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final RemoteCallback callback = new RemoteCallback((result) -> {
             if (result == null) {
                 if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
-                mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                        ignoredDatasets, changedFieldIds, changedDatasetIds,
-                        manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        mComponentName, mCompatMode);
+                logContextCommitted(null, null);
                 return;
             }
             final Scores scores = result.getParcelable(EXTRA_SCORES);
@@ -1381,7 +1574,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             final Float currentScore = scoresByField.get(categoryId);
                             if (currentScore != null && currentScore > score) {
                                 if (sVerbose) {
-                                    Slog.v(TAG,  "skipping score " + score
+                                    Slog.v(TAG, "skipping score " + score
                                             + " because it's less than " + currentScore);
                                 }
                                 continue;
@@ -1391,8 +1584,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                         + autofillId);
                             }
                             scoresByField.put(categoryId, score);
-                        }
-                        else if (sVerbose) {
+                        } else if (sVerbose) {
                             Slog.v(TAG, "skipping score 0 at index " + j + " and id " + autofillId);
                         }
                     }
@@ -1416,19 +1608,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
-            mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                    ignoredDatasets, changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                    manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    mComponentName, mCompatMode);
+            logContextCommitted(detectedFieldIds, detectedFieldClassifications);
         });
 
-        fcStrategy.getScores(callback, algorithm, algorithmArgs, currentValues, userValues);
+        fcStrategy.calculateScores(callback, currentValues, userValues, categoryIds,
+                defaultAlgorithm, defaultArgs, algorithms, args);
     }
 
     /**
      * Shows the save UI, when session can be saved.
      *
-     * @return {@code true} if session is done, or {@code false} if it's pending user action.
+     * @return {@code true} if session is done and could be removed, or {@code false} if it's
+     * pending user action or the service asked to keep it alive (for multi-screens workflow).
      */
     @GuardedBy("mLock")
     public boolean showSaveLocked() {
@@ -1437,7 +1628,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return false;
         }
-        final FillResponse response = getLastResponseLocked("showSaveLocked()");
+        final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
 
         /*
@@ -1448,21 +1639,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          * - autofillValue of at least one id (required or optional) has changed.
          * - there is no Dataset in the last FillResponse whose values of all dataset fields matches
          *   the current values of all fields in the screen.
+         * - server didn't ask to keep session alive
          */
         if (saveInfo == null) {
-            if (sVerbose) Slog.v(TAG, "showSaveLocked(): no saveInfo from service");
+            if (sVerbose) Slog.v(TAG, "showSaveLocked(" + this.id + "): no saveInfo from service");
             return true;
+        }
+
+        if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
+            // TODO(b/113281366): log metrics
+            if (sDebug) Slog.v(TAG, "showSaveLocked(" + this.id + "): service asked to delay save");
+            return false;
         }
 
         final ArrayMap<AutofillId, InternalSanitizer> sanitizers = createSanitizers(saveInfo);
 
         // Cache used to make sure changed fields do not belong to a dataset.
         final ArrayMap<AutofillId, AutofillValue> currentValues = new ArrayMap<>();
-        final ArraySet<AutofillId> allIds = new ArraySet<>();
+        // Savable (optional or required) ids that will be checked against the dataset ids.
+        final ArraySet<AutofillId> savableIds = new ArraySet<>();
 
         final AutofillId[] requiredIds = saveInfo.getRequiredIds();
         boolean allRequiredAreNotEmpty = true;
         boolean atLeastOneChanged = false;
+        // If an autofilled field is changed, we need to change isUpdate to true so the proper UI is
+        // shown.
+        boolean isUpdate = false;
         if (requiredIds != null) {
             for (int i = 0; i < requiredIds.length; i++) {
                 final AutofillId id = requiredIds[i];
@@ -1470,7 +1672,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.w(TAG, "null autofill id on " + Arrays.toString(requiredIds));
                     continue;
                 }
-                allIds.add(id);
+                savableIds.add(id);
                 final ViewState viewState = mViewStates.get(id);
                 if (viewState == null) {
                     Slog.w(TAG, "showSaveLocked(): no ViewState for required " + id);
@@ -1520,6 +1722,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             }
                             changed = false;
                         }
+                    } else {
+                        isUpdate = true;
                     }
                     if (changed) {
                         if (sDebug) {
@@ -1533,12 +1737,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final AutofillId[] optionalIds = saveInfo.getOptionalIds();
+        if (sVerbose) {
+            Slog.v(TAG, "allRequiredAreNotEmpty: " + allRequiredAreNotEmpty + " hasOptional: "
+                    + (optionalIds != null));
+        }
         if (allRequiredAreNotEmpty) {
-            if (!atLeastOneChanged && optionalIds != null) {
+            // Must look up all optional ids in 2 scenarios:
+            // - if no required id changed but an optional id did, it should trigger save / update
+            // - if at least one required id changed but it was not part of a filled dataset, we
+            //   need to check if an optional id is part of a filled datased (in which case we show
+            //   Update instead of Save)
+            if (optionalIds!= null && (!atLeastOneChanged || !isUpdate)) {
                 // No change on required ids yet, look for changes on optional ids.
                 for (int i = 0; i < optionalIds.length; i++) {
                     final AutofillId id = optionalIds[i];
-                    allIds.add(id);
+                    savableIds.add(id);
                     final ViewState viewState = mViewStates.get(id);
                     if (viewState == null) {
                         Slog.w(TAG, "no ViewState for optional " + id);
@@ -1546,17 +1759,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                     if ((viewState.getState() & ViewState.STATE_CHANGED) != 0) {
                         final AutofillValue currentValue = viewState.getCurrentValue();
-                        currentValues.put(id, currentValue);
+                        final AutofillValue value = getSanitizedValue(sanitizers, id, currentValue);
+                        if (value == null) {
+                            if (sDebug) {
+                                Slog.d(TAG, "value of opt. field " + id + " failed sanitization");
+                            }
+                            continue;
+                        }
+
+                        currentValues.put(id, value);
                         final AutofillValue filledValue = viewState.getAutofilledValue();
-                        if (currentValue != null && !currentValue.equals(filledValue)) {
+                        if (value != null && !value.equals(filledValue)) {
                             if (sDebug) {
                                 Slog.d(TAG, "found a change on optional " + id + ": " + filledValue
-                                        + " => " + currentValue);
+                                        + " => " + value);
+                            }
+                            if (filledValue != null) {
+                                isUpdate = true;
                             }
                             atLeastOneChanged = true;
-                            break;
                         }
-                    } else {
+                    } else  {
                         // Update current values cache based on initial value
                         final AutofillValue initialValue = getValueFromContextsLocked(id);
                         if (sDebug) {
@@ -1607,16 +1830,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 Helper.getFields(dataset);
                         if (sVerbose) {
                             Slog.v(TAG, "Checking if saved fields match contents of dataset #" + i
-                                    + ": " + dataset + "; allIds=" + allIds);
+                                    + ": " + dataset + "; savableIds=" + savableIds);
                         }
-                        for (int j = 0; j < allIds.size(); j++) {
-                            final AutofillId id = allIds.valueAt(j);
+                        savable_ids_loop: for (int j = 0; j < savableIds.size(); j++) {
+                            final AutofillId id = savableIds.valueAt(j);
                             final AutofillValue currentValue = currentValues.get(id);
                             if (currentValue == null) {
                                 if (sDebug) {
                                     Slog.d(TAG, "dataset has value for field that is null: " + id);
                                 }
-                                continue datasets_loop;
+                                continue savable_ids_loop;
                             }
                             final AutofillValue datasetValue = datasetValues.get(id);
                             if (!currentValue.equals(datasetValue)) {
@@ -1642,14 +1865,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 // Use handler so logContextCommitted() is logged first
-                mHandler.sendMessage(obtainMessage(
-                        Session::logSaveShown, this));
+                mHandler.sendMessage(obtainMessage(Session::logSaveShown, this));
 
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
-                getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
+
+                final CharSequence serviceLabel;
+                final Drawable serviceIcon;
+                synchronized (mLock) {
+                    serviceLabel = mService.getServiceLabelLocked();
+                    serviceIcon = mService.getServiceIconLocked();
+                }
+                if (serviceLabel == null || serviceIcon == null) {
+                    wtf(null, "showSaveLocked(): no service label or icon");
+                    return true;
+                }
+                getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this, mPendingSaveUi, mCompatMode);
+                        mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -1703,16 +1936,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private AutofillValue getSanitizedValue(
             @Nullable ArrayMap<AutofillId, InternalSanitizer> sanitizers,
             @NonNull AutofillId id,
-            @NonNull AutofillValue value) {
-        if (sanitizers == null) return value;
+            @Nullable AutofillValue value) {
+        if (sanitizers == null || value == null) return value;
 
-        final InternalSanitizer sanitizer = sanitizers.get(id);
-        if (sanitizer == null) {
-            return value;
+        final ViewState state = mViewStates.get(id);
+        AutofillValue sanitized = state == null ? null : state.getSanitizedValue();
+        if (sanitized == null) {
+            final InternalSanitizer sanitizer = sanitizers.get(id);
+            if (sanitizer == null) {
+                return value;
+            }
+
+            sanitized = sanitizer.sanitize(value);
+            if (sDebug) {
+                Slog.d(TAG, "Value for " + id + "(" + value + ") sanitized to " + sanitized);
+            }
+            if (state != null) {
+                state.setSanitizedValue(sanitized);
+            }
         }
-
-        final AutofillValue sanitized = sanitizer.sanitize(value);
-        if (sDebug) Slog.d(TAG, "Value for " + id + "(" + value + ") sanitized to " + sanitized);
         return sanitized;
     }
 
@@ -1729,15 +1971,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     @Nullable
-    private AutofillValue getValueFromContextsLocked(AutofillId id) {
+    private AutofillValue getValueFromContextsLocked(@NonNull AutofillId autofillId) {
         final int numContexts = mContexts.size();
         for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
-            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(), id);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
             if (node != null) {
                 final AutofillValue value = node.getAutofillValue();
                 if (sDebug) {
-                    Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + value);
+                    Slog.d(TAG, "getValueFromContexts(" + this.id + "/" + autofillId + ") at "
+                            + i + ": " + value);
                 }
                 if (value != null && !value.isEmpty()) {
                     return value;
@@ -1766,35 +2010,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
-     * Calls service when user requested save.
+     * Update the {@link AutofillValue values} of the {@link AssistStructure} before sending it to
+     * the service on save().
      */
-    @GuardedBy("mLock")
-    void callSaveLocked() {
-        if (mDestroyed) {
-            Slog.w(TAG, "Call to Session#callSaveLocked() rejected - session: "
-                    + id + " destroyed");
-            return;
-        }
-
-        if (sVerbose) Slog.v(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
-
-        if (mContexts == null) {
-            Slog.w(TAG, "callSaveLocked(): no contexts");
-            return;
-        }
-
+    private void updateValuesForSaveLocked() {
         final ArrayMap<AutofillId, InternalSanitizer> sanitizers =
                 createSanitizers(getSaveInfoLocked());
 
         final int numContexts = mContexts.size();
-
         for (int contextNum = 0; contextNum < numContexts; contextNum++) {
             final FillContext context = mContexts.get(contextNum);
 
             final ViewNode[] nodes =
                 context.findViewNodesByAutofillIds(getIdsOfAllViewStatesLocked());
 
-            if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + context);
+            if (sVerbose) Slog.v(TAG, "updateValuesForSaveLocked(): updating " + context);
 
             for (int viewStateNum = 0; viewStateNum < mViewStates.size(); viewStateNum++) {
                 final ViewState viewState = mViewStates.valueAt(viewStateNum);
@@ -1802,7 +2032,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final AutofillId id = viewState.id;
                 final AutofillValue value = viewState.getCurrentValue();
                 if (value == null) {
-                    if (sVerbose) Slog.v(TAG, "callSaveLocked(): skipping " + id);
+                    if (sVerbose) Slog.v(TAG, "updateValuesForSaveLocked(): skipping " + id);
                     continue;
                 }
                 final ViewNode node = nodes[viewStateNum];
@@ -1810,7 +2040,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
                     continue;
                 }
-                if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + id + " to " + value);
+                if (sVerbose) {
+                    Slog.v(TAG, "updateValuesForSaveLocked(): updating " + id + " to " + value);
+                }
 
                 AutofillValue sanitizedValue = viewState.getSanitizedValue();
 
@@ -1821,7 +2053,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sanitizedValue != null) {
                     node.updateAutofillValue(sanitizedValue);
                 } else if (sDebug) {
-                    Slog.d(TAG, "Not updating field " + id + " because it failed sanitization");
+                    Slog.d(TAG, "updateValuesForSaveLocked(): not updating field " + id
+                            + " because it failed sanitization");
                 }
             }
 
@@ -1829,21 +2062,109 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             context.getStructure().sanitizeForParceling(false);
 
             if (sVerbose) {
-                Slog.v(TAG, "Dumping structure of " + context + " before calling service.save()");
+                Slog.v(TAG, "updateValuesForSaveLocked(): dumping structure of " + context
+                        + " before calling service.save()");
                 context.getStructure().dump(false);
             }
         }
+    }
+
+    /**
+     * Calls service when user requested save.
+     */
+    @GuardedBy("mLock")
+    void callSaveLocked() {
+        if (mDestroyed) {
+            Slog.w(TAG, "Call to Session#callSaveLocked() rejected - session: "
+                    + id + " destroyed");
+            return;
+        }
+        if (mRemoteFillService == null) {
+            wtf(null, "callSaveLocked() called without a remote service. "
+                    + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+            return;
+        }
+
+        if (sVerbose) Slog.v(TAG, "callSaveLocked(" + this.id + "): mViewStates=" + mViewStates);
+
+        if (mContexts == null) {
+            Slog.w(TAG, "callSaveLocked(): no contexts");
+            return;
+        }
+
+        updateValuesForSaveLocked();
 
         // Remove pending fill requests as the session is finished.
-        cancelCurrentRequestLocked();
 
-        // Dispatch a snapshot of the current contexts list since it may change
-        // until the dispatch happens. The items in the list don't need to be cloned
-        // since we don't hold on them anywhere else. The client state is not touched
-        // by us, so no need to copy.
-        final SaveRequest saveRequest = new SaveRequest(new ArrayList<>(mContexts), mClientState,
-                mSelectedDatasetIds);
+        cancelCurrentRequestLocked();
+        final ArrayList<FillContext> contexts = mergePreviousSessionLocked( /* forSave= */ true);
+
+        final SaveRequest saveRequest =
+                new SaveRequest(contexts, mClientState, mSelectedDatasetIds);
         mRemoteFillService.onSaveRequest(saveRequest);
+    }
+
+    // TODO(b/113281366): rather than merge it here, it might be better to simply reuse the old
+    // session instead of creating a new one. But we need to consider what would happen on corner
+    // cases such as "Main Activity M -> activity A with username -> activity B with password"
+    // If user follows the normal workflow, than session A would be merged with session B as
+    // expected. But if when on Activity A the user taps back or somehow launches another activity,
+    // session A could be merged with the wrong session.
+    /**
+     * Gets a list of contexts that includes not only this session's contexts but also the contexts
+     * from previous sessions that were asked by the service to be delayed (if any).
+     *
+     * <p>As a side-effect:
+     * <ul>
+     *   <li>If the current {@link #mClientState} is {@code null}, sets it with the last non-
+     *   {@code null} client state from previous sessions.
+     *   <li>When {@code forSave} is {@code true}, calls {@link #updateValuesForSaveLocked()} in the
+     *   previous sessions.
+     * </ul>
+     */
+    @NonNull
+    private ArrayList<FillContext> mergePreviousSessionLocked(boolean forSave) {
+        final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
+        final ArrayList<FillContext> contexts;
+        if (previousSessions != null) {
+            if (sDebug) {
+                Slog.d(TAG, "mergeSessions(" + this.id + "): Merging the content of "
+                        + previousSessions.size() + " sessions for task " + taskId);
+            }
+            contexts = new ArrayList<>();
+            for (int i = 0; i < previousSessions.size(); i++) {
+                final Session previousSession = previousSessions.get(i);
+                final ArrayList<FillContext> previousContexts = previousSession.mContexts;
+                if (previousContexts == null) {
+                    Slog.w(TAG, "mergeSessions(" + this.id + "): Not merging null contexts from "
+                            + previousSession.id);
+                    continue;
+                }
+                if (forSave) {
+                    previousSession.updateValuesForSaveLocked();
+                }
+                if (sDebug) {
+                    Slog.d(TAG, "mergeSessions(" + this.id + "): adding " + previousContexts.size()
+                            + " context from previous session #" + previousSession.id);
+                }
+                contexts.addAll(previousContexts);
+                if (mClientState == null && previousSession.mClientState != null) {
+                    if (sDebug) {
+                        Slog.d(TAG, "mergeSessions(" + this.id + "): setting client state from "
+                                + "previous session" + previousSession.id);
+                    }
+                    mClientState = previousSession.mClientState;
+                }
+            }
+            contexts.addAll(mContexts);
+        } else {
+            // Dispatch a snapshot of the current contexts list since it may change
+            // until the dispatch happens. The items in the list don't need to be cloned
+            // since we don't hold on them anywhere else. The client state is not touched
+            // by us, so no need to copy.
+            contexts = new ArrayList<>(mContexts);
+        }
+        return contexts;
     }
 
     /**
@@ -1863,20 +2184,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
             @NonNull ViewState viewState, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+            mForAugmentedAutofillOnly = false;
             if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
-            viewState.setState(STATE_RESTARTED_SESSION);
-            requestNewFillResponseLocked(flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_RESTARTED_SESSION, flags);
             return;
         }
 
         // If it's not, then check if it it should start a partition.
         if (shouldStartNewPartitionLocked(id)) {
             if (sDebug) {
-                Slog.d(TAG, "Starting partition for view id " + id + ": "
+                Slog.d(TAG, "Starting partition or augmented request for view id " + id + ": "
                         + viewState.getStateAsString());
             }
-            viewState.setState(ViewState.STATE_STARTED_PARTITION);
-            requestNewFillResponseLocked(flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_PARTITION, flags);
         } else {
             if (sVerbose) {
                 Slog.v(TAG, "Not starting new partition for view " + id + ": "
@@ -1899,9 +2219,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final int numResponses = mResponses.size();
-        if (numResponses >= sPartitionMaxCount) {
+        if (numResponses >= AutofillManagerService.getPartitionMaxCount()) {
             Slog.e(TAG, "Not starting a new partition on " + id + " because session " + this.id
-                    + " reached maximum of " + sPartitionMaxCount);
+                    + " reached maximum of " + AutofillManagerService.getPartitionMaxCount());
             return false;
         }
 
@@ -1949,9 +2269,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        id.setSessionId(this.id);
         if (sVerbose) {
-            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + actionAsString(action)
-                    + ", flags=" + flags);
+            Slog.v(TAG, "updateLocked(" + this.id + "): id=" + id + ", action="
+                    + actionAsString(action) + ", flags=" + flags);
         }
         ViewState viewState = mViewStates.get(id);
 
@@ -1960,7 +2281,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     || action == ACTION_VIEW_ENTERED) {
                 if (sVerbose) Slog.v(TAG, "Creating viewState for " + id);
                 boolean isIgnored = isIgnoredLocked(id);
-                viewState = new ViewState(this, id, this,
+                viewState = new ViewState(id, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
 
@@ -1982,8 +2303,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
-                viewState.setState(ViewState.STATE_STARTED_SESSION);
-                requestNewFillResponseLocked(flags);
+                requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
                 break;
             case ACTION_VALUE_CHANGED:
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
@@ -2042,12 +2362,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // Must check if this update was caused by autofilling the view, in which
                     // case we just update the value, but not the UI.
                     final AutofillValue filledValue = viewState.getAutofilledValue();
-                    if (filledValue != null && filledValue.equals(value)) {
-                        if (sVerbose) {
-                            Slog.v(TAG, "ignoring autofilled change on id " + id);
+                    if (filledValue != null) {
+                        if (filledValue.equals(value)) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "ignoring autofilled change on id " + id);
+                            }
+                            viewState.resetState(ViewState.STATE_CHANGED);
+                            return;
                         }
-                        return;
+                        else {
+                            if ((viewState.id.equals(this.mCurrentViewId)) &&
+                                    (viewState.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                                // Remove autofilled state once field is changed after autofilling.
+                                if (sVerbose) {
+                                    Slog.v(TAG, "field changed after autofill on id " + id);
+                                }
+                                viewState.resetState(ViewState.STATE_AUTOFILLED);
+                                final ViewState currentView = mViewStates.get(mCurrentViewId);
+                                currentView.maybeCallOnFillReady(flags);
+                            }
+                        }
                     }
+
                     // Update the internal state...
                     viewState.setState(ViewState.STATE_CHANGED);
 
@@ -2069,31 +2405,58 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
 
+                // Update the view states first...
+                mCurrentViewId = viewState.id;
+                viewState.setCurrentValue(value);
+
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
                     if (sDebug) Slog.d(TAG, "Ignoring VIEW_ENTERED on URL BAR (id=" + id + ")");
+                    return;
+                }
+
+                if ((flags & FLAG_MANUAL_REQUEST) == 0 && mAugmentedAutofillableIds != null
+                        && mAugmentedAutofillableIds.contains(id)) {
+                    // View was already reported when server could not handle a response, but it
+                    // triggered augmented autofill
+
+                    if (sDebug) Slog.d(TAG, "updateLocked(" + id + "): augmented-autofillable");
+
+                    // ...then trigger the augmented autofill UI
+                    triggerAugmentedAutofillLocked();
                     return;
                 }
 
                 requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
-                if (mCurrentViewId != viewState.id) {
+                if (!Objects.equals(mCurrentViewId, viewState.id)) {
                     mUi.hideFillUi(this);
                     mCurrentViewId = viewState.id;
+                    hideAugmentedAutofillLocked(viewState);
                 }
 
                 // If the ViewState is ready to be displayed, onReady() will be called.
                 viewState.update(value, virtualBounds, flags);
                 break;
             case ACTION_VIEW_EXITED:
-                if (mCurrentViewId == viewState.id) {
-                    if (sVerbose) Slog.d(TAG, "Exiting view " + id);
+                if (Objects.equals(mCurrentViewId, viewState.id)) {
+                    if (sVerbose) Slog.v(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
+                    hideAugmentedAutofillLocked(viewState);
                     mCurrentViewId = null;
                 }
                 break;
             default:
                 Slog.w(TAG, "updateLocked(): unknown action: " + action);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void hideAugmentedAutofillLocked(@NonNull ViewState viewState) {
+        if ((viewState.getState()
+                & ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL) != 0) {
+            viewState.resetState(ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL);
+            cancelAugmentedAutofillLocked();
         }
     }
 
@@ -2125,9 +2488,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             filterText = value.getTextValue().toString();
         }
 
+        final CharSequence serviceLabel;
+        final Drawable serviceIcon;
+        synchronized (mLock) {
+            serviceLabel = mService.getServiceLabelLocked();
+            serviceIcon = mService.getServiceIconLocked();
+        }
+        if (serviceLabel == null || serviceIcon == null) {
+            wtf(null, "onFillReady(): no service label or icon");
+            return;
+        }
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName,
-                mService.getServiceLabel(), mService.getServiceIcon(), this, id, mCompatMode);
+                serviceLabel, serviceIcon, this, id, mCompatMode);
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {
@@ -2166,14 +2539,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private void notifyUnavailableToClient(int sessionFinishedState) {
+    private void notifyUnavailableToClient(int sessionFinishedState,
+            @Nullable ArrayList<AutofillId> autofillableIds) {
         synchronized (mLock) {
             if (mCurrentViewId == null) return;
             try {
                 if (mHasCallback) {
                     mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinishedState);
-                } else if (sessionFinishedState != 0) {
-                    mClient.setSessionFinished(sessionFinishedState);
+                } else if (sessionFinishedState != AutofillManager.STATE_UNKNOWN) {
+                    mClient.setSessionFinished(sessionFinishedState, autofillableIds);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
@@ -2193,13 +2567,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         boolean saveOnFinish = true;
         final SaveInfo saveInfo = response.getSaveInfo();
         final AutofillId saveTriggerId;
+        final int flags;
         if (saveInfo != null) {
             saveTriggerId = saveInfo.getTriggerId();
             if (saveTriggerId != null) {
                 writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
             }
-            mSaveOnAllViewsInvisible =
-                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            flags = saveInfo.getFlags();
+            mSaveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (mSaveOnAllViewsInvisible) {
@@ -2214,11 +2589,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Collections.addAll(trackedViews, saveInfo.getOptionalIds());
                 }
             }
-            if ((saveInfo.getFlags() & SaveInfo.FLAG_DONT_SAVE_ON_FINISH) != 0) {
+            if ((flags & SaveInfo.FLAG_DONT_SAVE_ON_FINISH) != 0) {
                 saveOnFinish = false;
             }
 
         } else {
+            flags = 0;
             saveTriggerId = null;
         }
 
@@ -2245,7 +2621,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         try {
             if (sVerbose) {
                 Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
-                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish);
+                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish
+                        + " flags: " + flags + " hasSaveInfo: " + (saveInfo != null));
             }
             mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
                     saveOnFinish, toArray(fillableIds), saveTriggerId);
@@ -2288,15 +2665,149 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         processResponseLocked(newResponse, newClientState, 0);
     }
 
-    private void processNullResponseLocked(int flags) {
-        if (sVerbose) Slog.v(TAG, "canceling session " + id + " when server returned null");
+    @GuardedBy("mLock")
+    private void processNullResponseLocked(int requestId, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
         }
+
+        final FillContext context = getFillContextByRequestIdLocked(requestId);
+
+        final ArrayList<AutofillId> autofillableIds;
+        if (context != null) {
+            final AssistStructure structure = context.getStructure();
+            autofillableIds = Helper.getAutofillIds(structure, /* autofillableOnly= */true);
+        } else {
+            Slog.w(TAG, "processNullResponseLocked(): no context for req " + requestId);
+            autofillableIds = null;
+        }
+
         mService.resetLastResponse();
-        // Nothing to be done, but need to notify client.
-        notifyUnavailableToClient(AutofillManager.STATE_FINISHED);
-        removeSelf();
+
+        // The default autofill service cannot fullfill the request, let's check if the augmented
+        // autofill service can.
+        mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked();
+        if (mAugmentedAutofillDestroyer == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "canceling session " + id + " when service returned null and it cannot "
+                        + "be augmented. AutofillableIds: " + autofillableIds);
+            }
+            // Nothing to be done, but need to notify client.
+            notifyUnavailableToClient(AutofillManager.STATE_FINISHED, autofillableIds);
+            removeSelf();
+        } else {
+            if (sVerbose) {
+                Slog.v(TAG, "keeping session " + id + " when service returned null but "
+                        + "it can be augmented. AutofillableIds: " + autofillableIds);
+            }
+            mAugmentedAutofillableIds = autofillableIds;
+            try {
+                mClient.setState(AutofillManager.SET_STATE_FLAG_FOR_AUTOFILL_ONLY);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error setting client to autofill-only", e);
+            }
+        }
+    }
+
+    /**
+     * Tries to trigger Augmented Autofill when the standard service could not fulfill a request.
+     *
+     * @return callback to destroy the autofill UI, or {@code null} if not supported.
+     */
+    // TODO(b/123099468): might need to call it in other places, like when the service returns a
+    // non-null response but without datasets (for example, just SaveInfo)
+    @GuardedBy("mLock")
+    private Runnable triggerAugmentedAutofillLocked() {
+        // Check if Smart Suggestions is supported...
+        final @SmartSuggestionMode int supportedModes = mService
+                .getSupportedSmartSuggestionModesLocked();
+        if (supportedModes == 0) {
+            if (sVerbose) Slog.v(TAG, "triggerAugmentedAutofillLocked(): no supported modes");
+            return null;
+        }
+
+        // ...then if the service is set for the user
+
+        final RemoteAugmentedAutofillService remoteService = mService
+                .getRemoteAugmentedAutofillServiceLocked();
+        if (remoteService == null) {
+            if (sVerbose) Slog.v(TAG, "triggerAugmentedAutofillLocked(): no service for user");
+            return null;
+        }
+
+        // Define which mode will be used
+        final int mode;
+        if ((supportedModes & FLAG_SMART_SUGGESTION_SYSTEM) != 0) {
+            mode = FLAG_SMART_SUGGESTION_SYSTEM;
+        } else {
+            Slog.w(TAG, "Unsupported Smart Suggestion mode: " + supportedModes);
+            return null;
+        }
+
+        if (mCurrentViewId == null) {
+            Slog.w(TAG, "triggerAugmentedAutofillLocked(): no view currently focused");
+            return null;
+        }
+
+        final boolean isWhitelisted = mService
+                .isWhitelistedForAugmentedAutofillLocked(mComponentName);
+
+        final String historyItem =
+                "aug:id=" + id + " u=" + uid + " m=" + mode
+                + " a=" + ComponentName.flattenToShortString(mComponentName)
+                + " f=" + mCurrentViewId
+                + " s=" + remoteService.getComponentName()
+                + " w=" + isWhitelisted;
+        mService.getMaster().logRequestLocked(historyItem);
+
+        if (!isWhitelisted) {
+            if (sVerbose) {
+                Slog.v(TAG, "triggerAugmentedAutofillLocked(): "
+                        + ComponentName.flattenToShortString(mComponentName) + " not whitelisted ");
+            }
+            return null;
+        }
+
+        if (sVerbose) {
+            Slog.v(TAG, "calling Augmented Autofill Service ("
+                    + ComponentName.flattenToShortString(remoteService.getComponentName())
+                    + ") on view " + mCurrentViewId + " using suggestion mode "
+                    + getSmartSuggestionModeToString(mode)
+                    + " when server returned null for session " + this.id);
+        }
+
+        final ViewState viewState = mViewStates.get(mCurrentViewId);
+        viewState.setState(ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL);
+        final AutofillValue currentValue = viewState.getCurrentValue();
+
+        if (mAugmentedRequestsLogs == null) {
+            mAugmentedRequestsLogs = new ArrayList<>();
+        }
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_AUGMENTED_REQUEST,
+                remoteService.getComponentName().getPackageName());
+        mAugmentedRequestsLogs.add(log);
+
+        final AutofillId focusedId = AutofillId.withoutSession(mCurrentViewId);
+
+        remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, focusedId,
+                currentValue);
+
+        if (mAugmentedAutofillDestroyer == null) {
+            mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();
+        }
+        return mAugmentedAutofillDestroyer;
+    }
+
+    @GuardedBy("mLock")
+    private void cancelAugmentedAutofillLocked() {
+        final RemoteAugmentedAutofillService remoteService = mService
+                .getRemoteAugmentedAutofillServiceLocked();
+        if (remoteService == null) {
+            Slog.w(TAG, "cancelAugmentedAutofillLocked(): no service for user");
+            return;
+        }
+        if (sVerbose) Slog.v(TAG, "cancelAugmentedAutofillLocked() on " + mCurrentViewId);
+        remoteService.onDestroyAutofillWindowsRequest();
     }
 
     @GuardedBy("mLock")
@@ -2414,10 +2925,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (viewState != null)  {
             viewState.setState(state);
         } else {
-            viewState = new ViewState(this, id, this, state);
+            viewState = new ViewState(id, this, state);
             if (sVerbose) {
                 Slog.v(TAG, "Adding autofillable view with id " + id + " and state " + state);
             }
+            viewState.setCurrentValue(findValueLocked(id));
             mViewStates.put(id, viewState);
         }
         if ((state & ViewState.STATE_AUTOFILLED) != 0) {
@@ -2462,12 +2974,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    CharSequence getServiceName() {
-        synchronized (mLock) {
-            return mService.getServiceName();
-        }
-    }
-
     // TODO: this should never be null, but we got at least one occurrence, probably due to a race.
     @GuardedBy("mLock")
     @Nullable
@@ -2507,6 +3013,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
+        pw.print(prefix); pw.print("taskId: "); pw.println(taskId);
         pw.print(prefix); pw.print("flags: "); pw.println(mFlags);
         pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
@@ -2582,7 +3089,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mSaveOnAllViewsInvisible: "); pw.println(
                 mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
-        mRemoteFillService.dump(prefix, pw);
+        if (mForAugmentedAutofillOnly) {
+            pw.print(prefix); pw.println("For Augmented Autofill Only");
+        }
+        if (mAugmentedAutofillDestroyer != null) {
+            pw.print(prefix); pw.println("has mAugmentedAutofillDestroyer");
+        }
+        if (mAugmentedRequestsLogs != null) {
+            pw.print(prefix); pw.print("number augmented requests: ");
+            pw.println(mAugmentedRequestsLogs.size());
+        }
+
+        if (mAugmentedAutofillableIds != null) {
+            pw.print(prefix); pw.print("mAugmentedAutofillableIds: ");
+            pw.println(mAugmentedAutofillableIds);
+        }
+        if (mRemoteFillService != null) {
+            mRemoteFillService.dump(prefix, pw);
+        }
     }
 
     private static void dumpRequestLog(@NonNull PrintWriter pw, @NonNull LogMaker log) {
@@ -2723,8 +3247,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mMetricsLogger.write(log);
             }
         }
-        mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_FINISHED)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_REQUESTS, totalRequests));
+
+        final int totalAugmentedRequests = mAugmentedRequestsLogs == null ? 0
+                : mAugmentedRequestsLogs.size();
+        if (totalAugmentedRequests > 0) {
+            if (sVerbose) {
+                Slog.v(TAG, "destroyLocked(): logging " + totalRequests + " augmented requests");
+            }
+            for (int i = 0; i < totalAugmentedRequests; i++) {
+                final LogMaker log = mAugmentedRequestsLogs.get(i);
+                mMetricsLogger.write(log);
+            }
+        }
+
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SESSION_FINISHED)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_REQUESTS, totalRequests);
+        if (totalAugmentedRequests > 0) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS,
+                    totalAugmentedRequests);
+        }
+        if (mForAugmentedAutofillOnly) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_AUGMENTED_ONLY, 1);
+        }
+        mMetricsLogger.write(log);
 
         return mRemoteFillService;
     }
@@ -2739,6 +3284,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @GuardedBy("mLock")
+    void forceRemoveSelfIfForAugmentedAutofillOnlyLocked() {
+        if (sVerbose) {
+            Slog.v(TAG, "forceRemoveSelfIfForAugmentedAutofillOnly(" + this.id + "): "
+                    + mForAugmentedAutofillOnly);
+        }
+        if (!mForAugmentedAutofillOnly) return;
+
+        forceRemoveSelfLocked();
+    }
+
+    @GuardedBy("mLock")
     void forceRemoveSelfLocked(int clientState) {
         if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
 
@@ -2748,10 +3304,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUi.destroyAll(mPendingSaveUi, this, false);
         if (!isPendingSaveUi) {
             try {
-                mClient.setSessionFinished(clientState);
+                mClient.setSessionFinished(clientState, /* autofillableIds= */ null);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to finish session", e);
             }
+        }
+        destroyAugmentedAutofillWindowsLocked();
+    }
+
+    @GuardedBy("mLock")
+    void destroyAugmentedAutofillWindowsLocked() {
+        if (mAugmentedAutofillDestroyer != null) {
+            mAugmentedAutofillDestroyer.run();
+            mAugmentedAutofillDestroyer = null;
         }
     }
 
@@ -2770,7 +3335,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     void removeSelfLocked() {
-        if (sVerbose) Slog.v(TAG, "removeSelfLocked(): " + mPendingSaveUi);
+        if (sVerbose) Slog.v(TAG, "removeSelfLocked(" + this.id + "): " + mPendingSaveUi);
         if (mDestroyed) {
             Slog.w(TAG, "Call to Session#removeSelfLocked() rejected - session: "
                     + id + " destroyed");
@@ -2841,11 +3406,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mMetricsLogger.write(newLogMaker(category));
     }
 
+    @GuardedBy("mLock")
     private void logAuthenticationStatusLocked(int requestId, int status) {
         addTaggedDataToRequestLogLocked(requestId,
                 MetricsEvent.FIELD_AUTOFILL_AUTHENTICATION_STATUS, status);
     }
 
+    @GuardedBy("mLock")
     private void addTaggedDataToRequestLogLocked(int requestId, int tag, @Nullable Object value) {
         final LogMaker requestLog = mRequestLogs.get(requestId);
         if (requestLog == null) {
@@ -2856,17 +3423,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         requestLog.addTaggedData(tag, value);
     }
 
-    private static String requestLogToString(@NonNull LogMaker log) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        dumpRequestLog(pw, log);
-        pw.flush();
-        return sw.toString();
-    }
-
     private void wtf(@Nullable Exception e, String fmt, Object...args) {
         final String message = String.format(fmt, args);
-        mWtfHistory.log(message);
+        synchronized (mLock) {
+            mWtfHistory.log(message);
+        }
 
         if (e != null) {
             Slog.wtf(TAG, message, e);

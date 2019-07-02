@@ -24,12 +24,16 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 
@@ -87,6 +91,50 @@ public final class PhoneWindowTest {
 
         assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
                 is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER));
+    }
+
+    @Test
+    public void testWindowBackground_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundColorLiteral);
+        installDecor();
+
+        Drawable backgroundDrawable = mPhoneWindow.getDecorView().getBackground();
+        assertThat(backgroundDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) backgroundDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.GREEN));
+    }
+
+    @Test
+    public void testWindowBackgroundFallback_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundFallbackColorLiteral);
+        installDecor();
+
+        DecorView decorView = (DecorView) mPhoneWindow.getDecorView();
+        Drawable fallbackDrawable = decorView.getBackgroundFallback();
+
+        assertThat(fallbackDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) fallbackDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.BLUE));
+    }
+
+    @Test
+    public void testWindowBackgroundFallbackWithExplicitBackgroundSet_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundFallbackColorLiteral);
+        // set background before decorView is created
+        mPhoneWindow.setBackgroundDrawable(new ColorDrawable(Color.CYAN));
+        installDecor();
+        // clear background so that fallback is used
+        mPhoneWindow.setBackgroundDrawable(null);
+
+        DecorView decorView = (DecorView) mPhoneWindow.getDecorView();
+        Drawable fallbackDrawable = decorView.getBackgroundFallback();
+
+        assertThat(fallbackDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) fallbackDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.BLUE));
     }
 
     private void createPhoneWindowWithTheme(int theme) {

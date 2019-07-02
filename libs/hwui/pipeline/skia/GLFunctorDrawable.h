@@ -16,16 +16,12 @@
 
 #pragma once
 
-#include <SkCanvas.h>
-#include <SkDrawable.h>
+#include "FunctorDrawable.h"
 
-#include <utils/Functor.h>
 #include <utils/RefBase.h>
 
 namespace android {
 namespace uirenderer {
-
-class GlFunctorLifecycleListener;
 
 namespace skiapipeline {
 
@@ -33,24 +29,16 @@ namespace skiapipeline {
  * This drawable wraps a OpenGL functor enabling it to be recorded into a list
  * of Skia drawing commands.
  */
-class GLFunctorDrawable : public SkDrawable {
+class GLFunctorDrawable : public FunctorDrawable {
 public:
-    GLFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
-            : mFunctor(functor), mListener(listener), mBounds(canvas->getLocalClipBounds()) {}
+    using FunctorDrawable::FunctorDrawable;
+
     virtual ~GLFunctorDrawable();
 
-    void syncFunctor() const;
-
 protected:
-    virtual SkRect onGetBounds() override { return mBounds; }
-    virtual void onDraw(SkCanvas* canvas) override;
-
-private:
-    Functor* mFunctor;
-    sp<GlFunctorLifecycleListener> mListener;
-    const SkRect mBounds;
+    void onDraw(SkCanvas* canvas) override;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

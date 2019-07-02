@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"ចុច​ដើម្បី​បញ្ចូល​ពាក្យ​សម្ងាត់"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"វាយ​បញ្ចូល​ពាក្យ​សម្ងាត់​ ដើម្បី​ដោះ​សោ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"វាយ​បញ្ចូល​កូដ PIN ដើម្បី​ដោះ​សោ"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"បញ្ចូល​កូដ PIN របស់​អ្នក"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"បញ្ចូល​លំនាំ​របស់​អ្នក"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"បញ្ចូល​ពាក្យ​សម្ងាត់​របស់អ្នក"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"បាន​សាក​ថ្ម"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"កំពុង​សាក​ថ្ម"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"សាកយ៉ាងឆាប់រហ័ស"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"សាកយឺត"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"បានសាក​ថ្មពេញ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"សូមសាក​ថ្ម​របស់​អ្នក។"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"បណ្ដាញ​ជាប់​សោ"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ស៊ីម​កាត​ជាប់​កូដ​ PUK ។"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"កំពុង​ដោះ​សោ​ស៊ីមកាត..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ប្រអប់​បំពេញ​កូដ PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"ពាក្យសម្ងាត់​ឧបករណ៍"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ប្រអប់​បំពេញ​កូដ PIN របស់​ស៊ីម"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ប្រអប់​បំពេញ​កូដ PUK របស់​ស៊ីម"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"បាន​កំណត់ម៉ោង​រោទិ៍​បន្ទាប់​នៅថ្ងៃ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"មិនអាច​បិទ eSIM បានទេ ដោយសារ​មាន​បញ្ហា។"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ភ្លេច​​លំនាំ"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"លំនាំ​មិន​ត្រឹមត្រូវ​ទេ"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ​ទេ"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"លំនាំមិនត្រឹមត្រូវ"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>
@@ -136,13 +141,94 @@
       <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
       <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"មិនអាចសម្គាល់បានទេ"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">បញ្ចូលកូដ PIN របស់ស៊ីម អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត។</item>
-      <item quantity="one">បញ្ចូលកូដ PIN របស់ស៊ីម អ្នក​នៅសល់​ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដង​ទៀត មុន​ពេល​ដែលអ្នក​ត្រូវទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក​ដើម្បី​ដោះសោ​ឧបករណ៍​របស់អ្នក។</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"មិនអាចសម្គាល់បានទេ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"មិនអាចសម្គាល់បានទេ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">បញ្ចូល​កូដ PIN របស់ស៊ីម។ អ្នកនៅ​សល់ការ​ព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត។</item>
+      <item quantity="one">បញ្ចូលកូដ PIN របស់ស៊ីម។ អ្នក​នៅសល់​ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដង​ទៀត មុន​ពេល​ដែលអ្នក​ត្រូវទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក​ដើម្បី​ដោះសោ​ឧបករណ៍​របស់អ្នក។</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_1">%d</xliff:g> ដងទៀត​មុនពេល​ស៊ីម​មិនអាច​ប្រើបាន​ជា​អចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់ព័ត៌មានលម្អិត។</item>
       <item quantity="one">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_0">%d</xliff:g> ដងទៀតមុនពេលស៊ីមមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់​ព័ត៌មាន​លម្អិត។</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"ដប់ពីរ"</item>
+    <item msgid="7389464214252023751">"មួយ"</item>
+    <item msgid="8803180377002008046">"ពីរ"</item>
+    <item msgid="8614897059944644719">"បី"</item>
+    <item msgid="2293058674782619556">"បួន"</item>
+    <item msgid="4815402358455041664">"ប្រាំ"</item>
+    <item msgid="3325754778509665687">"ប្រាំមួយ"</item>
+    <item msgid="5805551341866280575">"ប្រាំពីរ"</item>
+    <item msgid="203334816668238610">"ប្រាំបី"</item>
+    <item msgid="4828052671464488923">"ប្រាំបួន"</item>
+    <item msgid="2233497913571137419">"ដប់"</item>
+    <item msgid="5621554266768657830">"ដប់មួយ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"ម៉ោង"</item>
+    <item msgid="8837126587669001578">"មួយ"</item>
+    <item msgid="4294343372940455660">"ពីរ"</item>
+    <item msgid="7129166637707421536">"បី"</item>
+    <item msgid="7579404865008788673">"បួន"</item>
+    <item msgid="3873924689207380586">"ប្រាំ"</item>
+    <item msgid="4849565597850069377">"ប្រាំមួយ"</item>
+    <item msgid="4404219424523572364">"ប្រាំពីរ"</item>
+    <item msgid="8740481214764087329">"ប្រាំបី"</item>
+    <item msgid="1713216865806811237">"ប្រាំបួន"</item>
+    <item msgid="3508406095411245038">"ដប់"</item>
+    <item msgid="7161996337755311711">"ដប់មួយ"</item>
+    <item msgid="4044549963329624197">"ដប់ពីរ"</item>
+    <item msgid="333373157917379088">"ដប់បី"</item>
+    <item msgid="2631202907124819385">"ដប់បួន"</item>
+    <item msgid="6472396076858033453">"ដប់ប្រាំ"</item>
+    <item msgid="8656981856181581643">"ដប់ប្រាំមួយ"</item>
+    <item msgid="7289026608562030619">"ដប់ប្រាំពីរ"</item>
+    <item msgid="3881477602692646573">"ដប់​ប្រាំបី"</item>
+    <item msgid="3358129827772984226">"ដប់​ប្រាំបួន"</item>
+    <item msgid="3308575407402865807">"ម្ភៃ"</item>
+    <item msgid="5346560955382229629">"ម្ភៃ\nមួយ"</item>
+    <item msgid="226750304761473436">"ម្ភៃ\nពីរ"</item>
+    <item msgid="616811325336838734">"ម្ភៃ\nបី"</item>
+    <item msgid="616346116869053440">"ម្ភៃ\nបួន"</item>
+    <item msgid="4642996410384042830">"ម្ភៃ\nប្រាំ"</item>
+    <item msgid="7506092849993571465">"ម្ភៃ\nប្រាំមួយ"</item>
+    <item msgid="1915078191101042031">"ម្ភៃ\nប្រាំពីរ"</item>
+    <item msgid="4292378641900520252">"ម្ភៃ\nប្រាំបី"</item>
+    <item msgid="5339513901773103696">"ម្ភៃ\nប្រាំបួន"</item>
+    <item msgid="3574673250891657607">"សាមសិប"</item>
+    <item msgid="5796923836589110940">"សាមសិប\nមួយ"</item>
+    <item msgid="5859323597571702052">"សាមសិប\nពីរ"</item>
+    <item msgid="5133326723148876507">"សាមសិប\nបី"</item>
+    <item msgid="2693999494655663096">"សាមសិប\nបួន"</item>
+    <item msgid="3316754944962836197">"សាមសិប\nប្រាំ"</item>
+    <item msgid="816891008836796723">"សាមសិប\nប្រាំមួយ"</item>
+    <item msgid="9158890488666520078">"សាមសិប\nប្រាំពីរ"</item>
+    <item msgid="1894769703213894011">"សាមសិប\nប្រាំបី"</item>
+    <item msgid="5638820345598572399">"សាមសិប\nប្រាំបួន"</item>
+    <item msgid="8838304023017895439">"សែសិប"</item>
+    <item msgid="1834742948932559597">"សែសិប\nមួយ"</item>
+    <item msgid="6573707308847773944">"សែសិប\nពីរ"</item>
+    <item msgid="2450149950652678001">"សែសិប\nបី"</item>
+    <item msgid="2874667401318178036">"សែសិប\nបួន"</item>
+    <item msgid="3391101532763048862">"សែសិប\nប្រាំ"</item>
+    <item msgid="1671489330863254362">"សែសិប\nប្រាំមួយ"</item>
+    <item msgid="5916017359554531038">"សែសិប\nប្រាំពីរ"</item>
+    <item msgid="8205413177993059967">"សែសិប\nប្រាំបី"</item>
+    <item msgid="6607867415142171302">"សែសិប\nប្រាំបួន"</item>
+    <item msgid="8358850748472089162">"ហាសិប"</item>
+    <item msgid="3551313125255080234">"ហាសិប\nមួយ"</item>
+    <item msgid="1559678130725716542">"ហាសិប\nពីរ"</item>
+    <item msgid="431441994725492377">"ហាសិប\nបី"</item>
+    <item msgid="6345774640539623024">"ហាសិប\nបួន"</item>
+    <item msgid="8018192990793931120">"ហាសិប\nប្រាំ"</item>
+    <item msgid="6187650843754604534">"ហាសិប\nប្រាំមួយ"</item>
+    <item msgid="8727240174015993259">"ហាសិប\nប្រាំពីរ"</item>
+    <item msgid="848339003778952950">"ហាសិប\nប្រាំបី"</item>
+    <item msgid="5798985802835423618">"ហាសិប\nប្រាំបួន"</item>
+  </string-array>
 </resources>

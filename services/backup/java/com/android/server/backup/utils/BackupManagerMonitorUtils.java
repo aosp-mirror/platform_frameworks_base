@@ -21,6 +21,7 @@ import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NA
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
@@ -44,8 +45,13 @@ public class BackupManagerMonitorUtils {
      * @param extras - additional event data.
      * @return <code>monitor</code> if call succeeded and <code>null</code> otherwise.
      */
-    public static IBackupManagerMonitor monitorEvent(IBackupManagerMonitor monitor, int id,
-            PackageInfo pkg, int category, Bundle extras) {
+    @Nullable
+    public static IBackupManagerMonitor monitorEvent(
+            @Nullable IBackupManagerMonitor monitor,
+            int id,
+            PackageInfo pkg,
+            int category,
+            Bundle extras) {
         if (monitor != null) {
             try {
                 Bundle bundle = new Bundle();

@@ -23,6 +23,7 @@ import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -92,6 +93,8 @@ public class RatingBar extends AbsSeekBar {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.RatingBar, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.RatingBar,
+                attrs, a, defStyleAttr, defStyleRes);
         final int numStars = a.getInt(R.styleable.RatingBar_numStars, mNumStars);
         setIsIndicator(a.getBoolean(R.styleable.RatingBar_isIndicator, !mIsUserSeekable));
         final float rating = a.getFloat(R.styleable.RatingBar_rating, -1);
@@ -164,6 +167,7 @@ public class RatingBar extends AbsSeekBar {
      *
      * @attr ref android.R.styleable#RatingBar_isIndicator
      */
+    @InspectableProperty(name = "isIndicator")
     public boolean isIndicator() {
         return !mIsUserSeekable;
     }
@@ -190,6 +194,7 @@ public class RatingBar extends AbsSeekBar {
      * Returns the number of stars shown.
      * @return The number of stars shown.
      */
+    @InspectableProperty
     public int getNumStars() {
         return mNumStars;
     }
@@ -208,6 +213,7 @@ public class RatingBar extends AbsSeekBar {
      *
      * @return The current rating.
      */
+    @InspectableProperty
     public float getRating() {
         return getProgress() / getProgressPerStar();
     }
@@ -234,6 +240,7 @@ public class RatingBar extends AbsSeekBar {
      *
      * @return The step size.
      */
+    @InspectableProperty
     public float getStepSize() {
         return (float) getNumStars() / getMax();
     }

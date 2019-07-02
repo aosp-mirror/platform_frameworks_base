@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2006, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+-->
+<resources>
+<!-- Recents Layout -->
+
+    <!-- The amount to inset the stack, specifically at the top and the other sides.  We also
+         don't want this to change across configurations that Recents can be opened in, so we
+         define them statically for all display sizes. -->
+    <dimen name="recents_layout_min_margin">16dp</dimen>
+    <dimen name="recents_layout_top_margin_phone">16dp</dimen>
+    <dimen name="recents_layout_top_margin_tablet">32dp</dimen>
+    <dimen name="recents_layout_top_margin_tablet_xlarge">40dp</dimen>
+    <dimen name="recents_layout_bottom_margin">16dp</dimen>
+    <dimen name="recents_layout_side_margin_phone">16dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet">48dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet_docked">16dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet_xlarge">64dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet_xlarge_docked">16dp</dimen>
+
+    <!-- The height between the top margin and the top of the focused task. -->
+    <dimen name="recents_layout_top_peek_size">48dp</dimen>
+    <!-- The height between the bottom margin and the top of task in front of the focused task. -->
+    <dimen name="recents_layout_bottom_peek_size">56dp</dimen>
+
+    <!-- The offset from the top and bottom of the stack of the focused task.  The bottom offset
+         will be additionally offset by the bottom system insets since it goes under the nav bar
+         in certain orientations. -->
+    <dimen name="recents_layout_initial_top_offset_phone_port">128dp</dimen>
+    <dimen name="recents_layout_initial_bottom_offset_phone_port">80dp</dimen>
+    <dimen name="recents_layout_initial_top_offset_phone_land">72dp</dimen>
+    <dimen name="recents_layout_initial_bottom_offset_phone_land">72dp</dimen>
+    <dimen name="recents_layout_initial_top_offset_tablet">160dp</dimen>
+    <dimen name="recents_layout_initial_bottom_offset_tablet">112dp</dimen>
+
+    <!-- The min/max translationZ for the tasks in the stack. -->
+    <dimen name="recents_layout_z_min">3dp</dimen>
+    <dimen name="recents_layout_z_max">24dp</dimen>
+
+    <!-- The margin between the freeform and stack.  We also don't want this to change across
+         configurations that Recents can be opened in, so we define them statically for all
+         display sizes. -->
+    <dimen name="recents_freeform_layout_bottom_margin">16dp</dimen>
+
+    <!-- The padding between each freeform task. -->
+    <dimen name="recents_freeform_layout_task_padding">8dp</dimen>
+
+<!-- Recents Views -->
+
+    <!-- The height of a task view bar.  This has to be large enough to cover the action bar
+         height in either orientation at this smallest width. -->
+    <dimen name="recents_task_view_header_height">56dp</dimen>
+    <dimen name="recents_task_view_header_height_tablet_land">64dp</dimen>
+
+    <!-- The padding of a button in the recents task view header. -->
+    <dimen name="recents_task_view_header_button_padding">16dp</dimen>
+    <dimen name="recents_task_view_header_button_padding_tablet_land">20dp</dimen>
+
+    <!-- The radius of the rounded corners on a task view and its shadow (which can be larger
+         to create a softer corner effect. -->
+    <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
+    <dimen name="recents_task_view_shadow_rounded_corners_radius">6dp</dimen>
+
+    <!-- The amount of highlight to make on each task view. -->
+    <dimen name="recents_task_view_highlight">1dp</dimen>
+
+    <!-- The size of the lock-to-app button and its icon. -->
+    <dimen name="recents_lock_to_app_size">56dp</dimen>
+    <dimen name="recents_lock_to_app_icon_size">28dp</dimen>
+
+    <!-- The amount of overscroll allowed when flinging to the end of the stack. -->
+    <dimen name="recents_fling_overscroll_distance">24dp</dimen>
+
+    <!-- The size of the drag hint text. -->
+    <dimen name="recents_drag_hint_text_size">14sp</dimen>
+
+    <!-- The min alpha to apply to a task affiliation group color. -->
+    <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
+
+    <!-- The amount to offset when animating into an affiliate group. -->
+    <dimen name="recents_task_stack_animation_affiliate_enter_offset">32dp</dimen>
+
+    <!-- The offsets the tasks animate from when recents is launched while docking -->
+    <dimen name="recents_task_stack_animation_launched_while_docking_offset">144dp</dimen>
+
+    <!-- The amount to translate when animating the removal of a task. -->
+    <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
+
+    <!-- The alpha to apply to the recents row when it doesn't have focus -->
+    <item name="recents_recents_row_dim_alpha" format="float" type="dimen">0.5</item>
+
+    <!-- The speed in dp/s at which the user needs to be scrolling in recents such that we start
+         loading full resolution screenshots. -->
+    <dimen name="recents_fast_fling_velocity">600dp</dimen>
+
+</resources>

@@ -23,13 +23,15 @@ import static org.mockito.Mockito.when;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +39,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 public class ExpandHelperTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mRow;
@@ -46,6 +48,7 @@ public class ExpandHelperTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Assert.sMainLooper = TestableLooper.get(this).getLooper();
         Context context = getContext();
         mRow = new NotificationTestHelper(context).createRow();
         mCallback = mock(ExpandHelper.Callback.class);

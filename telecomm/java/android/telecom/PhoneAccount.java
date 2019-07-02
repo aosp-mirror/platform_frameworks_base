@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.SystemApi;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,7 +25,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -314,7 +314,22 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_RTT = 0x1000;
 
-    /* NEXT CAPABILITY: 0x2000 */
+    /**
+     * Flag indicating that this {@link PhoneAccount} is the preferred SIM subscription for
+     * emergency calls. A {@link PhoneAccount} that sets this capabilitiy must also
+     * set the {@link #CAPABILITY_SIM_SUBSCRIPTION} and {@link #CAPABILITY_PLACE_EMERGENCY_CALLS}
+     * capabilities. There should only be one emergency preferred {@link PhoneAccount}.
+     * <p>
+     * When set, Telecom will prefer this {@link PhoneAccount} over others for emergency calling,
+     * even if the emergency call was placed with a specific {@link PhoneAccount} set using the
+     * extra{@link TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE} in
+     * {@link Intent#ACTION_CALL_EMERGENCY} or {@link TelecomManager#placeCall(Uri, Bundle)}.
+     *
+     * @hide
+     */
+    public static final int CAPABILITY_EMERGENCY_PREFERRED = 0x2000;
+
+    /* NEXT CAPABILITY: 0x4000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -914,7 +929,7 @@ public final class PhoneAccount implements Parcelable {
         out.writeInt(mSupportedAudioRoutes);
     }
 
-    public static final Creator<PhoneAccount> CREATOR
+    public static final @android.annotation.NonNull Creator<PhoneAccount> CREATOR
             = new Creator<PhoneAccount>() {
         @Override
         public PhoneAccount createFromParcel(Parcel in) {
@@ -1019,6 +1034,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_PLACE_EMERGENCY_CALLS)) {
             sb.append("PlaceEmerg ");
+        }
+        if (hasCapabilities(CAPABILITY_EMERGENCY_PREFERRED)) {
+            sb.append("EmerPrefer ");
         }
         if (hasCapabilities(CAPABILITY_EMERGENCY_VIDEO_CALLING)) {
             sb.append("EmergVideo ");

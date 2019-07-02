@@ -16,31 +16,30 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
+import static com.android.systemui.plugins.DarkIconDispatcher.isInArea;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
-import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
-import static com.android.systemui.statusbar.policy.DarkIconDispatcher.isInArea;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import android.widget.LinearLayout;
+
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         StatusIconDisplayable {
@@ -59,6 +58,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     private ImageView mMobile, mMobileType, mMobileRoaming;
     private View mMobileRoamingSpace;
     private int mVisibleState = -1;
+    private DualToneHandler mDualToneHandler;
 
     public static StatusBarMobileView fromContext(Context context, String slot) {
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -100,6 +100,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     private void init() {
+        mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_group);
         mMobile = findViewById(R.id.mobile_signal);
         mMobileType = findViewById(R.id.mobile_type);
@@ -126,20 +127,21 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     public void applyMobileState(MobileIconState state) {
+        boolean requestLayout = false;
         if (state == null) {
+            requestLayout = getVisibility() != View.GONE;
             setVisibility(View.GONE);
             mState = null;
-            return;
-        }
-
-        if (mState == null) {
+        } else if (mState == null) {
+            requestLayout = true;
             mState = state.copy();
             initViewState();
-            return;
+        } else if (!mState.equals(state)) {
+            requestLayout = updateState(state.copy());
         }
 
-        if (!mState.equals(state)) {
-            updateState(state.copy());
+        if (requestLayout) {
+            requestLayout();
         }
     }
 
@@ -162,20 +164,24 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         mMobileRoaming.setVisibility(mState.roaming ? View.VISIBLE : View.GONE);
         mMobileRoamingSpace.setVisibility(mState.roaming ? View.VISIBLE : View.GONE);
         mIn.setVisibility(mState.activityIn ? View.VISIBLE : View.GONE);
-        mOut.setVisibility(mState.activityIn ? View.VISIBLE : View.GONE);
+        mOut.setVisibility(mState.activityOut ? View.VISIBLE : View.GONE);
         mInoutContainer.setVisibility((mState.activityIn || mState.activityOut)
                 ? View.VISIBLE : View.GONE);
     }
 
-    private void updateState(MobileIconState state) {
+    private boolean updateState(MobileIconState state) {
+        boolean needsLayout = false;
+
         setContentDescription(state.contentDescription);
         if (mState.visible != state.visible) {
             mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
+            needsLayout = true;
         }
         if (mState.strengthId != state.strengthId) {
             mMobileDrawable.setLevel(state.strengthId);
         }
         if (mState.typeId != state.typeId) {
+            needsLayout |= state.typeId == 0 || mState.typeId == 0;
             if (state.typeId != 0) {
                 mMobileType.setContentDescription(state.typeContentDescription);
                 mMobileType.setImageResource(state.typeId);
@@ -188,11 +194,16 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
         mMobileRoamingSpace.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
         mIn.setVisibility(state.activityIn ? View.VISIBLE : View.GONE);
-        mOut.setVisibility(state.activityIn ? View.VISIBLE : View.GONE);
+        mOut.setVisibility(state.activityOut ? View.VISIBLE : View.GONE);
         mInoutContainer.setVisibility((state.activityIn || state.activityOut)
                 ? View.VISIBLE : View.GONE);
 
+        needsLayout |= state.roaming != mState.roaming
+                || state.activityIn != mState.activityIn
+                || state.activityOut != mState.activityOut;
+
         mState = state;
+        return needsLayout;
     }
 
     @Override
@@ -200,7 +211,8 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         if (!isInArea(area, this)) {
             return;
         }
-        mMobileDrawable.setDarkIntensity(darkIntensity);
+        mMobileDrawable.setTintList(
+                ColorStateList.valueOf(mDualToneHandler.getSingleColor(darkIntensity)));
         ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
         mIn.setImageTintList(color);
         mOut.setImageTintList(color);
@@ -223,8 +235,10 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     public void setStaticDrawableColor(int color) {
         ColorStateList list = ColorStateList.valueOf(color);
         float intensity = color == Color.WHITE ? 0 : 1;
-        mMobileDrawable.setDarkIntensity(intensity);
-
+        // We want the ability to change the theme from the one set by SignalDrawable in certain
+        // surfaces. In this way, we can pass a theme to the view.
+        mMobileDrawable.setTintList(
+                ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
         mIn.setImageTintList(list);
         mOut.setImageTintList(list);
         mMobileType.setImageTintList(list);
@@ -243,7 +257,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void setVisibleState(int state) {
+    public void setVisibleState(int state, boolean animate) {
         if (state == mVisibleState) {
             return;
         }

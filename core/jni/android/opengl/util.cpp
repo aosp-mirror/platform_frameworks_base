@@ -622,13 +622,17 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
+// The internal format is no longer the same as pixel format, per Table 2 in
+// https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
 static int checkInternalFormat(SkColorType colorType, int internalformat,
     int type)
 {
     switch(colorType) {
         case kN32_SkColorType:
             return (type == GL_UNSIGNED_BYTE &&
-                internalformat == GL_RGBA) ? 0 : -1;
+                    internalformat == GL_RGBA) ||
+                (type == GL_UNSIGNED_BYTE &&
+                 internalformat == GL_SRGB8_ALPHA8) ? 0 : -1;
         case kAlpha_8_SkColorType:
             return (type == GL_UNSIGNED_BYTE &&
                 internalformat == GL_ALPHA) ? 0 : -1;
@@ -653,6 +657,7 @@ static int getPixelFormatFromInternalFormat(uint32_t internalFormat) {
     switch (internalFormat) {
         // For sized internal format.
         case GL_RGBA16F:
+        case GL_SRGB8_ALPHA8:
             return GL_RGBA;
         // Base internal formats and pixel formats are still the same, see Table 1 in
         // https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
@@ -698,27 +703,27 @@ static int getType(SkColorType colorType)
 }
 
 static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
-        jobject jbitmap)
+        jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
     return getInternalFormat(nativeBitmap.colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
-        jobject jbitmap)
+        jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
     return getType(nativeBitmap.colorType());
 }
 
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
-        jobject jbitmap, jint type, jint border)
+        jlong bitmapPtr, jint type, jint border)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
         internalformat = getInternalFormat(colorType);
@@ -743,10 +748,10 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
 
 static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint xoffset, jint yoffset,
-        jobject jbitmap, jint format, jint type)
+        jlong bitmapPtr, jint format, jint type)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     SkColorType colorType = bitmap.colorType();
     int internalFormat = getInternalFormat(colorType);
     if (format < 0) {
@@ -768,54 +773,18 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
  * ETC1 methods.
  */
 
-static jclass nioAccessClass;
-static jclass bufferClass;
-static jmethodID getBasePointerID;
-static jmethodID getBaseArrayID;
-static jmethodID getBaseArrayOffsetID;
-static jfieldID positionID;
-static jfieldID limitID;
-static jfieldID elementSizeShiftID;
-
-/* Cache method IDs each time the class is loaded. */
-
-static void
-nativeClassInitBuffer(JNIEnv *env)
-{
-    jclass nioAccessClassLocal = FindClassOrDie(env, "java/nio/NIOAccess");
-    nioAccessClass = MakeGlobalRefOrDie(env, nioAccessClassLocal);
-    getBasePointerID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-
-    jclass bufferClassLocal = FindClassOrDie(env, "java/nio/Buffer");
-    bufferClass = MakeGlobalRefOrDie(env, bufferClassLocal);
-    positionID = GetFieldIDOrDie(env, bufferClass, "position", "I");
-    limitID = GetFieldIDOrDie(env, bufferClass, "limit", "I");
-    elementSizeShiftID = GetFieldIDOrDie(env, bufferClass, "_elementSizeShift", "I");
-}
-
 static void *
 getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
 {
     jint position;
     jint limit;
     jint elementSizeShift;
-    jlong pointer;
-
-    position = _env->GetIntField(buffer, positionID);
-    limit = _env->GetIntField(buffer, limitID);
-    elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
-    *remaining = (limit - position) << elementSizeShift;
-    pointer = _env->CallStaticLongMethod(nioAccessClass,
-            getBasePointerID, buffer);
+    jlong pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
     if (pointer != 0L) {
-        return reinterpret_cast<void *>(pointer);
+        pointer += position << elementSizeShift;
     }
-    return NULL;
+    *remaining = (limit - position) << elementSizeShift;
+    return reinterpret_cast<void*>(pointer);
 }
 
 class BufferHelper {
@@ -1063,10 +1032,10 @@ static const JNINativeMethod gVisibilityMethods[] = {
 };
 
 static const JNINativeMethod gUtilsMethods[] = {
-    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
-    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
-    { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
-    { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
+    { "native_getInternalFormat", "(J)I", (void*) util_getInternalFormat },
+    { "native_getType", "(J)I", (void*) util_getType },
+    { "native_texImage2D", "(IIIJII)I", (void*)util_texImage2D },
+    { "native_texSubImage2D", "(IIIIJII)I", (void*)util_texSubImage2D },
 };
 
 static const JNINativeMethod gEtc1Methods[] = {
@@ -1096,7 +1065,6 @@ static const ClassRegistrationInfo gClasses[] = {
 
 int register_android_opengl_classes(JNIEnv* env)
 {
-    nativeClassInitBuffer(env);
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
         const ClassRegistrationInfo* cri = &gClasses[i];

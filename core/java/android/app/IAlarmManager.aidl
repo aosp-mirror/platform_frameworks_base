@@ -29,6 +29,7 @@ import android.os.WorkSource;
  */
 interface IAlarmManager {
 	/** windowLength == 0 means exact; windowLength < 0 means the let the OS decide */
+    @UnsupportedAppUsage
     void set(String callingPackage, int type, long triggerAtTime, long windowLength,
             long interval, int flags, in PendingIntent operation, in IAlarmListener listener,
             String listenerTag, in WorkSource workSource, in AlarmManager.AlarmClockInfo alarmClock);
@@ -37,6 +38,7 @@ interface IAlarmManager {
     void setTimeZone(String zone);
     void remove(in PendingIntent operation, in IAlarmListener listener);
     long getNextWakeFromIdleTime();
+    @UnsupportedAppUsage
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
     long currentNetworkTimeMillis();
 }

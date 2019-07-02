@@ -82,28 +82,6 @@ protected:
         mOutput << mIdent << "drawDRRect" << std::endl;
     }
 
-    void onDrawText(const void*, size_t, SkScalar, SkScalar, const SkPaint&) override {
-        mOutput << mIdent << "drawText" << std::endl;
-    }
-
-    void onDrawPosText(const void*, size_t, const SkPoint[], const SkPaint&) override {
-        mOutput << mIdent << "drawPosText" << std::endl;
-    }
-
-    void onDrawPosTextH(const void*, size_t, const SkScalar[], SkScalar, const SkPaint&) override {
-        mOutput << mIdent << "drawPosTextH" << std::endl;
-    }
-
-    void onDrawTextOnPath(const void*, size_t, const SkPath&, const SkMatrix*,
-                          const SkPaint&) override {
-        mOutput << mIdent << "drawTextOnPath" << std::endl;
-    }
-
-    void onDrawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*,
-                           const SkPaint&) override {
-        mOutput << mIdent << "drawTextRSXform" << std::endl;
-    }
-
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override {
         mOutput << mIdent << "drawTextBlob" << std::endl;
     }
@@ -143,7 +121,7 @@ protected:
             renderNodeDrawable->getRenderNode()->output(mOutput, mLevel + 1);
             return;
         }
-        auto glFunctorDrawable = getGLFunctorDrawable(drawable);
+        auto glFunctorDrawable = getFunctorDrawable(drawable);
         if (nullptr != glFunctorDrawable) {
             mOutput << std::string(mLevel * 2, ' ') << "drawGLFunctorDrawable" << std::endl;
             return;
@@ -162,10 +140,10 @@ private:
         return nullptr;
     }
 
-    GLFunctorDrawable* getGLFunctorDrawable(SkDrawable* drawable) {
+    FunctorDrawable* getFunctorDrawable(SkDrawable* drawable) {
         for (auto& child : mDisplayList.mChildFunctors) {
-            if (drawable == &child) {
-                return &child;
+            if (drawable == child) {
+                return child;
             }
         }
         return nullptr;
@@ -177,6 +155,6 @@ private:
     std::string mIdent;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

@@ -44,8 +44,8 @@ public class NullVibrator extends Vibrator {
     }
 
     @Override
-    public void vibrate(int uid, String opPkg,
-            VibrationEffect effect, AudioAttributes attributes) {
+    public void vibrate(int uid, String opPkg, VibrationEffect effect,
+            String reason, AudioAttributes attributes) {
     }
 
     @Override

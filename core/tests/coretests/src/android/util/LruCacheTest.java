@@ -16,12 +16,13 @@
 
 package android.util;
 
+import junit.framework.TestCase;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 
 public final class LruCacheTest extends TestCase {
     private int expectedCreateCount;

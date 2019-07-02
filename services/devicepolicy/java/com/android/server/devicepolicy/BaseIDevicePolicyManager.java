@@ -16,17 +16,8 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.IDevicePolicyManager;
-import android.content.ComponentName;
-import android.os.PersistableBundle;
-import android.security.keymaster.KeymasterCertificateChain;
-import android.security.keystore.ParcelableKeyGenParameterSpec;
-import android.telephony.data.ApnSetting;
 
 import com.android.server.SystemService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Defines the required interface for IDevicePolicyManager implemenation.
@@ -63,104 +54,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      */
     abstract void handleStopUser(int userId);
 
-    public void setSystemSetting(ComponentName who, String setting, String value){}
-
-    public void transferOwnership(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
-
-    public PersistableBundle getTransferOwnershipBundle() {
-        return null;
-    }
-
-    public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
-            ParcelableKeyGenParameterSpec keySpec, int idAttestationFlags,
-            KeymasterCertificateChain attestationChain) {
-        return false;
-    }
-
-    public boolean isUsingUnifiedPassword(ComponentName who) {
-        return true;
-    }
-
-    public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
-            byte[] cert, byte[] chain, boolean isUserSelectable) {
-        return false;
-    }
-
-    @Override
-    public void setStartUserSessionMessage(
-            ComponentName admin, CharSequence startUserSessionMessage) {}
-
-    @Override
-    public void setEndUserSessionMessage(ComponentName admin, CharSequence endUserSessionMessage) {}
-
-    @Override
-    public String getStartUserSessionMessage(ComponentName admin) {
-        return null;
-    }
-
-    @Override
-    public String getEndUserSessionMessage(ComponentName admin) {
-        return null;
-    }
-
-    @Override
-    public List<String> setMeteredDataDisabledPackages(ComponentName admin, List<String> packageNames) {
-        return packageNames;
-    }
-
-    @Override
-    public List<String> getMeteredDataDisabledPackages(ComponentName admin) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public int addOverrideApn(ComponentName admin, ApnSetting apnSetting) {
-        return -1;
-    }
-
-    @Override
-    public boolean updateOverrideApn(ComponentName admin, int apnId, ApnSetting apnSetting) {
-        return false;
-    }
-
-    @Override
-    public boolean removeOverrideApn(ComponentName admin, int apnId) {
-        return false;
-    }
-
-    @Override
-    public List<ApnSetting> getOverrideApns(ComponentName admin) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void setOverrideApnsEnabled(ComponentName admin, boolean enabled) {}
-
-    @Override
-    public boolean isOverrideApnEnabled(ComponentName admin) {
-        return false;
-    }
-
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
-    }
-
-    @Override
-    public boolean isMeteredDataDisabledPackageForUser(ComponentName admin,
-            String packageName, int userId) {
-        return false;
-    }
-
-    @Override
-    public long forceSecurityLogs() {
-        return 0;
-    }
-
-    @Override
-    public void setDefaultSmsApplication(ComponentName admin, String packageName) {
-    }
-
-    @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
-        return false;
     }
 }

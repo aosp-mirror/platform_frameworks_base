@@ -75,10 +75,13 @@ public abstract class Vibrator {
     private final String mPackageName;
     // The default vibration intensity level for haptic feedback.
     @VibrationIntensity
-    private final int mDefaultHapticFeedbackIntensity;
+    private int mDefaultHapticFeedbackIntensity;
     // The default vibration intensity level for notifications.
     @VibrationIntensity
-    private final int mDefaultNotificationVibrationIntensity;
+    private int mDefaultNotificationVibrationIntensity;
+    // The default vibration intensity level for ringtones.
+    @VibrationIntensity
+    private int mDefaultRingVibrationIntensity;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -87,10 +90,7 @@ public abstract class Vibrator {
     public Vibrator() {
         mPackageName = ActivityThread.currentPackageName();
         final Context ctx = ActivityThread.currentActivityThread().getSystemContext();
-        mDefaultHapticFeedbackIntensity = loadDefaultIntensity(ctx,
-                com.android.internal.R.integer.config_defaultHapticFeedbackIntensity);
-        mDefaultNotificationVibrationIntensity = loadDefaultIntensity(ctx,
-                com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
+        loadVibrationIntensities(ctx);
     }
 
     /**
@@ -98,10 +98,16 @@ public abstract class Vibrator {
      */
     protected Vibrator(Context context) {
         mPackageName = context.getOpPackageName();
+        loadVibrationIntensities(context);
+    }
+
+    private void loadVibrationIntensities(Context context) {
         mDefaultHapticFeedbackIntensity = loadDefaultIntensity(context,
                 com.android.internal.R.integer.config_defaultHapticFeedbackIntensity);
         mDefaultNotificationVibrationIntensity = loadDefaultIntensity(context,
                 com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
+        mDefaultRingVibrationIntensity = loadDefaultIntensity(context,
+                com.android.internal.R.integer.config_defaultRingVibrationIntensity);
     }
 
     private int loadDefaultIntensity(Context ctx, int resId) {
@@ -117,11 +123,18 @@ public abstract class Vibrator {
     }
 
     /**
-     * Get the default vibration intensity for notifications and ringtones.
+     * Get the default vibration intensity for notifications.
      * @hide
      */
     public int getDefaultNotificationVibrationIntensity() {
         return mDefaultNotificationVibrationIntensity;
+    }
+
+    /** Get the default vibration intensity for ringtones.
+     * @hide
+     */
+    public int getDefaultRingVibrationIntensity() {
+        return mDefaultRingVibrationIntensity;
     }
 
     /**
@@ -250,17 +263,17 @@ public abstract class Vibrator {
 
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(VibrationEffect vibe, AudioAttributes attributes) {
-        vibrate(Process.myUid(), mPackageName, vibe, attributes);
+        vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
     }
 
     /**
-     * Like {@link #vibrate(VibrationEffect, AudioAttributes)}, but allowing the caller to specify
-     * that the vibration is owned by someone else.
+     * Like {@link #vibrate(int, String, VibrationEffect, AudioAttributes)}, but allows the
+     * caller to specify the vibration is owned by someone else and set reason for vibration.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public abstract void vibrate(int uid, String opPkg,
-            VibrationEffect vibe, AudioAttributes attributes);
+    public abstract void vibrate(int uid, String opPkg, VibrationEffect vibe,
+            String reason, AudioAttributes attributes);
 
     /**
      * Turn the vibrator off.

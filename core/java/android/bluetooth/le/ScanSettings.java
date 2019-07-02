@@ -242,7 +242,7 @@ public final class ScanSettings implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ScanSettings> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ScanSettings> CREATOR =
             new Creator<ScanSettings>() {
         @Override
         public ScanSettings[] newArray(int size) {

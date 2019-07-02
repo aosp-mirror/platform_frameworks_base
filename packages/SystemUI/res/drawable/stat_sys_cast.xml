@@ -13,16 +13,4 @@ Copyright (C) 2017 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp">
-    <vector android:width="17dp"
-            android:height="17dp"
-            android:viewportWidth="17.0"
-            android:viewportHeight="17.0">
-
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M0.71,12.75v1.42c0,0.39 0.32,0.71 0.71,0.71h1.42C2.83,13.7 1.88,12.75 0.71,12.75zM0.69,10.67c-0.01,0.36 0.25,0.66 0.6,0.72c1.47,0.26 2.65,1.42 2.9,2.89c0.06,0.34 0.35,0.6 0.7,0.6c0.43,0 0.77,-0.38 0.71,-0.81c-0.34,-2.11 -2,-3.76 -4.11,-4.09C1.08,9.91 0.7,10.24 0.69,10.67zM13.46,4.96H3.54v1.15c2.81,0.91 5.02,3.12 5.93,5.93h3.99V4.96zM0.69,7.81C0.68,8.18 0.95,8.49 1.31,8.53c3.02,0.3 5.44,2.71 5.74,5.72c0.04,0.35 0.34,0.62 0.7,0.62c0.42,0 0.75,-0.36 0.71,-0.78c-0.37,-3.69 -3.3,-6.62 -6.99,-6.98C1.06,7.08 0.7,7.4 0.69,7.81zM14.88,2.12H2.12c-0.78,0 -1.42,0.64 -1.42,1.42v2.12h1.42V3.54h12.75v9.92H9.92v1.42h4.96c0.78,0 1.42,-0.64 1.42,-1.42V3.54C16.29,2.76 15.65,2.12 14.88,2.12z" />
-    </vector>
-</inset>
+<com.android.systemui.statusbar.CastDrawable />

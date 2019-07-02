@@ -16,19 +16,19 @@
 
 package android.widget.gridview;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 import java.util.Random;
 

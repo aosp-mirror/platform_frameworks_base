@@ -32,12 +32,12 @@ import static android.provider.DocumentsContract.buildDocumentUriMaybeUsingTree;
 import static android.provider.DocumentsContract.buildTreeDocumentUri;
 import static android.provider.DocumentsContract.getDocumentId;
 import static android.provider.DocumentsContract.getRootId;
-import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
 import android.Manifest;
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AuthenticationRequiredException;
 import android.content.ClipDescription;
@@ -47,6 +47,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.MimeTypeFilter;
 import android.content.UriMatcher;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -62,6 +63,8 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
@@ -468,10 +471,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * the most recently modified documents.
      * <p>
      * If this method is overriden by the concrete DocumentsProvider and
-     * QUERY_ARGS_LIMIT is specified with a nonnegative int under queryArgs, the
-     * result will be limited by that number and QUERY_ARG_LIMIT will be
-     * specified under EXTRA_HONORED_ARGS. Otherwise, a default 64 limit will
-     * be used and no QUERY_ARG* will be specified under EXTRA_HONORED_ARGS.
+     * {@link ContentResolver#QUERY_ARG_LIMIT} is specified with a nonnegative
+     * int under queryArgs, the result will be limited by that number and
+     * {@link ContentResolver#QUERY_ARG_LIMIT} will be specified under
+     * {@link ContentResolver#EXTRA_HONORED_ARGS}. Otherwise, a default 64 limit
+     * will be used and no QUERY_ARG* will be specified under
+     * {@link ContentResolver#EXTRA_HONORED_ARGS}.
      * <p>
      * Recent documents do not support change notifications.
      *
@@ -484,10 +489,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see DocumentsContract#EXTRA_LOADING
      */
     @SuppressWarnings("unused")
+    @Nullable
     public Cursor queryRecentDocuments(
-            String rootId, String[] projection, @Nullable Bundle queryArgs,
-            @Nullable CancellationSignal signal)
-            throws FileNotFoundException {
+            @NonNull String rootId, @Nullable String[] projection, @Nullable Bundle queryArgs,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
+        Preconditions.checkNotNull(rootId, "rootId can not be null");
+
         Cursor c = queryRecentDocuments(rootId, projection);
         Bundle extras = new Bundle();
         c.setExtras(extras);
@@ -651,6 +658,59 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * Return documents that match the given query under the requested
+     * root. The returned documents should be sorted by relevance in descending
+     * order. How documents are matched against the query string is an
+     * implementation detail left to each provider, but it's suggested that at
+     * least {@link Document#COLUMN_DISPLAY_NAME} be matched in a
+     * case-insensitive fashion.
+     * <p>
+     * If your provider is cloud-based, and you have some data cached or pinned
+     * locally, you may return the local data immediately, setting
+     * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
+     * you are still fetching additional data. Then, when the network data is
+     * available, you can send a change notification to trigger a requery and
+     * return the complete contents.
+     * <p>
+     * To support change notifications, you must
+     * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+     * Uri, such as {@link DocumentsContract#buildSearchDocumentsUri(String,
+     * String, String)}. Then you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver, boolean)} with that Uri to send change
+     * notifications.
+     *
+     * @param rootId the root to search under.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param queryArgs the query arguments.
+     *            {@link DocumentsContract#QUERY_ARG_EXCLUDE_MEDIA},
+     *            {@link DocumentsContract#QUERY_ARG_DISPLAY_NAME},
+     *            {@link DocumentsContract#QUERY_ARG_MIME_TYPES},
+     *            {@link DocumentsContract#QUERY_ARG_FILE_SIZE_OVER},
+     *            {@link DocumentsContract#QUERY_ARG_LAST_MODIFIED_AFTER}.
+     * @return cursor containing search result. Include
+     *         {@link ContentResolver#EXTRA_HONORED_ARGS} in {@link Cursor}
+     *         extras {@link Bundle} when any QUERY_ARG_* value was honored
+     *         during the preparation of the results.
+     *
+     * @see Root#COLUMN_QUERY_ARGS
+     * @see ContentResolver#EXTRA_HONORED_ARGS
+     * @see DocumentsContract#EXTRA_LOADING
+     * @see DocumentsContract#EXTRA_INFO
+     * @see DocumentsContract#EXTRA_ERROR
+     */
+    @SuppressWarnings("unused")
+    @Nullable
+    public Cursor querySearchDocuments(@NonNull String rootId,
+            @Nullable String[] projection, @NonNull Bundle queryArgs) throws FileNotFoundException {
+        Preconditions.checkNotNull(rootId, "rootId can not be null");
+        Preconditions.checkNotNull(queryArgs, "queryArgs can not be null");
+        return querySearchDocuments(rootId, DocumentsContract.getSearchDocumentsQuery(queryArgs),
+                projection);
+    }
+
+    /**
      * Ejects the root. Throws {@link IllegalStateException} if ejection failed.
      *
      * @param rootId the root to be ejected.
@@ -661,8 +721,29 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Eject not supported");
     }
 
-    /** {@hide} */
-    public @Nullable Bundle getDocumentMetadata(String documentId)
+    /**
+     * Returns metadata associated with the document. The type of metadata returned
+     * is specific to the document type. For example the data returned for an image
+     * file will likely consist primarily or solely of EXIF metadata.
+     *
+     * <p>The returned {@link Bundle} will contain zero or more entries depending
+     * on the type of data supported by the document provider.
+     *
+     * <ol>
+     * <li>A {@link DocumentsContract#METADATA_TYPES} containing a {@code String[]} value.
+     *     The string array identifies the type or types of metadata returned. Each
+     *     value in the can be used to access a {@link Bundle} of data
+     *     containing that type of data.
+     * <li>An entry each for each type of returned metadata. Each set of metadata is
+     *     itself represented as a bundle and accessible via a string key naming
+     *     the type of data.
+     * </ol>
+     *
+     * @param documentId get the metadata of the document
+     * @return a Bundle of Bundles.
+     * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
+     */
+    public @Nullable Bundle getDocumentMetadata(@NonNull String documentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Metadata not supported");
     }
@@ -795,7 +876,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *      {@link #queryDocument(String, String[])},
      *      {@link #queryRecentDocuments(String, String[])},
      *      {@link #queryRoots(String[])}, and
-     *      {@link #querySearchDocuments(String, String, String[])}.
+     *      {@link #querySearchDocuments(String, String[], Bundle)}.
      */
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
@@ -812,7 +893,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see #queryRecentDocuments(String, String[], Bundle, CancellationSignal)
      * @see #queryDocument(String, String[])
      * @see #queryChildDocuments(String, String[], String)
-     * @see #querySearchDocuments(String, String, String[])
+     * @see #querySearchDocuments(String, String[], Bundle)
      */
     @Override
     public final Cursor query(
@@ -825,8 +906,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                     return queryRecentDocuments(
                             getRootId(uri), projection, queryArgs, cancellationSignal);
                 case MATCH_SEARCH:
-                    return querySearchDocuments(
-                            getRootId(uri), getSearchDocumentsQuery(uri), projection);
+                    return querySearchDocuments(getRootId(uri), projection, queryArgs);
                 case MATCH_DOCUMENT:
                 case MATCH_DOCUMENT_TREE:
                     enforceTree(uri);
@@ -1301,7 +1381,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final long flags =
                     cursor.getLong(cursor.getColumnIndexOrThrow(Document.COLUMN_FLAGS));
                 if ((flags & Document.FLAG_VIRTUAL_DOCUMENT) == 0 && mimeType != null &&
-                        mimeTypeMatches(mimeTypeFilter, mimeType)) {
+                        MimeTypeFilter.matches(mimeType, mimeTypeFilter)) {
                     return new String[] { mimeType };
                 }
             }
@@ -1353,22 +1433,5 @@ public abstract class DocumentsProvider extends ContentProvider {
         }
         // For any other yet unhandled case, let the provider subclass handle it.
         return openTypedDocument(documentId, mimeTypeFilter, opts, signal);
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean mimeTypeMatches(String filter, String test) {
-        if (test == null) {
-            return false;
-        } else if (filter == null || "*/*".equals(filter)) {
-            return true;
-        } else if (filter.equals(test)) {
-            return true;
-        } else if (filter.endsWith("/*")) {
-            return filter.regionMatches(0, test, 0, filter.indexOf('/'));
-        } else {
-            return false;
-        }
     }
 }

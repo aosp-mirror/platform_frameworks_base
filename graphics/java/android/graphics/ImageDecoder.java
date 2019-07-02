@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
@@ -58,6 +59,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.nio.ByteBuffer;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -186,7 +190,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link OnHeaderDecodedListener OnHeaderDecodedListener} and once with an
      *  implementation of {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}
      *  that calls {@link #setTargetSize} with smaller dimensions. One {@code Source}
-     *  even used simultaneously in multiple threads.</p>
+     *  can even be used simultaneously in multiple threads.</p>
      */
     public static abstract class Source {
         private Source() {}
@@ -282,26 +286,7 @@ public final class ImageDecoder implements AutoCloseable {
 
                 return createFromStream(is, true, this);
             }
-
-            final FileDescriptor fd = assetFd.getFileDescriptor();
-            final long offset = assetFd.getStartOffset();
-
-            ImageDecoder decoder = null;
-            try {
-                try {
-                    Os.lseek(fd, offset, SEEK_SET);
-                    decoder = nCreate(fd, this);
-                } catch (ErrnoException e) {
-                    decoder = createFromStream(new FileInputStream(fd), true, this);
-                }
-            } finally {
-                if (decoder == null) {
-                    IoUtils.closeQuietly(assetFd);
-                } else {
-                    decoder.mAssetFd = assetFd;
-                }
-            }
-            return decoder;
+            return createFromAssetFileDescriptor(assetFd, this);
         }
     }
 
@@ -353,6 +338,30 @@ public final class ImageDecoder implements AutoCloseable {
         return decoder;
     }
 
+    @NonNull
+    private static ImageDecoder createFromAssetFileDescriptor(@NonNull AssetFileDescriptor assetFd,
+            Source source) throws IOException {
+        final FileDescriptor fd = assetFd.getFileDescriptor();
+        final long offset = assetFd.getStartOffset();
+
+        ImageDecoder decoder = null;
+        try {
+            try {
+                Os.lseek(fd, offset, SEEK_SET);
+                decoder = nCreate(fd, source);
+            } catch (ErrnoException e) {
+                decoder = createFromStream(new FileInputStream(fd), true, source);
+            }
+        } finally {
+            if (decoder == null) {
+                IoUtils.closeQuietly(assetFd);
+            } else {
+                decoder.mAssetFd = assetFd;
+            }
+        }
+        return decoder;
+    }
+
     /**
      * For backwards compatibility, this does *not* close the InputStream.
      *
@@ -365,7 +374,7 @@ public final class ImageDecoder implements AutoCloseable {
             }
             mResources = res;
             mInputStream = is;
-            mInputDensity = res != null ? inputDensity : Bitmap.DENSITY_NONE;
+            mInputDensity = inputDensity;
         }
 
         final Resources mResources;
@@ -524,6 +533,29 @@ public final class ImageDecoder implements AutoCloseable {
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
             return createFromFile(mFile, this);
+        }
+    }
+
+    private static class CallableSource extends Source {
+        CallableSource(@NonNull Callable<AssetFileDescriptor> callable) {
+            mCallable = callable;
+        }
+
+        private final Callable<AssetFileDescriptor> mCallable;
+
+        @Override
+        public ImageDecoder createImageDecoder() throws IOException {
+            AssetFileDescriptor assetFd = null;
+            try {
+                assetFd = mCallable.call();
+            } catch (Exception e) {
+                if (e instanceof IOException) {
+                    throw (IOException) e;
+                } else {
+                    throw new IOException(e);
+                }
+            }
+            return createFromAssetFileDescriptor(assetFd, this);
         }
     }
 
@@ -808,6 +840,40 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     * Return if the given MIME type is a supported file format that can be
+     * decoded by this class. This can be useful to determine if a file can be
+     * decoded directly, or if it needs to be converted into a more general
+     * format using an API like {@link ContentResolver#openTypedAssetFile}.
+     */
+    public static boolean isMimeTypeSupported(@NonNull String mimeType) {
+        Objects.requireNonNull(mimeType);
+        switch (mimeType.toLowerCase(Locale.US)) {
+            case "image/png":
+            case "image/jpeg":
+            case "image/webp":
+            case "image/gif":
+            case "image/heif":
+            case "image/heic":
+            case "image/bmp":
+            case "image/x-ico":
+            case "image/vnd.wap.wbmp":
+            case "image/x-sony-arw":
+            case "image/x-canon-cr2":
+            case "image/x-adobe-dng":
+            case "image/x-nikon-nef":
+            case "image/x-nikon-nrw":
+            case "image/x-olympus-orf":
+            case "image/x-fuji-raf":
+            case "image/x-panasonic-rw2":
+            case "image/x-pentax-pef":
+            case "image/x-samsung-srw":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Create a new {@link Source Source} from a resource.
      *
      * @param res the {@link Resources} object containing the image data.
@@ -967,6 +1033,27 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Source createSource(@NonNull File file) {
         return new FileSource(file);
+    }
+
+    /**
+     * Create a new {@link Source Source} from a {@link Callable} that returns a
+     * new {@link AssetFileDescriptor} for each request. This provides control
+     * over how the {@link AssetFileDescriptor} is created, such as passing
+     * options into {@link ContentResolver#openTypedAssetFileDescriptor}, or
+     * enabling use of a {@link android.os.CancellationSignal}.
+     * <p>
+     * It's important for the given {@link Callable} to return a new, unique
+     * {@link AssetFileDescriptor} for each invocation, to support reuse of the
+     * returned {@link Source Source}.
+     *
+     * @return a new Source object, which can be passed to
+     *         {@link #decodeDrawable decodeDrawable} or {@link #decodeBitmap
+     *         decodeBitmap}.
+     */
+    @AnyThread
+    @NonNull
+    public static Source createSource(@NonNull Callable<AssetFileDescriptor> callable) {
+        return new CallableSource(callable);
     }
 
     /**
@@ -1505,12 +1592,9 @@ public final class ImageDecoder implements AutoCloseable {
      * decoder will pick either the color space embedded in the image or the
      * {@link ColorSpace} best suited for the requested image configuration
      * (for instance {@link ColorSpace.Named#SRGB sRGB} for the
-     * {@link Bitmap.Config#ARGB_8888} configuration).</p>
-     *
-     * <p>{@link Bitmap.Config#RGBA_F16} always uses the
-     * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB scRGB} color space.
-     * Bitmaps in other configurations without an embedded color space are
-     * assumed to be in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
+     * {@link Bitmap.Config#ARGB_8888} configuration and
+     * {@link ColorSpace.Named#EXTENDED_SRGB EXTENDED_SRGB} for
+     * {@link Bitmap.Config#RGBA_F16}).</p>
      *
      * <p class="note">Only {@link ColorSpace.Model#RGB} color spaces are
      * currently supported. An <code>IllegalArgumentException</code> will
@@ -1558,14 +1642,16 @@ public final class ImageDecoder implements AutoCloseable {
         mTempStorage = null;
     }
 
-    private void checkState() {
+    private void checkState(boolean animated) {
         if (mNativePtr == 0) {
             throw new IllegalStateException("Cannot use closed ImageDecoder!");
         }
 
         checkSubset(mDesiredWidth, mDesiredHeight, mCropRect);
 
-        if (mAllocator == ALLOCATOR_HARDWARE) {
+        // animated ignores the allocator, so no need to check for incompatible
+        // fields.
+        if (!animated && mAllocator == ALLOCATOR_HARDWARE) {
             if (mMutable) {
                 throw new IllegalStateException("Cannot make mutable HARDWARE Bitmap!");
             }
@@ -1576,17 +1662,6 @@ public final class ImageDecoder implements AutoCloseable {
 
         if (mPostProcessor != null && mUnpremultipliedRequired) {
             throw new IllegalStateException("Cannot draw to unpremultiplied pixels!");
-        }
-
-        if (mDesiredColorSpace != null) {
-            if (!(mDesiredColorSpace instanceof ColorSpace.Rgb)) {
-                throw new IllegalArgumentException("The target color space must use the "
-                            + "RGB color model - provided: " + mDesiredColorSpace);
-            }
-            if (((ColorSpace.Rgb) mDesiredColorSpace).getTransferParameters() == null) {
-                throw new IllegalArgumentException("The target color space must use an "
-                            + "ICC parametric transfer function - provided: " + mDesiredColorSpace);
-            }
         }
     }
 
@@ -1600,14 +1675,30 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    private boolean checkForExtended() {
+        if (mDesiredColorSpace == null) {
+            return false;
+        }
+        return mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)
+                || mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+    }
+
+    private long getColorSpacePtr() {
+        if (mDesiredColorSpace == null) {
+            return 0;
+        }
+        return mDesiredColorSpace.getNativeInstance();
+    }
+
     @WorkerThread
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
-        checkState();
+        checkState(false);
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mUnpremultipliedRequired,
-                mConserveMemory, mDecodeAsAlphaMask, mDesiredColorSpace);
+                mConserveMemory, mDecodeAsAlphaMask, getColorSpacePtr(),
+                checkForExtended());
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1673,9 +1764,11 @@ public final class ImageDecoder implements AutoCloseable {
                 // mPostProcessor exists.
                 ImageDecoder postProcessPtr = decoder.mPostProcessor == null ?
                         null : decoder;
+                decoder.checkState(true);
                 Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
                         postProcessPtr, decoder.mDesiredWidth,
-                        decoder.mDesiredHeight, srcDensity,
+                        decoder.mDesiredHeight, decoder.getColorSpacePtr(),
+                        decoder.checkForExtended(), srcDensity,
                         src.computeDstDensity(), decoder.mCropRect,
                         decoder.mInputStream, decoder.mAssetFd);
                 // d has taken ownership of these objects.
@@ -1818,8 +1911,8 @@ public final class ImageDecoder implements AutoCloseable {
         }
 
         float scale = (float) dstDensity / srcDensity;
-        int scaledWidth = (int) (mWidth * scale + 0.5f);
-        int scaledHeight = (int) (mHeight * scale + 0.5f);
+        int scaledWidth = Math.max((int) (mWidth * scale + 0.5f), 1);
+        int scaledHeight = Math.max((int) (mHeight * scale + 0.5f), 1);
         this.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
@@ -1856,6 +1949,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Private method called by JNI.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private int postProcessAndRelease(@NonNull Canvas canvas) {
         try {
             return mPostProcessor.onPostProcess(canvas);
@@ -1894,7 +1988,7 @@ public final class ImageDecoder implements AutoCloseable {
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean unpremulRequired,
             boolean conserveMemory, boolean decodeAsAlphaMask,
-            @Nullable ColorSpace desiredColorSpace)
+            long desiredColorSpace, boolean extended)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);

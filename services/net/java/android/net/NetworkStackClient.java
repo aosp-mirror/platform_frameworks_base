@@ -41,7 +41,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -340,8 +340,6 @@ public class NetworkStackClient {
     private void maybeCrashWithTerribleFailure(@NonNull String message,
             @NonNull Context context, @Nullable String packageName) {
         logWtf(message, null);
-        // Called DeviceConfig to minimize merge conflicts
-        final DeviceConfigStub DeviceConfig = new DeviceConfigStub(context);
         // uptime is monotonic even after a framework restart
         final long uptime = SystemClock.elapsedRealtime();
         final long now = System.currentTimeMillis();
@@ -534,37 +532,5 @@ public class NetworkStackClient {
 
         pw.println();
         pw.println("pendingNetStackRequests length: " + requestsQueueLength);
-    }
-
-    /**
-     * Stub class to replicate DeviceConfig behavior with minimal merge conflicts.
-     */
-    private class DeviceConfigStub {
-        private final Context mContext;
-
-        // Namespace is actually unused, but is here to replicate the final API.
-        private static final String NAMESPACE_CONNECTIVITY = "connectivity";
-
-        private DeviceConfigStub(Context context) {
-            mContext = context;
-        }
-
-        private long getLong(
-                @NonNull String namespace, @NonNull String key, long defaultVal) {
-            // Temporary solution until DeviceConfig is available
-            try {
-                return Settings.Global.getLong(
-                        mContext.getContentResolver(), TAG + "_" + key, defaultVal);
-            } catch (Throwable e) {
-                logWtf("Could not obtain setting " + key, e);
-                return defaultVal;
-            }
-        }
-
-        private boolean getBoolean(
-                @NonNull String namespace, @NonNull String key, boolean defaultVal) {
-            // Temporary solution until DeviceConfig is available
-            return getLong(namespace, key, defaultVal ? 1 : 0) != 0;
-        }
     }
 }

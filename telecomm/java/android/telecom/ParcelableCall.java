@@ -319,7 +319,7 @@ public final class ParcelableCall implements Parcelable {
 
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static final Parcelable.Creator<ParcelableCall> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
         @Override
         public ParcelableCall createFromParcel(Parcel source) {

@@ -17,21 +17,22 @@
 package com.android.settingslib.utils;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.spy;
 
 import android.content.Context;
+import android.icu.text.RelativeDateTimeFormatter;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class StringUtilTest {
     private Context mContext;
 
@@ -116,8 +117,8 @@ public class StringUtilTest {
         final double testMillis = 40 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "Just now";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -125,8 +126,8 @@ public class StringUtilTest {
         final double testMillis = 40 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "1 minute ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -134,8 +135,8 @@ public class StringUtilTest {
         final double testMillis = 119 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "Just now";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -143,8 +144,8 @@ public class StringUtilTest {
         final double testMillis = 119 * DateUtils.SECOND_IN_MILLIS;
         final String expectedTime = "2 minutes ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -152,8 +153,8 @@ public class StringUtilTest {
         final double testMillis = 2 * DateUtils.MINUTE_IN_MILLIS;
         final String expectedTime = "2 minutes ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -161,8 +162,8 @@ public class StringUtilTest {
         final double testMillis = 119 * DateUtils.MINUTE_IN_MILLIS;
         final String expectedTime = "119 minutes ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -170,8 +171,8 @@ public class StringUtilTest {
         final double testMillis = 2 * DateUtils.HOUR_IN_MILLIS;
         final String expectedTime = "2 hours ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -179,8 +180,8 @@ public class StringUtilTest {
         final double testMillis = 47 * DateUtils.HOUR_IN_MILLIS;
         final String expectedTime = "47 hours ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -188,8 +189,8 @@ public class StringUtilTest {
         final double testMillis = 2 * DateUtils.DAY_IN_MILLIS;
         final String expectedTime = "2 days ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -197,8 +198,8 @@ public class StringUtilTest {
         final double testMillis = 0;
         final String expectedTime = "Just now";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 
     @Test
@@ -206,7 +207,7 @@ public class StringUtilTest {
         final double testMillis = 0;
         final String expectedTime = "0 minutes ago";
 
-        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
-                expectedTime);
+        assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false,
+                RelativeDateTimeFormatter.Style.LONG).toString()).isEqualTo(expectedTime);
     }
 }

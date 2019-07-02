@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.backup.IBackupCallback;
 import android.app.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
  
@@ -47,15 +48,14 @@ oneway interface IBackupAgent {
      *        be echoed back to the backup service binder once the new
      *        data has been written to the data and newState files.
      *
-     * @param callbackBinder Binder on which to indicate operation completion,
-     *        passed here as a convenience to the agent.
+     * @param callbackBinder Binder on which to indicate operation completion.
      *
      * @param transportFlags Flags with additional information about the transport.
      */
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
             in ParcelFileDescriptor newState,
-            long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags);
+            long quotaBytes, IBackupCallback callbackBinder, int transportFlags);
 
     /**
      * Restore an entire data snapshot to the application.
@@ -132,8 +132,9 @@ oneway interface IBackupAgent {
      *                        Could be less than total backup size if backup process was interrupted
      *                        before finish of processing all backup data.
      * @param quotaBytes Current amount of backup data that is allowed for the app.
+     * @param callbackBinder Binder on which to indicate operation completion.
      */
-    void doQuotaExceeded(long backupDataBytes, long quotaBytes);
+    void doQuotaExceeded(long backupDataBytes, long quotaBytes, IBackupCallback callbackBinder);
 
     /**
      * Restore a single "file" to the application.  The file was typically obtained from

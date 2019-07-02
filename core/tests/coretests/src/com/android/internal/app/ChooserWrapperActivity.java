@@ -16,13 +16,23 @@
 
 package com.android.internal.app;
 
+import static org.mockito.Mockito.mock;
+
 import android.app.usage.UsageStatsManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.util.Size;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.function.Function;
-
-import static org.mockito.Mockito.mock;
 
 public class ChooserWrapperActivity extends ChooserActivity {
     /*
@@ -31,8 +41,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
 
-    ResolveListAdapter getAdapter() {
-        return mAdapter;
+    ChooserListAdapter getAdapter() {
+        return (ChooserListAdapter) mAdapter;
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }
@@ -74,6 +84,50 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return super.getPackageManager();
     }
 
+    @Override
+    protected Bitmap loadThumbnail(Uri uri, Size size) {
+        if (sOverrides.previewThumbnail != null) {
+            return sOverrides.previewThumbnail;
+        }
+        return super.loadThumbnail(uri, size);
+    }
+
+    @Override
+    protected boolean isImageType(String mimeType) {
+        return sOverrides.isImageType;
+    }
+
+    @Override
+    protected MetricsLogger getMetricsLogger() {
+        return sOverrides.metricsLogger;
+    }
+
+    @Override
+    public Cursor queryResolver(ContentResolver resolver, Uri uri) {
+        if (sOverrides.resolverCursor != null) {
+            return sOverrides.resolverCursor;
+        }
+
+        if (sOverrides.resolverForceException) {
+            throw new SecurityException("Test exception handling");
+        }
+
+        return super.queryResolver(resolver, uri);
+    }
+
+    @Override
+    protected boolean isWorkProfile() {
+        if (sOverrides.alternateProfileSetting != 0) {
+            return sOverrides.alternateProfileSetting == MetricsEvent.MANAGED_PROFILE;
+        }
+        return super.isWorkProfile();
+    }
+
+    public DisplayResolveInfo createTestDisplayResolveInfo(Intent originalIntent, ResolveInfo pri,
+            CharSequence pLabel, CharSequence pInfo, Intent pOrigIntent) {
+        return new DisplayResolveInfo(originalIntent, pri, pLabel, pInfo, pOrigIntent);
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -85,12 +139,24 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
         public ResolverListController resolverListController;
         public Boolean isVoiceInteraction;
+        public boolean isImageType;
+        public Cursor resolverCursor;
+        public boolean resolverForceException;
+        public Bitmap previewThumbnail;
+        public MetricsLogger metricsLogger;
+        public int alternateProfileSetting;
 
         public void reset() {
             onSafelyStartCallback = null;
             isVoiceInteraction = null;
             createPackageManager = null;
+            previewThumbnail = null;
+            isImageType = false;
+            resolverCursor = null;
+            resolverForceException = false;
             resolverListController = mock(ResolverListController.class);
+            metricsLogger = mock(MetricsLogger.class);
+            alternateProfileSetting = 0;
         }
     }
 }

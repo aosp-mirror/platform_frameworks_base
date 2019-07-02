@@ -25,23 +25,21 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
-import android.graphics.drawable.Drawable;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.DisplayListCanvas;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.RenderNodeAnimator;
@@ -72,6 +70,7 @@ public class LockPatternView extends View {
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
 
     private static final boolean PROFILE_DRAWING = false;
+    private static final float LINE_FADE_ALPHA_MULTIPLIER = 1.5f;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;
@@ -635,7 +634,7 @@ public class LockPatternView extends View {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 mPatternDrawLookup[i][j] = false;
-                mLineFadeStart[i+j] = 0;
+                mLineFadeStart[i+j*3] = 0;
             }
         }
     }
@@ -1155,8 +1154,8 @@ public class LockPatternView extends View {
                     drawCellDrawable(canvas, i, j, cellState.radius, drawLookup[i][j]);
                 } else {
                     if (isHardwareAccelerated() && cellState.hwAnimating) {
-                        DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-                        displayListCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
+                        RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                        recordingCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
                                 cellState.hwRadius, cellState.hwPaint);
                     } else {
                         drawCircle(canvas, (int) centerX, (int) centerY + translationY,
@@ -1196,9 +1195,9 @@ public class LockPatternView extends View {
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
                 if (i != 0) {
-                   // Set this line segment to slowly fade over the next second.
+                   // Set this line segment to fade away animated.
                    int lineFadeVal = (int) Math.min((elapsedRealtime -
-                           mLineFadeStart[i])/2f, 255f);
+                           mLineFadeStart[i]) * LINE_FADE_ALPHA_MULTIPLIER, 255f);
 
                     CellState state = mCellStates[cell.row][cell.column];
                     currentPath.rewind();
@@ -1298,8 +1297,10 @@ public class LockPatternView extends View {
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
+        byte[] patternBytes = LockPatternUtils.patternToByteArray(mPattern);
+        String patternString = patternBytes != null ? new String(patternBytes) : null;
         return new SavedState(superState,
-                LockPatternUtils.patternToString(mPattern),
+                patternString,
                 mPatternDisplayMode.ordinal(),
                 mInputEnabled, mInStealthMode, mEnableHapticFeedback);
     }

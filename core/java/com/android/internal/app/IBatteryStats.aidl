@@ -71,8 +71,8 @@ interface IBatteryStats {
 
     void noteSyncStart(String name, int uid);
     void noteSyncFinish(String name, int uid);
-    void noteJobStart(String name, int uid);
-    void noteJobFinish(String name, int uid, int stopReason);
+    void noteJobStart(String name, int uid, int standbyBucket, int jobid);
+    void noteJobFinish(String name, int uid, int stopReason, int standbyBucket, int jobid);
 
     void noteStartWakelock(int uid, int pid, String name, String historyName,
             int type, boolean unimportantForLogging);
@@ -158,4 +158,7 @@ interface IBatteryStats {
     oneway void noteBluetoothControllerActivity(in BluetoothActivityEnergyInfo info);
     oneway void noteModemControllerActivity(in ModemActivityInfo info);
     oneway void noteWifiControllerActivity(in WifiActivityEnergyInfo info);
+
+    /** {@hide} */
+    boolean setChargingStateUpdateDelayMillis(int delay);
 }

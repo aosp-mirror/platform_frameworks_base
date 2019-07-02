@@ -43,6 +43,8 @@ class UiAutomationManager {
             new ComponentName("com.android.server.accessibility", "UiAutomation");
     private static final String LOG_TAG = "UiAutomationManager";
 
+    private final Object mLock;
+
     private UiAutomationService mUiAutomationService;
 
     private AccessibilityServiceInfo mUiAutomationServiceInfo;
@@ -51,6 +53,10 @@ class UiAutomationManager {
 
     private int mUiAutomationFlags;
 
+    UiAutomationManager(Object lock) {
+        mLock = lock;
+    }
+
     private IBinder mUiAutomationServiceOwner;
     private final DeathRecipient mUiAutomationServiceOwnerDeathRecipient =
             new DeathRecipient() {
@@ -58,9 +64,7 @@ class UiAutomationManager {
                 public void binderDied() {
                     mUiAutomationServiceOwner.unlinkToDeath(this, 0);
                     mUiAutomationServiceOwner = null;
-                    if (mUiAutomationService != null) {
-                        destroyUiAutomationService();
-                    }
+                    destroyUiAutomationService();
                 }
             };
 
@@ -77,56 +81,62 @@ class UiAutomationManager {
     void registerUiTestAutomationServiceLocked(IBinder owner,
             IAccessibilityServiceClient serviceClient,
             Context context, AccessibilityServiceInfo accessibilityServiceInfo,
-            int id, Handler mainHandler, Object lock,
+            int id, Handler mainHandler,
             AccessibilityManagerService.SecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
             GlobalActionPerformer globalActionPerfomer, int flags) {
-        accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
+        synchronized (mLock) {
+            accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
 
-        if (mUiAutomationService != null) {
-            throw new IllegalStateException("UiAutomationService " + serviceClient
-                    + "already registered!");
+            if (mUiAutomationService != null) {
+                throw new IllegalStateException("UiAutomationService " + serviceClient
+                        + "already registered!");
+            }
+
+            try {
+                owner.linkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Couldn't register for the death of a UiTestAutomationService!",
+                        re);
+                return;
+            }
+
+            mSystemSupport = systemSupport;
+            mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
+                    mainHandler, mLock, securityPolicy, systemSupport, windowManagerInternal,
+                    globalActionPerfomer);
+            mUiAutomationServiceOwner = owner;
+            mUiAutomationFlags = flags;
+            mUiAutomationServiceInfo = accessibilityServiceInfo;
+            mUiAutomationService.mServiceInterface = serviceClient;
+            mUiAutomationService.onAdded();
+            try {
+                mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
+                        0);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Failed registering death link: " + re);
+                destroyUiAutomationService();
+                return;
+            }
+
+            mUiAutomationService.connectServiceUnknownThread();
         }
-
-        try {
-            owner.linkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Couldn't register for the death of a UiTestAutomationService!", re);
-            return;
-        }
-
-        mSystemSupport = systemSupport;
-        mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
-                mainHandler, lock, securityPolicy, systemSupport, windowManagerInternal,
-                globalActionPerfomer);
-        mUiAutomationServiceOwner = owner;
-        mUiAutomationFlags = flags;
-        mUiAutomationServiceInfo = accessibilityServiceInfo;
-        mUiAutomationService.mServiceInterface = serviceClient;
-        mUiAutomationService.onAdded();
-        try {
-            mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService, 0);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Failed registering death link: " + re);
-            destroyUiAutomationService();
-            return;
-        }
-
-        mUiAutomationService.connectServiceUnknownThread();
     }
 
     void unregisterUiTestAutomationServiceLocked(IAccessibilityServiceClient serviceClient) {
-        if ((mUiAutomationService == null)
-                || (serviceClient == null)
-                || (mUiAutomationService.mServiceInterface == null)
-                || (serviceClient.asBinder()
-                        != mUiAutomationService.mServiceInterface.asBinder())) {
-            throw new IllegalStateException("UiAutomationService " + serviceClient
-                    + " not registered!");
-        }
+        synchronized (mLock) {
+            if ((mUiAutomationService == null)
+                    || (serviceClient == null)
+                    || (mUiAutomationService.mServiceInterface == null)
+                    || (serviceClient.asBinder()
+                    != mUiAutomationService.mServiceInterface.asBinder())) {
+                throw new IllegalStateException("UiAutomationService " + serviceClient
+                        + " not registered!");
+            }
 
-        destroyUiAutomationService();
+            destroyUiAutomationService();
+        }
     }
 
     void sendAccessibilityEventLocked(AccessibilityEvent event) {
@@ -159,33 +169,51 @@ class UiAutomationManager {
     }
 
     int getRelevantEventTypes() {
-        if (mUiAutomationService == null) return 0;
-        return mUiAutomationService.getRelevantEventTypes();
+        UiAutomationService uiAutomationService;
+        synchronized (mLock) {
+            uiAutomationService = mUiAutomationService;
+        }
+        if (uiAutomationService == null) return 0;
+        return uiAutomationService.getRelevantEventTypes();
     }
 
     @Nullable
     AccessibilityServiceInfo getServiceInfo() {
-        if (mUiAutomationService == null) return null;
-        return mUiAutomationService.getServiceInfo();
+        UiAutomationService uiAutomationService;
+        synchronized (mLock) {
+            uiAutomationService = mUiAutomationService;
+        }
+        if (uiAutomationService == null) return null;
+        return uiAutomationService.getServiceInfo();
     }
 
     void dumpUiAutomationService(FileDescriptor fd, final PrintWriter pw, String[] args) {
-        if (mUiAutomationService != null) {
-            mUiAutomationService.dump(fd, pw, args);
+        UiAutomationService uiAutomationService;
+        synchronized (mLock) {
+            uiAutomationService = mUiAutomationService;
+        }
+        if (uiAutomationService != null) {
+            uiAutomationService.dump(fd, pw, args);
         }
     }
 
     private void destroyUiAutomationService() {
-        mUiAutomationService.mServiceInterface.asBinder().unlinkToDeath(mUiAutomationService, 0);
-        mUiAutomationService.onRemoved();
-        mUiAutomationService.resetLocked();
-        mUiAutomationService = null;
-        mUiAutomationFlags = 0;
-        if (mUiAutomationServiceOwner != null) {
-            mUiAutomationServiceOwner.unlinkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
-            mUiAutomationServiceOwner = null;
+        synchronized (mLock) {
+            if (mUiAutomationService != null) {
+                mUiAutomationService.mServiceInterface.asBinder().unlinkToDeath(
+                        mUiAutomationService, 0);
+                mUiAutomationService.onRemoved();
+                mUiAutomationService.resetLocked();
+                mUiAutomationService = null;
+                mUiAutomationFlags = 0;
+                if (mUiAutomationServiceOwner != null) {
+                    mUiAutomationServiceOwner.unlinkToDeath(
+                            mUiAutomationServiceOwnerDeathRecipient, 0);
+                    mUiAutomationServiceOwner = null;
+                }
+                mSystemSupport.onClientChangeLocked(false);
+            }
         }
-        mSystemSupport.onClientChange(false);
     }
 
     private class UiAutomationService extends AbstractAccessibilityServiceConnection {
@@ -256,6 +284,11 @@ class UiAutomationManager {
         @Override
         public boolean setSoftKeyboardShowMode(int mode) {
             return false;
+        }
+
+        @Override
+        public int getSoftKeyboardShowMode() {
+            return 0;
         }
 
         @Override

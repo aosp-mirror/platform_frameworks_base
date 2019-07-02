@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 package android.text;
 
 /**
- * Hyphenator just initializes the native implementation of automatic hyphenation,
- * in essence finding valid hyphenation opportunities in a word.
+ * Does the native Hyphenator initialization.
  *
  * @hide
  */
 public class Hyphenator {
+    private Hyphenator() {}
+
+    // This method is called from Zygote.
     public static void init() {
         nInit();
     }
+
     private static native void nInit();
 }

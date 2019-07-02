@@ -272,9 +272,66 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
   out_pb_config->set_sdk_version(config.sdkVersion);
 }
 
+static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item,
+                                         std::vector<Overlayable*>& serialized_overlayables,
+                                         StringPool* source_pool, pb::Entry* pb_entry,
+                                         pb::ResourceTable* pb_table) {
+  // Retrieve the index of the overlayable in the list of groups that have already been serialized.
+  size_t i;
+  for (i = 0 ; i < serialized_overlayables.size(); i++) {
+    if (overlayable_item.overlayable.get() == serialized_overlayables[i]) {
+      break;
+    }
+  }
+
+  // Serialize the overlayable if it has not been serialized already.
+  if (i == serialized_overlayables.size()) {
+    serialized_overlayables.push_back(overlayable_item.overlayable.get());
+    pb::Overlayable* pb_overlayable = pb_table->add_overlayable();
+    pb_overlayable->set_name(overlayable_item.overlayable->name);
+    pb_overlayable->set_actor(overlayable_item.overlayable->actor);
+    SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
+                        pb_overlayable->mutable_source());
+  }
+
+  pb::OverlayableItem* pb_overlayable_item = pb_entry->mutable_overlayable_item();
+  pb_overlayable_item->set_overlayable_idx(i);
+
+  if (overlayable_item.policies & OverlayableItem::Policy::kPublic) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::PUBLIC);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kProduct) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kSystem) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::SYSTEM);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kVendor) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::VENDOR);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kSignature) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::SIGNATURE);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kOdm) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::ODM);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kOem) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::OEM);
+  }
+
+  SerializeSourceToPb(overlayable_item.source, source_pool,
+                      pb_overlayable_item->mutable_source());
+  pb_overlayable_item->set_comment(overlayable_item.comment);
+}
+
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
                         IDiagnostics* diag) {
   StringPool source_pool;
+  pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
+  pb_fingerprint->set_tool(util::GetToolName());
+  pb_fingerprint->set_version(util::GetToolFingerprint());
+
+  std::vector<Overlayable*> overlayables;
   for (const std::unique_ptr<ResourceTablePackage>& package : table.packages) {
     pb::Package* pb_package = out_table->add_package();
     if (package->id) {
@@ -310,11 +367,9 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
           pb_allow_new->set_comment(entry->allow_new.value().comment);
         }
 
-        if (entry->overlayable) {
-          pb::Overlayable* pb_overlayable = pb_entry->mutable_overlayable();
-          SerializeSourceToPb(entry->overlayable.value().source, &source_pool,
-                              pb_overlayable->mutable_source());
-          pb_overlayable->set_comment(entry->overlayable.value().comment);
+        if (entry->overlayable_item) {
+          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables, &source_pool,
+                                       pb_entry, out_table);
         }
 
         for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
@@ -601,7 +656,8 @@ static void SerializeXmlCommon(const xml::Node& node, pb::XmlNode* out_node) {
   pb_src->set_column_number(node.column_number);
 }
 
-void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
+void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node,
+                      const SerializeXmlOptions options) {
   SerializeXmlCommon(el, out_node);
 
   pb::XmlElement* pb_element = out_node->mutable_element();
@@ -637,7 +693,12 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
     if (const xml::Element* child_el = xml::NodeCast<xml::Element>(child.get())) {
       SerializeXmlToPb(*child_el, pb_element->add_child());
     } else if (const xml::Text* text_el = xml::NodeCast<xml::Text>(child.get())) {
-      pb::XmlNode* pb_child_node = pb_element->add_child();
+      if (options.remove_empty_text_nodes && util::TrimWhitespace(text_el->text).empty()) {
+        // Do not serialize whitespace text nodes if told not to
+        continue;
+      }
+
+      pb::XmlNode *pb_child_node = pb_element->add_child();
       SerializeXmlCommon(*text_el, pb_child_node);
       pb_child_node->set_text(text_el->text);
     } else {
@@ -646,8 +707,9 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
   }
 }
 
-void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node) {
-  SerializeXmlToPb(*resource.root, out_node);
+void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node,
+                              const SerializeXmlOptions options) {
+  SerializeXmlToPb(*resource.root, out_node, options);
 }
 
 }  // namespace aapt

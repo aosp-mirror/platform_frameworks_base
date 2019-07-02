@@ -18,31 +18,30 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothProfile;
-import android.content.Context;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class MapClientProfileTest {
 
-    @Mock
-    private LocalBluetoothAdapter mAdapter;
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
@@ -50,24 +49,18 @@ public class MapClientProfileTest {
     @Mock
     private BluetoothMapClient mService;
     @Mock
-    private CachedBluetoothDevice mCachedBluetoothDevice;
-    @Mock
     private BluetoothDevice mBluetoothDevice;
     private BluetoothProfile.ServiceListener mServiceListener;
     private MapClientProfile mProfile;
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        doAnswer((invocation) -> {
-            mServiceListener = (BluetoothProfile.ServiceListener) invocation.getArguments()[1];
-            return null;
-        }).when(mAdapter).getProfileProxy(any(Context.class),
-                any(BluetoothProfile.ServiceListener.class), eq(BluetoothProfile.MAP_CLIENT));
-
-        mProfile = new MapClientProfile(RuntimeEnvironment.application, mAdapter,
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        mProfile = new MapClientProfile(RuntimeEnvironment.application,
                 mDeviceManager, mProfileManager);
+        mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.MAP_CLIENT, mService);
     }
 

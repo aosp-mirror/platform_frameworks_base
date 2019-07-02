@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -44,6 +45,15 @@ public final class BinderProxy implements IBinder {
 
     // Assume the process-wide default value when created
     volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
+
+    private static volatile Binder.ProxyTransactListener sTransactListener = null;
+
+    /**
+     * @see {@link Binder#setProxyTransactListener(listener)}.
+     */
+    public static void setTransactListener(@Nullable Binder.ProxyTransactListener listener) {
+        sTransactListener = listener;
+    }
 
     /*
      * Map from longs to BinderProxy, retaining only a WeakReference to the BinderProxies.
@@ -350,6 +360,16 @@ public final class BinderProxy implements IBinder {
     }
 
     /**
+     * Returns the number of binder proxies held in this process.
+     * @return number of binder proxies in this process
+     */
+    public static int getProxyCount() {
+        synchronized (sProxyMap) {
+            return sProxyMap.size();
+        }
+    }
+
+    /**
      * Dump proxy debug information.
      *
      * @hide
@@ -469,9 +489,30 @@ public final class BinderProxy implements IBinder {
             Trace.traceBegin(Trace.TRACE_TAG_ALWAYS,
                     stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName());
         }
+
+        // Make sure the listener won't change while processing a transaction.
+        final Binder.ProxyTransactListener transactListener = sTransactListener;
+        Object session = null;
+
+        if (transactListener != null) {
+            final int origWorkSourceUid = Binder.getCallingWorkSourceUid();
+            session = transactListener.onTransactStarted(this, code);
+
+            // Allow the listener to update the work source uid. We need to update the request
+            // header if the uid is updated.
+            final int updatedWorkSourceUid = Binder.getCallingWorkSourceUid();
+            if (origWorkSourceUid != updatedWorkSourceUid) {
+                data.replaceCallingWorkSourceUid(updatedWorkSourceUid);
+            }
+        }
+
         try {
             return transactNative(code, data, reply, flags);
         } finally {
+            if (transactListener != null) {
+                transactListener.onTransactEnded(session);
+            }
+
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }

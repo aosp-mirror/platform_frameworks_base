@@ -154,7 +154,6 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    @UnsupportedAppUsage
     public String getOpPackageName() {
         return mBase.getOpPackageName();
     }
@@ -706,6 +705,18 @@ public class ContextWrapper extends Context {
         return mBase.bindService(service, conn, flags);
     }
 
+    @Override
+    public boolean bindService(Intent service, int flags, Executor executor,
+            ServiceConnection conn) {
+        return mBase.bindService(service, flags, executor, conn);
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, int flags, String instanceName,
+            Executor executor, ServiceConnection conn) {
+        return mBase.bindIsolatedService(service, flags, instanceName, executor, conn);
+    }
+
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
@@ -718,6 +729,11 @@ public class ContextWrapper extends Context {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         return mBase.bindServiceAsUser(service, conn, flags, handler, user);
+    }
+
+    @Override
+    public void updateServiceGroup(ServiceConnection conn, int group, int importance) {
+        mBase.updateServiceGroup(conn, group, importance);
     }
 
     @Override
@@ -909,13 +925,19 @@ public class ContextWrapper extends Context {
         return mBase.getDisplayAdjustments(displayId);
     }
 
+    /** @hide */
+    @TestApi
+    @Override
+    public Display getDisplay() {
+        return mBase.getDisplay();
+    }
+
     /**
      * @hide
      */
     @Override
-    @UnsupportedAppUsage
-    public Display getDisplay() {
-        return mBase.getDisplay();
+    public int getDisplayId() {
+        return mBase.getDisplayId();
     }
 
     /**
@@ -1013,12 +1035,26 @@ public class ContextWrapper extends Context {
         mBase.setAutofillClient(client);
     }
 
+    /** @hide */
+    @Override
+    public AutofillOptions getAutofillOptions() {
+        return mBase == null ? null : mBase.getAutofillOptions();
+    }
+
+    /** @hide */
+    @Override
+    public void setAutofillOptions(AutofillOptions options) {
+        if (mBase != null) {
+            mBase.setAutofillOptions(options);
+        }
+    }
+
     /**
      * @hide
      */
     @Override
-    public boolean isAutofillCompatibilityEnabled() {
-        return mBase != null && mBase.isAutofillCompatibilityEnabled();
+    public ContentCaptureOptions getContentCaptureOptions() {
+        return mBase == null ? null : mBase.getContentCaptureOptions();
     }
 
     /**
@@ -1026,9 +1062,9 @@ public class ContextWrapper extends Context {
      */
     @TestApi
     @Override
-    public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
+    public void setContentCaptureOptions(ContentCaptureOptions options) {
         if (mBase != null) {
-            mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+            mBase.setContentCaptureOptions(options);
         }
     }
 }

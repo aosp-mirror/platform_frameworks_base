@@ -16,11 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
-
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -32,16 +31,14 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.ExpandPipEvent;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
+import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 
 import java.io.PrintWriter;
 
@@ -55,7 +52,7 @@ public class PipManager implements BasePipManager {
 
     private Context mContext;
     private IActivityManager mActivityManager;
-    private IWindowManager mWindowManager;
+    private IActivityTaskManager mActivityTaskManager;
     private Handler mHandler = new Handler();
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
@@ -69,7 +66,7 @@ public class PipManager implements BasePipManager {
     /**
      * Handler for system task stack changes.
      */
-    SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
+    TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             mTouchHandler.onActivityPinned();
@@ -77,7 +74,9 @@ public class PipManager implements BasePipManager {
             mMenuController.onActivityPinned();
             mAppOpsListener.onActivityPinned(packageName);
 
-            SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
+            Dependency.get(UiOffloadThread.class).submit(() -> {
+                WindowManagerWrapper.getInstance().setPipVisibility(true);
+            });
         }
 
         @Override
@@ -85,12 +84,13 @@ public class PipManager implements BasePipManager {
             final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPinnedActivity(
                     mContext, mActivityManager);
             final ComponentName topActivity = topPipActivityInfo.first;
-            final int userId = topActivity != null ? topPipActivityInfo.second : 0;
             mMenuController.onActivityUnpinned();
             mTouchHandler.onActivityUnpinned(topActivity);
             mAppOpsListener.onActivityUnpinned();
 
-            SystemServicesProxy.getInstance(mContext).setPipVisibility(topActivity != null);
+            Dependency.get(UiOffloadThread.class).submit(() -> {
+                WindowManagerWrapper.getInstance().setPipVisibility(topActivity != null);
+            });
         }
 
         @Override
@@ -172,10 +172,10 @@ public class PipManager implements BasePipManager {
     public void initialize(Context context) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
-        mWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mActivityTaskManager = ActivityTaskManager.getService();
 
         try {
-            mWindowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
+            WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
@@ -186,11 +186,10 @@ public class PipManager implements BasePipManager {
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
-        mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
-                mInputConsumerController);
+        mTouchHandler = new PipTouchHandler(context, mActivityManager, mActivityTaskManager,
+                mMenuController, mInputConsumerController);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
-        EventBus.getDefault().register(this);
     }
 
     /**
@@ -203,8 +202,17 @@ public class PipManager implements BasePipManager {
     /**
      * Expands the PIP.
      */
-    public final void onBusEvent(ExpandPipEvent event) {
+    @Override
+    public void expandPip() {
         mTouchHandler.getMotionHelper().expandPip(false /* skipAnimation */);
+    }
+
+    /**
+     * Hides the PIP menu.
+     */
+    @Override
+    public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
+        mMenuController.hideMenu(onStartCallback, onEndCallback);
     }
 
     /**

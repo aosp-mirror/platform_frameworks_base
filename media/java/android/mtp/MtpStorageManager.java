@@ -21,6 +21,8 @@ import android.os.FileObserver;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -31,10 +33,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * MtpStorageManager provides functionality for listing, tracking, and notifying MtpServer of
@@ -57,7 +57,8 @@ public class MtpStorageManager {
 
         MtpObjectObserver(MtpObject object) {
             super(object.getPath().toString(),
-                    MOVED_FROM | MOVED_TO | DELETE | CREATE | IN_ONLYDIR);
+                    MOVED_FROM | MOVED_TO | DELETE | CREATE | IN_ONLYDIR
+                  | CLOSE_WRITE);
             mObject = object;
         }
 
@@ -87,6 +88,10 @@ public class MtpStorageManager {
                     if (mObject.mObserver != null)
                         mObject.mObserver.stopWatching();
                     mObject.mObserver = null;
+                } else if ((event & CLOSE_WRITE) != 0) {
+                    if (sDebug)
+                        Log.i(TAG, "inotify for " + mObject.getPath() + " CLOSE_WRITE: " + path);
+                    handleChangedObject(mObject, path);
                 } else {
                     Log.w(TAG, "Got unrecognized event " + path + " " + event);
                 }
@@ -128,6 +133,7 @@ public class MtpStorageManager {
 
     /** MtpObject represents either a file or directory in an associated storage. **/
     public static class MtpObject {
+        private MtpStorage mStorage;
         // null for root objects
         private MtpObject mParent;
 
@@ -144,9 +150,10 @@ public class MtpStorageManager {
         // null if not both a directory and visited
         private FileObserver mObserver;
 
-        MtpObject(String name, int id, MtpObject parent, boolean isDir) {
+        MtpObject(String name, int id, MtpStorage storage, MtpObject parent, boolean isDir) {
             mId = id;
             mName = name;
+            mStorage = Preconditions.checkNotNull(storage);
             mParent = parent;
             mObserver = null;
             mVisited = false;
@@ -201,6 +208,10 @@ public class MtpStorageManager {
 
         public boolean isRoot() {
             return mParent == null;
+        }
+
+        public String getVolumeName() {
+            return mStorage.getVolumeName();
         }
 
         /** For MtpStorageManager only **/
@@ -275,7 +286,7 @@ public class MtpStorageManager {
         }
 
         private MtpObject copy(boolean recursive) {
-            MtpObject copy = new MtpObject(mName, mId, mParent, mIsDir);
+            MtpObject copy = new MtpObject(mName, mId, mStorage, mParent, mIsDir);
             copy.mIsDir = mIsDir;
             copy.mVisited = mVisited;
             copy.mState = mState;
@@ -304,6 +315,11 @@ public class MtpStorageManager {
          * Called when an object is deleted.
          */
         public abstract void sendObjectRemoved(int id);
+
+        /**
+         * Called when an object info is changed.
+         */
+        public abstract void sendObjectInfoChanged(int id);
     }
 
     private MtpNotifier mMtpNotifier;
@@ -358,13 +374,13 @@ public class MtpStorageManager {
      * Clean up resources used by the storage manager.
      */
     public synchronized void close() {
-        Stream<MtpObject> objs = Stream.concat(mRoots.values().stream(),
-                mObjects.values().stream());
-
-        Iterator<MtpObject> iter = objs.iterator();
-        while (iter.hasNext()) {
-            // Close all FileObservers.
-            MtpObject obj = iter.next();
+        for (MtpObject obj : mObjects.values()) {
+            if (obj.getObserver() != null) {
+                obj.getObserver().stopWatching();
+                obj.setObserver(null);
+            }
+        }
+        for (MtpObject obj : mRoots.values()) {
             if (obj.getObserver() != null) {
                 obj.getObserver().stopWatching();
                 obj.setObserver(null);
@@ -400,7 +416,7 @@ public class MtpStorageManager {
     public synchronized MtpStorage addMtpStorage(StorageVolume volume) {
         int storageId = ((getNextStorageId() & 0x0000FFFF) << 16) + 1;
         MtpStorage storage = new MtpStorage(volume, storageId);
-        MtpObject root = new MtpObject(storage.getPath(), storageId, null, true);
+        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, null, true);
         mRoots.put(storageId, root);
         return storage;
     }
@@ -495,49 +511,48 @@ public class MtpStorageManager {
      * @param parent object id of the parent. 0 for all objects, 0xFFFFFFFF for all object in root
      * @param format format of returned objects. 0 for any format
      * @param storageId storage id to look in. 0xFFFFFFFF for all storages
-     * @return A stream of matched objects, or null if error
+     * @return A list of matched objects, or null if error
      */
-    public synchronized Stream<MtpObject> getObjects(int parent, int format, int storageId) {
+    public synchronized List<MtpObject> getObjects(int parent, int format, int storageId) {
         boolean recursive = parent == 0;
+        ArrayList<MtpObject> objs = new ArrayList<>();
+        boolean ret = true;
         if (parent == 0xFFFFFFFF)
             parent = 0;
         if (storageId == 0xFFFFFFFF) {
             // query all stores
             if (parent == 0) {
                 // Get the objects of this format and parent in each store.
-                ArrayList<Stream<MtpObject>> streamList = new ArrayList<>();
                 for (MtpObject root : mRoots.values()) {
-                    streamList.add(getObjects(root, format, recursive));
+                    ret &= getObjects(objs, root, format, recursive);
                 }
-                return Stream.of(streamList).flatMap(Collection::stream).reduce(Stream::concat)
-                        .orElseGet(Stream::empty);
+                return ret ? objs : null;
             }
         }
         MtpObject obj = parent == 0 ? getStorageRoot(storageId) : getObject(parent);
         if (obj == null)
             return null;
-        return getObjects(obj, format, recursive);
+        ret = getObjects(objs, obj, format, recursive);
+        return ret ? objs : null;
     }
 
-    private synchronized Stream<MtpObject> getObjects(MtpObject parent, int format, boolean rec) {
+    private synchronized boolean getObjects(List<MtpObject> toAdd, MtpObject parent, int format, boolean rec) {
         Collection<MtpObject> children = getChildren(parent);
         if (children == null)
-            return null;
-        Stream<MtpObject> ret = Stream.of(children).flatMap(Collection::stream);
+            return false;
 
-        if (format != 0) {
-            ret = ret.filter(o -> o.getFormat() == format);
+        for (MtpObject o : children) {
+            if (format == 0 || o.getFormat() == format) {
+                toAdd.add(o);
+            }
         }
+        boolean ret = true;
         if (rec) {
             // Get all objects recursively.
-            ArrayList<Stream<MtpObject>> streamList = new ArrayList<>();
-            streamList.add(ret);
             for (MtpObject o : children) {
                 if (o.isDir())
-                    streamList.add(getObjects(o, format, true));
+                    ret &= getObjects(toAdd, o, format, true);
             }
-            ret = Stream.of(streamList).filter(Objects::nonNull).flatMap(Collection::stream)
-                    .reduce(Stream::concat).orElseGet(Stream::empty);
         }
         return ret;
     }
@@ -601,7 +616,7 @@ public class MtpStorageManager {
             return null;
         }
 
-        MtpObject obj = new MtpObject(newName, getNextObjectId(), parent, isDir);
+        MtpObject obj = new MtpObject(newName, getNextObjectId(), parent.mStorage, parent, isDir);
         mObjects.put(obj.getId(), obj);
         parent.addChild(obj);
         return obj;
@@ -736,6 +751,25 @@ public class MtpStorageManager {
             Log.i(TAG, state + " transitioned to " + obj.getState() + " in op " + op);
     }
 
+    private synchronized void handleChangedObject(MtpObject parent, String path) {
+        MtpOperation op = MtpOperation.NONE;
+        MtpObject obj = parent.getChild(path);
+        if (obj != null) {
+            // Only handle files for size change notification event
+            if ((!obj.isDir()) && (obj.getSize() > 0))
+            {
+                MtpObjectState state = obj.getState();
+                op = obj.getOperation();
+                MtpStorageManager.this.mMtpNotifier.sendObjectInfoChanged(obj.getId());
+                if (sDebug)
+                    Log.d(TAG, "sendObjectInfoChanged: id=" + obj.getId() + ",size=" + obj.getSize());
+            }
+        } else {
+            if (sDebug)
+                Log.w(TAG, "object " + path + " null");
+        }
+    }
+
     /**
      * Block the caller until all events currently in the event queue have been
      * read and processed. Used for testing purposes.
@@ -767,12 +801,11 @@ public class MtpStorageManager {
      * @return true iff cache is consistent
      */
     public synchronized boolean checkConsistency() {
-        Stream<MtpObject> objs = Stream.concat(mRoots.values().stream(),
-                mObjects.values().stream());
-        Iterator<MtpObject> iter = objs.iterator();
+        List<MtpObject> objs = new ArrayList<>();
+        objs.addAll(mRoots.values());
+        objs.addAll(mObjects.values());
         boolean ret = true;
-        while (iter.hasNext()) {
-            MtpObject obj = iter.next();
+        for (MtpObject obj : objs) {
             if (!obj.exists()) {
                 Log.w(TAG, "Object doesn't exist " + obj.getPath() + " " + obj.getId());
                 ret = false;

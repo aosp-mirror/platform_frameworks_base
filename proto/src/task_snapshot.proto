@@ -31,4 +31,6 @@
      int32 windowing_mode = 7;
      int32 system_ui_visibility = 8;
      bool is_translucent = 9;
+     string top_activity_component = 10;
+     float scale = 11;
  }

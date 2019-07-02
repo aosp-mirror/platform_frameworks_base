@@ -693,7 +693,7 @@ public class AccountManagerService
             return visibility;
         }
 
-        boolean isPrivileged = isPermittedForPackage(packageName, uid, accounts.userId,
+        boolean isPrivileged = isPermittedForPackage(packageName, accounts.userId,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
 
         // Device/Profile owner gets visibility by default.
@@ -703,8 +703,8 @@ public class AccountManagerService
 
         boolean preO = isPreOApplication(packageName);
         if ((signatureCheckResult != SIGNATURE_CHECK_MISMATCH)
-                || (preO && checkGetAccountsPermission(packageName, uid, accounts.userId))
-                || (checkReadContactsPermission(packageName, uid, accounts.userId)
+                || (preO && checkGetAccountsPermission(packageName, accounts.userId))
+                || (checkReadContactsPermission(packageName, accounts.userId)
                     && accountTypeManagesContacts(account.type, accounts.userId))
                 || isPrivileged) {
             // Use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
@@ -1182,8 +1182,8 @@ public class AccountManagerService
                         final long accountId = accountEntry.getKey();
                         final Account account = accountEntry.getValue();
                         if (obsoleteAuthType.contains(account.type)) {
-                            Slog.w(TAG, "deleting account " + account.name + " because type "
-                                    + account.type
+                            Slog.w(TAG, "deleting account " + account.toSafeString()
+                                    + " because type " + account.type
                                     + "'s registered authenticator no longer exist.");
                             Map<String, Integer> packagesToVisibility =
                                     getRequestingPackages(account, accounts);
@@ -1322,7 +1322,8 @@ public class AccountManagerService
         Preconditions.checkState(Thread.holdsLock(mUsers), "mUsers lock must be held");
         List<Account> accountsToRemove = accounts.accountsDb.findCeAccountsNotInDe();
         if (!accountsToRemove.isEmpty()) {
-            Slog.i(TAG, "Accounts " + accountsToRemove + " were previously deleted while user "
+            Slog.i(TAG, accountsToRemove.size()
+                    + " accounts were previously deleted while user "
                     + accounts.userId + " was locked. Removing accounts from CE tables");
             logRecord(accounts, AccountsDb.DEBUG_ACTION_SYNC_DE_CE_ACCOUNTS,
                     AccountsDb.TABLE_ACCOUNTS);
@@ -1637,7 +1638,7 @@ public class AccountManagerService
             return;
         }
 
-        Slog.d(TAG, "Copying account " + account.name
+        Slog.d(TAG, "Copying account " + account.toSafeString()
                 + " from user " + userFrom + " to user " + userTo);
         long identityToken = clearCallingIdentity();
         try {
@@ -1773,8 +1774,8 @@ public class AccountManagerService
             return false;
         }
         if (!isLocalUnlockedUser(accounts.userId)) {
-            Log.w(TAG, "Account " + account + " cannot be added - user " + accounts.userId
-                    + " is locked. callingUid=" + callingUid);
+            Log.w(TAG, "Account " + account.toSafeString() + " cannot be added - user "
+                    + accounts.userId + " is locked. callingUid=" + callingUid);
             return false;
         }
         synchronized (accounts.dbLock) {
@@ -1782,19 +1783,19 @@ public class AccountManagerService
                 accounts.accountsDb.beginTransaction();
                 try {
                     if (accounts.accountsDb.findCeAccountId(account) >= 0) {
-                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
                                 + ", skipping since the account already exists");
                         return false;
                     }
                     long accountId = accounts.accountsDb.insertCeAccount(account, password);
                     if (accountId < 0) {
-                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
                                 + ", skipping the DB insert failed");
                         return false;
                     }
                     // Insert into DE table
                     if (accounts.accountsDb.insertDeAccount(account, accountId) < 0) {
-                        Log.w(TAG, "insertAccountIntoDatabase: " + account
+                        Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
                                 + ", skipping the DB insert failed");
                         return false;
                     }
@@ -1802,7 +1803,8 @@ public class AccountManagerService
                         for (String key : extras.keySet()) {
                             final String value = extras.getString(key);
                             if (accounts.accountsDb.insertExtra(accountId, key, value) < 0) {
-                                Log.w(TAG, "insertAccountIntoDatabase: " + account
+                                Log.w(TAG, "insertAccountIntoDatabase: "
+                                        + account.toSafeString()
                                         + ", skipping since insertExtra failed for key " + key);
                                 return false;
                             }
@@ -2278,7 +2280,8 @@ public class AccountManagerService
         boolean isChanged = false;
         boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
         if (!userUnlocked) {
-            Slog.i(TAG, "Removing account " + account + " while user "+ accounts.userId
+            Slog.i(TAG, "Removing account " + account.toSafeString()
+                    + " while user " + accounts.userId
                     + " is still locked. CE data will be removed later");
         }
         synchronized (accounts.dbLock) {
@@ -2903,7 +2906,7 @@ public class AccountManagerService
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", getAuthToken"
-                            + ", " + account
+                            + ", " + account.toSafeString()
                             + ", authTokenType " + authTokenType
                             + ", loginOptions " + loginOptions
                             + ", notifyOnAuthFailure " + notifyOnAuthFailure;
@@ -3314,8 +3317,8 @@ public class AccountManagerService
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
 
         // Check to see if the Password should be included to the caller.
-        String callerPkg = optionsIn.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        boolean isPasswordForwardingAllowed = isPermitted(
+        String callerPkg = options.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        boolean isPasswordForwardingAllowed = checkPermissionAndNote(
                 callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         long identityToken = clearCallingIdentity();
@@ -3665,7 +3668,7 @@ public class AccountManagerService
                 @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", confirmCredentials"
-                            + ", " + account;
+                            + ", " + account.toSafeString();
                 }
             }.bind();
         } finally {
@@ -3703,7 +3706,7 @@ public class AccountManagerService
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", updateCredentials"
-                            + ", " + account
+                            + ", " + account.toSafeString()
                             + ", authTokenType " + authTokenType
                             + ", loginOptions " + loginOptions;
                 }
@@ -3740,7 +3743,7 @@ public class AccountManagerService
 
         // Check to see if the Password should be included to the caller.
         String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        boolean isPasswordForwardingAllowed = isPermitted(
+        boolean isPasswordForwardingAllowed = checkPermissionAndNote(
                 callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         long identityToken = clearCallingIdentity();
@@ -3767,7 +3770,7 @@ public class AccountManagerService
                         loginOptions.keySet();
                     return super.toDebugString(now)
                             + ", startUpdateCredentialsSession"
-                            + ", " + account
+                            + ", " + account.toSafeString()
                             + ", authTokenType " + authTokenType
                             + ", loginOptions " + loginOptions;
                 }
@@ -3808,7 +3811,7 @@ public class AccountManagerService
                 @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", isCredentialsUpdateSuggested"
-                            + ", " + account;
+                            + ", " + account.toSafeString();
                 }
 
                 @Override
@@ -4365,7 +4368,7 @@ public class AccountManagerService
         accounts.accountsDb.deleteSharedAccount(account);
         long accountId = accounts.accountsDb.insertSharedAccount(account);
         if (accountId < 0) {
-            Log.w(TAG, "insertAccountIntoDatabase: " + account
+            Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
                     + ", skipping the DB insert failed");
             return false;
         }
@@ -5199,7 +5202,7 @@ public class AccountManagerService
                     Process.SYSTEM_UID, null /* packageName */, false);
             fout.println("Accounts: " + accounts.length);
             for (Account account : accounts) {
-                fout.println("  " + account);
+                fout.println("  " + account.toString());
             }
 
             // Add debug information.
@@ -5287,7 +5290,9 @@ public class AccountManagerService
         try {
             INotificationManager notificationManager = mInjector.getNotificationManager();
             try {
-                notificationManager.enqueueNotificationWithTag(packageName, packageName,
+                // The calling uid must match either the package or op package, so use an op
+                // package that matches the cleared calling identity.
+                notificationManager.enqueueNotificationWithTag(packageName, "android",
                         id.mTag, id.mId, notification, userId);
             } catch (RemoteException e) {
                 /* ignore - local call */
@@ -5313,31 +5318,36 @@ public class AccountManagerService
         }
     }
 
-    private boolean isPermittedForPackage(String packageName, int uid, int userId,
-            String... permissions) {
+    private boolean isPermittedForPackage(String packageName, int userId, String... permissions) {
         final long identity = Binder.clearCallingIdentity();
         try {
+            final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
             IPackageManager pm = ActivityThread.getPackageManager();
             for (String perm : permissions) {
                 if (pm.checkPermission(perm, packageName, userId)
                         == PackageManager.PERMISSION_GRANTED) {
                     // Checks runtime permission revocation.
                     final int opCode = AppOpsManager.permissionToOpCode(perm);
-                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOpNoThrow(
+                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.checkOpNoThrow(
                             opCode, uid, packageName) == AppOpsManager.MODE_ALLOWED) {
                         return true;
                     }
                 }
             }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        } catch (NameNotFoundException | RemoteException e) {
+            // Assume permission is not granted if an error accrued.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
         return false;
     }
 
-    private boolean isPermitted(String opPackageName, int callingUid, String... permissions) {
+    /**
+     * Checks that package has at least one of given permissions and makes note of app
+     * performing the action.
+     */
+    private boolean checkPermissionAndNote(String opPackageName, int callingUid,
+            String... permissions) {
         for (String perm : permissions) {
             if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -5442,13 +5452,13 @@ public class AccountManagerService
     // Method checks visibility for applications targeing API level below {@link
     // android.os.Build.VERSION_CODES#O},
     // returns true if the the app has GET_ACCOUNTS or GET_ACCOUNTS_PRIVILEGED permission.
-    private boolean checkGetAccountsPermission(String packageName, int uid, int userId) {
-        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.GET_ACCOUNTS,
+    private boolean checkGetAccountsPermission(String packageName, int userId) {
+        return isPermittedForPackage(packageName, userId, Manifest.permission.GET_ACCOUNTS,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
     }
 
-    private boolean checkReadContactsPermission(String packageName, int uid, int userId) {
-        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.READ_CONTACTS);
+    private boolean checkReadContactsPermission(String packageName, int userId) {
+        return isPermittedForPackage(packageName, userId, Manifest.permission.READ_CONTACTS);
     }
 
     // Heuristic to check that account type may be associated with some contacts data and
@@ -5468,7 +5478,7 @@ public class AccountManagerService
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo
                 : serviceInfos) {
             if (accountType.equals(serviceInfo.type.type)) {
-                return isPermittedForPackage(serviceInfo.type.packageName, serviceInfo.uid, userId,
+                return isPermittedForPackage(serviceInfo.type.packageName, userId,
                     Manifest.permission.WRITE_CONTACTS);
             }
         }
@@ -5602,7 +5612,8 @@ public class AccountManagerService
                 if (!permissionGranted && ActivityManager.isRunningInTestHarness()) {
                     // TODO: Skip this check when running automated tests. Replace this
                     // with a more general solution.
-                    Log.d(TAG, "no credentials permission for usage of " + account + ", "
+                    Log.d(TAG, "no credentials permission for usage of "
+                            + account.toSafeString() + ", "
                             + authTokenType + " by uid " + callerUid
                             + " but ignoring since device is in test harness.");
                     return true;
@@ -6140,7 +6151,12 @@ public class AccountManagerService
 
             final int uid;
             try {
-                uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                long identityToken = clearCallingIdentity();
+                try {
+                    uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                } finally {
+                    restoreCallingIdentity(identityToken);
+                }
             } catch (NameNotFoundException e) {
                 Slog.e(TAG, "Unknown package " + packageName);
                 return;

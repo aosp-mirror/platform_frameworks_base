@@ -16,8 +16,11 @@
 
 package android.transition;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,9 +39,9 @@ public final class Scene {
     private int mLayoutId = -1;
     private ViewGroup mSceneRoot;
     private View mLayout; // alternative to layoutId
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     Runnable mEnterAction;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     Runnable mExitAction;
 
     /**
@@ -93,7 +96,7 @@ public final class Scene {
      * the hierarchy specified by the layoutId resource file.
      *
      * <p>This method is hidden because layoutId-based scenes should be
-     * created by the caching factory method {@link Scene#getCurrentScene(View)}.</p>
+     * created by the caching factory method {@link Scene#getCurrentScene(ViewGroup)}.</p>
      *
      * @param sceneRoot The root of the hierarchy in which scene changes
      * and transitions will take place.
@@ -191,27 +194,29 @@ public final class Scene {
     }
 
     /**
-     * Set the scene that the given view is in. The current scene is set only
-     * on the root view of a scene, not for every view in that hierarchy. This
+     * Set the scene that the given ViewGroup is in. The current scene is set only
+     * on the root ViewGroup of a scene, not for every view in that hierarchy. This
      * information is used by Scene to determine whether there is a previous
      * scene which should be exited before the new scene is entered.
      *
-     * @param view The view on which the current scene is being set
+     * @param sceneRoot The ViewGroup on which the current scene is being set
      */
-    @UnsupportedAppUsage
-    static void setCurrentScene(View view, Scene scene) {
-        view.setTagInternal(com.android.internal.R.id.current_scene, scene);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    static void setCurrentScene(@NonNull ViewGroup sceneRoot, @Nullable Scene scene) {
+        sceneRoot.setTagInternal(com.android.internal.R.id.current_scene, scene);
     }
 
     /**
-     * Gets the current {@link Scene} set on the given view. A scene is set on a view
-     * only if that view is the scene root.
+     * Gets the current {@link Scene} set on the given ViewGroup. A scene is set on a ViewGroup
+     * only if that ViewGroup is the scene root.
      *
-     * @return The current Scene set on this view. A value of null indicates that
+     * @param sceneRoot The ViewGroup on which the current scene will be returned
+     * @return The current Scene set on this ViewGroup. A value of null indicates that
      * no Scene is currently set.
      */
-    static Scene getCurrentScene(View view) {
-        return (Scene) view.getTag(com.android.internal.R.id.current_scene);
+    @Nullable
+    public static Scene getCurrentScene(@NonNull ViewGroup sceneRoot) {
+        return (Scene) sceneRoot.getTag(com.android.internal.R.id.current_scene);
     }
 
     /**
@@ -229,8 +234,7 @@ public final class Scene {
      * @param action The runnable whose {@link Runnable#run() run()} method will
      * be called when this scene is entered
      * @see #setExitAction(Runnable)
-     * @see Scene#Scene(ViewGroup, int, Context)
-     * @see Scene#Scene(ViewGroup, ViewGroup)
+     * @see Scene#Scene(ViewGroup, View)
      */
     public void setEnterAction(Runnable action) {
         mEnterAction = action;
@@ -250,8 +254,7 @@ public final class Scene {
      * if an enter action is set.
      *
      * @see #setEnterAction(Runnable)
-     * @see Scene#Scene(ViewGroup, int, Context)
-     * @see Scene#Scene(ViewGroup, ViewGroup)
+     * @see Scene#Scene(ViewGroup, View)
      */
     public void setExitAction(Runnable action) {
         mExitAction = action;

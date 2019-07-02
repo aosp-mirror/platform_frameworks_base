@@ -140,7 +140,7 @@ public final class CacheQuotaHint implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<CacheQuotaHint> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CacheQuotaHint> CREATOR =
             new Creator<CacheQuotaHint>() {
                 @Override
                 public CacheQuotaHint createFromParcel(Parcel in) {

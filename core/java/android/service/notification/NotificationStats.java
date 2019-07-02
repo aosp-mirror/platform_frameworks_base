@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * Information about how the user has interacted with a given notification.
  * @hide
  */
 @TestApi
@@ -71,9 +72,44 @@ public final class NotificationStats implements Parcelable {
      */
     public static final int DISMISSAL_SHADE = 3;
 
+    /** @hide */
+    @IntDef(prefix = { "DISMISS_SENTIMENT_" }, value = {
+            DISMISS_SENTIMENT_UNKNOWN, DISMISS_SENTIMENT_NEGATIVE, DISMISS_SENTIMENT_NEUTRAL,
+            DISMISS_SENTIMENT_POSITIVE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DismissalSentiment {}
+
+    /**
+     * No information is available about why this notification was dismissed, or the notification
+     * isn't dismissed yet.
+     */
+    public static final int DISMISS_SENTIMENT_UNKNOWN = -1000;
+    /**
+     * The user indicated while dismissing that they did not like the notification.
+     */
+    public static final int DISMISS_SENTIMENT_NEGATIVE = 0;
+    /**
+     * The user didn't indicate one way or another how they felt about the notification while
+     * dismissing it.
+     */
+    public static final int DISMISS_SENTIMENT_NEUTRAL = 1;
+    /**
+     * The user indicated while dismissing that they did like the notification.
+     */
+    public static final int DISMISS_SENTIMENT_POSITIVE = 2;
+
+
+    private @DismissalSentiment
+    int mDismissalSentiment = DISMISS_SENTIMENT_UNKNOWN;
+
     public NotificationStats() {
     }
 
+    /**
+     * @hide
+     */
+    @SystemApi
     protected NotificationStats(Parcel in) {
         mSeen = in.readByte() != 0;
         mExpanded = in.readByte() != 0;
@@ -82,6 +118,7 @@ public final class NotificationStats implements Parcelable {
         mViewedSettings = in.readByte() != 0;
         mInteracted = in.readByte() != 0;
         mDismissalSurface = in.readInt();
+        mDismissalSentiment = in.readInt();
     }
 
     @Override
@@ -93,6 +130,7 @@ public final class NotificationStats implements Parcelable {
         dest.writeByte((byte) (mViewedSettings ? 1 : 0));
         dest.writeByte((byte) (mInteracted ? 1 : 0));
         dest.writeInt(mDismissalSurface);
+        dest.writeInt(mDismissalSentiment);
     }
 
     @Override
@@ -100,7 +138,7 @@ public final class NotificationStats implements Parcelable {
         return 0;
     }
 
-    public static final Creator<NotificationStats> CREATOR = new Creator<NotificationStats>() {
+    public static final @android.annotation.NonNull Creator<NotificationStats> CREATOR = new Creator<NotificationStats>() {
         @Override
         public NotificationStats createFromParcel(Parcel in) {
             return new NotificationStats(in);
@@ -210,6 +248,21 @@ public final class NotificationStats implements Parcelable {
      */
     public void setDismissalSurface(@DismissalSurface int dismissalSurface) {
         mDismissalSurface = dismissalSurface;
+    }
+
+    /**
+     * Records whether the user indicated how they felt about a notification before or
+     * during dismissal.
+     */
+    public void setDismissalSentiment(@DismissalSentiment int dismissalSentiment) {
+        mDismissalSentiment = dismissalSentiment;
+    }
+
+    /**
+     * Returns how the user indicated they felt about a notification before or during dismissal.
+     */
+    public @DismissalSentiment int getDismissalSentiment() {
+        return mDismissalSentiment;
     }
 
     @Override

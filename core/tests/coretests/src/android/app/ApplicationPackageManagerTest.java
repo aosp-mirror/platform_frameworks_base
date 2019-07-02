@@ -16,13 +16,17 @@
 
 package android.app;
 
+import static android.os.storage.VolumeInfo.STATE_MOUNTED;
+import static android.os.storage.VolumeInfo.STATE_UNMOUNTED;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.support.test.filters.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 
@@ -31,9 +35,6 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static android.os.storage.VolumeInfo.STATE_MOUNTED;
-import static android.os.storage.VolumeInfo.STATE_UNMOUNTED;
 
 @LargeTest
 public class ApplicationPackageManagerTest extends TestCase {

@@ -16,36 +16,55 @@
 
 package android.media;
 
+import static android.media.MediaMetadataRetriever.METADATA_KEY_DURATION;
+import static android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT;
+import static android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH;
+import static android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC;
+import static android.os.Environment.MEDIA_UNKNOWN;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ImageDecoder;
+import android.graphics.ImageDecoder.ImageInfo;
+import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaFile.MediaFileType;
 import android.net.Uri;
 import android.os.Build;
+import android.os.CancellationSignal;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore.Images;
+import android.provider.MediaStore.ThumbnailConstants;
 import android.util.Log;
+import android.util.Size;
 
-import java.io.FileInputStream;
-import java.io.FileDescriptor;
+import com.android.internal.util.ArrayUtils;
+
+import libcore.io.IoUtils;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.ToIntFunction;
 
 /**
- * Thumbnail generation routines for media provider.
+ * Utilities for generating visual thumbnails from files.
  */
-
 public class ThumbnailUtils {
     private static final String TAG = "ThumbnailUtils";
 
-    /* Maximum pixels size for created bitmap. */
-    private static final int MAX_NUM_PIXELS_THUMBNAIL = 512 * 384;
-    private static final int MAX_NUM_PIXELS_MICRO_THUMBNAIL = 160 * 120;
-    private static final int UNCONSTRAINED = -1;
+    /** @hide */
+    @Deprecated
+    @UnsupportedAppUsage
+    public static final int TARGET_SIZE_MICRO_THUMBNAIL = 96;
 
     /* Options used internally. */
     private static final int OPTIONS_NONE = 0x0;
@@ -57,145 +76,304 @@ public class ThumbnailUtils {
      */
     public static final int OPTIONS_RECYCLE_INPUT = 0x2;
 
-    /**
-     * Constant used to indicate the dimension of mini thumbnail.
-     * @hide Only used by media framework and media provider internally.
-     */
-    public static final int TARGET_SIZE_MINI_THUMBNAIL = 320;
+    private static Size convertKind(int kind) {
+        if (kind == ThumbnailConstants.MICRO_KIND) {
+            return Point.convert(ThumbnailConstants.MICRO_SIZE);
+        } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
+            return Point.convert(ThumbnailConstants.FULL_SCREEN_SIZE);
+        } else if (kind == ThumbnailConstants.MINI_KIND) {
+            return Point.convert(ThumbnailConstants.MINI_SIZE);
+        } else {
+            throw new IllegalArgumentException("Unsupported kind: " + kind);
+        }
+    }
 
-    /**
-     * Constant used to indicate the dimension of micro thumbnail.
-     * @hide Only used by media framework and media provider internally.
-     */
-    @UnsupportedAppUsage
-    public static final int TARGET_SIZE_MICRO_THUMBNAIL = 96;
+    private static class Resizer implements ImageDecoder.OnHeaderDecodedListener {
+        private final Size size;
+        private final CancellationSignal signal;
 
-    /**
-     * This method first examines if the thumbnail embedded in EXIF is bigger than our target
-     * size. If not, then it'll create a thumbnail from original image. Due to efficiency
-     * consideration, we want to let MediaThumbRequest avoid calling this method twice for
-     * both kinds, so it only requests for MICRO_KIND and set saveImage to true.
-     *
-     * This method always returns a "square thumbnail" for MICRO_KIND thumbnail.
-     *
-     * @param filePath the path of image file
-     * @param kind could be MINI_KIND or MICRO_KIND
-     * @return Bitmap, or null on failures
-     *
-     * @hide This method is only used by media framework and media provider internally.
-     */
-    @UnsupportedAppUsage
-    public static Bitmap createImageThumbnail(String filePath, int kind) {
-        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND);
-        int targetSize = wantMini
-                ? TARGET_SIZE_MINI_THUMBNAIL
-                : TARGET_SIZE_MICRO_THUMBNAIL;
-        int maxPixels = wantMini
-                ? MAX_NUM_PIXELS_THUMBNAIL
-                : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
-        SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
-        Bitmap bitmap = null;
-        MediaFileType fileType = MediaFile.getFileType(filePath);
-        if (fileType != null) {
-            if (fileType.fileType == MediaFile.FILE_TYPE_JPEG
-                    || MediaFile.isRawImageFileType(fileType.fileType)) {
-                createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
-                bitmap = sizedThumbnailBitmap.mBitmap;
-            } else if (fileType.fileType == MediaFile.FILE_TYPE_HEIF) {
-                bitmap = createThumbnailFromMetadataRetriever(filePath, targetSize, maxPixels);
+        public Resizer(Size size, CancellationSignal signal) {
+            this.size = size;
+            this.signal = signal;
+        }
+
+        @Override
+        public void onHeaderDecoded(ImageDecoder decoder, ImageInfo info, Source source) {
+            // One last-ditch check to see if we've been canceled.
+            if (signal != null) signal.throwIfCanceled();
+
+            // We don't know how clients will use the decoded data, so we have
+            // to default to the more flexible "software" option.
+            decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+
+            // We requested a rough thumbnail size, but the remote size may have
+            // returned something giant, so defensively scale down as needed.
+            final int widthSample = info.getSize().getWidth() / size.getWidth();
+            final int heightSample = info.getSize().getHeight() / size.getHeight();
+            final int sample = Math.max(widthSample, heightSample);
+            if (sample > 1) {
+                decoder.setTargetSampleSize(sample);
             }
         }
+    }
+
+    /**
+     * Create a thumbnail for given audio file.
+     *
+     * @param filePath The audio file.
+     * @param kind The desired thumbnail kind, such as
+     *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createAudioThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
+     */
+    @Deprecated
+    public static @Nullable Bitmap createAudioThumbnail(@NonNull String filePath, int kind) {
+        try {
+            return createAudioThumbnail(new File(filePath), convertKind(kind), null);
+        } catch (IOException e) {
+            Log.w(TAG, e);
+            return null;
+        }
+    }
+
+    /**
+     * Create a thumbnail for given audio file.
+     *
+     * @param file The audio file.
+     * @param size The desired thumbnail size.
+     * @throws IOException If any trouble was encountered while generating or
+     *             loading the thumbnail, or if
+     *             {@link CancellationSignal#cancel()} was invoked.
+     */
+    public static @NonNull Bitmap createAudioThumbnail(@NonNull File file, @NonNull Size size,
+            @Nullable CancellationSignal signal) throws IOException {
+        // Checkpoint before going deeper
+        if (signal != null) signal.throwIfCanceled();
+
+        final Resizer resizer = new Resizer(size, signal);
+        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+            retriever.setDataSource(file.getAbsolutePath());
+            final byte[] raw = retriever.getEmbeddedPicture();
+            if (raw != null) {
+                return ImageDecoder.decodeBitmap(ImageDecoder.createSource(raw), resizer);
+            }
+        } catch (RuntimeException e) {
+            throw new IOException("Failed to create thumbnail", e);
+        }
+
+        // Only poke around for files on external storage
+        if (MEDIA_UNKNOWN.equals(Environment.getExternalStorageState(file))) {
+            throw new IOException("No embedded album art found");
+        }
+
+        // Ignore "Downloads" or top-level directories
+        final File parent = file.getParentFile();
+        final File grandParent = parent != null ? parent.getParentFile() : null;
+        if (parent != null
+                && parent.getName().equals(Environment.DIRECTORY_DOWNLOADS)) {
+            throw new IOException("No thumbnails in Downloads directories");
+        }
+        if (grandParent != null
+                && MEDIA_UNKNOWN.equals(Environment.getExternalStorageState(grandParent))) {
+            throw new IOException("No thumbnails in top-level directories");
+        }
+
+        // If no embedded image found, look around for best standalone file
+        final File[] found = ArrayUtils
+                .defeatNullable(file.getParentFile().listFiles((dir, name) -> {
+                    final String lower = name.toLowerCase();
+                    return (lower.endsWith(".jpg") || lower.endsWith(".png"));
+                }));
+
+        final ToIntFunction<File> score = (f) -> {
+            final String lower = f.getName().toLowerCase();
+            if (lower.equals("albumart.jpg")) return 4;
+            if (lower.startsWith("albumart") && lower.endsWith(".jpg")) return 3;
+            if (lower.contains("albumart") && lower.endsWith(".jpg")) return 2;
+            if (lower.endsWith(".jpg")) return 1;
+            return 0;
+        };
+        final Comparator<File> bestScore = (a, b) -> {
+            return score.applyAsInt(a) - score.applyAsInt(b);
+        };
+
+        final File bestFile = Arrays.asList(found).stream().max(bestScore).orElse(null);
+        if (bestFile == null) {
+            throw new IOException("No album art found");
+        }
+
+        // Checkpoint before going deeper
+        if (signal != null) signal.throwIfCanceled();
+
+        return ImageDecoder.decodeBitmap(ImageDecoder.createSource(bestFile), resizer);
+    }
+
+    /**
+     * Create a thumbnail for given image file.
+     *
+     * @param filePath The image file.
+     * @param kind The desired thumbnail kind, such as
+     *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createImageThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
+     */
+    @Deprecated
+    public static @Nullable Bitmap createImageThumbnail(@NonNull String filePath, int kind) {
+        try {
+            return createImageThumbnail(new File(filePath), convertKind(kind), null);
+        } catch (IOException e) {
+            Log.w(TAG, e);
+            return null;
+        }
+    }
+
+    /**
+     * Create a thumbnail for given image file.
+     *
+     * @param file The audio file.
+     * @param size The desired thumbnail size.
+     * @throws IOException If any trouble was encountered while generating or
+     *             loading the thumbnail, or if
+     *             {@link CancellationSignal#cancel()} was invoked.
+     */
+    public static @NonNull Bitmap createImageThumbnail(@NonNull File file, @NonNull Size size,
+            @Nullable CancellationSignal signal) throws IOException {
+        // Checkpoint before going deeper
+        if (signal != null) signal.throwIfCanceled();
+
+        final Resizer resizer = new Resizer(size, signal);
+        final String mimeType = MediaFile.getMimeTypeForFile(file.getName());
+        Bitmap bitmap = null;
+        ExifInterface exif = null;
+        int orientation = 0;
+
+        // get orientation
+        if (MediaFile.isExifMimeType(mimeType)) {
+            exif = new ExifInterface(file);
+            switch (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0)) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    orientation = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    orientation = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    orientation = 270;
+                    break;
+            }
+        }
+
+        if (mimeType.equals("image/heif")
+                || mimeType.equals("image/heif-sequence")
+                || mimeType.equals("image/heic")
+                || mimeType.equals("image/heic-sequence")) {
+            try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+                retriever.setDataSource(file.getAbsolutePath());
+                bitmap = retriever.getThumbnailImageAtIndex(-1,
+                        new MediaMetadataRetriever.BitmapParams(), size.getWidth(),
+                        size.getWidth() * size.getHeight());
+            } catch (RuntimeException e) {
+                throw new IOException("Failed to create thumbnail", e);
+            }
+        }
+
+        if (bitmap == null && exif != null) {
+            final byte[] raw = exif.getThumbnailBytes();
+            if (raw != null) {
+                try {
+                    bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(raw), resizer);
+                } catch (ImageDecoder.DecodeException e) {
+                    Log.w(TAG, e);
+                }
+            }
+        }
+
+        // Checkpoint before going deeper
+        if (signal != null) signal.throwIfCanceled();
 
         if (bitmap == null) {
-            FileInputStream stream = null;
-            try {
-                stream = new FileInputStream(filePath);
-                FileDescriptor fd = stream.getFD();
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 1;
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFileDescriptor(fd, null, options);
-                if (options.mCancel || options.outWidth == -1
-                        || options.outHeight == -1) {
-                    return null;
-                }
-                options.inSampleSize = computeSampleSize(
-                        options, targetSize, maxPixels);
-                options.inJustDecodeBounds = false;
-
-                options.inDither = false;
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                bitmap = BitmapFactory.decodeFileDescriptor(fd, null, options);
-            } catch (IOException ex) {
-                Log.e(TAG, "", ex);
-            } catch (OutOfMemoryError oom) {
-                Log.e(TAG, "Unable to decode file " + filePath + ". OutOfMemoryError.", oom);
-            } finally {
-                try {
-                    if (stream != null) {
-                        stream.close();
-                    }
-                } catch (IOException ex) {
-                    Log.e(TAG, "", ex);
-                }
-            }
-
+            bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(file), resizer);
+            // Use ImageDecoder to do full file decoding, we don't need to handle the orientation
+            return bitmap;
         }
 
-        if (kind == Images.Thumbnails.MICRO_KIND) {
-            // now we make it a "square thumbnail" for MICRO_KIND thumbnail
-            bitmap = extractThumbnail(bitmap,
-                    TARGET_SIZE_MICRO_THUMBNAIL,
-                    TARGET_SIZE_MICRO_THUMBNAIL, OPTIONS_RECYCLE_INPUT);
+        // Transform the bitmap if the orientation of the image is not 0.
+        if (orientation != 0 && bitmap != null) {
+            final int width = bitmap.getWidth();
+            final int height = bitmap.getHeight();
+
+            final Matrix m = new Matrix();
+            m.setRotate(orientation, width / 2, height / 2);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, m, false);
         }
+
         return bitmap;
     }
 
     /**
-     * Create a video thumbnail for a video. May return null if the video is
-     * corrupt or the format is not supported.
+     * Create a thumbnail for given video file.
      *
-     * @param filePath the path of video file
-     * @param kind could be MINI_KIND or MICRO_KIND
+     * @param filePath The video file.
+     * @param kind The desired thumbnail kind, such as
+     *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createVideoThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
      */
-    public static Bitmap createVideoThumbnail(String filePath, int kind) {
-        Bitmap bitmap = null;
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+    @Deprecated
+    public static @Nullable Bitmap createVideoThumbnail(@NonNull String filePath, int kind) {
         try {
-            retriever.setDataSource(filePath);
-            bitmap = retriever.getFrameAtTime(-1);
-        } catch (IllegalArgumentException ex) {
-            // Assume this is a corrupt video file
-        } catch (RuntimeException ex) {
-            // Assume this is a corrupt video file.
-        } finally {
-            try {
-                retriever.release();
-            } catch (RuntimeException ex) {
-                // Ignore failures while cleaning up.
-            }
+            return createVideoThumbnail(new File(filePath), convertKind(kind), null);
+        } catch (IOException e) {
+            Log.w(TAG, e);
+            return null;
         }
+    }
 
-        if (bitmap == null) return null;
+    /**
+     * Create a thumbnail for given video file.
+     *
+     * @param file The video file.
+     * @param size The desired thumbnail size.
+     * @throws IOException If any trouble was encountered while generating or
+     *             loading the thumbnail, or if
+     *             {@link CancellationSignal#cancel()} was invoked.
+     */
+    public static @NonNull Bitmap createVideoThumbnail(@NonNull File file, @NonNull Size size,
+            @Nullable CancellationSignal signal) throws IOException {
+        // Checkpoint before going deeper
+        if (signal != null) signal.throwIfCanceled();
 
-        if (kind == Images.Thumbnails.MINI_KIND) {
-            // Scale down the bitmap if it's too large.
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            int max = Math.max(width, height);
-            if (max > 512) {
-                float scale = 512f / max;
-                int w = Math.round(scale * width);
-                int h = Math.round(scale * height);
-                bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true);
+        final Resizer resizer = new Resizer(size, signal);
+        try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
+            mmr.setDataSource(file.getAbsolutePath());
+
+            // Try to retrieve thumbnail from metadata
+            final byte[] raw = mmr.getEmbeddedPicture();
+            if (raw != null) {
+                return ImageDecoder.decodeBitmap(ImageDecoder.createSource(raw), resizer);
             }
-        } else if (kind == Images.Thumbnails.MICRO_KIND) {
-            bitmap = extractThumbnail(bitmap,
-                    TARGET_SIZE_MICRO_THUMBNAIL,
-                    TARGET_SIZE_MICRO_THUMBNAIL,
-                    OPTIONS_RECYCLE_INPUT);
+
+            // Fall back to middle of video
+            final int width = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_WIDTH));
+            final int height = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_HEIGHT));
+            final long duration = Long.parseLong(mmr.extractMetadata(METADATA_KEY_DURATION));
+
+            // If we're okay with something larger than native format, just
+            // return a frame without up-scaling it
+            if (size.getWidth() > width && size.getHeight() > height) {
+                return Objects.requireNonNull(
+                        mmr.getFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC));
+            } else {
+                return Objects.requireNonNull(
+                        mmr.getScaledFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC,
+                        size.getWidth(), size.getHeight()));
+            }
+        } catch (RuntimeException e) {
+            throw new IOException("Failed to create thumbnail", e);
         }
-        return bitmap;
     }
 
     /**
@@ -237,122 +415,27 @@ public class ThumbnailUtils {
         return thumbnail;
     }
 
-    /*
-     * Compute the sample size as a function of minSideLength
-     * and maxNumOfPixels.
-     * minSideLength is used to specify that minimal width or height of a
-     * bitmap.
-     * maxNumOfPixels is used to specify the maximal size in pixels that is
-     * tolerable in terms of memory usage.
-     *
-     * The function returns a sample size based on the constraints.
-     * Both size and minSideLength can be passed in as IImage.UNCONSTRAINED,
-     * which indicates no care of the corresponding constraint.
-     * The functions prefers returning a sample size that
-     * generates a smaller bitmap, unless minSideLength = IImage.UNCONSTRAINED.
-     *
-     * Also, the function rounds up the sample size to a power of 2 or multiple
-     * of 8 because BitmapFactory only honors sample size this way.
-     * For example, BitmapFactory downsamples an image by 2 even though the
-     * request is 3. So we round up the sample size to avoid OOM.
-     */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
-        int initialSize = computeInitialSampleSize(options, minSideLength,
-                maxNumOfPixels);
-
-        int roundedSize;
-        if (initialSize <= 8 ) {
-            roundedSize = 1;
-            while (roundedSize < initialSize) {
-                roundedSize <<= 1;
-            }
-        } else {
-            roundedSize = (initialSize + 7) / 8 * 8;
-        }
-
-        return roundedSize;
+        return 1;
     }
 
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static int computeInitialSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
-        double w = options.outWidth;
-        double h = options.outHeight;
-
-        int lowerBound = (maxNumOfPixels == UNCONSTRAINED) ? 1 :
-                (int) Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
-        int upperBound = (minSideLength == UNCONSTRAINED) ? 128 :
-                (int) Math.min(Math.floor(w / minSideLength),
-                Math.floor(h / minSideLength));
-
-        if (upperBound < lowerBound) {
-            // return the larger one when there is no overlapping zone.
-            return lowerBound;
-        }
-
-        if ((maxNumOfPixels == UNCONSTRAINED) &&
-                (minSideLength == UNCONSTRAINED)) {
-            return 1;
-        } else if (minSideLength == UNCONSTRAINED) {
-            return lowerBound;
-        } else {
-            return upperBound;
-        }
+        return 1;
     }
 
-    /**
-     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
-     * The image data will be read from specified pfd if it's not null, otherwise
-     * a new input stream will be created using specified ContentResolver.
-     *
-     * Clients are allowed to pass their own BitmapFactory.Options used for bitmap decoding. A
-     * new BitmapFactory.Options will be created if options is null.
-     */
-    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-            Uri uri, ContentResolver cr, ParcelFileDescriptor pfd,
-            BitmapFactory.Options options) {
-        Bitmap b = null;
-        try {
-            if (pfd == null) pfd = makeInputStream(uri, cr);
-            if (pfd == null) return null;
-            if (options == null) options = new BitmapFactory.Options();
-
-            FileDescriptor fd = pfd.getFileDescriptor();
-            options.inSampleSize = 1;
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFileDescriptor(fd, null, options);
-            if (options.mCancel || options.outWidth == -1
-                    || options.outHeight == -1) {
-                return null;
-            }
-            options.inSampleSize = computeSampleSize(
-                    options, minSideLength, maxNumOfPixels);
-            options.inJustDecodeBounds = false;
-
-            options.inDither = false;
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            b = BitmapFactory.decodeFileDescriptor(fd, null, options);
-        } catch (OutOfMemoryError ex) {
-            Log.e(TAG, "Got oom exception ", ex);
-            return null;
-        } finally {
-            closeSilently(pfd);
-        }
-        return b;
-    }
-
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void closeSilently(ParcelFileDescriptor c) {
-      if (c == null) return;
-      try {
-          c.close();
-      } catch (Throwable t) {
-          // do nothing
-      }
+        IoUtils.closeQuietly(c);
     }
 
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static ParcelFileDescriptor makeInputStream(
             Uri uri, ContentResolver cr) {
@@ -366,6 +449,7 @@ public class ThumbnailUtils {
     /**
      * Transform source Bitmap to targeted width and height.
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static Bitmap transform(Matrix scaler,
             Bitmap source,
@@ -463,14 +547,7 @@ public class ThumbnailUtils {
         return b2;
     }
 
-    /**
-     * SizedThumbnailBitmap contains the bitmap, which is downsampled either from
-     * the thumbnail in exif or the full image.
-     * mThumbnailData, mThumbnailWidth and mThumbnailHeight are set together only if mThumbnail
-     * is not null.
-     *
-     * The width/height of the sized bitmap may be different from mThumbnailWidth/mThumbnailHeight.
-     */
+    @Deprecated
     private static class SizedThumbnailBitmap {
         public byte[] mThumbnailData;
         public Bitmap mBitmap;
@@ -478,81 +555,9 @@ public class ThumbnailUtils {
         public int mThumbnailHeight;
     }
 
-    /**
-     * Creates a bitmap by either downsampling from the thumbnail in EXIF or the full image.
-     * The functions returns a SizedThumbnailBitmap,
-     * which contains a downsampled bitmap and the thumbnail data in EXIF if exists.
-     */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void createThumbnailFromEXIF(String filePath, int targetSize,
             int maxPixels, SizedThumbnailBitmap sizedThumbBitmap) {
-        if (filePath == null) return;
-
-        ExifInterface exif = null;
-        byte [] thumbData = null;
-        try {
-            exif = new ExifInterface(filePath);
-            thumbData = exif.getThumbnail();
-        } catch (IOException ex) {
-            Log.w(TAG, ex);
-        }
-
-        BitmapFactory.Options fullOptions = new BitmapFactory.Options();
-        BitmapFactory.Options exifOptions = new BitmapFactory.Options();
-        int exifThumbWidth = 0;
-        int fullThumbWidth = 0;
-
-        // Compute exifThumbWidth.
-        if (thumbData != null) {
-            exifOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, exifOptions);
-            exifOptions.inSampleSize = computeSampleSize(exifOptions, targetSize, maxPixels);
-            exifThumbWidth = exifOptions.outWidth / exifOptions.inSampleSize;
-        }
-
-        // Compute fullThumbWidth.
-        fullOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, fullOptions);
-        fullOptions.inSampleSize = computeSampleSize(fullOptions, targetSize, maxPixels);
-        fullThumbWidth = fullOptions.outWidth / fullOptions.inSampleSize;
-
-        // Choose the larger thumbnail as the returning sizedThumbBitmap.
-        if (thumbData != null && exifThumbWidth >= fullThumbWidth) {
-            int width = exifOptions.outWidth;
-            int height = exifOptions.outHeight;
-            exifOptions.inJustDecodeBounds = false;
-            sizedThumbBitmap.mBitmap = BitmapFactory.decodeByteArray(thumbData, 0,
-                    thumbData.length, exifOptions);
-            if (sizedThumbBitmap.mBitmap != null) {
-                sizedThumbBitmap.mThumbnailData = thumbData;
-                sizedThumbBitmap.mThumbnailWidth = width;
-                sizedThumbBitmap.mThumbnailHeight = height;
-            }
-        } else {
-            fullOptions.inJustDecodeBounds = false;
-            sizedThumbBitmap.mBitmap = BitmapFactory.decodeFile(filePath, fullOptions);
-        }
-    }
-
-    private static Bitmap createThumbnailFromMetadataRetriever(
-            String filePath, int targetSize, int maxPixels) {
-        if (filePath == null) {
-            return null;
-        }
-        Bitmap thumbnail = null;
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(filePath);
-            MediaMetadataRetriever.BitmapParams params = new MediaMetadataRetriever.BitmapParams();
-            params.setPreferredConfig(Bitmap.Config.ARGB_8888);
-            thumbnail = retriever.getThumbnailImageAtIndex(-1, params, targetSize, maxPixels);
-        } catch (RuntimeException ex) {
-            // Assume this is a corrupt video file.
-        } finally {
-            if (retriever != null) {
-                retriever.release();
-            }
-        }
-        return thumbnail;
     }
 }

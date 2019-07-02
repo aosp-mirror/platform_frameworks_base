@@ -17,7 +17,6 @@
 package android.widget.scroll;
 
 import android.util.ScrollViewScenario;
-
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;

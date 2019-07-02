@@ -24,14 +24,13 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Xfermode;
@@ -75,7 +74,7 @@ import java.io.IOException;
  */
 public class ShapeDrawable extends Drawable {
     private @NonNull ShapeState mShapeState;
-    private PorterDuffColorFilter mTintFilter;
+    private BlendModeColorFilter mBlendModeColorFilter;
     private boolean mMutated;
 
     /**
@@ -238,8 +237,8 @@ public class ShapeDrawable extends Drawable {
         // only draw shape if it may affect output
         if (paint.getAlpha() != 0 || paint.getXfermode() != null || paint.hasShadowLayer()) {
             final boolean clearColorFilter;
-            if (mTintFilter != null && paint.getColorFilter() == null) {
-                paint.setColorFilter(mTintFilter);
+            if (mBlendModeColorFilter != null && paint.getColorFilter() == null) {
+                paint.setColorFilter(mBlendModeColorFilter);
                 clearColorFilter = true;
             } else {
                 clearColorFilter = false;
@@ -292,14 +291,16 @@ public class ShapeDrawable extends Drawable {
     @Override
     public void setTintList(ColorStateList tint) {
         mShapeState.mTint = tint;
-        mTintFilter = updateTintFilter(mTintFilter, tint, mShapeState.mTintMode);
+        mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, tint,
+                mShapeState.mBlendMode);
         invalidateSelf();
     }
 
     @Override
-    public void setTintMode(PorterDuff.Mode tintMode) {
-        mShapeState.mTintMode = tintMode;
-        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, tintMode);
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
+        mShapeState.mBlendMode = blendMode;
+        mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mShapeState.mTint,
+                blendMode);
         invalidateSelf();
     }
 
@@ -352,8 +353,9 @@ public class ShapeDrawable extends Drawable {
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final ShapeState state = mShapeState;
-        if (state.mTint != null && state.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        if (state.mTint != null && state.mBlendMode != null) {
+            mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, state.mTint,
+                    state.mBlendMode);
             return true;
         }
         return false;
@@ -475,7 +477,7 @@ public class ShapeDrawable extends Drawable {
 
         final int tintMode = a.getInt(R.styleable.ShapeDrawable_tintMode, -1);
         if (tintMode != -1) {
-            state.mTintMode = Drawable.parseTintMode(tintMode, Mode.SRC_IN);
+            state.mBlendMode = Drawable.parseBlendMode(tintMode, BlendMode.SRC_IN);
         }
 
         final ColorStateList tint = a.getColorStateList(R.styleable.ShapeDrawable_tint);
@@ -540,7 +542,7 @@ public class ShapeDrawable extends Drawable {
         int[] mThemeAttrs;
         Shape mShape;
         ColorStateList mTint;
-        Mode mTintMode = DEFAULT_TINT_MODE;
+        BlendMode mBlendMode = DEFAULT_BLEND_MODE;
         Rect mPadding;
         int mIntrinsicWidth;
         int mIntrinsicHeight;
@@ -573,7 +575,7 @@ public class ShapeDrawable extends Drawable {
                 }
             }
             mTint = orig.mTint;
-            mTintMode = orig.mTintMode;
+            mBlendMode = orig.mBlendMode;
             if (orig.mPadding != null) {
                 mPadding = new Rect(orig.mPadding);
             }
@@ -594,12 +596,12 @@ public class ShapeDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new ShapeDrawable(this, null);
+            return new ShapeDrawable(new ShapeState(this), null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new ShapeDrawable(this, res);
+            return new ShapeDrawable(new ShapeState(this), res);
         }
 
         @Override
@@ -625,7 +627,8 @@ public class ShapeDrawable extends Drawable {
      * after inflating or applying a theme.
      */
     private void updateLocalState() {
-        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, mShapeState.mTintMode);
+        mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mShapeState.mTint,
+                mShapeState.mBlendMode);
     }
 
     /**

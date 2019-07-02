@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupTransport;
@@ -29,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -61,7 +61,7 @@ public class TransportManager {
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
-    private final Context mContext;
+    private final @UserIdInt int mUserId;
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
     private final TransportClientManager mTransportClientManager;
@@ -86,22 +86,24 @@ public class TransportManager {
     @Nullable
     private volatile String mCurrentTransportName;
 
-    TransportManager(Context context, Set<ComponentName> whitelist, String selectedTransport) {
-        mContext = context;
+    TransportManager(@UserIdInt int userId, Context context, Set<ComponentName> whitelist,
+            String selectedTransport) {
+        mUserId = userId;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
         mTransportStats = new TransportStats();
-        mTransportClientManager = new TransportClientManager(context, mTransportStats);
+        mTransportClientManager = new TransportClientManager(mUserId, context, mTransportStats);
     }
 
     @VisibleForTesting
     TransportManager(
+            @UserIdInt int userId,
             Context context,
             Set<ComponentName> whitelist,
             String selectedTransport,
             TransportClientManager transportClientManager) {
-        mContext = context;
+        mUserId = userId;
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
@@ -176,9 +178,27 @@ public class TransportManager {
         return mTransportWhitelist;
     }
 
+    /** Returns the name of the selected transport or {@code null} if no transport selected. */
     @Nullable
-    String getCurrentTransportName() {
+    public String getCurrentTransportName() {
         return mCurrentTransportName;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or
+     * {@code null} if no transport selected.
+     *
+     * @throws TransportNotRegisteredException if the selected transport is not registered.
+     */
+    @Nullable
+    public ComponentName getCurrentTransportComponent()
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            if (mCurrentTransportName == null) {
+                return null;
+            }
+            return getRegisteredTransportComponentOrThrowLocked(mCurrentTransportName);
+        }
     }
 
     /**
@@ -264,7 +284,7 @@ public class TransportManager {
      * @throws TransportNotRegisteredException if the transport is not registered.
      */
     @Nullable
-    public String getTransportDataManagementLabel(String transportName)
+    public CharSequence getTransportDataManagementLabel(String transportName)
             throws TransportNotRegisteredException {
         synchronized (mTransportLock) {
             return getRegisteredTransportDescriptionOrThrowLocked(transportName)
@@ -307,7 +327,7 @@ public class TransportManager {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            @Nullable String dataManagementLabel) {
+            @Nullable CharSequence dataManagementLabel) {
         synchronized (mTransportLock) {
             TransportDescription description =
                     mRegisteredTransportsDescriptionMap.get(transportComponent);
@@ -322,6 +342,16 @@ public class TransportManager {
             description.dataManagementLabel = dataManagementLabel;
             Slog.d(TAG, "Transport " + name + " updated its attributes");
         }
+    }
+
+    @GuardedBy("mTransportLock")
+    private ComponentName getRegisteredTransportComponentOrThrowLocked(String transportName)
+            throws TransportNotRegisteredException {
+        ComponentName transportComponent = getRegisteredTransportComponentLocked(transportName);
+        if (transportComponent == null) {
+            throw new TransportNotRegisteredException(transportName);
+        }
+        return transportComponent;
     }
 
     @GuardedBy("mTransportLock")
@@ -424,9 +454,13 @@ public class TransportManager {
      *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      * @return A {@link TransportClient} or null if not registered.
+     * @throws IllegalStateException if no transport is selected.
      */
     @Nullable
     public TransportClient getCurrentTransportClient(String caller) {
+        if (mCurrentTransportName == null) {
+            throw new IllegalStateException("No transport selected");
+        }
         synchronized (mTransportLock) {
             return getTransportClient(mCurrentTransportName, caller);
         }
@@ -440,9 +474,13 @@ public class TransportManager {
      *     details.
      * @return A {@link TransportClient}.
      * @throws TransportNotRegisteredException if the transport is not registered.
+     * @throws IllegalStateException if no transport is selected.
      */
     public TransportClient getCurrentTransportClientOrThrow(String caller)
             throws TransportNotRegisteredException {
+        if (mCurrentTransportName == null) {
+            throw new IllegalStateException("No transport selected");
+        }
         synchronized (mTransportLock) {
             return getTransportClientOrThrow(mCurrentTransportName, caller);
         }
@@ -524,7 +562,7 @@ public class TransportManager {
     private void registerTransportsFromPackage(
             String packageName, Predicate<ComponentName> transportComponentFilter) {
         try {
-            mPackageManager.getPackageInfo(packageName, 0);
+            mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Trying to register transports from package not found " + packageName);
             return;
@@ -539,7 +577,7 @@ public class TransportManager {
     private void registerTransportsForIntent(
             Intent intent, Predicate<ComponentName> transportComponentFilter) {
         List<ResolveInfo> hosts =
-                mPackageManager.queryIntentServicesAsUser(intent, 0, UserHandle.USER_SYSTEM);
+                mPackageManager.queryIntentServicesAsUser(intent, 0, mUserId);
         if (hosts == null) {
             return;
         }
@@ -555,12 +593,14 @@ public class TransportManager {
     /** Transport has to be whitelisted and privileged. */
     private boolean isTransportTrusted(ComponentName transport) {
         if (!mTransportWhitelist.contains(transport)) {
-            Slog.w(TAG, "BackupTransport " + transport.flattenToShortString() +
-                    " not whitelisted.");
+            Slog.w(
+                    TAG,
+                    "BackupTransport " + transport.flattenToShortString() + " not whitelisted.");
             return false;
         }
         try {
-            PackageInfo packInfo = mPackageManager.getPackageInfo(transport.getPackageName(), 0);
+            PackageInfo packInfo =
+                    mPackageManager.getPackageInfoAsUser(transport.getPackageName(), 0, mUserId);
             if ((packInfo.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
                     == 0) {
                 Slog.w(TAG, "Transport package " + transport.getPackageName() + " not privileged");
@@ -596,8 +636,9 @@ public class TransportManager {
         Bundle extras = new Bundle();
         extras.putBoolean(BackupTransport.EXTRA_TRANSPORT_REGISTRATION, true);
 
-        TransportClient transportClient = mTransportClientManager.getTransportClient(
-            transportComponent, extras, callerLogString);
+        TransportClient transportClient =
+                mTransportClientManager.getTransportClient(
+                        transportComponent, extras, callerLogString);
         final IBackupTransport transport;
         try {
             transport = transportClient.connectOrThrow(callerLogString);
@@ -637,7 +678,7 @@ public class TransportManager {
                         transport.configurationIntent(),
                         transport.currentDestinationString(),
                         transport.dataManagementIntent(),
-                        transport.dataManagementLabel());
+                        transport.dataManagementIntentLabel());
         synchronized (mTransportLock) {
             mRegisteredTransportsDescriptionMap.put(transportComponent, description);
         }
@@ -666,7 +707,7 @@ public class TransportManager {
         @Nullable private Intent configurationIntent;
         private String currentDestinationString;
         @Nullable private Intent dataManagementIntent;
-        @Nullable private String dataManagementLabel;
+        @Nullable private CharSequence dataManagementLabel;
 
         private TransportDescription(
                 String name,
@@ -674,7 +715,7 @@ public class TransportManager {
                 @Nullable Intent configurationIntent,
                 String currentDestinationString,
                 @Nullable Intent dataManagementIntent,
-                @Nullable String dataManagementLabel) {
+                @Nullable CharSequence dataManagementLabel) {
             this.name = name;
             this.transportDirName = transportDirName;
             this.configurationIntent = configurationIntent;

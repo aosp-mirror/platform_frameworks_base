@@ -42,6 +42,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
+import android.app.Person;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -91,6 +93,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
@@ -104,8 +107,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,8 +144,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             switch (name) {
                 case Context.USER_SERVICE:
                     return mMockUserManager;
+                case Context.DEVICE_POLICY_SERVICE:
+                    return mMockDevicePolicyManager;
             }
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
 
         @Override
@@ -610,9 +613,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
+    protected DevicePolicyManager mMockDevicePolicyManager;
     protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
+    protected ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -749,9 +754,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
+        mMockDevicePolicyManager = mock(DevicePolicyManager.class);
         mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
+        mMockActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
@@ -759,6 +766,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
+        LocalServices.addService(ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
 
@@ -959,6 +968,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getInstrumentation().getContext();
     }
 
+    protected Context getClientContext() {
+        return mClientContext;
+    }
+
     protected ShortcutManager getManager() {
         return mManager;
     }
@@ -1047,7 +1060,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 new PackageParser.SigningDetails(
                         genSignatures(signatures),
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         return pi;
@@ -1572,6 +1584,22 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
+     * Make a shortcut with an ID and Category.
+     */
+    protected ShortcutInfo makeShortcutWithCategory(String id, Set<String> categories) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setCategories(categories);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
      * Make an intent.
      */
     protected Intent makeIntent(String action, Class<?> clazz, Object... bundleKeysAndValues) {
@@ -1579,6 +1607,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         intent.setComponent(makeComponent(clazz));
         intent.replaceExtras(makeBundle(bundleKeysAndValues));
         return intent;
+    }
+
+    /**
+     * Make a Person.
+     */
+    protected Person makePerson(CharSequence name, String key, String uri) {
+        final Person.Builder builder = new Person.Builder();
+        return builder.setName(name).setKey(key).setUri(uri).build();
     }
 
     /**
@@ -1641,11 +1677,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected Intent[] launchShortcutAndGetIntentsInner(Runnable shortcutStarter,
             @NonNull String packageName, @NonNull String shortcutId, int userId) {
-        reset(mMockActivityManagerInternal);
+        reset(mMockActivityTaskManagerInternal);
         shortcutStarter.run();
 
         final ArgumentCaptor<Intent[]> intentsCaptor = ArgumentCaptor.forClass(Intent[].class);
-        verify(mMockActivityManagerInternal).startActivitiesAsPackage(
+        verify(mMockActivityTaskManagerInternal).startActivitiesAsPackage(
                 eq(packageName),
                 eq(userId),
                 intentsCaptor.capture(),
@@ -1695,7 +1731,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void assertShortcutNotLaunched(@NonNull String packageName,
             @NonNull String shortcutId, int userId) {
-        reset(mMockActivityManagerInternal);
+        reset(mMockActivityTaskManagerInternal);
         try {
             mLauncherApps.startShortcut(packageName, shortcutId, null, null,
                     UserHandle.of(userId));
@@ -1703,7 +1739,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         } catch (ActivityNotFoundException expected) {
         }
         // This shouldn't have been called.
-        verify(mMockActivityManagerInternal, times(0)).startActivitiesAsPackage(
+        verify(mMockActivityTaskManagerInternal, times(0)).startActivitiesAsPackage(
                 anyString(),
                 anyInt(),
                 any(Intent[].class),
@@ -1786,6 +1822,26 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ShortcutPackage p = mService.getPackageShortcutForTest(
                 getCallingPackage(), getCallingUserId());
         return p == null ? null : p.getAllShortcutsForTest();
+    }
+
+    /**
+     * @return all share targets stored internally for the caller.
+     */
+    protected List<ShareTargetInfo> getCallerShareTargets() {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        return p == null ? null : p.getAllShareTargetsForTest();
+    }
+
+    /**
+     * @return the number of shortcuts stored internally for the caller that can be used as a share
+     * target in the ShareSheet. Such shortcuts have a matching category with at least one of the
+     * defined ShareTargets from the app's Xml resource.
+     */
+    protected int getCallerSharingShortcutCount() {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        return p == null ? 0 : p.getSharingShortcutCount();
     }
 
     /**

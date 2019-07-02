@@ -16,17 +16,13 @@
 
 package com.android.systemui.usb;
 
-import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.XmlResourceParser;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -45,12 +41,7 @@ import android.widget.TextView;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.internal.util.XmlUtils;
-import android.hardware.usb.AccessoryFilter;
-import android.hardware.usb.DeviceFilter;
 import com.android.systemui.R;
-
-import org.xmlpull.v1.XmlPullParser;
 
 public class UsbPermissionActivity extends AlertActivity
         implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {
@@ -71,12 +62,13 @@ public class UsbPermissionActivity extends AlertActivity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-       Intent intent = getIntent();
+        Intent intent = getIntent();
         mDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         mPendingIntent = (PendingIntent)intent.getParcelableExtra(Intent.EXTRA_INTENT);
         mUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-        mPackageName = intent.getStringExtra("package");
+        mPackageName = intent.getStringExtra(UsbManager.EXTRA_PACKAGE);
+        boolean canBeDefault = intent.getBooleanExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, false);
 
         PackageManager packageManager = getPackageManager();
         ApplicationInfo aInfo;
@@ -105,121 +97,27 @@ public class UsbPermissionActivity extends AlertActivity
         ap.mPositiveButtonListener = this;
         ap.mNegativeButtonListener = this;
 
-        try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(mPackageName,
-                    PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
-
-            if ((mDevice != null && canBeDefault(mDevice, packageInfo))
-                    || (mAccessory != null && canBeDefault(mAccessory, packageInfo))) {
-                // add "open when" checkbox
-                LayoutInflater inflater = (LayoutInflater) getSystemService(
-                        Context.LAYOUT_INFLATER_SERVICE);
-                ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
-                mAlwaysUse = (CheckBox) ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
-                if (mDevice == null) {
-                    mAlwaysUse.setText(getString(R.string.always_use_accessory, appName,
-                            mAccessory.getDescription()));
-                } else {
-                    mAlwaysUse.setText(getString(R.string.always_use_device, appName,
-                            mDevice.getProductName()));
-                }
-                mAlwaysUse.setOnCheckedChangeListener(this);
-
-                mClearDefaultHint = (TextView)ap.mView.findViewById(
-                        com.android.internal.R.id.clearDefaultHint);
-                mClearDefaultHint.setVisibility(View.GONE);
+        if (canBeDefault && (mDevice != null || mAccessory != null)) {
+            // add "open when" checkbox
+            LayoutInflater inflater = (LayoutInflater) getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
+            mAlwaysUse = (CheckBox) ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
+            if (mDevice == null) {
+                mAlwaysUse.setText(getString(R.string.always_use_accessory, appName,
+                        mAccessory.getDescription()));
+            } else {
+                mAlwaysUse.setText(getString(R.string.always_use_device, appName,
+                        mDevice.getProductName()));
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            // ignore
+            mAlwaysUse.setOnCheckedChangeListener(this);
+
+            mClearDefaultHint = (TextView)ap.mView.findViewById(
+                    com.android.internal.R.id.clearDefaultHint);
+            mClearDefaultHint.setVisibility(View.GONE);
         }
 
         setupAlert();
-
-    }
-
-    /**
-     * Can the app be the default for the USB device. I.e. can the app be launched by default if
-     * the device is plugged in.
-     *
-     * @param device The device the app would be default for
-     * @param packageInfo The package info of the app
-     *
-     * @return {@code true} iff the app can be default
-     */
-    private boolean canBeDefault(@NonNull UsbDevice device, @NonNull PackageInfo packageInfo) {
-        ActivityInfo[] activities = packageInfo.activities;
-        if (activities != null) {
-            int numActivities = activities.length;
-            for (int i = 0; i < numActivities; i++) {
-                ActivityInfo activityInfo = activities[i];
-
-                try (XmlResourceParser parser = activityInfo.loadXmlMetaData(getPackageManager(),
-                        UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
-                    if (parser == null) {
-                        continue;
-                    }
-
-                    XmlUtils.nextElement(parser);
-                    while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
-                        if ("usb-device".equals(parser.getName())) {
-                            DeviceFilter filter = DeviceFilter.read(parser);
-                            if (filter.matches(device)) {
-                                return true;
-                            }
-                        }
-
-                        XmlUtils.nextElement(parser);
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, "Unable to load component info " + activityInfo.toString(), e);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Can the app be the default for the USB accessory. I.e. can the app be launched by default if
-     * the accessory is plugged in.
-     *
-     * @param accessory The accessory the app would be default for
-     * @param packageInfo The package info of the app
-     *
-     * @return {@code true} iff the app can be default
-     */
-    private boolean canBeDefault(@NonNull UsbAccessory accessory,
-            @NonNull PackageInfo packageInfo) {
-        ActivityInfo[] activities = packageInfo.activities;
-        if (activities != null) {
-            int numActivities = activities.length;
-            for (int i = 0; i < numActivities; i++) {
-                ActivityInfo activityInfo = activities[i];
-
-                try (XmlResourceParser parser = activityInfo.loadXmlMetaData(getPackageManager(),
-                        UsbManager.ACTION_USB_ACCESSORY_ATTACHED)) {
-                    if (parser == null) {
-                        continue;
-                    }
-
-                    XmlUtils.nextElement(parser);
-                    while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
-                        if ("usb-accessory".equals(parser.getName())) {
-                            AccessoryFilter filter = AccessoryFilter.read(parser);
-                            if (filter.matches(accessory)) {
-                                return true;
-                            }
-                        }
-
-                        XmlUtils.nextElement(parser);
-                    }
-                } catch (Exception e) {
-                    Log.w(TAG, "Unable to load component info " + activityInfo.toString(), e);
-                }
-            }
-        }
-
-        return false;
     }
 
     @Override

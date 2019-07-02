@@ -1,19 +1,21 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2018 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package android.content.res;
+
+import static android.content.res.Resources.ID_NULL;
 
 import android.animation.Animator;
 import android.animation.StateListAnimator;
@@ -35,6 +37,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
 import android.icu.text.PluralRules;
@@ -295,6 +298,13 @@ public class ResourcesImpl {
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
                 + Integer.toHexString(resid));
+    }
+
+    @NonNull
+    String getLastResourceResolution() throws NotFoundException {
+        String str = mAssets.getLastResourceResolution();
+        if (str != null) return str;
+        throw new NotFoundException("Associated AssetManager hasn't resolved a resource");
     }
 
     @NonNull
@@ -846,10 +856,11 @@ public class ResourcesImpl {
             stack.push(id);
             try {
                 if (file.endsWith(".xml")) {
-                    final XmlResourceParser rp = loadXmlResourceParser(
-                            file, id, value.assetCookie, "drawable");
-                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, null);
-                    rp.close();
+                    if (file.startsWith("res/color/")) {
+                        dr = loadColorOrXmlDrawable(wrapper, value, id, density, file);
+                    } else {
+                        dr = loadXmlDrawable(wrapper, value, id, density, file);
+                    }
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
@@ -902,6 +913,33 @@ public class ResourcesImpl {
         return dr;
     }
 
+    private Drawable loadColorOrXmlDrawable(@NonNull Resources wrapper, @NonNull TypedValue value,
+            int id, int density, String file) {
+        try {
+            ColorStateList csl = loadColorStateList(wrapper, value, id, null);
+            return new ColorStateListDrawable(csl);
+        } catch (NotFoundException originalException) {
+            // If we fail to load as color, try as normal XML drawable
+            try {
+                return loadXmlDrawable(wrapper, value, id, density, file);
+            } catch (Exception ignored) {
+                // If fallback also fails, throw the original exception
+                throw originalException;
+            }
+        }
+    }
+
+    private Drawable loadXmlDrawable(@NonNull Resources wrapper, @NonNull TypedValue value,
+            int id, int density, String file)
+            throws IOException, XmlPullParserException {
+        try (
+                XmlResourceParser rp =
+                        loadXmlResourceParser(file, id, value.assetCookie, "drawable")
+        ) {
+            return Drawable.createFromXmlForDensity(wrapper, rp, density, null);
+        }
+    }
+
     /**
      * Loads a font from XML or resources stream.
      */
@@ -938,7 +976,8 @@ public class ResourcesImpl {
                 }
                 return Typeface.createFromResources(familyEntry, mAssets, file);
             }
-            return Typeface.createFromResources(mAssets, file, value.assetCookie);
+            return new Typeface.Builder(mAssets, file, false /* isAsset */, value.assetCookie)
+                    .build();
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Failed to parse xml resource " + file, e);
         } catch (IOException e) {
@@ -1185,7 +1224,7 @@ public class ResourcesImpl {
                     for (int i = 0; i < num; i++) {
                         if (cachedXmlBlockCookies[i] == assetCookie && cachedXmlBlockFiles[i] != null
                                 && cachedXmlBlockFiles[i].equals(file)) {
-                            return cachedXmlBlocks[i].newParser();
+                            return cachedXmlBlocks[i].newParser(id);
                         }
                     }
 
@@ -1202,7 +1241,7 @@ public class ResourcesImpl {
                         cachedXmlBlockCookies[pos] = assetCookie;
                         cachedXmlBlockFiles[pos] = file;
                         cachedXmlBlocks[pos] = block;
-                        return block.newParser();
+                        return block.newParser(id);
                     }
                 }
             } catch (Exception e) {
@@ -1260,6 +1299,14 @@ public class ResourcesImpl {
             mPreloading = false;
             flushLayoutCache();
         }
+    }
+
+    @AnyRes
+    static int getAttributeSetSourceResId(@Nullable AttributeSet set) {
+        if (set == null || !(set instanceof XmlBlock.Parser)) {
+            return ID_NULL;
+        }
+        return ((XmlBlock.Parser) set).getSourceResId();
     }
 
     LongSparseArray<Drawable.ConstantState> getPreloadedDrawables() {
@@ -1329,7 +1376,7 @@ public class ResourcesImpl {
         void setTo(ThemeImpl other) {
             synchronized (mKey) {
                 synchronized (other.mKey) {
-                    AssetManager.nativeThemeCopy(mTheme, other.mTheme);
+                    mAssets.setThemeTo(mTheme, other.mAssets, other.mTheme);
 
                     mThemeResId = other.mThemeResId;
                     mKey.setTo(other.getKey());
@@ -1343,11 +1390,9 @@ public class ResourcesImpl {
                 @StyleableRes int[] attrs,
                 @AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes) {
-            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "obtainStyledAttributes");
-            TypedArray array;
             synchronized (mKey) {
                 final int len = attrs.length;
-                array = TypedArray.obtain(wrapper.getResources(), len);
+                final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
 
                 // XXX note that for now we only work with compiled XML files.
                 // To support generic XML files we will need to manually parse
@@ -1358,9 +1403,8 @@ public class ResourcesImpl {
                         array.mDataAddress, array.mIndicesAddress);
                 array.mTheme = wrapper;
                 array.mXml = parser;
+                return array;
             }
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-            return array;
         }
 
         @NonNull
@@ -1439,6 +1483,33 @@ public class ResourcesImpl {
                     final boolean force = mKey.mForce[i];
                     mAssets.applyStyleToTheme(mTheme, resId, force);
                 }
+            }
+        }
+
+        /**
+         * Returns the ordered list of resource ID that are considered when resolving attribute
+         * values when making an equivalent call to
+         * {@link #obtainStyledAttributes(Resources.Theme, AttributeSet, int[], int, int)}. The list
+         * will include a set of explicit styles ({@code explicitStyleRes} and it will include the
+         * default styles ({@code defStyleAttr} and {@code defStyleRes}).
+         *
+         * @param defStyleAttr An attribute in the current theme that contains a
+         *                     reference to a style resource that supplies
+         *                     defaults values for the TypedArray.  Can be
+         *                     0 to not look for defaults.
+         * @param defStyleRes A resource identifier of a style resource that
+         *                    supplies default values for the TypedArray,
+         *                    used only if defStyleAttr is 0 or can not be found
+         *                    in the theme.  Can be 0 to not look for defaults.
+         * @param explicitStyleRes A resource identifier of an explicit style resource.
+         * @return ordered list of resource ID that are considered when resolving attribute values.
+         */
+        @Nullable
+        public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
+            synchronized (mKey) {
+                return mAssets.getAttributeResolutionStack(
+                        mTheme, defStyleAttr, defStyleRes, explicitStyleRes);
             }
         }
     }

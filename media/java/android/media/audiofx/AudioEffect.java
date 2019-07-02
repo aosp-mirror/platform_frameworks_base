@@ -25,10 +25,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.util.Log;
+
 import java.lang.ref.WeakReference;
-import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -231,29 +234,6 @@ public class AudioEffect {
         }
 
         /**
-         * @param type          UUID identifying the effect type. May be one of:
-         * {@link AudioEffect#EFFECT_TYPE_AEC}, {@link AudioEffect#EFFECT_TYPE_AGC},
-         * {@link AudioEffect#EFFECT_TYPE_BASS_BOOST}, {@link AudioEffect#EFFECT_TYPE_ENV_REVERB},
-         * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
-         * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB},
-         * {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
-         * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
-         * @param uuid         UUID for this particular implementation
-         * @param connectMode  {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}
-         * @param name         human readable effect name
-         * @param implementor  human readable effect implementor name
-        *
-        */
-        public Descriptor(String type, String uuid, String connectMode,
-                String name, String implementor) {
-            this.type = UUID.fromString(type);
-            this.uuid = UUID.fromString(uuid);
-            this.connectMode = connectMode;
-            this.name = name;
-            this.implementor = implementor;
-        }
-
-        /**
          *  Indicates the generic type of the effect (Equalizer, Bass boost ...).
          *  One of {@link AudioEffect#EFFECT_TYPE_AEC},
          *  {@link AudioEffect#EFFECT_TYPE_AGC}, {@link AudioEffect#EFFECT_TYPE_BASS_BOOST},
@@ -289,7 +269,69 @@ public class AudioEffect {
          * Human readable effect implementor name
          */
         public String implementor;
-    };
+
+        /**
+         * @param type          UUID identifying the effect type. May be one of:
+         * {@link AudioEffect#EFFECT_TYPE_AEC}, {@link AudioEffect#EFFECT_TYPE_AGC},
+         * {@link AudioEffect#EFFECT_TYPE_BASS_BOOST}, {@link AudioEffect#EFFECT_TYPE_ENV_REVERB},
+         * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
+         * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB},
+         * {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
+         * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
+         * @param uuid         UUID for this particular implementation
+         * @param connectMode  {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}
+         * @param name         human readable effect name
+         * @param implementor  human readable effect implementor name
+        *
+        */
+        public Descriptor(String type, String uuid, String connectMode,
+                String name, String implementor) {
+            this.type = UUID.fromString(type);
+            this.uuid = UUID.fromString(uuid);
+            this.connectMode = connectMode;
+            this.name = name;
+            this.implementor = implementor;
+        }
+
+        /** @hide */
+        @TestApi
+        public Descriptor(Parcel in) {
+            type = UUID.fromString(in.readString());
+            uuid = UUID.fromString(in.readString());
+            connectMode = in.readString();
+            name = in.readString();
+            implementor = in.readString();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, uuid, connectMode, name, implementor);
+        }
+
+        /** @hide */
+        @TestApi
+        public void writeToParcel(Parcel dest) {
+            dest.writeString(type.toString());
+            dest.writeString(uuid.toString());
+            dest.writeString(connectMode);
+            dest.writeString(name);
+            dest.writeString(implementor);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || !(o instanceof Descriptor)) return false;
+
+            Descriptor that = (Descriptor) o;
+
+            return (type.equals(that.type)
+                    && uuid.equals(that.uuid)
+                    && connectMode.equals(that.connectMode)
+                    && name.equals(that.name)
+                    && implementor.equals(that.implementor));
+        }
+    }
 
     /**
      * Effect connection mode is insert. Specifying an audio session ID when creating the effect

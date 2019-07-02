@@ -16,10 +16,16 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.UnsupportedAppUsage;
+import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 
 /**
  * Interface containing all of the fingerprint-specific constants.
+ *
+ * NOTE: The error messages must be consistent between BiometricConstants, Biometric*Constants,
+ *       and the frameworks/support/biometric/.../BiometricConstants files.
+ *
  * @hide
  */
 public interface BiometricFingerprintConstants {
@@ -107,8 +113,24 @@ public interface BiometricFingerprintConstants {
     public static final int FINGERPRINT_ERROR_HW_NOT_PRESENT = 12;
 
     /**
+     * The user pressed the negative button. This is a placeholder that is currently only used
+     * by the support library.
      * @hide
      */
+    public static final int FINGERPRINT_ERROR_NEGATIVE_BUTTON = 13;
+
+    /**
+     * The device does not have pin, pattern, or password set up. See
+     * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} and
+     * {@link KeyguardManager#isDeviceSecure()}
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
+
+    /**
+     * @hide
+     */
+    @UnsupportedAppUsage
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
     //

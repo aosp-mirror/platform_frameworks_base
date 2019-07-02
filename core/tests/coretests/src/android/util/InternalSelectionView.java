@@ -16,19 +16,16 @@
 
 package android.util;
 
-import com.android.frameworks.coretests.R;
-
-import android.view.View;
-import android.view.KeyEvent;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Paint;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.Color;
-import android.util.AttributeSet;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.view.KeyEvent;
+import android.view.View;
 
-
+import com.android.frameworks.coretests.R;
 
 /**
  * A view that has a known number of selectable rows, and maintains a notion of which

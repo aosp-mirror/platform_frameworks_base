@@ -42,12 +42,12 @@
     <string name="page_description_template" msgid="6831239682256197161">"Strana <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> od <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"Rezime, primjeraka <xliff:g id="COPIES">%1$s</xliff:g>, veličina papira <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Regulator za proširivanje"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Regulator za skupljanje"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"Regulator za sužavanje"</string>
     <string name="print_button" msgid="645164566271246268">"Štampaj"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"Sačuvaj u PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Opcije za štampanje su proširene"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Opcije za štampanje su skupljene"</string>
-    <string name="search" msgid="5421724265322228497">"Traži"</string>
+    <string name="search" msgid="5421724265322228497">"Pretraživanje"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Svi štampači"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Dodaj uslugu"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Okvir za pretraživanje je prikazan"</string>
@@ -70,7 +70,7 @@
     <string name="print_no_print_services" msgid="8561247706423327966">"Usluga za štampanje nije uključena"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Nijedan štampač nije pronađen"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Ne mogu se dodati štampači"</string>
-    <string name="select_to_add_printers" msgid="3800709038689830974">"Odaberite da biste dodali štampač"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"Odaberite da dodate štampač"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"Odaberite da biste uključili"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"Uključene usluge"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"Preporučene usluge"</string>
@@ -106,7 +106,7 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Nije moguće pisati u fajl"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"Nažalost, nije uspjelo. Pokušajte ponovo."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"Ponovi"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Pokušaj ponovo"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Štampač trenutno nije dostupan."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Pregled se ne može prikazati"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Priprema pregleda..."</string>

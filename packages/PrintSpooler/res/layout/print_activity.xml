@@ -29,7 +29,7 @@
         android:paddingStart="8dip"
         android:layout_marginEnd="16dp"
         android:elevation="@dimen/preview_controls_elevation"
-        android:background="?android:attr/colorPrimary">
+        style="?android:actionBarStyle">
 
         <com.android.printspooler.widget.ClickInterceptSpinner
             android:id="@+id/destination_spinner"
@@ -55,7 +55,7 @@
         android:paddingBottom="8dip"
         android:orientation="horizontal"
         android:elevation="@dimen/preview_controls_elevation"
-        android:background="?android:attr/colorPrimary">
+        style="?android:actionBarStyle">
 
         <TextView
             android:layout_width="wrap_content"
@@ -107,6 +107,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dip"
         android:elevation="@dimen/preview_controls_elevation"
+        android:tint="@android:color/white"
         android:background="@drawable/print_button">
     </ImageButton>
 
@@ -121,7 +122,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:animateLayoutChanges="true"
-        android:background="@color/print_preview_background_color"
         android:gravity="center">
 
         <!-- Error message added here -->

@@ -18,15 +18,17 @@ syntax = "proto2";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/backtrace.proto";
-import "frameworks/base/core/proto/android/os/batterystats.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/data.proto";
+import "frameworks/base/core/proto/android/os/header.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/metadata.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 import "frameworks/base/core/proto/android/os/ps.proto";
+import "frameworks/base/core/proto/android/os/statsdata.proto";
 import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
@@ -34,6 +36,7 @@ import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
+import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
@@ -45,13 +48,12 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/core/proto/android/service/restricted_image.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
-import "frameworks/base/libs/incident/proto/android/os/header.proto";
-import "frameworks/base/libs/incident/proto/android/os/metadata.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/section.proto";
 
 package android.os;
 
@@ -69,6 +71,12 @@ message IncidentProto {
     optional SystemPropertiesProto system_properties = 1000 [
         (section).type = SECTION_COMMAND,
         (section).args = "getprop"
+    ];
+
+    optional string kernel_version = 1002 [
+        (section).type = SECTION_FILE,
+        (section).args = "/proc/version",
+        (privacy).dest = DEST_AUTOMATIC
     ];
 
     // Device Logs
@@ -162,7 +170,6 @@ message IncidentProto {
 
     optional CpuFreqProto cpu_freq = 2004 [
         (section).type = SECTION_FILE,
-        (section).device_specific = true,
         (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
     ];
 
@@ -173,7 +180,6 @@ message IncidentProto {
 
     optional BatteryTypeProto battery_type = 2006 [
         (section).type = SECTION_FILE,
-        (section).device_specific = true,
         (section).args = "/sys/class/power_supply/bms/battery_type"
     ];
 
@@ -184,7 +190,7 @@ message IncidentProto {
     ];
 
     // System Services
-    optional com.android.server.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+    optional com.android.server.biometrics.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "fingerprint --proto --incident"
     ];
@@ -295,6 +301,31 @@ message IncidentProto {
     optional android.service.batterystats.BatteryStatsServiceDumpHistoryProto battery_history = 3022 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "batterystats --proto --history",
+        (section).userdebug_and_eng_only = true
+    ];
+
+    optional android.os.StatsDataDumpProto stats_data = 3023 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "stats --proto",
+        (section).userdebug_and_eng_only = true
+    ];
+
+    optional com.android.server.role.RoleManagerServiceDumpProto role = 3024 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "role --proto"
+    ];
+
+    optional android.service.restricted_image.RestrictedImagesDumpProto restricted_images = 3025 [
+        (section).type = SECTION_DUMPSYS,
+        (section).userdebug_and_eng_only = true,
+        (section).args = "incidentcompanion --restricted_image"
+    ];
+
+    // System trace as a serialized protobuf.
+    optional bytes system_trace = 3026 [
+        (section).type = SECTION_FILE,
+        (section).args = "/data/misc/perfetto-traces/incident-trace",
+        (privacy).dest = DEST_AUTOMATIC,
         (section).userdebug_and_eng_only = true
     ];
 

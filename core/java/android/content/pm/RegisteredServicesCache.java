@@ -294,9 +294,11 @@ public abstract class RegisteredServicesCache<V> {
         }
 
         final RegisteredServicesCacheListener<V> listener2 = listener;
-        handler.post(new Runnable() {
-            public void run() {
+        handler.post(() -> {
+            try {
                 listener2.onServiceChanged(type, userId, removed);
+            } catch (Throwable th) {
+                Slog.wtf(TAG, "Exception from onServiceChanged", th);
             }
         });
     }

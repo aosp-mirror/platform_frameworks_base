@@ -91,7 +91,7 @@ option java_package com.android.server.am
 30043 am_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
 
 # Stack focus
-30044 am_focused_stack (User|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
+30044 am_focused_stack (User|1|5),(Display Id|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
 
 # Running pre boot receiver
 30045 am_pre_boot (User|1|5),(Package|3)
@@ -136,3 +136,14 @@ option java_package com.android.server.am
 
 # The task is being removed from its parent stack
 30061 am_remove_task (Task ID|1|5), (Stack ID|1|5)
+
+# The task is being compacted
+30063 am_compact (Pid|1|5),(Process Name|3),(Action|3),(BeforeRssTotal|2|2),(BeforeRssFile|2|2),(BeforeRssAnon|2|2),(BeforeRssSwap|2|2),(DeltaRssTotal|2|2),(DeltaRssFile|2|2),(DeltaRssAnon|2|2),(DeltaRssSwap|2|2),(Time|2|3),(LastAction|1|2),(LastActionTimestamp|2|3),(setAdj|1|2),(procState|1|2),(BeforeZRAMFree|2|2),(DeltaZRAMFree|2|2)
+
+# The activity's onTopResumedActivityChanged(true) has been called.
+30064 am_on_top_resumed_gained_called (User|1|5),(Component Name|3),(Reason|3)
+# The activity's onTopResumedActivityChanged(false) has been called.
+30065 am_on_top_resumed_lost_called (User|1|5),(Component Name|3),(Reason|3)
+
+# An activity been add into stopping list
+30066 am_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)

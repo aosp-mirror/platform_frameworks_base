@@ -18,13 +18,13 @@ package com.android.systemui.doze;
 
 import static junit.framework.TestCase.assertEquals;
 
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -48,10 +48,10 @@ public class DozeConfigurationTest extends SysuiTestCase {
             return;
         }
 
-        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.DOZE_ALWAYS_ON,
-                null);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.DOZE_ALWAYS_ON, null, UserHandle.USER_CURRENT);
         boolean defaultValue = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dozeAlwaysOnEnabled);
-        assertEquals(mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT), defaultValue);
+        assertEquals(defaultValue, mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT));
     }
 }

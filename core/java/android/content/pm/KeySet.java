@@ -63,7 +63,7 @@ public class KeySet implements Parcelable {
      * Implement Parcelable
      * @hide
      */
-    public static final Parcelable.Creator<KeySet> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<KeySet> CREATOR
             = new Parcelable.Creator<KeySet>() {
 
         /**

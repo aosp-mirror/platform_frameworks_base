@@ -20,7 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -36,7 +35,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -250,7 +248,7 @@ import java.util.List;
      * @throws IllegalArgumentException
      */
     public boolean sendMediaKeyEvent(KeyEvent keyEvent) throws IllegalArgumentException {
-        if (!KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
+        if (!KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
             throw new IllegalArgumentException("not a media key event");
         }
         synchronized (mInfoLock) {
@@ -634,8 +632,8 @@ import java.util.List;
             l = this.mOnClientUpdateListener;
         }
         if (l != null) {
-            int playstate = state == null ? RemoteControlClient.PLAYSTATE_NONE : PlaybackState
-                    .getRccStateFromState(state.getState());
+            int playstate = state == null ? RemoteControlClient.PLAYSTATE_NONE
+                    : RemoteControlClient.getRccStateFromState(state.getState());
             if (state == null || state.getPosition() == PlaybackState.PLAYBACK_POSITION_UNKNOWN) {
                 l.onClientPlaybackStateUpdate(playstate);
             } else {
@@ -644,7 +642,7 @@ import java.util.List;
             }
             if (state != null) {
                 l.onClientTransportControlUpdate(
-                        PlaybackState.getRccControlFlagsFromActions(state.getActions()));
+                        RemoteControlClient.getRccControlFlagsFromActions(state.getActions()));
             }
         }
     }

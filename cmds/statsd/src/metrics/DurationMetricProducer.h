@@ -42,7 +42,7 @@ public:
                            const int conditionIndex, const size_t startIndex,
                            const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
                            const sp<ConditionWizard>& wizard,
-                           const FieldMatcher& internalDimensions, const int64_t startTimeNs);
+                           const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~DurationMetricProducer();
 
@@ -63,6 +63,8 @@ private:
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
+                            const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
 
@@ -71,8 +73,14 @@ private:
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
 
+    // Internal interface to handle active state change.
+    void onActiveStateChangedLocked(const int64_t& eventTimeNs) override;
+
     // Internal interface to handle sliced condition change.
     void onSlicedConditionMayChangeLocked(bool overallCondition, const int64_t eventTime) override;
+
+    void onSlicedConditionMayChangeInternalLocked(bool overallCondition,
+                                                  const int64_t eventTimeNs);
 
     void onSlicedConditionMayChangeLocked_opt1(bool overallCondition, const int64_t eventTime);
     void onSlicedConditionMayChangeLocked_opt2(bool overallCondition, const int64_t eventTime);
@@ -87,7 +95,8 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const int64_t& eventTime);
 
-    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                  const int64_t& nextBucketStartTimeNs) override;
 
     const DurationMetric_AggregationType mAggregationType;
 
@@ -115,7 +124,6 @@ private:
     ConditionState mUnSlicedPartCondition;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
     // The duration trackers in the current bucket.
@@ -137,11 +145,13 @@ private:
 
     FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
+    FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState);
     FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade);
     FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket);
     FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);
     FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicates);
+    FRIEND_TEST(DurationMetricTrackerTest, TestFirstBucket);
 };
 
 }  // namespace statsd

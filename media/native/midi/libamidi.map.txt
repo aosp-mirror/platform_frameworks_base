@@ -1,0 +1,18 @@
+LIBAMIDI {
+  global:
+    AMidiDevice_fromJava;
+    AMidiDevice_release;
+    AMidiDevice_getType;
+    AMidiDevice_getNumInputPorts;
+    AMidiDevice_getNumOutputPorts;
+    AMidiOutputPort_open;
+    AMidiOutputPort_close;
+    AMidiOutputPort_receive;
+    AMidiInputPort_open;
+    AMidiInputPort_send;
+    AMidiInputPort_sendWithTimestamp;
+    AMidiInputPort_sendFlush;
+    AMidiInputPort_close;
+  local:
+    *;
+};

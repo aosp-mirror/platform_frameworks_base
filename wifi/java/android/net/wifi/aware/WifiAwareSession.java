@@ -133,7 +133,7 @@ public class WifiAwareSession implements AutoCloseable {
      *      An application must use the {@link DiscoverySession#close()} to
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
-     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to start a publish discovery session.
      *
      * @param publishConfig The {@link PublishConfig} specifying the
@@ -179,7 +179,7 @@ public class WifiAwareSession implements AutoCloseable {
      *      An application must use the {@link DiscoverySession#close()} to
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
-     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission to start a subscribe discovery session.
      *
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
@@ -213,7 +213,7 @@ public class WifiAwareSession implements AutoCloseable {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)}.
+     *     {@link android.net.wifi.aware.WifiAwareNetworkSpecifier.Builder}.
      * <p>
      * To set up an encrypted link use the
      * {@link #createNetworkSpecifierPassphrase(int, byte[], String)} API.
@@ -254,7 +254,7 @@ public class WifiAwareSession implements AutoCloseable {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
+     *     {@link android.net.wifi.aware.WifiAwareNetworkSpecifier.Builder}.
      *
      * @param role  The role of this device:
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
@@ -300,7 +300,7 @@ public class WifiAwareSession implements AutoCloseable {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
+     *     {@link android.net.wifi.aware.WifiAwareNetworkSpecifier.Builder}.
      *
      * @param role  The role of this device:
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or

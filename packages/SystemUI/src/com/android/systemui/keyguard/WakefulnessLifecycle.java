@@ -23,9 +23,13 @@ import com.android.systemui.Dumpable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Tracks the wakefulness lifecycle.
  */
+@Singleton
 public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observer> implements
         Dumpable {
 
@@ -35,6 +39,10 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public static final int WAKEFULNESS_GOING_TO_SLEEP = 3;
 
     private int mWakefulness = WAKEFULNESS_ASLEEP;
+
+    @Inject
+    public WakefulnessLifecycle() {
+    }
 
     public int getWakefulness() {
         return mWakefulness;

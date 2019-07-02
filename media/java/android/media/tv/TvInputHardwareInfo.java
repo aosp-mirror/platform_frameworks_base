@@ -74,7 +74,7 @@ public final class TvInputHardwareInfo implements Parcelable {
     public static final int CABLE_CONNECTION_STATUS_DISCONNECTED =
             Constants.CABLE_CONNECTION_STATUS_DISCONNECTED;
 
-    public static final Parcelable.Creator<TvInputHardwareInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvInputHardwareInfo> CREATOR =
             new Parcelable.Creator<TvInputHardwareInfo>() {
         @Override
         public TvInputHardwareInfo createFromParcel(Parcel source) {

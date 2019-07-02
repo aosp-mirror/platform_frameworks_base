@@ -16,15 +16,14 @@
 
 package android.widget.scroll;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Button;
 
+import com.android.frameworks.coretests.R;
 
 /**
  * Basic scroll view example

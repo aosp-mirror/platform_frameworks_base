@@ -16,9 +16,6 @@
 
 package com.android.server.voiceinteraction;
 
-import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -26,9 +23,17 @@ import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
+
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.UriGrantsManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ClipData;
@@ -61,6 +66,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -81,6 +87,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     final int mCallingUid;
     final Handler mHandler;
     final IActivityManager mAm;
+    final UriGrantsManagerInternal mUgmInternal;
     final IWindowManager mIWindowManager;
     final AppOpsManager mAppOps;
     final IBinder mPermissionOwner;
@@ -140,25 +147,22 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mCallingUid = callingUid;
         mHandler = handler;
         mAm = ActivityManager.getService();
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mAssistDataRequester = new AssistDataRequester(mContext, mAm, mIWindowManager,
+        mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE),
                 this, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
-        IBinder permOwner = null;
-        try {
-            permOwner = mAm.newUriPermissionOwner("voicesession:"
+        final IBinder permOwner = mUgmInternal.newUriPermissionOwner("voicesession:"
                     + component.flattenToShortString());
-        } catch (RemoteException e) {
-            Slog.w("voicesession", "AM dead", e);
-        }
         mPermissionOwner = permOwner;
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
         mBound = mContext.bindServiceAsUser(mBindIntent, this,
                 Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
-                        | Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
+                        | Context.BIND_ALLOW_OOM_MANAGEMENT
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, new UserHandle(mUser));
         if (mBound) {
             try {
                 mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
@@ -190,7 +194,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
                         Context.BIND_AUTO_CREATE | Context.BIND_TREAT_LIKE_ACTIVITY
-                                | Context.BIND_FOREGROUND_SERVICE,
+                                | Context.BIND_FOREGROUND_SERVICE
+                                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                         new UserHandle(mUser));
             }
 
@@ -248,15 +253,20 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
         if (data == null) {
             try {
-                mSession.handleAssist(null, null, null, 0, 0);
+                mSession.handleAssist(-1, null, null, null, null, 0, 0);
             } catch (RemoteException e) {
                 // Ignore
             }
         } else {
+            final int taskId = data.getInt(ASSIST_TASK_ID);
+            final IBinder activityId = data.getBinder(ASSIST_ACTIVITY_ID);
             final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
             final AssistStructure structure = data.getParcelable(ASSIST_KEY_STRUCTURE);
             final AssistContent content = data.getParcelable(ASSIST_KEY_CONTENT);
-            final int uid = data.getInt(Intent.EXTRA_ASSIST_UID, -1);
+            int uid = -1;
+            if (assistData != null) {
+                uid = assistData.getInt(Intent.EXTRA_ASSIST_UID, -1);
+            }
             if (uid >= 0 && content != null) {
                 Intent intent = content.getIntent();
                 if (intent != null) {
@@ -273,8 +283,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 }
             }
             try {
-                mSession.handleAssist(assistData, structure, content, activityIndex,
-                        activityCount);
+                mSession.handleAssist(taskId, activityId, assistData, structure,
+                        content, activityIndex, activityCount);
             } catch (RemoteException e) {
                 // Ignore
             }
@@ -302,13 +312,14 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException for us.
-            mAm.checkGrantUriPermission(srcUid, null, ContentProvider.getUriWithoutUserId(uri),
-                    mode, ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(srcUid)));
+            mUgmInternal.checkGrantUriPermission(srcUid, null,
+                    ContentProvider.getUriWithoutUserId(uri), mode,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(srcUid)));
             // No security exception, do the grant.
             int sourceUserId = ContentProvider.getUserIdFromUri(uri, mUser);
             uri = ContentProvider.getUriWithoutUserId(uri);
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, srcUid, destPkg,
-                    uri, FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, mUser);
+            UriGrantsManager.getService().grantUriPermissionFromOwner(mPermissionOwner, srcUid,
+                    destPkg, uri, FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, mUser);
         } catch (RemoteException e) {
         } catch (SecurityException e) {
             Slog.w(TAG, "Can't propagate permission", e);
@@ -351,15 +362,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     } catch (RemoteException e) {
                     }
                 }
-                try {
-                    mAm.revokeUriPermissionFromOwner(mPermissionOwner, null,
-                            FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION,
-                            mUser);
-                } catch (RemoteException e) {
-                }
+                mUgmInternal.revokeUriPermissionFromOwner(mPermissionOwner, null,
+                        FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION, mUser);
                 if (mSession != null) {
                     try {
-                        mAm.finishVoiceTask(mSession);
+                        ActivityTaskManager.getService().finishVoiceTask(mSession);
                     } catch (RemoteException e) {
                     }
                 }
@@ -387,7 +394,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
             if (finishTask && mSession != null) {
                 try {
-                    mAm.finishVoiceTask(mSession);
+                    ActivityTaskManager.getService().finishVoiceTask(mSession);
                 } catch (RemoteException e) {
                 }
             }

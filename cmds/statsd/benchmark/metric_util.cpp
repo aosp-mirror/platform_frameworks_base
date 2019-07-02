@@ -362,11 +362,13 @@ std::unique_ptr<LogEvent> CreateSyncEndEvent(
 sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
                                               const ConfigKey& key) {
     sp<UidMap> uidMap = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> periodicAlarmMonitor;
-    sp<StatsLogProcessor> processor = new StatsLogProcessor(
-        uidMap, anomalyAlarmMonitor, periodicAlarmMonitor, timeBaseSec * NS_PER_SEC,
-        [](const ConfigKey&){return true;});
+    sp<StatsLogProcessor> processor =
+            new StatsLogProcessor(uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec * NS_PER_SEC, [](const ConfigKey&) { return true; },
+                                  [](const int&, const vector<int64_t>&) { return true; });
     processor->OnConfigUpdated(timeBaseSec * NS_PER_SEC, key, config);
     return processor;
 }

@@ -53,6 +53,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.server.accessibility.AccessibilityManagerService.RemoteAccessibilityConnection;
@@ -216,7 +217,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
          * Called back to notify system that the client has changed
          * @param serviceInfoChanged True if the service's AccessibilityServiceInfo changed.
          */
-        void onClientChange(boolean serviceInfoChanged);
+        void onClientChangeLocked(boolean serviceInfoChanged);
 
         int getCurrentUserIdLocked();
 
@@ -272,6 +273,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         if((mAccessibilityServiceInfo.getCapabilities()
                 & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) == 0) {
+            return false;
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return false;
         }
         try {
@@ -344,8 +348,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     int getRelevantEventTypes() {
-        return (mUsesAccessibilityCache ? AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK : 0)
-                | mEventTypes;
+        return (mUsesAccessibilityCache ? AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK
+                : AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) | mEventTypes;
     }
 
     @Override
@@ -363,7 +367,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 } else {
                     setDynamicallyConfigurableProperties(info);
                 }
-                mSystemSupport.onClientChange(true);
+                mSystemSupport.onClientChangeLocked(true);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -385,6 +389,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return null;
             }
             if (mSecurityPolicy.mWindows == null) {
+                return null;
+            }
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
                 return null;
             }
             List<AccessibilityWindowInfo> windows = new ArrayList<>();
@@ -410,6 +417,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final boolean permissionGranted =
                     mSecurityPolicy.canRetrieveWindowsLocked(this);
             if (!permissionGranted) {
+                return null;
+            }
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
                 return null;
             }
             AccessibilityWindowInfo window = mSecurityPolicy.findA11yWindowInfoById(windowId);
@@ -454,16 +464,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfosByViewId(accessibilityNodeId,
                     viewIdResName, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -511,16 +523,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfosByText(accessibilityNodeId,
                     text, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -568,16 +582,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfoByAccessibilityId(
                     accessibilityNodeId, partialInteractiveRegion, interactionId, callback,
                     mFetchFlags | flags, interrogatingPid, interrogatingTid, spec, arguments);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -625,16 +641,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findFocus(accessibilityNodeId, focusType,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -681,16 +699,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             spec = mSystemSupport.getCompatibleMagnificationSpecLocked(resolvedWindowId);
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return null;
+        }
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().focusSearch(accessibilityNodeId, direction,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -726,6 +746,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return false;
             }
         }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            return false;
+        }
         boolean returnValue =
                 mSystemSupport.performAccessibilityAction(resolvedWindowId, accessibilityNodeId,
                 action, arguments, interactionId, callback, mFetchFlags, interrogatingTid);
@@ -756,7 +779,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public float getMagnificationScale() {
+    public float getMagnificationScale(int displayId) {
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return 1.0f;
@@ -764,14 +787,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mSystemSupport.getMagnificationController().getScale();
+            return mSystemSupport.getMagnificationController().getScale(displayId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public Region getMagnificationRegion() {
+    public Region getMagnificationRegion(int displayId) {
         synchronized (mLock) {
             final Region region = Region.obtain();
             if (!isCalledForCurrentUserLocked()) {
@@ -780,22 +803,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             MagnificationController magnificationController =
                     mSystemSupport.getMagnificationController();
             boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(magnificationController);
+                    registerMagnificationIfNeeded(displayId, magnificationController);
             final long identity = Binder.clearCallingIdentity();
             try {
-                magnificationController.getMagnificationRegion(region);
+                magnificationController.getMagnificationRegion(displayId, region);
                 return region;
             } finally {
                 Binder.restoreCallingIdentity(identity);
                 if (registeredJustForThisCall) {
-                    magnificationController.unregister();
+                    magnificationController.unregister(displayId);
                 }
             }
         }
     }
 
     @Override
-    public float getMagnificationCenterX() {
+    public float getMagnificationCenterX(int displayId) {
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return 0.0f;
@@ -803,21 +826,21 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             MagnificationController magnificationController =
                     mSystemSupport.getMagnificationController();
             boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(magnificationController);
+                    registerMagnificationIfNeeded(displayId, magnificationController);
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterX();
+                return magnificationController.getCenterX(displayId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
                 if (registeredJustForThisCall) {
-                    magnificationController.unregister();
+                    magnificationController.unregister(displayId);
                 }
             }
         }
     }
 
     @Override
-    public float getMagnificationCenterY() {
+    public float getMagnificationCenterY(int displayId) {
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return 0.0f;
@@ -825,31 +848,31 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             MagnificationController magnificationController =
                     mSystemSupport.getMagnificationController();
             boolean registeredJustForThisCall =
-                    registerMagnificationIfNeeded(magnificationController);
+                    registerMagnificationIfNeeded(displayId, magnificationController);
             final long identity = Binder.clearCallingIdentity();
             try {
-                return magnificationController.getCenterY();
+                return magnificationController.getCenterY(displayId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
                 if (registeredJustForThisCall) {
-                    magnificationController.unregister();
+                    magnificationController.unregister(displayId);
                 }
             }
         }
     }
 
-    private boolean registerMagnificationIfNeeded(
+    private boolean registerMagnificationIfNeeded(int displayId,
             MagnificationController magnificationController) {
-        if (!magnificationController.isRegisteredLocked()
+        if (!magnificationController.isRegistered(displayId)
                 && mSecurityPolicy.canControlMagnification(this)) {
-            magnificationController.register();
+            magnificationController.register(displayId);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean resetMagnification(boolean animate) {
+    public boolean resetMagnification(int displayId, boolean animate) {
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return false;
@@ -860,15 +883,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mSystemSupport.getMagnificationController().reset(animate);
+            MagnificationController magnificationController =
+                    mSystemSupport.getMagnificationController();
+            return (magnificationController.reset(displayId, animate)
+                    || !magnificationController.isMagnifying(displayId));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
-            boolean animate) {
+    public boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX,
+            float centerY, boolean animate) {
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return false;
@@ -880,11 +906,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             try {
                 MagnificationController magnificationController =
                         mSystemSupport.getMagnificationController();
-                if (!magnificationController.isRegisteredLocked()) {
-                    magnificationController.register();
+                if (!magnificationController.isRegistered(displayId)) {
+                    magnificationController.register(displayId);
                 }
                 return magnificationController
-                        .setScaleAndCenter(scale, centerX, centerY, animate, mId);
+                        .setScaleAndCenter(displayId, scale, centerX, centerY, animate, mId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -892,12 +918,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public void setMagnificationCallbackEnabled(boolean enabled) {
-        mInvocationHandler.setMagnificationCallbackEnabled(enabled);
+    public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {
+        mInvocationHandler.setMagnificationCallbackEnabled(displayId, enabled);
     }
 
-    public boolean isMagnificationCallbackEnabled() {
-        return mInvocationHandler.mIsMagnificationCallbackEnabled;
+    public boolean isMagnificationCallbackEnabled(int displayId) {
+        return mInvocationHandler.isMagnificationCallbackEnabled(displayId);
     }
 
     @Override
@@ -975,6 +1001,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return;
             }
 
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
             // Make a copy since during dispatch it is possible the event to
             // be modified to remove its source if the receiving service does
             // not have permission to access the window content.
@@ -1108,10 +1137,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
     }
 
-    public void notifyMagnificationChangedLocked(@NonNull Region region,
+    public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
             float scale, float centerX, float centerY) {
         mInvocationHandler
-                .notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+                .notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
     }
 
     public void notifySoftKeyboardShowModeChangedLocked(int showState) {
@@ -1130,12 +1159,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * Called by the invocation handler to notify the service that the
      * state of magnification has changed.
      */
-    private void notifyMagnificationChangedInternal(@NonNull Region region,
+    private void notifyMagnificationChangedInternal(int displayId, @NonNull Region region,
             float scale, float centerX, float centerY) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
-                listener.onMagnificationChanged(region, scale, centerX, centerY);
+                listener.onMagnificationChanged(displayId, region, scale, centerX, centerY);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
             }
@@ -1253,7 +1282,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_CLICKED = 7;
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 8;
 
-        private boolean mIsMagnificationCallbackEnabled = false;
+        /** List of magnification callback states, mapping from displayId -> Boolean */
+        @GuardedBy("mlock")
+        private final SparseArray<Boolean> mMagnificationCallbackState = new SparseArray<>(0);
         private boolean mIsSoftKeyboardCallbackEnabled = false;
 
         public InvocationHandler(Looper looper) {
@@ -1279,7 +1310,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     final float scale = (float) args.arg2;
                     final float centerX = (float) args.arg3;
                     final float centerY = (float) args.arg4;
-                    notifyMagnificationChangedInternal(region, scale, centerX, centerY);
+                    final int displayId = args.argi1;
+                    notifyMagnificationChangedInternal(displayId, region, scale, centerX, centerY);
                     args.recycle();
                 } break;
 
@@ -1303,11 +1335,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
         }
 
-        public void notifyMagnificationChangedLocked(@NonNull Region region, float scale,
-                float centerX, float centerY) {
-            if (!mIsMagnificationCallbackEnabled) {
-                // Callback is disabled, don't bother packing args.
-                return;
+        public void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
+                float scale, float centerX, float centerY) {
+            synchronized (mLock) {
+                if (mMagnificationCallbackState.get(displayId) == null) {
+                    return;
+                }
             }
 
             final SomeArgs args = SomeArgs.obtain();
@@ -1315,13 +1348,26 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             args.arg2 = scale;
             args.arg3 = centerX;
             args.arg4 = centerY;
+            args.argi1 = displayId;
 
             final Message msg = obtainMessage(MSG_ON_MAGNIFICATION_CHANGED, args);
             msg.sendToTarget();
         }
 
-        public void setMagnificationCallbackEnabled(boolean enabled) {
-            mIsMagnificationCallbackEnabled = enabled;
+        public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {
+            synchronized (mLock) {
+                if (enabled) {
+                    mMagnificationCallbackState.put(displayId, true);
+                } else {
+                    mMagnificationCallbackState.remove(displayId);
+                }
+            }
+        }
+
+        public boolean isMagnificationCallbackEnabled(int displayId) {
+            synchronized (mLock) {
+                return mMagnificationCallbackState.get(displayId) != null;
+            }
         }
 
         public void notifySoftKeyboardShowModeChangedLocked(int showState) {

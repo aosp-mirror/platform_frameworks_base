@@ -16,9 +16,14 @@
 
 package android.os;
 
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.Manifest.permission.READ_LOGS;
+
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.Log;
@@ -64,7 +69,8 @@ public class DropBoxManager {
     /**
      * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
      * You must hold the {@link android.Manifest.permission#READ_LOGS} permission
-     * in order to receive this broadcast.
+     * in order to receive this broadcast. This broadcast can be rate limited for low priority
+     * entries
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -85,6 +91,13 @@ public class DropBoxManager {
      * when the entry was created.
      */
     public static final String EXTRA_TIME = "time";
+
+    /**
+     * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+     * integer value containing number of broadcasts dropped due to rate limiting on
+     * this {@link android.os.DropBoxManager#EXTRA_TAG}
+     */
+    public static final String EXTRA_DROPPED_COUNT = "android.os.extra.DROPPED_COUNT";
 
     /**
      * A single entry retrieved from the drop box.
@@ -224,7 +237,7 @@ public class DropBoxManager {
             return (mFlags & IS_GZIPPED) != 0 ? new GZIPInputStream(is) : is;
         }
 
-        public static final Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {
+        public static final @android.annotation.NonNull Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {
             public Entry[] newArray(int size) { return new Entry[size]; }
             public Entry createFromParcel(Parcel in) {
                 String tag = in.readString();
@@ -353,16 +366,23 @@ public class DropBoxManager {
 
     /**
      * Gets the next entry from the drop box <em>after</em> the specified time.
-     * Requires <code>android.permission.READ_LOGS</code>.  You must always call
-     * {@link Entry#close()} on the return value!
+     * You must always call {@link Entry#close()} on the return value!
      *
      * @param tag of entry to look for, null for all tags
      * @param msec time of the last entry seen
      * @return the next entry, or null if there are no more entries
      */
-    public Entry getNextEntry(String tag, long msec) {
+    @RequiresPermission(allOf = { READ_LOGS, PACKAGE_USAGE_STATS })
+    public @Nullable Entry getNextEntry(String tag, long msec) {
         try {
-            return mService.getNextEntry(tag, msec);
+            return mService.getNextEntry(tag, msec, mContext.getOpPackageName());
+        } catch (SecurityException e) {
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                throw e;
+            } else {
+                Log.w(TAG, e.getMessage());
+                return null;
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,6 +26,8 @@ import android.text.style.MetricAffectingSpan;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -116,6 +119,16 @@ public class PrecomputedText implements Spannable {
              */
             public Builder(@NonNull TextPaint paint) {
                 mPaint = paint;
+            }
+
+            /**
+             * Builder constructor from existing params.
+             */
+            public Builder(@NonNull Params params) {
+                mPaint = params.mPaint;
+                mTextDir = params.mTextDir;
+                mBreakStrategy = params.mBreakStrategy;
+                mHyphenationFrequency = params.mHyphenationFrequency;
             }
 
             /**
@@ -220,13 +233,41 @@ public class PrecomputedText implements Spannable {
         }
 
         /** @hide */
-        public boolean isSameTextMetricsInternal(@NonNull TextPaint paint,
+        @IntDef(value = { UNUSABLE, NEED_RECOMPUTE, USABLE })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface CheckResultUsableResult {}
+
+        /**
+         * Constant for returning value of checkResultUsable indicating that given parameter is not
+         * compatible.
+         * @hide
+         */
+        public static final int UNUSABLE = 0;
+
+        /**
+         * Constant for returning value of checkResultUsable indicating that given parameter is not
+         * compatible but partially usable for creating new PrecomputedText.
+         * @hide
+         */
+        public static final int NEED_RECOMPUTE = 1;
+
+        /**
+         * Constant for returning value of checkResultUsable indicating that given parameter is
+         * compatible.
+         * @hide
+         */
+        public static final int USABLE = 2;
+
+        /** @hide */
+        public @CheckResultUsableResult int checkResultUsable(@NonNull TextPaint paint,
                 @NonNull TextDirectionHeuristic textDir, @Layout.BreakStrategy int strategy,
                 @Layout.HyphenationFrequency int frequency) {
-            return mTextDir == textDir
-                && mBreakStrategy == strategy
-                && mHyphenationFrequency == frequency
-                && mPaint.equalsForTextMeasurement(paint);
+            if (mBreakStrategy == strategy && mHyphenationFrequency == frequency
+                    && mPaint.equalsForTextMeasurement(paint)) {
+                return mTextDir == textDir ? USABLE : NEED_RECOMPUTE;
+            } else {
+                return UNUSABLE;
+            }
         }
 
         /**
@@ -243,8 +284,8 @@ public class PrecomputedText implements Spannable {
                 return false;
             }
             Params param = (Params) o;
-            return isSameTextMetricsInternal(param.mPaint, param.mTextDir, param.mBreakStrategy,
-                    param.mHyphenationFrequency);
+            return checkResultUsable(param.mPaint, param.mTextDir, param.mBreakStrategy,
+                    param.mHyphenationFrequency) == Params.USABLE;
         }
 
         @Override
@@ -321,9 +362,53 @@ public class PrecomputedText implements Spannable {
      * @return A {@link PrecomputedText}
      */
     public static PrecomputedText create(@NonNull CharSequence text, @NonNull Params params) {
-        ParagraphInfo[] paraInfo = createMeasuredParagraphs(
-                text, params, 0, text.length(), true /* computeLayout */);
+        ParagraphInfo[] paraInfo = null;
+        if (text instanceof PrecomputedText) {
+            final PrecomputedText hintPct = (PrecomputedText) text;
+            final PrecomputedText.Params hintParams = hintPct.getParams();
+            final @Params.CheckResultUsableResult int checkResult =
+                    hintParams.checkResultUsable(params.mPaint, params.mTextDir,
+                            params.mBreakStrategy, params.mHyphenationFrequency);
+            switch (checkResult) {
+                case Params.USABLE:
+                    return hintPct;
+                case Params.NEED_RECOMPUTE:
+                    // To be able to use PrecomputedText for new params, at least break strategy and
+                    // hyphenation frequency must be the same.
+                    if (params.getBreakStrategy() == hintParams.getBreakStrategy()
+                            && params.getHyphenationFrequency()
+                                == hintParams.getHyphenationFrequency()) {
+                        paraInfo = createMeasuredParagraphsFromPrecomputedText(
+                                hintPct, params, true /* compute layout */);
+                    }
+                    break;
+                case Params.UNUSABLE:
+                    // Unable to use anything in PrecomputedText. Create PrecomputedText as the
+                    // normal text input.
+            }
+
+        }
+        if (paraInfo == null) {
+            paraInfo = createMeasuredParagraphs(
+                    text, params, 0, text.length(), true /* computeLayout */);
+        }
         return new PrecomputedText(text, 0, text.length(), params, paraInfo);
+    }
+
+    private static ParagraphInfo[] createMeasuredParagraphsFromPrecomputedText(
+            @NonNull PrecomputedText pct, @NonNull Params params, boolean computeLayout) {
+        final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
+                && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
+        ArrayList<ParagraphInfo> result = new ArrayList<>();
+        for (int i = 0; i < pct.getParagraphCount(); ++i) {
+            final int paraStart = pct.getParagraphStart(i);
+            final int paraEnd = pct.getParagraphEnd(i);
+            result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
+                    params.getTextPaint(), pct, paraStart, paraEnd, params.getTextDirection(),
+                    needHyphenation, computeLayout, pct.getMeasuredParagraph(i),
+                    null /* no recycle */)));
+        }
+        return result.toArray(new ParagraphInfo[result.size()]);
     }
 
     /** @hide */
@@ -350,7 +435,8 @@ public class PrecomputedText implements Spannable {
 
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
                     params.getTextPaint(), text, paraStart, paraEnd, params.getTextDirection(),
-                    needHyphenation, computeLayout, null /* no recycle */)));
+                    needHyphenation, computeLayout, null /* no hint */,
+                    null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
     }
@@ -434,13 +520,15 @@ public class PrecomputedText implements Spannable {
      * Returns true if the given TextPaint gives the same result of text layout for this text.
      * @hide
      */
-    public boolean canUseMeasuredResult(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
-            @NonNull TextDirectionHeuristic textDir, @NonNull TextPaint paint,
-            @Layout.BreakStrategy int strategy, @Layout.HyphenationFrequency int frequency) {
-        final TextPaint mtPaint = mParams.getTextPaint();
-        return mStart == start
-            && mEnd == end
-            && mParams.isSameTextMetricsInternal(paint, textDir, strategy, frequency);
+    public @Params.CheckResultUsableResult int checkResultUsable(@IntRange(from = 0) int start,
+            @IntRange(from = 0) int end, @NonNull TextDirectionHeuristic textDir,
+            @NonNull TextPaint paint, @Layout.BreakStrategy int strategy,
+            @Layout.HyphenationFrequency int frequency) {
+        if (mStart != start || mEnd != end) {
+            return Params.UNUSABLE;
+        } else {
+            return mParams.checkResultUsable(paint, textDir, strategy, frequency);
+        }
     }
 
     /** @hide */
@@ -516,6 +604,21 @@ public class PrecomputedText implements Spannable {
                 + "request: (" + start + ", " + end + ")");
         }
         getMeasuredParagraph(paraIndex).getBounds(start - paraStart, end - paraStart, bounds);
+    }
+
+    /**
+     * Returns a width of a character at offset
+     *
+     * @param offset an offset of the text.
+     * @return a width of the character.
+     * @hide
+     */
+    public float getCharWidthAt(@IntRange(from = 0) int offset) {
+        Preconditions.checkArgument(0 <= offset && offset < mText.length(), "invalid offset");
+        final int paraIndex = findParaIndex(offset);
+        final int paraStart = getParagraphStart(paraIndex);
+        final int paraEnd = getParagraphEnd(paraIndex);
+        return getMeasuredParagraph(paraIndex).getCharWidthAt(offset - paraStart);
     }
 
     /**

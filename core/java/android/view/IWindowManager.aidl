@@ -17,8 +17,6 @@
 package android.view;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
@@ -27,6 +25,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -36,10 +35,12 @@ import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IDisplayFoldListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
+import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
@@ -53,6 +54,7 @@ import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
+import android.view.SurfaceControl;
 
 /**
  * System private interface to the window manager.
@@ -71,9 +73,7 @@ interface IWindowManager
     boolean stopViewServer();            // Transaction #2
     boolean isViewServerRunning();       // Transaction #3
 
-    IWindowSession openSession(in IWindowSessionCallback callback, in IInputMethodClient client,
-            in IInputContext inputContext);
-    boolean inputMethodClientHasFocus(IInputMethodClient client);
+    IWindowSession openSession(in IWindowSessionCallback callback);
 
     @UnsupportedAppUsage
     void getInitialDisplaySize(int displayId, out Point size);
@@ -94,32 +94,7 @@ interface IWindowManager
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
-    void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
-    @UnsupportedAppUsage
-    int getPendingAppTransition();
-    void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback);
-    void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
-            int startHeight);
-    void overridePendingAppTransitionClipReveal(int startX, int startY,
-            int startWidth, int startHeight);
-    void overridePendingAppTransitionThumb(in GraphicBuffer srcThumb, int startX, int startY,
-            IRemoteCallback startedCallback, boolean scaleUp);
-    void overridePendingAppTransitionAspectScaledThumb(in GraphicBuffer srcThumb, int startX,
-            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
-            boolean scaleUp);
-    /**
-     * Overrides animation for app transition that exits from an application to a multi-window
-     * environment and allows specifying transition animation parameters for each window.
-     *
-     * @param specs Array of transition animation descriptions for entering windows.
-     *
-     * @hide
-     */
-    void overridePendingAppTransitionMultiThumb(in AppTransitionAnimationSpec[] specs,
-            IRemoteCallback startedCallback, IRemoteCallback finishedCallback, boolean scaleUp);
-    void overridePendingAppTransitionInPlace(String packageName, int anim);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
@@ -129,9 +104,10 @@ interface IWindowManager
     @UnsupportedAppUsage
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
-            boolean scaleUp);
+            boolean scaleUp, int displayId);
     @UnsupportedAppUsage
-    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
+    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter,
+            int displayId);
     @UnsupportedAppUsage
     void executeAppTransition();
 
@@ -142,26 +118,19 @@ interface IWindowManager
     @UnsupportedAppUsage
     void endProlongedAnimations();
 
-    // Re-evaluate the current orientation from the caller's state.
-    // If there is a change, the new Configuration is returned and the
-    // caller must call setNewConfiguration() sometime later.
-    Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded, int displayId);
-    // Notify window manager of the new display override configuration. Returns an array of stack
-    // ids that were affected by the update, ActivityManager should resize these stacks.
-    int[] setNewDisplayOverrideConfiguration(in Configuration overrideConfig, int displayId);
-
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
 
     // these require DISABLE_KEYGUARD permission
-    void disableKeyguard(IBinder token, String tag);
-    void reenableKeyguard(IBinder token);
+    /** @deprecated use Activity.setShowWhenLocked instead. */
+    void disableKeyguard(IBinder token, String tag, int userId);
+    /** @deprecated use Activity.setShowWhenLocked instead. */
+    void reenableKeyguard(IBinder token, int userId);
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     @UnsupportedAppUsage
     boolean isKeyguardLocked();
     @UnsupportedAppUsage
-    boolean isKeyguardSecure();
+    boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
@@ -172,6 +141,7 @@ interface IWindowManager
     // These can only be called with the SET_ANIMATON_SCALE permission.
     @UnsupportedAppUsage
     float getAnimationScale(int which);
+    @UnsupportedAppUsage
     float[] getAnimationScales();
     @UnsupportedAppUsage
     void setAnimationScale(int which, float scale);
@@ -238,33 +208,60 @@ interface IWindowManager
 
     /**
      * Determine the preferred edge of the screen to pin the compact options menu against.
-     * @return a Gravity value for the options menu panel
+     *
+     * @param displayId Id of the display where the menu window currently resides.
+     * @return a Gravity value for the options menu panel.
      * @hide
      */
-    int getPreferredOptionsPanelGravity();
+    int getPreferredOptionsPanelGravity(int displayId);
 
     /**
-     * Lock the device orientation to the specified rotation, or to the
-     * current rotation if -1.  Sensor input will be ignored until
-     * thawRotation() is called.
-     * @hide
+     * Equivalent to calling {@link #freezeDisplayRotation(int, int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY} and given rotation.
      */
     @UnsupportedAppUsage
     void freezeRotation(int rotation);
 
     /**
-     * Release the orientation lock imposed by freezeRotation().
-     * @hide
+     * Equivalent to calling {@link #thawDisplayRotation(int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY}.
      */
     @UnsupportedAppUsage
     void thawRotation();
 
     /**
-     * Gets whether the rotation is frozen.
-     *
-     * @return Whether the rotation is frozen.
+     * Equivelant to call {@link #isDisplayRotationFrozen(int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY}.
      */
     boolean isRotationFrozen();
+
+    /**
+     * Lock the display orientation to the specified rotation, or to the current
+     * rotation if -1. Sensor input will be ignored until thawRotation() is called.
+     *
+     * @param displayId the ID of display which rotation should be frozen.
+     * @param rotation one of {@link android.view.Surface#ROTATION_0},
+     *        {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
+     *        {@link android.view.Surface#ROTATION_270} or -1 to freeze it to current rotation.
+     * @hide
+     */
+    void freezeDisplayRotation(int displayId, int rotation);
+
+    /**
+     * Release the orientation lock imposed by freezeRotation() on the display.
+     *
+     * @param displayId the ID of display which rotation should be thawed.
+     * @hide
+     */
+    void thawDisplayRotation(int displayId);
+
+    /**
+     * Gets whether the rotation is frozen on the display.
+     *
+     * @param displayId the ID of display which frozen is needed.
+     * @return Whether the rotation is frozen.
+     */
+    boolean isDisplayRotationFrozen(int displayId);
 
     /**
      * Screenshot the current wallpaper layer, including the whole screen.
@@ -285,6 +282,18 @@ interface IWindowManager
         int displayId);
 
     /**
+     * Registers a system gesture exclusion listener for a given display.
+     */
+    void registerSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
+        int displayId);
+
+    /**
+     * Unregisters a system gesture exclusion listener for a given display.
+     */
+    void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener,
+        int displayId);
+
+    /**
      * Used only for assist -- request a screenshot of the current application.
      */
     boolean requestAssistScreenshot(IAssistDataReceiver receiver);
@@ -292,7 +301,17 @@ interface IWindowManager
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
-    oneway void statusBarVisibilityChanged(int visibility);
+    oneway void statusBarVisibilityChanged(int displayId, int visibility);
+
+    /**
+    * When set to {@code true} the system bars will always be shown. This is true even if an app
+    * requests to be fullscreen by setting the system ui visibility flags. The
+    * functionality was added for the automotive case as a way to guarantee required content stays
+    * on screen at all times.
+    *
+    * @hide
+    */
+    oneway void setForceShowSystemBars(boolean show);
 
     /**
      * Called by System UI to notify of changes to the visibility of Recents.
@@ -317,15 +336,17 @@ interface IWindowManager
     void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
 
     /**
-     * Device has a software navigation bar (separate from the status bar).
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
      */
     @UnsupportedAppUsage
-    boolean hasNavigationBar();
+    boolean hasNavigationBar(int displayId);
 
     /**
      * Get the position of the nav bar
      */
-    int getNavBarPosition();
+    int getNavBarPosition(int displayId);
 
     /**
      * Lock the device immediately with the specified options (can be null).
@@ -408,6 +429,16 @@ interface IWindowManager
     void getStableInsets(int displayId, out Rect outInsets);
 
     /**
+     * Set the forwarded insets on the display.
+     * <p>
+     * This is only used in case a virtual display is displayed on another display that has insets,
+     * and the bounds of the virtual display is overlapping with the insets from the host display.
+     * In that case, the contents on the virtual display won't be placed over the forwarded insets.
+     * Only the owner of the display is permitted to set the forwarded insets on it.
+     */
+    void setForwardedInsets(int displayId, in Insets insets);
+
+    /**
      * Register shortcut key. Shortcut code is packed as:
      * (MetaState << Integer.SIZE) | KeyCode
      * @hide
@@ -415,21 +446,33 @@ interface IWindowManager
     void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
 
     /**
-     * Create an input consumer by name.
-     */
-    void createInputConsumer(IBinder token, String name, out InputChannel inputChannel);
-
-    /**
-     * Destroy an input consumer by name.  This method will also dispose the input channels
-     * associated with that InputConsumer.
+     * Create an input consumer by name and display id.
      */
     @UnsupportedAppUsage
-    boolean destroyInputConsumer(String name);
+    void createInputConsumer(IBinder token, String name, int displayId,
+        out InputChannel inputChannel);
+
+    /**
+     * Destroy an input consumer by name and display id.
+     * This method will also dispose the input channels associated with that InputConsumer.
+     */
+    @UnsupportedAppUsage
+    boolean destroyInputConsumer(String name, int displayId);
 
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.
      */
     Region getCurrentImeTouchRegion();
+
+    /**
+     * Registers an IDisplayFoldListener.
+     */
+    void registerDisplayFoldListener(IDisplayFoldListener listener);
+
+    /**
+     * Unregisters an IDisplayFoldListener.
+     */
+    void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
      * Starts a window trace.
@@ -447,8 +490,8 @@ interface IWindowManager
     boolean isWindowTraceEnabled();
 
     /**
-     * Requests that the WindowManager sends WindowManagerPolicy#ACTION_USER_ACTIVITY_NOTIFICATION
-     * on the next user activity.
+     * Requests that the WindowManager sends
+     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
      */
     void requestUserActivityNotification();
 
@@ -461,4 +504,138 @@ interface IWindowManager
      * @param displayId The id of the display.
      */
     void dontOverrideDisplayInfo(int displayId);
+
+    /**
+     * Gets the windowing mode of the display.
+     *
+     * @param displayId The id of the display.
+     * @return {@link WindowConfiguration.WindowingMode}
+     */
+    int getWindowingMode(int displayId);
+
+    /**
+     * Sets the windowing mode of the display.
+     *
+     * @param displayId The id of the display.
+     * @param mode {@link WindowConfiguration.WindowingMode}
+     */
+    void setWindowingMode(int displayId, int mode);
+
+    /**
+     * Gets current remove content mode of the display.
+     * <p>
+     * What actions should be performed with the display's content when it is removed. Default
+     * behavior for public displays in this case is to move all activities to the primary display
+     * and make it focused. For private display is to destroy all activities.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return The remove content mode of the display.
+     * @see WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
+     * @see WindowManager#REMOVE_CONTENT_MODE_DESTROY
+     */
+    int getRemoveContentMode(int displayId);
+
+    /**
+     * Sets the remove content mode of the display.
+     * <p>
+     * This mode indicates what actions should be performed with the display's content when it is
+     * removed.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @param mode Remove content mode.
+     * @see WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
+     * @see WindowManager#REMOVE_CONTENT_MODE_DESTROY
+     */
+    void setRemoveContentMode(int displayId, int mode);
+
+    /**
+     * Indicates that the display should show its content when non-secure keyguard is shown.
+     * <p>
+     * This flag identifies secondary displays that will continue showing content if keyguard can be
+     * dismissed without entering credentials.
+     * </p><p>
+     * An example of usage is a virtual display which content is displayed on external hardware
+     * display that is not visible to the system directly.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show its content when non-secure keyguard is
+     *         shown.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    boolean shouldShowWithInsecureKeyguard(int displayId);
+
+    /**
+     * Sets that the display should show its content when non-secure keyguard is shown.
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show its content when non-secure keyguard
+     *                  is shown.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    void setShouldShowWithInsecureKeyguard(int displayId, boolean shouldShow);
+
+    /**
+     * Indicates the display should show system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show system decors.
+     */
+    boolean shouldShowSystemDecors(int displayId);
+
+    /**
+     * Sets that the display should show system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show system decors.
+     */
+    void setShouldShowSystemDecors(int displayId, boolean shouldShow);
+
+    /**
+     * Indicates that the display should show IME.
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show IME.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    boolean shouldShowIme(int displayId);
+
+    /**
+     * Sets that the display should show IME.
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show IME.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    void setShouldShowIme(int displayId, boolean shouldShow);
+
+    /**
+     * Waits for transactions to get applied before injecting input.
+     * This includes waiting for the input windows to get sent to InputManager.
+     *
+     * This is needed for testing since the system add windows and injects input
+     * quick enough that the windows don't have time to get sent to InputManager.
+     */
+    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode);
+
+    /**
+     * Waits until all animations have completed and input information has been sent from
+     * WindowManager to native InputManager.
+     *
+     * This is needed for testing since we need to ensure input information has been propagated to
+     * native InputManager before proceeding with tests.
+     */
+    void syncInputTransactions();
 }

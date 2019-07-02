@@ -46,7 +46,7 @@ public class ActivityChangedEvent implements Parcelable {
         return mActivityRecognitionEvents;
     }
 
-    public static final Creator<ActivityChangedEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityChangedEvent> CREATOR =
             new Creator<ActivityChangedEvent>() {
         @Override
         public ActivityChangedEvent createFromParcel(Parcel source) {

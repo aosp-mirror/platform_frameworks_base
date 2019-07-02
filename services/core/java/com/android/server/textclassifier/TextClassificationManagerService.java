@@ -23,31 +23,36 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.textclassifier.ITextClassificationCallback;
+import android.service.textclassifier.ITextClassifierCallback;
 import android.service.textclassifier.ITextClassifierService;
-import android.service.textclassifier.ITextLinksCallback;
-import android.service.textclassifier.ITextSelectionCallback;
 import android.service.textclassifier.TextClassifierService;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
+import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
+import android.view.textclassifier.TextClassifierEvent;
+import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -123,10 +128,11 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onSuggestSelection(
             TextClassificationSessionId sessionId,
-            TextSelection.Request request, ITextSelectionCallback callback)
+            TextSelection.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -145,10 +151,11 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onClassifyText(
             TextClassificationSessionId sessionId,
-            TextClassification.Request request, ITextClassificationCallback callback)
+            TextClassification.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -167,10 +174,11 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onGenerateLinks(
             TextClassificationSessionId sessionId,
-            TextLinks.Request request, ITextLinksCallback callback)
+            TextLinks.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -190,7 +198,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onSelectionEvent(
             TextClassificationSessionId sessionId, SelectionEvent event) throws RemoteException {
         Preconditions.checkNotNull(event);
-        validateInput(event.getPackageName(), mContext);
+        validateInput(mContext, event.getPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -203,6 +211,73 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         }
     }
+    @Override
+    public void onTextClassifierEvent(
+            TextClassificationSessionId sessionId,
+            TextClassifierEvent event) throws RemoteException {
+        Preconditions.checkNotNull(event);
+        final String packageName = event.getEventContext() == null
+                ? null
+                : event.getEventContext().getPackageName();
+        validateInput(mContext, packageName);
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (userState.isBoundLocked()) {
+                userState.mService.onTextClassifierEvent(sessionId, event);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onTextClassifierEvent(sessionId, event),
+                        null /* onServiceFailure */, null /* binder */, this, userState));
+            }
+        }
+    }
+
+    @Override
+    public void onDetectLanguage(
+            TextClassificationSessionId sessionId,
+            TextLanguage.Request request,
+            ITextClassifierCallback callback) throws RemoteException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onDetectLanguage(sessionId, request, callback);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onDetectLanguage(sessionId, request, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
+            }
+        }
+    }
+
+    @Override
+    public void onSuggestConversationActions(
+            TextClassificationSessionId sessionId,
+            ConversationActions.Request request,
+            ITextClassifierCallback callback) throws RemoteException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(callback);
+        validateInput(mContext, request.getCallingPackageName());
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onSuggestConversationActions(sessionId, request, callback);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onSuggestConversationActions(sessionId, request, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
+            }
+        }
+    }
 
     @Override
     public void onCreateTextClassificationSession(
@@ -210,7 +285,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Preconditions.checkNotNull(sessionId);
         Preconditions.checkNotNull(classificationContext);
-        validateInput(classificationContext.getPackageName(), mContext);
+        validateInput(mContext, classificationContext.getPackageName());
 
         synchronized (mLock) {
             UserState userState = getCallingUserStateLocked();
@@ -242,10 +317,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
     }
 
+    @GuardedBy("mLock")
     private UserState getCallingUserStateLocked() {
         return getUserStateLocked(UserHandle.getCallingUserId());
     }
 
+    @GuardedBy("mLock")
     private UserState getUserStateLocked(int userId) {
         UserState result = mUserStates.get(userId);
         if (result == null) {
@@ -255,8 +332,31 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         return result;
     }
 
+    @GuardedBy("mLock")
     UserState peekUserStateLocked(int userId) {
         return mUserStates.get(userId);
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, fout)) return;
+        IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
+        TextClassificationManager tcm = mContext.getSystemService(TextClassificationManager.class);
+        tcm.dump(pw);
+
+        pw.printPair("context", mContext); pw.println();
+        synchronized (mLock) {
+            int size = mUserStates.size();
+            pw.print("Number user states: "); pw.println(size);
+            if (size > 0) {
+                for (int i = 0; i < size; i++) {
+                    pw.increaseIndent();
+                    UserState userState = mUserStates.valueAt(i);
+                    pw.print(i); pw.print(":"); userState.dump(pw); pw.println();
+                    pw.decreaseIndent();
+                }
+            }
+        }
     }
 
     private static final class PendingRequest implements IBinder.DeathRecipient {
@@ -320,15 +420,20 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 e -> Slog.d(LOG_TAG, "Error " + opDesc + ": " + e.getMessage()));
     }
 
-    private static void validateInput(String packageName, Context context)
+    private static void validateInput(Context context, @Nullable String packageName)
             throws RemoteException {
+        if (packageName == null) return;
+
         try {
-            final int uid = context.getPackageManager()
-                    .getPackageUid(packageName, 0);
-            Preconditions.checkArgument(Binder.getCallingUid() == uid);
-        } catch (IllegalArgumentException | NullPointerException |
-                PackageManager.NameNotFoundException e) {
-            throw new RemoteException(e.getMessage());
+            final int packageUid = context.getPackageManager()
+                    .getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
+            final int callingUid = Binder.getCallingUid();
+            Preconditions.checkArgument(callingUid == packageUid
+                    // Trust the system process:
+                    || callingUid == android.os.Process.SYSTEM_UID);
+        } catch (Exception e) {
+            throw new RemoteException(
+                    String.format("Invalid package: name=%s, error=%s", packageName, e));
         }
     }
 
@@ -374,6 +479,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         }
 
+        @GuardedBy("mLock")
         private boolean bindIfHasPendingRequestsLocked() {
             return !mPendingRequests.isEmpty() && bindLocked();
         }
@@ -382,6 +488,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
          * @return true if the service is bound or in the process of being bound.
          *      Returns false otherwise.
          */
+        @GuardedBy("mLock")
         private boolean bindLocked() {
             if (isBoundLocked() || mBinding) {
                 return true;
@@ -402,13 +509,23 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 Slog.d(LOG_TAG, "Binding to " + serviceIntent.getComponent());
                 willBind = mContext.bindServiceAsUser(
                         serviceIntent, mConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                                | Context.BIND_RESTRICT_ASSOCIATIONS,
                         UserHandle.of(mUserId));
                 mBinding = willBind;
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
             return willBind;
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.printPair("context", mContext);
+            pw.printPair("userId", mUserId);
+            synchronized (mLock) {
+                pw.printPair("binding", mBinding);
+                pw.printPair("numberRequests", mPendingRequests.size());
+            }
         }
 
         private final class TextClassifierServiceConnection implements ServiceConnection {

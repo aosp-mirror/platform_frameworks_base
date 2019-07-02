@@ -49,6 +49,9 @@ class ActiveInstrumentation {
     // Connection to use the UI introspection APIs.
     IUiAutomationConnection mUiAutomationConnection;
 
+    // Whether the caller holds START_ACTIVITIES_FROM_BACKGROUND permission
+    boolean mHasBackgroundActivityStartsPermission;
+
     // As given to us
     Bundle mArguments;
 
@@ -117,6 +120,8 @@ class ActiveInstrumentation {
             pw.print(prefix); pw.print("mUiAutomationConnection=");
             pw.println(mUiAutomationConnection);
         }
+        pw.print("mHasBackgroundActivityStartsPermission=");
+        pw.println(mHasBackgroundActivityStartsPermission);
         pw.print(prefix); pw.print("mArguments=");
         pw.println(mArguments);
     }
@@ -133,13 +138,15 @@ class ActiveInstrumentation {
             proto.write(ActiveInstrumentationProto.TARGET_PROCESSES, p);
         }
         if (mTargetInfo != null) {
-            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO);
+            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO, 0);
         }
         proto.write(ActiveInstrumentationProto.PROFILE_FILE, mProfileFile);
         proto.write(ActiveInstrumentationProto.WATCHER, mWatcher.toString());
         proto.write(ActiveInstrumentationProto.UI_AUTOMATION_CONNECTION,
                 mUiAutomationConnection.toString());
-        proto.write(ActiveInstrumentationProto.ARGUMENTS, mArguments.toString());
+        if (mArguments != null) {
+            mArguments.writeToProto(proto, ActiveInstrumentationProto.ARGUMENTS);
+        }
         proto.end(token);
     }
 }

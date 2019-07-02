@@ -234,7 +234,9 @@ enum {
     RES_TABLE_PACKAGE_TYPE      = 0x0200,
     RES_TABLE_TYPE_TYPE         = 0x0201,
     RES_TABLE_TYPE_SPEC_TYPE    = 0x0202,
-    RES_TABLE_LIBRARY_TYPE      = 0x0203
+    RES_TABLE_LIBRARY_TYPE      = 0x0203,
+    RES_TABLE_OVERLAYABLE_TYPE  = 0x0204,
+    RES_TABLE_OVERLAYABLE_POLICY_TYPE = 0x0205,
 };
 
 /**
@@ -780,6 +782,9 @@ public:
     void getPosition(ResXMLPosition* pos) const;
     void setPosition(const ResXMLPosition& pos);
 
+    void setSourceResourceId(const uint32_t resId);
+    uint32_t getSourceResourceId() const;
+
 private:
     friend class ResXMLTree;
     
@@ -789,6 +794,7 @@ private:
     event_code_t                mEventCode;
     const ResXMLTree_node*      mCurNode;
     const void*                 mCurExt;
+    uint32_t                    mSourceResourceId;
 };
 
 class DynamicRefTable;
@@ -1354,10 +1360,6 @@ struct ResTable_typeSpec
     enum : uint32_t {
         // Additional flag indicating an entry is public.
         SPEC_PUBLIC = 0x40000000u,
-
-        // Additional flag indicating an entry is overlayable at runtime.
-        // Added in Android-P.
-        SPEC_OVERLAYABLE = 0x80000000u,
     };
 };
 
@@ -1607,6 +1609,63 @@ struct ResTable_lib_entry
     uint16_t packageName[128];
 };
 
+/**
+ * Specifies the set of resources that are explicitly allowed to be overlaid by RROs.
+ */
+struct ResTable_overlayable_header
+{
+  struct ResChunk_header header;
+
+  // The name of the overlayable set of resources that overlays target.
+  uint16_t name[256];
+
+ // The component responsible for enabling and disabling overlays targeting this chunk.
+  uint16_t actor[256];
+};
+
+/**
+ * Holds a list of resource ids that are protected from being overlaid by a set of policies. If
+ * the overlay fulfils at least one of the policies, then the overlay can overlay the list of
+ * resources.
+ */
+struct ResTable_overlayable_policy_header
+{
+  struct ResChunk_header header;
+
+  enum PolicyFlags : uint32_t {
+    // Any overlay can overlay these resources.
+    POLICY_PUBLIC = 0x00000001,
+
+    // The overlay must reside of the system partition or must have existed on the system partition
+    // before an upgrade to overlay these resources.
+    POLICY_SYSTEM_PARTITION = 0x00000002,
+
+    // The overlay must reside of the vendor partition or must have existed on the vendor partition
+    // before an upgrade to overlay these resources.
+    POLICY_VENDOR_PARTITION = 0x00000004,
+
+    // The overlay must reside of the product partition or must have existed on the product
+    // partition before an upgrade to overlay these resources.
+    POLICY_PRODUCT_PARTITION = 0x00000008,
+
+    // The overlay must be signed with the same signature as the actor of the target resource,
+    // which can be separate or the same as the target package with the resource.
+    POLICY_SIGNATURE = 0x00000010,
+
+    // The overlay must reside of the odm partition or must have existed on the odm
+    // partition before an upgrade to overlay these resources.
+    POLICY_ODM_PARTITION = 0x00000020,
+
+    // The overlay must reside of the oem partition or must have existed on the oem
+    // partition before an upgrade to overlay these resources.
+    POLICY_OEM_PARTITION = 0x00000040,
+  };
+  uint32_t policy_flags;
+
+  // The number of ResTable_ref that follow this header.
+  uint32_t entry_count;
+};
+
 struct alignas(uint32_t) Idmap_header {
   // Always 0x504D4449 ('IDMP')
   uint32_t magic;
@@ -1709,13 +1768,13 @@ public:
 
     struct resource_name
     {
-        const char16_t* package;
+        const char16_t* package = NULL;
         size_t packageLen;
-        const char16_t* type;
-        const char* type8;
+        const char16_t* type = NULL;
+        const char* type8 = NULL;
         size_t typeLen;
-        const char16_t* name;
-        const char* name8;
+        const char16_t* name = NULL;
+        const char* name8 = NULL;
         size_t nameLen;
     };
 
@@ -1990,7 +2049,7 @@ public:
     // Return value: on success: NO_ERROR; caller is responsible for free-ing
     // outData (using free(3)). On failure, any status_t value other than
     // NO_ERROR; the caller should not free outData.
-    status_t createIdmap(const ResTable& overlay,
+    status_t createIdmap(const ResTable& targetResTable,
             uint32_t targetCrc, uint32_t overlayCrc,
             const char* targetPath, const char* overlayPath,
             void** outData, size_t* outSize) const;

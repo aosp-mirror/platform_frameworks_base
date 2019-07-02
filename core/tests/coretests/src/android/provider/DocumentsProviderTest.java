@@ -20,11 +20,11 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.DocumentsContract.Path;
-import android.support.test.filters.SmallTest;
 import android.test.ProviderTestCase2;
 
+import androidx.test.filters.SmallTest;
+
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Unit tests for {@link DocumentsProvider}.
@@ -60,7 +60,8 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
                 DocumentsContract.buildDocumentUri(TestDocumentsProvider.AUTHORITY, DOCUMENT_ID);
         try (ContentProviderClient client =
                      mResolver.acquireUnstableContentProviderClient(docUri)) {
-            final Path actual = DocumentsContract.findDocumentPath(client, docUri);
+            final Path actual = DocumentsContract.findDocumentPath(
+                    ContentResolver.wrap(client), docUri);
             assertEquals(expected, actual);
         }
     }
@@ -84,7 +85,10 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        assertNull(DocumentsContract.findDocumentPath(mResolver, docUri));
+        try {
+            DocumentsContract.findDocumentPath(mResolver, docUri);
+            fail("Expected a SecurityException to be throw");
+        } catch (SecurityException expected) { }
     }
 
     public void testFindDocumentPath_treeUri_erasesNonNullRootId() throws Exception {

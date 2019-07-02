@@ -111,12 +111,14 @@ final public class MediaCodecList {
             caps[typeIx++] = getCodecCapabilities(index, type);
         }
         return new MediaCodecInfo(
-                getCodecName(index), isEncoder(index), caps);
+                getCodecName(index), getCanonicalName(index), getAttributes(index), caps);
     }
 
     /* package private */ static native final String getCodecName(int index);
 
-    /* package private */ static native final boolean isEncoder(int index);
+    /* package private */ static native final String getCanonicalName(int index);
+
+    /* package private */ static native final int getAttributes(int index);
 
     /* package private */ static native final String[] getSupportedTypes(int index);
 
@@ -201,7 +203,7 @@ final public class MediaCodecList {
      * <code class=prettyprint>format.setString(MediaFormat.KEY_FRAME_RATE, null)</code>
      * to clear any existing frame rate setting in the format.
      *
-     * @see MediaCodecList.CodecCapabilities.isFormatSupported for format keys
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported(MediaFormat) for format keys
      * considered per android versions when evaluating suitable codecs.
      *
      * @param format A decoder media format with optional feature directives.
@@ -225,7 +227,7 @@ final public class MediaCodecList {
      * <code class=prettyprint>format.setString(MediaFormat.KEY_FRAME_RATE, null)</code>
      * to clear any existing frame rate setting in the format.
      *
-     * @see MediaCodecList.CodecCapabilities.isFormatSupported for format keys
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported(MediaFormat) for format keys
      * considered per android versions when evaluating suitable codecs.
      *
      * @param format An encoder media format with optional feature directives.

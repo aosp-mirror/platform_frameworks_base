@@ -67,14 +67,16 @@ public:
                        const int64_t& currentBucketValue);
 
     // Informs incidentd about the detected alert.
-    void declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key);
+    void declareAnomaly(const int64_t& timestampNs, int64_t metricId, const MetricDimensionKey& key,
+                        int64_t metricValue);
 
     // Detects if, based on past buckets plus the new currentBucketValue (which generally
     // represents the partially-filled current bucket), an anomaly has happened, and if so,
     // declares an anomaly and informs relevant subscribers.
     // Also advances to currBucketNum-1.
     void detectAndDeclareAnomaly(const int64_t& timestampNs, const int64_t& currBucketNum,
-                                 const MetricDimensionKey& key, const int64_t& currentBucketValue);
+                                 int64_t metricId, const MetricDimensionKey& key,
+                                 const int64_t& currentBucketValue);
 
     // Init the AlarmMonitor which is shared across anomaly trackers.
     virtual void setAlarmMonitor(const sp<AlarmMonitor>& alarmMonitor) {
@@ -176,7 +178,7 @@ protected:
     virtual void resetStorage();
 
     // Informs the subscribers (incidentd, perfetto, broadcasts, etc) that an anomaly has occurred.
-    void informSubscribers(const MetricDimensionKey& key);
+    void informSubscribers(const MetricDimensionKey& key, int64_t metricId, int64_t metricValue);
 
     FRIEND_TEST(AnomalyTrackerTest, TestConsecutiveBuckets);
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);

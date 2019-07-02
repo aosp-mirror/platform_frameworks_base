@@ -17,6 +17,7 @@
 package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,6 +42,8 @@ public final class WrappedApplicationKey implements Parcelable {
     private String mAlias;
     // The only supported format is AES-256 symmetric key.
     private byte[] mEncryptedKeyMaterial;
+    // The optional metadata that's authenticated (but unencrypted) with the key material.
+    private byte[] mMetadata;
 
     // IMPORTANT! PLEASE READ!
     // -----------------------
@@ -69,18 +72,9 @@ public final class WrappedApplicationKey implements Parcelable {
          * @param alias The alias.
          * @return This builder.
          */
-        public Builder setAlias(@NonNull String alias) {
+        public @NonNull Builder setAlias(@NonNull String alias) {
             mInstance.mAlias = alias;
             return this;
-        }
-
-        /**
-         * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
-         * @removed
-         */
-        @Deprecated
-        public Builder setAccount(@NonNull byte[] account) {
-            throw new UnsupportedOperationException();
         }
 
         /**
@@ -89,9 +83,19 @@ public final class WrappedApplicationKey implements Parcelable {
          * @param encryptedKeyMaterial The key material
          * @return This builder
          */
-
-        public Builder setEncryptedKeyMaterial(@NonNull byte[] encryptedKeyMaterial) {
+        public @NonNull Builder setEncryptedKeyMaterial(@NonNull byte[] encryptedKeyMaterial) {
             mInstance.mEncryptedKeyMaterial = encryptedKeyMaterial;
+            return this;
+        }
+
+        /**
+         * Sets the metadata that is authenticated (but unecrypted) with the key material.
+         *
+         * @param metadata The metadata
+         * @return This builder
+         */
+        public @NonNull Builder setMetadata(@Nullable byte[] metadata) {
+            mInstance.mMetadata = metadata;
             return this;
         }
 
@@ -101,7 +105,7 @@ public final class WrappedApplicationKey implements Parcelable {
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        @NonNull public WrappedApplicationKey build() {
+        public @NonNull WrappedApplicationKey build() {
             Preconditions.checkNotNull(mInstance.mAlias);
             Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
             return mInstance;
@@ -111,9 +115,10 @@ public final class WrappedApplicationKey implements Parcelable {
     private WrappedApplicationKey() { }
 
     /**
-     * Deprecated - consider using Builder.
+     * @deprecated Use the builder instead.
      * @hide
      */
+    @Deprecated
     public WrappedApplicationKey(@NonNull String alias, @NonNull byte[] encryptedKeyMaterial) {
         mAlias = Preconditions.checkNotNull(alias);
         mEncryptedKeyMaterial = Preconditions.checkNotNull(encryptedKeyMaterial);
@@ -133,16 +138,12 @@ public final class WrappedApplicationKey implements Parcelable {
         return mEncryptedKeyMaterial;
     }
 
-    /**
-     * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
-     * @removed
-     */
-    @Deprecated
-    public @NonNull byte[] getAccount() {
-        throw new UnsupportedOperationException();
+    /** The metadata with the key. */
+    public @Nullable byte[] getMetadata() {
+        return mMetadata;
     }
 
-    public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
+    public static final @NonNull Parcelable.Creator<WrappedApplicationKey> CREATOR =
             new Parcelable.Creator<WrappedApplicationKey>() {
                 public WrappedApplicationKey createFromParcel(Parcel in) {
                     return new WrappedApplicationKey(in);
@@ -157,6 +158,7 @@ public final class WrappedApplicationKey implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAlias);
         out.writeByteArray(mEncryptedKeyMaterial);
+        out.writeByteArray(mMetadata);
     }
 
     /**
@@ -165,6 +167,10 @@ public final class WrappedApplicationKey implements Parcelable {
     protected WrappedApplicationKey(Parcel in) {
         mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
+        // Check if there is still data to be read.
+        if (in.dataAvail() > 0) {
+            mMetadata = in.createByteArray();
+        }
     }
 
     @Override

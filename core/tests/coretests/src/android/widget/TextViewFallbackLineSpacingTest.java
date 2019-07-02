@@ -21,8 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
 import android.text.DynamicLayout;
 import android.text.FontFallbackSetup;
 import android.text.Layout;
@@ -30,6 +28,9 @@ import android.text.StaticLayout;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView.BufferType;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
 import org.junit.Test;

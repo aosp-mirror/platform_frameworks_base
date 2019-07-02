@@ -25,6 +25,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.IntFunction;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
@@ -41,6 +43,8 @@ import java.util.Objects;
 public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
+
+    public static final File[] EMPTY_FILE = new File[0];
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
@@ -523,6 +527,13 @@ public class ArrayUtils {
         return (array != null) ? array.clone() : null;
     }
 
+    /**
+     * Clones an array or returns null if the array is null.
+     */
+    public static @Nullable <T> T[] cloneOrNull(@Nullable T[] array) {
+        return (array != null) ? array.clone() : null;
+    }
+
     public static @Nullable <T> ArraySet<T> cloneOrNull(@Nullable ArraySet<T> array) {
         return (array != null) ? new ArraySet<T>(array) : null;
     }
@@ -655,6 +666,10 @@ public class ArrayUtils {
         return (val != null) ? val : EmptyArray.STRING;
     }
 
+    public static @NonNull File[] defeatNullable(@Nullable File[] val) {
+        return (val != null) ? val : EMPTY_FILE;
+    }
+
     /**
      * Throws {@link ArrayIndexOutOfBoundsException} if the index is out of bounds.
      *
@@ -666,5 +681,83 @@ public class ArrayUtils {
         if (index < 0 || len <= index) {
             throw new ArrayIndexOutOfBoundsException("length=" + len + "; index=" + index);
         }
+    }
+
+    /**
+     * Returns an array with values from {@code val} minus {@code null} values
+     *
+     * @param arrayConstructor typically {@code T[]::new} e.g. {@code String[]::new}
+     */
+    public static <T> T[] filterNotNull(T[] val, IntFunction<T[]> arrayConstructor) {
+        int nullCount = 0;
+        int size = size(val);
+        for (int i = 0; i < size; i++) {
+            if (val[i] == null) {
+                nullCount++;
+            }
+        }
+        if (nullCount == 0) {
+            return val;
+        }
+        T[] result = arrayConstructor.apply(size - nullCount);
+        int outIdx = 0;
+        for (int i = 0; i < size; i++) {
+            if (val[i] != null) {
+                result[outIdx++] = val[i];
+            }
+        }
+        return result;
+    }
+
+    public static boolean startsWith(byte[] cur, byte[] val) {
+        if (cur == null || val == null) return false;
+        if (cur.length < val.length) return false;
+        for (int i = 0; i < val.length; i++) {
+            if (cur[i] != val[i]) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns the first element from the array for which
+     * condition {@code predicate} is true, or null if there is no such element
+     */
+    public static @Nullable <T> T find(@Nullable T[] items,
+            @NonNull java.util.function.Predicate<T> predicate) {
+        if (isEmpty(items)) return null;
+        for (final T item : items) {
+            if (predicate.test(item)) return item;
+        }
+        return null;
+    }
+
+    public static String deepToString(Object value) {
+        if (value != null && value.getClass().isArray()) {
+            if (value.getClass() == boolean[].class) {
+                return Arrays.toString((boolean[]) value);
+            } else if (value.getClass() == byte[].class) {
+                return Arrays.toString((byte[]) value);
+            } else if (value.getClass() == char[].class) {
+                return Arrays.toString((char[]) value);
+            } else if (value.getClass() == double[].class) {
+                return Arrays.toString((double[]) value);
+            } else if (value.getClass() == float[].class) {
+                return Arrays.toString((float[]) value);
+            } else if (value.getClass() == int[].class) {
+                return Arrays.toString((int[]) value);
+            } else if (value.getClass() == long[].class) {
+                return Arrays.toString((long[]) value);
+            } else if (value.getClass() == short[].class) {
+                return Arrays.toString((short[]) value);
+            } else {
+                return Arrays.deepToString((Object[]) value);
+            }
+        } else {
+            return String.valueOf(value);
+        }
+    }
+
+    public static @Nullable <T> T firstOrNull(T[] items) {
+        return items.length > 0 ? items[0] : null;
     }
 }

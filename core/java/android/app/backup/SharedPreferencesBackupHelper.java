@@ -51,8 +51,8 @@ import java.io.File;
  *     // identify the SharedPreferenceBackupHelper's data.
  *     static final String MY_PREFS_BACKUP_KEY = "myprefs";
  *
- *     // Simply allocate a helper and install it
- *     void onCreate() {
+ *     // Allocate a helper and install it.
+ *     public void onCreate() {
  *         SharedPreferencesBackupHelper helper =
  *                 new SharedPreferencesBackupHelper(this, PREFS_DISPLAY, PREFS_SCORES);
  *         addHelper(MY_PREFS_BACKUP_KEY, helper);
@@ -117,7 +117,7 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
      */
     public void restoreEntity(BackupDataInputStream data) {
         Context context = mContext;
-        
+
         String key = data.getKey();
         if (DEBUG) Log.d(TAG, "got entity '" + key + "' size=" + data.size());
 

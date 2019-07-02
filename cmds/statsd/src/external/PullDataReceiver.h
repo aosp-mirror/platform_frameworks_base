@@ -28,7 +28,14 @@ namespace statsd {
 class PullDataReceiver : virtual public RefBase{
  public:
   virtual ~PullDataReceiver() {}
-  virtual void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) = 0;
+  /**
+   * @param data The pulled data.
+   * @param pullSuccess Whether the pull succeeded. If the pull does not succeed, the data for the
+   * bucket should be invalidated.
+   * @param originalPullTimeNs This is when all the pulls have been initiated (elapsed time).
+   */
+  virtual void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data, 
+                            bool pullSuccess, int64_t originalPullTimeNs) = 0;
 };
 
 }  // namespace statsd

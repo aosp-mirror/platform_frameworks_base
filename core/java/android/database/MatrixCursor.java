@@ -18,6 +18,7 @@ package android.database;
 
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
+
 import java.util.ArrayList;
 
 /**
@@ -238,6 +239,12 @@ public class MatrixCursor extends AbstractCursor {
                     data[(row * columnCount) + i] = value;
                 }
             }
+            return this;
+        }
+
+        /** @hide */
+        public final RowBuilder add(int columnIndex, Object value) {
+            data[(row * columnCount) + columnIndex] = value;
             return this;
         }
     }

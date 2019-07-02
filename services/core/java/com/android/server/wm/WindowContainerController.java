@@ -32,7 +32,7 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
 
     final WindowManagerService mService;
     final RootWindowContainer mRoot;
-    final WindowHashMap mWindowMap;
+    final WindowManagerGlobalLock mGlobalLock;
 
     // The window container this controller owns.
     E mContainer;
@@ -43,7 +43,7 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
         mListener = listener;
         mService = service;
         mRoot = mService != null ? mService.mRoot : null;
-        mWindowMap = mService != null ? mService.mWindowMap : null;
+        mGlobalLock = mService != null ? mService.mGlobalLock : null;
     }
 
     void setContainer(E container) {
@@ -72,12 +72,12 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
     }
 
     @Override
-    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        synchronized (mWindowMap) {
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 return;
             }
-            mContainer.onOverrideConfigurationChanged(overrideConfiguration);
+            mContainer.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         }
     }
 }

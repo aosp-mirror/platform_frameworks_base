@@ -17,11 +17,12 @@
 package android.widget.listview.arrowscroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.listview.ListWithNoFadingEdge;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class ListWithNoFadingEdgeTest extends ActivityInstrumentationTestCase<ListWithNoFadingEdge> {
 

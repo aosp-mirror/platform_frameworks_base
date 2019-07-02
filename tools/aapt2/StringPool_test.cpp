@@ -303,6 +303,37 @@ TEST(StringPoolTest, Flatten) {
   }
 }
 
+TEST(StringPoolTest, ModifiedUTF8) {
+  using namespace android;  // For NO_ERROR on Windows.
+  StdErrDiagnostics diag;
+  StringPool pool;
+  StringPool::Ref ref_a = pool.MakeRef("\xF0\x90\x90\x80"); // 𐐀 (U+10400)
+  StringPool::Ref ref_b = pool.MakeRef("foo \xF0\x90\x90\xB7 bar"); // 𐐷 (U+10437)
+  StringPool::Ref ref_c = pool.MakeRef("\xF0\x90\x90\x80\xF0\x90\x90\xB7");
+
+  BigBuffer buffer(1024);
+  StringPool::FlattenUtf8(&buffer, pool, &diag);
+  std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
+
+  // Check that the codepoints are encoded using two three-byte surrogate pairs
+  ResStringPool test;
+  ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
+  size_t len;
+  const char* str = test.string8At(0, &len);
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(std::string(str, len), Eq("\xED\xA0\x81\xED\xB0\x80"));
+  str = test.string8At(1, &len);
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(std::string(str, len), Eq("foo \xED\xA0\x81\xED\xB0\xB7 bar"));
+  str = test.string8At(2, &len);
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(std::string(str, len), Eq("\xED\xA0\x81\xED\xB0\x80\xED\xA0\x81\xED\xB0\xB7"));
+
+  // Check that retrieving the strings returns the original UTF-8 character bytes
+  EXPECT_THAT(util::GetString(test, 0), Eq("\xF0\x90\x90\x80"));
+  EXPECT_THAT(util::GetString(test, 1), Eq("foo \xF0\x90\x90\xB7 bar"));
+  EXPECT_THAT(util::GetString(test, 2), Eq("\xF0\x90\x90\x80\xF0\x90\x90\xB7"));
+}
 
 TEST(StringPoolTest, MaxEncodingLength) {
   StdErrDiagnostics diag;

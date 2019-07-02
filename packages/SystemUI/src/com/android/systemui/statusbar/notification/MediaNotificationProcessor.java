@@ -23,11 +23,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import androidx.annotation.VisibleForTesting;
-import androidx.palette.graphics.Palette;
 import android.util.LayoutDirection;
 
-import com.android.internal.util.NotificationColorUtil;
+import androidx.annotation.VisibleForTesting;
+import androidx.palette.graphics.Palette;
+
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -68,8 +69,7 @@ public class MediaNotificationProcessor {
     private static final int RESIZE_BITMAP_AREA = 150 * 150;
     private final ImageGradientColorizer mColorizer;
     private final Context mContext;
-    private float[] mFilteredBackgroundHsl = null;
-    private Palette.Filter mBlackWhiteFilter = (rgb, hsl) -> !isWhiteOrBlack(hsl);
+    private final Palette.Filter mBlackWhiteFilter = (rgb, hsl) -> !isWhiteOrBlack(hsl);
 
     /**
      * The context of the notification. This is the app context of the package posting the
@@ -120,23 +120,21 @@ public class MediaNotificationProcessor {
                 drawable.setBounds(0, 0, width, height);
                 drawable.draw(canvas);
 
-                // for the background we only take the left side of the image to ensure
-                // a smooth transition
-                Palette.Builder paletteBuilder = Palette.from(bitmap)
-                        .setRegion(0, 0, bitmap.getWidth() / 2, bitmap.getHeight())
-                        .clearFilters() // we want all colors, red / white / black ones too!
-                        .resizeBitmapArea(RESIZE_BITMAP_AREA);
+                Palette.Builder paletteBuilder = generateArtworkPaletteBuilder(bitmap);
                 Palette palette = paletteBuilder.generate();
-                backgroundColor = findBackgroundColorAndFilter(palette);
+                Palette.Swatch backgroundSwatch = findBackgroundSwatch(palette);
+                backgroundColor = backgroundSwatch.getRgb();
                 // we want most of the full region again, slightly shifted to the right
                 float textColorStartWidthFraction = 0.4f;
                 paletteBuilder.setRegion((int) (bitmap.getWidth() * textColorStartWidthFraction), 0,
                         bitmap.getWidth(),
                         bitmap.getHeight());
-                if (mFilteredBackgroundHsl != null) {
+                // We're not filtering on white or black
+                if (!isWhiteOrBlack(backgroundSwatch.getHsl())) {
+                    final float backgroundHue = backgroundSwatch.getHsl()[0];
                     paletteBuilder.addFilter((rgb, hsl) -> {
                         // at least 10 degrees hue difference
-                        float diff = Math.abs(hsl[0] - mFilteredBackgroundHsl[0]);
+                        float diff = Math.abs(hsl[0] - backgroundHue);
                         return diff > 10 && diff < 350;
                     });
                 }
@@ -155,7 +153,7 @@ public class MediaNotificationProcessor {
     }
 
     private int selectForegroundColor(int backgroundColor, Palette palette) {
-        if (NotificationColorUtil.isColorLight(backgroundColor)) {
+        if (ContrastColorUtil.isColorLight(backgroundColor)) {
             return selectForegroundColorForSwatches(palette.getDarkVibrantSwatch(),
                     palette.getVibrantSwatch(),
                     palette.getDarkMutedSwatch(),
@@ -243,18 +241,31 @@ public class MediaNotificationProcessor {
                 && (swatch.getPopulation() / (float) RESIZE_BITMAP_AREA > MINIMUM_IMAGE_FRACTION);
     }
 
-    private int findBackgroundColorAndFilter(Palette palette) {
+    /**
+     * Finds an appropriate background swatch from media artwork.
+     *
+     * @param artwork Media artwork
+     * @return Swatch that should be used as the background of the media notification.
+     */
+    public static Palette.Swatch findBackgroundSwatch(Bitmap artwork) {
+        return findBackgroundSwatch(generateArtworkPaletteBuilder(artwork).generate());
+    }
+
+    /**
+     * Finds an appropriate background swatch from the palette of media artwork.
+     *
+     * @param palette Artwork palette, should be obtained from {@link generateArtworkPaletteBuilder}
+     * @return Swatch that should be used as the background of the media notification.
+     */
+    private static Palette.Swatch findBackgroundSwatch(Palette palette) {
         // by default we use the dominant palette
         Palette.Swatch dominantSwatch = palette.getDominantSwatch();
         if (dominantSwatch == null) {
-            // We're not filtering on white or black
-            mFilteredBackgroundHsl = null;
-            return Color.WHITE;
+            return new Palette.Swatch(Color.WHITE, 100);
         }
 
         if (!isWhiteOrBlack(dominantSwatch.getHsl())) {
-            mFilteredBackgroundHsl = dominantSwatch.getHsl();
-            return dominantSwatch.getRgb();
+            return dominantSwatch;
         }
         // Oh well, we selected black or white. Lets look at the second color!
         List<Palette.Swatch> swatches = palette.getSwatches();
@@ -269,38 +280,51 @@ public class MediaNotificationProcessor {
             }
         }
         if (second == null) {
-            // We're not filtering on white or black
-            mFilteredBackgroundHsl = null;
-            return dominantSwatch.getRgb();
+            return dominantSwatch;
         }
         if (dominantSwatch.getPopulation() / highestNonWhitePopulation
                 > POPULATION_FRACTION_FOR_WHITE_OR_BLACK) {
             // The dominant swatch is very dominant, lets take it!
             // We're not filtering on white or black
-            mFilteredBackgroundHsl = null;
-            return dominantSwatch.getRgb();
+            return dominantSwatch;
         } else {
-            mFilteredBackgroundHsl = second.getHsl();
-            return second.getRgb();
+            return second;
         }
     }
 
-    private boolean isWhiteOrBlack(float[] hsl) {
-        return isBlack(hsl) || isWhite(hsl);
+    /**
+     * Generate a palette builder for media artwork.
+     *
+     * For producing a smooth background transition, the palette is extracted from only the left
+     * side of the artwork.
+     *
+     * @param artwork Media artwork
+     * @return Builder that generates the {@link Palette} for the media artwork.
+     */
+    private static Palette.Builder generateArtworkPaletteBuilder(Bitmap artwork) {
+        // for the background we only take the left side of the image to ensure
+        // a smooth transition
+        return Palette.from(artwork)
+                .setRegion(0, 0, artwork.getWidth() / 2, artwork.getHeight())
+                .clearFilters() // we want all colors, red / white / black ones too!
+                .resizeBitmapArea(RESIZE_BITMAP_AREA);
     }
 
+    private static boolean isWhiteOrBlack(float[] hsl) {
+        return isBlack(hsl) || isWhite(hsl);
+    }
 
     /**
      * @return true if the color represents a color which is close to black.
      */
-    private boolean isBlack(float[] hslColor) {
+    private static boolean isBlack(float[] hslColor) {
         return hslColor[2] <= BLACK_MAX_LIGHTNESS;
     }
 
     /**
      * @return true if the color represents a color which is close to white.
      */
-    private boolean isWhite(float[] hslColor) {
+    private static boolean isWhite(float[] hslColor) {
         return hslColor[2] >= WHITE_MIN_LIGHTNESS;
     }
 }

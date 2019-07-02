@@ -17,16 +17,16 @@
 package android.database;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.database.Cursor;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 import android.test.MoreAsserts;
+import android.util.Log;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+
+import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
-import junit.framework.TestCase;
 
 public class DatabaseLocaleTest extends TestCase {
 

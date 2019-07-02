@@ -17,14 +17,16 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.content.Intent;
 import android.os.Bundle;
 
 /** @hide */
 interface IAppTask {
     void finishAndRemoveTask();
+    @UnsupportedAppUsage
     ActivityManager.RecentTaskInfo getTaskInfo();
-    void moveToFront();
+    void moveToFront(in IApplicationThread appThread, in String callingPackage);
     int startActivity(IBinder whoThread, String callingPackage,
             in Intent intent, String resolvedType, in Bundle options);
     void setExcludeFromRecents(boolean exclude);

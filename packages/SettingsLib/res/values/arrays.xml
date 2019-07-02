@@ -102,6 +102,20 @@
 
 
     <!-- Bluetooth settings -->
+    <!-- Titles for Bluetooth HCI Snoop Logging -->
+    <string-array name="bt_hci_snoop_log_entries">
+        <item>Disabled</item>
+        <item>Enabled Filtered</item>
+        <item>Enabled</item>
+    </string-array>
+
+    <!-- Values for Bluetooth HCI Snoop Logging -->
+    <string-array name="bt_hci_snoop_log_values" translatable="false">
+        <item>disabled</item>
+        <item>filtered</item>
+        <item>full</item>
+    </string-array>
+
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
         <item>AVRCP 1.4 (Default)</item>
@@ -588,5 +602,27 @@
         <item>0</item><item>3</item>
         <item>3</item><item>3</item>
     </array>
+
+    <!-- Bluetooth icon foreground colors -->
+    <integer-array name="bt_icon_fg_colors">
+        <item>@color/bt_color_icon_1</item>
+        <item>@color/bt_color_icon_2</item>
+        <item>@color/bt_color_icon_3</item>
+        <item>@color/bt_color_icon_4</item>
+        <item>@color/bt_color_icon_5</item>
+        <item>@color/bt_color_icon_6</item>
+        <item>@color/bt_color_icon_7</item>
+    </integer-array>
+
+    <!-- Bluetooth icon background colors -->
+    <integer-array name="bt_icon_bg_colors">
+        <item>@color/bt_color_bg_1</item>
+        <item>@color/bt_color_bg_2</item>
+        <item>@color/bt_color_bg_3</item>
+        <item>@color/bt_color_bg_4</item>
+        <item>@color/bt_color_bg_5</item>
+        <item>@color/bt_color_bg_6</item>
+        <item>@color/bt_color_bg_7</item>
+    </integer-array>
 
 </resources>

@@ -17,11 +17,14 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
+#include <binder/IServiceManager.h>
 #include <hidl/HidlTransportSupport.h>
 
 #include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
+
+#include <bionic_malloc.h>
 
 #include <cutils/properties.h>
 #include <utils/Log.h>
@@ -34,7 +37,8 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
     char propBuf[PROPERTY_VALUE_MAX];
     property_get("system_init.startsensorservice", propBuf, "1");
     if (strcmp(propBuf, "1") == 0) {
-        SensorService::instantiate();
+        SensorService::publish(false /* allowIsolated */,
+                               IServiceManager::DUMP_FLAG_PRIORITY_CRITICAL);
     }
 
 }
@@ -62,6 +66,11 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
 }
 
+static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
+                                                                     jobject /* clazz */) {
+   android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
+}
+
 /*
  * JNI registration.
  */
@@ -69,6 +78,8 @@ static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
     { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
+    { "initZygoteChildHeapProfiling", "()V",
+      (void*) android_server_SystemServer_initZygoteChildHeapProfiling },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)

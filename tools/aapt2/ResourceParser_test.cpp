@@ -183,11 +183,11 @@ TEST_F(ResourceParserTest, ParseStringTruncateASCII) {
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   // Preserve non-ASCII whitespace including extended ASCII characters
-  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#160;</string>)"));
+  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#x202F;World&#160;</string>)"));
 
   str = test::GetValue<String>(&table_, "string/foo3");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xC2\xA0"));
+  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xE2\x80\xAFWorld\xC2\xA0"));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   EXPECT_TRUE(TestParse(R"(<string name="foo4">2005年6月1日</string>)"));
@@ -215,6 +215,29 @@ TEST_F(ResourceParserTest, ParseStyledStringWithWhitespace) {
   EXPECT_THAT(*str->value->spans[1].name, StrEq("i"));
   EXPECT_THAT(str->value->spans[1].first_char, Eq(5u));
   EXPECT_THAT(str->value->spans[1].last_char, Eq(13u));
+}
+
+TEST_F(ResourceParserTest, ParseStringTranslatableAttribute) {
+  // If there is no translate attribute the default is 'true'
+  EXPECT_TRUE(TestParse(R"(<string name="foo1">Translate</string>)"));
+  String* str = test::GetValue<String>(&table_, "string/foo1");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_TRUE(str->IsTranslatable());
+
+  // Explicit 'true' translate attribute
+  EXPECT_TRUE(TestParse(R"(<string name="foo2" translatable="true">Translate</string>)"));
+  str = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_TRUE(str->IsTranslatable());
+
+  // Explicit 'false' translate attribute
+  EXPECT_TRUE(TestParse(R"(<string name="foo3" translatable="false">Do not translate</string>)"));
+  str = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_FALSE(str->IsTranslatable());
+
+  // Invalid value for the translate attribute, should be boolean ('true' or 'false')
+  EXPECT_FALSE(TestParse(R"(<string name="foo4" translatable="yes">Translate</string>)"));
 }
 
 TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
@@ -318,7 +341,7 @@ TEST_F(ResourceParserTest, ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoC
   std::string input = R"(
       <attr name="foo" />
       <declare-styleable name="bar">
-        <attr name="baz" />
+        <attr name="baz" format="reference"/>
       </declare-styleable>)";
   ASSERT_TRUE(TestParse(input, watch_config));
 
@@ -498,6 +521,24 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
   EXPECT_THAT(style->entries[0].key.name, Eq(make_value(test::ParseNameOrDie("android:attr/bar"))));
 }
 
+TEST_F(ResourceParserTest, ParseStyleWithRawStringItem) {
+  std::string input = R"(
+      <style name="foo">
+        <item name="bar">
+          com.helloworld.AppClass
+        </item>
+      </style>)";
+  ASSERT_TRUE(TestParse(input));
+
+  Style* style = test::GetValue<Style>(&table_, "style/foo");
+  ASSERT_THAT(style, NotNull());
+  EXPECT_THAT(style->entries[0].value, NotNull());
+  RawString* value = ValueCast<RawString>(style->entries[0].value.get());
+  EXPECT_THAT(value, NotNull());
+  EXPECT_THAT(*value->value, StrEq(R"(com.helloworld.AppClass)"));
+}
+
+
 TEST_F(ResourceParserTest, ParseStyleWithInferredParent) {
   ASSERT_TRUE(TestParse(R"(<style name="foo.bar"/>)"));
 
@@ -548,8 +589,7 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
 
   Attribute* attr = test::GetValue<Attribute>(&table_, "attr/bar");
-  ASSERT_THAT(attr, NotNull());
-  EXPECT_TRUE(attr->IsWeak());
+  ASSERT_THAT(attr, IsNull());
 
   attr = test::GetValue<Attribute>(&table_, "attr/bat");
   ASSERT_THAT(attr, NotNull());
@@ -873,63 +913,289 @@ TEST_F(ResourceParserTest, ParsePlatformIndependentNewline) {
   ASSERT_TRUE(TestParse(R"(<string name="foo">%1$s %n %2$s</string>)"));
 }
 
-TEST_F(ResourceParserTest, ParseOverlayableTagWithSystemPolicy) {
+TEST_F(ResourceParserTest, ParseOverlayable) {
   std::string input = R"(
-      <overlayable policy="illegal_policy">
-        <item type="string" name="foo" />
-      </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-
-  input = R"(
-      <overlayable policy="system">
-        <item name="foo" />
-      </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-
-  input = R"(
-      <overlayable policy="system">
-        <item type="attr" />
-      </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-
-  input = R"(
-      <overlayable policy="system">
-        <item type="bad_type" name="foo" />
-      </overlayable>)";
-  EXPECT_FALSE(TestParse(input));
-
-  input = R"(<overlayable policy="system" />)";
-  EXPECT_TRUE(TestParse(input));
-
-  input = R"(<overlayable />)";
-  EXPECT_TRUE(TestParse(input));
-
-  input = R"(
-      <overlayable policy="system">
-        <item type="string" name="foo" />
-        <item type="dimen" name="foo" />
+      <overlayable name="Name" actor="overlay://theme">
+          <policy type="signature">
+            <item type="string" name="foo" />
+            <item type="drawable" name="bar" />
+          </policy>
       </overlayable>)";
   ASSERT_TRUE(TestParse(input));
 
-  input = R"(
-      <overlayable>
-        <item type="string" name="bar" />
-      </overlayable>)";
-  ASSERT_TRUE(TestParse(input));
-
-  Maybe<ResourceTable::SearchResult> search_result =
-      table_.FindResource(test::ParseNameOrDie("string/bar"));
+  auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
-  EXPECT_TRUE(search_result.value().entry->overlayable);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("drawable/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableRequiresName) {
+  EXPECT_FALSE(TestParse(R"(<overlayable actor="overlay://theme" />)"));
+  EXPECT_TRUE(TestParse(R"(<overlayable name="Name" />)"));
+  EXPECT_TRUE(TestParse(R"(<overlayable name="Name" actor="overlay://theme" />)"));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableBadActorFail) {
+  EXPECT_FALSE(TestParse(R"(<overlayable name="Name" actor="overley://theme" />)"));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="bar" />
+        </policy>
+        <policy type="system">
+          <item type="string" name="fiz" />
+        </policy>
+        <policy type="vendor">
+          <item type="string" name="fuz" />
+        </policy>
+        <policy type="public">
+          <item type="string" name="faz" />
+        </policy>
+        <policy type="signature">
+          <item type="string" name="foz" />
+        </policy>
+        <policy type="odm">
+          <item type="string" name="biz" />
+        </policy>
+        <policy type="oem">
+          <item type="string" name="buz" />
+        </policy>
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+
+  auto search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/fiz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSystem));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/fuz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kVendor));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/faz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/foz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/biz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kOdm));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/buz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kOem));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableNoPolicyError) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy>
+          <item name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableBadPolicyError) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <policy type="illegal_policy">
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="vendor">
+          <item type="string" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableMultiplePolicy) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <policy type="vendor|public">
+          <item type="string" name="foo" />
+        </policy>
+        <policy type="product|system">
+          <item type="string" name="bar" />
+        </policy>
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+
+  auto search_result = table_.FindResource(test::ParseNameOrDie("string/foo"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kVendor
+                                                   | OverlayableItem::Policy::kPublic));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
+                                                   | OverlayableItem::Policy::kSystem));
 }
 
 TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
   std::string input = R"(
-      <overlayable>
+      <overlayable name="Name">
         <item type="string" name="foo" />
         <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <item type="string" name="foo" />
+      </overlayable>
+      <overlayable name="Name">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <item type="string" name="foo" />
+      </overlayable>
+      <overlayable name="Other">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name" actor="overlay://my.actor.one">
+        <item type="string" name="foo" />
+      </overlayable>
+      <overlayable name="Other" actor="overlay://my.actor.two">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="foo" />
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+        <policy type="vendor">
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>
+
+      <overlayable name="Name">
+        <policy type="product">
+          <item type="string" name="foo" />
+        </policy>
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, NestPolicyInOverlayableError) {
+  std::string input = R"(
+      <overlayable name="Name">
+        <policy type="vendor|product">
+          <policy type="public">
+            <item type="string" name="foo" />
+          </policy>
+        </policy>
       </overlayable>)";
   EXPECT_FALSE(TestParse(input));
 }
@@ -969,6 +1235,45 @@ TEST_F(ResourceParserTest, ParseIdItem) {
 
   // Ids that reference other resource ids cannot be public
   input = R"(<public name="foo7" type="id">@id/bar7</item>)";
+  ASSERT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, ParseCData) {
+  // Double quotes should still change the state of whitespace processing
+  std::string input = R"(<string name="foo">Hello<![CDATA[ "</string>' ]]>      World</string>)";
+  ASSERT_TRUE(TestParse(input));
+  auto output = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("Hello </string>'       World").data()));
+
+  input = R"(<string name="foo2"><![CDATA[Hello
+                                          World]]></string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("Hello World").data()));
+
+  // Cdata blocks should have their whitespace trimmed
+  input = R"(<string name="foo3">     <![CDATA[ text ]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("text").data()));
+
+  input = R"(<string name="foo4">     <![CDATA[]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo4");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("").data()));
+
+  input = R"(<string name="foo5">     <![CDATA[    ]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo5");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("").data()));
+
+  // Single quotes must still be escaped
+  input = R"(<string name="foo6"><![CDATA[some text and ' apostrophe]]></string>)";
   ASSERT_FALSE(TestParse(input));
 }
 

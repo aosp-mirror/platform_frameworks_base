@@ -16,7 +16,6 @@
 
 package com.android.systemui.pip.tv;
 
-import android.app.ActivityManager;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -24,19 +23,14 @@ import android.graphics.Color;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.os.Handler;
-import android.os.RemoteException;
+import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.widget.ImageView;
+import android.view.View;
 import android.widget.LinearLayout;
-import android.util.AttributeSet;
 
 import com.android.systemui.R;
-
-import static android.media.session.PlaybackState.ACTION_PAUSE;
-import static android.media.session.PlaybackState.ACTION_PLAY;
 
 import java.util.ArrayList;
 import java.util.List;

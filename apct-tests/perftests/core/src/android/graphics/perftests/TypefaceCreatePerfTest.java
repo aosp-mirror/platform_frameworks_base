@@ -18,22 +18,26 @@ package android.graphics.perftests;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.perftests.core.R;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -103,4 +107,15 @@ public class TypefaceCreatePerfTest {
 
         outFile.delete();
     }
+
+    @Test
+    public void testCreate_fromResources() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final Resources r = InstrumentationRegistry.getContext().getResources();
+
+        while (state.keepRunning()) {
+            Typeface face = r.getFont(R.font.samplefont);
+        }
+    }
+
 }

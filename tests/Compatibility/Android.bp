@@ -14,7 +14,7 @@
 
 android_test {
     name: "AppCompatibilityTest",
-    static_libs: ["android-support-test"],
+    static_libs: ["androidx.test.rules"],
     // Include all test java files.
     srcs: ["src/**/*.java"],
     platform_apis: true,

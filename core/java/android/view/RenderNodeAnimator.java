@@ -22,6 +22,10 @@ import android.animation.ValueAnimator;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.VirtualRefBasePtr;
@@ -81,6 +85,7 @@ public class RenderNodeAnimator extends Animator {
 
     private VirtualRefBasePtr mNativePtr;
 
+    private Handler mHandler;
     private RenderNode mTarget;
     private View mViewTarget;
     private int mRenderProperty = -1;
@@ -186,6 +191,9 @@ public class RenderNodeAnimator extends Animator {
         }
 
         mState = STATE_DELAYED;
+        if (mHandler == null) {
+            mHandler = new Handler(true);
+        }
         applyInterpolator();
 
         if (mNativePtr == null) {
@@ -205,7 +213,7 @@ public class RenderNodeAnimator extends Animator {
         // it with the final value here.
         if (mRenderProperty == RenderNodeAnimator.ALPHA) {
             mViewTarget.ensureTransformationInfo();
-            mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
+            mViewTarget.setAlphaInternal(mFinalValue);
         }
 
         moveToRunningState();
@@ -280,15 +288,22 @@ public class RenderNodeAnimator extends Animator {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @UnsupportedAppUsage
     public void setTarget(View view) {
         mViewTarget = view;
         setTarget(mViewTarget.mRenderNode);
     }
 
-    /** Sets the animation target to the owning view of the DisplayListCanvas */
-    public void setTarget(DisplayListCanvas canvas) {
+    /** Sets the animation target to the owning view of the RecordingCanvas */
+    public void setTarget(RecordingCanvas canvas) {
         setTarget(canvas.mNode);
+    }
+
+    /** @hide */
+    @UnsupportedAppUsage
+    public void setTarget(DisplayListCanvas canvas) {
+        setTarget((RecordingCanvas) canvas);
     }
 
     private void setTarget(RenderNode node) {
@@ -406,7 +421,7 @@ public class RenderNodeAnimator extends Animator {
         return listeners;
     }
 
-    long getNativeAnimator() {
+    public long getNativeAnimator() {
         return mNativePtr.get();
     }
 
@@ -489,7 +504,11 @@ public class RenderNodeAnimator extends Animator {
     // Called by native
     @UnsupportedAppUsage
     private static void callOnFinished(RenderNodeAnimator animator) {
-        animator.onFinished();
+        if (animator.mHandler != null) {
+            animator.mHandler.post(animator::onFinished);
+        } else {
+            new Handler(Looper.getMainLooper(), null, true).post(animator::onFinished);
+        }
     }
 
     @Override

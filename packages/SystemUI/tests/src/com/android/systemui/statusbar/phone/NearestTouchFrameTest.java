@@ -171,6 +171,19 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         ev.recycle();
     }
 
+    @Test
+    public void testViewNotAttachedNoCrash() {
+        View view = mockViewAt(0, 20, 10, 10);
+        when(view.isAttachedToWindow()).thenReturn(false);
+        mNearestTouchFrame.addView(view);
+        mNearestTouchFrame.onMeasure(0, 0);
+
+        MotionEvent ev = MotionEvent.obtain(0, 0, 0, 5 /* x */, 18 /* y */, 0);
+        mNearestTouchFrame.onTouchEvent(ev);
+        verify(view, never()).onTouchEvent(eq(ev));
+        ev.recycle();
+    }
+
     private View mockViewAt(int x, int y, int width, int height) {
         View v = spy(new View(mContext));
         doAnswer(invocation -> {

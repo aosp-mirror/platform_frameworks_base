@@ -6,4 +6,6 @@
         android:title="Call isAppInactive()"/>
     <item android:id="@+id/set_app_limit"
         android:title="Set App Limit" />
+    <item android:id="@+id/set_app_usage_limit"
+          android:title="Set App Usage Limit" />
 </menu>

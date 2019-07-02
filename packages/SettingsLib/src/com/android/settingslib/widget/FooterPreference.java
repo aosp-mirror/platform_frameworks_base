@@ -17,12 +17,13 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
-import androidx.core.content.res.TypedArrayUtils;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import androidx.core.content.res.TypedArrayUtils;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.R;
 
@@ -55,9 +56,8 @@ public class FooterPreference extends Preference {
     }
 
     private void init() {
-        setIcon(R.drawable.ic_info_outline_24dp);
+        setIcon(R.drawable.ic_info_outline_24);
         setKey(KEY_FOOTER);
         setOrder(ORDER_FOOTER);
-        setSelectable(false);
     }
 }

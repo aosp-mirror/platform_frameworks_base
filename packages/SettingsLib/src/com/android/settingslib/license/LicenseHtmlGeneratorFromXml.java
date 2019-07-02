@@ -16,10 +16,11 @@
 
 package com.android.settingslib.license;
 
-import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
+
+import androidx.annotation.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -45,7 +46,7 @@ import java.util.zip.GZIPInputStream;
  * TODO: Remove duplicate codes once backward support ends.
  */
 class LicenseHtmlGeneratorFromXml {
-    private static final String TAG = "LicenseHtmlGeneratorFromXml";
+    private static final String TAG = "LicenseGeneratorFromXml";
 
     private static final String TAG_ROOT = "licenses";
     private static final String TAG_FILE_NAME = "file-name";

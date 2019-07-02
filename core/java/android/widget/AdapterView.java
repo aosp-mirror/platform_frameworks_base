@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.os.Build;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -152,7 +153,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * True if the data has changed since the last layout
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768524)
     boolean mDataChanged;
 
     /**
@@ -1309,13 +1310,22 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     @Override
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
+    }
 
-        final Adapter adapter = getAdapter();
-        if (adapter == null) return;
+    /** @hide */
+    @Override
+    protected void onProvideStructure(@NonNull ViewStructure structure,
+            @ViewStructureType int viewFor, int flags) {
+        super.onProvideStructure(structure, viewFor, flags);
 
-        final CharSequence[] options = adapter.getAutofillOptions();
-        if (options != null) {
-            structure.setAutofillOptions(options);
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+            final Adapter adapter = getAdapter();
+            if (adapter == null) return;
+
+            final CharSequence[] options = adapter.getAutofillOptions();
+            if (options != null) {
+                structure.setAutofillOptions(options);
+            }
         }
     }
 }

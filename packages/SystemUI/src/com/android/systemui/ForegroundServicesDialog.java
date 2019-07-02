@@ -42,8 +42,6 @@ import com.android.internal.app.AlertController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 
-import com.android.systemui.R;
-
 import java.util.ArrayList;
 
 /**

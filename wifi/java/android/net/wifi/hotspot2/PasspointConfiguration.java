@@ -20,16 +20,18 @@ import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
+import android.os.Bundle;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.os.Parcel;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -324,6 +326,50 @@ public final class PasspointConfiguration implements Parcelable {
     }
 
     /**
+     * The map of OSU service provider names whose each element is presented in different
+     * languages for the service provider, which is used for finding a matching
+     * PasspointConfiguration with a given service provider name.
+     */
+    private Map<String, String> mServiceFriendlyNames = null;
+
+    /**
+     * @hide
+     */
+    public void setServiceFriendlyNames(Map<String, String> serviceFriendlyNames) {
+        mServiceFriendlyNames = serviceFriendlyNames;
+    }
+
+    /**
+     * @hide
+     */
+    public Map<String, String> getServiceFriendlyNames() {
+        return mServiceFriendlyNames;
+    }
+
+    /**
+     * Return the friendly Name for current language from the list of friendly names of OSU
+     * provider.
+     * The string matching the default locale will be returned if it is found, otherwise the
+     * first string in the list will be returned.  A null will be returned if the list is empty.
+     *
+     * @return String matching the default locale, null otherwise
+     * @hide
+     */
+    public String getServiceFriendlyName() {
+        if (mServiceFriendlyNames == null || mServiceFriendlyNames.isEmpty()) return null;
+        String lang = Locale.getDefault().getLanguage();
+        String friendlyName = mServiceFriendlyNames.get(lang);
+        if (friendlyName != null) {
+            return friendlyName;
+        }
+        friendlyName = mServiceFriendlyNames.get("en");
+        if (friendlyName != null) {
+            return friendlyName;
+        }
+        return mServiceFriendlyNames.get(mServiceFriendlyNames.keySet().stream().findFirst().get());
+    }
+
+    /**
      * Constructor for creating PasspointConfiguration with default values.
      */
     public PasspointConfiguration() {}
@@ -362,6 +408,7 @@ public final class PasspointConfiguration implements Parcelable {
         mUsageLimitStartTimeInMillis = source.mUsageLimitStartTimeInMillis;
         mUsageLimitTimeLimitInMinutes = source.mUsageLimitTimeLimitInMinutes;
         mUsageLimitUsageTimePeriodInMinutes = source.mUsageLimitUsageTimePeriodInMinutes;
+        mServiceFriendlyNames = source.mServiceFriendlyNames;
     }
 
     @Override
@@ -385,6 +432,10 @@ public final class PasspointConfiguration implements Parcelable {
         dest.writeLong(mUsageLimitStartTimeInMillis);
         dest.writeLong(mUsageLimitDataLimit);
         dest.writeLong(mUsageLimitTimeLimitInMinutes);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("serviceFriendlyNames",
+                (HashMap<String, String>) mServiceFriendlyNames);
+        dest.writeBundle(bundle);
     }
 
     @Override
@@ -398,10 +449,10 @@ public final class PasspointConfiguration implements Parcelable {
         PasspointConfiguration that = (PasspointConfiguration) thatObject;
         return (mHomeSp == null ? that.mHomeSp == null : mHomeSp.equals(that.mHomeSp))
                 && (mCredential == null ? that.mCredential == null
-                        : mCredential.equals(that.mCredential))
+                : mCredential.equals(that.mCredential))
                 && (mPolicy == null ? that.mPolicy == null : mPolicy.equals(that.mPolicy))
                 && (mSubscriptionUpdate == null ? that.mSubscriptionUpdate == null
-                        : mSubscriptionUpdate.equals(that.mSubscriptionUpdate))
+                : mSubscriptionUpdate.equals(that.mSubscriptionUpdate))
                 && isTrustRootCertListEquals(mTrustRootCertList, that.mTrustRootCertList)
                 && mUpdateIdentifier == that.mUpdateIdentifier
                 && mCredentialPriority == that.mCredentialPriority
@@ -411,7 +462,9 @@ public final class PasspointConfiguration implements Parcelable {
                 && mUsageLimitUsageTimePeriodInMinutes == that.mUsageLimitUsageTimePeriodInMinutes
                 && mUsageLimitStartTimeInMillis == that.mUsageLimitStartTimeInMillis
                 && mUsageLimitDataLimit == that.mUsageLimitDataLimit
-                && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes;
+                && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes
+                && (mServiceFriendlyNames == null ? that.mServiceFriendlyNames == null
+                : mServiceFriendlyNames.equals(that.mServiceFriendlyNames));
     }
 
     @Override
@@ -419,7 +472,8 @@ public final class PasspointConfiguration implements Parcelable {
         return Objects.hash(mHomeSp, mCredential, mPolicy, mSubscriptionUpdate, mTrustRootCertList,
                 mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMillis,
                 mSubscriptionExpirationTimeInMillis, mUsageLimitUsageTimePeriodInMinutes,
-                mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes);
+                mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes,
+                mServiceFriendlyNames);
     }
 
     @Override
@@ -463,28 +517,61 @@ public final class PasspointConfiguration implements Parcelable {
             builder.append("TrustRootCertServers: ").append(mTrustRootCertList.keySet())
                     .append("\n");
         }
+        if (mServiceFriendlyNames != null) {
+            builder.append("ServiceFriendlyNames: ").append(mServiceFriendlyNames);
+        }
         return builder.toString();
     }
 
     /**
-     * Validate the configuration data.
+     * Validate the R1 configuration data.
      *
      * @return true on success or false on failure
      * @hide
      */
     public boolean validate() {
-        if (mHomeSp == null || !mHomeSp.validate()) {
-            return false;
-        }
-        if (mCredential == null || !mCredential.validate()) {
-            return false;
-        }
-        if (mPolicy != null && !mPolicy.validate()) {
-            return false;
-        }
+        // Optional: PerProviderSubscription/<X+>/SubscriptionUpdate
         if (mSubscriptionUpdate != null && !mSubscriptionUpdate.validate()) {
             return false;
         }
+        return validateForCommonR1andR2(true);
+    }
+
+    /**
+     * Validate the R2 configuration data.
+     *
+     * @return true on success or false on failure
+     * @hide
+     */
+    public boolean validateForR2() {
+        // Required: PerProviderSubscription/UpdateIdentifier
+        if (mUpdateIdentifier == Integer.MIN_VALUE) {
+            return false;
+        }
+
+        // Required: PerProviderSubscription/<X+>/SubscriptionUpdate
+        if (mSubscriptionUpdate == null || !mSubscriptionUpdate.validate()) {
+            return false;
+        }
+        return validateForCommonR1andR2(false);
+    }
+
+    private boolean validateForCommonR1andR2(boolean isR1) {
+        // Required: PerProviderSubscription/<X+>/HomeSP
+        if (mHomeSp == null || !mHomeSp.validate()) {
+            return false;
+        }
+
+        // Required: PerProviderSubscription/<X+>/Credential
+        if (mCredential == null || !mCredential.validate(isR1)) {
+            return false;
+        }
+
+        // Optional: PerProviderSubscription/<X+>/Policy
+        if (mPolicy != null && !mPolicy.validate()) {
+            return false;
+        }
+
         if (mTrustRootCertList != null) {
             for (Map.Entry<String, byte[]> entry : mTrustRootCertList.entrySet()) {
                 String url = entry.getKey();
@@ -513,7 +600,7 @@ public final class PasspointConfiguration implements Parcelable {
         return true;
     }
 
-    public static final Creator<PasspointConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<PasspointConfiguration> CREATOR =
         new Creator<PasspointConfiguration>() {
             @Override
             public PasspointConfiguration createFromParcel(Parcel in) {
@@ -532,6 +619,10 @@ public final class PasspointConfiguration implements Parcelable {
                 config.setUsageLimitStartTimeInMillis(in.readLong());
                 config.setUsageLimitDataLimit(in.readLong());
                 config.setUsageLimitTimeLimitInMinutes(in.readLong());
+                Bundle bundle = in.readBundle();
+                Map<String, String> friendlyNamesMap = (HashMap) bundle.getSerializable(
+                        "serviceFriendlyNames");
+                config.setServiceFriendlyNames(friendlyNamesMap);
                 return config;
             }
 

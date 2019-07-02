@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.os;
 
 import android.app.ActivityManager;
@@ -20,10 +21,10 @@ import android.app.VrManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Process;
 import android.provider.Settings;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests ActivityManager#setPersistentVrThread and ActivityManager#setVrThread's

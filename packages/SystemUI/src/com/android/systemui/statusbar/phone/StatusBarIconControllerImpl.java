@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconStat
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -46,13 +45,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
  * all the icons. Dispatches this state to any IconManagers that are currently
  * registered with it.
  */
+@Singleton
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
 
@@ -60,7 +61,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
-    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     // Points to light or dark context depending on the... context?
     private Context mContext;
@@ -69,6 +69,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private boolean mIsDark = false;
 
+    @Inject
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
@@ -79,7 +80,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         loadDimens();
 
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .addCallbacks(this);
+                .addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, ICON_BLACKLIST);
     }
 
@@ -145,7 +146,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         int viewIndex = getViewIndex(index, holder.getTag());
         boolean blocked = mIconBlacklist.contains(slot);
 
-        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, blocked, holder));
     }
 
@@ -283,8 +283,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             return;
         }
 
-        mIconLogger.onIconHidden(slotName);
-
         int slotIndex = getSlotIndex(slotName);
         List<StatusBarIconHolder> iconsToRemove = slot.getHolderListInViewOrder();
         for (StatusBarIconHolder holder : iconsToRemove) {
@@ -299,7 +297,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         if (getIcon(index, tag) == null) {
             return;
         }
-        mIconLogger.onIconHidden(getSlotName(index));
         super.removeIcon(index, tag);
         int viewIndex = getViewIndex(index, 0);
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
@@ -307,7 +304,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private void handleSet(int index, StatusBarIconHolder holder) {
         int viewIndex = getViewIndex(index, holder.getTag());
-        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
         mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 

@@ -16,8 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.provider.Settings.Secure.SHOW_MODE_AUTO;
-
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -93,8 +91,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         if (userState == null) return;
         final long identity = Binder.clearCallingIdentity();
         try {
-            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE;
-            if (userState.mBindInstantServiceAllowed) {
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                    | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS;
+            if (userState.getBindInstantServiceAllowed()) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
             if (mService == null && mContext.bindServiceAsUser(
@@ -111,6 +110,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         UserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
+        mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
         resetLocked();
     }
 
@@ -123,16 +123,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         synchronized (mLock) {
             UserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
-            if (userState.mEnabledServices.remove(mComponentName)) {
+            if (userState.getEnabledServicesLocked().remove(mComponentName)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     mSystemSupport.persistComponentNamesToSettingLocked(
                             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                            userState.mEnabledServices, userState.mUserId);
+                            userState.getEnabledServicesLocked(), userState.mUserId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-                mSystemSupport.onClientChange(false);
+                mSystemSupport.onClientChangeLocked(false);
             }
         }
     }
@@ -157,7 +157,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             UserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             userState.addServiceLocked(this);
-            mSystemSupport.onClientChange(false);
+            mSystemSupport.onClientChangeLocked(false);
             // Initialize the service on the main handler after we're done setting up for
             // the new configuration (for example, initializing the input filter).
             mMainHandler.sendMessage(obtainMessage(
@@ -182,6 +182,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 bindingServices.remove(mComponentName);
                 mWasConnectedAndDied = false;
                 serviceInterface = mServiceInterface;
+            }
+            // There's a chance that service is removed from enabled_accessibility_services setting
+            // key, but skip unbinding because of it's in binding state. Unbinds it if it's
+            // not in enabled service list.
+            if (serviceInterface != null
+                    && !userState.getEnabledServicesLocked().contains(mComponentName)) {
+                mSystemSupport.onClientChangeLocked(false);
+                return;
             }
         }
         if (serviceInterface == null) {
@@ -218,24 +226,18 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!isCalledForCurrentUserLocked()) {
                 return false;
             }
+            final UserState userState = mUserStateWeakReference.get();
+            if (userState == null) return false;
+            return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
         }
-        UserState userState = mUserStateWeakReference.get();
-        if (userState == null) return false;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            // Keep track of the last service to request a non-default show mode. The show mode
-            // should be restored to default should this service be disabled.
-            userState.mServiceChangingSoftKeyboardMode = (showMode == SHOW_MODE_AUTO)
-                    ? null : mComponentName;
-
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, showMode,
-                    userState.mUserId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return true;
     }
+
+    @Override
+    public int getSoftKeyboardShowMode() {
+        final UserState userState = mUserStateWeakReference.get();
+        return (userState != null) ? userState.getSoftKeyboardShowMode() : 0;
+    }
+
 
     @Override
     public boolean isAccessibilityButtonAvailable() {
@@ -258,11 +260,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 return;
             }
             mWasConnectedAndDied = true;
-            resetLocked();
-            if (mId == mSystemSupport.getMagnificationController().getIdOfLastServiceToMagnify()) {
-                mSystemSupport.getMagnificationController().resetIfNeeded(true);
+            UserState userState = mUserStateWeakReference.get();
+            if (userState != null) {
+                userState.serviceDisconnectedLocked(this);
             }
-            mSystemSupport.onClientChange(false);
+            resetLocked();
+            mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
+            mSystemSupport.onClientChangeLocked(false);
         }
     }
 

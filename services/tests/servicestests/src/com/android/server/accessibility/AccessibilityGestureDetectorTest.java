@@ -18,23 +18,22 @@ package com.android.server.accessibility;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import java.util.ArrayList;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 
 /**
  * Tests for AccessibilityGestureDetector
@@ -46,32 +45,9 @@ public class AccessibilityGestureDetectorTest {
     private static final int PATH_STEP_PIXELS = 200;
     private static final long PATH_STEP_MILLISEC = 100;
 
-    /**
-     * AccessibilitGestureDetector that can mock double-tap detector.
-     */
-    private class AccessibilityGestureDetectorTestable extends AccessibilityGestureDetector {
-        public AccessibilityGestureDetectorTestable(Context context, Listener listener) {
-            super(context, listener);
-        }
-
-        protected void setDoubleTapDetector(GestureDetector gestureDetector) {
-            mGestureDetector = gestureDetector;
-            mGestureDetector.setOnDoubleTapListener(this);
-        }
-    }
-
-
     // Data used by all tests
-    private AccessibilityGestureDetectorTestable mDetector;
+    private AccessibilityGestureDetector mDetector;
     private AccessibilityGestureDetector.Listener mResultListener;
-
-
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
 
     @Before
     public void setUp() {
@@ -82,14 +58,12 @@ public class AccessibilityGestureDetectorTest {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getDisplayMetrics()).thenReturn(displayMetricsMock);
         Context contextMock = mock(Context.class);
-        when(contextMock.getMainLooper()).thenReturn(Looper.myLooper());
         when(contextMock.getResources()).thenReturn(mockResources);
 
         // Construct a testable AccessibilityGestureDetector.
         mResultListener = mock(AccessibilityGestureDetector.Listener.class);
-        mDetector = new AccessibilityGestureDetectorTestable(contextMock, mResultListener);
         GestureDetector doubleTapDetectorMock = mock(GestureDetector.class);
-        mDetector.setDoubleTapDetector(doubleTapDetectorMock);
+        mDetector = new AccessibilityGestureDetector(contextMock, mResultListener, doubleTapDetectorMock);
     }
 
 
@@ -195,7 +169,7 @@ public class AccessibilityGestureDetectorTest {
                     point.x, point.y, 0);
 
             // Send event.
-            mDetector.onMotionEvent(event, policyFlags);
+            mDetector.onMotionEvent(event, event, policyFlags);
             eventTimeMs += PATH_STEP_MILLISEC;
         }
 

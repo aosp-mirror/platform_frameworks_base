@@ -70,22 +70,24 @@ interface IAccessibilityServiceConnection {
 
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
-    float getMagnificationScale();
+    float getMagnificationScale(int displayId);
 
-    float getMagnificationCenterX();
+    float getMagnificationCenterX(int displayId);
 
-    float getMagnificationCenterY();
+    float getMagnificationCenterY(int displayId);
 
-    Region getMagnificationRegion();
+    Region getMagnificationRegion(int displayId);
 
-    boolean resetMagnification(boolean animate);
+    boolean resetMagnification(int displayId, boolean animate);
 
-    boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
+    boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX, float centerY,
         boolean animate);
 
-    void setMagnificationCallbackEnabled(boolean enabled);
+    void setMagnificationCallbackEnabled(int displayId, boolean enabled);
 
     boolean setSoftKeyboardShowMode(int showMode);
+
+    int getSoftKeyboardShowMode();
 
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 

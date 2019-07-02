@@ -19,6 +19,9 @@ package com.android.server.oemlock;
 import android.annotation.Nullable;
 
 abstract class OemLock {
+    @Nullable
+    abstract String getLockName();
+
     abstract void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature);
     abstract boolean isOemUnlockAllowedByCarrier();
 

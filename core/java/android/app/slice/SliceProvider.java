@@ -209,8 +209,8 @@ public abstract class SliceProvider extends ContentProvider {
      *
      * @param sliceUri Uri to bind.
      * @param supportedSpecs List of supported specs.
-     * @see {@link Slice}
-     * @see {@link Slice#HINT_PARTIAL}
+     * @see Slice
+     * @see Slice#HINT_PARTIAL
      */
     public Slice onBindSlice(Uri sliceUri, Set<SliceSpec> supportedSpecs) {
         return onBindSlice(sliceUri, new ArrayList<>(supportedSpecs));

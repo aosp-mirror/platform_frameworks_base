@@ -16,17 +16,18 @@
 
 package android.provider;
 
-public interface BaseColumns
-{
+import android.database.Cursor;
+
+public interface BaseColumns {
     /**
      * The unique ID for a row.
-     * <P>Type: INTEGER (long)</P>
      */
+    @Column(Cursor.FIELD_TYPE_INTEGER)
     public static final String _ID = "_id";
 
     /**
      * The count of rows in a directory.
-     * <P>Type: INTEGER</P>
      */
+    // @Column(Cursor.FIELD_TYPE_INTEGER)
     public static final String _COUNT = "_count";
 }

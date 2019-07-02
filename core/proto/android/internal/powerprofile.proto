@@ -1,0 +1,111 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.internal.os;
+
+option java_multiple_files = true;
+
+// next: 41
+message PowerProfileProto {
+    optional double cpu_suspend = 1;
+
+    optional double cpu_idle = 2;
+
+    optional double cpu_active = 3;
+
+    message CpuCluster {
+        optional int32 id = 1;
+        optional double cluster_power = 2;
+        optional int32 cores = 3;
+        repeated int64 speed = 4;
+        repeated double core_power = 5;
+    }
+
+    repeated CpuCluster cpu_cluster = 40;
+
+    optional double wifi_scan = 4;
+
+    optional double wifi_on = 5;
+
+    optional double wifi_active = 6;
+
+    optional double wifi_controller_idle = 7;
+
+    optional double wifi_controller_rx = 8;
+
+    optional double wifi_controller_tx = 9;
+
+    repeated double wifi_controller_tx_levels = 10;
+
+    optional double wifi_controller_operating_voltage = 11;
+
+    optional double bluetooth_controller_idle = 12;
+
+    optional double bluetooth_controller_rx = 13;
+
+    optional double bluetooth_controller_tx = 14;
+
+    optional double bluetooth_controller_operating_voltage = 15;
+
+    optional double modem_controller_sleep = 16;
+
+    optional double modem_controller_idle = 17;
+
+    optional double modem_controller_rx = 18;
+
+    repeated double modem_controller_tx = 19;
+
+    optional double modem_controller_operating_voltage = 20;
+
+    optional double gps_on = 21;
+
+    repeated double gps_signal_quality_based = 22;
+
+    optional double gps_operating_voltage = 23;
+
+    optional double bluetooth_on = 24;
+
+    optional double bluetooth_active = 25;
+
+    optional double bluetooth_at_cmd = 26;
+
+    optional double ambient_display = 27;
+
+    optional double screen_on = 28;
+
+    optional double radio_on = 29;
+
+    optional double radio_scanning = 30;
+
+    optional double radio_active = 31;
+
+    optional double screen_full = 32;
+
+    optional double audio = 33;
+
+    optional double video = 34;
+
+    optional double flashlight = 35;
+
+    optional double memory = 36;
+
+    optional double camera = 37;
+
+    optional double wifi_batched_scan = 38;
+
+    optional double battery_capacity = 39;
+}

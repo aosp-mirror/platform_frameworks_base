@@ -310,6 +310,7 @@ please see themes_device_defaults.xml.
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
         <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
+        <item name="magnifierStyle">@style/Widget.Magnifier</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.PreferenceScreen</item>
@@ -868,13 +869,6 @@ please see themes_device_defaults.xml.
     <!-- System themes -->
     <eat-comment />
 
-    <!-- Theme for the dialog shown when an app crashes or ANRs. -->
-    <style name="Theme.Dialog.AppError" parent="Theme.DeviceDefault.Light.Dialog.Alert">
-        <item name="windowContentTransitions">false</item>
-        <item name="windowActivityTransitions">false</item>
-        <item name="windowCloseOnTouchOutside">false</item>
-    </style>
-
     <!-- Special theme for the recent apps dialog, to allow customization
          with overlays. -->
     <style name="Theme.Dialog.RecentApplications" parent="Theme.DeviceDefault.Light.Dialog">
@@ -885,6 +879,9 @@ please see themes_device_defaults.xml.
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
     </style>
+
+    <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->
+    <style name="Theme.Dialog.Confirmation" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
 
     <!-- Theme for a window that looks like a toast. -->
     <style name="Theme.Toast" parent="Theme.DeviceDefault.Dialog">

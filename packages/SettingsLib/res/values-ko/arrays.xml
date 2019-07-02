@@ -58,6 +58,11 @@
     <item msgid="3878793616631049349">"DRM 콘텐츠에 대해서만 HDCP 확인 사용"</item>
     <item msgid="45075631231212732">"항상 HDCP 확인 사용"</item>
   </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"사용 중지됨"</item>
+    <item msgid="1969681323976948639">"필터링 사용 설정됨"</item>
+    <item msgid="8719029132154020716">"사용 설정됨"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4(기본)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"오디오 및 연결 품질의 균형 유지"</item>
     <item msgid="4681409244565426925">"연결 품질에 최적화됨"</item>
     <item msgid="364670732877872677">"최선의 결과(비트 전송률 자동 조절)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", 활성"</item>
+    <item msgid="8962366465966010158">", 활성(미디어)"</item>
+    <item msgid="4046665544396189228">", 활성(휴대전화)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"사용 안함"</item>

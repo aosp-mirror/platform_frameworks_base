@@ -34,7 +34,7 @@ public final class UiccCardInfo implements Parcelable {
     private final int mSlotIndex;
     private final boolean mIsRemovable;
 
-    public static final Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
+    public static final @android.annotation.NonNull Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
         @Override
         public UiccCardInfo createFromParcel(Parcel in) {
             return new UiccCardInfo(in);

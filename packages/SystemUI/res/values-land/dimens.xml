@@ -24,10 +24,8 @@
 
     <dimen name="brightness_mirror_height">40dp</dimen>
 
-    <!-- Width for the spacer, used between QS tiles. -->
-    <dimen name="qs_quick_tile_space_width">38dp</dimen>
-    <dimen name="qs_tile_margin_top">2dp</dimen>
-    <dimen name="qs_header_tooltip_height">24dp</dimen>
+    <dimen name="qs_tile_margin_top">8dp</dimen>
+    <dimen name="qs_tile_margin_vertical">0dp</dimen>
 
     <dimen name="battery_detail_graph_space_top">9dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">9dp</dimen>
@@ -35,5 +33,7 @@
     <integer name="quick_settings_num_columns">4</integer>
     <bool name="quick_settings_wide">true</bool>
     <dimen name="qs_detail_margin_top">0dp</dimen>
-    <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
+
+    <dimen name="volume_tool_tip_right_margin">136dp</dimen>
+    <dimen name="volume_tool_tip_top_margin">12dp</dimen>
 </resources>

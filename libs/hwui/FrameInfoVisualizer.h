@@ -39,7 +39,7 @@ typedef RingBuffer<FrameInfo, 120> FrameInfoSource;
 
 class FrameInfoVisualizer {
 public:
-    explicit FrameInfoVisualizer(FrameInfoSource& source);
+    explicit FrameInfoVisualizer(FrameInfoSource& source, nsecs_t frameInterval);
     ~FrameInfoVisualizer();
 
     bool consumeProperties();
@@ -71,6 +71,7 @@ private:
 
     FrameInfoSource& mFrameSource;
 
+    nsecs_t mFrameInterval;
     int mVerticalUnit = 0;
     int mThresholdStroke = 0;
 

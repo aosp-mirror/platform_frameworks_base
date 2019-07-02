@@ -21,29 +21,12 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_DX_FLAGS := --multi-dex
 
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..
-LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
-
 LOCAL_PACKAGE_NAME := SystemUITests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    $(call all-Iaidl-files-under, src)
-
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
-
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    SystemUI-core
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    metrics-helper-lib \
-    androidx.test.rules \
-    hamcrest-library \
-    mockito-target-inline-minus-junit4 \
-    testables \
-    truth-prebuilt \
+    SystemUI-tests
 
 LOCAL_MULTILIB := both
 
@@ -55,7 +38,6 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
     telephony-common \
     android.test.base \
-    android.car
 
 LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 
@@ -89,8 +71,8 @@ local_space := $(local_empty) $(local_empty)
 # This appends a * to all classes and replace the space separators with commas.
 jacoco_exclude := $(subst $(space),$(comma),$(patsubst %,%*,$(local_classes)))
 
-LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*
-LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_exclude)
+LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*,com.android.keyguard.*
+LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := $(jacoco_exclude)
 
 ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
     include $(BUILD_PACKAGE)

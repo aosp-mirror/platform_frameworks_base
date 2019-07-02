@@ -27,7 +27,7 @@ public class PhysicalCaptureResultInfo implements Parcelable {
     private String cameraId;
     private CameraMetadataNative cameraMetadata;
 
-    public static final Parcelable.Creator<PhysicalCaptureResultInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PhysicalCaptureResultInfo> CREATOR =
             new Parcelable.Creator<PhysicalCaptureResultInfo>() {
         @Override
         public PhysicalCaptureResultInfo createFromParcel(Parcel in) {

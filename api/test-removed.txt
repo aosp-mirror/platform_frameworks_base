@@ -1,1 +1,23 @@
 // Signature format: 2.0
+package android.app.prediction {
+
+  public static final class AppTarget.Builder {
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
+  }
+
+}
+
+package android.provider {
+
+  public final class DeviceConfig {
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+  }
+
+  public static interface DeviceConfig.OnPropertyChangedListener {
+    method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
+  }
+
+}
+

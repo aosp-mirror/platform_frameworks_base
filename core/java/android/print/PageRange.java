@@ -162,7 +162,7 @@ public final class PageRange implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<PageRange> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PageRange> CREATOR =
             new Creator<PageRange>() {
         @Override
         public PageRange createFromParcel(Parcel parcel) {

@@ -389,16 +389,12 @@ public class AnimationSet extends Animation {
         }
 
         if (started && !mStarted) {
-            if (mListener != null) {
-                mListener.onAnimationStart(this);
-            }
+            dispatchAnimationStart();
             mStarted = true;
         }
 
         if (ended != mEnded) {
-            if (mListener != null) {
-                mListener.onAnimationEnd(this);
-            }
+            dispatchAnimationEnd();
             mEnded = ended;
         }
 

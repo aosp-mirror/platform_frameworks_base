@@ -45,7 +45,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
  * messages and adapts the layout accordingly.
  */
 @RemoteViews.RemoteView
-public class MessagingLayout extends FrameLayout {
+public class MessagingLayout extends FrameLayout implements ImageMessageConsumer {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
@@ -95,6 +95,7 @@ public class MessagingLayout extends FrameLayout {
     private Person mUser;
     private CharSequence mNameReplacement;
     private boolean mDisplayImagesAtEnd;
+    private ImageResolver mImageResolver;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -165,6 +166,11 @@ public class MessagingLayout extends FrameLayout {
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         bind(newMessages, newHistoricMessages, showSpinner);
+    }
+
+    @Override
+    public void setImageResolver(ImageResolver resolver) {
+        mImageResolver = resolver;
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -325,13 +331,13 @@ public class MessagingLayout extends FrameLayout {
     }
 
     private int findColor(CharSequence senderName, int layoutColor) {
-        double luminance = NotificationColorUtil.calculateLuminance(layoutColor);
+        double luminance = ContrastColorUtil.calculateLuminance(layoutColor);
         float shift = Math.abs(senderName.hashCode()) % 5 / 4.0f - 0.5f;
 
         // we need to offset the range if the luminance is too close to the borders
         shift += Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - luminance, 0);
         shift -= Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - (1.0f - luminance), 0);
-        return NotificationColorUtil.getShiftedColor(layoutColor,
+        return ContrastColorUtil.getShiftedColor(layoutColor,
                 (int) (shift * COLOR_SHIFT_AMOUNT));
     }
 
@@ -463,12 +469,12 @@ public class MessagingLayout extends FrameLayout {
      */
     private List<MessagingMessage> createMessages(
             List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
-        List<MessagingMessage> result = new ArrayList<>();;
+        List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m);
+                message = MessagingMessage.createMessage(this, m, mImageResolver);
             }
             message.setIsHistoric(historic);
             result.add(message);

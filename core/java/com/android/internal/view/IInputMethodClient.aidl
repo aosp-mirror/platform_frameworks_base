@@ -16,6 +16,8 @@
 
 package com.android.internal.view;
 
+import android.view.inputmethod.EditorInfo;
+
 import com.android.internal.view.InputBindResult;
 
 /**
@@ -23,11 +25,11 @@ import com.android.internal.view.InputBindResult;
  * itself and receive information about changes to the global manager state.
  */
 oneway interface IInputMethodClient {
-    void setUsingInputMethod(boolean state);
     void onBindMethod(in InputBindResult res);
-    // unbindReason corresponds to InputMethodClient.UnbindReason.
     void onUnbindMethod(int sequence, int unbindReason);
     void setActive(boolean active, boolean fullscreen);
-    void setUserActionNotificationSequenceNumber(int sequenceNumber);
     void reportFullscreenMode(boolean fullscreen);
+    void reportPreRendered(in EditorInfo info);
+    void applyImeVisibility(boolean setVisible);
+    void updateActivityViewToScreenMatrix(int bindSequence, in float[] matrixValues);
 }

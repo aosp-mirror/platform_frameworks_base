@@ -16,16 +16,11 @@
 
 package android.view;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
-import android.widget.TextView;
+
+import com.android.frameworks.coretests.R;
 
 public class ScaleGesture extends Activity {
     private ScaleGestureDetector mScaleGestureDetector;

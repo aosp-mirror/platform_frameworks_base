@@ -16,25 +16,13 @@
 
 package com.android.test.hwui;
 
-import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_RARELY;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
 import android.graphics.Picture;
-import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
-import android.view.Surface;
-import android.view.ThreadedRenderer;
 import android.widget.ImageView;
 
 public class DrawIntoHwBitmapActivity extends Activity {

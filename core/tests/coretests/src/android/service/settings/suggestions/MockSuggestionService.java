@@ -16,16 +16,12 @@
 
 package android.service.settings.suggestions;
 
-import android.support.annotation.VisibleForTesting;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MockSuggestionService extends SuggestionService {
 
-    @VisibleForTesting
     static boolean sOnSuggestionLaunchedCalled;
-    @VisibleForTesting
     static boolean sOnSuggestionDismissedCalled;
 
     public static void reset() {

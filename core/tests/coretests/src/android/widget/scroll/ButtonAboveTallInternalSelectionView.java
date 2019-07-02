@@ -18,7 +18,6 @@ package android.widget.scroll;
 
 import android.util.InternalSelectionView;
 import android.util.ScrollViewScenario;
-
 import android.widget.Button;
 
 /**

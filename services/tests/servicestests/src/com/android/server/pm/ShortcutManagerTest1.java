@@ -75,6 +75,7 @@ import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
@@ -96,16 +97,26 @@ import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Xml;
 
 import com.android.frameworks.servicestests.R;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.mockito.ArgumentCaptor;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BiConsumer;
@@ -398,7 +409,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(3, mManager.getRemainingCallCount());
     }
 
-   public void testPublishWithNoActivity() {
+    public void testPublishWithNoActivity() {
         // If activity is not explicitly set, use the default one.
 
         mRunningUsers.put(USER_10, true);
@@ -2904,7 +2915,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
-                    .when(mMockActivityManagerInternal).startActivitiesAsPackage(
+                    .when(mMockActivityTaskManagerInternal).startActivitiesAsPackage(
                     anyStringOrNull(), anyInt(),
                     anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
@@ -2912,7 +2923,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             // Still not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
-                    .when(mMockActivityManagerInternal)
+                    .when(mMockActivityTaskManagerInternal)
                     .startActivitiesAsPackage(
                             anyStringOrNull(), anyInt(),
                             anyOrNull(Intent[].class), anyOrNull(Bundle.class));
@@ -6273,6 +6284,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0);
     }
 
+    public void testGetShareTargets_permission() {
+        IntentFilter filter = new IntentFilter();
+
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+                mManager.getShareTargets(filter));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+        mManager.getShareTargets(filter);
+    }
+
+    public void testHasShareTargets_permission() {
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+                mManager.hasShareTargets(CALLING_PACKAGE_1));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+        mManager.hasShareTargets(CALLING_PACKAGE_1);
+    }
+
     public void testDumpsys_crossProfile() {
         prepareCrossProfileDataSet();
         dumpsysOnLogcat("test1", /* force= */ true);
@@ -8014,5 +8045,123 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         makeUidForeground(uid);
 
         assertFalse(mInternal.isForegroundDefaultLauncher("another", uid));
+    }
+
+    public void testParseShareTargetsFromManifest() {
+        // These values must exactly match the content of shortcuts_share_targets.xml resource
+        List<ShareTargetInfo> expectedValues = new ArrayList<>();
+        expectedValues.add(new ShareTargetInfo(
+                new ShareTargetInfo.TargetData[]{new ShareTargetInfo.TargetData(
+                        "http", "www.google.com", "1234", "somePath", "somePathPattern",
+                        "somePathPrefix", "text/plain")}, "com.test.directshare.TestActivity1",
+                new String[]{"com.test.category.CATEGORY1", "com.test.category.CATEGORY2"}));
+        expectedValues.add(new ShareTargetInfo(new ShareTargetInfo.TargetData[]{
+                new ShareTargetInfo.TargetData(null, null, null, null, null, null, "video/mp4"),
+                new ShareTargetInfo.TargetData("content", null, null, null, null, null, "video/*")},
+                "com.test.directshare.TestActivity5",
+                new String[]{"com.test.category.CATEGORY5", "com.test.category.CATEGORY6"}));
+
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_share_targets);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        List<ShareTargetInfo> shareTargets = getCallerShareTargets();
+
+        assertNotNull(shareTargets);
+        assertEquals(expectedValues.size(), shareTargets.size());
+
+        for (int i = 0; i < expectedValues.size(); i++) {
+            ShareTargetInfo expected = expectedValues.get(i);
+            ShareTargetInfo actual = shareTargets.get(i);
+
+            assertEquals(expected.mTargetData.length, actual.mTargetData.length);
+            for (int j = 0; j < expected.mTargetData.length; j++) {
+                assertEquals(expected.mTargetData[j].mScheme, actual.mTargetData[j].mScheme);
+                assertEquals(expected.mTargetData[j].mHost, actual.mTargetData[j].mHost);
+                assertEquals(expected.mTargetData[j].mPort, actual.mTargetData[j].mPort);
+                assertEquals(expected.mTargetData[j].mPath, actual.mTargetData[j].mPath);
+                assertEquals(expected.mTargetData[j].mPathPrefix,
+                        actual.mTargetData[j].mPathPrefix);
+                assertEquals(expected.mTargetData[j].mPathPattern,
+                        actual.mTargetData[j].mPathPattern);
+                assertEquals(expected.mTargetData[j].mMimeType, actual.mTargetData[j].mMimeType);
+            }
+
+            assertEquals(expected.mTargetClass, actual.mTargetClass);
+
+            assertEquals(expected.mCategories.length, actual.mCategories.length);
+            for (int j = 0; j < expected.mCategories.length; j++) {
+                assertEquals(expected.mCategories[j], actual.mCategories[j]);
+            }
+        }
+    }
+
+    public void testShareTargetInfo_saveToXml() throws IOException, XmlPullParserException {
+        List<ShareTargetInfo> expectedValues = new ArrayList<>();
+        expectedValues.add(new ShareTargetInfo(
+                new ShareTargetInfo.TargetData[]{new ShareTargetInfo.TargetData(
+                        "http", "www.google.com", "1234", "somePath", "somePathPattern",
+                        "somePathPrefix", "text/plain")}, "com.test.directshare.TestActivity1",
+                new String[]{"com.test.category.CATEGORY1", "com.test.category.CATEGORY2"}));
+        expectedValues.add(new ShareTargetInfo(new ShareTargetInfo.TargetData[]{
+                new ShareTargetInfo.TargetData(null, null, null, null, null, null, "video/mp4"),
+                new ShareTargetInfo.TargetData("content", null, null, null, null, null, "video/*")},
+                "com.test.directshare.TestActivity5",
+                new String[]{"com.test.category.CATEGORY5", "com.test.category.CATEGORY6"}));
+
+        // Write ShareTargets to Xml
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        final XmlSerializer outXml = new FastXmlSerializer();
+        outXml.setOutput(outStream, StandardCharsets.UTF_8.name());
+        outXml.startDocument(null, true);
+        for (int i = 0; i < expectedValues.size(); i++) {
+            expectedValues.get(i).saveToXml(outXml);
+        }
+        outXml.endDocument();
+        outXml.flush();
+
+        // Read ShareTargets from Xml
+        ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new InputStreamReader(inStream));
+        List<ShareTargetInfo> shareTargets = new ArrayList<>();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            if (type == XmlPullParser.START_TAG && parser.getName().equals("share-target")) {
+                shareTargets.add(ShareTargetInfo.loadFromXml(parser));
+            }
+        }
+
+        // Assert two lists are equal
+        assertNotNull(shareTargets);
+        assertEquals(expectedValues.size(), shareTargets.size());
+
+        for (int i = 0; i < expectedValues.size(); i++) {
+            ShareTargetInfo expected = expectedValues.get(i);
+            ShareTargetInfo actual = shareTargets.get(i);
+
+            assertEquals(expected.mTargetData.length, actual.mTargetData.length);
+            for (int j = 0; j < expected.mTargetData.length; j++) {
+                assertEquals(expected.mTargetData[j].mScheme, actual.mTargetData[j].mScheme);
+                assertEquals(expected.mTargetData[j].mHost, actual.mTargetData[j].mHost);
+                assertEquals(expected.mTargetData[j].mPort, actual.mTargetData[j].mPort);
+                assertEquals(expected.mTargetData[j].mPath, actual.mTargetData[j].mPath);
+                assertEquals(expected.mTargetData[j].mPathPrefix,
+                        actual.mTargetData[j].mPathPrefix);
+                assertEquals(expected.mTargetData[j].mPathPattern,
+                        actual.mTargetData[j].mPathPattern);
+                assertEquals(expected.mTargetData[j].mMimeType, actual.mTargetData[j].mMimeType);
+            }
+
+            assertEquals(expected.mTargetClass, actual.mTargetClass);
+
+            assertEquals(expected.mCategories.length, actual.mCategories.length);
+            for (int j = 0; j < expected.mCategories.length; j++) {
+                assertEquals(expected.mCategories[j], actual.mCategories[j]);
+            }
+        }
     }
 }

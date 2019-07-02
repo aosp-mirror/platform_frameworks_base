@@ -26,9 +26,12 @@
 
 #include <algorithm>
 #include <limits>
+#include <map>
 #include <memory>
+#include <set>
 #include <type_traits>
 
+#include <android-base/macros.h>
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
@@ -1591,6 +1594,16 @@ void ResXMLParser::setPosition(const ResXMLParser::ResXMLPosition& pos)
     mCurExt = pos.curExt;
 }
 
+void ResXMLParser::setSourceResourceId(const uint32_t resId)
+{
+    mSourceResourceId = resId;
+}
+
+uint32_t ResXMLParser::getSourceResourceId() const
+{
+    return mSourceResourceId;
+}
+
 // --------------------------------------------------------------------
 
 static volatile int32_t gCount = 0;
@@ -3073,6 +3086,7 @@ struct LocaleParserState {
                }
                break;
            }
+           FALLTHROUGH_INTENDED;
        case 5:
        case 6:
        case 7:
@@ -3205,20 +3219,6 @@ String8 ResTable_config::toString() const {
                 break;
         }
     }
-    if ((colorMode&MASK_HDR) != 0) {
-        if (res.size() > 0) res.append("-");
-        switch (colorMode&MASK_HDR) {
-            case ResTable_config::HDR_NO:
-                res.append("lowdr");
-                break;
-            case ResTable_config::HDR_YES:
-                res.append("highdr");
-                break;
-            default:
-                res.appendFormat("hdr=%d", dtohs(colorMode&MASK_HDR));
-                break;
-        }
-    }
     if ((colorMode&MASK_WIDE_COLOR_GAMUT) != 0) {
         if (res.size() > 0) res.append("-");
         switch (colorMode&MASK_WIDE_COLOR_GAMUT) {
@@ -3230,6 +3230,20 @@ String8 ResTable_config::toString() const {
                 break;
             default:
                 res.appendFormat("wideColorGamut=%d", dtohs(colorMode&MASK_WIDE_COLOR_GAMUT));
+                break;
+        }
+    }
+    if ((colorMode&MASK_HDR) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (colorMode&MASK_HDR) {
+            case ResTable_config::HDR_NO:
+                res.append("lowdr");
+                break;
+            case ResTable_config::HDR_YES:
+                res.append("highdr");
+                break;
+            default:
+                res.appendFormat("hdr=%d", dtohs(colorMode&MASK_HDR));
                 break;
         }
     }
@@ -3496,6 +3510,7 @@ struct ResTable::Package
     ResStringPool                   keyStrings;
 
     size_t                          typeIdOffset;
+    bool                            definesOverlayable = false;
 };
 
 // A group of objects describing a particular resource package.
@@ -6847,6 +6862,10 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 ALOGW("Found multiple library tables, ignoring...");
             }
         } else {
+            if (ctype == RES_TABLE_OVERLAYABLE_TYPE) {
+                package->definesOverlayable = true;
+            }
+
             status_t err = validate_chunk(chunk, sizeof(ResChunk_header),
                                           endPos, "ResTable_package:unknown");
             if (err != NO_ERROR) {
@@ -6960,6 +6979,11 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
 
+    if (!Res_VALIDID(res)) {
+        // Cannot look up a null or invalid id, so no lookup needs to be done.
+        return NO_ERROR;
+    }
+
     if (packageId == APP_PACKAGE_ID && !mAppAsLib) {
         // No lookup needs to be done, app package IDs are absolute.
         return NO_ERROR;
@@ -6995,24 +7019,26 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
     uint8_t resolvedType = Res_value::TYPE_REFERENCE;
     switch (value->dataType) {
-    case Res_value::TYPE_ATTRIBUTE:
-        resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
-    case Res_value::TYPE_REFERENCE:
-        if (!mAppAsLib) {
-            return NO_ERROR;
-        }
+        case Res_value::TYPE_ATTRIBUTE:
+            resolvedType = Res_value::TYPE_ATTRIBUTE;
+            FALLTHROUGH_INTENDED;
+        case Res_value::TYPE_REFERENCE:
+            // Only resolve non-dynamic references and attributes if the package is loaded as a
+            // library or if a shared library is attempting to retrieve its own resource
+            if (!(mAppAsLib || (Res_GETPACKAGE(value->data) + 1) == 0)) {
+                return NO_ERROR;
+            }
 
         // If the package is loaded as shared library, the resource reference
         // also need to be fixed.
         break;
-    case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
-        resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
-    case Res_value::TYPE_DYNAMIC_REFERENCE:
-        break;
-    default:
-        return NO_ERROR;
+        case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
+            resolvedType = Res_value::TYPE_ATTRIBUTE;
+            FALLTHROUGH_INTENDED;
+        case Res_value::TYPE_DYNAMIC_REFERENCE:
+            break;
+        default:
+            return NO_ERROR;
     }
 
     status_t err = lookupResourceId(&value->data);
@@ -7024,176 +7050,209 @@ status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
     return NO_ERROR;
 }
 
-struct IdmapTypeMap {
-    ssize_t overlayTypeId;
-    size_t entryOffset;
-    Vector<uint32_t> entryMap;
+class IdmapMatchingResources;
+
+class IdmapTypeMapping {
+public:
+    void add(uint32_t targetResId, uint32_t overlayResId) {
+        uint8_t targetTypeId = Res_GETTYPE(targetResId);
+        if (mData.find(targetTypeId) == mData.end()) {
+            mData.emplace(targetTypeId, std::set<std::pair<uint32_t, uint32_t>>());
+        }
+        auto& entries = mData[targetTypeId];
+        entries.insert(std::make_pair(targetResId, overlayResId));
+    }
+
+    bool empty() const {
+        return mData.empty();
+    }
+
+private:
+    // resource type ID in context of target -> set of resource entries mapping target -> overlay
+    std::map<uint8_t, std::set<std::pair<uint32_t, uint32_t>>> mData;
+
+    friend IdmapMatchingResources;
 };
 
-status_t ResTable::createIdmap(const ResTable& overlay,
+class IdmapMatchingResources {
+public:
+    IdmapMatchingResources(std::unique_ptr<IdmapTypeMapping> tm) : mTypeMapping(std::move(tm)) {
+        assert(mTypeMapping);
+        for (auto ti = mTypeMapping->mData.cbegin(); ti != mTypeMapping->mData.cend(); ++ti) {
+            uint32_t lastSeen = 0xffffffff;
+            size_t totalEntries = 0;
+            for (auto ei = ti->second.cbegin(); ei != ti->second.cend(); ++ei) {
+                assert(lastSeen == 0xffffffff || lastSeen < ei->first);
+                mEntryPadding[ei->first] = (lastSeen == 0xffffffff) ? 0 : ei->first - lastSeen - 1;
+                lastSeen = ei->first;
+                totalEntries += 1 + mEntryPadding[ei->first];
+            }
+            mNumberOfEntriesIncludingPadding[ti->first] = totalEntries;
+        }
+    }
+
+    const std::map<uint8_t, std::set<std::pair<uint32_t, uint32_t>>>& getTypeMapping() const {
+        return mTypeMapping->mData;
+    }
+
+    size_t getNumberOfEntriesIncludingPadding(uint8_t type) const {
+        return mNumberOfEntriesIncludingPadding.at(type);
+    }
+
+    size_t getPadding(uint32_t resid) const {
+        return mEntryPadding.at(resid);
+    }
+
+private:
+    // resource type ID in context of target -> set of resource entries mapping target -> overlay
+    const std::unique_ptr<IdmapTypeMapping> mTypeMapping;
+
+    // resource ID in context of target -> trailing padding for that resource (call FixPadding
+    // before use)
+    std::map<uint32_t, size_t> mEntryPadding;
+
+    // resource type ID in context of target -> total number of entries, including padding entries,
+    // for that type (call FixPadding before use)
+    std::map<uint8_t, size_t> mNumberOfEntriesIncludingPadding;
+};
+
+status_t ResTable::createIdmap(const ResTable& targetResTable,
         uint32_t targetCrc, uint32_t overlayCrc,
         const char* targetPath, const char* overlayPath,
         void** outData, size_t* outSize) const
 {
-    // see README for details on the format of map
-    if (mPackageGroups.size() == 0) {
-        ALOGW("idmap: target package has no package groups, cannot create idmap\n");
+    if (targetPath == NULL || overlayPath == NULL || outData == NULL || outSize == NULL) {
+        ALOGE("idmap: unexpected NULL parameter");
+        return UNKNOWN_ERROR;
+    }
+    if (strlen(targetPath) > 255) {
+        ALOGE("idmap: target path exceeds idmap file format limit of 255 chars");
+        return UNKNOWN_ERROR;
+    }
+    if (strlen(overlayPath) > 255) {
+        ALOGE("idmap: overlay path exceeds idmap file format limit of 255 chars");
+        return UNKNOWN_ERROR;
+    }
+    if (mPackageGroups.size() == 0 || mPackageGroups[0]->packages.size() == 0) {
+        ALOGE("idmap: invalid overlay package");
+        return UNKNOWN_ERROR;
+    }
+    if (targetResTable.mPackageGroups.size() == 0 ||
+            targetResTable.mPackageGroups[0]->packages.size() == 0) {
+        ALOGE("idmap: invalid target package");
         return UNKNOWN_ERROR;
     }
 
-    if (mPackageGroups[0]->packages.size() == 0) {
-        ALOGW("idmap: target package has no packages in its first package group, "
-                "cannot create idmap\n");
+    // Idmap is not aware of overlayable, exit since policy checks can't be done
+    if (targetResTable.mPackageGroups[0]->packages[0]->definesOverlayable) {
         return UNKNOWN_ERROR;
     }
 
-    // The number of resources overlaid that were not explicitly marked overlayable.
-    size_t forcedOverlayCount = 0u;
+    const ResTable_package* targetPackageStruct =
+        targetResTable.mPackageGroups[0]->packages[0]->package;
+    const size_t tmpNameSize = arraysize(targetPackageStruct->name);
+    char16_t tmpName[tmpNameSize];
+    strcpy16_dtoh(tmpName, targetPackageStruct->name, tmpNameSize);
+    const String16 targetPackageName(tmpName);
 
-    KeyedVector<uint8_t, IdmapTypeMap> map;
+    const PackageGroup* packageGroup = mPackageGroups[0];
 
-    // overlaid packages are assumed to contain only one package group
-    const PackageGroup* pg = mPackageGroups[0];
-
-    // starting size is header
-    *outSize = ResTable::IDMAP_HEADER_SIZE_BYTES;
-
-    // target package id and number of types in map
-    *outSize += 2 * sizeof(uint16_t);
-
-    // overlay packages are assumed to contain only one package group
-    const ResTable_package* overlayPackageStruct = overlay.mPackageGroups[0]->packages[0]->package;
-    char16_t tmpName[sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0])];
-    strcpy16_dtoh(tmpName, overlayPackageStruct->name, sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0]));
-    const String16 overlayPackage(tmpName);
-
-    for (size_t typeIndex = 0; typeIndex < pg->types.size(); ++typeIndex) {
-        const TypeList& typeList = pg->types[typeIndex];
+    // find the resources that exist in both packages
+    auto typeMapping = std::make_unique<IdmapTypeMapping>();
+    for (size_t typeIndex = 0; typeIndex < packageGroup->types.size(); ++typeIndex) {
+        const TypeList& typeList = packageGroup->types[typeIndex];
         if (typeList.isEmpty()) {
             continue;
         }
-
         const Type* typeConfigs = typeList[0];
 
-        IdmapTypeMap typeMap;
-        typeMap.overlayTypeId = -1;
-        typeMap.entryOffset = 0;
-
         for (size_t entryIndex = 0; entryIndex < typeConfigs->entryCount; ++entryIndex) {
-            uint32_t resID = Res_MAKEID(pg->id - 1, typeIndex, entryIndex);
-            resource_name resName;
-            if (!this->getResourceName(resID, false, &resName)) {
-                if (typeMap.entryMap.isEmpty()) {
-                    typeMap.entryOffset++;
-                }
+            uint32_t overlay_resid = Res_MAKEID(packageGroup->id - 1, typeIndex, entryIndex);
+            resource_name current_res;
+            if (!getResourceName(overlay_resid, false, &current_res)) {
                 continue;
             }
 
             uint32_t typeSpecFlags = 0u;
-            const String16 overlayType(resName.type, resName.typeLen);
-            const String16 overlayName(resName.name, resName.nameLen);
-            uint32_t overlayResID = overlay.identifierForName(overlayName.string(),
-                                                              overlayName.size(),
-                                                              overlayType.string(),
-                                                              overlayType.size(),
-                                                              overlayPackage.string(),
-                                                              overlayPackage.size(),
-                                                              &typeSpecFlags);
-            if (overlayResID == 0) {
-                // No such target resource was found.
-                if (typeMap.entryMap.isEmpty()) {
-                    typeMap.entryOffset++;
-                }
+            const uint32_t target_resid = targetResTable.identifierForName(
+                    current_res.name,
+                    current_res.nameLen,
+                    current_res.type,
+                    current_res.typeLen,
+                    targetPackageName.string(),
+                    targetPackageName.size(),
+                    &typeSpecFlags);
+
+            if (target_resid == 0) {
                 continue;
             }
 
-            // Now that we know this is being overlaid, check if it can be, and emit a warning if
-            // it can't.
-            if ((dtohl(typeConfigs->typeSpecFlags[entryIndex]) &
-                    ResTable_typeSpec::SPEC_OVERLAYABLE) == 0) {
-                forcedOverlayCount++;
-            }
-
-            if (typeMap.overlayTypeId == -1) {
-                typeMap.overlayTypeId = Res_GETTYPE(overlayResID) + 1;
-            }
-
-            if (Res_GETTYPE(overlayResID) + 1 != static_cast<size_t>(typeMap.overlayTypeId)) {
-                ALOGE("idmap: can't mix type ids in entry map. Resource 0x%08x maps to 0x%08x"
-                        " but entries should map to resources of type %02zx",
-                        resID, overlayResID, typeMap.overlayTypeId);
-                return BAD_TYPE;
-            }
-
-            if (typeMap.entryOffset + typeMap.entryMap.size() < entryIndex) {
-                // pad with 0xffffffff's (indicating non-existing entries) before adding this entry
-                size_t index = typeMap.entryMap.size();
-                size_t numItems = entryIndex - (typeMap.entryOffset + index);
-                if (typeMap.entryMap.insertAt(0xffffffff, index, numItems) < 0) {
-                    return NO_MEMORY;
-                }
-            }
-            typeMap.entryMap.add(Res_GETENTRY(overlayResID));
-        }
-
-        if (!typeMap.entryMap.isEmpty()) {
-            if (map.add(static_cast<uint8_t>(typeIndex), typeMap) < 0) {
-                return NO_MEMORY;
-            }
-            *outSize += (4 * sizeof(uint16_t)) + (typeMap.entryMap.size() * sizeof(uint32_t));
+            typeMapping->add(target_resid, overlay_resid);
         }
     }
 
-    if (map.isEmpty()) {
-        ALOGW("idmap: no resources in overlay package present in base package");
+    if (typeMapping->empty()) {
+        ALOGE("idmap: no matching resources");
         return UNKNOWN_ERROR;
     }
 
+    const IdmapMatchingResources matchingResources(std::move(typeMapping));
+
+    // write idmap
+    *outSize = ResTable::IDMAP_HEADER_SIZE_BYTES; // magic, version, target and overlay crc
+    *outSize += 2 * sizeof(uint16_t); // target package id, type count
+    auto fixedTypeMapping = matchingResources.getTypeMapping();
+    const auto typesEnd = fixedTypeMapping.cend();
+    for (auto ti = fixedTypeMapping.cbegin(); ti != typesEnd; ++ti) {
+        *outSize += 4 * sizeof(uint16_t); // target type, overlay type, entry count, entry offset
+        *outSize += matchingResources.getNumberOfEntriesIncludingPadding(ti->first) *
+            sizeof(uint32_t); // entries
+    }
     if ((*outData = malloc(*outSize)) == NULL) {
         return NO_MEMORY;
     }
 
-    uint32_t* data = (uint32_t*)*outData;
-    *data++ = htodl(IDMAP_MAGIC);
-    *data++ = htodl(ResTable::IDMAP_CURRENT_VERSION);
-    *data++ = htodl(targetCrc);
-    *data++ = htodl(overlayCrc);
-    const char* paths[] = { targetPath, overlayPath };
-    for (int j = 0; j < 2; ++j) {
-        char* p = (char*)data;
-        const char* path = paths[j];
-        const size_t I = strlen(path);
-        if (I > 255) {
-            ALOGV("path exceeds expected 255 characters: %s\n", path);
-            return UNKNOWN_ERROR;
-        }
-        for (size_t i = 0; i < 256; ++i) {
-            *p++ = i < I ? path[i] : '\0';
-        }
-        data += 256 / sizeof(uint32_t);
-    }
-    const size_t mapSize = map.size();
-    uint16_t* typeData = reinterpret_cast<uint16_t*>(data);
-    *typeData++ = htods(pg->id);
-    *typeData++ = htods(mapSize);
-    for (size_t i = 0; i < mapSize; ++i) {
-        uint8_t targetTypeId = map.keyAt(i);
-        const IdmapTypeMap& typeMap = map[i];
-        *typeData++ = htods(targetTypeId + 1);
-        *typeData++ = htods(typeMap.overlayTypeId);
-        *typeData++ = htods(typeMap.entryMap.size());
-        *typeData++ = htods(typeMap.entryOffset);
+    // write idmap header
+    uint32_t* data = reinterpret_cast<uint32_t*>(*outData);
+    *data++ = htodl(IDMAP_MAGIC); // write: magic
+    *data++ = htodl(ResTable::IDMAP_CURRENT_VERSION); // write: version
+    *data++ = htodl(targetCrc); // write: target crc
+    *data++ = htodl(overlayCrc); // write: overlay crc
 
-        const size_t entryCount = typeMap.entryMap.size();
-        uint32_t* entries = reinterpret_cast<uint32_t*>(typeData);
-        for (size_t j = 0; j < entryCount; j++) {
-            entries[j] = htodl(typeMap.entryMap[j]);
+    char* charData = reinterpret_cast<char*>(data);
+    size_t pathLen = strlen(targetPath);
+    for (size_t i = 0; i < 256; ++i) {
+        *charData++ = i < pathLen ? targetPath[i] : '\0'; // write: target path
+    }
+    pathLen = strlen(overlayPath);
+    for (size_t i = 0; i < 256; ++i) {
+        *charData++ = i < pathLen ? overlayPath[i] : '\0'; // write: overlay path
+    }
+    data += (2 * 256) / sizeof(uint32_t);
+
+    // write idmap data header
+    uint16_t* typeData = reinterpret_cast<uint16_t*>(data);
+    *typeData++ = htods(targetPackageStruct->id); // write: target package id
+    *typeData++ =
+        htods(static_cast<uint16_t>(fixedTypeMapping.size())); // write: type count
+
+    // write idmap data
+    for (auto ti = fixedTypeMapping.cbegin(); ti != typesEnd; ++ti) {
+        const size_t entryCount = matchingResources.getNumberOfEntriesIncludingPadding(ti->first);
+        auto ei = ti->second.cbegin();
+        *typeData++ = htods(Res_GETTYPE(ei->first) + 1); // write: target type id
+        *typeData++ = htods(Res_GETTYPE(ei->second) + 1); // write: overlay type id
+        *typeData++ = htods(entryCount); // write: entry count
+        *typeData++ = htods(Res_GETENTRY(ei->first)); // write: (target) entry offset
+        uint32_t *entryData = reinterpret_cast<uint32_t*>(typeData);
+        for (; ei != ti->second.cend(); ++ei) {
+            const size_t padding = matchingResources.getPadding(ei->first);
+            for (size_t i = 0; i < padding; ++i) {
+                *entryData++ = htodl(0xffffffff); // write: padding
+            }
+            *entryData++ = htodl(Res_GETENTRY(ei->second)); // write: (overlay) entry
         }
         typeData += entryCount * 2;
-    }
-
-    if (forcedOverlayCount > 0) {
-        ALOGW("idmap: overlaid %zu resources not marked overlayable", forcedOverlayCount);
     }
 
     return NO_ERROR;

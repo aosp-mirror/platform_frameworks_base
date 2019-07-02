@@ -187,4 +187,8 @@ final class NetworkLogger {
     List<NetworkEvent> retrieveLogs(long batchToken) {
         return mNetworkLoggingHandler.retrieveFullLogBatch(batchToken);
     }
+
+    long forceBatchFinalization() {
+        return mNetworkLoggingHandler.forceBatchFinalization();
+    }
 }

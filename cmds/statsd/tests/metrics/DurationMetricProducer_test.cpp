@@ -39,6 +39,23 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, 12345);
 
+TEST(DurationMetricTrackerTest, TestFirstBucket) {
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    DurationMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_MINUTE);
+    metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
+
+    FieldMatcher dimensions;
+    DurationMetricProducer durationProducer(
+            kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, 5, 600 * NS_PER_SEC + NS_PER_SEC/2);
+
+    EXPECT_EQ(600500000000, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(10, durationProducer.mCurrentBucketNum);
+    EXPECT_EQ(660000000005, durationProducer.getCurrentBucketEndTimeNs());
+}
+
 TEST(DurationMetricTrackerTest, TestNoCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     int64_t bucketStartTimeNs = 10000000000;
@@ -58,8 +75,7 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
@@ -100,8 +116,8 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, 0 /* condition index */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
+    durationProducer.mCondition = ConditionState::kFalse;
 
     EXPECT_FALSE(durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
@@ -118,6 +134,51 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
     EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_METRIC_DIMENSION_KEY) !=
                 durationProducer.mPastBuckets.end());
+    const auto& buckets2 = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
+    EXPECT_EQ(1UL, buckets2.size());
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets2[0].mBucketStartNs);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets2[0].mBucketEndNs);
+    EXPECT_EQ(1LL, buckets2[0].mDuration);
+}
+
+TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState) {
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+
+    DurationMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_MINUTE);
+    metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
+
+    int tagId = 1;
+    LogEvent event1(tagId, bucketStartTimeNs + 1);
+    event1.init();
+    LogEvent event2(tagId, bucketStartTimeNs + 2);
+    event2.init();
+    LogEvent event3(tagId, bucketStartTimeNs + bucketSizeNs + 1);
+    event3.init();
+    LogEvent event4(tagId, bucketStartTimeNs + bucketSizeNs + 3);
+    event4.init();
+
+    FieldMatcher dimensions;
+    DurationMetricProducer durationProducer(
+            kConfigKey, metric, 0 /* condition index */, 1 /* start index */, 2 /* stop index */,
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
+
+    EXPECT_EQ(ConditionState::kUnknown, durationProducer.mCondition);
+    EXPECT_FALSE(durationProducer.isConditionSliced());
+
+    durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
+    durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
+    durationProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
+    EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
+
+    durationProducer.onMatchedLogEvent(1 /* start index*/, event3);
+    durationProducer.onConditionChanged(true /* condition */, bucketStartTimeNs + bucketSizeNs + 2);
+    durationProducer.onMatchedLogEvent(2 /* stop index*/, event4);
+    durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
+    EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
     const auto& buckets2 = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(1UL, buckets2.size());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets2[0].mBucketStartNs);
@@ -151,8 +212,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     LogEvent start_event(tagId, startTimeNs);
     start_event.init();
@@ -206,8 +266,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     LogEvent start_event(tagId, startTimeNs);
     start_event.init();
@@ -261,8 +320,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     sp<AnomalyTracker> anomalyTracker = durationProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
@@ -300,8 +358,7 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     LogEvent start_event(tagId, startTimeNs);
     start_event.init();
@@ -348,8 +405,7 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket) {
     FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
-    durationProducer.setBucketSize(60 * NS_PER_SEC);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     LogEvent start_event(tagId, startTimeNs);
     start_event.init();

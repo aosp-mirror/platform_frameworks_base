@@ -30,7 +30,7 @@ import java.util.List;
 @SystemApi
 public final class GetEuiccProfileInfoListResult implements Parcelable {
 
-    public static final Creator<GetEuiccProfileInfoListResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<GetEuiccProfileInfoListResult> CREATOR =
             new Creator<GetEuiccProfileInfoListResult>() {
                 @Override
                 public GetEuiccProfileInfoListResult createFromParcel(Parcel in) {

@@ -44,8 +44,6 @@ public abstract class InternalTransformation implements Transformation, Parcelab
      * @param finder object used to find the value of a field in the screen.
      * @param template the {@link RemoteViews presentation template}.
      * @param childViewId resource id of the child view inside the template.
-     *
-     * @hide
      */
     abstract void apply(@NonNull ValueFinder finder, @NonNull RemoteViews template,
             int childViewId) throws Exception;
@@ -58,8 +56,6 @@ public abstract class InternalTransformation implements Transformation, Parcelab
      * @param template the {@link RemoteViews presentation template}.
      * @param transformations map of resource id of the child view inside the template to
      * transformation.
-     *
-     * @hide
      */
     public static boolean batchApply(@NonNull ValueFinder finder, @NonNull RemoteViews template,
             @NonNull ArrayList<Pair<Integer, InternalTransformation>> transformations) {

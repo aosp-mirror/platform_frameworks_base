@@ -20,8 +20,10 @@
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
+#include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "renderthread/CanvasContext.h"
+#include "tests/common/TestContext.h"
 #include "tests/common/TestUtils.h"
 
 using namespace android;
@@ -36,32 +38,37 @@ TEST(SkiaDisplayList, create) {
 }
 
 TEST(SkiaDisplayList, reset) {
-    SkiaDisplayList skiaDL;
+    std::unique_ptr<SkiaDisplayList> skiaDL;
+    {
+        SkiaRecordingCanvas canvas{nullptr, 1, 1};
+        canvas.drawColor(0, SkBlendMode::kSrc);
+        skiaDL.reset(canvas.finishRecording());
+    }
 
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
-    skiaDL.mChildNodes.emplace_back(nullptr, &dummyCanvas);
-    skiaDL.mChildFunctors.emplace_back(nullptr, nullptr, &dummyCanvas);
-    skiaDL.mMutableImages.push_back(nullptr);
-    skiaDL.mVectorDrawables.push_back(nullptr);
-    skiaDL.mDisplayList.drawAnnotation(SkRect::MakeWH(200, 200), "testAnnotation", nullptr);
-    skiaDL.mProjectionReceiver = &drawable;
+    skiaDL->mChildNodes.emplace_back(nullptr, &dummyCanvas);
+    GLFunctorDrawable functorDrawable(nullptr, nullptr, &dummyCanvas);
+    skiaDL->mChildFunctors.push_back(&functorDrawable);
+    skiaDL->mMutableImages.push_back(nullptr);
+    skiaDL->appendVD(nullptr);
+    skiaDL->mProjectionReceiver = &drawable;
 
-    ASSERT_FALSE(skiaDL.mChildNodes.empty());
-    ASSERT_FALSE(skiaDL.mChildFunctors.empty());
-    ASSERT_FALSE(skiaDL.mMutableImages.empty());
-    ASSERT_FALSE(skiaDL.mVectorDrawables.empty());
-    ASSERT_FALSE(skiaDL.isEmpty());
-    ASSERT_TRUE(skiaDL.mProjectionReceiver);
+    ASSERT_FALSE(skiaDL->mChildNodes.empty());
+    ASSERT_FALSE(skiaDL->mChildFunctors.empty());
+    ASSERT_FALSE(skiaDL->mMutableImages.empty());
+    ASSERT_TRUE(skiaDL->hasVectorDrawables());
+    ASSERT_FALSE(skiaDL->isEmpty());
+    ASSERT_TRUE(skiaDL->mProjectionReceiver);
 
-    skiaDL.reset();
+    skiaDL->reset();
 
-    ASSERT_TRUE(skiaDL.mChildNodes.empty());
-    ASSERT_TRUE(skiaDL.mChildFunctors.empty());
-    ASSERT_TRUE(skiaDL.mMutableImages.empty());
-    ASSERT_TRUE(skiaDL.mVectorDrawables.empty());
-    ASSERT_TRUE(skiaDL.isEmpty());
-    ASSERT_FALSE(skiaDL.mProjectionReceiver);
+    ASSERT_TRUE(skiaDL->mChildNodes.empty());
+    ASSERT_TRUE(skiaDL->mChildFunctors.empty());
+    ASSERT_TRUE(skiaDL->mMutableImages.empty());
+    ASSERT_FALSE(skiaDL->hasVectorDrawables());
+    ASSERT_TRUE(skiaDL->isEmpty());
+    ASSERT_FALSE(skiaDL->mProjectionReceiver);
 }
 
 TEST(SkiaDisplayList, reuseDisplayList) {
@@ -91,18 +98,38 @@ TEST(SkiaDisplayList, syncContexts) {
 
     SkCanvas dummyCanvas;
     TestUtils::MockFunctor functor;
-    skiaDL.mChildFunctors.emplace_back(&functor, nullptr, &dummyCanvas);
+    GLFunctorDrawable functorDrawable(&functor, nullptr, &dummyCanvas);
+    skiaDL.mChildFunctors.push_back(&functorDrawable);
+
+    int functor2 = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    auto& counts = TestUtils::countsForFunctor(functor2);
+    skiaDL.mChildFunctors.push_back(
+            skiaDL.allocateDrawable<GLFunctorDrawable>(functor2, &dummyCanvas));
+    WebViewFunctor_release(functor2);
 
     SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
     vectorDrawable.mutateStagingProperties()->setBounds(bounds);
-    skiaDL.mVectorDrawables.push_back(&vectorDrawable);
+    skiaDL.appendVD(&vectorDrawable);
 
     // ensure that the functor and vectorDrawable are properly synced
-    skiaDL.syncContents();
+    TestUtils::runOnRenderThread([&](auto&) {
+        skiaDL.syncContents(WebViewSyncData{
+                .applyForceDark = false,
+        });
+    });
 
-    ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
-    ASSERT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
+    EXPECT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
+    EXPECT_EQ(counts.sync, 1);
+    EXPECT_EQ(counts.destroyed, 0);
+    EXPECT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
+
+    skiaDL.reset();
+    TestUtils::runOnRenderThread([](auto&) {
+        // Fence
+    });
+    EXPECT_EQ(counts.destroyed, 1);
 }
 
 class ContextFactory : public IContextFactory {
@@ -123,9 +150,14 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
 
     SkiaDisplayList skiaDL;
 
+    // The VectorDrawableRoot needs to have bounds on screen (and therefore not
+    // empty) in order to have PropertyChangeWillBeConsumed set.
+    const auto bounds = SkRect::MakeIWH(100, 100);
+
     // prepare with a clean VD
     VectorDrawableRoot cleanVD(new VectorDrawable::Group());
-    skiaDL.mVectorDrawables.push_back(&cleanVD);
+    cleanVD.mutateProperties()->setBounds(bounds);
+    skiaDL.appendVD(&cleanVD);
     cleanVD.getBitmapUpdateIfDirty();  // this clears the dirty bit
 
     ASSERT_FALSE(cleanVD.isDirty());
@@ -133,11 +165,12 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     TestUtils::MockTreeObserver observer;
     ASSERT_FALSE(skiaDL.prepareListAndChildren(observer, info, false,
                                                [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
-    ASSERT_TRUE(cleanVD.getPropertyChangeWillBeConsumed());
+    ASSERT_FALSE(cleanVD.getPropertyChangeWillBeConsumed());
 
     // prepare again this time adding a dirty VD
     VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
-    skiaDL.mVectorDrawables.push_back(&dirtyVD);
+    dirtyVD.mutateProperties()->setBounds(bounds);
+    skiaDL.appendVD(&dirtyVD);
 
     ASSERT_TRUE(dirtyVD.isDirty());
     ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
@@ -163,6 +196,169 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     ASSERT_TRUE(hasRun);
 
     canvasContext->destroy();
+}
+
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscreen) {
+    auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+
+    // Set up a Surface so that we can position the VectorDrawable offscreen.
+    test::TestContext testContext;
+    testContext.setRenderOffscreen(true);
+    auto surface = testContext.surface();
+    int width, height;
+    surface->query(NATIVE_WINDOW_WIDTH, &width);
+    surface->query(NATIVE_WINDOW_HEIGHT, &height);
+    canvasContext->setSurface(std::move(surface));
+
+    TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+
+    // The VectorDrawableRoot needs to have bounds on screen (and therefore not
+    // empty) in order to have PropertyChangeWillBeConsumed set.
+    const auto bounds = SkRect::MakeIWH(100, 100);
+
+    for (const SkRect b : {bounds.makeOffset(width, 0),
+                           bounds.makeOffset(0, height),
+                           bounds.makeOffset(-bounds.width(), 0),
+                           bounds.makeOffset(0, -bounds.height())}) {
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(b);
+        skiaDL.appendVD(&dirtyVD);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_FALSE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+    }
+
+    // The DamageAccumulator's transform can also result in the
+    // VectorDrawableRoot being offscreen.
+    for (const SkISize translate : { SkISize{width, 0},
+                                     SkISize{0, height},
+                                     SkISize{-width, 0},
+                                     SkISize{0, -height}}) {
+        Matrix4 mat4;
+        mat4.translate(translate.fWidth, translate.fHeight);
+        damageAccumulator.pushTransform(&mat4);
+
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(bounds);
+        skiaDL.appendVD(&dirtyVD);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_FALSE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+        damageAccumulator.popTransform();
+    }
+
+    // Another way to be offscreen: a matrix from the draw call.
+    for (const SkMatrix translate : { SkMatrix::MakeTrans(width, 0),
+                                      SkMatrix::MakeTrans(0, height),
+                                      SkMatrix::MakeTrans(-width, 0),
+                                      SkMatrix::MakeTrans(0, -height)}) {
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(bounds);
+        skiaDL.appendVD(&dirtyVD, translate);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_FALSE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+    }
+
+    // Verify that the matrices are combined in the right order.
+    {
+        // Rotate and then translate, so the VD is offscreen.
+        Matrix4 mat4;
+        mat4.loadRotate(180);
+        damageAccumulator.pushTransform(&mat4);
+
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(bounds);
+        SkMatrix translate = SkMatrix::MakeTrans(50, 50);
+        skiaDL.appendVD(&dirtyVD, translate);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_FALSE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+        damageAccumulator.popTransform();
+    }
+    {
+        // Switch the order of rotate and translate, so it is on screen.
+        Matrix4 mat4;
+        mat4.translate(50, 50);
+        damageAccumulator.pushTransform(&mat4);
+
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(bounds);
+        SkMatrix rotate;
+        rotate.setRotate(180);
+        skiaDL.appendVD(&dirtyVD, rotate);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_TRUE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_TRUE(dirtyVD.getPropertyChangeWillBeConsumed());
+        damageAccumulator.popTransform();
+    }
+    {
+        // An AVD that is larger than the screen.
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(SkRect::MakeLTRB(-1, -1, width + 1, height + 1));
+        skiaDL.appendVD(&dirtyVD);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_TRUE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_TRUE(dirtyVD.getPropertyChangeWillBeConsumed());
+    }
+    {
+        // An AVD whose bounds are not a rectangle after applying a matrix.
+        SkiaDisplayList skiaDL;
+        VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
+        dirtyVD.mutateProperties()->setBounds(bounds);
+        SkMatrix mat;
+        mat.setRotate(45, 50, 50);
+        skiaDL.appendVD(&dirtyVD, mat);
+
+        ASSERT_TRUE(dirtyVD.isDirty());
+        ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
+
+        TestUtils::MockTreeObserver observer;
+        ASSERT_TRUE(skiaDL.prepareListAndChildren(
+                observer, info, false, [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+        ASSERT_TRUE(dirtyVD.getPropertyChangeWillBeConsumed());
+    }
 }
 
 TEST(SkiaDisplayList, updateChildren) {

@@ -153,7 +153,7 @@ public class RadioAccessFamily implements Parcelable {
     /**
      * Implement the Parcelable interface.
      */
-    public static final Creator<android.telephony.RadioAccessFamily> CREATOR =
+    public static final @android.annotation.NonNull Creator<android.telephony.RadioAccessFamily> CREATOR =
             new Creator<android.telephony.RadioAccessFamily>() {
 
         @Override

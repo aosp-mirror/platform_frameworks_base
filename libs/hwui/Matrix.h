@@ -27,6 +27,7 @@ namespace android {
 namespace uirenderer {
 
 #define SK_MATRIX_STRING "[%.2f %.2f %.2f] [%.2f %.2f %.2f] [%.2f %.2f %.2f]"
+#define SK_MATRIX_STRING_V "[%.9f %.9f %.9f] [%.9f %.9f %.9f] [%.9f %.9f %.9f]"
 #define SK_MATRIX_ARGS(m)                                                                      \
     (m)->get(0), (m)->get(1), (m)->get(2), (m)->get(3), (m)->get(4), (m)->get(5), (m)->get(6), \
             (m)->get(7), (m)->get(8)
@@ -244,5 +245,5 @@ private:
 
 typedef Matrix4 mat4;
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

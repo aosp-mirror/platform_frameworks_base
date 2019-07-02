@@ -17,15 +17,15 @@
 package android.text.method;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.util.KeyUtils;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView.BufferType;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -239,7 +239,6 @@ public class ForwardDeleteTest {
     }
 
     @Test
-    @Suppress
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
@@ -256,20 +255,15 @@ public class ForwardDeleteTest {
         // Isolated multiple emoji modifier
         state.setByString("| U+1F3FB U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
-        forwardDelete(state, 0);
         state.assertEquals("|");
 
         // Multiple emoji modifiers
         state.setByString("| U+1F466 U+1F3FB U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
-        forwardDelete(state, 0);
         state.assertEquals("|");
     }
 
     @Test
-    @Suppress
     public void testMixedEdgeCases() {
         EditorState state = new EditorState();
 
@@ -318,7 +312,7 @@ public class ForwardDeleteTest {
         // COMBINING ENCLOSING KEYCAP + emoji modifier
         state.setByString("| '1' U+20E3 U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
+        state.assertEquals("|");
 
         // Emoji modifier + COMBINING ENCLOSING KEYCAP
         state.setByString("| U+1F466 U+1F3FB U+20E3");
@@ -360,7 +354,7 @@ public class ForwardDeleteTest {
         // Variation selector + emoji modifier
         state.setByString("| U+2665 U+FE0F U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
+        state.assertEquals("|");
 
         // Emoji modifier + variation selector
         state.setByString("| U+1F466 U+1F3FB U+FE0F");
@@ -396,7 +390,7 @@ public class ForwardDeleteTest {
         // Start with ZERO WIDTH JOINER + emoji modifier
         state.setByString("| U+200D U+1F3FB");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
+        state.assertEquals("|");
 
         // ZERO WIDTH JOINER + emoji modifier
         state.setByString("| U+1F469 U+200D U+1F3FB");
@@ -409,14 +403,13 @@ public class ForwardDeleteTest {
         state.assertEquals("|");
 
         // Emoji modifier + ZERO WIDTH JOINER
-        state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
+        // TODO(nona): Revive this test once HarfBuzz is updated to 2.0.2 (b/117953171)
+        // state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
+        // forwardDelete(state, 0);
+        // state.assertEquals("|");
 
         // Regional indicator symbol + emoji modifier
         state.setByString("| U+1F1FA U+1F3FB");
-        forwardDelete(state, 0);
-        state.assertEquals("| U+1F3FB");
         forwardDelete(state, 0);
         state.assertEquals("|");
 

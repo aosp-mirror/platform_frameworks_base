@@ -59,8 +59,8 @@ public:
         }
 
         mBootAction = new BootAction();
-        if (!mBootAction->init(library_path, mBootParameters->getParameters())) {
-            mBootAction = NULL;
+        if (!mBootAction->init(library_path, mBootParameters)) {
+            mBootAction = nullptr;
         }
     };
 
@@ -116,8 +116,16 @@ int main() {
     sp<ProcessState> proc(ProcessState::self());
     ProcessState::self()->startThreadPool();
 
-    sp<BootAnimation> boot = new BootAnimation(
-            new BootActionAnimationCallbacks(std::move(bootParameters)));
+    bool isSilentBoot = bootParameters->isSilentBoot();
+    sp<BootActionAnimationCallbacks> callbacks =
+        new BootActionAnimationCallbacks(std::move(bootParameters));
+
+    // On silent boot, animations aren't displayed.
+    if (isSilentBoot) {
+        callbacks->init({});
+    } else {
+        sp<BootAnimation> boot = new BootAnimation(callbacks);
+    }
 
     IPCThreadState::self()->joinThreadPool();
     return 0;

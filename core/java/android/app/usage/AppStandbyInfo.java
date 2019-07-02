@@ -50,7 +50,7 @@ public final class AppStandbyInfo implements Parcelable {
         dest.writeInt(mStandbyBucket);
     }
 
-    public static final Creator<AppStandbyInfo> CREATOR = new Creator<AppStandbyInfo>() {
+    public static final @android.annotation.NonNull Creator<AppStandbyInfo> CREATOR = new Creator<AppStandbyInfo>() {
         @Override
         public AppStandbyInfo createFromParcel(Parcel source) {
             return new AppStandbyInfo(source);

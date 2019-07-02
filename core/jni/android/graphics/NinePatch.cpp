@@ -23,8 +23,6 @@
 #include <hwui/Paint.h>
 #include <utils/Log.h>
 
-#include <ResourceCache.h>
-
 #include "SkCanvas.h"
 #include "SkLatticeIter.h"
 #include "SkRegion.h"
@@ -83,21 +81,16 @@ public:
 
     static void finalize(JNIEnv* env, jobject, jlong patchHandle) {
         int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
-        if (android::uirenderer::ResourceCache::hasInstance()) {
-            Res_png_9patch* p = (Res_png_9patch*) patch;
-            android::uirenderer::ResourceCache::getInstance().destructor(p);
-        } else {
-            delete[] patch;
-        }
+        delete[] patch;
     }
 
-    static jlong getTransparentRegion(JNIEnv* env, jobject, jobject jbitmap,
+    static jlong getTransparentRegion(JNIEnv* env, jobject, jlong bitmapPtr,
             jlong chunkHandle, jobject dstRect) {
         Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         SkASSERT(chunk);
 
         SkBitmap bitmap;
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+        bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
         SkRect dst;
         GraphicsJNI::jrect_to_rect(env, dstRect, &dst);
 
@@ -163,7 +156,7 @@ static const JNINativeMethod gNinePatchMethods[] = {
     { "validateNinePatchChunk", "([B)J",
             (void*) SkNinePatchGlue::validateNinePatchChunk },
     { "nativeFinalize", "(J)V", (void*) SkNinePatchGlue::finalize },
-    { "nativeGetTransparentRegion", "(Landroid/graphics/Bitmap;JLandroid/graphics/Rect;)J",
+    { "nativeGetTransparentRegion", "(JJLandroid/graphics/Rect;)J",
             (void*) SkNinePatchGlue::getTransparentRegion }
 };
 

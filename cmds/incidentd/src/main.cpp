@@ -45,7 +45,8 @@ int main(int /*argc*/, char** /*argv*/) {
 
     // Create the service
     sp<IncidentService> service = new IncidentService(looper);
-    if (defaultServiceManager()->addService(String16("incident"), service) != 0) {
+    if (defaultServiceManager()->addService(String16("incident"), service, false,
+            IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO) != 0) {
         ALOGE("Failed to add service");
         return -1;
     }

@@ -162,7 +162,7 @@ public final class ScanFilter implements Parcelable {
     /**
      * A {@link android.os.Parcelable.Creator} to create {@link ScanFilter} from parcel.
      */
-    public static final Creator<ScanFilter> CREATOR =
+    public static final @android.annotation.NonNull Creator<ScanFilter> CREATOR =
             new Creator<ScanFilter>() {
 
         @Override
@@ -590,6 +590,9 @@ public final class ScanFilter implements Parcelable {
         public @NonNull Builder setServiceSolicitationUuid(
                 @Nullable ParcelUuid serviceSolicitationUuid) {
             mServiceSolicitationUuid = serviceSolicitationUuid;
+            if (serviceSolicitationUuid == null) {
+                mServiceSolicitationUuidMask = null;
+            }
             return this;
         }
 
@@ -600,13 +603,16 @@ public final class ScanFilter implements Parcelable {
          * indicate a match is needed for the bit in {@code serviceSolicitationUuid}, and 0 to
          * ignore that bit.
          *
+         * @param serviceSolicitationUuid can only be null if solicitationUuidMask is null.
+         * @param solicitationUuidMask can be null or a mask with no restriction.
+         *
          * @throws IllegalArgumentException If {@code serviceSolicitationUuid} is {@code null} but
          *             {@code serviceSolicitationUuidMask} is not {@code null}.
          */
         public @NonNull Builder setServiceSolicitationUuid(
                 @Nullable ParcelUuid serviceSolicitationUuid,
                 @Nullable ParcelUuid solicitationUuidMask) {
-            if (mServiceSolicitationUuidMask != null && mServiceSolicitationUuid == null) {
+            if (solicitationUuidMask != null && serviceSolicitationUuid == null) {
                 throw new IllegalArgumentException(
                         "SolicitationUuid is null while SolicitationUuidMask is not null!");
             }

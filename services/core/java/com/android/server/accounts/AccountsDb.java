@@ -266,6 +266,13 @@ class AccountsDb implements AutoCloseable {
         }
 
         @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.e(TAG, "onDowngrade: recreate accounts CE table");
+            resetDatabase(db);
+            onCreate(db);
+        }
+
+        @Override
         public void onOpen(SQLiteDatabase db) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "opened database " + CE_DATABASE_NAME);
         }
@@ -613,6 +620,13 @@ class AccountsDb implements AutoCloseable {
             if (oldVersion != newVersion) {
                 Log.e(TAG, "failed to upgrade version " + oldVersion + " to version " + newVersion);
             }
+        }
+
+        @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.e(TAG, "onDowngrade: recreate accounts DE table");
+            resetDatabase(db);
+            onCreate(db);
         }
 
         public SQLiteDatabase getReadableDatabaseUserIsUnlocked() {
@@ -1398,4 +1412,26 @@ class AccountsDb implements AutoCloseable {
         return new AccountsDb(deDatabaseHelper, context, preNDatabaseFile);
     }
 
+    /**
+     * Removes all tables and triggers created by AccountManager.
+     */
+    private static void resetDatabase(SQLiteDatabase db) {
+        try (Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type ='table'", null)) {
+            while (c.moveToNext()) {
+                String name = c.getString(0);
+                // Skip tables managed by SQLiteDatabase
+                if ("android_metadata".equals(name) || "sqlite_sequence".equals(name)) {
+                    continue;
+                }
+                db.execSQL("DROP TABLE IF EXISTS " + name);
+            }
+        }
+
+        try (Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type ='trigger'", null)) {
+            while (c.moveToNext()) {
+                String name = c.getString(0);
+                db.execSQL("DROP TRIGGER IF EXISTS " + name);
+            }
+        }
+    }
 }

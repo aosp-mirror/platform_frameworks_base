@@ -35,14 +35,14 @@ static jmethodID gAnimatedImageDrawable_onAnimationEndMethodID;
 // Note: jpostProcess holds a handle to the ImageDecoder.
 static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
                                            jlong nativeImageDecoder, jobject jpostProcess,
-                                           jint width, jint height, jobject jsubset) {
+                                           jint width, jint height, jlong colorSpaceHandle,
+                                           jboolean extended, jobject jsubset) {
     if (nativeImageDecoder == 0) {
         doThrowIOE(env, "Cannot create AnimatedImageDrawable from null!");
         return 0;
     }
 
     auto* imageDecoder = reinterpret_cast<ImageDecoder*>(nativeImageDecoder);
-    const SkISize scaledSize = SkISize::Make(width, height);
     SkIRect subset;
     if (jsubset) {
         GraphicsJNI::jrect_to_irect(env, jsubset, &subset);
@@ -50,15 +50,8 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         subset = SkIRect::MakeWH(width, height);
     }
 
-    auto info = imageDecoder->mCodec->getInfo();
     bool hasRestoreFrame = false;
-    if (imageDecoder->mCodec->getEncodedFormat() == SkEncodedImageFormat::kWEBP) {
-        if (width < info.width() && height < info.height()) {
-            // WebP will scale its SkBitmap to the scaled size.
-            // FIXME: b/73529447 GIF should do the same.
-            info = info.makeWH(width, height);
-        }
-    } else {
+    if (imageDecoder->mCodec->getEncodedFormat() != SkEncodedImageFormat::kWEBP) {
         const int frameCount = imageDecoder->mCodec->codec()->getFrameCount();
         for (int i = 0; i < frameCount; ++i) {
             SkCodec::FrameInfo frameInfo;
@@ -71,6 +64,12 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
                 break;
             }
         }
+    }
+
+    auto info = imageDecoder->mCodec->getInfo().makeWH(width, height)
+        .makeColorSpace(GraphicsJNI::getNativeColorSpace(colorSpaceHandle));
+    if (extended) {
+        info = info.makeColorType(kRGBA_F16_SkColorType);
     }
 
     size_t bytesUsed = info.computeMinByteSize();
@@ -96,7 +95,7 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
 
 
     sk_sp<SkAnimatedImage> animatedImg = SkAnimatedImage::Make(std::move(imageDecoder->mCodec),
-                                                               scaledSize, subset,
+                                                               info, subset,
                                                                std::move(picture));
     if (!animatedImg) {
         doThrowIOE(env, "Failed to create drawable");
@@ -246,7 +245,7 @@ static void AnimatedImageDrawable_nSetMirrored(JNIEnv* env, jobject /*clazz*/, j
 }
 
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
-    { "nCreate",             "(JLandroid/graphics/ImageDecoder;IILandroid/graphics/Rect;)J", (void*) AnimatedImageDrawable_nCreate },
+    { "nCreate",             "(JLandroid/graphics/ImageDecoder;IIJZLandroid/graphics/Rect;)J",(void*) AnimatedImageDrawable_nCreate },
     { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
     { "nDraw",               "(JJ)J",                                                        (void*) AnimatedImageDrawable_nDraw },
     { "nSetAlpha",           "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetAlpha },

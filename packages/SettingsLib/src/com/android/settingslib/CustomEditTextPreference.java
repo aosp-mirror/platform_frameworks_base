@@ -23,13 +23,20 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.CallSuper;
-import androidx.preference.EditTextPreferenceDialogFragment;
-import androidx.preference.EditTextPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 
+import androidx.annotation.CallSuper;
+import androidx.preference.EditTextPreference;
+import androidx.preference.EditTextPreferenceDialogFragment;
+
+/**
+ * Framework version is deprecated, use the compat version instead.
+ *
+ * @deprecated
+ */
+@Deprecated
 public class CustomEditTextPreference extends EditTextPreference {
 
     private CustomPreferenceDialogFragment mFragment;

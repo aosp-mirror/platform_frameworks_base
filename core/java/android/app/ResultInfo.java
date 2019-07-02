@@ -67,7 +67,7 @@ public class ResultInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static final Parcelable.Creator<ResultInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ResultInfo> CREATOR
             = new Parcelable.Creator<ResultInfo>() {
         public ResultInfo createFromParcel(Parcel in) {
             return new ResultInfo(in);

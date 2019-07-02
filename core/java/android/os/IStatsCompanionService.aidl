@@ -69,6 +69,12 @@ interface IStatsCompanionService {
     oneway void sendDataBroadcast(in IBinder intentSender, long lastReportTimeNs);
 
     /**
+     * Send a broadcast to the specified PendingIntent's as IBinder notifying it that the list
+     * of active configs has changed.
+     */
+    oneway void sendActiveConfigsChangedBroadcast(in IBinder intentSender, in long[] configIds);
+
+    /**
      * Requests StatsCompanionService to send a broadcast using the given intentSender
      * (which should cast to an IIntentSender), along with the other information specified.
      */

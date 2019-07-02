@@ -18,7 +18,7 @@ syntax = "proto2";
 package android.service.pm;
 
 import "frameworks/base/core/proto/android/content/featureinfo.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "PackageServiceProto";
@@ -48,7 +48,7 @@ message PackageServiceDumpProto {
     message SharedUserProto {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 user_id = 1;
+        optional int32 uid = 1;
         // Name of the shared UID. eg: android.uid.bluetooth
         optional string name = 2;
     }
@@ -111,6 +111,7 @@ message PackageProto {
         optional EnabledState enabled_state = 7;
         optional string last_disabled_app_caller = 8;
         optional string suspending_package = 9;
+        optional int32 distraction_flags = 10;
     }
 
     // Name of package. e.g. "com.android.providers.telephony".

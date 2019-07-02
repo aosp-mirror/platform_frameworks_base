@@ -309,7 +309,7 @@ public final class CellIdentityLte extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Creator<CellIdentityLte> CREATOR =
+    public static final @android.annotation.NonNull Creator<CellIdentityLte> CREATOR =
             new Creator<CellIdentityLte>() {
                 @Override
                 public CellIdentityLte createFromParcel(Parcel in) {

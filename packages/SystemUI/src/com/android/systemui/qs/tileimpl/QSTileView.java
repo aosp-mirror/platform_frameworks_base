@@ -15,11 +15,10 @@
 package com.android.systemui.qs.tileimpl;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.service.quicksettings.Tile;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -46,6 +46,8 @@ public class QSTileView extends QSTileBaseView {
     private ViewGroup mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
+    private ColorStateList mColorLabelDefault;
+    private ColorStateList mColorLabelUnavailable;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -62,6 +64,11 @@ public class QSTileView extends QSTileBaseView {
         createLabel();
         setOrientation(VERTICAL);
         setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+        mColorLabelDefault = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
+        // The text color for unavailable tiles is textColorSecondary, same as secondaryLabel for
+        // contrast purposes
+        mColorLabelUnavailable = Utils.getColorAttr(getContext(),
+                android.R.attr.textColorSecondary);
     }
 
     TextView getLabel() {
@@ -111,12 +118,8 @@ public class QSTileView extends QSTileBaseView {
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         if (!Objects.equals(mLabel.getText(), state.label) || mState != state.state) {
-            if (state.state == Tile.STATE_UNAVAILABLE) {
-                int color = QSTileImpl.getColorForState(getContext(), state.state);
-                state.label = new SpannableStringBuilder().append(state.label,
-                        new ForegroundColorSpan(color),
-                        SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
-            }
+            mLabel.setTextColor(state.state == Tile.STATE_UNAVAILABLE ? mColorLabelUnavailable
+                    : mColorLabelDefault);
             mState = state.state;
             mLabel.setText(state.label);
         }

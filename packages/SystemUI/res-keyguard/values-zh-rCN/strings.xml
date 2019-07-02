@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"触摸即可输入密码"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"输入密码即可解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"输入 PIN 码即可解锁"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"输入您的 PIN 码"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"绘制您的图案"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"输入您的密码"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN 码有误。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM 卡无效。"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"已充满电"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"正在充电"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"正在快速充电"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"正在慢速充电"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"充电完成"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在无线充电"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在快速充电"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在慢速充电"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"请连接充电器。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"按“菜单”即可解锁。"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"网络已锁定"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"正在解锁 SIM 卡…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN 码区域"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"设备密码"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM 卡 PIN 码区域"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM 卡 PUK 码区域"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"下一个闹钟时间已设置为<xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"出现错误，无法停用 eSIM 卡。"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"输入"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"忘记了图案"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"图案错误"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"密码错误"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"图案错误"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"密码错误"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN 码错误"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。</item>
@@ -136,8 +141,9 @@
       <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认密码。</item>
       <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认密码。</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"无法识别"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"无法识别"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"无法识别"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
       <item quantity="one">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，则需要联系运营商帮您解锁设备。</item>
     </plurals>
@@ -145,4 +151,84 @@
       <item quantity="other">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
       <item quantity="one">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_0">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"时间是"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"时间是"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"十二"</item>
+    <item msgid="7389464214252023751">"一"</item>
+    <item msgid="8803180377002008046">"二"</item>
+    <item msgid="8614897059944644719">"三"</item>
+    <item msgid="2293058674782619556">"四"</item>
+    <item msgid="4815402358455041664">"五"</item>
+    <item msgid="3325754778509665687">"六"</item>
+    <item msgid="5805551341866280575">"七"</item>
+    <item msgid="203334816668238610">"八"</item>
+    <item msgid="4828052671464488923">"九"</item>
+    <item msgid="2233497913571137419">"十"</item>
+    <item msgid="5621554266768657830">"十一"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"点整"</item>
+    <item msgid="8837126587669001578">"一点"</item>
+    <item msgid="4294343372940455660">"两点"</item>
+    <item msgid="7129166637707421536">"三点"</item>
+    <item msgid="7579404865008788673">"四点"</item>
+    <item msgid="3873924689207380586">"五点"</item>
+    <item msgid="4849565597850069377">"六点"</item>
+    <item msgid="4404219424523572364">"七点"</item>
+    <item msgid="8740481214764087329">"八点"</item>
+    <item msgid="1713216865806811237">"九点"</item>
+    <item msgid="3508406095411245038">"十"</item>
+    <item msgid="7161996337755311711">"十一"</item>
+    <item msgid="4044549963329624197">"十二"</item>
+    <item msgid="333373157917379088">"十三"</item>
+    <item msgid="2631202907124819385">"十四"</item>
+    <item msgid="6472396076858033453">"十五"</item>
+    <item msgid="8656981856181581643">"十六"</item>
+    <item msgid="7289026608562030619">"十七"</item>
+    <item msgid="3881477602692646573">"十八"</item>
+    <item msgid="3358129827772984226">"十九"</item>
+    <item msgid="3308575407402865807">"二十"</item>
+    <item msgid="5346560955382229629">"二十\n一"</item>
+    <item msgid="226750304761473436">"二十\n二"</item>
+    <item msgid="616811325336838734">"二十\n三"</item>
+    <item msgid="616346116869053440">"二十\n四"</item>
+    <item msgid="4642996410384042830">"二十\n五"</item>
+    <item msgid="7506092849993571465">"二十\n六"</item>
+    <item msgid="1915078191101042031">"二十\n七"</item>
+    <item msgid="4292378641900520252">"二十\n八"</item>
+    <item msgid="5339513901773103696">"二十\n九"</item>
+    <item msgid="3574673250891657607">"三十"</item>
+    <item msgid="5796923836589110940">"三十\n一"</item>
+    <item msgid="5859323597571702052">"三十\n二"</item>
+    <item msgid="5133326723148876507">"三十\n三"</item>
+    <item msgid="2693999494655663096">"三十\n四"</item>
+    <item msgid="3316754944962836197">"三十\n五"</item>
+    <item msgid="816891008836796723">"三十\n六"</item>
+    <item msgid="9158890488666520078">"三十\n七"</item>
+    <item msgid="1894769703213894011">"三十\n八"</item>
+    <item msgid="5638820345598572399">"三十\n九"</item>
+    <item msgid="8838304023017895439">"四十"</item>
+    <item msgid="1834742948932559597">"四十\n一"</item>
+    <item msgid="6573707308847773944">"四十\n二"</item>
+    <item msgid="2450149950652678001">"四十\n三"</item>
+    <item msgid="2874667401318178036">"四十\n四"</item>
+    <item msgid="3391101532763048862">"四十\n五"</item>
+    <item msgid="1671489330863254362">"四十\n六"</item>
+    <item msgid="5916017359554531038">"四十\n七"</item>
+    <item msgid="8205413177993059967">"四十\n八"</item>
+    <item msgid="6607867415142171302">"四十\n九"</item>
+    <item msgid="8358850748472089162">"五十"</item>
+    <item msgid="3551313125255080234">"五十\n一"</item>
+    <item msgid="1559678130725716542">"五十\n二"</item>
+    <item msgid="431441994725492377">"五十\n三"</item>
+    <item msgid="6345774640539623024">"五十\n四"</item>
+    <item msgid="8018192990793931120">"五十\n五"</item>
+    <item msgid="6187650843754604534">"五十\n六"</item>
+    <item msgid="8727240174015993259">"五十\n七"</item>
+    <item msgid="848339003778952950">"五十\n八"</item>
+    <item msgid="5798985802835423618">"五十\n九"</item>
+  </string-array>
 </resources>

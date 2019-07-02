@@ -16,6 +16,31 @@
 
 package com.android.internal.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED;
+import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import static org.junit.Assert.fail;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -25,11 +50,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.media.Ringtone;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.support.test.runner.AndroidJUnit4;
-
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.view.Window;
@@ -37,9 +64,12 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.Toast;
+
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.R;
-import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkObjectProvider;
+import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,31 +78,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 
-import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED;
-import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-
-import static org.junit.Assert.fail;
-import static org.mockito.AdditionalMatchers.aryEq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutControllerTest {
@@ -102,6 +113,9 @@ public class AccessibilityShortcutControllerTest {
     private @Mock Vibrator mVibrator;
     private @Mock ApplicationInfo mApplicationInfo;
     private @Mock PackageManager mPackageManager;
+    private @Mock TextToSpeech mTextToSpeech;
+    private @Mock Voice mVoice;
+    private @Mock Ringtone mRingtone;
 
     private MockContentResolver mContentResolver;
     private WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
@@ -137,6 +151,9 @@ public class AccessibilityShortcutControllerTest {
         when(mFrameworkObjectProvider.makeToastFromText(eq(mContext), anyObject(), anyInt()))
                 .thenReturn(mToast);
         when(mFrameworkObjectProvider.getSystemUiContext()).thenReturn(mContext);
+        when(mFrameworkObjectProvider.getTextToSpeech(eq(mContext), any()))
+                .thenReturn(mTextToSpeech);
+        when(mFrameworkObjectProvider.getRingtone(eq(mContext), any())).thenReturn(mRingtone);
 
         when(mResources.getString(anyInt())).thenReturn("Howdy %s");
         when(mResources.getIntArray(anyInt())).thenReturn(VIBRATOR_PATTERN_INT);
@@ -172,6 +189,8 @@ public class AccessibilityShortcutControllerTest {
             throw new RuntimeException("Unable to set mWindowAttributes", e);
         }
         when(mAlertDialog.getWindow()).thenReturn(window);
+
+        when(mTextToSpeech.getVoice()).thenReturn(mVoice);
     }
 
     @After
@@ -308,8 +327,10 @@ public class AccessibilityShortcutControllerTest {
                 mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0));
         verify(mResources).getString(R.string.accessibility_shortcut_toogle_warning);
         verify(mAlertDialog).show();
-        verify(mAccessibilityManagerService).getInstalledAccessibilityServiceList(anyInt());
+        verify(mAccessibilityManagerService, atLeastOnce()).getInstalledAccessibilityServiceList(
+                anyInt());
         verify(mAccessibilityManagerService, times(0)).performAccessibilityShortcut();
+        verify(mFrameworkObjectProvider, times(0)).getTextToSpeech(any(), any());
     }
 
     @Test
@@ -434,6 +455,49 @@ public class AccessibilityShortcutControllerTest {
         verify(mAccessibilityManagerService).performAccessibilityShortcut();
     }
 
+    @Test
+    public void testOnAccessibilityShortcut_showsWarningDialog_shouldTtsSpokenPrompt() {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureValidShortcutService();
+        configureTtsSpokenPromptEnabled();
+        configureHandlerCallbackInvocation();
+        AccessibilityShortcutController accessibilityShortcutController = getController();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0);
+        accessibilityShortcutController.performAccessibilityShortcut();
+
+        verify(mAlertDialog).show();
+        ArgumentCaptor<TextToSpeech.OnInitListener> onInitCap = ArgumentCaptor.forClass(
+                TextToSpeech.OnInitListener.class);
+        verify(mFrameworkObjectProvider).getTextToSpeech(any(), onInitCap.capture());
+        onInitCap.getValue().onInit(TextToSpeech.SUCCESS);
+        verify(mTextToSpeech).speak(any(), eq(TextToSpeech.QUEUE_FLUSH), any(), any());
+        ArgumentCaptor<DialogInterface.OnDismissListener> onDismissCap = ArgumentCaptor.forClass(
+                DialogInterface.OnDismissListener.class);
+        verify(mAlertDialog).setOnDismissListener(onDismissCap.capture());
+        onDismissCap.getValue().onDismiss(mAlertDialog);
+        verify(mTextToSpeech).shutdown();
+        verify(mRingtone, times(0)).play();
+    }
+
+    @Test
+    public void testOnAccessibilityShortcut_showsWarningDialog_ttsInitFail_noSpokenPrompt() {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureValidShortcutService();
+        configureTtsSpokenPromptEnabled();
+        configureHandlerCallbackInvocation();
+        AccessibilityShortcutController accessibilityShortcutController = getController();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0);
+        accessibilityShortcutController.performAccessibilityShortcut();
+
+        verify(mAlertDialog).show();
+        ArgumentCaptor<TextToSpeech.OnInitListener> onInitCap = ArgumentCaptor.forClass(
+                TextToSpeech.OnInitListener.class);
+        verify(mFrameworkObjectProvider).getTextToSpeech(any(), onInitCap.capture());
+        onInitCap.getValue().onInit(TextToSpeech.ERROR);
+        verify(mTextToSpeech, times(0)).speak(any(), anyInt(), any(), any());
+        verify(mRingtone).play();
+    }
+
     private void configureNoShortcutService() {
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "");
     }
@@ -479,6 +543,19 @@ public class AccessibilityShortcutControllerTest {
         Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_ENABLED, enabled ? 1 : 0);
         Settings.Secure.putInt(
                 mContentResolver, ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, lockscreen ? 1 : 0);
+    }
+
+    private void configureTtsSpokenPromptEnabled() {
+        mServiceInfo.flags |= AccessibilityServiceInfo
+                .FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK;
+    }
+
+    private void configureHandlerCallbackInvocation() {
+        doAnswer((InvocationOnMock invocation) -> {
+            Message m = (Message) invocation.getArguments()[0];
+            m.getCallback().run();
+            return true;
+        }).when(mHandler).sendMessageAtTime(any(), anyLong());
     }
 
     private AccessibilityShortcutController getController() {

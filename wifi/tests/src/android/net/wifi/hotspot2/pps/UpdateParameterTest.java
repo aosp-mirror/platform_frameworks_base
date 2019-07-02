@@ -16,21 +16,20 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.net.wifi.FakeKeys;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.util.Base64;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.pps.UpdateParameter}.
@@ -59,6 +58,7 @@ public class UpdateParameterTest {
                 Base64.encodeToString("password".getBytes(), Base64.DEFAULT));
         updateParam.setTrustRootCertUrl("trust.cert.com");
         updateParam.setTrustRootCertSha256Fingerprint(new byte[32]);
+        updateParam.setCaCertificate(FakeKeys.CA_CERT0);
         return updateParam;
     }
 
@@ -74,6 +74,7 @@ public class UpdateParameterTest {
         parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
         UpdateParameter paramFromRead = UpdateParameter.CREATOR.createFromParcel(parcel);
         assertTrue(paramFromRead.equals(paramToWrite));
+        assertEquals(paramToWrite.hashCode(), paramFromRead.hashCode());
     }
 
     /**

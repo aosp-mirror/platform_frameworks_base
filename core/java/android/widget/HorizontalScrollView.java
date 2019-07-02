@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -79,10 +81,24 @@ public class HorizontalScrollView extends FrameLayout {
     private final Rect mTempRect = new Rect();
     @UnsupportedAppUsage
     private OverScroller mScroller;
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowLeft;
-    @UnsupportedAppUsage
-    private EdgeEffect mEdgeGlowRight;
+    /**
+     * Tracks the state of the left edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
+     */
+    @NonNull
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124053130)
+    private EdgeEffect mEdgeGlowLeft = new EdgeEffect(getContext());
+
+    /**
+     * Tracks the state of the bottom edge glow.
+     *
+     * Even though this field is practically final, we cannot make it final because there are apps
+     * setting it via reflection and they need to keep working until they target Q.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124052619)
+    private EdgeEffect mEdgeGlowRight = new EdgeEffect(getContext());
 
     /**
      * Position of the last motion event.
@@ -174,6 +190,8 @@ public class HorizontalScrollView extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, android.R.styleable.HorizontalScrollView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, android.R.styleable.HorizontalScrollView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         setFillViewport(a.getBoolean(android.R.styleable.HorizontalScrollView_fillViewport, false));
 
@@ -212,6 +230,74 @@ public class HorizontalScrollView extends FrameLayout {
         }
 
         return 1.0f;
+    }
+
+    /**
+     * Sets the edge effect color for both left and right edge effects.
+     *
+     * @param color The color for the edge effects.
+     * @see #setLeftEdgeEffectColor(int)
+     * @see #setRightEdgeEffectColor(int)
+     * @see #getLeftEdgeEffectColor()
+     * @see #getRightEdgeEffectColor()
+     */
+    public void setEdgeEffectColor(@ColorInt int color) {
+        setLeftEdgeEffectColor(color);
+        setRightEdgeEffectColor(color);
+    }
+
+    /**
+     * Sets the right edge effect color.
+     *
+     * @param color The color for the right edge effect.
+     * @see #setLeftEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getLeftEdgeEffectColor()
+     * @see #getRightEdgeEffectColor()
+     */
+    public void setRightEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowRight.setColor(color);
+    }
+
+    /**
+     * Sets the left edge effect color.
+     *
+     * @param color The color for the left edge effect.
+     * @see #setRightEdgeEffectColor(int)
+     * @see #setEdgeEffectColor(int)
+     * @see #getLeftEdgeEffectColor()
+     * @see #getRightEdgeEffectColor()
+     */
+    public void setLeftEdgeEffectColor(@ColorInt int color) {
+        mEdgeGlowLeft.setColor(color);
+    }
+
+    /**
+     * Returns the left edge effect color.
+     *
+     * @return The left edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setLeftEdgeEffectColor(int)
+     * @see #setRightEdgeEffectColor(int)
+     * @see #getRightEdgeEffectColor()
+     */
+    @ColorInt
+    public int getLeftEdgeEffectColor() {
+        return mEdgeGlowLeft.getColor();
+    }
+
+    /**
+     * Returns the right edge effect color.
+     *
+     * @return The right edge effect color.
+     * @see #setEdgeEffectColor(int)
+     * @see #setLeftEdgeEffectColor(int)
+     * @see #setRightEdgeEffectColor(int)
+     * @see #getLeftEdgeEffectColor()
+     */
+    @ColorInt
+    public int getRightEdgeEffectColor() {
+        return mEdgeGlowRight.getColor();
     }
 
     /**
@@ -293,6 +379,7 @@ public class HorizontalScrollView extends FrameLayout {
      *
      * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
      */
+    @InspectableProperty
     public boolean isFillViewport() {
         return mFillViewport;
     }
@@ -663,7 +750,7 @@ public class HorizontalScrollView extends FrameLayout {
                                 mEdgeGlowLeft.onRelease();
                             }
                         }
-                        if (mEdgeGlowLeft != null
+                        if (shouldDisplayEdgeEffects()
                                 && (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
                             postInvalidateOnAnimation();
                         }
@@ -691,7 +778,7 @@ public class HorizontalScrollView extends FrameLayout {
                     mIsBeingDragged = false;
                     recycleVelocityTracker();
 
-                    if (mEdgeGlowLeft != null) {
+                    if (shouldDisplayEdgeEffects()) {
                         mEdgeGlowLeft.onRelease();
                         mEdgeGlowRight.onRelease();
                     }
@@ -706,7 +793,7 @@ public class HorizontalScrollView extends FrameLayout {
                     mIsBeingDragged = false;
                     recycleVelocityTracker();
 
-                    if (mEdgeGlowLeft != null) {
+                    if (shouldDisplayEdgeEffects()) {
                         mEdgeGlowLeft.onRelease();
                         mEdgeGlowRight.onRelease();
                     }
@@ -1648,26 +1735,15 @@ public class HorizontalScrollView extends FrameLayout {
         }
     }
 
-    @Override
-    public void setOverScrollMode(int mode) {
-        if (mode != OVER_SCROLL_NEVER) {
-            if (mEdgeGlowLeft == null) {
-                Context context = getContext();
-                mEdgeGlowLeft = new EdgeEffect(context);
-                mEdgeGlowRight = new EdgeEffect(context);
-            }
-        } else {
-            mEdgeGlowLeft = null;
-            mEdgeGlowRight = null;
-        }
-        super.setOverScrollMode(mode);
+    private boolean shouldDisplayEdgeEffects() {
+        return getOverScrollMode() != OVER_SCROLL_NEVER;
     }
 
     @SuppressWarnings({"SuspiciousNameCombination"})
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        if (mEdgeGlowLeft != null) {
+        if (shouldDisplayEdgeEffects()) {
             final int scrollX = mScrollX;
             if (!mEdgeGlowLeft.isFinished()) {
                 final int restoreCount = canvas.save();
@@ -1768,7 +1844,7 @@ public class HorizontalScrollView extends FrameLayout {
                     + "}";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

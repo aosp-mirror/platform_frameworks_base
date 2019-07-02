@@ -36,8 +36,6 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @param mode The porter-duff mode that is applied
      *
      * @see Color
-     * @see #setColor(int)
-     * @see #setMode(android.graphics.PorterDuff.Mode)
      */
     public PorterDuffColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         mColor = color;
@@ -49,7 +47,6 @@ public class PorterDuffColorFilter extends ColorFilter {
      * is applied.
      *
      * @see Color
-     * @see #setColor(int)
      *
      * @hide
      */
@@ -60,30 +57,10 @@ public class PorterDuffColorFilter extends ColorFilter {
     }
 
     /**
-     * Specifies the color to tint the source pixels with when this color
-     * filter is applied.
-     *
-     * @param color An ARGB {@link Color color}
-     *
-     * @see Color
-     * @see #getColor()
-     * @see #getMode()
-     *
-     * @hide
-     */
-    public void setColor(@ColorInt int color) {
-        if (mColor != color) {
-            mColor = color;
-            discardNativeInstance();
-        }
-    }
-
-    /**
      * Returns the Porter-Duff mode used to composite this color filter's
      * color with the source pixel when this filter is applied.
      *
      * @see PorterDuff
-     * @see #setMode(android.graphics.PorterDuff.Mode)
      *
      * @hide
      */
@@ -92,27 +69,9 @@ public class PorterDuffColorFilter extends ColorFilter {
         return mMode;
     }
 
-    /**
-     * Specifies the Porter-Duff mode to use when compositing this color
-     * filter's color with the source pixel at draw time.
-     *
-     * @see PorterDuff
-     * @see #getMode()
-     * @see #getColor()
-     *
-     * @hide
-     */
-    public void setMode(@NonNull PorterDuff.Mode mode) {
-        if (mode == null) {
-            throw new IllegalArgumentException("mode must be non-null");
-        }
-        mMode = mode;
-        discardNativeInstance();
-    }
-
     @Override
     long createNativeInstance() {
-        return native_CreatePorterDuffFilter(mColor, mMode.nativeInt);
+        return native_CreateBlendModeFilter(mColor, mMode.nativeInt);
     }
 
     @Override
@@ -132,5 +91,5 @@ public class PorterDuffColorFilter extends ColorFilter {
         return 31 *  mMode.hashCode() + mColor;
     }
 
-    private static native long native_CreatePorterDuffFilter(int srcColor, int porterDuffMode);
+    private static native long native_CreateBlendModeFilter(int srcColor, int blendmode);
 }

@@ -79,6 +79,7 @@
             android:singleUser="true" android:exported="true" />
         <receiver android:name="TrackTimeReceiver" />
         <receiver android:name="AlarmSpamReceiver" />
+        <receiver android:name="SlowReceiver" />
         <activity android:name="DisableScreenshotsActivity"
                 android:label="DisableScreenshots"
                 android:theme="@style/DisableScreenshots">

@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Dependency.BG_HANDLER_NAME;
+
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -47,7 +49,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 
@@ -55,6 +56,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class SecurityControllerImpl extends CurrentUserTracker implements SecurityController {
 
     private static final String TAG = "SecurityController";
@@ -78,6 +86,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final Handler mBgHandler;
 
     @GuardedBy("mCallbacks")
     private final ArrayList<SecurityControllerCallback> mCallbacks = new ArrayList<>();
@@ -90,13 +99,18 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     // Needs to be cached here since the query has to be asynchronous
     private ArrayMap<Integer, Boolean> mHasCACerts = new ArrayMap<Integer, Boolean>();
 
-    public SecurityControllerImpl(Context context) {
-        this(context, null);
+    /**
+     */
+    @Inject
+    public SecurityControllerImpl(Context context, @Named(BG_HANDLER_NAME) Handler bgHandler) {
+        this(context, bgHandler, null);
     }
 
-    public SecurityControllerImpl(Context context, SecurityControllerCallback callback) {
+    public SecurityControllerImpl(Context context, Handler bgHandler,
+            SecurityControllerCallback callback) {
         super(context);
         mContext = context;
+        mBgHandler = bgHandler;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
@@ -112,7 +126,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null,
-                new Handler(Dependency.get(Dependency.BG_LOOPER)));
+                bgHandler);
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
@@ -403,8 +417,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
                 boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
                 return new Pair<Integer, Boolean>(userId[0], hasCACerts);
             } catch (RemoteException | InterruptedException | AssertionError e) {
-                Log.i(TAG, e.getMessage());
-                new Handler(Dependency.get(Dependency.BG_LOOPER)).postDelayed(
+                Log.i(TAG, "failed to get CA certs", e);
+                mBgHandler.postDelayed(
                         () -> new CACertLoader().execute(userId[0]),
                         CA_CERT_LOADING_RETRY_TIME_IN_MS);
                 return new Pair<Integer, Boolean>(userId[0], null);

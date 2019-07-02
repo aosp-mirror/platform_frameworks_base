@@ -3,6 +3,7 @@ package com.android.server.locksettings.recoverablekeystore;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.security.keystore.recovery.TrustedRootCertificates;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -26,30 +27,30 @@ public class TestOnlyInsecureCertificateHelperTest {
     @Test
     public void testDoesCredentailSupportInsecureMode_forNonWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345")).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345".getBytes())).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234")).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234".getBytes())).isFalse();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_forWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isTrue();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isTrue();
 
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12")).isTrue();
+                (TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12").getBytes())).isTrue();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_Pattern() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
     }
 
     @Test
@@ -64,10 +65,10 @@ public class TestOnlyInsecureCertificateHelperTest {
 
     @Test
     public void testKeepOnlyWhitelistedInsecureKeys_emptyKeysList() throws Exception {
-        Map<String, SecretKey> rawKeys = new HashMap<>();
-        Map<String, SecretKey> expectedResult = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> rawKeys = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> expectedResult = new HashMap<>();
 
-        Map<String, SecretKey> filteredKeys =
+        Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
         assertThat(filteredKeys.entrySet()).containsAllIn(rawKeys.entrySet());
@@ -75,13 +76,13 @@ public class TestOnlyInsecureCertificateHelperTest {
 
     @Test
     public void testKeepOnlyWhitelistedInsecureKeys_singleNonWhitelistedKey() throws Exception {
-        Map<String, SecretKey> rawKeys = new HashMap<>();
-        Map<String, SecretKey> expectedResult = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> rawKeys = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> expectedResult = new HashMap<>();
 
         String alias = "secureAlias";
-        rawKeys.put(alias, TestData.generateKey());
+        rawKeys.put(alias, Pair.create(TestData.generateKey(), /*metadata=*/ null));
 
-        Map<String, SecretKey> filteredKeys =
+        Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
         assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
@@ -89,14 +90,14 @@ public class TestOnlyInsecureCertificateHelperTest {
 
     @Test
     public void testKeepOnlyWhitelistedInsecureKeys_singleWhitelistedKey() throws Exception {
-        Map<String, SecretKey> rawKeys = new HashMap<>();
-        Map<String, SecretKey> expectedResult = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> rawKeys = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> expectedResult = new HashMap<>();
 
         String alias = TrustedRootCertificates.INSECURE_KEY_ALIAS_PREFIX;
-        rawKeys.put(alias, TestData.generateKey());
+        rawKeys.put(alias, Pair.create(TestData.generateKey(), /*metadata=*/ null));
         expectedResult.put(alias, rawKeys.get(alias));
 
-        Map<String, SecretKey> filteredKeys =
+        Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
         assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
@@ -104,21 +105,21 @@ public class TestOnlyInsecureCertificateHelperTest {
 
     @Test
     public void testKeepOnlyWhitelistedInsecureKeys() throws Exception {
-        Map<String, SecretKey> rawKeys = new HashMap<>();
-        Map<String, SecretKey> expectedResult = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> rawKeys = new HashMap<>();
+        Map<String, Pair<SecretKey, byte[]>> expectedResult = new HashMap<>();
 
         String alias = "SECURE_ALIAS" + TrustedRootCertificates.INSECURE_KEY_ALIAS_PREFIX;
-        rawKeys.put(alias, TestData.generateKey());
+        rawKeys.put(alias, Pair.create(TestData.generateKey(), /*metadata=*/ null));
 
         alias = TrustedRootCertificates.INSECURE_KEY_ALIAS_PREFIX + "1";
-        rawKeys.put(alias, TestData.generateKey());
+        rawKeys.put(alias, Pair.create(TestData.generateKey(), /*metadata=*/ null));
         expectedResult.put(alias, rawKeys.get(alias));
 
         alias = TrustedRootCertificates.INSECURE_KEY_ALIAS_PREFIX + "2";
-        rawKeys.put(alias, TestData.generateKey());
+        rawKeys.put(alias, Pair.create(TestData.generateKey(), /*metadata=*/ null));
         expectedResult.put(alias, rawKeys.get(alias));
 
-        Map<String, SecretKey> filteredKeys =
+        Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
         assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());

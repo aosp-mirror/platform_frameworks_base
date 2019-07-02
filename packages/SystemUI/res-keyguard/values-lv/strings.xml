@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Piesk., lai ievadītu paroli"</font>"."</string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Ievadiet paroli, lai atbloķētu."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Ievadiet PIN kodu, lai atbloķētu."</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Ievadiet savu PIN kodu"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Ievadiet savu kombināciju"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Ievadiet paroli"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kods nav pareizs."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nederīga karte."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Akumulators uzlādēts"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Notiek uzlāde"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Notiek ātrā uzlāde"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Notiek lēnā uzlāde"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Pilnībā uzlādēts"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek bezvadu uzlāde"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek uzlāde"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek ātrā uzlāde"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek lēnā uzlāde"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Pievienojiet uzlādes ierīci."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Lai atbloķētu, nospiediet izvēlnes ikonu."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Tīkls ir bloķēts."</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM karte ir bloķēta ar PUK kodu."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Notiek SIM kartes atbloķēšana..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN apgabals"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Ierīces parole"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM kartes PIN apgabals"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM kartes PUK apgabals"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Nākamā signāla atskaņošanas laiks: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Kļūdas dēļ nevar atspējot eSIM karti."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Ievadīšanas taustiņš"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Aizmirsu kombināciju"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Nepareiza kombinācija."</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Nepareiza parole."</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Nepareiza kombinācija"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Nepareiza parole"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nepareizs PIN kods."</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="zero">Mēģiniet vēlreiz pēc <xliff:g id="NUMBER">%d</xliff:g> sekundēm.</item>
@@ -142,15 +147,97 @@
       <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet paroli.</item>
       <item quantity="other">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet paroli.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nav atpazīts"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="zero">Ievadiet SIM kartes PIN kodu. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
-      <item quantity="one">Ievadiet SIM kartes PIN kodu. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
-      <item quantity="other">Ievadiet SIM kartes PIN kodu. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nav atpazīts"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nav atpazīts"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="zero">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+      <item quantity="one">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
+      <item quantity="other">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="zero">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
       <item quantity="one">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
       <item quantity="other">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="zero">"<annotation name="color">"Laiks:"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Laiks:"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Laiks:"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Divpadsmit"</item>
+    <item msgid="7389464214252023751">"Viens"</item>
+    <item msgid="8803180377002008046">"Divi"</item>
+    <item msgid="8614897059944644719">"Trīs"</item>
+    <item msgid="2293058674782619556">"Četri"</item>
+    <item msgid="4815402358455041664">"Pieci"</item>
+    <item msgid="3325754778509665687">"Seši"</item>
+    <item msgid="5805551341866280575">"Septiņi"</item>
+    <item msgid="203334816668238610">"Astoņi"</item>
+    <item msgid="4828052671464488923">"Deviņi"</item>
+    <item msgid="2233497913571137419">"Desmit"</item>
+    <item msgid="5621554266768657830">"Vienpadsmit"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Nulle, nulle"</item>
+    <item msgid="8837126587669001578">"Viena"</item>
+    <item msgid="4294343372940455660">"Divas"</item>
+    <item msgid="7129166637707421536">"Trīs"</item>
+    <item msgid="7579404865008788673">"Četras"</item>
+    <item msgid="3873924689207380586">"Piecas"</item>
+    <item msgid="4849565597850069377">"Sešas"</item>
+    <item msgid="4404219424523572364">"Septiņas"</item>
+    <item msgid="8740481214764087329">"Astoņas"</item>
+    <item msgid="1713216865806811237">"Deviņas"</item>
+    <item msgid="3508406095411245038">"Desmit"</item>
+    <item msgid="7161996337755311711">"Vienpadsmit"</item>
+    <item msgid="4044549963329624197">"Divpadsmit"</item>
+    <item msgid="333373157917379088">"Trīspadsmit"</item>
+    <item msgid="2631202907124819385">"Četrpadsmit"</item>
+    <item msgid="6472396076858033453">"Piecpadsmit"</item>
+    <item msgid="8656981856181581643">"Sešdpadsmit"</item>
+    <item msgid="7289026608562030619">"Septiņpadsmit"</item>
+    <item msgid="3881477602692646573">"Astoņpadsmit"</item>
+    <item msgid="3358129827772984226">"Deviņpadsmit"</item>
+    <item msgid="3308575407402865807">"Divdesmit"</item>
+    <item msgid="5346560955382229629">"Divdesmit\nviena"</item>
+    <item msgid="226750304761473436">"Divdesmit\ndivas"</item>
+    <item msgid="616811325336838734">"Divdesmit\ntrīs"</item>
+    <item msgid="616346116869053440">"Divdesmit\nčetras"</item>
+    <item msgid="4642996410384042830">"Divdesmit\npiecas"</item>
+    <item msgid="7506092849993571465">"Divdesmit\nsešas"</item>
+    <item msgid="1915078191101042031">"Divdesmit\nseptiņas"</item>
+    <item msgid="4292378641900520252">"Divdesmit\nastoņas"</item>
+    <item msgid="5339513901773103696">"Divdesmit\ndeviņas"</item>
+    <item msgid="3574673250891657607">"Trīsdesmit"</item>
+    <item msgid="5796923836589110940">"Trīsdesmit\nviena"</item>
+    <item msgid="5859323597571702052">"Trīsdesmit\ndivas"</item>
+    <item msgid="5133326723148876507">"Trīsdesmit\ntrīs"</item>
+    <item msgid="2693999494655663096">"Trīsdesmit\nčetras"</item>
+    <item msgid="3316754944962836197">"Trīsdesmit\npiecas"</item>
+    <item msgid="816891008836796723">"Trīsdesmit\nsešas"</item>
+    <item msgid="9158890488666520078">"Trīsdesmit\nseptiņas"</item>
+    <item msgid="1894769703213894011">"Trīsdesmit\nastoņas"</item>
+    <item msgid="5638820345598572399">"Trīsdesmit\ndeviņas"</item>
+    <item msgid="8838304023017895439">"Četrdesmit"</item>
+    <item msgid="1834742948932559597">"Četrdesmit\nviena"</item>
+    <item msgid="6573707308847773944">"Četrdesmit\ndivas"</item>
+    <item msgid="2450149950652678001">"Četrdesmit\ntrīs"</item>
+    <item msgid="2874667401318178036">"Četrdesmit\nčetras"</item>
+    <item msgid="3391101532763048862">"Četrdesmit\npiecas"</item>
+    <item msgid="1671489330863254362">"Četrdesmit\nsešas"</item>
+    <item msgid="5916017359554531038">"Četrdesmit\nseptiņas"</item>
+    <item msgid="8205413177993059967">"Četrdesmit\nastoņas"</item>
+    <item msgid="6607867415142171302">"Četrdesmit\ndeviņas"</item>
+    <item msgid="8358850748472089162">"Piecdesmit"</item>
+    <item msgid="3551313125255080234">"Piecdesmit\nviena"</item>
+    <item msgid="1559678130725716542">"Piecdesmit\ndivas"</item>
+    <item msgid="431441994725492377">"Piecdesmit\ntrīs"</item>
+    <item msgid="6345774640539623024">"Piecdesmit\nčetras"</item>
+    <item msgid="8018192990793931120">"Piecdesmit\npiecas"</item>
+    <item msgid="6187650843754604534">"Piecdesmit\nsešas"</item>
+    <item msgid="8727240174015993259">"Piecdesmit\nseptiņas"</item>
+    <item msgid="848339003778952950">"Piecdesmit\nastoņas"</item>
+    <item msgid="5798985802835423618">"Piecdesmit\ndeviņas"</item>
+  </string-array>
 </resources>

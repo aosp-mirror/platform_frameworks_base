@@ -17,13 +17,13 @@
 package android.graphics;
 
 import android.os.ParcelFileDescriptor;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-
 
 public class BitmapFactoryTest extends TestCase {
 

@@ -108,7 +108,7 @@ final class EntityConfidence implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<EntityConfidence> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<EntityConfidence> CREATOR =
             new Parcelable.Creator<EntityConfidence>() {
                 @Override
                 public EntityConfidence createFromParcel(Parcel in) {

@@ -60,7 +60,7 @@ void AlarmMonitor::add(sp<const InternalAlarm> alarm) {
         ALOGW("Asked to add a 0-time alarm.");
         return;
     }
-    // TODO: Ensure that refractory period is respected.
+    // TODO(b/110563466): Ensure that refractory period is respected.
     VLOG("Adding alarm with time %u", alarm->timestampSec);
     mPq.push(alarm);
     if (mRegisteredAlarmTimeSec < 1 ||

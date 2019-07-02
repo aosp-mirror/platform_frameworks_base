@@ -1,0 +1,4 @@
+<ports>
+    <port display="0" input="USB1" />
+    <port display="1" input="USB2" />
+</ports>

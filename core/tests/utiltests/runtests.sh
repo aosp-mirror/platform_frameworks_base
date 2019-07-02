@@ -21,4 +21,4 @@ adb wait-for-device
 
 adb install -r -g "$OUT/data/app/FrameworksUtilTests/FrameworksUtilTests.apk"
 
-adb shell am instrument -w "$@" 'com.android.frameworks.utiltests/android.support.test.runner.AndroidJUnitRunner'
+adb shell am instrument -w "$@" 'com.android.frameworks.utiltests/androidx.test.runner.AndroidJUnitRunner'

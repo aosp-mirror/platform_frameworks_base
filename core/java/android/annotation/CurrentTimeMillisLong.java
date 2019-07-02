@@ -25,12 +25,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * @memberDoc Value is a non-negative timestamp in the
- *            {@link System#currentTimeMillis()} time base.
- * @paramDoc Value is a non-negative timestamp in the
- *           {@link System#currentTimeMillis()} time base.
- * @returnDoc Value is a non-negative timestamp in the
- *            {@link System#currentTimeMillis()} time base.
+ * @memberDoc Value is a non-negative timestamp measured as the number of
+ *            milliseconds since 1970-01-01T00:00:00Z.
+ * @paramDoc Value is a non-negative timestamp measured as the number of
+ *            milliseconds since 1970-01-01T00:00:00Z.
+ * @returnDoc Value is a non-negative timestamp measured as the number of
+ *            milliseconds since 1970-01-01T00:00:00Z.
  * @hide
  */
 @Retention(SOURCE)

@@ -95,7 +95,7 @@ public final class Messenger implements Parcelable {
         out.writeStrongBinder(mTarget.asBinder());
     }
 
-    public static final Parcelable.Creator<Messenger> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Messenger> CREATOR
             = new Parcelable.Creator<Messenger>() {
         public Messenger createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();

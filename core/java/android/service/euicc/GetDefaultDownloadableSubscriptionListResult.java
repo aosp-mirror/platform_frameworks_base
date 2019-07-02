@@ -32,7 +32,7 @@ import java.util.List;
 @SystemApi
 public final class GetDefaultDownloadableSubscriptionListResult implements Parcelable {
 
-    public static final Creator<GetDefaultDownloadableSubscriptionListResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<GetDefaultDownloadableSubscriptionListResult> CREATOR =
             new Creator<GetDefaultDownloadableSubscriptionListResult>() {
         @Override
         public GetDefaultDownloadableSubscriptionListResult createFromParcel(Parcel in) {

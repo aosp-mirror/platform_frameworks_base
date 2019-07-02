@@ -350,7 +350,7 @@ public class WifiP2pServiceResponse implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<WifiP2pServiceResponse> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiP2pServiceResponse> CREATOR =
         new Creator<WifiP2pServiceResponse>() {
             public WifiP2pServiceResponse createFromParcel(Parcel in) {
 

@@ -16,9 +16,6 @@
 
 package com.android.server.display;
 
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.IndentingPrintWriter;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +32,12 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -581,7 +582,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         private final int mHeight;
         private final float mRefreshRate;
         private final int mFlags;
-        private final String mAddress;
+        private final DisplayAddress mAddress;
         private final Display.Mode mMode;
 
         private Surface mSurface;
@@ -596,7 +597,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mHeight = height;
             mRefreshRate = refreshRate;
             mFlags = flags;
-            mAddress = address;
+            mAddress = DisplayAddress.fromMacAddress(address);
             mSurface = surface;
             mMode = createMode(width, height, refreshRate);
         }

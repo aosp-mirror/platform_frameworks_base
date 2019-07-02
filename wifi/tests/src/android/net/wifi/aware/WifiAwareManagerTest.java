@@ -16,8 +16,11 @@
 
 package android.net.wifi.aware;
 
+import static android.net.wifi.aware.WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,13 +34,15 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.MacAddress;
 import android.net.wifi.RttManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import libcore.util.HexEncoding;
 
@@ -50,6 +55,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.Inet6Address;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -105,7 +112,7 @@ public class WifiAwareManagerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
         when(mockPackageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(
                 mockApplicationInfo);
         when(mockContext.getOpPackageName()).thenReturn("XXX");
@@ -569,7 +576,7 @@ public class WifiAwareManagerTest {
                 equalTo(configRequest.mClusterLow));
         collector.checkThat("mMasterPreference", 0,
                 equalTo(configRequest.mMasterPreference));
-        collector.checkThat("mSupport5gBand", false, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mSupport5gBand", true, equalTo(configRequest.mSupport5gBand));
         collector.checkThat("mDiscoveryWindowInterval.length", 2,
                 equalTo(configRequest.mDiscoveryWindowInterval.length));
         collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
@@ -702,6 +709,7 @@ public class WifiAwareManagerTest {
         ConfigRequest rereadConfigRequest = ConfigRequest.CREATOR.createFromParcel(parcelR);
 
         assertEquals(configRequest, rereadConfigRequest);
+        assertEquals(configRequest.hashCode(), rereadConfigRequest.hashCode());
     }
 
     /*
@@ -794,6 +802,7 @@ public class WifiAwareManagerTest {
         SubscribeConfig rereadSubscribeConfig = SubscribeConfig.CREATOR.createFromParcel(parcelR);
 
         assertEquals(subscribeConfig, rereadSubscribeConfig);
+        assertEquals(subscribeConfig.hashCode(), rereadSubscribeConfig.hashCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -885,6 +894,7 @@ public class WifiAwareManagerTest {
         PublishConfig rereadPublishConfig = PublishConfig.CREATOR.createFromParcel(parcelR);
 
         assertEquals(publishConfig, rereadPublishConfig);
+        assertEquals(publishConfig.hashCode(), rereadPublishConfig.hashCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -909,11 +919,14 @@ public class WifiAwareManagerTest {
         final int clientId = 4565;
         final int sessionId = 123;
         final PeerHandle peerHandle = new PeerHandle(123412);
-        final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
         final byte[] pmk = PMK_VALID;
         final String passphrase = PASSPHRASE_VALID;
+        final int port = 5;
+        final int transportProtocol = 10;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
+
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
 
         ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
                 WifiAwareSession.class);
@@ -948,34 +961,72 @@ public class WifiAwareManagerTest {
         WifiAwareNetworkSpecifier ns =
                 (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierOpen(
                         peerHandle);
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(
+                publishSession.getValue(), peerHandle).build();
 
         // validate format
-        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(ns.role));
         collector.checkThat("client_id", clientId, equalTo(ns.clientId));
         collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
         collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
 
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(nsb.role));
+        collector.checkThat("client_id", clientId, equalTo(nsb.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(nsb.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(nsb.peerId));
+        collector.checkThat("port", 0, equalTo(nsb.port));
+        collector.checkThat("transportProtocol", -1, equalTo(nsb.transportProtocol));
+
         // (4) request an encrypted (PMK) network specifier from the session
         ns = (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierPmk(
                 peerHandle, pmk);
+        nsb = new WifiAwareNetworkSpecifier.Builder(publishSession.getValue(), peerHandle).setPmk(
+                pmk).setPort(port).setTransportProtocol(transportProtocol).build();
 
         // validate format
-        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(ns.role));
         collector.checkThat("client_id", clientId, equalTo(ns.clientId));
         collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
         collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
         collector.checkThat("pmk", pmk , equalTo(ns.pmk));
 
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(nsb.role));
+        collector.checkThat("client_id", clientId, equalTo(nsb.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(nsb.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(nsb.peerId));
+        collector.checkThat("pmk", pmk , equalTo(nsb.pmk));
+        collector.checkThat("port", port, equalTo(nsb.port));
+        collector.checkThat("transportProtocol", transportProtocol, equalTo(nsb.transportProtocol));
+
         // (5) request an encrypted (Passphrase) network specifier from the session
-        ns = (WifiAwareNetworkSpecifier) publishSession.getValue().createNetworkSpecifierPassphrase(
-                peerHandle, passphrase);
+        ns =
+                (WifiAwareNetworkSpecifier) publishSession.getValue()
+                        .createNetworkSpecifierPassphrase(
+                        peerHandle, passphrase);
+        nsb = new WifiAwareNetworkSpecifier.Builder(publishSession.getValue(),
+                peerHandle).setPskPassphrase(passphrase).setPort(port).setTransportProtocol(
+                transportProtocol).build();
 
         // validate format
-        collector.checkThat("role", role, equalTo(ns.role));
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(ns.role));
         collector.checkThat("client_id", clientId, equalTo(ns.clientId));
         collector.checkThat("session_id", sessionId, equalTo(ns.sessionId));
         collector.checkThat("peer_id", peerHandle.peerId, equalTo(ns.peerId));
         collector.checkThat("passphrase", passphrase, equalTo(ns.passphrase));
+
+        collector.checkThat("role", WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER,
+                equalTo(nsb.role));
+        collector.checkThat("client_id", clientId, equalTo(nsb.clientId));
+        collector.checkThat("session_id", sessionId, equalTo(nsb.sessionId));
+        collector.checkThat("peer_id", peerHandle.peerId, equalTo(nsb.peerId));
+        collector.checkThat("passphrase", passphrase, equalTo(nsb.passphrase));
+        collector.checkThat("port", port, equalTo(nsb.port));
+        collector.checkThat("transportProtocol", transportProtocol, equalTo(nsb.transportProtocol));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
@@ -1048,7 +1099,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPmk() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, null, null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, null, null, false);
     }
 
     /**
@@ -1056,7 +1107,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientIncorrectLengthPmk() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, PMK_INVALID, null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, PMK_INVALID, null, false);
     }
 
     /**
@@ -1064,7 +1115,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, null, false);
     }
 
     /**
@@ -1073,7 +1124,7 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientTooShortPassphrase() throws Exception {
         executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null,
-                PASSPHRASE_TOO_SHORT);
+                PASSPHRASE_TOO_SHORT, false);
     }
 
     /**
@@ -1081,7 +1132,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientTooLongPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, PASSPHRASE_TOO_LONG);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, PASSPHRASE_TOO_LONG,
+                false);
     }
 
     /**
@@ -1089,7 +1141,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPeer() throws Exception {
-        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID);
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID, false);
     }
 
     /**
@@ -1098,11 +1151,75 @@ public class WifiAwareManagerTest {
     @Test
     public void testNetworkSpecifierWithClientNullPeerLegacyApi() throws Exception {
         mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
-        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID);
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID, false);
+    }
+
+    /**
+     * Validate that a null PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPmkBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, null, null, true);
+    }
+
+    /**
+     * Validate that a non-32-bytes PMK triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientIncorrectLengthPmkBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, PMK_INVALID, null, true);
+    }
+
+    /**
+     * Validate that a null Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPassphraseBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, null, true);
+    }
+
+    /**
+     * Validate that a too short Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientTooShortPassphraseBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null,
+                PASSPHRASE_TOO_SHORT, true);
+    }
+
+    /**
+     * Validate that a too long Passphrase triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientTooLongPassphraseBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, PASSPHRASE_TOO_LONG,
+                true);
+    }
+
+    /**
+     * Validate that a null PeerHandle triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPeerBuilder() throws Exception {
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID, true);
+    }
+
+    /**
+     * Validate that a null PeerHandle does not trigger an exception for legacy API.
+     */
+    @Test
+    public void testNetworkSpecifierWithClientNullPeerLegacyApiBuilder() throws Exception {
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID, false);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testNetworkSpecifierDeprecatedOnNewApi() throws Exception {
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID, false);
     }
 
     private void executeNetworkSpecifierWithClient(PeerHandle peerHandle, boolean doPmk, byte[] pmk,
-            String passphrase) throws Exception {
+            String passphrase, boolean useBuilder) throws Exception {
         final int clientId = 4565;
         final int sessionId = 123;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
@@ -1139,9 +1256,19 @@ public class WifiAwareManagerTest {
 
         // (3) create network specifier
         if (doPmk) {
-            publishSession.getValue().createNetworkSpecifierPmk(peerHandle, pmk);
+            if (useBuilder) {
+                new WifiAwareNetworkSpecifier.Builder(publishSession.getValue(), peerHandle).setPmk(
+                        pmk).build();
+            } else {
+                publishSession.getValue().createNetworkSpecifierPmk(peerHandle, pmk);
+            }
         } else {
-            publishSession.getValue().createNetworkSpecifierPassphrase(peerHandle, passphrase);
+            if (useBuilder) {
+                new WifiAwareNetworkSpecifier.Builder(publishSession.getValue(),
+                        peerHandle).setPskPassphrase(passphrase).build();
+            } else {
+                publishSession.getValue().createNetworkSpecifierPassphrase(peerHandle, passphrase);
+            }
         }
     }
 
@@ -1215,6 +1342,121 @@ public class WifiAwareManagerTest {
         executeNetworkSpecifierDirect(null, false, null, PASSPHRASE_VALID, false);
     }
 
+    /**
+     * Validate that get an exception when creating a network specifier with an invalid port number
+     * (<=0).
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierBuilderInvalidPortNumber() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final byte[] pmk = PMK_VALID;
+        final int port = 0;
+
+        DiscoverySession publishSession = executeSessionStartup(true);
+
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                peerHandle).setPmk(pmk).setPort(port).build();
+    }
+
+    /**
+     * Validate that get an exception when creating a network specifier with port information
+     * without also requesting a secure link.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testNetworkSpecifierBuilderInvalidPortOnInsecure() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final int port = 5;
+
+        DiscoverySession publishSession = executeSessionStartup(true);
+
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                peerHandle).setPort(port).build();
+    }
+
+    /**
+     * Validate that get an exception when creating a network specifier with port information on
+     * a responder.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testNetworkSpecifierBuilderInvalidPortOnResponder() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final int port = 5;
+
+        DiscoverySession subscribeSession = executeSessionStartup(false);
+
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(subscribeSession,
+                peerHandle).setPort(port).build();
+    }
+
+    /**
+     * Validate that get an exception when creating a network specifier with an invalid transport
+     * protocol number (not in [0, 255]).
+     */
+    @Test
+    public void testNetworkSpecifierBuilderInvalidTransportProtocolNumber() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final byte[] pmk = PMK_VALID;
+        final int tpNegative = -1;
+        final int tpTooLarge = 256;
+        final int tpSmallest = 0;
+        final int tpLargest = 255;
+
+        DiscoverySession publishSession = executeSessionStartup(true);
+
+        try {
+            WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                    peerHandle).setPmk(pmk).setTransportProtocol(tpNegative).build();
+            assertTrue("No exception on negative transport protocol!", false);
+        } catch (IllegalArgumentException e) {
+            // nop - exception is correct!
+        }
+        try {
+            WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                    peerHandle).setPmk(pmk).setTransportProtocol(tpTooLarge).build();
+            assertTrue("No exception on >255 transport protocol!", false);
+        } catch (IllegalArgumentException e) {
+            // nop - exception is correct!
+        }
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                peerHandle).setPmk(pmk).setTransportProtocol(tpSmallest).build();
+        nsb = new WifiAwareNetworkSpecifier.Builder(publishSession, peerHandle).setPmk(
+                pmk).setTransportProtocol(tpLargest).build();
+    }
+
+    /**
+     * Validate that get an exception when creating a network specifier with transport protocol
+     * information without also requesting a secure link.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testNetworkSpecifierBuilderInvalidTransportProtocolOnInsecure() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final int transportProtocol = 5;
+
+        DiscoverySession publishSession = executeSessionStartup(true);
+
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(publishSession,
+                peerHandle).setTransportProtocol(transportProtocol).build();
+    }
+
+    /**
+     * Validate that get an exception when creating a network specifier with transport protocol
+     * information on a responder.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testNetworkSpecifierBuilderInvalidTransportProtocolOnResponder() throws Exception {
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final int transportProtocol = 5;
+
+        DiscoverySession subscribeSession = executeSessionStartup(false);
+
+        WifiAwareNetworkSpecifier nsb = new WifiAwareNetworkSpecifier.Builder(subscribeSession,
+                peerHandle).setTransportProtocol(transportProtocol).build();
+    }
+
+    /*
+     * Utilities
+     */
+
     private void executeNetworkSpecifierDirect(byte[] someMac, boolean doPmk, byte[] pmk,
             String passphrase, boolean doInitiator) throws Exception {
         final int clientId = 134;
@@ -1244,5 +1486,139 @@ public class WifiAwareManagerTest {
         } else {
             sessionCaptor.getValue().createNetworkSpecifierPassphrase(role, someMac, passphrase);
         }
+    }
+
+    private DiscoverySession executeSessionStartup(boolean isPublish) throws Exception {
+        final int clientId = 4565;
+        final int sessionId = 123;
+        final PeerHandle peerHandle = new PeerHandle(123412);
+        final int port = 5;
+        final ConfigRequest configRequest = new ConfigRequest.Builder().build();
+        final SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
+        final PublishConfig publishConfig = new PublishConfig.Builder().build();
+
+        ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
+                WifiAwareSession.class);
+        ArgumentCaptor<IWifiAwareEventCallback> clientProxyCallback = ArgumentCaptor
+                .forClass(IWifiAwareEventCallback.class);
+        ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
+                .forClass(IWifiAwareDiscoverySessionCallback.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
+        ArgumentCaptor<SubscribeDiscoverySession> subscribeSession = ArgumentCaptor
+                .forClass(SubscribeDiscoverySession.class);
+
+
+        InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
+                mockPublishSession, mockRttListener);
+
+        // (1) connect successfully
+        mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
+        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+                eq(configRequest), eq(false));
+        clientProxyCallback.getValue().onConnectSuccess(clientId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockCallback).onAttached(sessionCaptor.capture());
+        WifiAwareSession session = sessionCaptor.getValue();
+
+        if (isPublish) {
+            // (2) publish successfully
+            session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
+            inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+                    sessionProxyCallback.capture());
+            sessionProxyCallback.getValue().onSessionStarted(sessionId);
+            mMockLooper.dispatchAll();
+            inOrder.verify(mockSessionCallback).onPublishStarted(publishSession.capture());
+            return publishSession.getValue();
+        } else {
+            // (2) subscribe successfully
+            session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
+            inOrder.verify(mockAwareService).subscribe(any(), eq(clientId), eq(subscribeConfig),
+                    sessionProxyCallback.capture());
+            sessionProxyCallback.getValue().onSessionStarted(sessionId);
+            mMockLooper.dispatchAll();
+            inOrder.verify(mockSessionCallback).onSubscribeStarted(subscribeSession.capture());
+            return subscribeSession.getValue();
+        }
+    }
+
+    // WifiAwareNetworkSpecifier && WifiAwareNetworkInfo tests
+
+    @Test
+    public void testWifiAwareNetworkSpecifierParcel() {
+        WifiAwareNetworkSpecifier ns = new WifiAwareNetworkSpecifier(NETWORK_SPECIFIER_TYPE_IB,
+                WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER, 5, 568, 334,
+                HexEncoding.decode("000102030405".toCharArray(), false),
+                "01234567890123456789012345678901".getBytes(), "blah blah", 666, 4, 10001);
+
+        Parcel parcelW = Parcel.obtain();
+        ns.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        WifiAwareNetworkSpecifier rereadNs =
+                WifiAwareNetworkSpecifier.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(ns, rereadNs);
+        assertEquals(ns.hashCode(), rereadNs.hashCode());
+    }
+
+    @Test
+    public void testWifiAwareNetworkCapabilitiesParcel() throws UnknownHostException {
+        final Inet6Address inet6 = MacAddress.fromString(
+                "11:22:33:44:55:66").getLinkLocalIpv6FromEui48Mac();
+        // note: dummy scope = 5
+        final Inet6Address inet6Scoped = Inet6Address.getByAddress(null, inet6.getAddress(), 5);
+        final int port = 5;
+        final int transportProtocol = 6;
+
+        assertEquals(inet6Scoped.toString(), "/fe80::1322:33ff:fe44:5566%5");
+        WifiAwareNetworkInfo cap = new WifiAwareNetworkInfo(inet6Scoped, port, transportProtocol);
+
+        Parcel parcelW = Parcel.obtain();
+        cap.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        WifiAwareNetworkInfo rereadCap =
+                WifiAwareNetworkInfo.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(cap.getPeerIpv6Addr().toString(), "/fe80::1322:33ff:fe44:5566%5");
+        assertEquals(cap, rereadCap);
+        assertEquals(cap.hashCode(), rereadCap.hashCode());
+    }
+
+    // ParcelablePeerHandle tests
+
+    /**
+     * Verify parceling of ParcelablePeerHandle and interoperability with PeerHandle.
+     */
+    @Test
+    public void testParcelablePeerHandleParcel() {
+        final PeerHandle peerHandle = new PeerHandle(5);
+        final ParcelablePeerHandle parcelablePeerHandle = new ParcelablePeerHandle(peerHandle);
+
+        Parcel parcelW = Parcel.obtain();
+        parcelablePeerHandle.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        ParcelablePeerHandle rereadParcelablePeerHandle =
+                ParcelablePeerHandle.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(peerHandle, rereadParcelablePeerHandle);
+        assertEquals(peerHandle.hashCode(), rereadParcelablePeerHandle.hashCode());
+        assertEquals(parcelablePeerHandle, rereadParcelablePeerHandle);
+        assertEquals(parcelablePeerHandle.hashCode(), rereadParcelablePeerHandle.hashCode());
+
     }
 }

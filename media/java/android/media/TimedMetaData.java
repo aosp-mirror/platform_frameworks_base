@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 
 /**
@@ -26,7 +27,7 @@ import android.os.Parcel;
  * <li> raw uninterpreted byte-array extracted directly from the container. </li>
  * </ul>
  *
- * @see MediaPlayer#setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataListener)
+ * @see MediaPlayer#setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataAvailableListener)
  */
 public final class TimedMetaData {
     private static final String TAG = "TimedMetaData";
@@ -45,6 +46,21 @@ public final class TimedMetaData {
         if (!parseParcel(parcel)) {
             throw new IllegalArgumentException("parseParcel() fails");
         }
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param timestampUs the timestamp in microsecond for the timed metadata
+     * @param metaData the metadata array for the timed metadata. No data copying is made.
+     *     It should not be null.
+     */
+    public TimedMetaData(long timestampUs, @NonNull byte[] metaData) {
+        if (metaData == null) {
+            throw new IllegalArgumentException("null metaData is not allowed");
+        }
+        mTimestampUs = timestampUs;
+        mMetaData = metaData;
     }
 
     /**

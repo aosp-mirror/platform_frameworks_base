@@ -19,5 +19,6 @@
         <permission name="android.permission.MANAGE_FINGERPRINT"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
+        <permission name="android.permission.WRITE_SETTINGS_HOMEPAGE_DATA"/>
     </privapp-permissions>
 </permissions>

@@ -16,13 +16,6 @@
 
 package android.preference;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
@@ -31,6 +24,13 @@ import android.util.Xml;
 import android.view.ContextThemeWrapper;
 import android.view.InflateException;
 import android.view.LayoutInflater;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
 
 // TODO: fix generics
 /**
@@ -41,7 +41,14 @@ import android.view.LayoutInflater;
  * @param T The type of the items to inflate
  * @param P The type of parents (that is those items that contain other items).
  *            Must implement {@link GenericInflater.Parent}
+ *
+ * @deprecated Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ *      <a href="{@docRoot}reference/androidx/preference/package-summary.html">
+ *      Preference Library</a> for consistent behavior across all devices. For more information on
+ *      using the AndroidX Preference Library see
+ *      <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>.
  */
+@Deprecated
 abstract class GenericInflater<T, P extends GenericInflater.Parent> {
     private final boolean DEBUG = false;
 

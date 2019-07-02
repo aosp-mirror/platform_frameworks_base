@@ -32,8 +32,8 @@ class LayerDrawable : public SkDrawable {
 public:
     explicit LayerDrawable(DeferredLayerUpdater* layerUpdater) : mLayerUpdater(layerUpdater) {}
 
-    static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
-                          const SkRect* dstRect = nullptr);
+    static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer, const SkRect* srcRect,
+                          const SkRect* dstRect, bool useLayerTransform);
 
 protected:
     virtual SkRect onGetBounds() override {
@@ -45,6 +45,6 @@ private:
     sp<DeferredLayerUpdater> mLayerUpdater;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

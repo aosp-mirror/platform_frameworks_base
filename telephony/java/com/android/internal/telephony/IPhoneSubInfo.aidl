@@ -127,16 +127,6 @@ interface IPhoneSubInfo {
     String getVoiceMailNumberForSubscriber(int subId, String callingPackage);
 
     /**
-     * Retrieves the complete voice mail number.
-     */
-    String getCompleteVoiceMailNumber();
-
-    /**
-     * Retrieves the complete voice mail number for particular subId
-     */
-    String getCompleteVoiceMailNumberForSubscriber(int subId);
-
-    /**
      * Retrieves the Carrier information used to encrypt IMSI and IMPI.
      */
     ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int subId, int keyType,

@@ -18,14 +18,12 @@ package com.android.systemui.settings;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -46,17 +44,12 @@ public class BrightnessDialog extends Activity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
-        // Use a dialog theme as the activity theme, but inflate the content as
-        // the QS content.
-        ContextThemeWrapper themedContext = new ContextThemeWrapper(this,
-                com.android.internal.R.style.Theme_DeviceDefault_QuickSettings);
-        View v = LayoutInflater.from(themedContext).inflate(
+        View v = LayoutInflater.from(this).inflate(
                 R.layout.quick_settings_brightness_dialog, null);
         setContentView(v);
 
-        final ImageView icon = findViewById(R.id.brightness_icon);
         final ToggleSliderView slider = findViewById(R.id.brightness_slider);
-        mBrightnessController = new BrightnessController(this, icon, slider);
+        mBrightnessController = new BrightnessController(this, slider);
     }
 
     @Override

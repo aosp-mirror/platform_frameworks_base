@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="center" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:background="@color/biometric_dialog_dim_color"
+        android:orientation="vertical">
+
+        <!-- This is not a Space since Spaces cannot be clicked -->
+        <View
+            android:id="@+id/space"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/biometric_dialog_empty_space_description"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- This is not a Space since Spaces cannot be clicked. The width of this changes
+                depending on horizontal/portrait orientation -->
+                <View
+                    android:id="@+id/left_space"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+                    <LinearLayout
+                        android:id="@+id/dialog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/biometric_dialog_bg"
+                        android:layout_marginBottom="@dimen/biometric_dialog_border_padding"
+                        android:layout_marginLeft="@dimen/biometric_dialog_border_padding"
+                        android:layout_marginRight="@dimen/biometric_dialog_border_padding">
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginTop="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:textSize="20sp"
+                            android:textColor="?android:attr/textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginEnd="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:textSize="16sp"
+                            android:textColor="?android:attr/textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:paddingTop="8dp"
+                            android:textSize="16sp"
+                            android:textColor="?android:attr/textColorPrimary"/>
+
+                        <ImageView
+                            android:id="@+id/biometric_icon"
+                            android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
+                            android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="48dp"
+                            android:scaleType="fitXY" />
+
+                        <TextView
+                            android:id="@+id/error"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="24dp"
+                            android:textSize="12sp"
+                            android:gravity="center_horizontal"
+                            android:accessibilityLiveRegion="polite"
+                            android:textColor="@color/biometric_dialog_gray"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="72dip"
+                            android:paddingTop="24dp"
+                            android:layout_gravity="center_vertical"
+                            style="?android:attr/buttonBarStyle"
+                            android:orientation="horizontal"
+                            android:measureWithLargestChild="true">
+                            <Space android:id="@+id/leftSpacer"
+                                android:layout_width="12dp"
+                                android:layout_height="match_parent"
+                                android:visibility="visible" />
+                            <!-- Negative Button -->
+                            <Button android:id="@+id/button2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                                android:gravity="center"
+                                android:maxLines="2" />
+                            <Space android:id="@+id/middleSpacer"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:visibility="visible" />
+                            <!-- Positive Button -->
+                            <Button android:id="@+id/button1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/biometric_dialog_confirm"
+                                android:visibility="gone"/>
+                            <!-- Try Again Button -->
+                            <Button android:id="@+id/button_try_again"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/biometric_dialog_try_again"
+                                android:visibility="gone"/>
+                            <Space android:id="@+id/rightSpacer"
+                                android:layout_width="12dip"
+                                android:layout_height="match_parent"
+                                android:visibility="visible" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                <!-- This is not a Space since Spaces cannot be clicked. The width of this changes
+                depending on horizontal/portrait orientation -->
+                <View
+                    android:id="@+id/right_space"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</FrameLayout>

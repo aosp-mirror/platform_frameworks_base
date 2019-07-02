@@ -54,7 +54,6 @@ import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageWriter;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
@@ -62,6 +61,8 @@ import android.util.Size;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -128,7 +129,8 @@ public class CameraTestUtils extends Assert {
     private static final Location sTestLocation2 = new Location(LocationManager.NETWORK_PROVIDER);
 
     protected static final String DEBUG_FILE_NAME_BASE =
-            Environment.getExternalStorageDirectory().getPath();
+            InstrumentationRegistry.getInstrumentation().getTargetContext()
+            .getExternalFilesDir(null).getPath();
 
     static {
         sTestLocation0.setTime(1199145600L);
@@ -857,7 +859,7 @@ public class CameraTestUtils extends Assert {
         // JPEG doesn't have pixelstride and rowstride, treat it as 1D buffer.
         // Same goes for DEPTH_POINT_CLOUD
         if (format == ImageFormat.JPEG || format == ImageFormat.DEPTH_POINT_CLOUD ||
-                format == ImageFormat.RAW_PRIVATE) {
+                format == ImageFormat.DEPTH_JPEG || format == ImageFormat.RAW_PRIVATE) {
             buffer = planes[0].getBuffer();
             assertNotNull("Fail to get jpeg or depth ByteBuffer", buffer);
             data = new byte[buffer.remaining()];
@@ -940,6 +942,7 @@ public class CameraTestUtils extends Assert {
             case ImageFormat.RAW_PRIVATE:
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.DEPTH_JPEG:
                 assertEquals("JPEG/RAW/depth Images should have one plane", 1, planes.length);
                 break;
             default:
@@ -1363,6 +1366,9 @@ public class CameraTestUtils extends Assert {
             case ImageFormat.RAW_PRIVATE:
                 validateRawPrivateData(data, width, height, image.getTimestamp(), filePath);
                 break;
+            case ImageFormat.DEPTH_JPEG:
+                validateDepthJpegData(data, width, height, format, image.getTimestamp(), filePath);
+                break;
             default:
                 throw new UnsupportedOperationException("Unsupported format for validation: "
                         + format);
@@ -1521,6 +1527,23 @@ public class CameraTestUtils extends Assert {
         if (DEBUG && filePath != null) {
             String fileName =
                     filePath + "/" + width + "x" + height + "_" + ts / 1e6 + ".depth_point_cloud";
+            dumpFile(fileName, depthData);
+        }
+
+        return;
+
+    }
+
+    private static void validateDepthJpegData(byte[] depthData, int width, int height, int format,
+            long ts, String filePath) {
+
+        if (VERBOSE) Log.v(TAG, "Validating depth jpeg data");
+
+        // Can't validate size since it is variable
+
+        if (DEBUG && filePath != null) {
+            String fileName =
+                    filePath + "/" + width + "x" + height + "_" + ts / 1e6 + ".jpg";
             dumpFile(fileName, depthData);
         }
 

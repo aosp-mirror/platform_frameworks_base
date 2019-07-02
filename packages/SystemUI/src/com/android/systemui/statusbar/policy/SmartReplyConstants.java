@@ -16,41 +16,59 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.ContentResolver;
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
+import android.app.RemoteInput;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 
-public final class SmartReplyConstants extends ContentObserver {
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+@Singleton
+public final class SmartReplyConstants {
 
     private static final String TAG = "SmartReplyConstants";
-
-    private static final String KEY_ENABLED = "enabled";
-    private static final String KEY_REQUIRES_TARGETING_P = "requires_targeting_p";
-    private static final String KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS =
-            "max_squeeze_remeasure_attempts";
 
     private final boolean mDefaultEnabled;
     private final boolean mDefaultRequiresP;
     private final int mDefaultMaxSqueezeRemeasureAttempts;
+    private final boolean mDefaultEditChoicesBeforeSending;
+    private final boolean mDefaultShowInHeadsUp;
+    private final int mDefaultMinNumSystemGeneratedReplies;
+    private final int mDefaultMaxNumActions;
+    private final int mDefaultOnClickInitDelay;
 
-    private boolean mEnabled;
-    private boolean mRequiresTargetingP;
-    private int mMaxSqueezeRemeasureAttempts;
+    // These fields are updated on the UI thread but can be accessed on both the UI thread and
+    // background threads. We use the volatile keyword here instead of synchronization blocks since
+    // we only care about variable updates here being visible to other threads (and not for example
+    // whether the variables we are reading were updated in the same go).
+    private volatile boolean mEnabled;
+    private volatile boolean mRequiresTargetingP;
+    private volatile int mMaxSqueezeRemeasureAttempts;
+    private volatile boolean mEditChoicesBeforeSending;
+    private volatile boolean mShowInHeadsUp;
+    private volatile int mMinNumSystemGeneratedReplies;
+    private volatile int mMaxNumActions;
+    private volatile long mOnClickInitDelay;
 
+    private final Handler mHandler;
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
-    public SmartReplyConstants(Handler handler, Context context) {
-        super(handler);
-
+    @Inject
+    public SmartReplyConstants(@Named(MAIN_HANDLER_NAME) Handler handler, Context context) {
+        mHandler = handler;
         mContext = context;
         final Resources resources = mContext.getResources();
         mDefaultEnabled = resources.getBoolean(
@@ -59,31 +77,90 @@ public final class SmartReplyConstants extends ContentObserver {
                 R.bool.config_smart_replies_in_notifications_requires_targeting_p);
         mDefaultMaxSqueezeRemeasureAttempts = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_max_squeeze_remeasure_attempts);
+        mDefaultEditChoicesBeforeSending = resources.getBoolean(
+                R.bool.config_smart_replies_in_notifications_edit_choices_before_sending);
+        mDefaultShowInHeadsUp = resources.getBoolean(
+                R.bool.config_smart_replies_in_notifications_show_in_heads_up);
+        mDefaultMinNumSystemGeneratedReplies = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_min_num_system_generated_replies);
+        mDefaultMaxNumActions = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_max_num_actions);
+        mDefaultOnClickInitDelay = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_onclick_init_delay);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS),
-                false, this);
+        registerDeviceConfigListener();
         updateConstants();
     }
 
-    @Override
-    public void onChange(boolean selfChange, Uri uri) {
+    private void registerDeviceConfigListener() {
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                this::postToHandler,
+                (properties) -> onDeviceConfigPropertiesChanged(properties.getNamespace()));
+    }
+
+    private void postToHandler(Runnable r) {
+        this.mHandler.post(r);
+    }
+
+    @VisibleForTesting
+    void onDeviceConfigPropertiesChanged(String namespace) {
+        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+            Log.e(TAG, "Received update from DeviceConfig for unrelated namespace: "
+                    + namespace);
+            return;
+        }
+
         updateConstants();
     }
 
     private void updateConstants() {
         synchronized (SmartReplyConstants.this) {
-            try {
-                mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
-                        Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS));
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Bad smart reply constants", e);
-            }
-            mEnabled = mParser.getBoolean(KEY_ENABLED, mDefaultEnabled);
-            mRequiresTargetingP = mParser.getBoolean(KEY_REQUIRES_TARGETING_P, mDefaultRequiresP);
-            mMaxSqueezeRemeasureAttempts = mParser.getInt(
-                    KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS, mDefaultMaxSqueezeRemeasureAttempts);
+            mEnabled = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_ENABLED,
+                    mDefaultEnabled);
+            mRequiresTargetingP = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P,
+                    mDefaultRequiresP);
+            mMaxSqueezeRemeasureAttempts = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
+                    mDefaultMaxSqueezeRemeasureAttempts);
+            mEditChoicesBeforeSending = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING,
+                    mDefaultEditChoicesBeforeSending);
+            mShowInHeadsUp = readDeviceConfigBooleanOrDefaultIfEmpty(
+                    SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP,
+                    mDefaultShowInHeadsUp);
+            mMinNumSystemGeneratedReplies = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES,
+                    mDefaultMinNumSystemGeneratedReplies);
+            mMaxNumActions = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS,
+                    mDefaultMaxNumActions);
+            mOnClickInitDelay = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY,
+                    mDefaultOnClickInitDelay);
         }
+    }
+
+    private static boolean readDeviceConfigBooleanOrDefaultIfEmpty(String propertyName,
+            boolean defaultValue) {
+        String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
+        if (TextUtils.isEmpty(value)) {
+            return defaultValue;
+        }
+        if ("true".equals(value)) {
+            return true;
+        }
+        if ("false".equals(value)) {
+            return false;
+        }
+        // For invalid configs we return the default value.
+        return defaultValue;
     }
 
     /** Returns whether smart replies in notifications are enabled. */
@@ -105,5 +182,56 @@ public final class SmartReplyConstants extends ContentObserver {
      */
     public int getMaxSqueezeRemeasureAttempts() {
         return mMaxSqueezeRemeasureAttempts;
+    }
+
+    /**
+     * Returns whether by tapping on a choice should let the user edit the input before it
+     * is sent to the app.
+     *
+     * @param remoteInputEditChoicesBeforeSending The value from
+     *         {@link RemoteInput#getEditChoicesBeforeSending()}
+     */
+    public boolean getEffectiveEditChoicesBeforeSending(
+            @RemoteInput.EditChoicesBeforeSending int remoteInputEditChoicesBeforeSending) {
+        switch (remoteInputEditChoicesBeforeSending) {
+            case RemoteInput.EDIT_CHOICES_BEFORE_SENDING_DISABLED:
+                return false;
+            case RemoteInput.EDIT_CHOICES_BEFORE_SENDING_ENABLED:
+                return true;
+            case RemoteInput.EDIT_CHOICES_BEFORE_SENDING_AUTO:
+            default:
+                return mEditChoicesBeforeSending;
+        }
+    }
+
+    /**
+     * Returns whether smart suggestions should be enabled in heads-up notifications.
+     */
+    public boolean getShowInHeadsUp() {
+        return mShowInHeadsUp;
+    }
+
+    /**
+     * Returns the minimum number of system generated replies to show in a notification.
+     * If we cannot show at least this many system generated replies we should show none.
+     */
+    public int getMinNumSystemGeneratedReplies() {
+        return mMinNumSystemGeneratedReplies;
+    }
+
+    /**
+     * Returns the maximum number smart actions to show in a notification, or -1 if there shouldn't
+     * be a limit.
+     */
+    public int getMaxNumActions() {
+        return mMaxNumActions;
+    }
+
+    /**
+     * Returns the amount of time (ms) before smart suggestions are clickable, since the suggestions
+     * were added.
+     */
+    public long getOnClickInitDelay() {
+        return mOnClickInitDelay;
     }
 }

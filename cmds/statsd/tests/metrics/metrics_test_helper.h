@@ -38,8 +38,7 @@ public:
     MOCK_METHOD4(RegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver,
                                         int64_t nextPulltimeNs, int64_t intervalNs));
     MOCK_METHOD2(UnRegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver));
-    MOCK_METHOD3(Pull, bool(const int pullCode, const int64_t timeNs,
-                            vector<std::shared_ptr<LogEvent>>* data));
+    MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
 };
 
 class MockUidMap : public UidMap {

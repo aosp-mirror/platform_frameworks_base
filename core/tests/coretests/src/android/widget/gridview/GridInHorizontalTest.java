@@ -17,10 +17,9 @@
 package android.widget.gridview;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.GridView;
 
-import android.widget.gridview.GridInHorizontal;
+import androidx.test.filters.MediumTest;
 
 public class GridInHorizontalTest extends ActivityInstrumentationTestCase<GridInHorizontal> {
 

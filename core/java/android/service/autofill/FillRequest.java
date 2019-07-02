@@ -65,12 +65,18 @@ public final class FillRequest implements Parcelable {
      */
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
+    /**
+     * Indicates this request was made using
+     * <a href="AutofillService.html#CompatibilityMode">compatibility mode</a>.
+     */
+    public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 0x2;
+
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
-            FLAG_MANUAL_REQUEST
+            FLAG_MANUAL_REQUEST, FLAG_COMPATIBILITY_MODE_REQUEST
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RequestFlags{}
@@ -93,7 +99,8 @@ public final class FillRequest implements Parcelable {
     public FillRequest(int id, @NonNull ArrayList<FillContext> contexts,
             @Nullable Bundle clientState, @RequestFlags int flags) {
         mId = id;
-        mFlags = Preconditions.checkFlagsArgument(flags, FLAG_MANUAL_REQUEST);
+        mFlags = Preconditions.checkFlagsArgument(flags,
+                FLAG_MANUAL_REQUEST | FLAG_COMPATIBILITY_MODE_REQUEST);
         mContexts = Preconditions.checkCollectionElementsNotNull(contexts, "contexts");
         mClientState = clientState;
     }
@@ -108,7 +115,8 @@ public final class FillRequest implements Parcelable {
     /**
      * Gets the flags associated with this request.
      *
-     * @see #FLAG_MANUAL_REQUEST
+     * @return any combination of {@link #FLAG_MANUAL_REQUEST} and
+     *         {@link #FLAG_COMPATIBILITY_MODE_REQUEST}.
      */
     public @RequestFlags int getFlags() {
         return mFlags;
@@ -116,6 +124,10 @@ public final class FillRequest implements Parcelable {
 
     /**
      * Gets the contexts associated with each previous fill request.
+     *
+     * <p><b>Note:</b> Starting on Android {@link android.os.Build.VERSION_CODES#Q}, it could also
+     * include contexts from requests whose {@link SaveInfo} had the
+     * {@link SaveInfo#FLAG_DELAY_SAVE} flag.
      */
     public @NonNull List<FillContext> getFillContexts() {
         return mContexts;
@@ -156,7 +168,7 @@ public final class FillRequest implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final Parcelable.Creator<FillRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FillRequest> CREATOR =
             new Parcelable.Creator<FillRequest>() {
         @Override
         public FillRequest createFromParcel(Parcel parcel) {

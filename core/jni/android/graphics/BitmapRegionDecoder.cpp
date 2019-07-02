@@ -33,6 +33,7 @@
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 
+#include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <binder/Parcel.h>
@@ -124,22 +125,21 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
  * reportSizeToVM not supported
  */
 static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint inputX,
-        jint inputY, jint inputWidth, jint inputHeight, jobject options) {
+        jint inputY, jint inputWidth, jint inputHeight, jobject options, jlong inBitmapHandle,
+        jlong colorSpaceHandle) {
 
     // Set default options.
     int sampleSize = 1;
     SkColorType colorType = kN32_SkColorType;
     bool requireUnpremul = false;
-    jobject javaBitmap = NULL;
+    jobject javaBitmap = nullptr;
     bool isHardware = false;
-    sk_sp<SkColorSpace> colorSpace = nullptr;
+    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     // Update the default options with any options supplied by the client.
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         colorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
-        jobject jcolorSpace = env->GetObjectField(options, gOptions_colorSpaceFieldID);
-        colorSpace = GraphicsJNI::getNativeColorSpace(env, jcolorSpace);
         isHardware = GraphicsJNI::isHardwareConfig(env, jconfig);
         requireUnpremul = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
@@ -159,15 +159,19 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     android::Bitmap* recycledBitmap = nullptr;
     size_t recycledBytes = 0;
     if (javaBitmap) {
-        recycledBitmap = &bitmap::toBitmap(env, javaBitmap);
+        recycledBitmap = &bitmap::toBitmap(inBitmapHandle);
         if (recycledBitmap->isImmutable()) {
             ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
         }
-        recycledBytes = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
+        recycledBytes = recycledBitmap->getAllocationByteCount();
     }
 
     SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     SkColorType decodeColorType = brd->computeOutputColorType(colorType);
+    if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
+            !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        decodeColorType = kN32_SkColorType;
+    }
 
     // Set up the pixel allocator
     SkBRDAllocator* allocator = nullptr;
@@ -212,7 +216,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetObjectField(options, gOptions_outConfigFieldID, config);
 
         env->SetObjectField(options, gOptions_outColorSpaceFieldID,
-                GraphicsJNI::getColorSpace(env, decodeColorSpace, decodeColorType));
+                GraphicsJNI::getColorSpace(env, decodeColorSpace.get(), decodeColorType));
     }
 
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
@@ -255,7 +259,7 @@ static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
 
 static const JNINativeMethod gBitmapRegionDecoderMethods[] = {
     {   "nativeDecodeRegion",
-        "(JIIIILandroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
+        "(JIIIILandroid/graphics/BitmapFactory$Options;JJ)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeRegion},
 
     {   "nativeGetHeight", "(J)I", (void*)nativeGetHeight},

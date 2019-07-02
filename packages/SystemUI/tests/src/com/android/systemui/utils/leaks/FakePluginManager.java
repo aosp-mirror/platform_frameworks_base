@@ -14,12 +14,11 @@
 
 package com.android.systemui.utils.leaks;
 
-import android.content.Context;
 import android.testing.LeakCheck;
 
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 
 public class FakePluginManager implements PluginManager {
 
@@ -60,6 +59,11 @@ public class FakePluginManager implements PluginManager {
     @Override
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
         return false;
+    }
+
+    @Override
+    public String[] getWhitelistedPlugins() {
+        return new String[0];
     }
 
     @Override

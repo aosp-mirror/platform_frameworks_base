@@ -450,6 +450,20 @@ final class HdmiCecKeycode {
     }
 
     /**
+     * Returns {@code true} if given Android keycode is volume control related,
+     * otherwise {@code false}.
+     */
+    static boolean isVolumeKeycode(int androidKeycode) {
+        int cecKeyCode = HdmiCecKeycode.androidKeyToCecKey(androidKeycode)[0];
+        return isSupportedKeycode(androidKeycode)
+            && (cecKeyCode == CEC_KEYCODE_VOLUME_UP
+                || cecKeyCode == CEC_KEYCODE_VOLUME_DOWN
+                || cecKeyCode == CEC_KEYCODE_MUTE
+                || cecKeyCode == CEC_KEYCODE_MUTE_FUNCTION
+                || cecKeyCode == CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
+    }
+
+    /**
      * Returns CEC keycode to control audio mute status.
      *
      * @param muting {@code true} if audio is being muted

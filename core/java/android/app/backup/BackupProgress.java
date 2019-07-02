@@ -52,7 +52,7 @@ public class BackupProgress implements Parcelable {
         out.writeLong(bytesTransferred);
     }
 
-    public static final Creator<BackupProgress> CREATOR = new Creator<BackupProgress>() {
+    public static final @android.annotation.NonNull Creator<BackupProgress> CREATOR = new Creator<BackupProgress>() {
         public BackupProgress createFromParcel(Parcel in) {
             return new BackupProgress(in);
         }

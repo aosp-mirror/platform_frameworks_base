@@ -16,14 +16,13 @@
 
 package android.widget.focus;
 
-import android.widget.focus.DescendantFocusability;
-
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.UiThreadTest;
 import android.test.TouchUtils;
 import android.view.ViewGroup;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class DescendantFocusabilityTest extends ActivityInstrumentationTestCase<DescendantFocusability> {
 

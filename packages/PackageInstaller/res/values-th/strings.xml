@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="7488448184431507488">"โปรแกรมติดตั้งแพ็กเกจ"</string>
+    <string name="install" msgid="711829760615509273">"ติดตั้ง"</string>
+    <string name="done" msgid="6632441120016885253">"เสร็จ"</string>
+    <string name="cancel" msgid="1018267193425558088">"ยกเลิก"</string>
+    <string name="installing" msgid="4921993079741206516">"กำลังติดตั้ง…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"กำลังติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="install_done" msgid="5987363587661783896">"ติดตั้งแอปแล้ว"</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"ต้องการติดตั้งแอปพลิเคชันนี้ไหม"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"ต้องการติดตั้งการอัปเดตของแอปพลิเคชันที่มีอยู่นี้ไหม ข้อมูลของคุณที่มีอยู่จะไม่สูญหาย"</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ต้องการติดตั้งการอัปเดตของแอปพลิเคชันที่มีอยู่ในตัวนี้ไหม ข้อมูลของคุณที่มีอยู่จะไม่สูญหาย"</string>
+    <string name="install_failed" msgid="5777824004474125469">"ไม่ได้ติดตั้งแอป"</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"มีการบล็อกแพ็กเกจไม่ให้ติดตั้ง"</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"ไม่ได้ติดตั้งแอปเพราะแพ็กเกจขัดแย้งกับแพ็กเกจที่มีอยู่"</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"ไม่ได้ติดตั้งแอปเพราะแอปใช้งานไม่ได้กับแท็บเล็ตของคุณ"</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"แอปนี้ใช้งานกับทีวีของคุณไม่ได้"</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"ไม่ได้ติดตั้งแอปเพราะแอปใช้งานไม่ได้กับโทรศัพท์ของคุณ"</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"ไม่ได้ติดตั้งแอปเพราะดูเหมือนว่าแพ็กเกจจะไม่ถูกต้อง"</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"ติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ในแท็บเล็ตของคุณไม่ได้"</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"ติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ในทีวีของคุณไม่ได้"</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"ติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ในโทรศัพท์ของคุณไม่ได้"</string>
+    <string name="launch" msgid="3952550563999890101">"เปิด"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"ผู้ดูแลระบบไม่อนุญาตให้ติดตั้งแอปที่ได้มาจากแหล่งที่มาที่ไม่รู้จัก"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ผู้ใช้รายนี้ไม่สามารถติดตั้งแอปที่ไม่รู้จัก"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ผู้ใช้รายนี้ไม่ได้รับอนุญาตให้ติดตั้งแอป"</string>
+    <string name="ok" msgid="7871959885003339302">"ตกลง"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"จัดการแอป"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ไม่มีพื้นที่"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"ติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้ เพิ่มพื้นที่ว่างแล้วลองอีกครั้ง"</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"ไม่พบแอป"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ไม่พบแอปนี้ในรายการแอปที่ติดตั้ง"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"ไม่อนุญาต"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ผู้ใช้ปัจจุบันไม่ได้รับอนุญาตให้ทำการถอนการติดตั้งนี้"</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ข้อผิดพลาด"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"ถอนการติดตั้งแอปไม่ได้"</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"ถอนการติดตั้งแอป"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"ถอนการติดตั้งการอัปเดต"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> เป็นส่วนหนึ่งของแอปต่อไปนี้"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"ต้องการถอนการติดตั้งแอปนี้ไหม"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้"<b>"ทั้งหมด"</b>"ไหม ระบบจะนำแอปและข้อมูลในแอปออกจากผู้ใช้"<b>"ทั้งหมด"</b>"ที่อยู่ในอุปกรณ์"</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก"</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก วิธีนี้จะส่งผลต่อผู้ใช้ทุกคนที่ใช้อุปกรณ์เครื่องนี้ รวมทั้งผู้ที่มีโปรไฟล์งาน"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"และนำไฟล์สื่อต่างๆ ที่เกี่ยวข้องซึ่งรวมแล้วมีขนาด <xliff:g id="SIZE">%1$s</xliff:g> ออกด้วย"</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"เก็บข้อมูลแอปไว้ <xliff:g id="SIZE">%1$s</xliff:g>"</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"กำลังเรียกใช้การถอนการติดตั้ง"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ถอนการติดตั้งไม่สำเร็จ"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"กำลังถอนการติดตั้ง…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"กำลังถอนการติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"ถอนการติดตั้งเสร็จแล้ว"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"ถอนการติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> แล้ว"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"ถอนการติดตั้งไม่สำเร็จ"</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"ถอนการติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ไม่สำเร็จ"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ถอนการติดตั้งแอปผู้ดูแลระบบอุปกรณ์ที่มีการใช้งานไม่ได้"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ถอนการติดตั้งแอปผู้ดูแลระบบอุปกรณ์ที่มีการใช้งานสำหรับ <xliff:g id="USERNAME">%1$s</xliff:g> ไม่ได้"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"แอปนี้จำเป็นสำหรับผู้ใช้หรือโปรไฟล์บางส่วน และถอนการติดตั้งไปแล้วสำหรับส่วนอื่น"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"แอปนี้จำเป็นสำหรับโปรไฟล์ของคุณและถอนการติดตั้งไม่ได้"</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ผู้ดูแลระบบอุปกรณ์กำหนดให้ใช้แอปนี้และถอนการติดตั้งไม่ได้"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"จัดการแอปผู้ดูแลระบบอุปกรณ์"</string>
+    <string name="manage_users" msgid="1243995386982560813">"จัดการผู้ใช้"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"ถอนการติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้"</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"พบปัญหาในการแยกวิเคราะห์แพ็กเกจ"</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"ติดตั้ง/ถอนการติดตั้งใน Wear ไม่ได้"</string>
+    <string name="message_staging" msgid="8032722385658438567">"กำลังปรับสภาพแวดล้อมของแอป…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"ไม่ทราบ"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"เพื่อความปลอดภัย ไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในแท็บเล็ต"</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"เพื่อความปลอดภัย ไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในทีวี"</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"เพื่อความปลอดภัย ไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในโทรศัพท์"</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"โทรศัพท์และข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับโทรศัพท์หรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"แท็บเล็ตและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับแท็บเล็ตหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ทีวีและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับทีวีหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"ดำเนินการต่อ"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"การตั้งค่า"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"กำลังติดตั้ง/ถอนการติดตั้งแอป Wear"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"การแจ้งเตือนว่าติดตั้งแอปแล้ว"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"ติดตั้งเรียบร้อยแล้ว"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"ติดตั้ง “<xliff:g id="APPNAME">%1$s</xliff:g>” สำเร็จแล้ว"</string>
+</resources>

@@ -1,5 +1,7 @@
 package com.android.systemui.power;
 
+import com.android.settingslib.fuelgauge.Estimate;
+
 public interface EnhancedEstimates {
 
     /**
@@ -23,4 +25,9 @@ public interface EnhancedEstimates {
      * show a severe warning to the user.
      */
     long getSevereWarningThreshold();
+
+    /**
+     * Returns a boolean indicating if the low warning should be shown at all or not.
+     */
+    boolean getLowWarningEnabled();
 }

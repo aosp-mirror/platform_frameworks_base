@@ -35,7 +35,7 @@ import java.util.ArrayList;
  */
 class ActivityTransitionState {
 
-    private static final String ENTERING_SHARED_ELEMENTS = "android:enteringSharedElements";
+    private static final String PENDING_EXIT_SHARED_ELEMENTS = "android:pendingExitSharedElements";
 
     private static final String EXITING_MAPPED_FROM = "android:exitingMappedFrom";
 
@@ -43,9 +43,9 @@ class ActivityTransitionState {
 
     /**
      * The shared elements that the calling Activity has said that they transferred to this
-     * Activity.
+     * Activity and will be transferred back during exit animation.
      */
-    private ArrayList<String> mEnteringNames;
+    private ArrayList<String> mPendingExitNames;
 
     /**
      * The names of shared elements that were shared to the called Activity.
@@ -112,8 +112,7 @@ class ActivityTransitionState {
 
     public int addExitTransitionCoordinator(ExitTransitionCoordinator exitTransitionCoordinator) {
         if (mExitTransitionCoordinators == null) {
-            mExitTransitionCoordinators =
-                    new SparseArray<WeakReference<ExitTransitionCoordinator>>();
+            mExitTransitionCoordinators = new SparseArray<>();
         }
         WeakReference<ExitTransitionCoordinator> ref = new WeakReference(exitTransitionCoordinator);
         // clean up old references:
@@ -132,7 +131,7 @@ class ActivityTransitionState {
     public void readState(Bundle bundle) {
         if (bundle != null) {
             if (mEnterTransitionCoordinator == null || mEnterTransitionCoordinator.isReturning()) {
-                mEnteringNames = bundle.getStringArrayList(ENTERING_SHARED_ELEMENTS);
+                mPendingExitNames = bundle.getStringArrayList(PENDING_EXIT_SHARED_ELEMENTS);
             }
             if (mEnterTransitionCoordinator == null) {
                 mExitingFrom = bundle.getStringArrayList(EXITING_MAPPED_FROM);
@@ -141,9 +140,21 @@ class ActivityTransitionState {
         }
     }
 
+    /**
+     * Returns the element names to be used for exit animation. It caches the list internally so
+     * that it is preserved through activty destroy and restore.
+     */
+    private ArrayList<String> getPendingExitNames() {
+        if (mPendingExitNames == null && mEnterTransitionCoordinator != null) {
+            mPendingExitNames = mEnterTransitionCoordinator.getPendingExitSharedElementNames();
+        }
+        return mPendingExitNames;
+    }
+
     public void saveState(Bundle bundle) {
-        if (mEnteringNames != null) {
-            bundle.putStringArrayList(ENTERING_SHARED_ELEMENTS, mEnteringNames);
+        ArrayList<String> pendingExitNames = getPendingExitNames();
+        if (pendingExitNames != null) {
+            bundle.putStringArrayList(PENDING_EXIT_SHARED_ELEMENTS, pendingExitNames);
         }
         if (mExitingFrom != null) {
             bundle.putStringArrayList(EXITING_MAPPED_FROM, mExitingFrom);
@@ -226,7 +237,7 @@ class ActivityTransitionState {
             }
         } else {
             mEnterTransitionCoordinator.namedViewsReady(null, null);
-            mEnteringNames = mEnterTransitionCoordinator.getAllSharedElementNames();
+            mPendingExitNames = null;
         }
 
         mExitingFrom = null;
@@ -247,10 +258,10 @@ class ActivityTransitionState {
         }
     }
 
-    public void onResume(Activity activity, boolean isTopOfTask) {
+    public void onResume(Activity activity) {
         // After orientation change, the onResume can come in before the top Activity has
         // left, so if the Activity is not top, wait a second for the top Activity to exit.
-        if (isTopOfTask || mEnterTransitionCoordinator == null) {
+        if (mEnterTransitionCoordinator == null || activity.isTopOfTask()) {
             restoreExitedViews();
             restoreReenteringViews();
         } else {
@@ -268,7 +279,7 @@ class ActivityTransitionState {
     }
 
     public void clear() {
-        mEnteringNames = null;
+        mPendingExitNames = null;
         mExitingFrom = null;
         mExitingTo = null;
         mExitingToView = null;
@@ -296,7 +307,8 @@ class ActivityTransitionState {
     }
 
     public boolean startExitBackTransition(final Activity activity) {
-        if (mEnteringNames == null || mCalledExitCoordinator != null) {
+        ArrayList<String> pendingExitNames = getPendingExitNames();
+        if (pendingExitNames == null || mCalledExitCoordinator != null) {
             return false;
         } else {
             if (!mHasExited) {
@@ -315,7 +327,7 @@ class ActivityTransitionState {
                 }
 
                 mReturnExitCoordinator = new ExitTransitionCoordinator(activity,
-                        activity.getWindow(), activity.mEnterTransitionListener, mEnteringNames,
+                        activity.getWindow(), activity.mEnterTransitionListener, pendingExitNames,
                         null, null, true);
                 if (enterViewsTransition != null && decor != null) {
                     enterViewsTransition.resume(decor);

@@ -30,10 +30,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class CustomEditTextPreferenceTest {
 
     @Mock
@@ -70,7 +71,7 @@ public class CustomEditTextPreferenceTest {
     }
 
     private static class TestPreference extends CustomEditTextPreference {
-        public TestPreference(Context context) {
+        private TestPreference(Context context) {
             super(context);
         }
     }

@@ -4,7 +4,6 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.app.ActivityManagerInternal;
 import android.app.Vr2dDisplayProperties;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,18 +12,15 @@ import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
-import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrManager;
 import android.util.Log;
 import android.view.Surface;
 
+import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 /**
@@ -230,7 +226,8 @@ class Vr2dDisplay {
                 resized = true;
             }
 
-            if ((displayProperties.getFlags() & Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
+            if ((displayProperties.getAddedFlags() &
+                    Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
                     == Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED) {
                 mIsVirtualDisplayAllowed = true;
             } else if ((displayProperties.getRemovedFlags() &
@@ -296,6 +293,8 @@ class Vr2dDisplay {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+
             mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
                     DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
                     null /* surface */, flags, null /* callback */, null /* handler */,
@@ -316,7 +315,7 @@ class Vr2dDisplay {
     }
 
     private void updateDisplayId(int displayId) {
-        mActivityManagerInternal.setVr2dDisplayId(displayId);
+        LocalServices.getService(ActivityTaskManagerInternal.class).setVr2dDisplayId(displayId);
         mWindowManagerInternal.setVr2dDisplayId(displayId);
     }
 

@@ -61,11 +61,13 @@ public class NotificationHeaderView extends ViewGroup {
     private View mCameraIcon;
     private View mMicIcon;
     private View mAppOps;
+    private View mAudiblyAlertedIcon;
     private int mIconColor;
     private int mOriginalNotificationColor;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
+    private int mHeaderTextMarginEnd;
     private Drawable mBackground;
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
@@ -121,6 +123,7 @@ public class NotificationHeaderView extends ViewGroup {
         mMicIcon = findViewById(com.android.internal.R.id.mic);
         mOverlayIcon = findViewById(com.android.internal.R.id.overlay);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
+        mAudiblyAlertedIcon = findViewById(com.android.internal.R.id.alerted_icon);
     }
 
     @Override
@@ -131,7 +134,8 @@ public class NotificationHeaderView extends ViewGroup {
                 MeasureSpec.AT_MOST);
         int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
                 MeasureSpec.AT_MOST);
-        int totalWidth = getPaddingStart() + getPaddingEnd();
+        int totalWidth = getPaddingStart();
+        int iconWidth = getPaddingEnd();
         for (int i = 0; i < getChildCount(); i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE) {
@@ -144,10 +148,19 @@ public class NotificationHeaderView extends ViewGroup {
             int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
-            totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            if ((child == mExpandButton && mShowExpandButtonAtEnd)
+                    || child == mProfileBadge
+                    || child == mAppOps) {
+                iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            } else {
+                totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            }
         }
-        if (totalWidth > givenWidth) {
-            int overFlow = totalWidth - givenWidth;
+
+        // Ensure that there is at least enough space for the icons
+        int endMargin = Math.max(mHeaderTextMarginEnd, iconWidth);
+        if (totalWidth > givenWidth - endMargin) {
+            int overFlow = totalWidth - givenWidth + endMargin;
             // We are overflowing, lets shrink the app name first
             overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
                     mChildMinWidth);
@@ -159,6 +172,7 @@ public class NotificationHeaderView extends ViewGroup {
             shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
                     0);
         }
+        totalWidth += getPaddingEnd();
         mTotalWidth = Math.min(totalWidth, givenWidth);
         setMeasuredDimension(givenWidth, givenHeight);
     }
@@ -193,28 +207,26 @@ public class NotificationHeaderView extends ViewGroup {
             }
             int childHeight = child.getMeasuredHeight();
             MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
-            left += params.getMarginStart();
-            int right = left + child.getMeasuredWidth();
+            int layoutLeft;
+            int layoutRight;
             int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
             int bottom = top + childHeight;
-            int layoutLeft = left;
-            int layoutRight = right;
-            if (child == mExpandButton && mShowExpandButtonAtEnd) {
-                layoutRight = end - mContentEndMargin;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
-            }
-            if (child == mProfileBadge) {
-                int paddingEnd = getPaddingEnd();
-                if (mShowWorkBadgeAtEnd) {
-                    paddingEnd = mContentEndMargin;
+            if ((child == mExpandButton && mShowExpandButtonAtEnd)
+                    || child == mProfileBadge
+                    || child == mAppOps) {
+                if (end == getMeasuredWidth()) {
+                    layoutRight = end - mContentEndMargin;
+                } else {
+                    layoutRight = end - params.getMarginEnd();
                 }
-                layoutRight = end - paddingEnd;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
-            }
-            if (child == mAppOps) {
-                int paddingEnd = mContentEndMargin;
-                layoutRight = end - paddingEnd;
-                end = layoutLeft = layoutRight - child.getMeasuredWidth();
+                layoutLeft = layoutRight - child.getMeasuredWidth();
+                end = layoutLeft - params.getMarginStart();
+            } else {
+                left += params.getMarginStart();
+                int right = left + child.getMeasuredWidth();
+                layoutLeft = left;
+                layoutRight = right;
+                left = right + params.getMarginEnd();
             }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 int ltrLeft = layoutLeft;
@@ -222,7 +234,6 @@ public class NotificationHeaderView extends ViewGroup {
                 layoutRight = getWidth() - ltrLeft;
             }
             child.layout(layoutLeft, top, layoutRight, bottom);
-            left = right + params.getMarginEnd();
         }
         updateTouchListener();
     }
@@ -337,6 +348,11 @@ public class NotificationHeaderView extends ViewGroup {
                 ? View.VISIBLE : View.GONE);
     }
 
+    /** Updates icon visibility based on the noisiness of the notification. */
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+        mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
+    }
+
     private void updateExpandButton() {
         int drawableId;
         int contentDescriptionId;
@@ -377,6 +393,26 @@ public class NotificationHeaderView extends ViewGroup {
 
     public CachingIconView getIcon() {
         return mIcon;
+    }
+
+    /**
+     * Sets the margin end for the text portion of the header, excluding right-aligned elements
+     * @param headerTextMarginEnd margin size
+     */
+    @RemotableViewMethod
+    public void setHeaderTextMarginEnd(int headerTextMarginEnd) {
+        if (mHeaderTextMarginEnd != headerTextMarginEnd) {
+            mHeaderTextMarginEnd = headerTextMarginEnd;
+            requestLayout();
+        }
+    }
+
+    /**
+     * Get the current margin end value for the header text
+     * @return margin size
+     */
+    public int getHeaderTextMarginEnd() {
+        return mHeaderTextMarginEnd;
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {

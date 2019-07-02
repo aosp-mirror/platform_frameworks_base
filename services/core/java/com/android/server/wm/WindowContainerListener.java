@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import android.content.res.Configuration;
+
 /**
  * Interface used by the owner/creator of the container to listen to changes with the container.
  * @see WindowContainerController
@@ -23,4 +25,5 @@ package com.android.server.wm;
 public interface WindowContainerListener {
     void registerConfigurationChangeListener(ConfigurationContainerListener listener);
     void unregisterConfigurationChangeListener(ConfigurationContainerListener listener);
+    default void onInitializeOverrideConfiguration(Configuration config) {}
 }
