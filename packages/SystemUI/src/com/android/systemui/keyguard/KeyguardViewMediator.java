@@ -61,6 +61,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
@@ -85,6 +86,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -2060,9 +2062,11 @@ public class KeyguardViewMediator extends SystemUI {
 
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelView panelView,
-            BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer) {
+            BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
+            View notificationContainer, KeyguardBypassController bypassController) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
-                biometricUnlockController, mDismissCallbackRegistry, lockIconContainer);
+                biometricUnlockController, mDismissCallbackRegistry, lockIconContainer,
+                notificationContainer, bypassController);
         return mStatusBarKeyguardViewManager;
     }
 

@@ -23,9 +23,11 @@
         android:fromAlpha="0.0" android:toAlpha="1.0"
         android:fillEnabled="true" android:fillBefore="true"
         android:interpolator="@interpolator/linear"
+        android:startOffset="80"
         android:duration="233"/>
     <translate android:fromYDelta="5%p" android:toYDelta="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/fast_out_slow_in"
+            android:startOffset="80"
             android:duration="233" />
 </set>
