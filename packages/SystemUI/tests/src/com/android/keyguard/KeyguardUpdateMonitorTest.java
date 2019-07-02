@@ -52,6 +52,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,6 +89,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private UserManager mUserManager;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -329,6 +332,28 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
         verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenTrustOnAgentKeyguard_ifBypass() {
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mKeyguardBypassController.canBypass()).thenReturn(true);
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test

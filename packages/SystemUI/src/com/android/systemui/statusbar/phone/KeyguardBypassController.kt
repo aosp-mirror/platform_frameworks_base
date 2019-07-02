@@ -104,23 +104,11 @@ class KeyguardBypassController {
      */
     fun onBiometricAuthenticated(biometricSourceType: BiometricSourceType): Boolean {
         if (bypassEnabled) {
-            if (bouncerShowing) {
-                // Whenever the bouncer is showing, we want to unlock. Otherwise we can get stuck
-                // in the shade locked where the bouncer wouldn't unlock
-                return true
-            }
-            if (statusBarStateController.state != StatusBarState.KEYGUARD) {
-                // We're bypassing but not actually on the lockscreen, the user should decide when
-                // to unlock
-                return false
-            }
-            if (launchingAffordance) {
-                return false
-            }
-            if (isPulseExpanding || qSExpanded) {
+            val can = canBypass()
+            if (!can && (isPulseExpanding || qSExpanded)) {
                 pendingUnlockType = biometricSourceType
-                return false
             }
+            return can
         }
         return true
     }
@@ -132,6 +120,22 @@ class KeyguardBypassController {
                 pendingUnlockType = null
             }
         }
+    }
+
+    /**
+     * If keyguard can be dismissed because of bypass.
+     */
+    fun canBypass(): Boolean {
+        if (bypassEnabled) {
+            return when {
+                bouncerShowing -> true
+                statusBarStateController.state != StatusBarState.KEYGUARD -> false
+                launchingAffordance -> false
+                isPulseExpanding || qSExpanded -> false
+                else -> true
+            }
+        }
+        return false
     }
 
     fun onStartedGoingToSleep() {
