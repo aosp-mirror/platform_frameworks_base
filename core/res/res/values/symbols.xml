@@ -3269,6 +3269,9 @@
   <java-symbol type="string" name="config_batterymeterBoltPath" />
   <java-symbol type="string" name="config_batterymeterPowersavePath" />
   <java-symbol type="bool" name="config_batterymeterDualTone" />
+  <java-symbol type="string" name="config_signalXPath" />
+  <java-symbol type="dimen" name="config_signalCutoutWidthFraction" />
+  <java-symbol type="dimen" name="config_signalCutoutHeightFraction" />
 
   <java-symbol type="bool" name="config_debugEnableAutomaticSystemServerHeapDumps" />
   <java-symbol type="integer" name="config_debugSystemServerPssThresholdBytes" />
@@ -3554,7 +3557,7 @@
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
-  <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
+  <java-symbol type="array" name="config_display_no_service_when_sim_unready" />
 
   <java-symbol type="layout" name="slice_grid" />
   <java-symbol type="layout" name="slice_message_local" />

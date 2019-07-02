@@ -100,7 +100,6 @@ cc_library_shared {
     ],
 
     shared_libs: [
-        "libandroidicu",
         "libbase",
         "libcutils",
         "libharfbuzz_ng",
@@ -267,6 +266,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
                 "libnetdutils",
@@ -343,6 +343,10 @@ cc_library_shared {
             ],
             include_dirs: [
                 "external/vulkan-headers/include",
+            ],
+            shared_libs: [
+                "libicui18n",
+                "libicuuc",
             ],
             static_libs: [
                 "libandroidfw",
