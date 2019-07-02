@@ -2353,12 +2353,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final String permissionName = pkg.requestedPermissions.get(i);
 
             final BasePermission bp = mSettings.getPermissionLocked(permissionName);
-            if (bp == null) {
-                Slog.w(TAG, "Cannot whitelist unknown permission: " + permissionName);
-                continue;
-            }
 
-            if (!bp.isHardOrSoftRestricted()) {
+            if (bp == null || !bp.isHardOrSoftRestricted()) {
                 continue;
             }
 
