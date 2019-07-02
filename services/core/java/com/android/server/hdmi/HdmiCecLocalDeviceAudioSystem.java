@@ -786,6 +786,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
+
+        if (systemAudioStatusOn) {
+            int sourcePhysicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+            if (sourcePhysicalAddress != getActiveSource().physicalAddress) {
+                // If the Active Source recorded by the current device is not synced up with TV,
+                // TODO(amyjojo): update Active Source internally
+            }
+            switchInputOnReceivingNewActivePath(sourcePhysicalAddress);
+        }
         return true;
     }
 
