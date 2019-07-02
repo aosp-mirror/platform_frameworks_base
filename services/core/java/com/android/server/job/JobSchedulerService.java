@@ -1494,16 +1494,16 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Called when we want to remove a JobStatus object that we've finished executing. Returns the
-     * object removed.
+     * Called when we want to remove a JobStatus object that we've finished executing.
+     * @return true if the job was removed.
      */
     private boolean stopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean writeBack) {
+            boolean removeFromPersisted) {
         // Deal with any remaining work items in the old job.
         jobStatus.stopTrackingJobLocked(ActivityManager.getService(), incomingJob);
 
         // Remove from store as well as controllers.
-        final boolean removed = mJobs.remove(jobStatus, writeBack);
+        final boolean removed = mJobs.remove(jobStatus, removeFromPersisted);
         if (removed && mReadyToRock) {
             for (int i=0; i<mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
