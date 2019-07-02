@@ -45,6 +45,7 @@ import org.mockito.MockitoAnnotations;
 public class BubbleFlyoutViewTest extends SysuiTestCase {
     private BubbleFlyoutView mFlyout;
     private TextView mFlyoutText;
+    private float[] mDotCenter = new float[2];
 
     @Before
     public void setUp() throws Exception {
@@ -52,12 +53,14 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
         mFlyout = new BubbleFlyoutView(getContext());
 
         mFlyoutText = mFlyout.findViewById(R.id.bubble_flyout_text);
+        mDotCenter[0] = 30;
+        mDotCenter[1] = 30;
     }
 
     @Test
     public void testShowFlyout_isVisible() {
         mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null);
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter);
         mFlyout.setVisibility(View.VISIBLE);
 
         assertEquals("Hello", mFlyoutText.getText());
@@ -68,7 +71,7 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
     public void testFlyoutHide_runsCallback() {
         Runnable after = Mockito.mock(Runnable.class);
         mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, after);
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, after, mDotCenter);
         mFlyout.hideFlyout();
 
         verify(after).run();
@@ -77,7 +80,7 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
     @Test
     public void testSetCollapsePercent() {
         mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null);
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter);
         mFlyout.setVisibility(View.VISIBLE);
 
         mFlyout.setCollapsePercent(1f);

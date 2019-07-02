@@ -18,6 +18,7 @@ package com.android.systemui.bubbles;
 import android.content.Context;
 
 import com.android.launcher3.icons.BaseIconFactory;
+import com.android.systemui.R;
 
 /**
  * Factory for creating normalized bubble icons.
@@ -25,8 +26,9 @@ import com.android.launcher3.icons.BaseIconFactory;
  * so there is no need to manage a pool across multiple threads.
  */
 public class BubbleIconFactory extends BaseIconFactory {
-    protected BubbleIconFactory(Context context, int iconBitmapSize) {
-        super(context, context.getResources().getConfiguration().densityDpi, iconBitmapSize);
+    protected BubbleIconFactory(Context context) {
+        super(context, context.getResources().getConfiguration().densityDpi,
+                context.getResources().getDimensionPixelSize(R.dimen.individual_bubble_size));
     }
 
     public int getBadgeSize() {

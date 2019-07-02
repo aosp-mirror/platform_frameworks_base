@@ -166,18 +166,23 @@ public class BubbleView extends FrameLayout {
 
     /** Sets the position of the 'new' dot, animating it out and back in if requested. */
     void setDotPosition(boolean onLeft, boolean animate) {
-        if (animate && onLeft != mBadgedImageView.getDotPosition() && !mSuppressDot) {
+        if (animate && onLeft != mBadgedImageView.getDotOnLeft() && !mSuppressDot) {
             animateDot(false /* showDot */, () -> {
-                mBadgedImageView.setDotPosition(onLeft);
+                mBadgedImageView.setDotOnLeft(onLeft);
                 animateDot(true /* showDot */, null);
             });
         } else {
-            mBadgedImageView.setDotPosition(onLeft);
+            mBadgedImageView.setDotOnLeft(onLeft);
         }
     }
 
+    float[] getDotCenter() {
+        float[] unscaled = mBadgedImageView.getDotCenter();
+        return new float[]{unscaled[0], unscaled[1]};
+    }
+
     boolean getDotPositionOnLeft() {
-        return mBadgedImageView.getDotPosition();
+        return mBadgedImageView.getDotOnLeft();
     }
 
     /**
