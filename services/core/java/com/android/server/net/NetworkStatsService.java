@@ -1208,14 +1208,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     }
                 }
 
-                // Traffic occurring on stacked interfaces is usually clatd,
-                // which is already accounted against its final egress interface
-                // by the kernel. Thus, we only need to collect stacked
-                // interface stats at the UID level.
+                // Traffic occurring on stacked interfaces is usually clatd.
+                // UID stats are always counted on the stacked interface and never
+                // on the base interface, because the packets on the base interface
+                // do not actually match application sockets until they are translated.
+                //
+                // Interface stats are more complicated. Packets subject to BPF offload
+                // never appear on the base interface and only appear on the stacked
+                // interface, so to ensure those packets increment interface stats, interface
+                // stats from stacked interfaces must be collected.
                 final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
                 for (LinkProperties stackedLink : stackedLinks) {
                     final String stackedIface = stackedLink.getInterfaceName();
                     if (stackedIface != null) {
+                        if (mUseBpfTrafficStats) {
+                            findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
+                        }
                         findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
                         if (isMobile) {
                             mobileIfaces.add(stackedIface);
