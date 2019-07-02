@@ -52,7 +52,7 @@ import android.view.KeyEvent;
 
     void onFingerprintGesture(int gesture);
 
-    void onAccessibilityButtonClicked();
+    void onAccessibilityButtonClicked(int displayId);
 
     void onAccessibilityButtonAvailabilityChanged(boolean available);
 }

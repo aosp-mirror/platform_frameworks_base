@@ -1085,9 +1085,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                     final AccessibilityServiceConnection service = state.mBoundServices.get(i);
                     if (service.mRequestAccessibilityButton) {
-                        // TODO(b/120762691): Need to notify each accessibility service if
-                        // accessibility button is clicked per display.
-                        service.notifyAccessibilityButtonClickedLocked();
+                        service.notifyAccessibilityButtonClickedLocked(displayId);
                         return;
                     }
                 }
@@ -1109,9 +1107,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     final AccessibilityServiceConnection service = state.mBoundServices.get(i);
                     if (service.mRequestAccessibilityButton && (service.mComponentName.equals(
                             state.mServiceAssignedToAccessibilityButton))) {
-                        // TODO(b/120762691): Need to notify each accessibility service if
-                        // accessibility button is clicked per display.
-                        service.notifyAccessibilityButtonClickedLocked();
+                        service.notifyAccessibilityButtonClickedLocked(displayId);
                         return;
                     }
                 }

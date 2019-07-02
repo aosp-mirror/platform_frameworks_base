@@ -1289,7 +1289,7 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void onAccessibilityButtonClicked() {
+                public void onAccessibilityButtonClicked(int displayId) {
                     /* do nothing */
                 }
 
