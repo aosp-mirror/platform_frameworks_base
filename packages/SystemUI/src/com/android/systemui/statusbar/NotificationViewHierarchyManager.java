@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
@@ -44,6 +47,7 @@ import java.util.List;
 import java.util.Stack;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -58,6 +62,8 @@ import dagger.Lazy;
 @Singleton
 public class NotificationViewHierarchyManager implements DynamicPrivacyController.Listener {
     private static final String TAG = "NotificationViewHierarchyManager";
+
+    private final Handler mHandler;
 
     //TODO: change this top <Entry, List<Entry>>?
     private final HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>>
@@ -88,9 +94,13 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     // Used to help track down re-entrant calls to our update methods, which will cause bugs.
     private boolean mPerformingUpdate;
+    // Hack to get around re-entrant call in onDynamicPrivacyChanged() until we can track down
+    // the problem.
+    private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
     @Inject
     public NotificationViewHierarchyManager(Context context,
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
@@ -100,6 +110,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             BubbleData bubbleData,
             KeyguardBypassController bypassController,
             DynamicPrivacyController privacyController) {
+        mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mBypassController = bypassController;
         mGroupManager = groupManager;
@@ -438,6 +449,20 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
+        if (mPerformingUpdate) {
+            Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
+        }
+        // This listener can be called from updateNotificationViews() via a convoluted listener
+        // chain, so we post here to prevent a re-entrant call. See b/136186188
+        // TODO: Refactor away the need for this
+        if (!mIsHandleDynamicPrivacyChangeScheduled) {
+            mIsHandleDynamicPrivacyChangeScheduled = true;
+            mHandler.post(this::onHandleDynamicPrivacyChanged);
+        }
+    }
+
+    private void onHandleDynamicPrivacyChanged() {
+        mIsHandleDynamicPrivacyChangeScheduled = false;
         updateNotificationViews();
     }
 

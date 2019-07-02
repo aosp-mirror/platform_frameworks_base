@@ -2523,11 +2523,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final int resource;
-        if (onWallpaper) {
-            resource = R.anim.lock_screen_behind_enter_wallpaper;
-        } else if (subtleAnimation) {
+        if (subtleAnimation) {
             resource = R.anim.lock_screen_behind_enter_subtle;
-        } else {
+        } else if (onWallpaper) {
+            resource = R.anim.lock_screen_behind_enter_wallpaper;
+        } else  {
             resource = R.anim.lock_screen_behind_enter;
         }
 

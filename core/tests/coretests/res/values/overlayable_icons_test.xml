@@ -70,6 +70,7 @@
     <item>@*android:drawable/ic_wifi_signal_3</item>
     <item>@*android:drawable/ic_wifi_signal_4</item>
     <item>@*android:drawable/perm_group_activity_recognition</item>
+    <item>@*android:drawable/perm_group_aural</item>
     <item>@*android:drawable/perm_group_calendar</item>
     <item>@*android:drawable/perm_group_call_log</item>
     <item>@*android:drawable/perm_group_camera</item>
