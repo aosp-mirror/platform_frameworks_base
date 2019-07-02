@@ -42,6 +42,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
+import android.app.AutomaticZenRule;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -1313,7 +1314,17 @@ public final class Settings {
             "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
 
     /**
-     * @hide
+     * Activity Action: Show the automatic do not disturb rule listing page
+     * <p>
+     *     Users can add, enable, disable, and remove automatic do not disturb rules from this
+     *     screen. See {@link NotificationManager#addAutomaticZenRule(AutomaticZenRule)} for more
+     *     details.
+     * </p>
+     * <p>
+     *     Input: Nothing
+     *     Output: Nothing
+     * </p>
+     *
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CONDITION_PROVIDER_SETTINGS
