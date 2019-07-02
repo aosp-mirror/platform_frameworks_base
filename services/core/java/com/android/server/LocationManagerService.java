@@ -1098,12 +1098,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         @GuardedBy("mLock")
         public void sendExtraCommandLocked(String command, Bundle extras) {
             if (mProvider != null) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    mProvider.sendExtraCommand(command, extras);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+                // intentionally do not clear binder identity so that providers can evaluate who
+                // is sending the extra command
+                mProvider.sendExtraCommand(command, extras);
             }
         }
 
