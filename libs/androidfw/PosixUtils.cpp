@@ -64,6 +64,9 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
     return nullptr;
   }
 
+  auto gid = getgid();
+  auto uid = getuid();
+
   char const** argv0 = (char const**)malloc(sizeof(char*) * (argv.size() + 1));
   for (size_t i = 0; i < argv.size(); i++) {
     argv0[i] = argv[i].c_str();
@@ -75,6 +78,16 @@ std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv) 
       PLOG(ERROR) << "fork";
       return nullptr;
     case 0: // child
+      if (setgid(gid) != 0) {
+        PLOG(ERROR) << "setgid";
+        exit(1);
+      }
+
+      if (setuid(uid) != 0) {
+        PLOG(ERROR) << "setuid";
+        exit(1);
+      }
+
       close(stdout[0]);
       if (dup2(stdout[1], STDOUT_FILENO) == -1) {
         abort();
