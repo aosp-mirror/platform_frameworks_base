@@ -2113,6 +2113,15 @@ public class CarrierConfigManager {
             "data_warning_notification_bool";
 
     /**
+     * Controls if the device should automatically warn the user that sim voice & data function
+     * might be limited due to dual sim scenario. When set to {@true} display the notification,
+     * {@code false} otherwise.
+     * @hide
+     */
+    public static final String KEY_LIMITED_SIM_FUNCTION_NOTIFICATION_FOR_DSDS_BOOL =
+            "limited_sim_function_notification_for_dsds_bool";
+
+    /**
      * Controls the cellular data limit.
      * <p>
      * If the user uses more than this amount of data in their billing cycle, as defined by
@@ -3260,6 +3269,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MONTHLY_DATA_CYCLE_DAY_INT, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putLong(KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putBoolean(KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
+        sDefaults.putBoolean(KEY_LIMITED_SIM_FUNCTION_NOTIFICATION_FOR_DSDS_BOOL, false);
         sDefaults.putLong(KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putBoolean(KEY_DATA_LIMIT_NOTIFICATION_BOOL, true);
         sDefaults.putBoolean(KEY_DATA_RAPID_NOTIFICATION_BOOL, true);
