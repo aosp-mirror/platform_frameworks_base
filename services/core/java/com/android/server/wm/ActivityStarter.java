@@ -2307,12 +2307,12 @@ class ActivityStarter {
         // isLockTaskModeViolation fails below.
 
         if (mReuseTask == null) {
+            final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
             final TaskRecord task = mTargetStack.createTaskRecord(
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.mUserId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
-                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity, mSourceRecord,
-                    mOptions);
+                    mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
             addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
             updateBounds(mStartActivity.getTaskRecord(), mLaunchParams.mBounds);
 
