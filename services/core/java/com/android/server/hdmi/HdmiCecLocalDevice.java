@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -426,15 +427,26 @@ abstract class HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Note that since this method is called after logical address allocation is done,
         // mDeviceInfo should not be null.
+        buildAndSendSetOsdName(message.getSource());
+        return true;
+    }
+
+    protected void buildAndSendSetOsdName(int dest) {
         HdmiCecMessage cecMessage =
-                HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                        mAddress, message.getSource(), mDeviceInfo.getDisplayName());
+            HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                mAddress, dest, mDeviceInfo.getDisplayName());
         if (cecMessage != null) {
-            mService.sendCecCommand(cecMessage);
+            mService.sendCecCommand(cecMessage, new SendMessageCallback() {
+                @Override
+                public void onSendCompleted(int error) {
+                    if (error != SendMessageResult.SUCCESS) {
+                        HdmiLogger.debug("Failed to send cec command " + cecMessage);
+                    }
+                }
+            });
         } else {
             Slog.w(TAG, "Failed to build <Get Osd Name>:" + mDeviceInfo.getDisplayName());
         }
-        return true;
     }
 
     // Audio System device with no Playback device type
