@@ -1311,7 +1311,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return semiTransparentBarColor;
         } else if ((flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
             return Color.BLACK;
-        } else if (scrimTransparent && barColor == Color.TRANSPARENT) {
+        } else if (scrimTransparent && Color.alpha(barColor) == 0) {
             boolean light = (sysuiVis & lightSysuiFlag) != 0;
             return light ? SCRIM_LIGHT : semiTransparentBarColor;
         } else {
