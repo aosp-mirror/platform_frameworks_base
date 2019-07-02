@@ -113,6 +113,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
@@ -287,6 +288,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @UnsupportedAppUsage
     static volatile IPackageManager sPackageManager;
+    private static volatile IPermissionManager sPermissionManager;
 
     @UnsupportedAppUsage
     final ApplicationThread mAppThread = new ApplicationThread();
@@ -2136,14 +2138,21 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     public static IPackageManager getPackageManager() {
         if (sPackageManager != null) {
-            //Slog.v("PackageManager", "returning cur default = " + sPackageManager);
             return sPackageManager;
         }
-        IBinder b = ServiceManager.getService("package");
-        //Slog.v("PackageManager", "default service binder = " + b);
+        final IBinder b = ServiceManager.getService("package");
         sPackageManager = IPackageManager.Stub.asInterface(b);
-        //Slog.v("PackageManager", "default service = " + sPackageManager);
         return sPackageManager;
+    }
+
+    /** Returns the permission manager */
+    public static IPermissionManager getPermissionManager() {
+        if (sPermissionManager != null) {
+            return sPermissionManager;
+        }
+        final IBinder b = ServiceManager.getService("permissionmgr");
+        sPermissionManager = IPermissionManager.Stub.asInterface(b);
+        return sPermissionManager;
     }
 
     private Configuration mMainThreadConfig = new Configuration();
@@ -6317,7 +6326,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         final InstrumentationInfo ii;
         if (data.instrumentationName != null) {
             try {
-                ii = new ApplicationPackageManager(null, getPackageManager())
+                ii = new ApplicationPackageManager(
+                        null, getPackageManager(), getPermissionManager())
                         .getInstrumentationInfo(data.instrumentationName, 0);
             } catch (PackageManager.NameNotFoundException e) {
                 throw new RuntimeException(

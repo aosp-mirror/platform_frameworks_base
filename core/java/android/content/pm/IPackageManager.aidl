@@ -171,9 +171,6 @@ interface IPackageManager {
     boolean isUidPrivileged(int uid);
 
     @UnsupportedAppUsage
-    String[] getAppOpPermissionPackages(String permissionName);
-
-    @UnsupportedAppUsage
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
     ResolveInfo findPersistentPreferredActivity(in Intent intent, int userId);
@@ -772,4 +769,12 @@ interface IPackageManager {
     void setRuntimePermissionsVersion(int version, int userId);
 
     void notifyPackagesReplacedReceived(in String[] packages);
+
+    //------------------------------------------------------------------------
+    //
+    // The following binder interfaces have been moved to IPermissionManager
+    //
+    //------------------------------------------------------------------------
+    @UnsupportedAppUsage
+    String[] getAppOpPermissionPackages(String permissionName);
 }

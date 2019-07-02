@@ -63,12 +63,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
@@ -122,7 +124,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Manages all permissions and handles permissions related tasks.
  */
-public class PermissionManagerService {
+public class PermissionManagerService extends IPermissionManager.Stub {
     private static final String TAG = "PackageManager";
 
     /** Permission grant: not grant the permission. */
@@ -283,13 +285,37 @@ public class PermissionManagerService {
         if (permMgrInt != null) {
             return permMgrInt;
         }
-        new PermissionManagerService(context, externalLock);
+        PermissionManagerService permissionService =
+                (PermissionManagerService) ServiceManager.getService("permissionmgr");
+        if (permissionService == null) {
+            permissionService =
+                    new PermissionManagerService(context, externalLock);
+            ServiceManager.addService("permissionmgr", permissionService);
+        }
         return LocalServices.getService(PermissionManagerServiceInternal.class);
     }
 
     @Nullable BasePermission getPermission(String permName) {
         synchronized (mLock) {
             return mSettings.getPermissionLocked(permName);
+        }
+    }
+
+    @Override
+    public String[] getAppOpPermissionPackages(String permName) {
+        return getAppOpPermissionPackagesInternal(permName, getCallingUid());
+    }
+
+    private String[] getAppOpPermissionPackagesInternal(String permName, int callingUid) {
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        synchronized (mLock) {
+            final ArraySet<String> pkgs = mSettings.mAppOpPermissionPackages.get(permName);
+            if (pkgs == null) {
+                return null;
+            }
+            return pkgs.toArray(new String[pkgs.size()]);
         }
     }
 
@@ -2497,19 +2523,6 @@ public class PermissionManagerService {
         return runtimePermissionChangedUserIds;
     }
 
-    private String[] getAppOpPermissionPackages(String permName) {
-        if (mPackageManagerInt.getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return null;
-        }
-        synchronized (mLock) {
-            final ArraySet<String> pkgs = mSettings.mAppOpPermissionPackages.get(permName);
-            if (pkgs == null) {
-                return null;
-            }
-            return pkgs.toArray(new String[pkgs.size()]);
-        }
-    }
-
     private int getPermissionFlags(
             String permName, String packageName, int callingUid, int userId) {
         if (!mUserManagerInt.exists(userId)) {
@@ -3200,8 +3213,9 @@ public class PermissionManagerService {
                     volumeUuid, sdkUpdated, allPackages, callback);
         }
         @Override
-        public String[] getAppOpPermissionPackages(String permName) {
-            return PermissionManagerService.this.getAppOpPermissionPackages(permName);
+        public String[] getAppOpPermissionPackages(String permName, int callingUid) {
+            return PermissionManagerService.this
+                    .getAppOpPermissionPackagesInternal(permName, callingUid);
         }
         @Override
         public int getPermissionFlags(String permName, String packageName, int callingUid,

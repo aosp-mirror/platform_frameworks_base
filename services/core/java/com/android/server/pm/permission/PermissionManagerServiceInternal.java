@@ -155,7 +155,9 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void removeDynamicPermission(@NonNull String permName, int callingUid,
             @Nullable PermissionCallback callback);
 
-    public abstract @Nullable String[] getAppOpPermissionPackages(@NonNull String permName);
+    /** Retrieve the packages that have requested the given app op permission */
+    public abstract @Nullable String[] getAppOpPermissionPackages(
+            @NonNull String permName, int callingUid);
 
     public abstract int getPermissionFlags(@NonNull String permName,
             @NonNull String packageName, int callingUid, int userId);

@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.IPackageManager;
+import android.permission.IPermissionManager;
 
 /**
  * Special private access for certain globals related to a process.
@@ -49,6 +50,14 @@ public class AppGlobals {
     @UnsupportedAppUsage
     public static IPackageManager getPackageManager() {
         return ActivityThread.getPackageManager();
+    }
+
+    /**
+     * Return the raw interface to the permission manager.
+     * @return The permission manager.
+     */
+    public static IPermissionManager getPermissionManager() {
+        return ActivityThread.getPermissionManager();
     }
 
     /**

@@ -271,8 +271,8 @@ import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -2890,6 +2890,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mIsolatedAppBindArgs == null) {
                 mIsolatedAppBindArgs = new ArrayMap<>(1);
                 addServiceToMap(mIsolatedAppBindArgs, "package");
+                addServiceToMap(mIsolatedAppBindArgs, "permissionmgr");
             }
             return mIsolatedAppBindArgs;
         }
@@ -2901,6 +2902,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
             // Enable the check in ApplicationThread.bindApplication() to make sure.
             addServiceToMap(mAppBindArgs, "package");
+            addServiceToMap(mAppBindArgs, "permissionmgr");
             addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
             addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
             addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);

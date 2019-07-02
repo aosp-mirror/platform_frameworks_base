@@ -238,6 +238,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
@@ -961,7 +962,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // TODO remove this and go through mPermissonManager directly
     final DefaultPermissionGrantPolicy mDefaultPermissionPolicy;
+    // Internal interface for permission manager
     private final PermissionManagerServiceInternal mPermissionManager;
+    // Public interface for permission manager
+    private final IPermissionManager mPermissionManagerService;
 
     private final ComponentResolver mComponentResolver;
     // List of packages names to keep cached, even if they are uninstalled for all users
@@ -2419,6 +2423,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPackages);
             mPermissionManager = PermissionManagerService.create(context,
                     mPackages /*externalLock*/);
+            mPermissionManagerService =
+                    (IPermissionManager) ServiceManager.getService("permissionmgr");
             mDefaultPermissionPolicy = mPermissionManager.getDefaultPermissionGrantPolicy();
             mSettings = new Settings(Environment.getDataDirectory(),
                     mPermissionManager.getPermissionSettings(), mPackages);
@@ -6567,7 +6573,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] getAppOpPermissionPackages(String permName) {
-        return mPermissionManager.getAppOpPermissionPackages(permName);
+        try {
+            // NOTE: Because this is defined in the package manager service AIDL, we want
+            // ensure we also go through the permission manager service AIDL
+            return mPermissionManagerService.getAppOpPermissionPackages(permName);
+        } catch (RemoteException ignore) { }
+        return null;
     }
 
     @Override
@@ -25286,7 +25297,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         String appOpPermission = Manifest.permission.REQUEST_INSTALL_PACKAGES;
-        String[] packagesDeclaringPermission = getAppOpPermissionPackages(appOpPermission);
+        String[] packagesDeclaringPermission =
+                mPermissionManager.getAppOpPermissionPackages(appOpPermission, callingUid);
         if (!ArrayUtils.contains(packagesDeclaringPermission, packageName)) {
             if (throwIfPermNotDeclared) {
                 throw new SecurityException("Need to declare " + appOpPermission
