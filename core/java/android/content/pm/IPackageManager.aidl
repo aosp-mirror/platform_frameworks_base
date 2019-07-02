@@ -78,15 +78,6 @@ interface IPackageManager {
     @UnsupportedAppUsage
     String[] canonicalToCurrentPackageNames(in String[] names);
 
-    PermissionInfo getPermissionInfo(String name, String packageName, int flags);
-
-    ParceledListSlice queryPermissionsByGroup(String group, int flags);
-
-    @UnsupportedAppUsage
-    PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
-
-    ParceledListSlice getAllPermissionGroups(int flags);
-
     @UnsupportedAppUsage
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
@@ -777,4 +768,7 @@ interface IPackageManager {
     //------------------------------------------------------------------------
     @UnsupportedAppUsage
     String[] getAppOpPermissionPackages(String permissionName);
+
+    @UnsupportedAppUsage
+    PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
 }

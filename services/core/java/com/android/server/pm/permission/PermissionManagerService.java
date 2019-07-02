@@ -51,10 +51,13 @@ import android.annotation.UserIdInt;
 import android.app.ApplicationPackageManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.PermissionGroupInfoFlags;
+import android.content.pm.PackageManager.PermissionInfoFlags;
 import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.metrics.LogMaker;
@@ -319,6 +322,84 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @Override
+    @NonNull
+    public ParceledListSlice<PermissionGroupInfo> getAllPermissionGroups(
+            @PermissionGroupInfoFlags int flags) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return ParceledListSlice.emptyList();
+        }
+        synchronized (mLock) {
+            final int n = mSettings.mPermissionGroups.size();
+            final ArrayList<PermissionGroupInfo> out =
+                    new ArrayList<PermissionGroupInfo>(n);
+            for (PackageParser.PermissionGroup pg : mSettings.mPermissionGroups.values()) {
+                out.add(PackageParser.generatePermissionGroupInfo(pg, flags));
+            }
+            return new ParceledListSlice<>(out);
+        }
+    }
+
+
+    @Override
+    @Nullable
+    public PermissionGroupInfo getPermissionGroupInfo(String groupName,
+            @PermissionGroupInfoFlags int flags) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        synchronized (mLock) {
+            return PackageParser.generatePermissionGroupInfo(
+                    mSettings.mPermissionGroups.get(groupName), flags);
+        }
+    }
+
+
+    @Override
+    @Nullable
+    public PermissionInfo getPermissionInfo(String permName, String packageName,
+            @PermissionInfoFlags int flags) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        synchronized (mLock) {
+            final BasePermission bp = mSettings.getPermissionLocked(permName);
+            if (bp == null) {
+                return null;
+            }
+            final int adjustedProtectionLevel = adjustPermissionProtectionFlagsLocked(
+                    bp.getProtectionLevel(), packageName, callingUid);
+            return bp.generatePermissionInfo(adjustedProtectionLevel, flags);
+        }
+    }
+
+    @Override
+    @Nullable
+    public ParceledListSlice<PermissionInfo> queryPermissionsByGroup(String groupName,
+            @PermissionInfoFlags int flags) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        synchronized (mLock) {
+            if (groupName != null && !mSettings.mPermissionGroups.containsKey(groupName)) {
+                return null;
+            }
+            final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
+            for (BasePermission bp : mSettings.mPermissions.values()) {
+                final PermissionInfo pi = bp.generatePermissionInfo(groupName, flags);
+                if (pi != null) {
+                    out.add(pi);
+                }
+            }
+            return new ParceledListSlice<>(out);
+        }
+    }
+
+
     private int checkPermission(String permName, String pkgName, int callingUid, int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
@@ -515,69 +596,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             String permName, int userId) {
         return FULLER_PERMISSION_MAP.containsKey(permName)
                 && permissionsState.hasPermission(FULLER_PERMISSION_MAP.get(permName), userId);
-    }
-
-    private PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags,
-            int callingUid) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        synchronized (mLock) {
-            return PackageParser.generatePermissionGroupInfo(
-                    mSettings.mPermissionGroups.get(groupName), flags);
-        }
-    }
-
-    private List<PermissionGroupInfo> getAllPermissionGroups(int flags, int callingUid) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        synchronized (mLock) {
-            final int N = mSettings.mPermissionGroups.size();
-            final ArrayList<PermissionGroupInfo> out
-                    = new ArrayList<PermissionGroupInfo>(N);
-            for (PackageParser.PermissionGroup pg : mSettings.mPermissionGroups.values()) {
-                out.add(PackageParser.generatePermissionGroupInfo(pg, flags));
-            }
-            return out;
-        }
-    }
-
-    private PermissionInfo getPermissionInfo(String permName, String packageName, int flags,
-            int callingUid) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        // reader
-        synchronized (mLock) {
-            final BasePermission bp = mSettings.getPermissionLocked(permName);
-            if (bp == null) {
-                return null;
-            }
-            final int adjustedProtectionLevel = adjustPermissionProtectionFlagsLocked(
-                    bp.getProtectionLevel(), packageName, callingUid);
-            return bp.generatePermissionInfo(adjustedProtectionLevel, flags);
-        }
-    }
-
-    private List<PermissionInfo> getPermissionInfoByGroup(
-            String groupName, int flags, int callingUid) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        synchronized (mLock) {
-            if (groupName != null && !mSettings.mPermissionGroups.containsKey(groupName)) {
-                return null;
-            }
-            final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
-            for (BasePermission bp : mSettings.mPermissions.values()) {
-                final PermissionInfo pi = bp.generatePermissionInfo(groupName, flags);
-                if (pi != null) {
-                    out.add(pi);
-                }
-            }
-            return out;
-        }
     }
 
     private int adjustPermissionProtectionFlagsLocked(
@@ -3264,27 +3282,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
                 int callingUid) {
             return PermissionManagerService.this.checkUidPermission(permName, pkg, uid, callingUid);
-        }
-        @Override
-        public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags,
-                int callingUid) {
-            return PermissionManagerService.this.getPermissionGroupInfo(
-                    groupName, flags, callingUid);
-        }
-        @Override
-        public List<PermissionGroupInfo> getAllPermissionGroups(int flags, int callingUid) {
-            return PermissionManagerService.this.getAllPermissionGroups(flags, callingUid);
-        }
-        @Override
-        public PermissionInfo getPermissionInfo(String permName, String packageName, int flags,
-                int callingUid) {
-            return PermissionManagerService.this.getPermissionInfo(
-                    permName, packageName, flags, callingUid);
-        }
-        @Override
-        public List<PermissionInfo> getPermissionInfoByGroup(String group, int flags,
-                int callingUid) {
-            return PermissionManagerService.this.getPermissionInfoByGroup(group, flags, callingUid);
         }
         @Override
         public PermissionSettings getPermissionSettings() {

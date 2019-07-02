@@ -20,9 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.PermissionInfoFlags;
 import android.content.pm.PackageParser;
-import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
@@ -161,26 +159,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     public abstract int getPermissionFlags(@NonNull String permName,
             @NonNull String packageName, int callingUid, int userId);
-    /**
-     * Retrieve all of the information we know about a particular group of permissions.
-     */
-    public abstract @Nullable PermissionGroupInfo getPermissionGroupInfo(
-            @NonNull String groupName, int flags, int callingUid);
-    /**
-     * Retrieve all of the known permission groups in the system.
-     */
-    public abstract @Nullable List<PermissionGroupInfo> getAllPermissionGroups(int flags,
-            int callingUid);
-    /**
-     * Retrieve all of the information we know about a particular permission.
-     */
-    public abstract @Nullable PermissionInfo getPermissionInfo(@NonNull String permName,
-            @NonNull String packageName, @PermissionInfoFlags int flags, int callingUid);
-    /**
-     * Retrieve all of the permissions associated with a particular group.
-     */
-    public abstract @Nullable List<PermissionInfo> getPermissionInfoByGroup(@NonNull String group,
-            @PermissionInfoFlags int flags, int callingUid);
 
     /**
      * Updates the flags associated with a permission by replacing the flags in

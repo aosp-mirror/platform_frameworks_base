@@ -4630,30 +4630,15 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
-    @Override
-    public PermissionInfo getPermissionInfo(String name, String packageName, int flags) {
-        return mPermissionManager.getPermissionInfo(name, packageName, flags, getCallingUid());
-    }
-
-    @Override
-    public @Nullable ParceledListSlice<PermissionInfo> queryPermissionsByGroup(String groupName,
-            int flags) {
-        final List<PermissionInfo> permissionList =
-                mPermissionManager.getPermissionInfoByGroup(groupName, flags, getCallingUid());
-        return (permissionList == null) ? null : new ParceledListSlice<>(permissionList);
-    }
-
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags) {
-        return mPermissionManager.getPermissionGroupInfo(groupName, flags, getCallingUid());
-    }
-
-    @Override
-    public @NonNull ParceledListSlice<PermissionGroupInfo> getAllPermissionGroups(int flags) {
-        final List<PermissionGroupInfo> permissionList =
-                mPermissionManager.getAllPermissionGroups(flags, getCallingUid());
-        return (permissionList == null)
-                ? ParceledListSlice.emptyList() : new ParceledListSlice<>(permissionList);
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            return mPermissionManagerService.getPermissionGroupInfo(groupName, flags);
+        } catch (RemoteException ignore) { }
+        return null;
     }
 
     @GuardedBy("mPackages")
@@ -6571,11 +6556,12 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public String[] getAppOpPermissionPackages(String permName) {
         try {
-            // NOTE: Because this is defined in the package manager service AIDL, we want
-            // ensure we also go through the permission manager service AIDL
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
             return mPermissionManagerService.getAppOpPermissionPackages(permName);
         } catch (RemoteException ignore) { }
         return null;
@@ -21758,7 +21744,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        (new PackageManagerShellCommand(this)).exec(
+        (new PackageManagerShellCommand(this, mPermissionManagerService)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
 

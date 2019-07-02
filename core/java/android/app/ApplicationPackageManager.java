@@ -321,30 +321,60 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public PermissionInfo getPermissionInfo(String name, int flags)
+    @SuppressWarnings("unchecked")
+    public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
+        try {
+            final ParceledListSlice<PermissionGroupInfo> parceledList =
+                    mPermissionManager.getAllPermissionGroups(flags);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags)
             throws NameNotFoundException {
         try {
-            PermissionInfo pi = mPM.getPermissionInfo(name,
-                    mContext.getOpPackageName(), flags);
+            final PermissionGroupInfo pgi =
+                    mPermissionManager.getPermissionGroupInfo(groupName, flags);
+            if (pgi != null) {
+                return pgi;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        throw new NameNotFoundException(groupName);
+    }
+
+    @Override
+    public PermissionInfo getPermissionInfo(String permName, int flags)
+            throws NameNotFoundException {
+        try {
+            final String packageName = mContext.getOpPackageName();
+            final PermissionInfo pi =
+                    mPermissionManager.getPermissionInfo(permName, packageName, flags);
             if (pi != null) {
                 return pi;
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
-        throw new NameNotFoundException(name);
+        throw new NameNotFoundException(permName);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<PermissionInfo> queryPermissionsByGroup(String group, int flags)
+    public List<PermissionInfo> queryPermissionsByGroup(String groupName, int flags)
             throws NameNotFoundException {
         try {
-            ParceledListSlice<PermissionInfo> parceledList =
-                    mPM.queryPermissionsByGroup(group, flags);
+            final ParceledListSlice<PermissionInfo> parceledList =
+                    mPermissionManager.queryPermissionsByGroup(groupName, flags);
             if (parceledList != null) {
-                List<PermissionInfo> pi = parceledList.getList();
+                final List<PermissionInfo> pi = parceledList.getList();
                 if (pi != null) {
                     return pi;
                 }
@@ -352,8 +382,7 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
-        throw new NameNotFoundException(group);
+        throw new NameNotFoundException(groupName);
     }
 
     @Override
@@ -366,36 +395,6 @@ public class ApplicationPackageManager extends PackageManager {
     public boolean isWirelessConsentModeEnabled() {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_wirelessConsentRequired);
-    }
-
-    @Override
-    public PermissionGroupInfo getPermissionGroupInfo(String name,
-            int flags) throws NameNotFoundException {
-        try {
-            PermissionGroupInfo pgi = mPM.getPermissionGroupInfo(name, flags);
-            if (pgi != null) {
-                return pgi;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        throw new NameNotFoundException(name);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
-        try {
-            ParceledListSlice<PermissionGroupInfo> parceledList =
-                    mPM.getAllPermissionGroups(flags);
-            if (parceledList == null) {
-                return Collections.emptyList();
-            }
-            return parceledList.getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     @Override
