@@ -627,7 +627,7 @@ public class NavigationBarView extends FrameLayout implements
         if (mOverviewProxyService.isEnabled()) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
-            if (pinningActive) {
+            if (pinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
                 disableBack = disableHome = false;
             }
         } else if (pinningActive) {
