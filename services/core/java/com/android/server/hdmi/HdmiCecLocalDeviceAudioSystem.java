@@ -998,6 +998,19 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 mService.announceSystemAudioModeChange(newSystemAudioMode);
             }
         }
+        // Since ARC is independent from System Audio Mode control, when the TV requests
+        // System Audio Mode off, it does not need to terminate ARC at the same time.
+        // When the current audio device is using ARC as a TV input and disables muting,
+        // it needs to automatically switch to the previous active input source when System
+        // Audio Mode is off even without terminating the ARC. This can stop the current
+        // audio device from playing audio when system audio mode is off.
+        if (mArcIntentUsed
+            && !mService.readBooleanSystemProperty(
+                    Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
+            && !newSystemAudioMode
+            && getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
+            routeToInputFromPortId(getRoutingPort());
+        }
         // Init arc whenever System Audio Mode is on
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
