@@ -3795,9 +3795,11 @@
     <integer name="config_stableDeviceDisplayWidth">-1</integer>
     <integer name="config_stableDeviceDisplayHeight">-1</integer>
 
-    <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
-         when SIM is unready. -->
-    <bool name="config_display_no_service_when_sim_unready">false</bool>
+    <!-- List of countries in which we display 'No service' on status bar
+         instead of 'Emergency calls only' when SIM is unready. -->
+    <string-array translatable="false" name="config_display_no_service_when_sim_unready">
+        <item>"DE"</item>
+    </string-array>
 
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
          classes are instantiated in the order of the array. -->
