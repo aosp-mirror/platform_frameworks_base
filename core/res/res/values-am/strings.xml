@@ -1131,8 +1131,14 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ክፈት በ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"ክፈት በ%1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ክፈት"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"የ<xliff:g id="HOST">%1$s</xliff:g> አገናኞችን በዚህ ለመክፈት መዳረሻ ይስጡ፦"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"የ<xliff:g id="HOST">%1$s</xliff:g> አገናኞችን በ<xliff:g id="APPLICATION">%2$s</xliff:g> ለመክፈት መዳረሻ ይስጡ"</string>
+    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
+    <skip />
+    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
+    <skip />
+    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
+    <skip />
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"መዳረሻ ስጥ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ያርትዑ በ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"ያርትዑ በ%1$s"</string>
@@ -1584,6 +1590,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ማሰሺያን አስነሳ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ጥሪ ተቀበል?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ዘወትር"</string>
+    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
+    <skip />
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"አንዴ ብቻ"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ቅንብሮች"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s የስራ መገለጫ አይደግፍም"</string>
