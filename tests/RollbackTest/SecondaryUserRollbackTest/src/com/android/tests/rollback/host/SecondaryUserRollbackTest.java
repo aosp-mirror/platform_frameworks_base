@@ -43,8 +43,8 @@ public class SecondaryUserRollbackTest extends BaseHostJUnit4Test {
     @After
     public void tearDown() throws Exception {
         getDevice().switchUser(mOriginalUser);
-        getDevice().executeShellCommand("pm uninstall com.android.tests.rollback.testapp.A");
-        getDevice().executeShellCommand("pm uninstall com.android.tests.rollback.testapp.B");
+        getDevice().executeShellCommand("pm uninstall com.android.cts.install.lib.testapp.A");
+        getDevice().executeShellCommand("pm uninstall com.android.cts.install.lib.testapp.B");
         removeSecondaryUserIfNecessary();
     }
 
