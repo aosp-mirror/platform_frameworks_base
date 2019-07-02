@@ -53,9 +53,14 @@ public class DetectTvSystemAudioModeSupportAction extends HdmiCecFeatureAction {
                 return false;
             }
             if (HdmiUtils.getAbortFeatureOpcode(cmd) == Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE) {
-                if(HdmiUtils.getAbortReason(cmd) == Constants.ABORT_NOT_IN_CORRECT_MODE) {
+                if (HdmiUtils.getAbortReason(cmd) == Constants.ABORT_NOT_IN_CORRECT_MODE) {
                     mActionTimer.clearTimerMessage();
                     mState = STATE_WAITING_FOR_SET_SAM;
+                    // Outgoing User Control Press commands, when in 'Press and Hold' mode, should
+                    // be this much apart from the adjacent one so as not to place unnecessarily
+                    // heavy load on the CEC line. We also wait this much time to send the next
+                    // retry of the System Audio Mode support detection message.
+                    addTimer(mState, HdmiConfig.IRT_MS);
                 } else {
                     finishAction(false);
                 }
