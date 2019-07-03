@@ -692,7 +692,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 try {
                     redrawNeeded |= visible && !mDrawFinished;
 
-                    SurfaceHolder.Callback callbacks[] = null;
+                    SurfaceHolder.Callback[] callbacks = null;
 
                     final boolean surfaceChanged = creating;
                     if (mSurfaceCreated && (surfaceChanged || (!visible && visibleChanged))) {
@@ -819,7 +819,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
                     try {
                         if (DEBUG) Log.d(TAG, String.format("%d updateSurfacePosition UI, " +
-                                "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
+                                "position = [%d, %d, %d, %d]", System.identityHashCode(this),
                                 mScreenRect.left, mScreenRect.top,
                                 mScreenRect.right, mScreenRect.bottom));
                         setParentSpaceRectangle(mScreenRect, -1);
@@ -842,9 +842,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             mDeferredDestroySurfaceControl = null;
         }
 
-        runOnUiThread(() -> {
-            performDrawFinished();
-        });
+        runOnUiThread(this::performDrawFinished);
     }
 
     /**
@@ -918,7 +916,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 if (DEBUG) {
                     Log.d(TAG, String.format(
                             "%d updateSurfacePosition RenderWorker, frameNr = %d, "
-                                    + "postion = [%d, %d, %d, %d]",
+                                    + "position = [%d, %d, %d, %d]",
                             System.identityHashCode(this), frameNumber,
                             left, top, right, bottom));
                 }
@@ -954,7 +952,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     };
 
     private SurfaceHolder.Callback[] getSurfaceCallbacks() {
-        SurfaceHolder.Callback callbacks[];
+        SurfaceHolder.Callback[] callbacks;
         synchronized (mCallbacks) {
             callbacks = new SurfaceHolder.Callback[mCallbacks.size()];
             mCallbacks.toArray(callbacks);
