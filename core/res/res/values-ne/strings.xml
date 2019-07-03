@@ -1974,7 +1974,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"आपतकालीन सन्देशहरूको परीक्षण"</string>
-    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"जवाफ दिनुहोस्"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"जवाफ दिनु…"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM मार्फत भ्वाइस कल गर्न मिल्दैन"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM मार्फत भ्वाइस कल गर्ने प्रावधान छैन"</string>
