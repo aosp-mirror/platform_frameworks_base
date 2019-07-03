@@ -2291,8 +2291,10 @@ public final class QuotaController extends StateController {
                     mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
                     changed = true;
                 }
-                long newQuotaBufferMs = Math.max(0,
-                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS));
+                // Make sure quota buffer is non-negative, not greater than allowed time per period,
+                // and no more than 5 minutes.
+                long newQuotaBufferMs = Math.max(0, Math.min(mAllowedTimePerPeriodMs,
+                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS)));
                 if (mQuotaBufferMs != newQuotaBufferMs) {
                     mQuotaBufferMs = newQuotaBufferMs;
                     mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;

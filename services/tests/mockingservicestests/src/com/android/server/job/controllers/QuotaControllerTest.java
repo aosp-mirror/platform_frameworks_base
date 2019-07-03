@@ -1925,6 +1925,16 @@ public class QuotaControllerTest {
         assertEquals(1, mQuotaController.getBucketMaxSessionCounts()[RARE_INDEX]);
         assertEquals(0, mQuotaController.getTimingSessionCoalescingDurationMs());
 
+        // Invalid configurations.
+        // In_QUOTA_BUFFER should never be greater than ALLOWED_TIME_PER_PERIOD
+        mQcConstants.ALLOWED_TIME_PER_PERIOD_MS = 2 * MINUTE_IN_MILLIS;
+        mQcConstants.IN_QUOTA_BUFFER_MS = 5 * MINUTE_IN_MILLIS;
+
+        mQcConstants.updateConstants();
+
+        assertTrue(mQuotaController.getInQuotaBufferMs()
+                <= mQuotaController.getAllowedTimePerPeriodMs());
+
         // Test larger than a day. Controller should cap at one day.
         mQcConstants.ALLOWED_TIME_PER_PERIOD_MS = 25 * HOUR_IN_MILLIS;
         mQcConstants.IN_QUOTA_BUFFER_MS = 25 * HOUR_IN_MILLIS;
