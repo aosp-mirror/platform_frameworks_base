@@ -2621,8 +2621,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    private void executeWhenUnlocked(OnDismissAction action) {
-        if (mStatusBarKeyguardViewManager.isShowing()) {
+    private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen) {
+        if (mStatusBarKeyguardViewManager.isShowing() && requiresShadeOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
         dismissKeyguardThenExecute(action, null /* cancelAction */, false /* afterKeyguardGone */);
