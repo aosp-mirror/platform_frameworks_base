@@ -4364,6 +4364,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
+    public VpnProfile[] getAllLegacyVpns() {
+        enforceConnectivityInternalPermission();
+        final ArrayList<VpnProfile> result = new ArrayList<>();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (String key : mKeyStore.list(Credentials.VPN)) {
+                final VpnProfile profile = VpnProfile.decode(key,
+                        mKeyStore.get(Credentials.VPN + key));
+                if (profile != null) {
+                    result.add(profile);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return result.toArray(new VpnProfile[result.size()]);
+    }
+
     /**
      * Start legacy VPN, controlling native daemons as needed. Creates a
      * secondary thread to perform connection work, returning quickly.

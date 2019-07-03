@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Custom QS tiles -->
     <!-- Caffeine QS tile -->
@@ -34,6 +34,14 @@
     <string name="accessibility_quick_settings_heads_up_on">Heads up on</string>
     <string name="accessibility_quick_settings_heads_up_changed_off">Heads up turned off</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on</string>
+
+    <!-- VPN QS tile -->
+    <string name="quick_settings_vpn_label">VPN</string>
+    <string name="quick_settings_vpn_connect_dialog_title">Connect to\u2026</string>
+    <string name="vpn_credentials_hint">Please enter your credentials for connecting to <xliff:g id="name">%s</xliff:g></string>
+    <string name="vpn_credentials_username">Username</string>
+    <string name="vpn_credentials_password">Password</string>
+    <string name="vpn_credentials_dialog_connect">Connect</string>
 
     <!-- Screenrecord stuff -->
     <string name="screenrecord_stopdot_label">Show stop dot</string>
