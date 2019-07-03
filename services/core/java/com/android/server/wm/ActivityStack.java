@@ -164,6 +164,8 @@ import com.android.server.am.AppTimeTracker;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 
+import com.google.android.collect.Sets;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -4030,6 +4032,14 @@ class ActivityStack extends ConfigurationContainer {
                             task.getTaskInfo());
                 }
                 getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+
+                // When finishing the activity pre-emptively take the snapshot before the app window
+                // is marked as hidden and any configuration changes take place
+                if (mWindowManager.mTaskSnapshotController != null) {
+                    final ArraySet<Task> tasks = Sets.newArraySet(task.mTask);
+                    mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
+                    mWindowManager.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(tasks);
+                }
 
                 // Tell window manager to prepare for this one to be removed.
                 r.setVisibility(false);
