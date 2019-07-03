@@ -235,10 +235,11 @@ public final class JobStore {
 
     /**
      * Remove the provided job. Will also delete the job if it was persisted.
-     * @param writeBack If true, the job will be deleted (if it was persisted) immediately.
+     * @param removeFromPersisted If true, the job will be removed from the persisted job list
+     *                            immediately (if it was persisted).
      * @return Whether or not the job existed to be removed.
      */
-    public boolean remove(JobStatus jobStatus, boolean writeBack) {
+    public boolean remove(JobStatus jobStatus, boolean removeFromPersisted) {
         boolean removed = mJobSet.remove(jobStatus);
         if (!removed) {
             if (DEBUG) {
@@ -246,7 +247,7 @@ public final class JobStore {
             }
             return false;
         }
-        if (writeBack && jobStatus.isPersisted()) {
+        if (removeFromPersisted && jobStatus.isPersisted()) {
             maybeWriteStatusToDiskAsync();
         }
         return removed;
@@ -342,6 +343,19 @@ public final class JobStore {
     @VisibleForTesting
     public void readJobMapFromDisk(JobSet jobSet, boolean rtcGood) {
         new ReadJobMapFromDiskRunnable(jobSet, rtcGood).run();
+    }
+
+    /** Write persisted JobStore state to disk synchronously. Should only be used for testing. */
+    @VisibleForTesting
+    public void writeStatusToDiskForTesting() {
+        synchronized (mWriteScheduleLock) {
+            if (mWriteScheduled) {
+                throw new IllegalStateException("An asynchronous write is already scheduled.");
+            }
+
+            mWriteScheduled = mWriteInProgress = true;
+            mWriteRunnable.run();
+        }
     }
 
     /**
@@ -1049,7 +1063,9 @@ public final class JobStore {
         }
     }
 
-    static final class JobSet {
+    /** Set of all tracked jobs. */
+    @VisibleForTesting
+    public static final class JobSet {
         @VisibleForTesting // Key is the getUid() originator of the jobs in each sheaf
         final SparseArray<ArraySet<JobStatus>> mJobs;
 
