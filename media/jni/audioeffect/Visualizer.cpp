@@ -78,10 +78,13 @@ status_t Visualizer::setEnabled(bool enabled)
     if (t != 0) {
         if (enabled) {
             if (t->exitPending()) {
+                mCaptureLock.unlock();
                 if (t->requestExitAndWait() == WOULD_BLOCK) {
+                    mCaptureLock.lock();
                     ALOGE("Visualizer::enable() called from thread");
                     return INVALID_OPERATION;
                 }
+                mCaptureLock.lock();
             }
         }
         t->mLock.lock();
