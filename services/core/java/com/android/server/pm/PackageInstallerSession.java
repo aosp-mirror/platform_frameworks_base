@@ -115,6 +115,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -959,7 +960,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             IApexService apex = IApexService.Stub.asInterface(
                     ServiceManager.getService("apexservice"));
-            apex.stagePackage(mResolvedBaseFile.toString());
+            apex.stagePackages(Collections.singletonList(mResolvedBaseFile.toString()));
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above
