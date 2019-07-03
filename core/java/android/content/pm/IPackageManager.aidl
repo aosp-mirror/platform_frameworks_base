@@ -78,15 +78,6 @@ interface IPackageManager {
     @UnsupportedAppUsage
     String[] canonicalToCurrentPackageNames(in String[] names);
 
-    PermissionInfo getPermissionInfo(String name, String packageName, int flags);
-
-    ParceledListSlice queryPermissionsByGroup(String group, int flags);
-
-    @UnsupportedAppUsage
-    PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
-
-    ParceledListSlice getAllPermissionGroups(int flags);
-
     @UnsupportedAppUsage
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
@@ -109,12 +100,6 @@ interface IPackageManager {
     int checkPermission(String permName, String pkgName, int userId);
 
     int checkUidPermission(String permName, int uid);
-
-    @UnsupportedAppUsage
-    boolean addPermission(in PermissionInfo info);
-
-    @UnsupportedAppUsage
-    void removePermission(String name);
 
     @UnsupportedAppUsage
     void grantRuntimePermission(String packageName, String permissionName, int userId);
@@ -623,9 +608,6 @@ interface IPackageManager {
     int movePackage(in String packageName, in String volumeUuid);
     int movePrimaryStorage(in String volumeUuid);
 
-    @UnsupportedAppUsage
-    boolean addPermissionAsync(in PermissionInfo info);
-
     boolean setInstallLocation(int loc);
     @UnsupportedAppUsage
     int getInstallLocation();
@@ -777,4 +759,16 @@ interface IPackageManager {
     //------------------------------------------------------------------------
     @UnsupportedAppUsage
     String[] getAppOpPermissionPackages(String permissionName);
+
+    @UnsupportedAppUsage
+    PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
+
+    @UnsupportedAppUsage
+    boolean addPermission(in PermissionInfo info);
+
+    @UnsupportedAppUsage
+    boolean addPermissionAsync(in PermissionInfo info);
+
+    @UnsupportedAppUsage
+    void removePermission(String name);
 }

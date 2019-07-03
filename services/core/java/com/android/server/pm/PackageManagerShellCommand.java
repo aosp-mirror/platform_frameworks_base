@@ -87,6 +87,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.IPermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -132,6 +133,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
 
     final IPackageManager mInterface;
+    final IPermissionManager mPermissionManager;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
     int mTargetUser;
@@ -139,8 +141,10 @@ class PackageManagerShellCommand extends ShellCommand {
     boolean mComponents;
     int mQueryFlags;
 
-    PackageManagerShellCommand(PackageManagerService service) {
+    PackageManagerShellCommand(
+            PackageManagerService service, IPermissionManager permissionManager) {
         mInterface = service;
+        mPermissionManager = permissionManager;
     }
 
     @Override
@@ -786,7 +790,8 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runListPermissionGroups() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final List<PermissionGroupInfo> pgs = mInterface.getAllPermissionGroups(0).getList();
+        final List<PermissionGroupInfo> pgs =
+                mPermissionManager.getAllPermissionGroups(0).getList();
 
         final int count = pgs.size();
         for (int p = 0; p < count ; p++) {
@@ -833,7 +838,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final ArrayList<String> groupList = new ArrayList<String>();
         if (groups) {
             final List<PermissionGroupInfo> infos =
-                    mInterface.getAllPermissionGroups(0 /*flags*/).getList();
+                    mPermissionManager.getAllPermissionGroups(0 /*flags*/).getList();
             final int count = infos.size();
             for (int i = 0; i < count; i++) {
                 groupList.add(infos.get(i).name);
@@ -2933,8 +2938,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
                 prefix = "  ";
             }
-            List<PermissionInfo> ps =
-                    mInterface.queryPermissionsByGroup(groupList.get(i), 0 /*flags*/).getList();
+            List<PermissionInfo> ps = mPermissionManager
+                    .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/).getList();
             final int count = ps.size();
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {

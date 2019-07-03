@@ -16,6 +16,10 @@
 
 package android.permission;
 
+import android.content.pm.ParceledListSlice;
+import android.content.pm.PermissionGroupInfo;
+import android.content.pm.PermissionInfo;
+
 /**
  * Interface to communicate directly with the permission manager service.
  * @see PermissionManager
@@ -23,4 +27,16 @@ package android.permission;
  */
 interface IPermissionManager {
     String[] getAppOpPermissionPackages(String permName);
+
+    ParceledListSlice getAllPermissionGroups(int flags);
+
+    PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags);
+
+    PermissionInfo getPermissionInfo(String permName, String packageName, int flags);
+
+    ParceledListSlice queryPermissionsByGroup(String groupName, int flags);
+
+    boolean addPermission(in PermissionInfo info, boolean async);
+
+    void removePermission(String name);
 }
