@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ٹائلز شامل کرنے کے لئے پکڑ کر گھسیٹیں"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ٹائلز کو دوبارہ ترتیب دینے کیلئے پکڑ کر گھسیٹیں"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ہٹانے کیلئے یہاں گھسیٹیں؟"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"آپ کو کم از کم 6 ٹائلز کی ضرورت ہے"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"آپ کو کم از کم <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ٹائلز کی ضرورت ہے"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ترمیم کریں"</string>
     <string name="tuner_time" msgid="6572217313285536011">"وقت"</string>
   <string-array name="clock_options">
