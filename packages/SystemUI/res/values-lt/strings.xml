@@ -788,7 +788,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Jei norite pridėti išklotinių, laikykite nuspaudę ir vilkite"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Norėdami pertvarkyti išklot., laikykite nuspaudę ir vilkite"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Vilkite čia, jei norite pašalinti"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Turi būti bent 6 išklotinės"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Turi būti bent <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> išklotinės elem."</string>
     <string name="qs_edit" msgid="2232596095725105230">"Redaguoti"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Laikas"</string>
   <string-array name="clock_options">

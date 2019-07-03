@@ -778,7 +778,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Blok eklemek için basılı tutup sürükleyin"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Blokları yeniden düzenlemek için basılı tutun ve sürükleyin"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kaldırmak için buraya sürükleyin"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"En az 6 blok gerekiyor"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"En az <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blok gerekiyor"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Düzenle"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Saat"</string>
   <string-array name="clock_options">
