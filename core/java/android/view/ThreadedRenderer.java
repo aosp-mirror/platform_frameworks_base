@@ -288,9 +288,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
     // applied as translation when updating the root render node.
     private int mInsetTop, mInsetLeft;
 
-    // Whether the surface has insets. Used to protect opacity.
-    private boolean mHasInsets;
-
     // Light properties specified by the theme.
     private final float mLightY;
     private final float mLightZ;
@@ -480,7 +477,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
         if (surfaceInsets != null && (surfaceInsets.left != 0 || surfaceInsets.right != 0
                 || surfaceInsets.top != 0 || surfaceInsets.bottom != 0)) {
-            mHasInsets = true;
             mInsetLeft = surfaceInsets.left;
             mInsetTop = surfaceInsets.top;
             mSurfaceWidth = width + mInsetLeft + surfaceInsets.right;
@@ -489,7 +485,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
             // If the surface has insets, it can't be opaque.
             setOpaque(false);
         } else {
-            mHasInsets = false;
             mInsetLeft = 0;
             mInsetTop = 0;
             mSurfaceWidth = width;
