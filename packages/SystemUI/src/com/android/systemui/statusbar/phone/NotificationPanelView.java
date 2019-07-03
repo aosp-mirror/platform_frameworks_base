@@ -932,7 +932,7 @@ public class NotificationPanelView extends PanelView implements
     protected void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mHeadsUpTouchHelper.notifyFling(!expand);
-        setClosingWithAlphaFadeout(!expand && getFadeoutAlpha() == 1.0f);
+        setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
@@ -2068,8 +2068,11 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private float getFadeoutAlpha() {
-        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getFirstItemMinHeight())
-                / mQsMinExpansionHeight;
+        float alpha;
+        if (mQsMinExpansionHeight == 0) {
+            return 1.0f;
+        }
+        alpha = getExpandedHeight() / mQsMinExpansionHeight;
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;
@@ -2127,18 +2130,18 @@ public class NotificationPanelView extends PanelView implements
         float alpha;
         if (mBarState == StatusBarState.KEYGUARD) {
 
-            // When on Keyguard, we hide the header as soon as the top card of the notification
-            // stack scroller is close enough (collision distance) to the bottom of the header.
-            alpha = getNotificationsTopY()
+            // When on Keyguard, we hide the header as soon as we expanded close enough to the
+            // header
+            alpha = getExpandedHeight()
                     /
                     (mKeyguardStatusBar.getHeight() + mNotificationsHeaderCollideDistance);
         } else {
 
             // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
             // soon as we start translating the stack.
-            alpha = getNotificationsTopY() / mKeyguardStatusBar.getHeight();
+            alpha = getExpandedHeight() / mKeyguardStatusBar.getHeight();
         }
-        alpha = MathUtils.constrain(alpha, 0, 1);
+        alpha = MathUtils.saturate(alpha);
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;
     }
@@ -2188,13 +2191,6 @@ public class NotificationPanelView extends PanelView implements
                 ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f, 0f, 1f, getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
         mBigClockContainer.setAlpha(alpha);
-    }
-
-    private float getNotificationsTopY() {
-        if (mNotificationStackScroller.getNotGoneChildCount() == 0) {
-            return getExpandedHeight();
-        }
-        return mNotificationStackScroller.getNotificationsTopY();
     }
 
     @Override

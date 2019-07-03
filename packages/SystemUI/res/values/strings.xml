@@ -2011,7 +2011,7 @@
     <string name="drag_to_remove_tiles">Drag here to remove</string>
 
     <!-- Label to indicate to users that additional tiles cannot be removed. [CHAR LIMIT=60] -->
-    <string name="drag_to_remove_disabled">You need at least 6 tiles</string>
+    <string name="drag_to_remove_disabled">You need at least <xliff:g id="min_num_tiles" example="6">%1$d</xliff:g> tiles</string>
 
     <!-- Button to edit the tile ordering of quick settings [CHAR LIMIT=60] -->
     <string name="qs_edit">Edit</string>

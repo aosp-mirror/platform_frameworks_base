@@ -30,6 +30,12 @@ import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.app.ActivityManager;
@@ -672,8 +678,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
-            mLockPatternUtils.requireStrongAuth(
-                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
+            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
                     getCurrentUser());
         }
 
@@ -833,8 +838,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
-            mLockPatternUtils.requireStrongAuth(
-                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
+            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
                     getCurrentUser());
         }
 
@@ -953,13 +957,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isUserInLockdown(int userId) {
-        return mStrongAuthTracker.getStrongAuthForUser(userId)
-                == LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+        return containsFlag(mStrongAuthTracker.getStrongAuthForUser(userId),
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
     }
 
     public boolean userNeedsStrongAuth() {
         return mStrongAuthTracker.getStrongAuthForUser(getCurrentUser())
                 != LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+    }
+
+    private boolean containsFlag(int haystack, int needle) {
+        return (haystack & needle) != 0;
     }
 
     public boolean needsSlowUnlockTransition() {
@@ -1680,23 +1688,32 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
         final boolean isLockOutOrLockDown =
-                strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT
-                        || strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_LOCKOUT)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        final boolean isEncryptedOrTimedOut =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
 
+        boolean canBypass = mKeyguardBypassController != null
+                && mKeyguardBypassController.canBypass();
         // There's no reason to ask the HAL for authentication when the user can dismiss the
         // bouncer, unless we're bypassing and need to auto-dismiss the lock screen even when
         // TrustAgents or biometrics are keeping the device unlocked.
-        boolean bypassEnabled = mKeyguardBypassController != null
-                && mKeyguardBypassController.getBypassEnabled();
-        boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || bypassEnabled;
+        boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
+
+        // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
+        // Lockout/lockdown modes shouldn't scan, since they are more explicit.
+        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
+                && !isLockOutOrLockDown;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
-                && mUserManager.isUserUnlocked(user) && mIsPrimaryUser
-                && !mSecureCameraLaunched && !isLockOutOrLockDown;
+                && strongAuthAllowsScanning && mIsPrimaryUser
+                && !mSecureCameraLaunched;
     }
 
     /**
