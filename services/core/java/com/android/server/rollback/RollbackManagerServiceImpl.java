@@ -75,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -114,9 +115,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Set<NewRollback> mNewRollbacks = new ArraySet<>();
 
     // The list of all rollbacks, including available and committed rollbacks.
-    // This list is null until the rollback data has been loaded.
     @GuardedBy("mLock")
-    private List<RollbackData> mRollbacks;
+    private final List<RollbackData> mRollbacks;
 
     private final RollbackStore mRollbackStore;
 
@@ -138,25 +138,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // SystemService#onStart.
         mInstaller = new Installer(mContext);
         mInstaller.onStart();
-        mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
-        mHandlerThread.start();
-
-        // Monitor the handler thread
-        Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
 
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
         mAppDataRollbackHelper = new AppDataRollbackHelper(mInstaller);
 
-        // Kick off loading of the rollback data from strorage in a background
-        // thread.
-        // TODO: Consider loading the rollback data directly here instead, to
-        // avoid the need to call ensureRollbackDataLoaded every time before
-        // accessing the rollback data?
-        // TODO: Test that this kicks off initial scheduling of rollback
-        // expiration.
-        getHandler().post(() -> ensureRollbackDataLoaded());
+        // Load rollback data from device storage.
+        synchronized (mLock) {
+            mRollbacks = mRollbackStore.loadAllRollbackData();
+            for (RollbackData data : mRollbacks) {
+                mAllocatedRollbackIds.put(data.info.getRollbackId(), true);
+            }
+        }
+
+        // Kick off and start monitoring the handler thread.
+        mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
+        mHandlerThread.start();
+        Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
 
         // TODO: Make sure to register these call backs when a new user is
         // added too.
@@ -299,20 +298,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // to get the most up-to-date results. This is intended to reduce test
         // flakiness when checking available rollbacks immediately after
         // installing a package with rollback enabled.
-        final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
-        getHandler().post(() -> result.offer(true));
-
+        CountDownLatch latch = new CountDownLatch(1);
+        getHandler().post(() -> latch.countDown());
         try {
-            result.take();
+            latch.await();
         } catch (InterruptedException ie) {
-            // We may not get the most up-to-date information, but whatever we
-            // can get now is better than nothing, so log but otherwise ignore
-            // the exception.
-            Slog.w(TAG, "Interrupted while waiting for handler thread in getAvailableRollbacks");
+            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
         }
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
@@ -329,7 +323,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
@@ -364,8 +357,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 final long timeDifference = mRelativeBootTime - oldRelativeBootTime;
 
                 synchronized (mLock) {
-                    ensureRollbackDataLoadedLocked();
-
                     Iterator<RollbackData> iter = mRollbacks.iterator();
                     while (iter.hasNext()) {
                         RollbackData data = iter.next();
@@ -544,13 +535,21 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "reloadPersistedData");
 
-        synchronized (mLock) {
-            mRollbacks = null;
-        }
+        CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
             updateRollbackLifetimeDurationInMillis();
-            ensureRollbackDataLoaded();
+            synchronized (mLock) {
+                mRollbacks.clear();
+                mRollbacks.addAll(mRollbackStore.loadAllRollbackData());
+            }
+            latch.countDown();
         });
+
+        try {
+            latch.await();
+        } catch (InterruptedException ie) {
+            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
+        }
     }
 
     @Override
@@ -559,7 +558,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "expireRollbackForPackage");
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -583,7 +581,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             try {
                 Thread.sleep(millis);
             } catch (InterruptedException e) {
-                // ignored.
+                throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
             }
         });
     }
@@ -626,7 +624,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackData> restoreInProgress = new ArrayList<>();
             Set<String> apexPackageNames = new HashSet<>();
             synchronized (mLock) {
-                ensureRollbackDataLoadedLocked();
                 for (RollbackData data : mRollbacks) {
                     if (data.isStaged()) {
                         if (data.state == RollbackData.ROLLBACK_STATE_ENABLING) {
@@ -686,41 +683,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     /**
-     * Load rollback data from storage if it has not already been loaded.
-     * After calling this function, mRollbacks will be non-null.
-     */
-    private void ensureRollbackDataLoaded() {
-        synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-        }
-    }
-
-    /**
-     * Load rollback data from storage if it has not already been loaded.
-     * After calling this function, mRollbacks will be non-null.
-     */
-    @GuardedBy("mLock")
-    private void ensureRollbackDataLoadedLocked() {
-        if (mRollbacks == null) {
-            loadAllRollbackDataLocked();
-        }
-    }
-
-    /**
-     * Load all rollback data from storage.
-     * Note: We do potentially heavy IO here while holding mLock, because we
-     * have to have the rollback data loaded before we can do anything else
-     * meaningful.
-     */
-    @GuardedBy("mLock")
-    private void loadAllRollbackDataLocked() {
-        mRollbacks = mRollbackStore.loadAllRollbackData();
-        for (RollbackData data : mRollbacks) {
-            mAllocatedRollbackIds.put(data.info.getRollbackId(), true);
-        }
-    }
-
-    /**
      * Called when a package has been replaced with a different version.
      * Removes all backups for the package not matching the currently
      * installed package version.
@@ -731,7 +693,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = getInstalledPackageVersion(packageName);
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -800,8 +761,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         Instant now = Instant.now();
         Instant oldest = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -921,7 +880,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // TODO: This check could be made more efficient.
         RollbackData rd = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.apkSessionId == parentSession.getSessionId()) {
@@ -1077,7 +1035,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void snapshotUserDataInternal(String packageName) {
         synchronized (mLock) {
             // staged installs
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); i++) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.state != RollbackData.ROLLBACK_STATE_ENABLING) {
@@ -1110,7 +1067,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageRollbackInfo info = null;
         RollbackData rollbackData = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.restoreUserDataInProgress) {
@@ -1206,7 +1162,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             RollbackData rd = null;
             synchronized (mLock) {
-                ensureRollbackDataLoadedLocked();
                 for (int i = 0; i < mRollbacks.size(); ++i) {
                     RollbackData data = mRollbacks.get(i);
                     if (data.stagedSessionId == originalSessionId) {
@@ -1377,7 +1332,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // device reboots between when the session is
             // committed and this point. Revisit this after
             // adding support for rollback of staged installs.
-            ensureRollbackDataLoadedLocked();
             mRollbacks.add(data);
         }
 
@@ -1414,9 +1368,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private RollbackData getRollbackForId(int rollbackId) {
         synchronized (mLock) {
-            // TODO: Have ensureRollbackDataLoadedLocked return the list of
-            // available rollbacks, to hopefully avoid forgetting to call it?
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.info.getRollbackId() == rollbackId) {
