@@ -38,6 +38,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -70,6 +71,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     @Mock private StatusBarNotification mSbn;
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
+    @Mock private StatusBarStateController mStatusBarStateController;
 
     @Before
     public void setUp() {
@@ -85,6 +87,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
                 mNotificationEntryManager, () -> mock(ShadeController.class),
+                mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
