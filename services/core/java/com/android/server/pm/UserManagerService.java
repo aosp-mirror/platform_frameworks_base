@@ -90,7 +90,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -2216,10 +2215,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
     private void fallbackToSingleUserLP() {
-        int flags = UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN;
-        // In headless system user mode, the primary flag is assigned to the first human user.
-        if (!RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER) {
-            flags |= UserInfo.FLAG_PRIMARY;
+        int flags = UserInfo.FLAG_INITIALIZED;
+        // In split system user mode, the admin and primary flags are assigned to the first human
+        // user.
+        if (!UserManager.isSplitSystemUser()) {
+            flags |= UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY;
         }
         // Create the system user
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags);
@@ -2733,9 +2733,9 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                // In headless system user mode, we assign the first human user the primary flag.
+                // In split system user mode, we assign the first human user the primary flag.
                 // And if there is no device owner, we also assign the admin flag to primary user.
-                if (RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER
+                if (UserManager.isSplitSystemUser()
                         && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
                     flags |= UserInfo.FLAG_PRIMARY;
                     synchronized (mUsersLock) {
