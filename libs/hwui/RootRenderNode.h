@@ -16,13 +16,12 @@
 
 #pragma once
 
-#include <utils/Looper.h>
-
 #include <set>
 #include <vector>
 
 #include "AnimationContext.h"
 #include "Animator.h"
+#include <IContextFactory.h>
 #include "PropertyValuesAnimatorSet.h"
 #include "RenderNode.h"
 

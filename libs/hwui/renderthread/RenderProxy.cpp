@@ -30,8 +30,6 @@
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
 
-#include <ui/GraphicBuffer.h>
-
 namespace android {
 namespace uirenderer {
 namespace renderthread {
