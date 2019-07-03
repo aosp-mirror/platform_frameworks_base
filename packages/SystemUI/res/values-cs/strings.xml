@@ -788,7 +788,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Dlaždice přidáte podržením a přetažením"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Dlaždice můžete uspořádat podržením a přetažením"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Přetažením sem dlaždice odstraníte"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Potřebujete minimálně šest dlaždic"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Potřebujete alespoň tento počet dlaždic: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Upravit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Čas"</string>
   <string-array name="clock_options">

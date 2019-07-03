@@ -778,7 +778,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"टाइल जोडण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"टाइलची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"काढण्यासाठी येथे ड्रॅग करा"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"तुम्हाला किमान ६ टाइलची गरज आहे"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"तुम्हाला किमान <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> टाइलची गरज आहे"</string>
     <string name="qs_edit" msgid="2232596095725105230">"संपादित करा"</string>
     <string name="tuner_time" msgid="6572217313285536011">"वेळ"</string>
   <string-array name="clock_options">
