@@ -28,13 +28,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A set of {@link Session2Command} which represents a command group.
- * <p>
  * This API is not generally intended for third party application developers.
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
- * for consistent behavior across all devices.
- * </p>
+ * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+ * Library</a> for consistent behavior across all devices.
+ * <p>
+ * A set of {@link Session2Command} which represents a command group.
  */
 public final class Session2CommandGroup implements Parcelable {
     private static final String TAG = "Session2CommandGroup";
@@ -131,6 +130,11 @@ public final class Session2CommandGroup implements Parcelable {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Builds a {@link Session2CommandGroup} object.
      */
     public static final class Builder {
