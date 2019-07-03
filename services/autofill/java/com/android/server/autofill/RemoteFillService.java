@@ -187,10 +187,9 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 if (err instanceof TimeoutException) {
                     dispatchCancellationSignal(cancellationSink.get());
                     mCallbacks.onFillRequestTimeout(request.getId());
+                } else if (err instanceof CancellationException) {
+                    dispatchCancellationSignal(cancellationSink.get());
                 } else {
-                    if (err instanceof CancellationException) {
-                        dispatchCancellationSignal(cancellationSink.get());
-                    }
                     mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
                 }
             }
