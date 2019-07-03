@@ -722,31 +722,32 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public int getPermissionFlags(String permissionName, String packageName, UserHandle user) {
+    public int getPermissionFlags(String permName, String packageName, UserHandle user) {
         try {
-            return mPM.getPermissionFlags(permissionName, packageName, user.getIdentifier());
+            return mPermissionManager
+                    .getPermissionFlags(permName, packageName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
-    public void updatePermissionFlags(String permissionName, String packageName,
+    public void updatePermissionFlags(String permName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
         if (DEBUG_TRACE_GRANTS
-                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
             Log.i(TAG, "App " + mContext.getPackageName() + " is updating flags for "
-                    + permissionName + " for user " + user.getIdentifier() + ": "
+                    + permName + " for user " + user.getIdentifier() + ": "
                     + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
                     + " := " + DebugUtils.flagsToString(
                             PackageManager.class, "FLAG_PERMISSION_", flagValues),
                     new RuntimeException());
         }
         try {
-            mPM.updatePermissionFlags(permissionName, packageName, flagMask,
-                    flagValues,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q,
-                    user.getIdentifier());
+            final boolean checkAdjustPolicyFlagPermission =
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
+            mPermissionManager.updatePermissionFlags(permName, packageName, flagMask,
+                    flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

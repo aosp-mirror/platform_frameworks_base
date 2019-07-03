@@ -39,4 +39,11 @@ interface IPermissionManager {
     boolean addPermission(in PermissionInfo info, boolean async);
 
     void removePermission(String name);
+
+    int getPermissionFlags(String permName, String packageName, int userId);
+
+    void updatePermissionFlags(String permName, String packageName, int flagMask,
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
+
+    void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
 }
