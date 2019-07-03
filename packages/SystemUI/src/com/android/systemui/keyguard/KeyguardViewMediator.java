@@ -2063,10 +2063,11 @@ public class KeyguardViewMediator extends SystemUI {
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelView panelView,
             BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
-        View notificationContainer, KeyguardBypassController bypassController, FalsingManager falsingManager) {
+            View notificationContainer, KeyguardBypassController bypassController,
+            FalsingManager falsingManager) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
                 biometricUnlockController, mDismissCallbackRegistry, lockIconContainer,
-            notificationContainer, bypassController, falsingManager);
+                notificationContainer, bypassController, falsingManager);
         return mStatusBarKeyguardViewManager;
     }
 

@@ -235,7 +235,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 BiometricUnlockController fingerprintUnlockController,
                 DismissCallbackRegistry dismissCallbackRegistry,
                 ViewGroup lockIconContainer, View notificationContainer,
-                KeyguardBypassController bypassController) {
+                KeyguardBypassController bypassController, FalsingManager falsingManager) {
             super.registerStatusBar(statusBar, container, notificationPanelView,
                     fingerprintUnlockController, dismissCallbackRegistry, lockIconContainer,
                     notificationContainer, bypassController, falsingManager);
