@@ -27,6 +27,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
@@ -731,10 +732,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Abort release; already destroying: " + r);
                 return null;
             }
-            // Don't consider any activies that are currently not in a state where they
+            // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
             if (r.visible || !r.stopped || !r.haveState
-                    || r.isState(RESUMED, PAUSING, PAUSED, STOPPING)) {
+                    || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
             }
