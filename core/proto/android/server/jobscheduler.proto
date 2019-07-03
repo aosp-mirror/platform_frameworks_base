@@ -175,6 +175,11 @@ message ConstantsProto {
     // is now set to 1, to prevent any batching at this level. Since we now do
     // batching through doze, that is a much better mechanism.
     optional int32 min_ready_jobs_count = 7;
+    // Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
+    optional int32 min_ready_non_active_jobs_count = 29;
+    // Don't batch a non-ACTIVE job if it's been delayed due to force batching attempts for
+    // at least this amount of time.
+    optional int64 max_non_active_job_batch_delay_ms = 30;
     // This is the job execution factor that is considered to be heavy use of
     // the system.
     optional double heavy_use_factor = 8;
@@ -307,6 +312,8 @@ message ConstantsProto {
 
     // In this time after screen turns on, we increase job concurrency.
     optional int32 screen_off_job_concurrency_increase_delay_ms = 28;
+
+    // Next tag: 31
 }
 
 // Next tag: 4
@@ -938,7 +945,15 @@ message JobStatusDumpProto {
 
     optional int64 internal_flags = 24;
 
-    // Next tag: 28
+    // Amount of time since this job was first deferred due to standby bucketing policy. Will be
+    // 0 if this job was never deferred.
+    optional int64 time_since_first_deferral_ms = 28;
+
+    // Amount of time since JobScheduler first tried to force batch this job. Will be 0 if there
+    // was no attempt.
+    optional int64 time_since_first_force_batch_attempt_ms = 29;
+
+    // Next tag: 30
 }
 
 // Dump from com.android.server.job.JobConcurrencyManager.

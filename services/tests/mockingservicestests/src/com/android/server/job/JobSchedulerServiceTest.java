@@ -25,6 +25,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import static org.junit.Assert.assertEquals;
@@ -661,5 +663,87 @@ public class JobSchedulerServiceTest {
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /** Tests that rare job batching works as expected. */
+    @Test
+    public void testRareJobBatching() {
+        spyOn(mService);
+        doNothing().when(mService).evaluateControllerStatesLocked(any());
+        doNothing().when(mService).noteJobsPending(any());
+        doReturn(true).when(mService).isReadyToBeExecutedLocked(any());
+        advanceElapsedClock(24 * HOUR_IN_MILLIS);
+
+        JobSchedulerService.MaybeReadyJobQueueFunctor maybeQueueFunctor =
+                mService.new MaybeReadyJobQueueFunctor();
+        mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
+        mService.mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = HOUR_IN_MILLIS;
+        mService.mConstants.MIN_CONNECTIVITY_COUNT = 2;
+        mService.mConstants.MIN_READY_JOBS_COUNT = 1;
+
+        JobStatus job = createJobStatus(
+                "testRareJobBatching",
+                createJobInfo().setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        job.setStandbyBucket(RARE_INDEX);
+
+        // Not enough RARE jobs to run.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.postProcess();
+        assertEquals(0, mService.mPendingJobs.size());
+
+        // Enough RARE jobs to run.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.postProcess();
+        assertEquals(5, mService.mPendingJobs.size());
+
+        // Not enough RARE jobs to run, but a non-batched job saves the day.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        JobStatus activeJob = createJobStatus(
+                "testRareJobBatching",
+                createJobInfo().setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        activeJob.setStandbyBucket(ACTIVE_INDEX);
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.accept(activeJob);
+        maybeQueueFunctor.postProcess();
+        assertEquals(3, mService.mPendingJobs.size());
+
+        // Not enough RARE jobs to run, but an old RARE job saves the day.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        JobStatus oldRareJob = createJobStatus("testRareJobBatching", createJobInfo());
+        oldRareJob.setStandbyBucket(RARE_INDEX);
+        final long oldBatchTime = sElapsedRealtimeClock.millis()
+                - 2 * mService.mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+        oldRareJob.setFirstForceBatchedTimeElapsed(oldBatchTime);
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.accept(oldRareJob);
+        assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
+        maybeQueueFunctor.postProcess();
+        assertEquals(3, mService.mPendingJobs.size());
     }
 }

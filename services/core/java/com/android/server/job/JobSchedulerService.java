@@ -446,6 +446,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
         private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
         private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
+        private static final String KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT =
+                "min_ready_non_active_jobs_count";
+        private static final String KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS =
+                "max_non_active_job_batch_delay_ms";
         private static final String KEY_HEAVY_USE_FACTOR = "heavy_use_factor";
         private static final String KEY_MODERATE_USE_FACTOR = "moderate_use_factor";
 
@@ -476,6 +480,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
         private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
         private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
+        private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
+        private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
         private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
@@ -527,6 +533,18 @@ public class JobSchedulerService extends com.android.server.SystemService
          * a much better mechanism.
          */
         int MIN_READY_JOBS_COUNT = DEFAULT_MIN_READY_JOBS_COUNT;
+
+        /**
+         * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
+         */
+        int MIN_READY_NON_ACTIVE_JOBS_COUNT = DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT;
+
+        /**
+         * Don't batch a non-ACTIVE job if it's been delayed due to force batching attempts for
+         * at least this amount of time.
+         */
+        long MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+
         /**
          * This is the job execution factor that is considered to be heavy use of the system.
          */
@@ -660,6 +678,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_MIN_CONTENT_COUNT);
             MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
                     DEFAULT_MIN_READY_JOBS_COUNT);
+            MIN_READY_NON_ACTIVE_JOBS_COUNT = mParser.getInt(
+                    KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
+                    DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT);
+            MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = mParser.getLong(
+                    KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
+                    DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS);
             HEAVY_USE_FACTOR = mParser.getFloat(KEY_HEAVY_USE_FACTOR,
                     DEFAULT_HEAVY_USE_FACTOR);
             MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
@@ -710,6 +734,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.printPair(KEY_MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT).println();
             pw.printPair(KEY_MIN_CONTENT_COUNT, MIN_CONTENT_COUNT).println();
             pw.printPair(KEY_MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT).println();
+            pw.printPair(KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
+                    MIN_READY_NON_ACTIVE_JOBS_COUNT).println();
+            pw.printPair(KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
+                    MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS).println();
             pw.printPair(KEY_HEAVY_USE_FACTOR, HEAVY_USE_FACTOR).println();
             pw.printPair(KEY_MODERATE_USE_FACTOR, MODERATE_USE_FACTOR).println();
 
@@ -752,6 +780,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT);
             proto.write(ConstantsProto.MIN_CONTENT_COUNT, MIN_CONTENT_COUNT);
             proto.write(ConstantsProto.MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT);
+            proto.write(ConstantsProto.MIN_READY_NON_ACTIVE_JOBS_COUNT,
+                    MIN_READY_NON_ACTIVE_JOBS_COUNT);
+            proto.write(ConstantsProto.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
+                    MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS);
             proto.write(ConstantsProto.HEAVY_USE_FACTOR, HEAVY_USE_FACTOR);
             proto.write(ConstantsProto.MODERATE_USE_FACTOR, MODERATE_USE_FACTOR);
 
@@ -1989,16 +2021,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     final class ReadyJobQueueFunctor implements Consumer<JobStatus> {
-        ArrayList<JobStatus> newReadyJobs;
+        final ArrayList<JobStatus> newReadyJobs = new ArrayList<>();
 
         @Override
         public void accept(JobStatus job) {
             if (isReadyToBeExecutedLocked(job)) {
                 if (DEBUG) {
                     Slog.d(TAG, "    queued " + job.toShortString());
-                }
-                if (newReadyJobs == null) {
-                    newReadyJobs = new ArrayList<JobStatus>();
                 }
                 newReadyJobs.add(job);
             } else {
@@ -2007,14 +2036,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         public void postProcess() {
-            if (newReadyJobs != null) {
-                noteJobsPending(newReadyJobs);
-                mPendingJobs.addAll(newReadyJobs);
-                if (mPendingJobs.size() > 1) {
-                    mPendingJobs.sort(mEnqueueTimeComparator);
-                }
+            noteJobsPending(newReadyJobs);
+            mPendingJobs.addAll(newReadyJobs);
+            if (mPendingJobs.size() > 1) {
+                mPendingJobs.sort(mEnqueueTimeComparator);
             }
-            newReadyJobs = null;
+
+            newReadyJobs.clear();
         }
     }
     private final ReadyJobQueueFunctor mReadyQueueFunctor = new ReadyJobQueueFunctor();
@@ -2031,7 +2059,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         int backoffCount;
         int connectivityCount;
         int contentCount;
-        List<JobStatus> runnableJobs;
+        int forceBatchedCount;
+        int unbatchedCount;
+        final List<JobStatus> runnableJobs = new ArrayList<>();
 
         public MaybeReadyJobQueueFunctor() {
             reset();
@@ -2051,29 +2081,39 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } catch (RemoteException e) {
                 }
-                if (job.getNumFailures() > 0) {
-                    backoffCount++;
-                }
-                if (job.hasIdleConstraint()) {
-                    idleCount++;
-                }
-                if (job.hasConnectivityConstraint()) {
-                    connectivityCount++;
-                }
-                if (job.hasChargingConstraint()) {
-                    chargingCount++;
-                }
-                if (job.hasBatteryNotLowConstraint()) {
-                    batteryNotLowCount++;
-                }
-                if (job.hasStorageNotLowConstraint()) {
-                    storageNotLowCount++;
-                }
-                if (job.hasContentTriggerConstraint()) {
-                    contentCount++;
-                }
-                if (runnableJobs == null) {
-                    runnableJobs = new ArrayList<>();
+                if (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
+                        && job.getStandbyBucket() != ACTIVE_INDEX
+                        && (job.getFirstForceBatchedTimeElapsed() == 0
+                        || sElapsedRealtimeClock.millis() - job.getFirstForceBatchedTimeElapsed()
+                                < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS)) {
+                    // Force batching non-ACTIVE jobs. Don't include them in the other counts.
+                    forceBatchedCount++;
+                    if (job.getFirstForceBatchedTimeElapsed() == 0) {
+                        job.setFirstForceBatchedTimeElapsed(sElapsedRealtimeClock.millis());
+                    }
+                } else {
+                    unbatchedCount++;
+                    if (job.getNumFailures() > 0) {
+                        backoffCount++;
+                    }
+                    if (job.hasIdleConstraint()) {
+                        idleCount++;
+                    }
+                    if (job.hasConnectivityConstraint()) {
+                        connectivityCount++;
+                    }
+                    if (job.hasChargingConstraint()) {
+                        chargingCount++;
+                    }
+                    if (job.hasBatteryNotLowConstraint()) {
+                        batteryNotLowCount++;
+                    }
+                    if (job.hasStorageNotLowConstraint()) {
+                        storageNotLowCount++;
+                    }
+                    if (job.hasContentTriggerConstraint()) {
+                        contentCount++;
+                    }
                 }
                 runnableJobs.add(job);
             } else {
@@ -2089,8 +2129,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     batteryNotLowCount >= mConstants.MIN_BATTERY_NOT_LOW_COUNT ||
                     storageNotLowCount >= mConstants.MIN_STORAGE_NOT_LOW_COUNT ||
                     contentCount >= mConstants.MIN_CONTENT_COUNT ||
-                    (runnableJobs != null
-                            && runnableJobs.size() >= mConstants.MIN_READY_JOBS_COUNT)) {
+                    forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT ||
+                    (unbatchedCount > 0 && (unbatchedCount + forceBatchedCount)
+                            >= mConstants.MIN_READY_JOBS_COUNT)) {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running jobs.");
                 }
@@ -2109,7 +2150,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             reset();
         }
 
-        private void reset() {
+        @VisibleForTesting
+        void reset() {
             chargingCount = 0;
             idleCount =  0;
             backoffCount = 0;
@@ -2117,7 +2159,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             batteryNotLowCount = 0;
             storageNotLowCount = 0;
             contentCount = 0;
-            runnableJobs = null;
+            forceBatchedCount = 0;
+            unbatchedCount = 0;
+            runnableJobs.clear();
         }
     }
     private final MaybeReadyJobQueueFunctor mMaybeQueueFunctor = new MaybeReadyJobQueueFunctor();
@@ -2226,7 +2270,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      *      - The job's standby bucket has come due to be runnable.
      *      - The component is enabled and runnable.
      */
-    private boolean isReadyToBeExecutedLocked(JobStatus job) {
+    @VisibleForTesting
+    boolean isReadyToBeExecutedLocked(JobStatus job) {
         final boolean jobReady = job.isReady();
 
         if (DEBUG) {
@@ -2358,7 +2403,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         return !appIsBad;
     }
 
-    private void evaluateControllerStatesLocked(final JobStatus job) {
+    @VisibleForTesting
+    void evaluateControllerStatesLocked(final JobStatus job) {
         for (int c = mControllers.size() - 1; c >= 0; --c) {
             final StateController sc = mControllers.get(c);
             sc.evaluateStateLocked(job);

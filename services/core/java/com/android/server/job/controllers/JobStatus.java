@@ -186,6 +186,9 @@ public final class JobStatus {
      */
     private long whenStandbyDeferred;
 
+    /** The first time this job was force batched. */
+    private long mFirstForceBatchedTimeElapsed;
+
     // Constraints.
     final int requiredConstraints;
     private final int mRequiredConstraintsOfInterest;
@@ -727,6 +730,18 @@ public final class JobStatus {
     // Called only by the standby monitoring code
     public void setWhenStandbyDeferred(long now) {
         whenStandbyDeferred = now;
+    }
+
+    /**
+     * Returns the first time this job was force batched, in the elapsed realtime timebase. Will be
+     * 0 if this job was never force batched.
+     */
+    public long getFirstForceBatchedTimeElapsed() {
+        return mFirstForceBatchedTimeElapsed;
+    }
+
+    public void setFirstForceBatchedTimeElapsed(long now) {
+        mFirstForceBatchedTimeElapsed = now;
     }
 
     public String getSourceTag() {
@@ -1625,6 +1640,12 @@ public final class JobStatus {
             TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
             pw.println();
         }
+        if (mFirstForceBatchedTimeElapsed != 0) {
+            pw.print(prefix);
+            pw.print("  Time since first force batch attempt: ");
+            TimeUtils.formatDuration(mFirstForceBatchedTimeElapsed, elapsedRealtimeMillis, pw);
+            pw.println();
+        }
         pw.print(prefix); pw.print("Enqueue time: ");
         TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
         pw.println();
@@ -1817,6 +1838,11 @@ public final class JobStatus {
 
         proto.write(JobStatusDumpProto.STANDBY_BUCKET, standbyBucket);
         proto.write(JobStatusDumpProto.ENQUEUE_DURATION_MS, elapsedRealtimeMillis - enqueueTime);
+        proto.write(JobStatusDumpProto.TIME_SINCE_FIRST_DEFERRAL_MS,
+                whenStandbyDeferred == 0 ? 0 : elapsedRealtimeMillis - whenStandbyDeferred);
+        proto.write(JobStatusDumpProto.TIME_SINCE_FIRST_FORCE_BATCH_ATTEMPT_MS,
+                mFirstForceBatchedTimeElapsed == 0
+                        ? 0 : elapsedRealtimeMillis - mFirstForceBatchedTimeElapsed);
         if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
             proto.write(JobStatusDumpProto.TIME_UNTIL_EARLIEST_RUNTIME_MS, 0);
         } else {
