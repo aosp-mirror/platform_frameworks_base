@@ -346,10 +346,11 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void enroll(final IBinder token, final byte[] cryptoToken,
+        public void enroll(int userId, final IBinder token, final byte[] cryptoToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
             checkPermission(MANAGE_BIOMETRIC);
+            updateActiveGroup(userId, opPackageName);
 
             mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
                     UserHandle.CURRENT);
@@ -448,8 +449,9 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void remove(final IBinder token, final int faceId, final int userId,
-                final IFaceServiceReceiver receiver) {
+                final IFaceServiceReceiver receiver, final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
+            updateActiveGroup(userId, opPackageName);
 
             if (token == null) {
                 Slog.w(TAG, "remove(): token is null");
@@ -612,9 +614,10 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void setFeature(int feature, boolean enabled, final byte[] token,
-                IFaceServiceReceiver receiver) {
+        public void setFeature(int userId, int feature, boolean enabled, final byte[] token,
+                IFaceServiceReceiver receiver, final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
+            updateActiveGroup(userId, opPackageName);
 
             mHandler.post(() -> {
                 if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
@@ -644,8 +647,10 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void getFeature(int feature, IFaceServiceReceiver receiver) {
+        public void getFeature(int userId, int feature, IFaceServiceReceiver receiver,
+                final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
+            updateActiveGroup(userId, opPackageName);
 
             mHandler.post(() -> {
                 // This should ideally return tri-state, but the user isn't shown settings unless
