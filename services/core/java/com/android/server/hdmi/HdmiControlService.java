@@ -56,6 +56,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -1662,6 +1663,8 @@ public class HdmiControlService extends SystemService {
         @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
+            int pid = Binder.getCallingPid();
+            Slog.d(TAG, "Proccess pid: " + pid + " is calling oneTouchPlay.");
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
