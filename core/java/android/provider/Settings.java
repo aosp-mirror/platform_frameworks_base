@@ -7764,6 +7764,12 @@ public final class Settings {
          */
         public static final String SKIP_GESTURE_COUNT = "skip_gesture_count";
 
+        /**
+         * Count of non-gesture interaction.
+         * @hide
+         */
+        public static final String SKIP_TOUCH_COUNT = "skip_touch_count";
+
         private static final Validator SKIP_GESTURE_COUNT_VALIDATOR =
                 NON_NEGATIVE_INTEGER_VALIDATOR;
 
@@ -7808,11 +7814,22 @@ public final class Settings {
         public static final String SILENCE_CALL_GESTURE_COUNT = "silence_call_gesture_count";
 
         /**
-         * Count of successful silence notification gestures.
+         * Count of non-gesture interaction.
          * @hide
          */
-        public static final String SILENCE_NOTIFICATION_GESTURE_COUNT =
-                "silence_notification_gesture_count";
+        public static final String SILENCE_ALARMS_TOUCH_COUNT = "silence_alarms_touch_count";
+
+        /**
+         * Count of non-gesture interaction.
+         * @hide
+         */
+        public static final String SILENCE_TIMER_TOUCH_COUNT = "silence_timer_touch_count";
+
+        /**
+         * Count of non-gesture interaction.
+         * @hide
+         */
+        public static final String SILENCE_CALL_TOUCH_COUNT = "silence_call_touch_count";
 
         private static final Validator SILENCE_GESTURE_COUNT_VALIDATOR =
                 NON_NEGATIVE_INTEGER_VALIDATOR;
@@ -9031,10 +9048,13 @@ public final class Settings {
             NAVIGATION_MODE,
             AWARE_ENABLED,
             SKIP_GESTURE_COUNT,
+            SKIP_TOUCH_COUNT,
             SILENCE_ALARMS_GESTURE_COUNT,
-            SILENCE_NOTIFICATION_GESTURE_COUNT,
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
+            SILENCE_ALARMS_TOUCH_COUNT,
+            SILENCE_CALL_TOUCH_COUNT,
+            SILENCE_TIMER_TOUCH_COUNT,
             DARK_MODE_DIALOG_SEEN,
             GLOBAL_ACTIONS_PANEL_ENABLED,
             AWARE_LOCK_ENABLED
@@ -9222,10 +9242,13 @@ public final class Settings {
             VALIDATORS.put(NAVIGATION_MODE, NAVIGATION_MODE_VALIDATOR);
             VALIDATORS.put(AWARE_ENABLED, AWARE_ENABLED_VALIDATOR);
             VALIDATORS.put(SKIP_GESTURE_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SKIP_TOUCH_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_ALARMS_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_TIMER_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_ALARMS_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_TIMER_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_CALL_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
             VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
             VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);

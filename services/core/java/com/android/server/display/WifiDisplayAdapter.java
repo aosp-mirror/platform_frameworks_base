@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplaySessionInfo;
@@ -95,6 +96,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             Context context, Handler handler, Listener listener,
             PersistentDataStore persistentDataStore) {
         super(syncRoot, context, handler, listener, TAG);
+
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_DIRECT)) {
+            throw new RuntimeException("WiFi display was requested, "
+                    + "but there is no WiFi Direct feature");
+        }
+
         mHandler = new WifiDisplayHandler(handler.getLooper());
         mPersistentDataStore = persistentDataStore;
         mSupportsProtectedBuffers = context.getResources().getBoolean(

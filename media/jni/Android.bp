@@ -47,7 +47,6 @@ cc_library_shared {
         "libstagefright_foundation",
         "libcamera_client",
         "libmtp",
-        "libexif",
         "libpiex",
         "libprocessgroup",
         "libandroidfw",

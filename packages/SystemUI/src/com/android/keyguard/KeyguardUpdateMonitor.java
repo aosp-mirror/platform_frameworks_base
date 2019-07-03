@@ -1683,12 +1683,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT
                         || strongAuth == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
+        boolean canBypass = mKeyguardBypassController != null
+                && mKeyguardBypassController.canBypass();
         // There's no reason to ask the HAL for authentication when the user can dismiss the
         // bouncer, unless we're bypassing and need to auto-dismiss the lock screen even when
         // TrustAgents or biometrics are keeping the device unlocked.
-        boolean bypassEnabled = mKeyguardBypassController != null
-                && mKeyguardBypassController.getBypassEnabled();
-        boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || bypassEnabled;
+        boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.

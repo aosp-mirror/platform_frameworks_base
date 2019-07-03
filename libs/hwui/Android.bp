@@ -250,6 +250,7 @@ cc_defaults {
                 "ProfileData.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
+                "RootRenderNode.cpp",
                 "TreeInfo.cpp",
                 "WebViewFunctorManager.cpp",
                 "protos/graphicsstats.proto",

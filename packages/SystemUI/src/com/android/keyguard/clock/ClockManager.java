@@ -15,8 +15,6 @@
  */
 package com.android.keyguard.clock;
 
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLOCK_FACE_BLACKLIST;
-
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,12 +24,9 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 
 import androidx.annotation.VisibleForTesting;
@@ -47,12 +42,10 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -73,8 +66,6 @@ public final class ClockManager {
     private final SettingsWrapper mSettingsWrapper;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final CurrentUserObservable mCurrentUserObservable;
-
-    private final ArraySet<String> mBlacklistedClockPlugins = new ArraySet<>();
 
     /**
      * Observe settings changes to know when to switch the clock face.
@@ -164,41 +155,6 @@ public final class ClockManager {
         DisplayMetrics dm = res.getDisplayMetrics();
         mWidth = dm.widthPixels;
         mHeight = dm.heightPixels;
-
-        updateBlackList();
-        registerDeviceConfigListener();
-    }
-
-    private void updateBlackList() {
-        String blacklist = getBlackListFromConfig();
-
-        mBlacklistedClockPlugins.clear();
-        if (blacklist != null && !blacklist.isEmpty()) {
-            mBlacklistedClockPlugins.addAll(Arrays.asList(blacklist.split(",")));
-        }
-    }
-
-    String getBlackListFromConfig() {
-        return DeviceConfig.getString(
-            DeviceConfig.NAMESPACE_SYSTEMUI, CLOCK_FACE_BLACKLIST, null);
-    }
-
-    private void registerDeviceConfigListener() {
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                r -> mMainHandler.post(r),
-                properties -> onDeviceConfigPropertiesChanged(properties.getNamespace()));
-    }
-
-    void onDeviceConfigPropertiesChanged(String namespace) {
-        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
-            Log.e(TAG, "Received update from DeviceConfig for unrelated namespace: "
-                    + namespace);
-            return;
-        }
-
-        updateBlackList();
-        reload();
     }
 
     /**
@@ -350,12 +306,10 @@ public final class ClockManager {
         }
 
         /**
-         * Get information about clock faces which are available and not in blacklist.
+         * Get information about available clock faces.
          */
         List<ClockInfo> getInfo() {
-            return mClockInfo.stream()
-                .filter(info -> !mBlacklistedClockPlugins.contains(info.getId()))
-                .collect(Collectors.toList());
+            return mClockInfo;
         }
 
         /**
@@ -407,7 +361,7 @@ public final class ClockManager {
             if (ClockManager.this.isDocked()) {
                 final String name = mSettingsWrapper.getDockedClockFace(
                         mCurrentUserObservable.getCurrentUser().getValue());
-                if (name != null && !mBlacklistedClockPlugins.contains(name)) {
+                if (name != null) {
                     plugin = mClocks.get(name);
                     if (plugin != null) {
                         return plugin;
@@ -416,7 +370,7 @@ public final class ClockManager {
             }
             final String name = mSettingsWrapper.getLockScreenCustomClockFace(
                     mCurrentUserObservable.getCurrentUser().getValue());
-            if (name != null && !mBlacklistedClockPlugins.contains(name)) {
+            if (name != null) {
                 plugin = mClocks.get(name);
             }
             return plugin;

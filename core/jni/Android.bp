@@ -153,6 +153,7 @@ cc_library_shared {
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
                 "android_view_InputQueue.cpp",
+                "android_view_FrameMetricsObserver.cpp",
                 "android_view_KeyCharacterMap.cpp",
                 "android_view_KeyEvent.cpp",
                 "android_view_MotionEvent.cpp",

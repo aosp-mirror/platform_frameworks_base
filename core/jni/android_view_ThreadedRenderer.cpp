@@ -25,11 +25,12 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <GraphicsJNI.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <gui/BufferItemConsumer.h>
 #include <gui/BufferQueue.h>
 #include <gui/Surface.h>
+
+#include "android_view_FrameMetricsObserver.h"
 
 #include <private/EGL/cache.h>
 
@@ -40,17 +41,11 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
-#include "android_os_MessageQueue.h"
-
-#include <Animator.h>
-#include <AnimationContext.h>
 #include <FrameInfo.h>
-#include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
 #include <Picture.h>
 #include <Properties.h>
-#include <PropertyValuesAnimatorSet.h>
-#include <RenderNode.h>
+#include <RootRenderNode.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -62,13 +57,6 @@ namespace android {
 
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
-
-struct {
-    jfieldID frameMetrics;
-    jfieldID timingDataBuffer;
-    jfieldID messageQueue;
-    jmethodID callback;
-} gFrameMetricsObserverClassInfo;
 
 struct {
     jclass clazz;
@@ -91,56 +79,18 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
-class OnFinishedEvent {
+class JvmErrorReporter : public ErrorHandler {
 public:
-    OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
-            : animator(animator), listener(listener) {}
-    sp<BaseRenderNodeAnimator> animator;
-    sp<AnimationListener> listener;
-};
-
-class InvokeAnimationListeners : public MessageHandler {
-public:
-    explicit InvokeAnimationListeners(std::vector<OnFinishedEvent>& events) {
-        mOnFinishedEvents.swap(events);
+    JvmErrorReporter(JNIEnv* env) {
+        env->GetJavaVM(&mVm);
     }
 
-    static void callOnFinished(OnFinishedEvent& event) {
-        event.listener->onAnimationFinished(event.animator.get());
-    }
-
-    virtual void handleMessage(const Message& message) {
-        std::for_each(mOnFinishedEvents.begin(), mOnFinishedEvents.end(), callOnFinished);
-        mOnFinishedEvents.clear();
-    }
-
-private:
-    std::vector<OnFinishedEvent> mOnFinishedEvents;
-};
-
-class FinishAndInvokeListener : public MessageHandler {
-public:
-    explicit FinishAndInvokeListener(PropertyValuesAnimatorSet* anim)
-            : mAnimator(anim) {
-        mListener = anim->getOneShotListener();
-        mRequestId = anim->getRequestId();
-    }
-
-    virtual void handleMessage(const Message& message) {
-        if (mAnimator->getRequestId() == mRequestId) {
-            // Request Id has not changed, meaning there's no animation lifecyle change since the
-            // message is posted, so go ahead and call finish to make sure the PlayState is properly
-            // updated. This is needed because before the next frame comes in from UI thread to
-            // trigger an animation update, there could be reverse/cancel etc. So we need to update
-            // the playstate in time to ensure all the subsequent events get chained properly.
-            mAnimator->end();
-        }
-        mListener->onAnimationFinished(nullptr);
+    virtual void onError(const std::string& message) override {
+        JNIEnv* env = getenv(mVm);
+        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
     }
 private:
-    sp<PropertyValuesAnimatorSet> mAnimator;
-    sp<AnimationListener> mListener;
-    uint32_t mRequestId;
+    JavaVM* mVm;
 };
 
 class FrameCompleteWrapper : public LightRefBase<FrameCompleteWrapper> {
@@ -175,419 +125,6 @@ private:
     }
 };
 
-class RootRenderNode : public RenderNode, ErrorHandler {
-public:
-    explicit RootRenderNode(JNIEnv* env) : RenderNode() {
-        env->GetJavaVM(&mVm);
-    }
-
-    virtual ~RootRenderNode() {}
-
-    virtual void onError(const std::string& message) override {
-        JNIEnv* env = getenv(mVm);
-        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
-    }
-
-    virtual void prepareTree(TreeInfo& info) override {
-        info.errorHandler = this;
-
-        for (auto& anim : mRunningVDAnimators) {
-            // Assume that the property change in VD from the animators will not be consumed. Mark
-            // otherwise if the VDs are found in the display list tree. For VDs that are not in
-            // the display list tree, we stop providing animation pulses by 1) removing them from
-            // the animation list, 2) post a delayed message to end them at end time so their
-            // listeners can receive the corresponding callbacks.
-            anim->getVectorDrawable()->setPropertyChangeWillBeConsumed(false);
-            // Mark the VD dirty so it will damage itself during prepareTree.
-            anim->getVectorDrawable()->markDirty();
-        }
-        if (info.mode == TreeInfo::MODE_FULL) {
-            for (auto &anim : mPausedVDAnimators) {
-                anim->getVectorDrawable()->setPropertyChangeWillBeConsumed(false);
-                anim->getVectorDrawable()->markDirty();
-            }
-        }
-        // TODO: This is hacky
-        info.updateWindowPositions = true;
-        RenderNode::prepareTree(info);
-        info.updateWindowPositions = false;
-        info.errorHandler = nullptr;
-    }
-
-    void attachAnimatingNode(RenderNode* animatingNode) {
-        mPendingAnimatingRenderNodes.push_back(animatingNode);
-    }
-
-    void attachPendingVectorDrawableAnimators() {
-        mRunningVDAnimators.insert(mPendingVectorDrawableAnimators.begin(),
-                mPendingVectorDrawableAnimators.end());
-        mPendingVectorDrawableAnimators.clear();
-    }
-
-    void detachAnimators() {
-        // Remove animators from the list and post a delayed message in future to end the animator
-        // For infinite animators, remove the listener so we no longer hold a global ref to the AVD
-        // java object, and therefore the AVD objects in both native and Java can be properly
-        // released.
-        for (auto& anim : mRunningVDAnimators) {
-            detachVectorDrawableAnimator(anim.get());
-            anim->clearOneShotListener();
-        }
-        for (auto& anim : mPausedVDAnimators) {
-            anim->clearOneShotListener();
-        }
-        mRunningVDAnimators.clear();
-        mPausedVDAnimators.clear();
-    }
-
-    // Move all the animators to the paused list, and send a delayed message to notify the finished
-    // listener.
-    void pauseAnimators() {
-        mPausedVDAnimators.insert(mRunningVDAnimators.begin(), mRunningVDAnimators.end());
-        for (auto& anim : mRunningVDAnimators) {
-            detachVectorDrawableAnimator(anim.get());
-        }
-        mRunningVDAnimators.clear();
-    }
-
-    void doAttachAnimatingNodes(AnimationContext* context) {
-        for (size_t i = 0; i < mPendingAnimatingRenderNodes.size(); i++) {
-            RenderNode* node = mPendingAnimatingRenderNodes[i].get();
-            context->addAnimatingRenderNode(*node);
-        }
-        mPendingAnimatingRenderNodes.clear();
-    }
-
-    // Run VectorDrawable animators after prepareTree.
-    void runVectorDrawableAnimators(AnimationContext* context, TreeInfo& info) {
-        // Push staging.
-        if (info.mode == TreeInfo::MODE_FULL) {
-            pushStagingVectorDrawableAnimators(context);
-        }
-
-        // Run the animators in the running list.
-        for (auto it = mRunningVDAnimators.begin(); it != mRunningVDAnimators.end();) {
-            if ((*it)->animate(*context)) {
-                it = mRunningVDAnimators.erase(it);
-            } else {
-                it++;
-            }
-        }
-
-        // Run the animators in paused list during full sync.
-        if (info.mode == TreeInfo::MODE_FULL) {
-            // During full sync we also need to pulse paused animators, in case their targets
-            // have been added back to the display list. All the animators that passed the
-            // scheduled finish time will be removed from the paused list.
-            for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
-                if ((*it)->animate(*context)) {
-                    // Animator has finished, remove from the list.
-                    it = mPausedVDAnimators.erase(it);
-                } else {
-                    it++;
-                }
-            }
-        }
-
-        // Move the animators with a target not in DisplayList to paused list.
-        for (auto it = mRunningVDAnimators.begin(); it != mRunningVDAnimators.end();) {
-            if (!(*it)->getVectorDrawable()->getPropertyChangeWillBeConsumed()) {
-                // Vector Drawable is not in the display list, we should remove this animator from
-                // the list, put it in the paused list, and post a delayed message to end the
-                // animator.
-                detachVectorDrawableAnimator(it->get());
-                mPausedVDAnimators.insert(*it);
-                it = mRunningVDAnimators.erase(it);
-            } else {
-                it++;
-            }
-        }
-
-        // Move the animators with a target in DisplayList from paused list to running list, and
-        // trim paused list.
-        if (info.mode == TreeInfo::MODE_FULL) {
-            // Check whether any paused animator's target is back in Display List. If so, put the
-            // animator back in the running list.
-            for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
-                if ((*it)->getVectorDrawable()->getPropertyChangeWillBeConsumed()) {
-                    mRunningVDAnimators.insert(*it);
-                    it = mPausedVDAnimators.erase(it);
-                } else {
-                    it++;
-                }
-            }
-            // Trim paused VD animators at full sync, so that when Java loses reference to an
-            // animator, we know we won't be requested to animate it any more, then we remove such
-            // animators from the paused list so they can be properly freed. We also remove the
-            // animators from paused list when the time elapsed since start has exceeded duration.
-            trimPausedVDAnimators(context);
-        }
-
-        info.out.hasAnimations |= !mRunningVDAnimators.empty();
-    }
-
-    void trimPausedVDAnimators(AnimationContext* context) {
-        // Trim paused vector drawable animator list.
-        for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
-            // Remove paused VD animator if no one else is referencing it. Note that animators that
-            // have passed scheduled finish time are removed from list when they are being pulsed
-            // before prepare tree.
-            // TODO: this is a bit hacky, need to figure out a better way to track when the paused
-            // animators should be freed.
-            if ((*it)->getStrongCount() == 1) {
-                it = mPausedVDAnimators.erase(it);
-            } else {
-                it++;
-            }
-        }
-    }
-
-    void pushStagingVectorDrawableAnimators(AnimationContext* context) {
-        for (auto& anim : mRunningVDAnimators) {
-            anim->pushStaging(*context);
-        }
-    }
-
-    void destroy() {
-        for (auto& renderNode : mPendingAnimatingRenderNodes) {
-            renderNode->animators().endAllStagingAnimators();
-        }
-        mPendingAnimatingRenderNodes.clear();
-        mPendingVectorDrawableAnimators.clear();
-    }
-
-    void addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) {
-        mPendingVectorDrawableAnimators.insert(anim);
-    }
-
-private:
-    JavaVM* mVm;
-    std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
-    std::set< sp<PropertyValuesAnimatorSet> > mPendingVectorDrawableAnimators;
-    std::set< sp<PropertyValuesAnimatorSet> > mRunningVDAnimators;
-    // mPausedVDAnimators stores a list of animators that have not yet passed the finish time, but
-    // their VectorDrawable targets are no longer in the DisplayList. We skip these animators when
-    // render thread runs animators independent of UI thread (i.e. RT_ONLY mode). These animators
-    // need to be re-activated once their VD target is added back into DisplayList. Since that could
-    // only happen when we do a full sync, we need to make sure to pulse these paused animators at
-    // full sync. If any animator's VD target is found in DisplayList during a full sync, we move
-    // the animator back to the running list.
-    std::set< sp<PropertyValuesAnimatorSet> > mPausedVDAnimators;
-    void detachVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) {
-        if (anim->isInfinite() || !anim->isRunning()) {
-            // Do not need to post anything if the animation is infinite (i.e. no meaningful
-            // end listener action), or if the animation has already ended.
-            return;
-        }
-        nsecs_t remainingTimeInMs = anim->getRemainingPlayTime();
-        // Post a delayed onFinished event that is scheduled to be handled when the animator ends.
-        if (anim->getOneShotListener()) {
-            // VectorDrawable's oneshot listener is updated when there are user triggered animation
-            // lifecycle changes, such as start(), end(), etc. By using checking and clearing
-            // one shot listener, we ensure the same end listener event gets posted only once.
-            // Therefore no duplicates. Another benefit of using one shot listener is that no
-            // removal is necessary: the end time of animation will not change unless triggered by
-            // user events, in which case the already posted listener's id will become stale, and
-            // the onFinished callback will then be ignored.
-            sp<FinishAndInvokeListener> message
-                    = new FinishAndInvokeListener(anim);
-            auto looper = Looper::getForThread();
-            LOG_ALWAYS_FATAL_IF(looper == nullptr, "Not on a looper thread?");
-            looper->sendMessageDelayed(ms2ns(remainingTimeInMs), message, 0);
-            anim->clearOneShotListener();
-        }
-    }
-};
-
-class AnimationContextBridge : public AnimationContext {
-public:
-    AnimationContextBridge(renderthread::TimeLord& clock, RootRenderNode* rootNode)
-            : AnimationContext(clock), mRootNode(rootNode) {
-    }
-
-    virtual ~AnimationContextBridge() {}
-
-    // Marks the start of a frame, which will update the frame time and move all
-    // next frame animations into the current frame
-    virtual void startFrame(TreeInfo::TraversalMode mode) {
-        if (mode == TreeInfo::MODE_FULL) {
-            mRootNode->doAttachAnimatingNodes(this);
-            mRootNode->attachPendingVectorDrawableAnimators();
-        }
-        AnimationContext::startFrame(mode);
-    }
-
-    // Runs any animations still left in mCurrentFrameAnimations
-    virtual void runRemainingAnimations(TreeInfo& info) {
-        AnimationContext::runRemainingAnimations(info);
-        mRootNode->runVectorDrawableAnimators(this, info);
-    }
-
-    virtual void pauseAnimators() override {
-        mRootNode->pauseAnimators();
-    }
-
-    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
-        listener->onAnimationFinished(animator);
-    }
-
-    virtual void destroy() {
-        AnimationContext::destroy();
-        mRootNode->detachAnimators();
-    }
-
-private:
-    sp<RootRenderNode> mRootNode;
-};
-
-class ContextFactoryImpl : public IContextFactory {
-public:
-    explicit ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
-
-    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
-        return new AnimationContextBridge(clock, mRootNode);
-    }
-
-private:
-    RootRenderNode* mRootNode;
-};
-
-class ObserverProxy;
-
-class NotifyHandler : public MessageHandler {
-public:
-    NotifyHandler(JavaVM* vm, ObserverProxy* observer) : mVm(vm), mObserver(observer) {}
-
-    virtual void handleMessage(const Message& message);
-
-private:
-    JavaVM* const mVm;
-    ObserverProxy* const mObserver;
-};
-
-static jlongArray get_metrics_buffer(JNIEnv* env, jobject observer) {
-    jobject frameMetrics = env->GetObjectField(
-            observer, gFrameMetricsObserverClassInfo.frameMetrics);
-    LOG_ALWAYS_FATAL_IF(frameMetrics == nullptr, "unable to retrieve data sink object");
-    jobject buffer = env->GetObjectField(
-            frameMetrics, gFrameMetricsObserverClassInfo.timingDataBuffer);
-    LOG_ALWAYS_FATAL_IF(buffer == nullptr, "unable to retrieve data sink buffer");
-    return reinterpret_cast<jlongArray>(buffer);
-}
-
-/*
- * Implements JNI layer for hwui frame metrics reporting.
- */
-class ObserverProxy : public FrameMetricsObserver {
-public:
-    ObserverProxy(JavaVM *vm, jobject observer) : mVm(vm) {
-        JNIEnv* env = getenv(mVm);
-
-        mObserverWeak = env->NewWeakGlobalRef(observer);
-        LOG_ALWAYS_FATAL_IF(mObserverWeak == nullptr,
-                "unable to create frame stats observer reference");
-
-        jlongArray buffer = get_metrics_buffer(env, observer);
-        jsize bufferSize = env->GetArrayLength(reinterpret_cast<jarray>(buffer));
-        LOG_ALWAYS_FATAL_IF(bufferSize != kBufferSize,
-                "Mismatched Java/Native FrameMetrics data format.");
-
-        jobject messageQueueLocal = env->GetObjectField(
-                observer, gFrameMetricsObserverClassInfo.messageQueue);
-        mMessageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueLocal);
-        LOG_ALWAYS_FATAL_IF(mMessageQueue == nullptr, "message queue not available");
-
-        mMessageHandler = new NotifyHandler(mVm, this);
-        LOG_ALWAYS_FATAL_IF(mMessageHandler == nullptr,
-                "OOM: unable to allocate NotifyHandler");
-    }
-
-    ~ObserverProxy() {
-        JNIEnv* env = getenv(mVm);
-        env->DeleteWeakGlobalRef(mObserverWeak);
-    }
-
-    jweak getObserverReference() {
-        return mObserverWeak;
-    }
-
-    bool getNextBuffer(JNIEnv* env, jlongArray sink, int* dropCount) {
-        FrameMetricsNotification& elem = mRingBuffer[mNextInQueue];
-
-        if (elem.hasData.load()) {
-            env->SetLongArrayRegion(sink, 0, kBufferSize, elem.buffer);
-            *dropCount = elem.dropCount;
-            mNextInQueue = (mNextInQueue + 1) % kRingSize;
-            elem.hasData = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    virtual void notify(const int64_t* stats) {
-        FrameMetricsNotification& elem = mRingBuffer[mNextFree];
-
-        if (!elem.hasData.load()) {
-            memcpy(elem.buffer, stats, kBufferSize * sizeof(stats[0]));
-
-            elem.dropCount = mDroppedReports;
-            mDroppedReports = 0;
-
-            incStrong(nullptr);
-            mNextFree = (mNextFree + 1) % kRingSize;
-            elem.hasData = true;
-
-            mMessageQueue->getLooper()->sendMessage(mMessageHandler, mMessage);
-        } else {
-            mDroppedReports++;
-        }
-    }
-
-private:
-    static const int kBufferSize = static_cast<int>(FrameInfoIndex::NumIndexes);
-    static constexpr int kRingSize = 3;
-
-    class FrameMetricsNotification {
-    public:
-        FrameMetricsNotification() : hasData(false) {}
-
-        std::atomic_bool hasData;
-        int64_t buffer[kBufferSize];
-        int dropCount = 0;
-    };
-
-    JavaVM* const mVm;
-    jweak mObserverWeak;
-
-    sp<MessageQueue> mMessageQueue;
-    sp<NotifyHandler> mMessageHandler;
-    Message mMessage;
-
-    int mNextFree = 0;
-    int mNextInQueue = 0;
-    FrameMetricsNotification mRingBuffer[kRingSize];
-
-    int mDroppedReports = 0;
-};
-
-void NotifyHandler::handleMessage(const Message& message) {
-    JNIEnv* env = getenv(mVm);
-
-    jobject target = env->NewLocalRef(mObserver->getObserverReference());
-
-    if (target != nullptr) {
-        jlongArray javaBuffer = get_metrics_buffer(env, target);
-        int dropCount = 0;
-        while (mObserver->getNextBuffer(env, javaBuffer, &dropCount)) {
-            env->CallVoidMethod(target, gFrameMetricsObserverClassInfo.callback, dropCount);
-        }
-        env->DeleteLocalRef(target);
-    }
-
-    mObserver->decStrong(nullptr);
-}
-
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
 }
@@ -604,7 +141,7 @@ static jint android_view_ThreadedRenderer_getRenderThreadTid(JNIEnv* env, jobjec
 }
 
 static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
-    RootRenderNode* node = new RootRenderNode(env);
+    RootRenderNode* node = new RootRenderNode(std::make_unique<JvmErrorReporter>(env));
     node->incStrong(0);
     node->setName("RootRenderNode");
     return reinterpret_cast<jlong>(node);
@@ -1053,7 +590,7 @@ static jlong android_view_ThreadedRenderer_addFrameMetricsObserver(JNIEnv* env,
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
-    FrameMetricsObserver* observer = new ObserverProxy(vm, fso);
+    FrameMetricsObserver* observer = new FrameMetricsObserverProxy(vm, fso);
     renderProxy->addFrameMetricsObserver(observer);
     return reinterpret_cast<jlong>(observer);
 }
@@ -1172,17 +709,6 @@ static void attachRenderThreadToJvm(const char* name) {
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
     env->GetJavaVM(&mJvm);
     RenderThread::setOnStartHook(&attachRenderThreadToJvm);
-    jclass observerClass = FindClassOrDie(env, "android/view/FrameMetricsObserver");
-    gFrameMetricsObserverClassInfo.frameMetrics = GetFieldIDOrDie(
-            env, observerClass, "mFrameMetrics", "Landroid/view/FrameMetrics;");
-    gFrameMetricsObserverClassInfo.messageQueue = GetFieldIDOrDie(
-            env, observerClass, "mMessageQueue", "Landroid/os/MessageQueue;");
-    gFrameMetricsObserverClassInfo.callback = GetMethodIDOrDie(
-            env, observerClass, "notifyDataAvailable", "(I)V");
-
-    jclass metricsClass = FindClassOrDie(env, "android/view/FrameMetrics");
-    gFrameMetricsObserverClassInfo.timingDataBuffer = GetFieldIDOrDie(
-            env, metricsClass, "mTimingData", "[J");
 
     jclass hardwareRenderer = FindClassOrDie(env,
             "android/graphics/HardwareRenderer");

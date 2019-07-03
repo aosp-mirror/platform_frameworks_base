@@ -380,6 +380,9 @@ public class HdmiControlService extends SystemService {
                 case Constants.MESSAGE_TEXT_VIEW_ON:
                     bufferImageOrTextViewOn(message);
                     return true;
+                case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
+                    bufferSystemAudioModeRequest(message);
+                    return true;
                     // Add here if new message that needs to buffer
                 default:
                     // Do not need to buffer messages other than above
@@ -408,6 +411,12 @@ public class HdmiControlService extends SystemService {
         private void bufferImageOrTextViewOn(HdmiCecMessage message) {
             if (!replaceMessageIfBuffered(message, Constants.MESSAGE_IMAGE_VIEW_ON) &&
                 !replaceMessageIfBuffered(message, Constants.MESSAGE_TEXT_VIEW_ON)) {
+                mBuffer.add(message);
+            }
+        }
+
+        private void bufferSystemAudioModeRequest(HdmiCecMessage message) {
+            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST)) {
                 mBuffer.add(message);
             }
         }

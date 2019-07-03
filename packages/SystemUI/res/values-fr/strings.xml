@@ -24,7 +24,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
-    <string name="battery_low_title" msgid="9187898087363540349">"Il est possible que vous soyez bientôt à court de batterie"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"La batterie est bientôt épuisée"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – Temps restant en fonction de votre utilisation : environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – Temps restant : environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -376,8 +376,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Jusqu\'à l\'aube"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"À partir de <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Jusqu\'à <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Mode sombre"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Thème foncé\nÉconomiseur de batterie"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Thème foncé"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Thème foncé\nÉconomiseur de batterie"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La technologie NFC est désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La technologie NFC est activée"</string>

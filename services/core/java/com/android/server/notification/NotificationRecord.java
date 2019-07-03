@@ -618,11 +618,11 @@ public final class NotificationRecord {
     public final String toString() {
         return String.format(
                 "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
-                        "appImportanceLocked=%s: %s)",
+                        ": %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
                 this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
-                mIsAppImportanceLocked, this.sbn.getNotification());
+                this.sbn.getNotification());
     }
 
     public boolean hasAdjustment(String key) {

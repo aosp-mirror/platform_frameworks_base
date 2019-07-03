@@ -46,6 +46,14 @@
           "include-filter": "android.permission.cts.BackgroundPermissionsTest"
         }
       ]
+    },
+    {
+      "name": "CtsBackupTestCases",
+      "options": [
+        {
+          "include-filter": "android.backup.cts.PermissionTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

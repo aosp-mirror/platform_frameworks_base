@@ -165,4 +165,16 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Verify rollback was not executed after health check deadline
         runPhase("assertNoNetworkStackRollbackCommitted");
     }
+
+    /**
+     * Tests rolling back user data where there are multiple rollbacks for that package.
+     */
+    @Test
+    public void testPreviouslyAbandonedRollbacks() throws Exception {
+        runPhase("testPreviouslyAbandonedRollbacksEnableRollback");
+        getDevice().reboot();
+        runPhase("testPreviouslyAbandonedRollbacksCommitRollback");
+        getDevice().reboot();
+        runPhase("testPreviouslyAbandonedRollbacksCheckUserdataRollback");
+    }
 }

@@ -329,6 +329,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
+        // Invalidate the internal active source record when goes to standby
+        // This set will also update mIsActiveSource
+        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
         mTvSystemAudioModeSupport = null;
         // Record the last state of System Audio Control before going to standby
         synchronized (mLock) {
@@ -783,6 +786,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
+
+        if (systemAudioStatusOn) {
+            int sourcePhysicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+            if (sourcePhysicalAddress != getActiveSource().physicalAddress) {
+                // If the Active Source recorded by the current device is not synced up with TV,
+                // TODO(amyjojo): update Active Source internally
+            }
+            switchInputOnReceivingNewActivePath(sourcePhysicalAddress);
+        }
         return true;
     }
 
@@ -922,8 +934,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv()) {
-            if (newSystemAudioMode && !isArcEnabled()
-                    && !hasAction(ArcInitiationActionFromAvr.class)) {
+            if (!hasAction(ArcInitiationActionFromAvr.class)) {
                 addAndStartAction(new ArcInitiationActionFromAvr(this));
             }
         }
@@ -1097,6 +1108,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     private void initArcOnFromAvr() {
+        removeAction(ArcTerminationActionFromAvr.class);
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv() && !isArcEnabled()) {
             removeAction(ArcInitiationActionFromAvr.class);
@@ -1138,7 +1150,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         // Wake up if the current device if ready to route.
         mService.wakeUp();
-        if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
+        // Switch to HOME if the current active port is not HOME yet
+        if (portId == Constants.CEC_SWITCH_HOME
+            && mService.isPlaybackDevice()
+            && getLocalActivePort() != Constants.CEC_SWITCH_HOME) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {
             switchToTvInput(SystemProperties.get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT));

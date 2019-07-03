@@ -8554,8 +8554,7 @@ public class Activity extends ContextThemeWrapper
 
     /** Log a lifecycle event for current user id and component class. */
     private void writeEventLog(int event, String reason) {
-        EventLog.writeEvent(event, UserHandle.myUserId(), getComponentName().getClassName(),
-                reason);
+        EventLog.writeEvent(event, mIdent, getComponentName().getClassName(), reason);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
