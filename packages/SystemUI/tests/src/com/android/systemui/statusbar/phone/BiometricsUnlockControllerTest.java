@@ -155,6 +155,30 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricAuthenticated_whenFace_andBypass_encrypted_showBouncer() {
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(false);
+        mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
+                BiometricSourceType.FACE);
+
+        verify(mStatusBarKeyguardViewManager).showBouncer(eq(false));
+    }
+
+    @Test
+    public void onBiometricAuthenticated_whenFace_noBypass_encrypted_doNothing() {
+        mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(false);
+        mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
+                BiometricSourceType.FACE);
+
+        verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
+        verify(mStatusBarKeyguardViewManager, never()).animateCollapsePanels(anyFloat());
+    }
+
+    @Test
     public void onBiometricAuthenticated_whenFaceOnBouncer_dismissBouncer() {
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
