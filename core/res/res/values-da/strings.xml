@@ -1130,14 +1130,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Åbn med"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Åbn med %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Åbn"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Åbn <xliff:g id="HOST">%1$s</xliff:g> links med"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"Åbn links med"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Åbn links med <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Åbn <xliff:g id="HOST">%1$s</xliff:g>-links med <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Giv adgang"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Rediger med"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediger med %1$s"</string>
@@ -1589,8 +1585,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vil du starte browseren?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vil du besvare opkaldet?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altid"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Angiv som altid åben"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kun én gang"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Indstillinger"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s understøtter ikke arbejdsprofil"</string>

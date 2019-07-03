@@ -1130,14 +1130,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Բացել հետևյալ ծրագրով՝"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել հավելվածով՝ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Բացել"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"<xliff:g id="HOST">%1$s</xliff:g> տեսակի հղումները բացել…"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"Հղումները բացել…"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Հղումները բացել <xliff:g id="APPLICATION">%1$s</xliff:g> դիտարկիչում"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"<xliff:g id="HOST">%1$s</xliff:g> տեսակի հղումները բացել <xliff:g id="APPLICATION">%2$s</xliff:g> դիտարկիչում"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Թույլատրել"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Խմբագրել հետևյալ ծրագրով՝"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Խմբագրել հետևյալով՝ %1$s"</string>
@@ -1155,7 +1151,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Լուսանկարել %1$s հավելվածի օգնությամբ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Լուսանկարել"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել ըստ կանխադրման այս գործողության համար:"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Օգտագործել այլ հավելված"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Ուրիշ հավելված"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Ընտրել գործողություն"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Ընտրեք հավելված USB սարքի համար"</string>
@@ -1589,9 +1585,8 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Գործարկե՞լ զննարկիչը:"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Ընդունե՞լ զանգը:"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Միշտ"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Միայն մեկ անգամ"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Միշտ բացել"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Միայն այս անգամ"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Կարգավորումներ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s-ը չի աջակցում աշխատանքային պրոֆիլներ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Գրասալիկ"</string>
