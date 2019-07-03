@@ -170,11 +170,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull String packageName, int flagMask, int flagValues, int callingUid, int userId,
             boolean overridePolicy, @Nullable PermissionCallback callback);
 
-    public abstract int checkPermission(@NonNull String permName, @NonNull String packageName,
-            int callingUid, int userId);
-    public abstract int checkUidPermission(@NonNull String permName,
-            @Nullable PackageParser.Package pkg, int uid, int callingUid);
-
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userid} is not for the caller.
@@ -202,4 +197,18 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     /** Get all permission that have a certain protection level */
     public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
             @PermissionInfo.Protection int protectionLevel);
+
+    /**
+     * Returns the delegate used to influence permission checking.
+     *
+     * @return The delegate instance.
+     */
+    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
+
+    /**
+     * Sets the delegate used to influence permission checking.
+     *
+     * @param delegate A delegate instance or {@code null} to clear.
+     */
+    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
 }

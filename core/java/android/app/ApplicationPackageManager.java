@@ -626,7 +626,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkPermission(String permName, String pkgName) {
         try {
-            return mPM.checkPermission(permName, pkgName, getUserId());
+            return mPermissionManager.checkPermission(permName, pkgName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

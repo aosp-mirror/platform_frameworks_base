@@ -46,4 +46,8 @@ interface IPermissionManager {
             int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
+
+    int checkPermission(String permName, String pkgName, int userId);
+
+    int checkUidPermission(String permName, int uid);
 }

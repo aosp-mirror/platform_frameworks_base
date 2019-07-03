@@ -77,6 +77,7 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -229,6 +230,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @GuardedBy("mLock")
     final private ArrayList<OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private CheckPermissionDelegate mCheckPermissionDelegate;
 
     // TODO: Take a look at the methods defined in the callback.
     // The callback was initially created to support the split between permission
@@ -710,12 +714,29 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private int checkPermission(String permName, String pkgName, int callingUid, int userId) {
+    @Override
+    public int checkPermission(String permName, String pkgName, int userId) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkPermissionImpl(permName, pkgName, userId);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
+                PermissionManagerService.this::checkPermissionImpl);
+    }
+
+    private int checkPermissionImpl(String permName, String pkgName, int userId) {
+        return checkPermissionInternal(permName, pkgName, getCallingUid(), userId);
+    }
+
+    private int checkPermissionInternal(String permName, String packageName, int callingUid,
+            int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(pkgName);
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
         if (pkg != null && pkg.mExtras != null) {
             if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
                 return PackageManager.PERMISSION_DENIED;
@@ -739,12 +760,38 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return PackageManager.PERMISSION_GRANTED;
             }
         }
-
         return PackageManager.PERMISSION_DENIED;
     }
 
-    private int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
-            int callingUid) {
+    @Override
+    public int checkUidPermission(String permName, int uid) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkUidPermissionImpl(permName, uid);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkUidPermission(permName, uid,
+                PermissionManagerService.this::checkUidPermissionImpl);
+    }
+
+    private int checkUidPermissionImpl(@NonNull String permName, int uid) {
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(uid);
+        synchronized (mLock) {
+            return checkUidPermissionInternal(permName, pkg, uid, getCallingUid());
+        }
+    }
+
+    /**
+     * Checks whether or not the given package has been granted the specified
+     * permission. If the given package is {@code null}, we instead check the
+     * system permissions for the given UID.
+     *
+     * @see SystemConfig#getSystemPermissions()
+     */
+    private int checkUidPermissionInternal(@NonNull String permName,
+            @Nullable PackageParser.Package pkg, int uid, int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp =
                 mPackageManagerInt.getInstantAppPackageName(callingUid) != null;
@@ -995,9 +1042,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         final int numPackages = allPackageNames.size();
                         for (int packageNum = 0; packageNum < numPackages; packageNum++) {
                             final String packageName = allPackageNames.get(packageNum);
-
-                            if (checkPermission(permissionName, packageName, UserHandle.USER_SYSTEM,
-                                    userId) == PackageManager.PERMISSION_GRANTED) {
+                            final int permissionState = checkPermissionInternal(
+                                    permissionName, packageName, UserHandle.USER_SYSTEM, userId);
+                            if (permissionState == PackageManager.PERMISSION_GRANTED) {
                                 EventLog.writeEvent(0x534e4554, "72710897",
                                         newPackage.applicationInfo.uid,
                                         "Revoking permission " + permissionName +
@@ -3362,17 +3409,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionManagerService.this.enforceGrantRevokeRuntimePermissionPermissions(message);
         }
         @Override
-        public int checkPermission(String permName, String packageName, int callingUid,
-                int userId) {
-            return PermissionManagerService.this.checkPermission(
-                    permName, packageName, callingUid, userId);
-        }
-        @Override
-        public int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
-                int callingUid) {
-            return PermissionManagerService.this.checkUidPermission(permName, pkg, uid, callingUid);
-        }
-        @Override
         public PermissionSettings getPermissionSettings() {
             return mSettings;
         }
@@ -3436,6 +3472,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 OnRuntimePermissionStateChangedListener listener) {
             PermissionManagerService.this.removeOnRuntimePermissionStateChangedListener(
                     listener);
+        }
+
+        @Override
+        public CheckPermissionDelegate getCheckPermissionDelegate() {
+            synchronized (mLock) {
+                return mCheckPermissionDelegate;
+            }
+        }
+
+        @Override
+        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
+            synchronized (mLock) {
+                mCheckPermissionDelegate = delegate;
+            }
         }
     }
 }

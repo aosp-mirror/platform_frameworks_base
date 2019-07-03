@@ -170,7 +170,6 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
 import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -1003,9 +1002,6 @@ public class PackageManagerService extends IPackageManager.Stub
         void startVerifications(int userId);
         void receiveVerificationResponse(int verificationId);
     }
-
-    @GuardedBy("mPackages")
-    private CheckPermissionDelegate mCheckPermissionDelegate;
 
     @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
@@ -5578,46 +5574,26 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
-        final CheckPermissionDelegate checkPermissionDelegate;
-        synchronized (mPackages) {
-            if (mCheckPermissionDelegate == null)  {
-                return checkPermissionImpl(permName, pkgName, userId);
-            }
-            checkPermissionDelegate = mCheckPermissionDelegate;
-        }
-        return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
-                PackageManagerService.this::checkPermissionImpl);
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            return mPermissionManagerService.checkPermission(permName, pkgName, userId);
+        } catch (RemoteException ignore) { }
+        return PackageManager.PERMISSION_DENIED;
     }
 
-    private int checkPermissionImpl(String permName, String pkgName, int userId) {
-        return mPermissionManager.checkPermission(permName, pkgName, getCallingUid(), userId);
-    }
-
+    // NOTE: Can't remove without a major refactor. Keep around for now.
     @Override
     public int checkUidPermission(String permName, int uid) {
-        final CheckPermissionDelegate checkPermissionDelegate;
-        synchronized (mPackages) {
-            if (mCheckPermissionDelegate == null)  {
-                return checkUidPermissionImpl(permName, uid);
-            }
-            checkPermissionDelegate = mCheckPermissionDelegate;
-        }
-        return checkPermissionDelegate.checkUidPermission(permName, uid,
-                PackageManagerService.this::checkUidPermissionImpl);
-    }
-
-    private int checkUidPermissionImpl(String permName, int uid) {
-        synchronized (mPackages) {
-            final String[] packageNames = getPackagesForUid(uid);
-            PackageParser.Package pkg = null;
-            final int N = packageNames == null ? 0 : packageNames.length;
-            for (int i = 0; pkg == null && i < N; i++) {
-                pkg = mPackages.get(packageNames[i]);
-            }
-            return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
-        }
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            return mPermissionManagerService.checkUidPermission(permName, uid);
+        } catch (RemoteException ignore) { }
+        return PackageManager.PERMISSION_DENIED;
     }
 
     @Override
@@ -9762,16 +9738,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             notifyPackageUseLocked(packageName, reason);
         }
-    }
-
-    @GuardedBy("mPackages")
-    public CheckPermissionDelegate getCheckPermissionDelegateLocked() {
-        return mCheckPermissionDelegate;
-    }
-
-    @GuardedBy("mPackages")
-    public void setCheckPermissionDelegateLocked(CheckPermissionDelegate delegate) {
-        mCheckPermissionDelegate = delegate;
     }
 
     @GuardedBy("mPackages")
@@ -24173,6 +24139,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public PackageParser.Package getPackage(int uid) {
+            synchronized (mPackages) {
+                final String[] packageNames = getPackagesForUid(uid);
+                PackageParser.Package pkg = null;
+                final int numPackages = packageNames == null ? 0 : packageNames.length;
+                for (int i = 0; pkg == null && i < numPackages; i++) {
+                    pkg = mPackages.get(packageNames[i]);
+                }
+                return pkg;
+            }
+        }
+
+        @Override
         public PackageList getPackageList(PackageListObserver observer) {
             synchronized (mPackages) {
                 final int N = mPackages.size();
@@ -24692,20 +24671,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public void notifyPackageUse(String packageName, int reason) {
             synchronized (mPackages) {
                 PackageManagerService.this.notifyPackageUseLocked(packageName, reason);
-            }
-        }
-
-        @Override
-        public CheckPermissionDelegate getCheckPermissionDelegate() {
-            synchronized (mPackages) {
-                return PackageManagerService.this.getCheckPermissionDelegateLocked();
-            }
-        }
-
-        @Override
-        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
-            synchronized (mPackages) {
-                PackageManagerService.this.setCheckPermissionDelegateLocked(delegate);
             }
         }
 

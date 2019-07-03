@@ -97,11 +97,6 @@ interface IPackageManager {
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
 
     @UnsupportedAppUsage
-    int checkPermission(String permName, String pkgName, int userId);
-
-    int checkUidPermission(String permName, int uid);
-
-    @UnsupportedAppUsage
     void grantRuntimePermission(String packageName, String permissionName, int userId);
 
     void revokeRuntimePermission(String packageName, String permissionName, int userId);
@@ -750,6 +745,10 @@ interface IPackageManager {
     // The following binder interfaces have been moved to IPermissionManager
     //
     //------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------
+    // We need to keep these in IPackageManager for app compatibility
+    //------------------------------------------------------------------------
     @UnsupportedAppUsage
     String[] getAppOpPermissionPackages(String permissionName);
 
@@ -764,4 +763,14 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     void removePermission(String name);
+
+    @UnsupportedAppUsage
+    int checkPermission(String permName, String pkgName, int userId);
+
+    //------------------------------------------------------------------------
+    // We need to keep these in IPackageManager for convenience in splitting
+    // out the permission manager. This should be cleaned up, but, will require
+    // a large change that modifies many repos.
+    //------------------------------------------------------------------------
+    int checkUidPermission(String permName, int uid);
 }

@@ -32,13 +32,10 @@ import android.os.PersistableBundle;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.internal.util.function.TriFunction;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -84,32 +81,6 @@ public abstract class PackageManagerInternal {
         default void onPackageChanged(@NonNull String packageName, int uid) {}
         /** A package was removed from the system. */
         void onPackageRemoved(@NonNull String packageName, int uid);
-    }
-
-    /** Interface to override permission checks via composition */
-    public interface CheckPermissionDelegate {
-        /**
-         * Allows overriding check permission behavior.
-         *
-         * @param permName The permission to check.
-         * @param pkgName The package for which to check.
-         * @param userId The user for which to check.
-         * @param superImpl The super implementation.
-         * @return The check permission result.
-         */
-        int checkPermission(String permName, String pkgName, int userId,
-                TriFunction<String, String, Integer, Integer> superImpl);
-
-        /**
-         * Allows overriding check UID permission behavior.
-         *
-         * @param permName The permission to check.
-         * @param uid The UID for which to check.
-         * @param superImpl The super implementation.
-         * @return The check permission result.
-         */
-        int checkUidPermission(String permName, int uid,
-                BiFunction<String, Integer, Integer> superImpl);
     }
 
     /**
@@ -668,6 +639,12 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
 
     /**
+     * Returns a package for the given UID. If the UID is part of a shared user ID, one
+     * of the packages will be chosen to be returned.
+     */
+    public abstract @Nullable PackageParser.Package getPackage(int uid);
+
+    /**
      * Returns a list without a change observer.
      *
      * @see #getPackageList(PackageListObserver)
@@ -769,20 +746,6 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
             @PackageParser.SigningDetails.CertCapabilities int capability);
-
-    /**
-     * Get the delegate to influence permission checking.
-     *
-     * @return The delegate instance or null to clear.
-     */
-    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
-
-    /**
-     * Set a delegate to influence permission checking.
-     *
-     * @param delegate A delegate instance or null to clear.
-     */
-    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
 
     /**
      * Get appIds of all available apps which specified android:sharedUserId in the manifest.
