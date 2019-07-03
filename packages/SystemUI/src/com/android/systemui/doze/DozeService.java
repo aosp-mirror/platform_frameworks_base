@@ -31,6 +31,8 @@ import com.android.systemui.shared.plugins.PluginManager;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 public class DozeService extends DreamService
         implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
@@ -40,6 +42,7 @@ public class DozeService extends DreamService
     private DozeServicePlugin mDozePlugin;
     private PluginManager mPluginManager;
 
+    @Inject
     public DozeService() {
         setDebug(DEBUG);
     }
