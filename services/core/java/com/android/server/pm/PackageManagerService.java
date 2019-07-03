@@ -5695,37 +5695,36 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean addDynamicPermission(PermissionInfo info, final boolean async) {
-        return mPermissionManager.addDynamicPermission(
-                info, async, getCallingUid(), new PermissionCallback() {
-                    @Override
-                    public void onPermissionChanged() {
-                        if (!async) {
-                            mSettings.writeLPr();
-                        } else {
-                            scheduleWriteSettingsLocked();
-                        }
-                    }
-                });
-    }
-
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public boolean addPermission(PermissionInfo info) {
-        synchronized (mPackages) {
-            return addDynamicPermission(info, false);
-        }
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            return mPermissionManagerService.addPermission(info, false);
+        } catch (RemoteException ignore) { }
+        return false;
     }
 
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public boolean addPermissionAsync(PermissionInfo info) {
-        synchronized (mPackages) {
-            return addDynamicPermission(info, true);
-        }
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            return mPermissionManagerService.addPermission(info, true);
+        } catch (RemoteException ignore) { }
+        return false;
     }
 
+    // NOTE: Can't remove due to unsupported app usage
     @Override
     public void removePermission(String permName) {
-        mPermissionManager.removeDynamicPermission(permName, getCallingUid(), mPermissionCallback);
+        try {
+            // Because this is accessed via the package manager service AIDL,
+            // go through the permission manager service AIDL
+            mPermissionManagerService.removePermission(permName);
+        } catch (RemoteException ignore) { }
     }
 
     @Override
@@ -25004,6 +25003,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInstaller.migrateLegacyObbData();
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
+            }
+        }
+
+        @Override
+        public void writeSettings(boolean async) {
+            synchronized (mPackages) {
+                if (async) {
+                    scheduleWriteSettingsLocked();
+                } else {
+                    mSettings.writeLPr();
+                }
             }
         }
     }

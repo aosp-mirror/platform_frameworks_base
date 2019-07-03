@@ -102,12 +102,6 @@ interface IPackageManager {
     int checkUidPermission(String permName, int uid);
 
     @UnsupportedAppUsage
-    boolean addPermission(in PermissionInfo info);
-
-    @UnsupportedAppUsage
-    void removePermission(String name);
-
-    @UnsupportedAppUsage
     void grantRuntimePermission(String packageName, String permissionName, int userId);
 
     void revokeRuntimePermission(String packageName, String permissionName, int userId);
@@ -614,9 +608,6 @@ interface IPackageManager {
     int movePackage(in String packageName, in String volumeUuid);
     int movePrimaryStorage(in String volumeUuid);
 
-    @UnsupportedAppUsage
-    boolean addPermissionAsync(in PermissionInfo info);
-
     boolean setInstallLocation(int loc);
     @UnsupportedAppUsage
     int getInstallLocation();
@@ -771,4 +762,13 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
+
+    @UnsupportedAppUsage
+    boolean addPermission(in PermissionInfo info);
+
+    @UnsupportedAppUsage
+    boolean addPermissionAsync(in PermissionInfo info);
+
+    @UnsupportedAppUsage
+    void removePermission(String name);
 }

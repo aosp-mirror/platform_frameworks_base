@@ -399,6 +399,62 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @Override
+    public boolean addPermission(PermissionInfo info, boolean async) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            throw new SecurityException("Instant apps can't add permissions");
+        }
+        if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
+            throw new SecurityException("Label must be specified in permission");
+        }
+        final BasePermission tree = mSettings.enforcePermissionTree(info.name, callingUid);
+        final boolean added;
+        final boolean changed;
+        synchronized (mLock) {
+            BasePermission bp = mSettings.getPermissionLocked(info.name);
+            added = bp == null;
+            int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
+            if (added) {
+                enforcePermissionCapLocked(info, tree);
+                bp = new BasePermission(info.name, tree.getSourcePackageName(),
+                        BasePermission.TYPE_DYNAMIC);
+            } else if (!bp.isDynamic()) {
+                throw new SecurityException("Not allowed to modify non-dynamic permission "
+                        + info.name);
+            }
+            changed = bp.addToTree(fixedLevel, info, tree);
+            if (added) {
+                mSettings.putPermissionLocked(info.name, bp);
+            }
+        }
+        if (changed) {
+            mPackageManagerInt.writeSettings(async);
+        }
+        return added;
+    }
+
+    @Override
+    public void removePermission(String permName) {
+        final int callingUid = getCallingUid();
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            throw new SecurityException("Instant applications don't have access to this method");
+        }
+        final BasePermission tree = mSettings.enforcePermissionTree(permName, callingUid);
+        synchronized (mLock) {
+            final BasePermission bp = mSettings.getPermissionLocked(permName);
+            if (bp == null) {
+                return;
+            }
+            if (bp.isDynamic()) {
+                // TODO: switch this back to SecurityException
+                Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
+                        + permName);
+            }
+            mSettings.removePermissionLocked(permName);
+            mPackageManagerInt.writeSettings(false);
+        }
+    }
 
     private int checkPermission(String permName, String pkgName, int callingUid, int userId) {
         if (!mUserManagerInt.exists(userId)) {
@@ -839,63 +895,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             if (r != null) {
                 if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
-            }
-        }
-    }
-
-    private boolean addDynamicPermission(
-            PermissionInfo info, int callingUid, PermissionCallback callback) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            throw new SecurityException("Instant apps can't add permissions");
-        }
-        if (info.labelRes == 0 && info.nonLocalizedLabel == null) {
-            throw new SecurityException("Label must be specified in permission");
-        }
-        final BasePermission tree = mSettings.enforcePermissionTree(info.name, callingUid);
-        final boolean added;
-        final boolean changed;
-        synchronized (mLock) {
-            BasePermission bp = mSettings.getPermissionLocked(info.name);
-            added = bp == null;
-            int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
-            if (added) {
-                enforcePermissionCapLocked(info, tree);
-                bp = new BasePermission(info.name, tree.getSourcePackageName(),
-                        BasePermission.TYPE_DYNAMIC);
-            } else if (!bp.isDynamic()) {
-                throw new SecurityException("Not allowed to modify non-dynamic permission "
-                        + info.name);
-            }
-            changed = bp.addToTree(fixedLevel, info, tree);
-            if (added) {
-                mSettings.putPermissionLocked(info.name, bp);
-            }
-        }
-        if (changed && callback != null) {
-            callback.onPermissionChanged();
-        }
-        return added;
-    }
-
-    private void removeDynamicPermission(
-            String permName, int callingUid, PermissionCallback callback) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            throw new SecurityException("Instant applications don't have access to this method");
-        }
-        final BasePermission tree = mSettings.enforcePermissionTree(permName, callingUid);
-        synchronized (mLock) {
-            final BasePermission bp = mSettings.getPermissionLocked(permName);
-            if (bp == null) {
-                return;
-            }
-            if (bp.isDynamic()) {
-                // TODO: switch this back to SecurityException
-                Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
-                        + permName);
-            }
-            mSettings.removePermissionLocked(permName);
-            if (callback != null) {
-                callback.onPermissionRemoved();
             }
         }
     }
@@ -3166,16 +3165,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void removeAllPermissions(Package pkg, boolean chatty) {
             PermissionManagerService.this.removeAllPermissions(pkg, chatty);
-        }
-        @Override
-        public boolean addDynamicPermission(PermissionInfo info, boolean async, int callingUid,
-                PermissionCallback callback) {
-            return PermissionManagerService.this.addDynamicPermission(info, callingUid, callback);
-        }
-        @Override
-        public void removeDynamicPermission(String permName, int callingUid,
-                PermissionCallback callback) {
-            PermissionManagerService.this.removeDynamicPermission(permName, callingUid, callback);
         }
         @Override
         public void grantRuntimePermission(String permName, String packageName,

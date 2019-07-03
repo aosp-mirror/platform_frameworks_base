@@ -148,10 +148,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void addAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract void addAllPermissionGroups(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
-    public abstract boolean addDynamicPermission(@NonNull PermissionInfo info, boolean async,
-            int callingUid, @Nullable PermissionCallback callback);
-    public abstract void removeDynamicPermission(@NonNull String permName, int callingUid,
-            @Nullable PermissionCallback callback);
 
     /** Retrieve the packages that have requested the given app op permission */
     public abstract @Nullable String[] getAppOpPermissionPackages(

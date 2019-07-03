@@ -999,4 +999,11 @@ public abstract class PackageManagerInternal {
      * Migrates legacy obb data to its new location.
      */
     public abstract void migrateLegacyObbData();
+
+    /**
+     * Writes all package manager settings to disk. If {@code async} is {@code true}, the
+     * settings are written at some point in the future. Otherwise, the call blocks until
+     * the settings have been written.
+     */
+    public abstract void writeSettings(boolean async);
 }

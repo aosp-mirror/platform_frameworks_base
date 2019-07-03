@@ -661,7 +661,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public boolean addPermission(PermissionInfo info) {
         try {
-            return mPM.addPermission(info);
+            return mPermissionManager.addPermission(info, false);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -670,7 +670,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public boolean addPermissionAsync(PermissionInfo info) {
         try {
-            return mPM.addPermissionAsync(info);
+            return mPermissionManager.addPermission(info, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -679,7 +679,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void removePermission(String name) {
         try {
-            mPM.removePermission(name);
+            mPermissionManager.removePermission(name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

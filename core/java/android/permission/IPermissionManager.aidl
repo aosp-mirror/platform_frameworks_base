@@ -35,4 +35,8 @@ interface IPermissionManager {
     PermissionInfo getPermissionInfo(String permName, String packageName, int flags);
 
     ParceledListSlice queryPermissionsByGroup(String groupName, int flags);
+
+    boolean addPermission(in PermissionInfo info, boolean async);
+
+    void removePermission(String name);
 }
