@@ -846,10 +846,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             if (sourcePhysicalAddress != getActiveSource().physicalAddress) {
                 // If the Active Source recorded by the current device is not synced up with TV,
                 // update the Active Source internally.
-                for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
-                    if (info.getPhysicalAddress() == sourcePhysicalAddress) {
-                        setActiveSource(info.getLogicalAddress(), info.getPhysicalAddress());
-                        break;
+                if (sourcePhysicalAddress == mService.getPhysicalAddress()) {
+                    // If the active path is the current device itself, update with local info
+                    if (mService.playback() != null) {
+                        setActiveSource(mService.playback().mAddress, sourcePhysicalAddress);
+                    } else {
+                        setActiveSource(mAddress, sourcePhysicalAddress);
+                    }
+                } else {
+                    // If it's not the current device, look for the device info from the list
+                    for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
+                        if (info.getPhysicalAddress() == sourcePhysicalAddress) {
+                            setActiveSource(info.getLogicalAddress(), info.getPhysicalAddress());
+                            break;
+                        }
                     }
                 }
                 // If the Active path from TV's System Audio Mode request does not belong to any
