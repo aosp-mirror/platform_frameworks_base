@@ -35,8 +35,10 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,7 +63,31 @@ public final class HdmiControlManager {
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
-    private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+    /**
+     * A cache of the current device's physical address. When device's HDMI out port
+     * is not connected to any device, it is set to {@link #INVALID_PHYSICAL_ADDRESS}.
+     *
+     * <p>Otherwise it is updated by the {@link ClientHotplugEventListener} registered
+     * with {@link com.android.server.hdmi.HdmiControlService} by the
+     * {@link #addHotplugEventListener(HotplugEventListener)} and the address is from
+     * {@link com.android.server.hdmi.HdmiControlService#getPortInfo()}
+     */
+    @GuardedBy("mLock")
+    private int mLocalPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+
+    private void setLocalPhysicalAddress(int physicalAddress) {
+        synchronized (mLock) {
+            mLocalPhysicalAddress = physicalAddress;
+        }
+    }
+
+    private int getLocalPhysicalAddress() {
+        synchronized (mLock) {
+            return mLocalPhysicalAddress;
+        }
+    }
+
+    private final Object mLock = new Object();
 
     /**
      * Broadcast Action: Display OSD message.
@@ -318,6 +344,37 @@ public final class HdmiControlManager {
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
         mIsSwitchDevice = SystemProperties.getBoolean(
             PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+        addHotplugEventListener(new ClientHotplugEventListener());
+    }
+
+    private final class ClientHotplugEventListener implements HotplugEventListener {
+
+        @Override
+        public void onReceived(HdmiHotplugEvent event) {
+            List<HdmiPortInfo> ports = new ArrayList<>();
+            try {
+                ports = mService.getPortInfo();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (ports.isEmpty()) {
+                Log.e(TAG, "Can't find port info, not updating connected status. "
+                        + "Hotplug event:" + event);
+                return;
+            }
+            // If the HDMI OUT port is plugged or unplugged, update the mLocalPhysicalAddress
+            for (HdmiPortInfo port : ports) {
+                if (port.getId() == event.getPort()) {
+                    if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
+                        setLocalPhysicalAddress(
+                                event.isConnected()
+                                ? port.getAddress()
+                                : INVALID_PHYSICAL_ADDRESS);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -616,15 +673,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public int getPhysicalAddress() {
-        if (mPhysicalAddress != INVALID_PHYSICAL_ADDRESS) {
-            return mPhysicalAddress;
-        }
-        try {
-            mPhysicalAddress = mService.getPhysicalAddress();
-            return mPhysicalAddress;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getLocalPhysicalAddress();
     }
 
     /**
@@ -641,15 +690,15 @@ public final class HdmiControlManager {
     @SystemApi
     public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Preconditions.checkNotNull(targetDevice);
-        mPhysicalAddress = getPhysicalAddress();
-        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+        int physicalAddress = getLocalPhysicalAddress();
+        if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
         int targetPhysicalAddress = targetDevice.getPhysicalAddress();
         if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
-        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, physicalAddress)
             != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
@@ -662,15 +711,15 @@ public final class HdmiControlManager {
     @SystemApi
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Preconditions.checkNotNull(targetDevice);
-        mPhysicalAddress = getPhysicalAddress();
-        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+        int physicalAddress = getLocalPhysicalAddress();
+        if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
         int targetPhysicalAddress = targetDevice.getPhysicalAddress();
         if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
-        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, physicalAddress)
             != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
