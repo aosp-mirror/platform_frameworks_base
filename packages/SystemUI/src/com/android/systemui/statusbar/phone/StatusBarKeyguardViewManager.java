@@ -677,6 +677,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mBouncer.isShowing();
     }
 
+    /**
+     * When bouncer is fully visible or {@link KeyguardBouncer#show(boolean)} was called but
+     * animation didn't finish yet.
+     */
+    public boolean bouncerIsOrWillBeShowing() {
+        return mBouncer.isShowing() || mBouncer.willShowSoon();
+    }
+
     public boolean isFullscreenBouncer() {
         return mBouncer.isFullscreenBouncer();
     }
