@@ -2042,10 +2042,10 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private boolean isProductServicesApp(String pkg) {
+    private boolean isSystemExtApp(String pkg) {
         try {
             final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
-            return info != null && info.applicationInfo.isProductServices();
+            return info != null && info.applicationInfo.isSystemExt();
         } catch (RemoteException e) {
             return false;
         }
@@ -2063,9 +2063,9 @@ class PackageManagerShellCommand extends ShellCommand {
             privAppPermissions = SystemConfig.getInstance().getVendorPrivAppPermissions(pkg);
         } else if (isProductApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance().getProductPrivAppPermissions(pkg);
-        } else if (isProductServicesApp(pkg)) {
+        } else if (isSystemExtApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance()
-                    .getProductServicesPrivAppPermissions(pkg);
+                    .getSystemExtPrivAppPermissions(pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
         }
@@ -2087,9 +2087,9 @@ class PackageManagerShellCommand extends ShellCommand {
             privAppPermissions = SystemConfig.getInstance().getVendorPrivAppDenyPermissions(pkg);
         } else if (isProductApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance().getProductPrivAppDenyPermissions(pkg);
-        } else if (isProductServicesApp(pkg)) {
+        } else if (isSystemExtApp(pkg)) {
             privAppPermissions = SystemConfig.getInstance()
-                    .getProductServicesPrivAppDenyPermissions(pkg);
+                    .getSystemExtPrivAppDenyPermissions(pkg);
         } else {
             privAppPermissions = SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
         }

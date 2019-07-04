@@ -614,10 +614,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Value for {@link #privateFlags}: whether this app is pre-installed on the
-     * google partition of the system image.
+     * system_ext partition of the system image.
      * @hide
      */
-    public static final int PRIVATE_FLAG_PRODUCT_SERVICES = 1 << 21;
+    public static final int PRIVATE_FLAG_SYSTEM_EXT = 1 << 21;
 
     /**
      * Indicates whether this package requires access to non-SDK APIs.
@@ -713,7 +713,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_USE_EMBEDDED_DEX,
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
-            PRIVATE_FLAG_PRODUCT_SERVICES,
+            PRIVATE_FLAG_SYSTEM_EXT,
             PRIVATE_FLAG_PROFILEABLE_BY_SHELL,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
             PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY,
@@ -2047,8 +2047,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
-    public boolean isProductServices() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
+    public boolean isSystemExt() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0;
     }
 
     /** @hide */
