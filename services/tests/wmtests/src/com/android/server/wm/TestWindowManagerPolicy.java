@@ -49,6 +49,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     int mRotationToReport = 0;
     boolean mKeyguardShowingAndNotOccluded = false;
+    boolean mOkToAnimate = true;
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
@@ -222,7 +223,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean okToAnimate() {
-        return true;
+        return mOkToAnimate;
     }
 
     @Override

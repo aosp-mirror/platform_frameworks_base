@@ -5178,15 +5178,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             w.getTouchableRegion(touchableRegion);
             touchableRegion.op(unhandled, Op.INTERSECT);
 
-            rectListToRegion(w.getSystemGestureExclusion(), local);
+            if (w.isImplicitlyExcludingAllSystemGestures()) {
+                local.set(touchableRegion);
+            } else {
+                rectListToRegion(w.getSystemGestureExclusion(), local);
 
-            // Transform to display coordinates
-            local.scale(w.mGlobalScale);
-            final Rect frame = w.getWindowFrames().mFrame;
-            local.translate(frame.left, frame.top);
+                // Transform to display coordinates
+                local.scale(w.mGlobalScale);
+                final Rect frame = w.getWindowFrames().mFrame;
+                local.translate(frame.left, frame.top);
 
-            // A window can only exclude system gestures where it is actually touchable
-            local.op(touchableRegion, Op.INTERSECT);
+                // A window can only exclude system gestures where it is actually touchable
+                local.op(touchableRegion, Op.INTERSECT);
+            }
 
             // Apply restriction if necessary.
             if (needsGestureExclusionRestrictions(w, mLastDispatchedSystemUiVisibility)) {
