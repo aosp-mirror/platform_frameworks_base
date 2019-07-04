@@ -16,10 +16,13 @@
 
 #include "RootRenderNode.h"
 
+#ifdef __ANDROID__ // Layoutlib does not support Looper (windows)
 #include <utils/Looper.h>
+#endif
 
 namespace android::uirenderer {
 
+#ifdef __ANDROID__ // Layoutlib does not support Looper
 class FinishAndInvokeListener : public MessageHandler {
 public:
     explicit FinishAndInvokeListener(PropertyValuesAnimatorSet* anim) : mAnimator(anim) {
@@ -282,5 +285,22 @@ private:
 AnimationContext* ContextFactoryImpl::createAnimationContext(renderthread::TimeLord& clock) {
     return new AnimationContextBridge(clock, mRootNode);
 }
+#else
+
+void RootRenderNode::prepareTree(TreeInfo& info) {
+    info.errorHandler = mErrorHandler.get();
+    info.updateWindowPositions = true;
+    RenderNode::prepareTree(info);
+    info.updateWindowPositions = false;
+    info.errorHandler = nullptr;
+}
+
+void RootRenderNode::attachAnimatingNode(RenderNode* animatingNode) { }
+
+void RootRenderNode::destroy() { }
+
+void RootRenderNode::addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) { }
+
+#endif
 
 }  // namespace android::uirenderer
