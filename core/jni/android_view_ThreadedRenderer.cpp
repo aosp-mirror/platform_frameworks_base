@@ -42,7 +42,6 @@
 #include <system/window.h>
 
 #include <FrameInfo.h>
-#include <IContextFactory.h>
 #include <Picture.h>
 #include <Properties.h>
 #include <RootRenderNode.h>

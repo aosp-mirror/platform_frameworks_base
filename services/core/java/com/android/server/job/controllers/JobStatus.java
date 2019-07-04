@@ -24,7 +24,6 @@ import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.pm.PackageManagerInternal;
 import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -131,7 +130,6 @@ public final class JobStatus {
      * that underly Sync Manager operation.
      */
     final int callingUid;
-    final int targetSdkVersion;
     final String batteryName;
 
     /**
@@ -187,6 +185,9 @@ public final class JobStatus {
      * is when we did so.
      */
     private long whenStandbyDeferred;
+
+    /** The first time this job was force batched. */
+    private long mFirstForceBatchedTimeElapsed;
 
     // Constraints.
     final int requiredConstraints;
@@ -344,7 +345,6 @@ public final class JobStatus {
      * @param job The actual requested parameters for the job
      * @param callingUid Identity of the app that is scheduling the job.  This may not be the
      *     app in which the job is implemented; such as with sync jobs.
-     * @param targetSdkVersion The targetSdkVersion of the app in which the job will run.
      * @param sourcePackageName The package name of the app in which the job will run.
      * @param sourceUserId The user in which the job will run
      * @param standbyBucket The standby bucket that the source package is currently assigned to,
@@ -363,13 +363,12 @@ public final class JobStatus {
      * @param lastFailedRunTime When did we last run this job only to have it stop incomplete?
      * @param internalFlags Non-API property flags about this job
      */
-    private JobStatus(JobInfo job, int callingUid, int targetSdkVersion, String sourcePackageName,
+    private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags) {
         this.job = job;
         this.callingUid = callingUid;
-        this.targetSdkVersion = targetSdkVersion;
         this.standbyBucket = standbyBucket;
         this.baseHeartbeat = heartbeat;
 
@@ -439,7 +438,7 @@ public final class JobStatus {
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
      *   so we preserve RTC window bounds if the source object has them. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.targetSdkVersion,
+        this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
                 jobStatus.getStandbyBucket(), jobStatus.getBaseHeartbeat(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
@@ -468,7 +467,7 @@ public final class JobStatus {
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC,
             int innerFlags) {
-        this(job, callingUid, resolveTargetSdkVersion(job), sourcePkgName, sourceUserId,
+        this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket, baseHeartbeat,
                 sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
@@ -491,7 +490,7 @@ public final class JobStatus {
             long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int backoffAttempt,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
-        this(rescheduling.job, rescheduling.getUid(), resolveTargetSdkVersion(rescheduling.job),
+        this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), newBaseHeartbeat,
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
@@ -533,7 +532,7 @@ public final class JobStatus {
         long currentHeartbeat = js != null
                 ? js.baseHeartbeatForApp(jobPackage, sourceUserId, standbyBucket)
                 : 0;
-        return new JobStatus(job, callingUid, resolveTargetSdkVersion(job), sourcePkg, sourceUserId,
+        return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
                 standbyBucket, currentHeartbeat, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
@@ -681,10 +680,6 @@ public final class JobStatus {
         return job.getId();
     }
 
-    public int getTargetSdkVersion() {
-        return targetSdkVersion;
-    }
-
     public void printUniqueId(PrintWriter pw) {
         UserHandle.formatUid(pw, callingUid);
         pw.print("/");
@@ -735,6 +730,18 @@ public final class JobStatus {
     // Called only by the standby monitoring code
     public void setWhenStandbyDeferred(long now) {
         whenStandbyDeferred = now;
+    }
+
+    /**
+     * Returns the first time this job was force batched, in the elapsed realtime timebase. Will be
+     * 0 if this job was never force batched.
+     */
+    public long getFirstForceBatchedTimeElapsed() {
+        return mFirstForceBatchedTimeElapsed;
+    }
+
+    public void setFirstForceBatchedTimeElapsed(long now) {
+        mFirstForceBatchedTimeElapsed = now;
     }
 
     public String getSourceTag() {
@@ -1441,11 +1448,6 @@ public final class JobStatus {
         }
     }
 
-    private static int resolveTargetSdkVersion(JobInfo job) {
-        return LocalServices.getService(PackageManagerInternal.class)
-                .getPackageTargetSdkVersion(job.getService().getPackageName());
-    }
-
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix, boolean full, long elapsedRealtimeMillis) {
         pw.print(prefix); UserHandle.formatUid(pw, callingUid);
@@ -1636,6 +1638,12 @@ public final class JobStatus {
         if (whenStandbyDeferred != 0) {
             pw.print(prefix); pw.print("  Deferred since: ");
             TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
+            pw.println();
+        }
+        if (mFirstForceBatchedTimeElapsed != 0) {
+            pw.print(prefix);
+            pw.print("  Time since first force batch attempt: ");
+            TimeUtils.formatDuration(mFirstForceBatchedTimeElapsed, elapsedRealtimeMillis, pw);
             pw.println();
         }
         pw.print(prefix); pw.print("Enqueue time: ");
@@ -1830,6 +1838,11 @@ public final class JobStatus {
 
         proto.write(JobStatusDumpProto.STANDBY_BUCKET, standbyBucket);
         proto.write(JobStatusDumpProto.ENQUEUE_DURATION_MS, elapsedRealtimeMillis - enqueueTime);
+        proto.write(JobStatusDumpProto.TIME_SINCE_FIRST_DEFERRAL_MS,
+                whenStandbyDeferred == 0 ? 0 : elapsedRealtimeMillis - whenStandbyDeferred);
+        proto.write(JobStatusDumpProto.TIME_SINCE_FIRST_FORCE_BATCH_ATTEMPT_MS,
+                mFirstForceBatchedTimeElapsed == 0
+                        ? 0 : elapsedRealtimeMillis - mFirstForceBatchedTimeElapsed);
         if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
             proto.write(JobStatusDumpProto.TIME_UNTIL_EARLIEST_RUNTIME_MS, 0);
         } else {

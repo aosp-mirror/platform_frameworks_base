@@ -118,6 +118,8 @@ public class CarFacetButton extends LinearLayout {
                 options.setLaunchDisplayId(mContext.getDisplayId());
                 intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
                 mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
+                mContext.sendBroadcastAsUser(
+                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
             });
 
             if (longPressIntentString != null) {
@@ -128,6 +130,8 @@ public class CarFacetButton extends LinearLayout {
                     options.setLaunchDisplayId(mContext.getDisplayId());
                     mContext.startActivityAsUser(longPressIntent, options.toBundle(),
                             UserHandle.CURRENT);
+                    mContext.sendBroadcastAsUser(
+                            new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
                     return true;
                 });
             }

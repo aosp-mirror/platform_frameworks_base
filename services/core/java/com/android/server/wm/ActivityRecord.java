@@ -108,6 +108,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.LAUNCH_TICK;
@@ -1922,6 +1923,15 @@ final class ActivityRecord extends ConfigurationContainer {
         return state1 == mState || state2 == mState || state3 == mState || state4 == mState;
     }
 
+    /**
+     * Returns {@code true} if the Activity is in one of the specified states.
+     */
+    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3,
+            ActivityState state4, ActivityState state5) {
+        return state1 == mState || state2 == mState || state3 == mState || state4 == mState
+                || state5 == mState;
+    }
+
     void notifyAppResumed(boolean wasStopped) {
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: "
@@ -2037,12 +2047,10 @@ final class ActivityRecord extends ConfigurationContainer {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
             makeActiveIfNeeded(null /* activeActivity*/);
-            if (isState(STOPPING, STOPPED) && isFocusable()) {
-                // #shouldMakeActive() only evaluates the topmost activities in task, so
-                // activities that are not the topmost in task are not being resumed or paused.
-                // For activities that are still in STOPPING or STOPPED state, updates the state
-                // to PAUSE at least when making it visible.
-                setState(PAUSED, "makeClientVisible");
+            if (isState(STOPPING, STOPPED)) {
+                // Set state to STARTED in order to have consistent state with client while
+                // making an non-active activity visible from stopped.
+                setState(STARTED, "makeClientVisible");
             }
         } catch (Exception e) {
             Slog.w(TAG, "Exception thrown sending visibility update: " + intent.getComponent(), e);
@@ -2118,7 +2126,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // calls will lead to noticeable jank. A later call to
         // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to a proper
         // active state.
-        if (!isState(RESUMED, PAUSED, STOPPED, STOPPING)
+        if (!isState(STARTED, RESUMED, PAUSED, STOPPED, STOPPING)
                 || getActivityStack().mTranslucentActivityWaiting != null) {
             return false;
         }
@@ -2646,7 +2654,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
-                mState.ordinal() >= RESUMED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
                 fromRecents);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;

@@ -62,6 +62,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
@@ -163,6 +164,8 @@ import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
+
+import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -292,6 +295,7 @@ class ActivityStack extends ConfigurationContainer {
 
     enum ActivityState {
         INITIALIZING,
+        STARTED,
         RESUMED,
         PAUSING,
         PAUSED,
@@ -1608,7 +1612,7 @@ class ActivityStack extends ConfigurationContainer {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
-                if (r.isState(STOPPING, STOPPED, PAUSED, PAUSING)) {
+                if (r.isState(STARTED, STOPPING, STOPPED, PAUSED, PAUSING)) {
                     r.setSleeping(true);
                 }
             }
@@ -2435,6 +2439,7 @@ class ActivityStack extends ConfigurationContainer {
                 case RESUMED:
                 case PAUSING:
                 case PAUSED:
+                case STARTED:
                     addToStopping(r, true /* scheduleIdle */,
                             canEnterPictureInPicture /* idleDelayed */, "makeInvisible");
                     break;
@@ -3882,7 +3887,7 @@ class ActivityStack extends ConfigurationContainer {
         }
         if (activityNdx >= 0) {
             r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
-            if (r.isState(RESUMED, PAUSING, PAUSED)) {
+            if (r.isState(STARTED, RESUMED, PAUSING, PAUSED)) {
                 if (!r.isActivityTypeHome() || mService.mHomeProcess != r.app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
@@ -4031,6 +4036,14 @@ class ActivityStack extends ConfigurationContainer {
                 }
                 getDisplay().mDisplayContent.prepareAppTransition(transit, false);
 
+                // When finishing the activity pre-emptively take the snapshot before the app window
+                // is marked as hidden and any configuration changes take place
+                if (mWindowManager.mTaskSnapshotController != null) {
+                    final ArraySet<Task> tasks = Sets.newArraySet(task.mTask);
+                    mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
+                    mWindowManager.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(tasks);
+                }
+
                 // Tell window manager to prepare for this one to be removed.
                 r.setVisibility(false);
 
@@ -4146,6 +4159,7 @@ class ActivityStack extends ConfigurationContainer {
                 || (prevState == PAUSED
                     && (mode == FINISH_AFTER_PAUSE || inPinnedWindowingMode()))
                 || finishingInNonFocusedStackOrNoRunning
+                || prevState == STARTED
                 || prevState == STOPPING
                 || prevState == STOPPED
                 || prevState == ActivityState.INITIALIZING) {

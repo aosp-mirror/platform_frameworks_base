@@ -30,7 +30,6 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
@@ -44,6 +43,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.IPermissionManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -921,7 +921,7 @@ public final class BroadcastQueue {
         if (perms == null) {
             return false;
         }
-        IPackageManager pm = AppGlobals.getPackageManager();
+        IPermissionManager pm = AppGlobals.getPermissionManager();
         for (int i = perms.length-1; i >= 0; i--) {
             try {
                 PermissionInfo pi = pm.getPermissionInfo(perms[i], "android", 0);

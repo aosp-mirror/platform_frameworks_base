@@ -4967,7 +4967,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
         event.setScrollable(mScrollable);
-        event.setScrollX(mScrollX);
         event.setMaxScrollX(mScrollX);
         if (ANCHOR_SCROLLING) {
             // TODO

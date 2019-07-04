@@ -48,6 +48,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.location.ProviderProperties;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -2298,18 +2299,19 @@ public class LocationManager {
     }
 
     /**
-     * Sends additional commands to a location provider.
-     * Can be used to support provider specific extensions to the Location Manager API
+     * Sends additional commands to a location provider. Can be used to support provider specific
+     * extensions to the Location Manager API.
      *
      * @param provider name of the location provider.
-     * @param command name of the command to send to the provider.
-     * @param extras optional arguments for the command (or null).
-     * The provider may optionally fill the extras Bundle with results from the command.
-     *
-     * @return true if the command succeeds.
+     * @param command  name of the command to send to the provider.
+     * @param extras   optional arguments for the command (or null).
+     * @return true always
      */
     public boolean sendExtraCommand(
             @NonNull String provider, @NonNull String command, @Nullable Bundle extras) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(command != null, "invalid null command");
+
         try {
             return mService.sendExtraCommand(provider, command, extras);
         } catch (RemoteException e) {

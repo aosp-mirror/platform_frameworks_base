@@ -8273,6 +8273,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
+        event.setScrollX(getScrollX());
+        event.setScrollY(getScrollY());
 
         switch (event.getEventType()) {
             case AccessibilityEvent.TYPE_VIEW_FOCUSED: {

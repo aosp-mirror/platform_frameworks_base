@@ -68,6 +68,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateControllerProto;
 
 import java.util.ArrayList;
@@ -735,6 +736,18 @@ public final class QuotaController extends StateController {
     /** @return true if the job was started while the app was in the TOP state. */
     private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
         return mTopStartedJobs.contains(jobStatus);
+    }
+
+    /** Returns the maximum amount of time this job could run for. */
+    public long getMaxJobExecutionTimeMsLocked(@NonNull final JobStatus jobStatus) {
+        // If quota is currently "free", then the job can run for the full amount of time.
+        if (mChargeTracker.isCharging()
+                || mInParole
+                || isTopStartedJobLocked(jobStatus)
+                || isUidInForeground(jobStatus.getSourceUid())) {
+            return JobServiceContext.EXECUTING_TIMESLICE_MILLIS;
+        }
+        return getRemainingExecutionTimeLocked(jobStatus);
     }
 
     /**
@@ -2278,8 +2291,10 @@ public final class QuotaController extends StateController {
                     mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
                     changed = true;
                 }
-                long newQuotaBufferMs = Math.max(0,
-                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS));
+                // Make sure quota buffer is non-negative, not greater than allowed time per period,
+                // and no more than 5 minutes.
+                long newQuotaBufferMs = Math.max(0, Math.min(mAllowedTimePerPeriodMs,
+                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS)));
                 if (mQuotaBufferMs != newQuotaBufferMs) {
                     mQuotaBufferMs = newQuotaBufferMs;
                     mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;

@@ -279,6 +279,7 @@ java_defaults {
         "core/java/android/os/storage/IStorageShutdownObserver.aidl",
         "core/java/android/os/storage/IObbActionListener.aidl",
         "core/java/android/permission/IPermissionController.aidl",
+        "core/java/android/permission/IPermissionManager.aidl",
         ":keystore_aidl",
         "core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl",
         "core/java/android/service/appprediction/IPredictionService.aidl",

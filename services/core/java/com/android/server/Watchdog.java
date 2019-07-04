@@ -114,7 +114,8 @@ public class Watchdog extends Thread {
             "android.hardware.media.omx@1.0::IOmxStore",
             "android.hardware.power.stats@1.0::IPowerStats",
             "android.hardware.sensors@1.0::ISensors",
-            "android.hardware.vr@1.0::IVr"
+            "android.hardware.vr@1.0::IVr",
+            "android.system.suspend@1.0::ISystemSuspend"
     );
 
     static Watchdog sWatchdog;

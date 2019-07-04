@@ -16,6 +16,8 @@
 
 #include "RootRenderNode.h"
 
+#include <utils/Looper.h>
+
 namespace android::uirenderer {
 
 class FinishAndInvokeListener : public MessageHandler {

@@ -90,13 +90,13 @@ public class AccessibilityRecord {
     int mItemCount = UNDEFINED;
     int mFromIndex = UNDEFINED;
     int mToIndex = UNDEFINED;
-    int mScrollX = UNDEFINED;
-    int mScrollY = UNDEFINED;
+    int mScrollX = 0;
+    int mScrollY = 0;
 
     int mScrollDeltaX = UNDEFINED;
     int mScrollDeltaY = UNDEFINED;
-    int mMaxScrollX = UNDEFINED;
-    int mMaxScrollY = UNDEFINED;
+    int mMaxScrollX = 0;
+    int mMaxScrollY = 0;
 
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
@@ -878,10 +878,10 @@ public class AccessibilityRecord {
         mItemCount = UNDEFINED;
         mFromIndex = UNDEFINED;
         mToIndex = UNDEFINED;
-        mScrollX = UNDEFINED;
-        mScrollY = UNDEFINED;
-        mMaxScrollX = UNDEFINED;
-        mMaxScrollY = UNDEFINED;
+        mScrollX = 0;
+        mScrollY = 0;
+        mMaxScrollX = 0;
+        mMaxScrollY = 0;
         mAddedCount = UNDEFINED;
         mRemovedCount = UNDEFINED;
         mClassName = null;

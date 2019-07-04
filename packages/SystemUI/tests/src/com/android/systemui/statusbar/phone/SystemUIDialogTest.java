@@ -17,9 +17,11 @@ package com.android.systemui.statusbar.phone;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -52,13 +54,18 @@ public class SystemUIDialogTest extends SysuiTestCase {
 
     @Test
     public void testRegisterReceiver() {
+        final ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
         final ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        verify(mContextSpy).registerReceiverAsUser(any(), any(),
+        mDialog.show();
+        verify(mContextSpy).registerReceiverAsUser(broadcastReceiverCaptor.capture(), any(),
                 intentFilterCaptor.capture(), any(), any());
 
         assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-    }
 
+        mDialog.dismiss();
+        verify(mContextSpy).unregisterReceiver(eq(broadcastReceiverCaptor.getValue()));
+    }
 }

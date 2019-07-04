@@ -951,8 +951,6 @@ public class HorizontalScrollView extends FrameLayout {
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
         event.setScrollable(getScrollRange() > 0);
-        event.setScrollX(mScrollX);
-        event.setScrollY(mScrollY);
         event.setMaxScrollX(getScrollRange());
         event.setMaxScrollY(mScrollY);
     }

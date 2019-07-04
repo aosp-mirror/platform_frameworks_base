@@ -56,6 +56,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -1172,6 +1173,29 @@ public class HdmiControlService extends SystemService {
         return mCecController.getLocalDeviceList();
     }
 
+    /**
+     * Check if a logical address is conflict with the current device's. Reallocate the logical
+     * address of the current device if there is conflict.
+     *
+     * Android HDMI CEC 1.4 is handling logical address allocation in the framework side. This could
+     * introduce delay between the logical address allocation and notifying the driver that the
+     * address is occupied. Adding this check to avoid such case.
+     *
+     * @param logicalAddress logical address of the remote device that might have the same logical
+     * address as the current device.
+     */
+    protected void checkLogicalAddressConflictAndReallocate(int logicalAddress) {
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            if (device.getDeviceInfo().getLogicalAddress() == logicalAddress) {
+                HdmiLogger.debug("allocate logical address for " + device.getDeviceInfo());
+                ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
+                localDevices.add(device);
+                allocateLogicalAddress(localDevices, HdmiControlService.INITIATED_BY_HOTPLUG);
+                return;
+            }
+        }
+    }
+
     Object getServiceLock() {
         return mLock;
     }
@@ -1461,25 +1485,34 @@ public class HdmiControlService extends SystemService {
                         return playback().getDeviceInfo();
                     }
                     // Otherwise get the active source and look for it from the device list
-                    ActiveSource activeSource = mActiveSource;
-                    // If the active source is not set yet, return null
-                    if (!activeSource.isValid()) {
+                    ActiveSource activeSource = getLocalActiveSource();
+                    // If the physical address is not set yet, return null
+                    if (activeSource.physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
                         return null;
                     }
                     if (audioSystem() != null) {
                         HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
                         for (HdmiDeviceInfo info : audioSystem.getSafeCecDevicesLocked()) {
-                            if (info.getLogicalAddress() == activeSource.logicalAddress) {
+                            if (info.getPhysicalAddress() == activeSource.physicalAddress) {
                                 return info;
                             }
                         }
                     }
                     // If the device info is not in the list yet, return a device info with minimum
                     // information from mActiveSource.
-                    return new HdmiDeviceInfo(activeSource.logicalAddress,
-                        activeSource.physicalAddress, pathToPortId(activeSource.physicalAddress),
-                        HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
-                        HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress));
+                    // If the Active Source has unregistered logical address, return with an
+                    // HdmiDeviceInfo built from physical address information only.
+                    return HdmiUtils.isValidAddress(activeSource.logicalAddress)
+                        ?
+                        new HdmiDeviceInfo(activeSource.logicalAddress,
+                            activeSource.physicalAddress,
+                            pathToPortId(activeSource.physicalAddress),
+                            HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
+                            HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress))
+                        :
+                            new HdmiDeviceInfo(activeSource.physicalAddress,
+                                pathToPortId(activeSource.physicalAddress));
+
                 }
                 return null;
             }
@@ -1630,6 +1663,8 @@ public class HdmiControlService extends SystemService {
         @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
+            int pid = Binder.getCallingPid();
+            Slog.d(TAG, "Proccess pid: " + pid + " is calling oneTouchPlay.");
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2808,7 +2843,7 @@ public class HdmiControlService extends SystemService {
         setLastInputForMhl(Constants.INVALID_PORT_ID);
     }
 
-    ActiveSource getActiveSource() {
+    ActiveSource getLocalActiveSource() {
         synchronized (mLock) {
             return mActiveSource;
         }
@@ -2818,6 +2853,21 @@ public class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mActiveSource.logicalAddress = logicalAddress;
             mActiveSource.physicalAddress = physicalAddress;
+        }
+        // If the current device is a source device, check if the current Active Source matches
+        // the local device info. Set mIsActiveSource of the local device accordingly.
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            // mIsActiveSource only exists in source device, ignore this setting if the current
+            // device is not an HdmiCecLocalDeviceSource.
+            if (!(device instanceof HdmiCecLocalDeviceSource)) {
+                continue;
+            }
+            if (logicalAddress == device.getDeviceInfo().getLogicalAddress()
+                && physicalAddress == getPhysicalAddress()) {
+                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(true);
+            } else {
+                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(false);
+            }
         }
     }
 
