@@ -6360,6 +6360,9 @@ message GpuStatsAppInfo {
 
     // CPU Vulkan implementation is in use.
     optional bool cpu_vulkan_in_use = 6;
+
+    // App is not doing pre-rotation correctly.
+    optional bool false_prerotation = 7;
 }
 
 /*
