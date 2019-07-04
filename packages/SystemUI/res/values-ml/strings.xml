@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ടൈലുകൾ ചേർക്കാൻ ക്ലിക്ക് ചെയ്ത് ഇഴയ്‌ക്കുക"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ടൈലുകൾ പുനഃക്രമീകരിക്കാൻ അമർത്തിപ്പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"നീക്കംചെയ്യുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"നിങ്ങൾക്ക് ചുരുങ്ങിയത് 6 ടൈലുകൾ വേണം"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"നിങ്ങൾക്ക് ചുരുങ്ങിയത് <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ടൈലുകളെങ്കിലും വേണം"</string>
     <string name="qs_edit" msgid="2232596095725105230">"എഡിറ്റുചെയ്യുക"</string>
     <string name="tuner_time" msgid="6572217313285536011">"സമയം"</string>
   <string-array name="clock_options">
