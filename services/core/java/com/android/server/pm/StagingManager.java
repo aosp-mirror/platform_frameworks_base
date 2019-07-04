@@ -104,7 +104,7 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
-    private boolean validateApexSignature(String apexPath, String packageName) {
+    private boolean validateApexSignature(String apexPath, String apexModuleName) {
         final SigningDetails signingDetails;
         try {
             signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
@@ -113,11 +113,11 @@ public class StagingManager {
             return false;
         }
 
-        final PackageInfo packageInfo = mApexManager.getPackageInfoForApexName(packageName);
+        final PackageInfo packageInfo = mApexManager.getPackageInfoForApexName(apexModuleName);
 
         if (packageInfo == null) {
             // Don't allow installation of new APEX.
-            Slog.e(TAG, "Attempted to install a new apex " + packageName + ". Rejecting");
+            Slog.e(TAG, "Attempted to install a new apex " + apexModuleName + ". Rejecting");
             return false;
         }
 
@@ -154,9 +154,9 @@ public class StagingManager {
                     "APEX staging failed, check logcat messages from apexd for more details.");
             return false;
         }
-        for (ApexInfo newPackage : apexInfoList.apexInfos) {
+        for (ApexInfo newModule : apexInfoList.apexInfos) {
             PackageInfo activePackage = mApexManager.getPackageInfoForApexName(
-                    newPackage.packageName);
+                    newModule.moduleName);
             if (activePackage == null) {
                 continue;
             }
@@ -166,7 +166,7 @@ public class StagingManager {
                 if (activeVersion != session.params.requiredInstalledVersionCode) {
                     session.setStagedSessionFailed(
                             SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "Installed version of APEX package " + newPackage.packageName
+                            "Installed version of APEX package " + activePackage.packageName
                             + " does not match required. Active version: " + activeVersion
                             + " required: " + session.params.requiredInstalledVersionCode);
 
@@ -179,12 +179,12 @@ public class StagingManager {
 
             boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
                     session.params.installFlags, activePackage.applicationInfo.flags);
-            if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
+            if (activeVersion > newModule.versionCode && !allowsDowngrade) {
                 session.setStagedSessionFailed(
                         SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Downgrade of APEX package " + newPackage.packageName
+                        "Downgrade of APEX package " + activePackage.packageName
                                 + " is not allowed. Active version: " + activeVersion
-                                + " attempted: " + newPackage.versionCode);
+                                + " attempted: " + newModule.versionCode);
 
                 if (!mApexManager.abortActiveSession()) {
                     Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
@@ -242,13 +242,13 @@ public class StagingManager {
             // so we fail the session early if there is a signature mismatch. For APKs, the
             // signature verification will be done by the package manager at the point at which
             // it applies the staged install.
-            for (ApexInfo apexPackage : apexInfoList.apexInfos) {
-                if (!validateApexSignature(apexPackage.packagePath,
-                        apexPackage.packageName)) {
+            for (ApexInfo apexModule : apexInfoList.apexInfos) {
+                if (!validateApexSignature(apexModule.modulePath,
+                        apexModule.moduleName)) {
                     session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                             "APK-container signature verification failed for package "
-                                    + apexPackage.packageName + ". Signature of file "
-                                    + apexPackage.packagePath + " does not match the signature of "
+                                    + apexModule.moduleName + ". Signature of file "
+                                    + apexModule.modulePath + " does not match the signature of "
                                     + " the package already installed.");
                     // TODO(b/118865310): abort the session on apexd.
                     return;
