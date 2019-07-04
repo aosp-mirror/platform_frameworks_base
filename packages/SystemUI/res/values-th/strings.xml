@@ -778,7 +778,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"กดค้างแล้วลากเพื่อเพิ่มไทล์"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"กดไทล์ค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"คุณต้องมีชิ้นส่วนอย่างน้อย 6 ชิ้น"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>
     <string name="tuner_time" msgid="6572217313285536011">"เวลา"</string>
   <string-array name="clock_options">

@@ -778,7 +778,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"按住并拖动即可添加图块"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖动到此处即可移除"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"您至少需要 6 个图块"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="2232596095725105230">"编辑"</string>
     <string name="tuner_time" msgid="6572217313285536011">"时间"</string>
   <string-array name="clock_options">

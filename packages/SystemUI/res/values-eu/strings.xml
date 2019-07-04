@@ -778,7 +778,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Lauzak gehitzeko, eduki sakatuta eta arrastatu"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Lauzak antolatzeko, eduki sakatuta eta arrastatu"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kentzeko, arrastatu hona"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Gutxienez sei lauza behar dituzu"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"<xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> lauza behar dituzu gutxienez"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Ordua"</string>
   <string-array name="clock_options">
