@@ -38,7 +38,6 @@ import android.text.style.AccessibilityClickableSpan;
 import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
 import android.util.Slog;
-import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeIdManager;
@@ -903,38 +902,6 @@ public final class AccessibilityInteractionController {
                 }
             }
         }
-
-        if (spec != null) {
-            AttachInfo attachInfo = mViewRootImpl.mAttachInfo;
-            if (attachInfo.mDisplay == null) {
-                return;
-            }
-
-            final float scale = attachInfo.mApplicationScale * spec.scale;
-
-            Rect visibleWinFrame = mTempRect1;
-            visibleWinFrame.left = (int) (attachInfo.mWindowLeft * scale + spec.offsetX);
-            visibleWinFrame.top = (int) (attachInfo.mWindowTop * scale + spec.offsetY);
-            visibleWinFrame.right = (int) (visibleWinFrame.left + mViewRootImpl.mWidth * scale);
-            visibleWinFrame.bottom = (int) (visibleWinFrame.top + mViewRootImpl.mHeight * scale);
-
-            attachInfo.mDisplay.getRealSize(mTempPoint);
-            final int displayWidth = mTempPoint.x;
-            final int displayHeight = mTempPoint.y;
-
-            Rect visibleDisplayFrame = mTempRect2;
-            visibleDisplayFrame.set(0, 0, displayWidth, displayHeight);
-
-            if (!visibleWinFrame.intersect(visibleDisplayFrame)) {
-                // If there's no intersection with display, set visibleWinFrame empty.
-                visibleDisplayFrame.setEmpty();
-            }
-
-            if (!visibleWinFrame.intersects(boundsInScreen.left, boundsInScreen.top,
-                    boundsInScreen.right, boundsInScreen.bottom)) {
-                info.setVisibleToUser(false);
-            }
-        }
     }
 
     private boolean shouldApplyAppScaleAndMagnificationSpec(float appScale,
@@ -948,8 +915,10 @@ public final class AccessibilityInteractionController {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             adjustBoundsInScreenIfNeeded(infos);
-            applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
+            // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
+            // then impact the visibility result, we need to adjust visibility before apply scale.
             adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
+            applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
             callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             if (infos != null) {
                 infos.clear();
@@ -967,8 +936,10 @@ public final class AccessibilityInteractionController {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             adjustBoundsInScreenIfNeeded(info);
-            applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
+            // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
+            // then impact the visibility result, we need to adjust visibility before apply scale.
             adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
+            applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
             callback.setFindAccessibilityNodeInfoResult(info, interactionId);
         } catch (RemoteException re) {
                 /* ignore - the other side will time out */
