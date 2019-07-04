@@ -157,7 +157,7 @@ public class PerformAdbRestoreTask implements Runnable {
             }
 
             FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService, null,
-                    mObserver, null, null, true, true/*unused*/, 0 /*unused*/, true);
+                    mObserver, null, null, true, 0 /*unused*/, true);
             FullRestoreEngineThread mEngineThread = new FullRestoreEngineThread(mEngine,
                     tarInputStream);
             mEngineThread.run();
