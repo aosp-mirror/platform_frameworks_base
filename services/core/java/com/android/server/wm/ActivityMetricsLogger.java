@@ -225,7 +225,7 @@ class ActivityMetricsLogger {
 
         private WindowingModeTransitionInfoSnapshot(WindowingModeTransitionInfo info,
                 ActivityRecord launchedActivity, int windowsFullyDrawnDelayMs) {
-            applicationInfo = launchedActivity.appInfo;
+            applicationInfo = launchedActivity.info.applicationInfo;
             packageName = launchedActivity.packageName;
             launchedActivityName = launchedActivity.info.name;
             launchedActivityLaunchedFromPackage = launchedActivity.launchedFromPackage;
@@ -582,7 +582,7 @@ class ActivityMetricsLogger {
             final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.valueAt(i);
 
             // App isn't attached to record yet, so match with info.
-            if (info.launchedActivity.appInfo == appInfo) {
+            if (info.launchedActivity.info.applicationInfo == appInfo) {
                 info.bindApplicationDelayMs = calculateCurrentDelay();
             }
         }
@@ -649,13 +649,13 @@ class ActivityMetricsLogger {
         mMetricsLogger.write(builder);
         StatsLog.write(
                 StatsLog.APP_START_CANCELED,
-                info.launchedActivity.appInfo.uid,
+                info.launchedActivity.info.applicationInfo.uid,
                 info.launchedActivity.packageName,
                 convertAppStartTransitionType(type),
                 info.launchedActivity.info.name);
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_CANCELED(%s, %s, %s, %s)",
-                    info.launchedActivity.appInfo.uid,
+                    info.launchedActivity.info.applicationInfo.uid,
                     info.launchedActivity.packageName,
                     convertAppStartTransitionType(type),
                     info.launchedActivity.info.name));
@@ -821,7 +821,7 @@ class ActivityMetricsLogger {
         mMetricsLogger.write(builder);
         StatsLog.write(
                 StatsLog.APP_START_FULLY_DRAWN,
-                info.launchedActivity.appInfo.uid,
+                info.launchedActivity.info.applicationInfo.uid,
                 info.launchedActivity.packageName,
                 restoredFromBundle
                         ? StatsLog.APP_START_FULLY_DRAWN__TYPE__WITH_BUNDLE
@@ -961,7 +961,7 @@ class ActivityMetricsLogger {
     private WindowProcessController findProcessForActivity(ActivityRecord launchedActivity) {
         return launchedActivity != null
                 ? mSupervisor.mService.mProcessNames.get(
-                        launchedActivity.processName, launchedActivity.appInfo.uid)
+                        launchedActivity.processName, launchedActivity.info.applicationInfo.uid)
                 : null;
     }
 

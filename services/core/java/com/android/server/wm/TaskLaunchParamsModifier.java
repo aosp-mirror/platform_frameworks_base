@@ -423,8 +423,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
      * @return {@code true} if it should be forced to maximize; {@code false} otherwise.
      */
     private boolean isTaskForcedMaximized(@NonNull ActivityRecord root) {
-        if (root.appInfo.targetSdkVersion < Build.VERSION_CODES.DONUT
-                || (root.appInfo.flags & SUPPORTS_SCREEN_RESIZEABLE_MASK) == 0) {
+        if (root.info.applicationInfo.targetSdkVersion < Build.VERSION_CODES.DONUT
+                || (root.info.applicationInfo.flags & SUPPORTS_SCREEN_RESIZEABLE_MASK) == 0) {
             return true;
         }
 
