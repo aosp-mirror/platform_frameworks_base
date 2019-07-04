@@ -157,9 +157,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mHandlerThread.start();
         Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
 
-        // TODO: Make sure to register these call backs when a new user is
-        // added too.
-        SessionCallback sessionCallback = new SessionCallback();
         for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
             registerUserCallbacks(userInfo.getUserHandle());
         }
@@ -252,9 +249,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Slog.e(TAG, "Unable to register user callbacks for user " + user);
             return;
         }
-
-        // TODO: Reuse the same SessionCallback and broadcast receiver
-        // instances, rather than creating new instances for each user.
 
         context.getPackageManager().getPackageInstaller()
                 .registerSessionCallback(new SessionCallback(), getHandler());
