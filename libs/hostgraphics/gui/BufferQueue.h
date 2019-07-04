@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-#define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
+#ifndef ANDROID_GUI_BUFFERQUEUE_H
+#define ANDROID_GUI_BUFFERQUEUE_H
 
-#include <utils/RefBase.h>
-
-#include <ui/GraphicBuffer.h>
+#include <gui/BufferItem.h>
+#include <gui/IGraphicBufferConsumer.h>
+#include <gui/IGraphicBufferProducer.h>
 
 namespace android {
 
-class IGraphicBufferProducer : virtual public RefBase {
+class BufferQueue {
 public:
-    enum class DisconnectMode {
-        // Disconnect only the specified API.
-        Api,
-        // Disconnect any API originally connected from the process calling disconnect.
-        AllLocal
-    };
+    enum { INVALID_BUFFER_SLOT = BufferItem::INVALID_BUFFER_SLOT };
+    enum { NO_BUFFER_AVAILABLE = IGraphicBufferConsumer::NO_BUFFER_AVAILABLE };
+
+    static void createBufferQueue(sp<IGraphicBufferProducer>* outProducer,
+            sp<IGraphicBufferConsumer>* outConsumer);
 };
 
 } // namespace android
 
-#endif // ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
+#endif // ANDROID_GUI_BUFFERQUEUE_H

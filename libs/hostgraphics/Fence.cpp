@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-#define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
-
-#include <utils/RefBase.h>
-
-#include <ui/GraphicBuffer.h>
+#include <ui/Fence.h>
 
 namespace android {
 
-class IGraphicBufferProducer : virtual public RefBase {
-public:
-    enum class DisconnectMode {
-        // Disconnect only the specified API.
-        Api,
-        // Disconnect any API originally connected from the process calling disconnect.
-        AllLocal
-    };
-};
+const sp<Fence> Fence::NO_FENCE = sp<Fence>(new Fence);
 
 } // namespace android
-
-#endif // ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
