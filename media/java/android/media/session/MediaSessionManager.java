@@ -119,6 +119,11 @@ public final class MediaSessionManager {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Notifies that a new {@link MediaSession2} with type {@link Session2Token#TYPE_SESSION} is
      * created.
      * <p>
@@ -192,6 +197,11 @@ public final class MediaSessionManager {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Gets a list of {@link Session2Token} with type {@link Session2Token#TYPE_SESSION} for the
      * current user.
      * <p>
@@ -335,12 +345,12 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
-     * <p>
      * This API is not generally intended for third party application developers.
      * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
-     * for consistent behavior across all devices.
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
      *
      * @param listener The listener to add
      */
@@ -350,12 +360,12 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
-     * <p>
      * This API is not generally intended for third party application developers.
      * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
-     * for consistent behavior across all devices.
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
      *
      * @param listener The listener to add
      * @param handler The handler to call listener on.
@@ -366,12 +376,12 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
-     * <p>
      * This API is not generally intended for third party application developers.
      * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
-     * for consistent behavior across all devices.
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
      *
      * @param userId The userId to listen for changes on
      * @param listener The listener to add
@@ -402,6 +412,11 @@ public final class MediaSessionManager {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Removes the {@link OnSession2TokensChangedListener} to stop receiving session token updates.
      *
      * @param listener The listener to remove.
@@ -765,13 +780,13 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Listens for changes to the {@link #getSession2Tokens()}. This can be added
-     * using {@link #addOnSession2TokensChangedListener(OnSession2TokensChangedListener, Handler)}.
-     * <p>
      * This API is not generally intended for third party application developers.
      * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-     * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
-     * for consistent behavior across all devices.
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Listens for changes to the {@link #getSession2Tokens()}. This can be added
+     * using {@link #addOnSession2TokensChangedListener(OnSession2TokensChangedListener, Handler)}.
      */
     public interface OnSession2TokensChangedListener {
         /**
