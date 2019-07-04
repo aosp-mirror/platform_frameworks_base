@@ -297,10 +297,10 @@ public class DividerSnapAlgorithm {
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
             int bottomPosition, int dividerMax) {
-        maybeAddTarget(topPosition, topPosition - mInsets.top);
+        maybeAddTarget(topPosition, topPosition - getStartInset());
         addMiddleTarget(isHorizontalDivision);
-        maybeAddTarget(bottomPosition, dividerMax - mInsets.bottom
-                - (bottomPosition + mDividerSize));
+        maybeAddTarget(bottomPosition,
+                dividerMax - getEndInset() - (bottomPosition + mDividerSize));
     }
 
     private void addFixedDivisionTargets(boolean isHorizontalDivision, int dividerMax) {
