@@ -239,7 +239,7 @@ class IdmapManager {
 
         // Check partitions for which there exists no policy so overlays on these partitions will
         // not fulfill the system policy.
-        if (ai.isProductServices()) {
+        if (ai.isSystemExt()) {
             return fulfilledPolicies;
         }
 

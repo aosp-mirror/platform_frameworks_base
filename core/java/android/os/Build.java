@@ -1186,7 +1186,7 @@ public class Build {
         ArrayList<Partition> partitions = new ArrayList();
 
         String[] names = new String[] {
-            "bootimage", "odm", "product", "product_services", Partition.PARTITION_NAME_SYSTEM,
+            "bootimage", "odm", "product", "system_ext", Partition.PARTITION_NAME_SYSTEM,
             "vendor"
         };
         for (String name : names) {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.test.libs.product_services;
+package com.android.test.libs.system_ext;
 
 /**
- * Test class for product_services libs.
+ * Test class for system_ext libs.
  */
-public class LibsProductServicesTest {
+public class LibsSystemExtTest {
 
     /**
      * Dummy method for testing.
