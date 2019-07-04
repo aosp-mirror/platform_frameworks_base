@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.hardware.biometrics.BiometricSourceType;
 import android.metrics.LogMaker;
@@ -39,6 +40,8 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.NotificationMediaManager;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
@@ -49,6 +52,20 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private static final boolean DEBUG_BIO_WAKELOCK = KeyguardConstants.DEBUG_BIOMETRIC_WAKELOCK;
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
+
+    @IntDef(prefix = { "MODE_" }, value = {
+            MODE_NONE,
+            MODE_WAKE_AND_UNLOCK,
+            MODE_WAKE_AND_UNLOCK_PULSING,
+            MODE_SHOW_BOUNCER,
+            MODE_ONLY_WAKE,
+            MODE_UNLOCK_COLLAPSING,
+            MODE_UNLOCK_FADING,
+            MODE_DISMISS_BOUNCER,
+            MODE_WAKE_AND_UNLOCK_FROM_DREAM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WakeAndUnlockMode {}
 
     /**
      * Mode in which we don't need to wake up the device when we authenticate.
@@ -81,12 +98,23 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     /**
      * Mode in which fingerprint unlocks the device.
      */
-    public static final int MODE_UNLOCK = 5;
+    public static final int MODE_UNLOCK_COLLAPSING = 5;
 
     /**
      * Mode in which fingerprint wakes and unlocks the device from a dream.
      */
     public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 6;
+
+    /**
+     * Faster mode of dismissing the lock screen when we cross fade to an app
+     * (used for keyguard bypass.)
+     */
+    public static final int MODE_UNLOCK_FADING = 7;
+
+    /**
+     * When bouncer is visible and will be dismissed.
+     */
+    public static final int MODE_DISMISS_BOUNCER = 8;
 
     /**
      * How much faster we collapse the lockscreen when authenticating with biometric.
@@ -240,8 +268,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         startWakeAndUnlock(calculateMode(biometricSourceType));
     }
 
-    public void startWakeAndUnlock(int mode) {
-        // TODO(b/62444020): remove when this bug is fixed
+    public void startWakeAndUnlock(@WakeAndUnlockMode int mode) {
         Log.v(TAG, "startWakeAndUnlock(" + mode + ")");
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = mode;
@@ -277,18 +304,16 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             wakeUp.run();
         }
         switch (mMode) {
-            case MODE_UNLOCK:
-                Trace.beginSection("MODE_UNLOCK");
-                if (!wasDeviceInteractive) {
-                    mPendingShowBouncer = true;
-                } else {
-                    mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
-                            false /* strongAuth */);
-                }
+            case MODE_DISMISS_BOUNCER:
+            case MODE_UNLOCK_FADING:
+                Trace.beginSection("MODE_DISMISS_BOUNCER or MODE_UNLOCK_FADING");
+                mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
+                        false /* strongAuth */);
                 Trace.endSection();
                 break;
+            case MODE_UNLOCK_COLLAPSING:
             case MODE_SHOW_BOUNCER:
-                Trace.beginSection("MODE_SHOW_BOUNCER");
+                Trace.beginSection("MODE_UNLOCK_COLLAPSING or MODE_SHOW_BOUNCER");
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
@@ -368,51 +393,83 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         return mMode;
     }
 
-    private int calculateMode(BiometricSourceType biometricSourceType) {
+    private @WakeAndUnlockMode int calculateMode(BiometricSourceType biometricSourceType) {
+        if (biometricSourceType == BiometricSourceType.FACE
+                || biometricSourceType == BiometricSourceType.IRIS) {
+            return calculateModeForPassiveAuth();
+        } else {
+            return calculateModeForFingerprint();
+        }
+    }
+
+    private @WakeAndUnlockMode int calculateModeForFingerprint() {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithBiometricAllowed();
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
-        boolean face = biometricSourceType == BiometricSourceType.FACE;
-        boolean faceStayingOnKeyguard = face && !mKeyguardBypassController.getBypassEnabled();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
-                // Let's not wake-up to lock screen when not bypassing, otherwise the notification
-                // would move as the user tried to tap it.
-                return faceStayingOnKeyguard ? MODE_NONE : MODE_WAKE_AND_UNLOCK_PULSING;
-            } else if (!face && (unlockingAllowed || !mUnlockMethodCache.isMethodSecure())) {
+                return MODE_WAKE_AND_UNLOCK_PULSING;
+            } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;
-            } else if (face) {
-                if (!(mDozeScrimController.isPulsing() && !unlockingAllowed)) {
-                    Log.wtf(TAG, "Face somehow arrived when the device was not interactive");
-                }
-                if (faceStayingOnKeyguard) {
-                    // We could theoretically return MODE_NONE, but this means that the device
-                    // would be not interactive, unlocked, and the user would not see the device
-                    // state.
-                    return MODE_ONLY_WAKE;
-                } else {
-                    // Wake-up fading out nicely
-                    return MODE_WAKE_AND_UNLOCK_PULSING;
-                }
             } else {
                 return MODE_SHOW_BOUNCER;
             }
         }
-        if (unlockingAllowed && deviceDreaming && !faceStayingOnKeyguard) {
+        if (unlockingAllowed && deviceDreaming) {
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            if ((mStatusBarKeyguardViewManager.isBouncerShowing())
-                    && unlockingAllowed) {
-                return MODE_UNLOCK;
+            if (mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+                return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
-                return faceStayingOnKeyguard ? MODE_ONLY_WAKE : MODE_UNLOCK;
-            } else if (face) {
-                return faceStayingOnKeyguard ? MODE_NONE : MODE_SHOW_BOUNCER;
+                return MODE_UNLOCK_COLLAPSING;
             } else if (!mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 return MODE_SHOW_BOUNCER;
+            }
+        }
+        return MODE_NONE;
+    }
+
+    private @WakeAndUnlockMode int calculateModeForPassiveAuth() {
+        boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithBiometricAllowed();
+        boolean deviceDreaming = mUpdateMonitor.isDreaming();
+        boolean bypass = mKeyguardBypassController.getBypassEnabled();
+
+        if (!mUpdateMonitor.isDeviceInteractive()) {
+            if (!mStatusBarKeyguardViewManager.isShowing()) {
+                return bypass ? MODE_WAKE_AND_UNLOCK : MODE_ONLY_WAKE;
+            } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
+                // Let's not wake-up to lock screen when not bypassing, otherwise the notification
+                // would move as the user tried to tap it.
+                return bypass ? MODE_WAKE_AND_UNLOCK_PULSING : MODE_NONE;
+            } else {
+                if (!(mDozeScrimController.isPulsing() && !unlockingAllowed)) {
+                    Log.wtf(TAG, "Face somehow arrived when the device was not interactive");
+                }
+                if (bypass) {
+                    // Wake-up fading out nicely
+                    return MODE_WAKE_AND_UNLOCK_PULSING;
+                } else {
+                    // We could theoretically return MODE_NONE, but this means that the device
+                    // would be not interactive, unlocked, and the user would not see the device
+                    // state.
+                    return MODE_ONLY_WAKE;
+                }
+            }
+        }
+        if (unlockingAllowed && deviceDreaming) {
+            return bypass ? MODE_WAKE_AND_UNLOCK_FROM_DREAM : MODE_ONLY_WAKE;
+        }
+        if (mStatusBarKeyguardViewManager.isShowing()) {
+            if (mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+                return bypass && !mKeyguardBypassController.canPlaySubtleWindowAnimations()
+                        ? MODE_UNLOCK_COLLAPSING : MODE_UNLOCK_FADING;
+            } else if (unlockingAllowed) {
+                return bypass ? MODE_UNLOCK_FADING : MODE_NONE;
+            } else {
+                return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
             }
         }
         return MODE_NONE;
@@ -504,7 +561,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
      * on or off.
      */
     public boolean isBiometricUnlock() {
-        return isWakeAndUnlock() || mMode == MODE_UNLOCK;
+        return isWakeAndUnlock() || mMode == MODE_UNLOCK_COLLAPSING || mMode == MODE_UNLOCK_FADING;
     }
 
     /**
