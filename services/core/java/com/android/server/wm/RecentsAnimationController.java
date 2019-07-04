@@ -24,6 +24,7 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
@@ -651,8 +652,8 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     boolean isWallpaperVisible(WindowState w) {
-        return w != null && w.mAppToken != null && mTargetAppToken == w.mAppToken
-                && isTargetOverWallpaper();
+        return w != null && w.mAttrs.type == TYPE_BASE_APPLICATION && w.mAppToken != null
+                && mTargetAppToken == w.mAppToken && isTargetOverWallpaper();
     }
 
     /**
