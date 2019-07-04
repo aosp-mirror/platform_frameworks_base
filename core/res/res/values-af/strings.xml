@@ -1130,14 +1130,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Maak oop met"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Maak oop met %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Maak oop"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Maak <xliff:g id="HOST">%1$s</xliff:g>-skakels oop met"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"Maak skakels oop met"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Maak skakels oop met <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Maak <xliff:g id="HOST">%1$s</xliff:g>-skakels oop met <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Verleen toegang"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Redigeer met"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redigeer met %1$s"</string>
@@ -1589,8 +1585,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altyd"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Stel om altyd oop te maak"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Net een keer"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Instellings"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s steun nie werkprofiel nie"</string>

@@ -1132,14 +1132,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"បើក​ជាមួយ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"បើក"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"បើកតំណជាមួយ"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"បើក​តំណជាមួយ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
@@ -1591,8 +1587,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ចាប់ផ្ដើម​កម្មវិធី​អ៊ីនធឺណិត?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ទទួល​ការ​ហៅ​?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ជា​និច្ច"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"កំណត់​ឱ្យ​បើក​ជានិច្ច"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"តែ​ម្ដង"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ការកំណត់"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s មិន​គាំទ្រ​ប្រវត្តិរូប​ការងារ"</string>
