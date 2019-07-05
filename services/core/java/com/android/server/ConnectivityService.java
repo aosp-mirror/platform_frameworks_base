@@ -2479,10 +2479,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
         final long DIAG_TIME_MS = 5000;
         for (NetworkAgentInfo nai : networksSortedById()) {
+            PrivateDnsConfig privateDnsCfg = mDnsManager.getPrivateDnsConfig(nai.network);
             // Start gathering diagnostic information.
             netDiags.add(new NetworkDiagnostics(
                     nai.network,
                     new LinkProperties(nai.linkProperties),  // Must be a copy.
+                    privateDnsCfg,
                     DIAG_TIME_MS));
         }
 
