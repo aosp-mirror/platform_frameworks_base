@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.os.RemoteException;
@@ -147,14 +148,10 @@ abstract class ApexManager {
      * @param childSessionIds if {@code sessionId} is a multi-package session, this should contain
      *                        an array of identifiers of all the child sessions. Otherwise it should
      *                        be an empty array.
-     * @param apexInfoList this is an output parameter, which needs to be initialized by tha caller
-     *                     and will be filled with a list of {@link ApexInfo} objects, each of which
-     *                     contains metadata about one of the packages being submitted as part of
-     *                     the session.
-     * @return whether the submission of the session was successful.
+     * @throws PackageManagerException if call to apexd fails
      */
-    abstract boolean submitStagedSession(
-            int sessionId, @NonNull int[] childSessionIds, @NonNull ApexInfoList apexInfoList);
+    abstract ApexInfoList submitStagedSession(int sessionId, @NonNull int[] childSessionIds)
+            throws PackageManagerException;
 
     /**
      * Mark a staged session previously submitted using {@code submitStagedSession} as ready to be
@@ -388,13 +385,19 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean submitStagedSession(
-                int sessionId, @NonNull int[] childSessionIds, @NonNull ApexInfoList apexInfoList) {
+        ApexInfoList submitStagedSession(int sessionId, @NonNull int[] childSessionIds)
+                throws PackageManagerException {
             try {
-                return mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+                final ApexInfoList apexInfoList = new ApexInfoList();
+                mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+                return apexInfoList;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 throw new RuntimeException(re);
+            } catch (Exception e) {
+                throw new PackageManagerException(
+                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "apexd verification failed : " + e.getMessage());
             }
         }
 
@@ -566,9 +569,10 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean submitStagedSession(int sessionId, int[] childSessionIds,
-                ApexInfoList apexInfoList) {
-            throw new UnsupportedOperationException();
+        ApexInfoList submitStagedSession(int sessionId, int[] childSessionIds)
+                throws PackageManagerException {
+            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                    "Device doesn't support updating APEX");
         }
 
         @Override

@@ -155,13 +155,10 @@ public class StagingManager {
                 }
             }
         }
-        final ApexInfoList apexInfoList = new ApexInfoList();
-        boolean submittedToApexd = mApexManager.submitStagedSession(session.sessionId,
-                childSessionsIds.toArray(), apexInfoList);
-        if (!submittedToApexd) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "APEX staging failed, check logcat messages from apexd for more details.");
-        }
+        // submitStagedSession will throw a PackageManagerException if apexd verification fails,
+        // which will be propagated to populate stagedSessionErrorMessage of this session.
+        final ApexInfoList apexInfoList = mApexManager.submitStagedSession(session.sessionId,
+                childSessionsIds.toArray());
         final List<PackageInfo> result = new ArrayList<>();
         for (ApexInfo newPackage : apexInfoList.apexInfos) {
             final PackageInfo pkg;
