@@ -514,11 +514,11 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
-                break;
+                continue;
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             if (!row.isHeadsUp()) {
-                break;
+                continue;
             }
             ExpandableViewState childState = row.getViewState();
             if (topHeadsUpEntry == null && row.mustStayOnScreen() && !childState.headsUpIsVisible) {
