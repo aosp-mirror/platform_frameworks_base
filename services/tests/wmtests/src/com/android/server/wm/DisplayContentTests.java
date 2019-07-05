@@ -794,6 +794,30 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCalculateSystemGestureExclusion_modal() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "base");
+        win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win.setSystemGestureExclusion(Collections.singletonList(new Rect(0, 0, 1000, 1000)));
+
+        final WindowState win2 = createWindow(null, TYPE_APPLICATION, dc, "modal");
+        win2.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win2.getAttrs().privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        win2.getAttrs().width = 10;
+        win2.getAttrs().height = 10;
+        win2.setSystemGestureExclusion(Collections.emptyList());
+
+        dc.setLayoutNeeded();
+        dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        win.setHasSurface(true);
+        win2.setHasSurface(true);
+
+        final Region expected = Region.obtain();
+        assertEquals(expected, dc.calculateSystemGestureExclusion());
+    }
+
+    @Test
     public void testCalculateSystemGestureExclusion_immersiveStickyLegacyWindow() throws Exception {
         synchronized (mWm.mGlobalLock) {
             mWm.mSystemGestureExcludedByPreQStickyImmersive = true;
