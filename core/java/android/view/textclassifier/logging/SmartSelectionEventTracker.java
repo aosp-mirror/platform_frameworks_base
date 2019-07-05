@@ -27,6 +27,7 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextSelection;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
@@ -551,10 +552,11 @@ public final class SmartSelectionEventTracker {
             return new SelectionEvent(start, end, actionType, entityType, versionTag);
         }
 
-        private static String getVersionInfo(String signature) {
-            final int start = signature.indexOf("|");
+        @VisibleForTesting
+        public static String getVersionInfo(String signature) {
+            final int start = signature.indexOf("|") + 1;
             final int end = signature.indexOf("|", start);
-            if (start >= 0 && end >= start) {
+            if (start >= 1 && end >= start) {
                 return signature.substring(start, end);
             }
             return "";
