@@ -165,11 +165,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Dezactivată"</item>
-    <item msgid="2969458029344750262">"64 KB/zonă-tampon de înregistrări în jurnal"</item>
-    <item msgid="1342285115665698168">"256 KB/zonă-tampon de înregistrări în jurnal"</item>
-    <item msgid="1314234299552254621">"1 MB/zonă-tampon de înregistrări în jurnal"</item>
-    <item msgid="3606047780792894151">"4 MB/zonă-tampon de înregistrări în jurnal"</item>
-    <item msgid="5431354956856655120">"16 MB/zonă-tampon de înregistrări în jurnal"</item>
+    <item msgid="2969458029344750262">"64 KB/mem. temporară de înregistrări în jurnal"</item>
+    <item msgid="1342285115665698168">"256 KB/mem. temporară de înregistrări în jurnal"</item>
+    <item msgid="1314234299552254621">"1 MB/mem. temporară de înregistrări în jurnal"</item>
+    <item msgid="3606047780792894151">"4 MB/mem. temporară de înregistrări în jurnal"</item>
+    <item msgid="5431354956856655120">"16 MB/mem. temporară de înregistrări în jurnal"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Dezactivată"</item>
@@ -181,7 +181,7 @@
     <item msgid="2216470072500521830">"Dezactivată"</item>
     <item msgid="172978079776521897">"Toate zonele-tampon pentru jurnale"</item>
     <item msgid="3873873912383879240">"Toate zonele-tampon pentru jurnale fără cele radio"</item>
-    <item msgid="8489661142527693381">"numai zona-tampon pentru jurnalul nucleului"</item>
+    <item msgid="8489661142527693381">"numai memoria temporară pentru jurnalul nucleului"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animație dezactivată"</item>
