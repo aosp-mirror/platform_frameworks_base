@@ -307,7 +307,7 @@
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulo hapësirën e ngjyrës"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Aktivizo gjurmët e OpenGL-së"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Çaktivizo rrugëzuesin automatik për te kufjet ose altoparlantët"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Çaktivizo router-in automatik për te kufjet ose altoparlantët"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Shfaq konturet e kuadrit"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
