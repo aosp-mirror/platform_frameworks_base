@@ -3030,6 +3030,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         subtractTouchExcludeRegionIfNeeded(outRegion);
     }
 
+    /**
+     * Get the effective touchable region in global coordinates.
+     *
+     * In contrast to {@link #getTouchableRegion}, this takes into account
+     * {@link WindowManager.LayoutParams#FLAG_NOT_TOUCH_MODAL touch modality.}
+     */
+    void getEffectiveTouchableRegion(Region outRegion) {
+        final boolean modal = (mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        final DisplayContent dc = getDisplayContent();
+
+        if (modal && dc != null) {
+            outRegion.set(dc.getBounds());
+            cropRegionToStackBoundsIfNeeded(outRegion);
+            subtractTouchExcludeRegionIfNeeded(outRegion);
+        } else {
+            getTouchableRegion(outRegion);
+        }
+    }
+
     private void setTouchableRegionCropIfNeeded(InputWindowHandle handle) {
         final Task task = getTask();
         if (task == null || !task.cropWindowsToStackBounds()) {
