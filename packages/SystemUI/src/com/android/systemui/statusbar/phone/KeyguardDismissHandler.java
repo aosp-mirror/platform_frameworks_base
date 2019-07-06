@@ -24,6 +24,7 @@ public interface KeyguardDismissHandler {
     /**
      * Executes an action that requres the screen to be unlocked, showing the keyguard if
      * necessary. Does not close the notification shade (in case it was open).
+     * @param requiresShadeOpen does the shade need to be forced open when hiding the keyguard?
      */
-    void executeWhenUnlocked(OnDismissAction action);
+    void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen);
 }

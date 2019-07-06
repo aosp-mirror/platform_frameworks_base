@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.Manifest.permission;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -662,49 +663,69 @@ public final class SmsApplication {
             }
 
             defaultSmsAppChanged(context);
+        }
+    }
 
-            if (DEBUG_MULTIUSER) {
-                Log.i(LOG_TAG, "setDefaultApplicationInternal oldAppData=" + oldAppData);
-            }
-            if (oldAppData != null && oldAppData.mSmsAppChangedReceiverClass != null) {
-                // Notify the old sms app that it's no longer the default
-                final Intent oldAppIntent =
-                        new Intent(Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED);
-                final ComponentName component = new ComponentName(oldAppData.mPackageName,
-                        oldAppData.mSmsAppChangedReceiverClass);
-                oldAppIntent.setComponent(component);
-                oldAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_IS_DEFAULT_SMS_APP, false);
-                if (DEBUG_MULTIUSER) {
-                    Log.i(LOG_TAG, "setDefaultApplicationInternal old=" + oldAppData.mPackageName);
-                }
-                context.sendBroadcastAsUser(oldAppIntent, userHandle);
-            }
-            // Notify the new sms app that it's now the default (if the new sms app has a receiver
-            // to handle the changed default sms intent).
-            if (DEBUG_MULTIUSER) {
-                Log.i(LOG_TAG, "setDefaultApplicationInternal new applicationData=" +
-                        applicationData);
-            }
-            if (applicationData.mSmsAppChangedReceiverClass != null) {
-                final Intent intent =
-                        new Intent(Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED);
-                final ComponentName component = new ComponentName(applicationData.mPackageName,
-                        applicationData.mSmsAppChangedReceiverClass);
-                intent.setComponent(component);
-                intent.putExtra(Telephony.Sms.Intents.EXTRA_IS_DEFAULT_SMS_APP, true);
-                if (DEBUG_MULTIUSER) {
-                    Log.i(LOG_TAG, "setDefaultApplicationInternal new=" + packageName);
-                }
-                context.sendBroadcastAsUser(intent, userHandle);
-            }
+    /**
+     * Sends broadcasts on sms app change:
+     * {@link Intent#ACTION_DEFAULT_SMS_PACKAGE_CHANGED}
+     * {@link Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
+     */
+    public static void broadcastSmsAppChange(Context context,
+            UserHandle userHandle, @Nullable String oldPackage, @Nullable String newPackage) {
+        Collection<SmsApplicationData> apps = getApplicationCollection(context);
 
-            // Send an implicit broadcast for the system server.
-            // (or anyone with MONITOR_DEFAULT_SMS_PACKAGE, really.)
+        broadcastSmsAppChange(context, userHandle,
+                getApplicationForPackage(apps, oldPackage),
+                getApplicationForPackage(apps, newPackage));
+    }
+
+    private static void broadcastSmsAppChange(Context context, UserHandle userHandle,
+            @Nullable SmsApplicationData oldAppData,
+            @Nullable SmsApplicationData applicationData) {
+        if (DEBUG_MULTIUSER) {
+            Log.i(LOG_TAG, "setDefaultApplicationInternal oldAppData=" + oldAppData);
+        }
+        if (oldAppData != null && oldAppData.mSmsAppChangedReceiverClass != null) {
+            // Notify the old sms app that it's no longer the default
+            final Intent oldAppIntent =
+                    new Intent(Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED);
+            final ComponentName component = new ComponentName(oldAppData.mPackageName,
+                    oldAppData.mSmsAppChangedReceiverClass);
+            oldAppIntent.setComponent(component);
+            oldAppIntent.putExtra(Intents.EXTRA_IS_DEFAULT_SMS_APP, false);
+            if (DEBUG_MULTIUSER) {
+                Log.i(LOG_TAG, "setDefaultApplicationInternal old=" + oldAppData.mPackageName);
+            }
+            context.sendBroadcastAsUser(oldAppIntent, userHandle);
+        }
+        // Notify the new sms app that it's now the default (if the new sms app has a receiver
+        // to handle the changed default sms intent).
+        if (DEBUG_MULTIUSER) {
+            Log.i(LOG_TAG, "setDefaultApplicationInternal new applicationData=" +
+                    applicationData);
+        }
+        if (applicationData != null && applicationData.mSmsAppChangedReceiverClass != null) {
             final Intent intent =
-                    new Intent(Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
-            context.sendBroadcastAsUser(intent, userHandle,
-                    permission.MONITOR_DEFAULT_SMS_PACKAGE);
+                    new Intent(Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED);
+            final ComponentName component = new ComponentName(applicationData.mPackageName,
+                    applicationData.mSmsAppChangedReceiverClass);
+            intent.setComponent(component);
+            intent.putExtra(Intents.EXTRA_IS_DEFAULT_SMS_APP, true);
+            if (DEBUG_MULTIUSER) {
+                Log.i(LOG_TAG, "setDefaultApplicationInternal new=" + applicationData.mPackageName);
+            }
+            context.sendBroadcastAsUser(intent, userHandle);
+        }
 
+        // Send an implicit broadcast for the system server.
+        // (or anyone with MONITOR_DEFAULT_SMS_PACKAGE, really.)
+        final Intent intent =
+                new Intent(Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
+        context.sendBroadcastAsUser(intent, userHandle,
+                permission.MONITOR_DEFAULT_SMS_PACKAGE);
+
+        if (applicationData != null) {
             MetricsLogger.action(context, MetricsEvent.ACTION_DEFAULT_SMS_APP_CHANGED,
                     applicationData.mPackageName);
         }

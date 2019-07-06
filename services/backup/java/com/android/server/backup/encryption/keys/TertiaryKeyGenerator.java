@@ -35,7 +35,7 @@ public class TertiaryKeyGenerator {
             mKeyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
             mKeyGenerator.init(KEY_SIZE_BITS, secureRandom);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(
+            throw new AssertionError(
                     "Impossible condition: JCE thinks it does not support AES.", e);
         }
     }

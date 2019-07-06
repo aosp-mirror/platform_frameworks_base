@@ -46,14 +46,14 @@ import android.util.Log;
 import java.util.concurrent.Executor;
 
 /**
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+ * Library</a> for consistent behavior across all devices.
+ *
  * Allows an app to interact with an active {@link MediaSession2} or a
  * {@link MediaSession2Service} which would provide {@link MediaSession2}. Media buttons and other
  * commands can be sent to the session.
- * <p>
- * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
- * for consistent behavior across all devices.
  */
 public class MediaController2 implements AutoCloseable {
     static final String TAG = "MediaController2";
@@ -405,6 +405,11 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Builder for {@link MediaController2}.
      * <p>
      * Any incoming event from the {@link MediaSession2} will be handled on the callback
@@ -502,9 +507,12 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Interface for listening to change in activeness of the {@link MediaSession2}.
-     * <p>
      * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Interface for listening to change in activeness of the {@link MediaSession2}.
      */
     public abstract static class ControllerCallback {
         /**

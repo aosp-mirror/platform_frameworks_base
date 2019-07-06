@@ -52,13 +52,13 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * Allows a media app to expose its transport controls and playback information in a process to
- * other processes including the Android framework and other apps.
- * <p>
  * This API is not generally intended for third party application developers.
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
- * for consistent behavior across all devices.
+ * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+ * Library</a> for consistent behavior across all devices.
+ * <p>
+ * Allows a media app to expose its transport controls and playback information in a process to
+ * other processes including the Android framework and other apps.
  */
 public class MediaSession2 implements AutoCloseable {
     static final String TAG = "MediaSession2";
@@ -481,6 +481,11 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Builder for {@link MediaSession2}.
      * <p>
      * Any incoming event from the {@link MediaController2} will be handled on the callback
@@ -616,9 +621,12 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Information of a controller.
-     * <p>
      * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Information of a controller.
      */
     public static final class ControllerInfo {
         private final RemoteUserInfo mRemoteUserInfo;
@@ -807,9 +815,12 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Callback to be called for all incoming commands from {@link MediaController2}s.
-     * <p>
      * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
+     * Callback to be called for all incoming commands from {@link MediaController2}s.
      */
     public abstract static class SessionCallback {
         /**

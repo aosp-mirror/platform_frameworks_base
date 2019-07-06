@@ -786,7 +786,7 @@ class ActivityStack extends ConfigurationContainer {
                 && !topActivity.noDisplay) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
-            final String packageName = topActivity.appInfo.packageName;
+            final String packageName = topActivity.info.applicationInfo.packageName;
             mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     topTask.taskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
         }
@@ -2976,7 +2976,8 @@ class ActivityStack extends ConfigurationContainer {
                 }
 
                 if (next.newIntents != null) {
-                    transaction.addCallback(NewIntentItem.obtain(next.newIntents));
+                    transaction.addCallback(
+                            NewIntentItem.obtain(next.newIntents, true /* resume */));
                 }
 
                 // Well the app will no longer be stopped.

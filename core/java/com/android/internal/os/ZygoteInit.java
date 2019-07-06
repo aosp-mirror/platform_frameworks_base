@@ -188,13 +188,6 @@ public class ZygoteInit {
         System.loadLibrary("android");
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
-
-        // tolerate missing sfplugin_ccodec which is only present on Codec 2 devices
-        try {
-            System.loadLibrary("sfplugin_ccodec");
-        } catch (Error | RuntimeException e) {
-            Log.w(TAG, "Problem preloading sfplugin_ccodec: " + e);
-        }
     }
 
     native private static void nativePreloadAppProcessHALs();

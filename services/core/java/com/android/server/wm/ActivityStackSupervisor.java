@@ -761,10 +761,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             final int applicationInfoUid =
                     (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
-            if ((r.mUserId != proc.mUserId) || (r.appInfo.uid != applicationInfoUid)) {
+            if ((r.mUserId != proc.mUserId) || (r.info.applicationInfo.uid != applicationInfoUid)) {
                 Slog.wtf(TAG,
                         "User ID for activity changing for " + r
-                                + " appInfo.uid=" + r.appInfo.uid
+                                + " appInfo.uid=" + r.info.applicationInfo.uid
                                 + " info.ai.uid=" + applicationInfoUid
                                 + " old=" + r.app + " new=" + proc);
             }
@@ -2462,7 +2462,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
         mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
-                task.taskId, reason, topActivity.appInfo.packageName);
+                task.taskId, reason, topActivity.info.applicationInfo.packageName);
     }
 
     void activityRelaunchedLocked(IBinder token) {

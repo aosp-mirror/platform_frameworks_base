@@ -105,7 +105,8 @@ class AppWarnings {
     public void showUnsupportedDisplaySizeDialogIfNeeded(ActivityRecord r) {
         final Configuration globalConfig = mAtm.getGlobalConfiguration();
         if (globalConfig.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
-                && r.appInfo.requiresSmallestWidthDp > globalConfig.smallestScreenWidthDp) {
+                && r.info.applicationInfo.requiresSmallestWidthDp
+                > globalConfig.smallestScreenWidthDp) {
             mUiHandler.showUnsupportedDisplaySizeDialog(r);
         }
     }
@@ -116,7 +117,8 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showUnsupportedCompileSdkDialogIfNeeded(ActivityRecord r) {
-        if (r.appInfo.compileSdkVersion == 0 || r.appInfo.compileSdkVersionCodename == null) {
+        if (r.info.applicationInfo.compileSdkVersion == 0
+                || r.info.applicationInfo.compileSdkVersionCodename == null) {
             // We don't know enough about this package. Abort!
             return;
         }
@@ -135,14 +137,16 @@ class AppWarnings {
         // the application was built OR both are pre-release with the same SDK_INT but different
         // codenames (e.g. simultaneous pre-release development), then we're likely to run into
         // compatibility issues. Warn the user and offer to check for an update.
-        final int compileSdk = r.appInfo.compileSdkVersion;
+        final int compileSdk = r.info.applicationInfo.compileSdkVersion;
         final int platformSdk = Build.VERSION.SDK_INT;
-        final boolean isCompileSdkPreview = !"REL".equals(r.appInfo.compileSdkVersionCodename);
+        final boolean isCompileSdkPreview =
+                !"REL".equals(r.info.applicationInfo.compileSdkVersionCodename);
         final boolean isPlatformSdkPreview = !"REL".equals(Build.VERSION.CODENAME);
         if ((isCompileSdkPreview && compileSdk < platformSdk)
                 || (isPlatformSdkPreview && platformSdk < compileSdk)
                 || (isCompileSdkPreview && isPlatformSdkPreview && platformSdk == compileSdk
-                    && !Build.VERSION.CODENAME.equals(r.appInfo.compileSdkVersionCodename))) {
+                    && !Build.VERSION.CODENAME.equals(
+                            r.info.applicationInfo.compileSdkVersionCodename))) {
             mUiHandler.showUnsupportedCompileSdkDialog(r);
         }
     }
@@ -153,7 +157,7 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showDeprecatedTargetDialogIfNeeded(ActivityRecord r) {
-        if (r.appInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT) {
+        if (r.info.applicationInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT) {
             mUiHandler.showDeprecatedTargetDialog(r);
         }
     }

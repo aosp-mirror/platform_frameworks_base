@@ -889,7 +889,8 @@ public class ResolverActivity extends Activity {
                 : mAdapterView.getCheckedItemPosition();
         boolean hasIndexBeenFiltered = !mAdapter.hasFilteredItem();
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
-        if (!ri.handleAllWebDataURI && id == R.id.button_always) {
+        if (mUseLayoutForBrowsables
+                && !ri.handleAllWebDataURI && id == R.id.button_always) {
             showSettingsForSelected(ri);
         } else {
             startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);

@@ -86,7 +86,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private final TransportClient mTransportClient;
 
     // Where per-transport saved state goes
-    File mStateDir;
+    private File mStateDir;
 
     // Restore observer; may be null
     private IRestoreObserver mObserver;
@@ -153,10 +153,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
-    private File mSavedStateName;
     private File mNewStateName;
-    ParcelFileDescriptor mBackupData;
-    ParcelFileDescriptor mNewState;
+    private ParcelFileDescriptor mBackupData;
+    private ParcelFileDescriptor mNewState;
 
     private final int mEphemeralOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
@@ -666,7 +665,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     }
 
     // Guts of a key/value restore operation
-    void initiateOneRestore(PackageInfo app, long appVersionCode) {
+    private void initiateOneRestore(PackageInfo app, long appVersionCode) {
         final String packageName = app.packageName;
 
         if (DEBUG) {
@@ -677,7 +676,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mBackupDataName = new File(backupManagerService.getDataDir(), packageName + ".restore");
         mStageName = new File(backupManagerService.getDataDir(), packageName + ".stage");
         mNewStateName = new File(mStateDir, packageName + ".new");
-        mSavedStateName = new File(mStateDir, packageName);
 
         // don't stage the 'android' package where the wallpaper data lives.  this is
         // an optimization: we know there's no widget data hosted/published by that
@@ -870,7 +868,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     mCurrentPackage.packageName);
 
             mEngine = new FullRestoreEngine(backupManagerService, this, null,
-                    mMonitor, mCurrentPackage, false, false, mEphemeralOpToken, false);
+                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false);
             mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
 
             ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
@@ -1160,7 +1158,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // the following from a discard of the newly-written state to the
         // "correct" operation of renaming into the canonical state blob.
         mNewStateName.delete();                      // TODO: remove; see above comment
-        //mNewStateName.renameTo(mSavedStateName);   // TODO: replace with this
 
         // If this wasn't the PM pseudopackage, tear down the agent side
         if (mCurrentPackage.applicationInfo != null) {

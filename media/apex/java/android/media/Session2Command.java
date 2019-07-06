@@ -26,6 +26,11 @@ import android.text.TextUtils;
 import java.util.Objects;
 
 /**
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+ * Library</a> for consistent behavior across all devices.
+ * <p>
  * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
  * <p>
  * If {@link #getCommandCode()} isn't {@link #COMMAND_CODE_CUSTOM}), it's predefined command.
@@ -35,11 +40,6 @@ import java.util.Objects;
  * Refer to the
  * <a href="{@docRoot}reference/androidx/media2/SessionCommand2.html">AndroidX SessionCommand</a>
  * class for the list of valid commands.
- * <p>
- * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
- * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>
- * for consistent behavior across all devices.
  */
 public final class Session2Command implements Parcelable {
     /**
@@ -162,6 +162,11 @@ public final class Session2Command implements Parcelable {
     }
 
     /**
+     * This API is not generally intended for third party application developers.
+     * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+     * <a href="{@docRoot}reference/androidx/media2/session/package-summary.html">Media2 session
+     * Library</a> for consistent behavior across all devices.
+     * <p>
      * Contains the result of {@link Session2Command}.
      */
     public static final class Result {

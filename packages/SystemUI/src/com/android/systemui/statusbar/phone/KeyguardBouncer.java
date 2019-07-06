@@ -346,6 +346,13 @@ public class KeyguardBouncer {
     }
 
     /**
+     * {@link #show(boolean)} was called but we're not showing yet.
+     */
+    public boolean willShowSoon() {
+        return mShowingSoon;
+    }
+
+    /**
      * @return {@code true} when bouncer's pre-hide animation already started but isn't completely
      *         hidden yet, {@code false} otherwise.
      */

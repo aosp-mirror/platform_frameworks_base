@@ -385,9 +385,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         for (int i = displaysList.size() - 1; i >= 0; i--) {
             final int displayId = displaysList.get(i).getDisplayId();
+            final Context displayContext = mContext.createDisplayContext(displaysList.get(i));
 
             if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
-                TouchExplorer explorer = new TouchExplorer(mContext, mAms);
+                TouchExplorer explorer = new TouchExplorer(displayContext, mAms);
                 addFirstEventHandler(displayId, explorer);
                 mTouchExplorer.put(displayId, explorer);
             }
@@ -400,7 +401,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 final boolean triggerable = (mEnabledFeatures
                         & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
                 MagnificationGestureHandler magnificationGestureHandler =
-                        new MagnificationGestureHandler(mContext,
+                        new MagnificationGestureHandler(displayContext,
                                 mAms.getMagnificationController(),
                                 detectControlGestures, triggerable, displayId);
                 addFirstEventHandler(displayId, magnificationGestureHandler);
