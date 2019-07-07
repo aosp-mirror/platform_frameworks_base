@@ -932,6 +932,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
     }
 
+    public void setUnlockIsFading(boolean unlockFading) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setUnlockIsFading(unlockFading);
+        }
+    }
+
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
         for (ScrimState state : ScrimState.values()) {
             state.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
