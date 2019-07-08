@@ -33,6 +33,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_UNSET;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
@@ -581,8 +582,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 displayContent.mClosingApps.add(this);
                 mEnteringAnimation = false;
             }
-            if (appTransition.getAppTransition()
-                    == WindowManager.TRANSIT_TASK_OPEN_BEHIND) {
+            if (appTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND) {
                 // We're launchingBehind, add the launching activity to mOpeningApps.
                 final WindowState win = getDisplayContent().findFocusedWindow();
                 if (win != null) {
@@ -593,7 +593,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                                     + " adding " + focusedToken + " to mOpeningApps");
                         }
                         // Force animation to be loaded.
-                        focusedToken.setHidden(true);
                         displayContent.mOpeningApps.add(focusedToken);
                     }
                 }
@@ -620,9 +619,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // * token is transitioning visibility state
         // * or the token was marked as hidden and is exiting before we had a chance to play the
         // transition animation
-        // * or this is an opening app and windows are being replaced.
+        // * or this is an opening app and windows are being replaced
+        // * or the token is the opening app and visible while opening task behind existing one.
+        final DisplayContent displayContent = getDisplayContent();
         boolean visibilityChanged = false;
-        if (isHidden() == visible || (isHidden() && mIsExiting) || (visible && waitingForReplacement())) {
+        if (isHidden() == visible || (isHidden() && mIsExiting)
+                || (visible && waitingForReplacement())
+                || (visible && displayContent.mOpeningApps.contains(this)
+                && displayContent.mAppTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND)) {
             final AccessibilityController accessibilityController =
                     mWmService.mAccessibilityController;
             boolean changed = false;
@@ -675,13 +679,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
 
             if (changed) {
-                getDisplayContent().getInputMonitor().setUpdateInputWindowsNeededLw();
+                displayContent.getInputMonitor().setUpdateInputWindowsNeededLw();
                 if (performLayout) {
                     mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                             false /*updateInputWindows*/);
                     mWmService.mWindowPlacerLocked.performSurfacePlacement();
                 }
-                getDisplayContent().getInputMonitor().updateInputWindowsLw(false /*force*/);
+                displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
             }
         }
         mUseTransferredAnimation = false;
@@ -720,14 +724,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 setClientHidden(!visible);
             }
 
-            if (!getDisplayContent().mClosingApps.contains(this)
-                    && !getDisplayContent().mOpeningApps.contains(this)) {
+            if (!displayContent.mClosingApps.contains(this)
+                    && !displayContent.mOpeningApps.contains(this)) {
                 // The token is not closing nor opening, so even if there is an animation set, that
                 // doesn't mean that it goes through the normal app transition cycle so we have
                 // to inform the docked controller about visibility change.
                 // TODO(multi-display): notify docked divider on all displays where visibility was
                 // affected.
-                getDisplayContent().getDockedDividerController().notifyAppVisibilityChanged();
+                displayContent.getDockedDividerController().notifyAppVisibilityChanged();
 
                 // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
                 // will not be taken.
@@ -744,7 +748,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // no animation but there will still be a transition set.
             // We still need to delay hiding the surface such that it
             // can be synchronized with showing the next surface in the transition.
-            if (isHidden() && !delayed && !getDisplayContent().mAppTransition.isTransitionSet()) {
+            if (isHidden() && !delayed && !displayContent.mAppTransition.isTransitionSet()) {
                 SurfaceControl.openTransaction();
                 for (int i = mChildren.size() - 1; i >= 0; i--) {
                     mChildren.get(i).mWinAnimator.hide("immediately hidden");

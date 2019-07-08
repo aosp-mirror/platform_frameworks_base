@@ -1846,7 +1846,7 @@ class ActivityStarter {
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
         mDoResume = doResume;
-        if (!doResume || !r.okToShowLocked()) {
+        if (!doResume || !r.okToShowLocked() || mLaunchTaskBehind) {
             r.delayedResume = true;
             mDoResume = false;
         }
@@ -2680,7 +2680,8 @@ class ActivityStarter {
 
         if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
                  || mPreferredDisplayId != DEFAULT_DISPLAY) {
-            final boolean onTop = aOptions == null || !aOptions.getAvoidMoveToFront();
+            final boolean onTop =
+                    (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
             final ActivityStack stack =
                     mRootActivityContainer.getLaunchStack(r, aOptions, task, onTop, mLaunchParams);
             return stack;
