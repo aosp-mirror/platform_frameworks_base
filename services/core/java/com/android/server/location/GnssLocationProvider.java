@@ -1028,7 +1028,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
+    public void onSetRequest(ProviderRequest request, WorkSource source) {
         sendMessage(SET_REQUEST, 0, new GpsRequest(request, source));
     }
 
@@ -1165,7 +1165,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @Override
-    public void sendExtraCommand(String command, Bundle extras) {
+    public void onSendExtraCommand(int uid, int pid, String command, Bundle extras) {
 
         long identity = Binder.clearCallingIdentity();
         try {

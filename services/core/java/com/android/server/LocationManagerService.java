@@ -905,7 +905,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Integer.parseInt(fragments[9]) /* accuracy */);
             LocationProvider testProviderManager = new LocationProvider(name);
             addProviderLocked(testProviderManager);
-            new MockProvider(mContext, testProviderManager, properties);
+            testProviderManager.attachLocked(
+                    new MockProvider(mContext, testProviderManager, properties));
         }
     }
 
@@ -1026,16 +1027,29 @@ public class LocationManagerService extends ILocationManager.Stub {
             return mProperties;
         }
 
-        @GuardedBy("mLock")
-        public void setRequestLocked(ProviderRequest request, WorkSource workSource) {
-            if (mProvider != null) {
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    mProvider.setRequest(request, workSource);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+        public void setRequest(ProviderRequest request, WorkSource workSource) {
+            // move calls going to providers onto a different thread to avoid deadlock
+            mHandler.post(() -> {
+                synchronized (mLock) {
+                    if (mProvider != null) {
+                        mProvider.onSetRequest(request, workSource);
+                    }
                 }
-            }
+            });
+        }
+
+        public void sendExtraCommand(String command, Bundle extras) {
+            int uid = Binder.getCallingUid();
+            int pid = Binder.getCallingPid();
+
+            // move calls going to providers onto a different thread to avoid deadlock
+            mHandler.post(() -> {
+                synchronized (mLock) {
+                    if (mProvider != null) {
+                        mProvider.onSendExtraCommand(uid, pid, command, extras);
+                    }
+                }
+            });
         }
 
         @GuardedBy("mLock")
@@ -1095,79 +1109,53 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        @GuardedBy("mLock")
-        public void sendExtraCommandLocked(String command, Bundle extras) {
-            if (mProvider != null) {
-                // intentionally do not clear binder identity so that providers can evaluate who
-                // is sending the extra command
-                mProvider.sendExtraCommand(command, extras);
+        @Override
+        public void onReportLocation(Location location) {
+            synchronized (mLock) {
+                handleLocationChangedLocked(location, this);
             }
         }
 
-        // called from any thread
-        @Override
-        public void onReportLocation(Location location) {
-            // no security check necessary because this is coming from an internal-only interface
-            // move calls coming from below LMS onto a different thread to avoid deadlock
-            mHandler.post(() -> {
-                synchronized (mLock) {
-                    handleLocationChangedLocked(location, this);
-                }
-            });
-        }
-
-        // called from any thread
         @Override
         public void onReportLocation(List<Location> locations) {
-            // move calls coming from below LMS onto a different thread to avoid deadlock
-            mHandler.post(() -> {
-                synchronized (mLock) {
-                    LocationProvider gpsProvider = getLocationProviderLocked(GPS_PROVIDER);
-                    if (gpsProvider == null || !gpsProvider.isUseableLocked()) {
-                        Slog.w(TAG, "reportLocationBatch() called without user permission");
-                        return;
-                    }
-
-                    if (mGnssBatchingCallback == null) {
-                        Slog.e(TAG, "reportLocationBatch() called without active Callback");
-                        return;
-                    }
-
-                    try {
-                        mGnssBatchingCallback.onLocationBatch(locations);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "mGnssBatchingCallback.onLocationBatch failed", e);
-                    }
+            synchronized (mLock) {
+                LocationProvider gpsProvider = getLocationProviderLocked(GPS_PROVIDER);
+                if (gpsProvider == null || !gpsProvider.isUseableLocked()) {
+                    Slog.w(TAG, "reportLocationBatch() called without user permission");
+                    return;
                 }
-            });
+
+                if (mGnssBatchingCallback == null) {
+                    Slog.e(TAG, "reportLocationBatch() called without active Callback");
+                    return;
+                }
+
+                try {
+                    mGnssBatchingCallback.onLocationBatch(locations);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "mGnssBatchingCallback.onLocationBatch failed", e);
+                }
+            }
         }
 
-        // called from any thread
         @Override
         public void onSetEnabled(boolean enabled) {
-            // move calls coming from below LMS onto a different thread to avoid deadlock
-            mHandler.post(() -> {
-                synchronized (mLock) {
-                    if (enabled == mEnabled) {
-                        return;
-                    }
-
-                    if (D) {
-                        Log.d(TAG, mName + " provider enabled is now " + mEnabled);
-                    }
-
-                    mEnabled = enabled;
-                    onUseableChangedLocked(false);
+            synchronized (mLock) {
+                if (enabled == mEnabled) {
+                    return;
                 }
-            });
+
+                if (D) {
+                    Log.d(TAG, mName + " provider enabled is now " + mEnabled);
+                }
+
+                mEnabled = enabled;
+                onUseableChangedLocked(false);
+            }
         }
 
         @Override
         public void onSetProperties(ProviderProperties properties) {
-            // because this does not invoke any other methods which might result in calling back
-            // into the location provider, it is safe to run this on the calling thread. it is also
-            // currently necessary to run this on the calling thread to ensure that property changes
-            // are publicly visibly immediately, ie for mock providers which are created.
             synchronized (mLock) {
                 mProperties = properties;
             }
@@ -1325,9 +1313,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
-        @GuardedBy("mLock")
-        public void setRequestLocked(ProviderRequest request, WorkSource workSource) {
-            super.setRequestLocked(request, workSource);
+        public void setRequest(ProviderRequest request, WorkSource workSource) {
+            super.setRequest(request, workSource);
             mCurrentRequest = request;
         }
 
@@ -2232,7 +2219,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        provider.setRequestLocked(providerRequest, worksource);
+        provider.setRequest(providerRequest, worksource);
     }
 
     /**
@@ -3116,7 +3103,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             LocationProvider provider = getLocationProviderLocked(providerName);
             if (provider != null) {
-                provider.sendExtraCommandLocked(command, extras);
+                provider.sendExtraCommand(command, extras);
             }
 
             mLocationUsageLogger.logLocationApiUsage(
