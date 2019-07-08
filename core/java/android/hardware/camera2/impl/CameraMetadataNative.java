@@ -21,6 +21,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -29,6 +30,7 @@ import android.hardware.camera2.marshal.MarshalRegistry;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
+import android.hardware.camera2.marshal.impl.MarshalQueryableCapabilityAndMaxSize;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
@@ -48,6 +50,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableSizeF;
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
+import android.hardware.camera2.params.CapabilityAndMaxSize;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
@@ -669,6 +672,15 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getOisSamples();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_CAPABILITIES.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getBokehCapabilities();
                     }
                 });
     }
@@ -1373,6 +1385,24 @@ public class CameraMetadataNative implements Parcelable {
         return samples;
     }
 
+    private CapabilityAndMaxSize[] getBokehCapabilities() {
+        CapabilityAndMaxSize[] bcs = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_CAPABILITIES);
+
+        if (bcs != null) {
+            for (CapabilityAndMaxSize bc : bcs) {
+                if (bc.getMode() < CameraMetadata.CONTROL_BOKEH_MODE_OFF ||
+                        bc.getMode() > CameraMetadata.CONTROL_BOKEH_MODE_CONTINUOUS) {
+                    throw new AssertionError(String.format(
+                            "bokehMode %d is out of valid range [%d, %d]", bc.getMode(),
+                            CameraMetadata.CONTROL_BOKEH_MODE_OFF,
+                            CameraMetadata.CONTROL_BOKEH_MODE_CONTINUOUS));
+                }
+            }
+        }
+        return bcs;
+    }
+
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
         setBase(key.getNativeKey(), value);
     }
@@ -1750,6 +1780,7 @@ public class CameraMetadataNative implements Parcelable {
                 new MarshalQueryableBlackLevelPattern(),
                 new MarshalQueryableHighSpeedVideoConfiguration(),
                 new MarshalQueryableRecommendedStreamConfiguration(),
+                new MarshalQueryableCapabilityAndMaxSize(),
 
                 // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
                 new MarshalQueryableParcelable(),

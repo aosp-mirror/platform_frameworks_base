@@ -2444,6 +2444,34 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_BOKEH_MODE
+    //
+
+    /**
+     * <p>Bokeh mode is disabled.</p>
+     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     */
+    public static final int CONTROL_BOKEH_MODE_OFF = 0;
+
+    /**
+     * <p>High quality bokeh mode is enabled for all non-raw streams (including YUV,
+     * JPEG, and IMPLEMENTATION_DEFINED) when capture intent is STILL_CAPTURE. Due to the
+     * extra image processing, this mode may introduce additional stall to non-raw streams.
+     * This mode should be used in high quality still capture use case.</p>
+     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     */
+    public static final int CONTROL_BOKEH_MODE_STILL_CAPTURE = 1;
+
+    /**
+     * <p>Bokeh effect must not slow down capture rate relative to sensor raw output,
+     * and the effect is applied to all processed streams no larger than the maximum
+     * streaming dimension. This mode should be used if performance and power are a
+     * priority, such as video recording.</p>
+     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     */
+    public static final int CONTROL_BOKEH_MODE_CONTINUOUS = 2;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 

@@ -1125,6 +1125,37 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
+     * <p>The list of bokeh modes that are supported by this camera device, and each bokeh mode's
+     * maximum streaming (non-stall) size with bokeh effect.</p>
+     * <p>For OFF mode, the camera behaves normally with no bokeh effect.</p>
+     * <p>For STILL_CAPTURE mode, the maximum streaming dimension specifies the limit under which
+     * bokeh is effective when capture intent is PREVIEW. Note that when capture intent is
+     * PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE intent
+     * in order to maintain reasonable frame rate. The maximum streaming dimension must be one
+     * of the YUV_420_888 or PRIVATE resolutions in availableStreamConfigurations, or (0, 0)
+     * if preview bokeh is not supported. If the application configures a stream larger than
+     * the maximum streaming dimension, bokeh effect may not be applied for this stream for
+     * PREVIEW intent.</p>
+     * <p>For CONTINUOUS mode, the maximum streaming dimension specifies the limit under which
+     * bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE resolutions
+     * in availableStreamConfigurations, and if the sensor maximum resolution is larger than or
+     * equal to 1080p, the maximum streaming dimension must be at least 1080p. If the
+     * application configures a stream with larger dimension, the stream may not have bokeh
+     * effect applied.</p>
+     * <p><b>Units</b>: (mode, width, height)</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.hardware.camera2.params.CapabilityAndMaxSize[]> CONTROL_AVAILABLE_BOKEH_CAPABILITIES =
+            new Key<android.hardware.camera2.params.CapabilityAndMaxSize[]>("android.control.availableBokehCapabilities", android.hardware.camera2.params.CapabilityAndMaxSize[].class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support

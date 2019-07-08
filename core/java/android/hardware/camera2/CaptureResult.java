@@ -398,7 +398,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * application controls how the color mapping is performed.</p>
      * <p>We define the expected processing pipeline below. For consistency
      * across devices, this is always the case with TRANSFORM_MATRIX.</p>
-     * <p>When either FULL or HIGH_QUALITY is used, the camera device may
+     * <p>When either FAST or HIGH_QUALITY is used, the camera device may
      * do additional processing but {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform} will still be provided by the
      * camera device (in the results) and be roughly correct.</p>
@@ -2322,6 +2322,52 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Integer> CONTROL_AF_SCENE_CHANGE =
             new Key<Integer>("android.control.afSceneChange", int.class);
+
+    /**
+     * <p>Whether bokeh mode is enabled for a particular capture request.</p>
+     * <p>With bokeh mode, the camera device may blur out the parts of scene that are not in
+     * focus, creating a bokeh (or shallow depth of field) effect for people or objects.</p>
+     * <p>When set to STILL_CAPTURE bokeh mode with STILL_CAPTURE capture intent, due to the extra
+     * processing needed for high quality bokeh effect, the stall may be longer than when
+     * capture intent is not STILL_CAPTURE.</p>
+     * <p>When set to STILL_CAPTURE bokeh mode with PREVIEW capture intent,</p>
+     * <ul>
+     * <li>If the camera device has BURST_CAPTURE capability, the frame rate requirement of
+     * BURST_CAPTURE must still be met.</li>
+     * <li>All streams not larger than the maximum streaming dimension for STILL_CAPTURE mode
+     * (queried via {@link android.hardware.camera2.CameraCharacteristics#CONTROL_AVAILABLE_BOKEH_CAPABILITIES })
+     * will have preview bokeh effect applied.</li>
+     * </ul>
+     * <p>When set to CONTINUOUS mode, configured streams dimension should not exceed this mode's
+     * maximum streaming dimension in order to have bokeh effect applied. Bokeh effect may not
+     * be available for streams larger than the maximum streaming dimension.</p>
+     * <p>Switching between different bokeh modes may involve reconfiguration of the camera
+     * pipeline, resulting in long latency. The application should check this key against the
+     * available session keys queried via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</p>
+     * <p>When bokeh mode is on, the camera device may override certain control parameters, such as
+     * reduce frame rate or use face priority scene mode, to achieve best power and quality
+     * tradeoffs. When turned on, AE, AWB, and AF run in auto modes, and only the mandatory
+     * stream combinations of LIMITED hardware level are guaranteed.</p>
+     * <p>For a logical multi-camera, bokeh may be implemented by stereo vision from sub-cameras
+     * with different field of view. As a result, when bokeh mode is enabled, the camera device
+     * may override android.scaler.CropRegion, and the field of view will be smaller than when
+     * bokeh mode is off.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #CONTROL_BOKEH_MODE_OFF OFF}</li>
+     *   <li>{@link #CONTROL_BOKEH_MODE_STILL_CAPTURE STILL_CAPTURE}</li>
+     *   <li>{@link #CONTROL_BOKEH_MODE_CONTINUOUS CONTINUOUS}</li>
+     * </ul></p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #CONTROL_BOKEH_MODE_OFF
+     * @see #CONTROL_BOKEH_MODE_STILL_CAPTURE
+     * @see #CONTROL_BOKEH_MODE_CONTINUOUS
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_BOKEH_MODE =
+            new Key<Integer>("android.control.bokehMode", int.class);
 
     /**
      * <p>Operation mode for edge
