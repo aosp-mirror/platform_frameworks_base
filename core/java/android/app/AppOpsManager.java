@@ -240,7 +240,8 @@ public class AppOpsManager {
     public @interface UidState {}
 
     /**
-     * Uid state: The UID is a foreground persistent app.
+     * Uid state: The UID is a foreground persistent app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -248,7 +249,8 @@ public class AppOpsManager {
     public static final int UID_STATE_PERSISTENT = 100;
 
     /**
-     * Uid state: The UID is top foreground app.
+     * Uid state: The UID is top foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -257,6 +259,7 @@ public class AppOpsManager {
 
     /**
      * Uid state: The UID is running a foreground service of location type.
+     * The lower the UID state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -264,7 +267,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
 
     /**
-     * Uid state: The UID is running a foreground service.
+     * Uid state: The UID is running a foreground service. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -279,7 +283,8 @@ public class AppOpsManager {
     public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
 
     /**
-     * Uid state: The UID is a foreground app.
+     * Uid state: The UID is a foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -287,7 +292,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND = 500;
 
     /**
-     * Uid state: The UID is a background app.
+     * Uid state: The UID is a background app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -295,7 +301,8 @@ public class AppOpsManager {
     public static final int UID_STATE_BACKGROUND = 600;
 
     /**
-     * Uid state: The UID is a cached app.
+     * Uid state: The UID is a cached app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
