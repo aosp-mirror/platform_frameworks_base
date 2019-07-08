@@ -974,6 +974,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract int getTargetSdk(int uid);
 
-    /** HACK. Remove when listeners move to the permission manager */
-    public abstract void onPermissionsChangedTEMP(int uid);
+    /**
+     * Returns {@code true} if the caller is the installer of record for the given package.
+     * Otherwise, {@code false}.
+     */
+    public abstract boolean isCallerInstallerOfRecord(
+            @NonNull PackageParser.Package pkg, int callingUid);
 }

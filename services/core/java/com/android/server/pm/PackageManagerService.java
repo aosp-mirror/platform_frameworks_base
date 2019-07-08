@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
@@ -90,6 +91,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
+import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
@@ -111,6 +113,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFile
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
+import static com.android.server.pm.permission.PermissionManagerService.killUid;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -144,7 +147,6 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
-import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -168,7 +170,6 @@ import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
-import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
@@ -582,9 +583,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
 
-    private static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
-            "permissions revoked";
-
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
     private static final String PACKAGE_SCHEME = "package";
@@ -913,8 +911,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private AtomicInteger mNextMoveId = new AtomicInteger();
     private final MoveCallbacks mMoveCallbacks;
-
-    private final OnPermissionChangeListeners mOnPermissionChangeListeners;
 
     // Cache of users who need badging.
     private final SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
@@ -1770,7 +1766,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void onPermissionGranted(int uid, @UserIdInt int userId) {
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            mPermissionManager.notifyPermissionsChangedTEMP(uid);
 
             // Not critical; if this is lost, the application has to request again.
             synchronized (mPackages) {
@@ -1787,7 +1783,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void onPermissionRevoked(int uid, @UserIdInt int userId) {
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            mPermissionManager.notifyPermissionsChangedTEMP(uid);
 
             synchronized (mPackages) {
                 // Critical; after this call the application should never have the permission
@@ -1818,7 +1814,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
                 int uid) {
             onPermissionUpdated(updatedUserIds, sync);
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            mPermissionManager.notifyPermissionsChangedTEMP(uid);
         }
 
         @Override
@@ -1831,7 +1827,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void onInstallPermissionUpdatedNotifyListener(int uid) {
             onInstallPermissionUpdated();
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            mPermissionManager.notifyPermissionsChangedTEMP(uid);
         }
 
         @Override
@@ -1862,7 +1858,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     && !whitelistedRestrictedPermissions.isEmpty()) {
                 mPermissionManager.setWhitelistedRestrictedPermissions(
                         res.pkg, res.newUsers, whitelistedRestrictedPermissions,
-                        Process.myUid(), PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER,
+                        Process.myUid(), FLAG_PERMISSION_WHITELIST_INSTALLER,
                         mPermissionCallback);
             }
 
@@ -2492,9 +2488,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mViewCompiler = new ViewCompiler(mInstallLock, mInstaller);
-
-        mOnPermissionChangeListeners = new OnPermissionChangeListeners(
-                FgThread.get().getLooper());
 
         getDefaultDisplayMetrics(context, mMetrics);
 
@@ -5727,228 +5720,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public @Nullable List<String> getWhitelistedRestrictedPermissions(@NonNull String packageName,
-            @PermissionWhitelistFlags int whitelistFlags, @UserIdInt int userId) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkFlagsArgument(whitelistFlags,
-                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
-        Preconditions.checkArgumentNonNegative(userId, null);
-
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS,
-                    "getWhitelistedRestrictedPermissions for user " + userId);
-        }
-
-        final PackageParser.Package pkg;
-
-        synchronized (mPackages) {
-            final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
-            if (packageSetting == null) {
-                Slog.w(TAG, "Unknown package: " + packageName);
-                return null;
-            }
-
-            pkg = packageSetting.pkg;
-
-            final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
-                            == PackageManager.PERMISSION_GRANTED;
-            final PackageSetting installerPackageSetting = mSettings.mPackages.get(
-                    packageSetting.installerPackageName);
-            final boolean isCallerInstallerOnRecord = installerPackageSetting != null
-                    && UserHandle.isSameApp(installerPackageSetting.appId, Binder.getCallingUid());
-
-            if ((whitelistFlags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
-                    && !isCallerPrivileged) {
-                throw new SecurityException("Querying system whitelist requires "
-                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-            }
-
-            if ((whitelistFlags & (PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
-                    | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) != 0) {
-                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                    throw new SecurityException("Querying upgrade or installer whitelist"
-                            + " requires being installer on record or "
-                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-                }
-            }
-
-            if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
-                    UserHandle.getCallingUserId())) {
-                return null;
-            }
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mPermissionManager.getWhitelistedRestrictedPermissions(
-                    pkg, whitelistFlags, userId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
-    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags,
-            @UserIdInt int userId) {
-        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
-        Preconditions.checkNotNull(permission);
-
-        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
-            return false;
-        }
-
-        List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
-                whitelistFlags, userId);
-        if (permissions == null) {
-            permissions = new ArrayList<>(1);
-        }
-        if (permissions.indexOf(permission) < 0) {
-            permissions.add(permission);
-            return setWhitelistedRestrictedPermissions(packageName, permissions,
-                    whitelistFlags, userId);
-        }
-        return false;
-    }
-
-    private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
-            @NonNull String permission) {
-        synchronized (mPackages) {
-            final BasePermission bp = mPermissionManager.getPermissionTEMP(permission);
-            if (bp == null) {
-                Slog.w(TAG, "No such permissions: " + permission);
-                return false;
-            }
-            if (bp.isHardOrSoftRestricted() && bp.isImmutablyRestricted()
-                    && mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Cannot modify whitelisting of an immutably "
-                        + "restricted permission: " + permission);
-            }
-            return true;
-        }
-    }
-
-    @Override
-    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags,
-            @UserIdInt int userId) {
-        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
-        Preconditions.checkNotNull(permission);
-
-        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
-            return false;
-        }
-
-        final List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
-                whitelistFlags, userId);
-        if (permissions != null && permissions.remove(permission)) {
-            return setWhitelistedRestrictedPermissions(packageName, permissions,
-                    whitelistFlags, userId);
-        }
-        return false;
-    }
-
-    private boolean setWhitelistedRestrictedPermissions(@NonNull String packageName,
-            @Nullable List<String> permissions, @PermissionWhitelistFlags int whitelistFlag,
-            @UserIdInt int userId) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkFlagsArgument(whitelistFlag,
-                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
-        Preconditions.checkArgument(Integer.bitCount(whitelistFlag) == 1);
-        Preconditions.checkArgumentNonNegative(userId, null);
-
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS,
-                    "setWhitelistedRestrictedPermissions for user " + userId);
-        }
-
-        final PackageParser.Package pkg;
-
-        synchronized (mPackages) {
-            final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
-            if (packageSetting == null) {
-                Slog.w(TAG, "Unknown package: " + packageName);
-                return false;
-            }
-
-            pkg = packageSetting.pkg;
-
-            final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
-                            == PackageManager.PERMISSION_GRANTED;
-            final PackageSetting installerPackageSetting = mSettings.mPackages.get(
-                    packageSetting.installerPackageName);
-            final boolean isCallerInstallerOnRecord = installerPackageSetting != null
-                    && UserHandle.isSameApp(installerPackageSetting.appId, Binder.getCallingUid());
-
-            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
-                    && !isCallerPrivileged) {
-                throw new SecurityException("Modifying system whitelist requires "
-                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-            }
-
-            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
-                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                    throw new SecurityException("Modifying upgrade whitelist requires"
-                            + " being installer on record or "
-                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-                }
-                final List<String> whitelistedPermissions = getWhitelistedRestrictedPermissions(
-                        packageName, whitelistFlag, userId);
-                if (permissions == null || permissions.isEmpty()) {
-                    if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
-                        return true;
-                    }
-                } else {
-                    // Only the system can add and remove while the installer can only remove.
-                    final int permissionCount = permissions.size();
-                    for (int i = 0; i < permissionCount; i++) {
-                        if ((whitelistedPermissions == null
-                                || !whitelistedPermissions.contains(permissions.get(i)))
-                                && !isCallerPrivileged) {
-                            throw new SecurityException("Adding to upgrade whitelist requires"
-                                    + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-                        }
-                    }
-                }
-            }
-
-            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
-                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                    throw new SecurityException("Modifying installer whitelist requires"
-                            + " being installer on record or "
-                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-                }
-            }
-
-            if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
-                    UserHandle.getCallingUserId())) {
-                return false;
-            }
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mPermissionManager.setWhitelistedRestrictedPermissions(pkg,
-                    new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
-                    mPermissionCallback);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        return true;
-    }
-
-    @Override
     public boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId) {
@@ -5986,27 +5757,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
-    }
-
-    @Override
-    public void addOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
-                "addOnPermissionsChangeListener");
-
-        synchronized (mPackages) {
-            mOnPermissionChangeListeners.addListenerLocked(listener);
-        }
-    }
-
-    @Override
-    public void removeOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            throw new SecurityException("Instant applications don't have access to this method");
-        }
-        synchronized (mPackages) {
-            mOnPermissionChangeListeners.removeListenerLocked(listener);
-        }
     }
 
     @Override
@@ -6167,29 +5917,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 default:
                     return false;
             }
-        }
-    }
-
-    /**
-     * This method should typically only be used when granting or revoking
-     * permissions, since the app may immediately restart after this call.
-     * <p>
-     * If you're doing surgery on app code/data, use {@link PackageFreezer} to
-     * guard your work against the app being relaunched.
-     */
-    private void killUid(int appId, int userId, String reason) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            IActivityManager am = ActivityManager.getService();
-            if (am != null) {
-                try {
-                    am.killUid(appId, userId, reason);
-                } catch (RemoteException e) {
-                    /* ignore - same process */
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -13443,8 +13170,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         != 0 && pkgSetting.pkg != null) {
                     whiteListedPermissions = pkgSetting.pkg.requestedPermissions;
                 }
-                setWhitelistedRestrictedPermissions(packageName, whiteListedPermissions,
-                        PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+                mPermissionManager.setWhitelistedRestrictedPermissions(packageName,
+                        whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
 
                 if (pkgSetting.pkg != null) {
                     synchronized (mInstallLock) {
@@ -19844,7 +19571,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 int revocationUID = IntPair.first(revokedPermissions.valueAt(i));
                 int revocationUserId = IntPair.second(revokedPermissions.valueAt(i));
 
-                mOnPermissionChangeListeners.onPermissionsChanged(revocationUID);
+                mPermissionManager.notifyPermissionsChangedTEMP(revocationUID);
 
                 // Kill app later as we are holding mPackages
                 mHandler.post(() -> killUid(UserHandle.getAppId(revocationUID), revocationUserId,
@@ -23888,59 +23615,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private final static class OnPermissionChangeListeners extends Handler {
-        private static final int MSG_ON_PERMISSIONS_CHANGED = 1;
-
-        private final RemoteCallbackList<IOnPermissionsChangeListener> mPermissionListeners =
-                new RemoteCallbackList<>();
-
-        public OnPermissionChangeListeners(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_ON_PERMISSIONS_CHANGED: {
-                    final int uid = msg.arg1;
-                    handleOnPermissionsChanged(uid);
-                } break;
-            }
-        }
-
-        public void addListenerLocked(IOnPermissionsChangeListener listener) {
-            mPermissionListeners.register(listener);
-
-        }
-
-        public void removeListenerLocked(IOnPermissionsChangeListener listener) {
-            mPermissionListeners.unregister(listener);
-        }
-
-        public void onPermissionsChanged(int uid) {
-            if (mPermissionListeners.getRegisteredCallbackCount() > 0) {
-                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
-            }
-        }
-
-        private void handleOnPermissionsChanged(int uid) {
-            final int count = mPermissionListeners.beginBroadcast();
-            try {
-                for (int i = 0; i < count; i++) {
-                    IOnPermissionsChangeListener callback = mPermissionListeners
-                            .getBroadcastItem(i);
-                    try {
-                        callback.onPermissionsChanged(uid);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Permission listener is dead", e);
-                    }
-                }
-            } finally {
-                mPermissionListeners.finishBroadcast();
-            }
-        }
-    }
-
     private class PackageManagerNative extends IPackageManagerNative.Stub {
         @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
@@ -24895,11 +24569,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void onPermissionsChangedTEMP(int uid) {
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
-        }
-
-        @Override
         public int getTargetSdk(int uid) {
             int userId = UserHandle.getUserId(uid);
 
@@ -24928,6 +24597,24 @@ public class PackageManagerService extends IPackageManager.Stub
                     return maxTargetSdk;
                 }
                 return 0;
+            }
+        }
+
+        @Override
+        public boolean isCallerInstallerOfRecord(
+                @NonNull PackageParser.Package pkg, int callingUid) {
+            synchronized (mPackages) {
+                if (pkg == null) {
+                    return false;
+                }
+                final PackageSetting packageSetting = (PackageSetting) pkg.mExtras;
+                if (packageSetting == null) {
+                    return false;
+                }
+                final PackageSetting installerPackageSetting =
+                        mSettings.mPackages.get(packageSetting.installerPackageName);
+                return installerPackageSetting != null
+                        && UserHandle.isSameApp(installerPackageSetting.appId, callingUid);
             }
         }
     }

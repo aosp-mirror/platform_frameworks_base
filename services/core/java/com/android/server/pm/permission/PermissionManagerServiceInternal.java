@@ -83,14 +83,15 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
             @NonNull String[] grantedPermissions, int callingUid,
             @Nullable PermissionCallback callback);
-    public abstract @Nullable List<String> getWhitelistedRestrictedPermissions(
-            @NonNull PackageParser.Package pkg,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags, int userId);
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
             @NonNull List<String> permissions, int callingUid,
             @PackageManager.PermissionWhitelistFlags int whitelistFlags,
             @Nullable PermissionCallback callback);
+    /** Sets the whitelisted, restricted permissions for the given package. */
+    public abstract void setWhitelistedRestrictedPermissions(
+            @NonNull String packageName, @NonNull List<String> permissions,
+            @PackageManager.PermissionWhitelistFlags int flags, @NonNull int userId);
     public abstract void revokeRuntimePermission(@NonNull String permName,
             @NonNull String packageName, boolean overridePolicy, int userId,
             @Nullable PermissionCallback callback);
@@ -193,6 +194,9 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+    /** HACK HACK notify the permission listener; this shouldn't be needed after permissions
+     *  are fully removed from the package manager */
+    public abstract void notifyPermissionsChangedTEMP(int uid);
 
     /** Get all permission that have a certain protection level */
     public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(

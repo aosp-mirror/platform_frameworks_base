@@ -19,6 +19,7 @@ package android.permission;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.permission.IOnPermissionsChangeListener;
 
 /**
  * Interface to communicate directly with the permission manager service.
@@ -50,4 +51,17 @@ interface IPermissionManager {
     int checkPermission(String permName, String pkgName, int userId);
 
     int checkUidPermission(String permName, int uid);
+
+    void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+
+    void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+
+    List<String> getWhitelistedRestrictedPermissions(String packageName,
+            int flags, int userId);
+
+    boolean addWhitelistedRestrictedPermission(String packageName, String permName,
+            int flags, int userId);
+
+    boolean removeWhitelistedRestrictedPermission(String packageName, String permName,
+            int flags, int userId);
 }
