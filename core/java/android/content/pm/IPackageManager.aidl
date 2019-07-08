@@ -94,14 +94,6 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
-
-    @UnsupportedAppUsage
-    void grantRuntimePermission(String packageName, String permissionName, int userId);
-
-    void revokeRuntimePermission(String packageName, String permissionName, int userId);
-
-    void resetRuntimePermissions();
-
     boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId);
 
@@ -754,6 +746,9 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     int checkPermission(String permName, String pkgName, int userId);
+
+    @UnsupportedAppUsage
+    void grantRuntimePermission(String packageName, String permissionName, int userId);
 
     //------------------------------------------------------------------------
     // We need to keep these in IPackageManager for convenience in splitting

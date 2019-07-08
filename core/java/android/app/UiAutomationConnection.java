@@ -20,7 +20,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -31,6 +30,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.permission.IPermissionManager;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.InputEvent;
@@ -69,8 +69,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub
             .asInterface(ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
 
-    private final IPackageManager mPackageManager = IPackageManager.Stub
-            .asInterface(ServiceManager.getService("package"));
+    private final IPermissionManager mPermissionManager = IPermissionManager.Stub
+            .asInterface(ServiceManager.getService("permissionmgr"));
 
     private final IActivityManager mActivityManager = IActivityManager.Stub
             .asInterface(ServiceManager.getService("activity"));
@@ -273,7 +273,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPackageManager.grantRuntimePermission(packageName, permission, userId);
+            mPermissionManager.grantRuntimePermission(packageName, permission, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -289,7 +289,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPackageManager.revokeRuntimePermission(packageName, permission, userId);
+            mPermissionManager.revokeRuntimePermission(packageName, permission, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

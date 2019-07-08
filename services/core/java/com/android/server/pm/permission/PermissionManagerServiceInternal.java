@@ -26,7 +26,6 @@ import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -73,28 +72,19 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract boolean isPermissionsReviewRequired(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId);
 
-    public abstract void grantRuntimePermission(
-            @NonNull String permName, @NonNull String packageName, boolean overridePolicy,
-            int callingUid, int userId, @Nullable PermissionCallback callback);
     public abstract void grantRuntimePermissionsGrantedToDisabledPackage(
-            @NonNull PackageParser.Package pkg, int callingUid,
-            @Nullable PermissionCallback callback);
+            @NonNull PackageParser.Package pkg, int callingUid);
     public abstract void grantRequestedRuntimePermissions(
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
-            @NonNull String[] grantedPermissions, int callingUid,
-            @Nullable PermissionCallback callback);
+            @NonNull String[] grantedPermissions, int callingUid);
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
             @NonNull List<String> permissions, int callingUid,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags,
-            @Nullable PermissionCallback callback);
+            @PackageManager.PermissionWhitelistFlags int whitelistFlags);
     /** Sets the whitelisted, restricted permissions for the given package. */
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull String packageName, @NonNull List<String> permissions,
             @PackageManager.PermissionWhitelistFlags int flags, @NonNull int userId);
-    public abstract void revokeRuntimePermission(@NonNull String permName,
-            @NonNull String packageName, boolean overridePolicy, int userId,
-            @Nullable PermissionCallback callback);
 
     /**
      * Update permissions when a package changed.
@@ -110,9 +100,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param callback Callback to call after permission changes
      */
     public abstract void updatePermissions(@NonNull String packageName,
-            @Nullable PackageParser.Package pkg,
-            @NonNull Collection<PackageParser.Package> allPackages,
-            @NonNull PermissionCallback callback);
+            @Nullable PackageParser.Package pkg);
 
     /**
      * Update all permissions for all apps.
@@ -126,9 +114,22 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param allPackages All currently known packages
      * @param callback Callback to call after permission changes
      */
-    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate,
-            @NonNull Collection<PackageParser.Package> allPackages,
-            @NonNull PermissionCallback callback);
+    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
+
+    /**
+     * Resets any user permission state changes (eg. permissions and flags) of all
+     * packages installed for the given user.
+     *
+     * @see #resetRuntimePermissions(android.content.pm.PackageParser.Package, int)
+     */
+    public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
+
+    /**
+     * Resets any user permission state changes (eg. permissions and flags) of the
+     * specified package for the given user.
+     */
+    public abstract void resetRuntimePermissions(@NonNull PackageParser.Package pkg,
+            @UserIdInt int userId);
 
     /**
      * We might auto-grant permissions if any permission of the group is already granted. Hence if
@@ -138,13 +139,11 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param newPackage The new package that was installed
      * @param oldPackage The old package that was updated
      * @param allPackageNames All packages
-     * @param permissionCallback Callback for permission changed
      */
     public abstract void revokeRuntimePermissionsIfGroupChanged(
             @NonNull PackageParser.Package newPackage,
             @NonNull PackageParser.Package oldPackage,
-            @NonNull ArrayList<String> allPackageNames,
-            @NonNull PermissionCallback permissionCallback);
+            @NonNull ArrayList<String> allPackageNames);
 
     /**
      * Add all permissions in the given package.

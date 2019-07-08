@@ -707,15 +707,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permissionName,
-            UserHandle user) {
+    public void revokeRuntimePermission(String packageName, String permName, UserHandle user) {
         if (DEBUG_TRACE_GRANTS
-                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
             Log.i(TAG, "App " + mContext.getPackageName() + " is revoking "
-                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+                    + permName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
-            mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
+            mPermissionManager
+                    .revokeRuntimePermission(packageName, permName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

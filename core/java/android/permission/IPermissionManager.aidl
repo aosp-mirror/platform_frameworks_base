@@ -64,4 +64,10 @@ interface IPermissionManager {
 
     boolean removeWhitelistedRestrictedPermission(String packageName, String permName,
             int flags, int userId);
+
+    void grantRuntimePermission(String packageName, String permName, int userId);
+
+    void revokeRuntimePermission(String packageName, String permName, int userId);
+
+    void resetRuntimePermissions();
 }
