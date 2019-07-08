@@ -116,6 +116,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
   if (result != 0) {
     LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
+    ::CloseArchive(unmanaged_handle);
     return {};
   }
 
