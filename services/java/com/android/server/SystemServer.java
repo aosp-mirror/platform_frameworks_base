@@ -1190,7 +1190,6 @@ public final class SystemServer {
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity,
                             /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
-                networkStats.bindConnectivityManager(connectivity);
                 networkPolicy.bindConnectivityManager(connectivity);
             } catch (Throwable e) {
                 reportWtf("starting Connectivity Service", e);

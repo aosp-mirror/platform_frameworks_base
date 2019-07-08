@@ -399,6 +399,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Heshtje\ne plotë"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Vetëm\nme prioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Vetëm\nalarmet"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po ngarkohet me valë (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> derisa të mbushet)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po ngarkohet (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> derisa të mbushet)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po ngarkohet me shpejtësi (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> derisa të mbushet)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po ngarkohet ngadalë (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> derisa të mbushet)"</string>
@@ -799,7 +800,7 @@
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Disa funksione janë të kufizuara kur telefoni është duke u ftohur"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefoni yt do të përpiqet automatikisht që të ftohet. Mund ta përdorësh përsëri telefonin, por ai mund të punojë më ngadalë.\n\nPasi telefoni të jetë ftohur, ai do të punojë si normalisht."</string>
     <string name="high_temp_alarm_title" msgid="442812040762745210">"Shkëput karikuesin"</string>
-    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Ka një problem me karikimin e kësaj pajisjeje. Shkëpute përshtatësin e energjisë dhe trego kujdes pasi kablloja mund të jetë e ngrohtë."</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Ka një problem me karikimin e kësaj pajisjeje. Hiqe spinën dhe trego kujdes pasi kablloja mund të jetë e ngrohtë."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Shiko hapat për kujdesin"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Shkurtorja majtas"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Shkurtorja djathtas"</string>
