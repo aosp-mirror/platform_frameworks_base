@@ -24,8 +24,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Size;
 import android.view.Gravity;
-import android.view.ViewConfiguration;
-import android.widget.Scroller;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -180,14 +178,6 @@ public class PipSnapAlgorithm {
         // If we're not flinging along the current edge, find the closest point instead.
         final double distanceVert = Math.hypot(vertPoint.x - x, vertPoint.y - y);
         final double distanceHoriz = Math.hypot(horizPoint.x - x, horizPoint.y - y);
-        // Ensure that we're actually going somewhere
-        if (distanceVert == 0) {
-            return horizPoint;
-        }
-        if (distanceHoriz == 0) {
-            return vertPoint;
-        }
-        // Otherwise use the closest point
         return Math.abs(distanceVert) > Math.abs(distanceHoriz) ? horizPoint : vertPoint;
     }
 
