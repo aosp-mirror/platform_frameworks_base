@@ -90,7 +90,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.widget.ILockSettings;
@@ -9298,13 +9297,6 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
-            if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
-                CLONE_TO_MANAGED_PROFILE.add(DEFAULT_INPUT_METHOD);
-                CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER_SUBTYPE);
-            }
         }
 
         /** @hide */
