@@ -1934,7 +1934,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Called when another window is about to transfer it's input focus.
      */
-    public void onInputFocusTransfer(boolean start) {
+    public void onInputFocusTransfer(boolean start, float velocity) {
         if (!mCommandQueue.panelsEnabled()) {
             return;
         }
@@ -1942,7 +1942,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (start) {
             mNotificationPanel.startWaitingForOpenPanelGesture();
         } else {
-            mNotificationPanel.stopWaitingForOpenPanelGesture();
+            mNotificationPanel.stopWaitingForOpenPanelGesture(velocity);
         }
     }
 
