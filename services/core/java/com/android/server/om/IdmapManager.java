@@ -237,14 +237,9 @@ class IdmapManager {
             return fulfilledPolicies | IIdmap2.POLICY_OEM_PARTITION;
         }
 
-        // Check partitions for which there exists no policy so overlays on these partitions will
-        // not fulfill the system policy.
-        if (ai.isSystemExt()) {
-            return fulfilledPolicies;
-        }
-
+        // System_ext partition (/system_ext) is considered as system
         // Check this last since every partition except for data is scanned as system in the PMS.
-        if (ai.isSystemApp()) {
+        if (ai.isSystemApp() || ai.isSystemExt()) {
             return fulfilledPolicies | IIdmap2.POLICY_SYSTEM_PARTITION;
         }
 
