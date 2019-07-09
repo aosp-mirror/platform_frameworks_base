@@ -483,7 +483,7 @@
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"डिवाइस प्रबंधन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
-    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"वीपीएन"</string>
     <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"नेटवर्क लॉगिंग"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"CA प्रमाणपत्र"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करें"</string>
@@ -512,7 +512,7 @@
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nज़्यादा जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"आपने किसी ऐप को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क की गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल को प्रबंधित करता है.\n\n आपका एडमिन ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nऔर जानकारी के लिए अपने एडमिन से संपर्क करें.\n\nआप ऐसे VPN से भी कनेक्‍ट हैं, जो आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"वीपीएन"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्‍स और वेबसाइटों सहित आपकी व्‍यक्‍तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइट सहित आपकी व्‍यक्‍तिगत नेटवर्क गतिविधि को मॉनिटर कर सकता है."</string>
