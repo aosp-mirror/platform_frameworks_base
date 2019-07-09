@@ -29,7 +29,6 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.FileDescriptor;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -37,7 +36,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.TreeSet;
 
 /**
  * Native methods for managing network interfaces.
@@ -392,72 +390,30 @@ public class NetworkUtils {
         return result;
     }
 
-    /**
-     * Returns a prefix set without overlaps.
-     *
-     * This expects the src set to be sorted from shorter to longer. Results are undefined
-     * failing this condition. The returned prefix set is sorted in the same order as the
-     * passed set, with the same comparator.
-     */
-    private static TreeSet<IpPrefix> deduplicatePrefixSet(final TreeSet<IpPrefix> src) {
-        final TreeSet<IpPrefix> dst = new TreeSet<>(src.comparator());
-        // Prefixes match addresses that share their upper part up to their length, therefore
-        // the only kind of possible overlap in two prefixes is strict inclusion of the longer
-        // (more restrictive) in the shorter (including equivalence if they have the same
-        // length).
-        // Because prefixes in the src set are sorted from shorter to longer, deduplicating
-        // is done by simply iterating in order, and not adding any longer prefix that is
-        // already covered by a shorter one.
-        newPrefixes:
-        for (IpPrefix newPrefix : src) {
-            for (IpPrefix existingPrefix : dst) {
-                if (existingPrefix.containsPrefix(newPrefix)) {
-                    continue newPrefixes;
-                }
-            }
-            dst.add(newPrefix);
-        }
-        return dst;
-    }
+    private static final int[] ADDRESS_FAMILIES = new int[] {AF_INET, AF_INET6};
 
     /**
-     * Returns how many IPv4 addresses match any of the prefixes in the passed ordered set.
+     * Returns true if the hostname is weakly validated.
+     * @param hostname Name of host to validate.
+     * @return True if it's a valid-ish hostname.
      *
-     * Obviously this returns an integral value between 0 and 2**32.
-     * The behavior is undefined if any of the prefixes is not an IPv4 prefix or if the
-     * set is not ordered smallest prefix to longer prefix.
-     *
-     * @param prefixes the set of prefixes, ordered by length
+     * @hide
      */
-    public static long routedIPv4AddressCount(final TreeSet<IpPrefix> prefixes) {
-        long routedIPCount = 0;
-        for (final IpPrefix prefix : deduplicatePrefixSet(prefixes)) {
-            if (!prefix.isIPv4()) {
-                Log.wtf(TAG, "Non-IPv4 prefix in routedIPv4AddressCount");
-            }
-            int rank = 32 - prefix.getPrefixLength();
-            routedIPCount += 1L << rank;
+    public static boolean isWeaklyValidatedHostname(@NonNull String hostname) {
+        // TODO(b/34953048): Use a validation method that permits more accurate,
+        // but still inexpensive, checking of likely valid DNS hostnames.
+        final String weakHostnameRegex = "^[a-zA-Z0-9_.-]+$";
+        if (!hostname.matches(weakHostnameRegex)) {
+            return false;
         }
-        return routedIPCount;
-    }
 
-    /**
-     * Returns how many IPv6 addresses match any of the prefixes in the passed ordered set.
-     *
-     * This returns a BigInteger between 0 and 2**128.
-     * The behavior is undefined if any of the prefixes is not an IPv6 prefix or if the
-     * set is not ordered smallest prefix to longer prefix.
-     */
-    public static BigInteger routedIPv6AddressCount(final TreeSet<IpPrefix> prefixes) {
-        BigInteger routedIPCount = BigInteger.ZERO;
-        for (final IpPrefix prefix : deduplicatePrefixSet(prefixes)) {
-            if (!prefix.isIPv6()) {
-                Log.wtf(TAG, "Non-IPv6 prefix in routedIPv6AddressCount");
+        for (int address_family : ADDRESS_FAMILIES) {
+            if (Os.inet_pton(address_family, hostname) != null) {
+                return false;
             }
-            int rank = 128 - prefix.getPrefixLength();
-            routedIPCount = routedIPCount.add(BigInteger.ONE.shiftLeft(rank));
         }
-        return routedIPCount;
+
+        return true;
     }
 
     private static final int[] ADDRESS_FAMILIES = new int[] {AF_INET, AF_INET6};
