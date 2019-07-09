@@ -102,7 +102,7 @@ public class PerimeterPathGuide {
      * Sets the rotation.
      *
      * @param rotation one of Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_180,
-     *                  Surface.ROTATION_270
+     *                 Surface.ROTATION_270
      */
     public void setRotation(int rotation) {
         if (rotation != mRotation) {
@@ -229,14 +229,14 @@ public class PerimeterPathGuide {
                     - mDeviceWidthPx) / 2, (mDeviceWidthPx - mDeviceHeightPx) / 2);
         }
 
-        CircularCornerPathRenderer.Corner screenBottomLeft = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.BOTTOM_LEFT);
-        CircularCornerPathRenderer.Corner screenBottomRight = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.BOTTOM_RIGHT);
-        CircularCornerPathRenderer.Corner screenTopLeft = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.TOP_LEFT);
-        CircularCornerPathRenderer.Corner screenTopRight = getRotatedCorner(
-                CircularCornerPathRenderer.Corner.TOP_RIGHT);
+        CornerPathRenderer.Corner screenBottomLeft = getRotatedCorner(
+                CornerPathRenderer.Corner.BOTTOM_LEFT);
+        CornerPathRenderer.Corner screenBottomRight = getRotatedCorner(
+                CornerPathRenderer.Corner.BOTTOM_RIGHT);
+        CornerPathRenderer.Corner screenTopLeft = getRotatedCorner(
+                CornerPathRenderer.Corner.TOP_LEFT);
+        CornerPathRenderer.Corner screenTopRight = getRotatedCorner(
+                CornerPathRenderer.Corner.TOP_RIGHT);
 
         mRegions[Region.BOTTOM_LEFT.ordinal()].path =
                 mCornerPathRenderer.getInsetPath(screenBottomLeft, mEdgeInset);
