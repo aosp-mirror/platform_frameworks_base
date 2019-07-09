@@ -18,6 +18,7 @@
 
 import os
 import sys
+import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(
   os.path.abspath(__file__)))))
@@ -54,10 +55,13 @@ def disable_selinux():
   cmd_utils.run_shell_command('adb wait-for-device')
 
 def pkill(procname: str):
-  """Kills a process in device by its package name."""
+  """Kills a process on device specified by the substring pattern in procname"""
   _, pids = cmd_utils.run_shell_command('adb shell ps | grep "{}" | '
                                         'awk \'{{print $2;}}\''.
                                           format(procname))
 
   for pid in pids.split('\n'):
-    cmd_utils.run_adb_shell_command('kill {}'.format(pid))
+    pid = pid.strip()
+    if pid:
+      passed,_ = cmd_utils.run_adb_shell_command('kill {}'.format(pid))
+      time.sleep(1)

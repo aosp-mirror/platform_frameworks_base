@@ -31,7 +31,6 @@ import os
 import sys
 import time
 from typing import List, Tuple
-from pathlib import Path
 
 # local imports
 import lib.adb_utils as adb_utils
@@ -103,7 +102,17 @@ def validate_options(opts: argparse.Namespace) -> bool:
     print_utils.error_print('--input not specified!')
     return False
 
-  # Install necessary trace file.
+  if not opts.activity:
+    _, opts.activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                                'get_activity_name',
+                                                [opts.package])
+
+  if not opts.activity:
+    print_utils.error_print('Activity name could not be found, '
+                              'invalid package name?!')
+    return False
+
+  # Install necessary trace file. This must be after the activity checking.
   if needs_trace_file:
     passed = iorapd_utils.iorapd_compiler_install_trace_file(
       opts.package, opts.activity, opts.input)
@@ -112,18 +121,6 @@ def validate_options(opts: argparse.Namespace) -> bool:
                               '"{}/{}"'.
                                 format(opts.package, opts.activity))
       return False
-
-  if opts.activity is not None:
-    return True
-
-  _, opts.activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
-                                              'get_activity_name',
-                                              [opts.package])
-
-  if not opts.activity:
-    print_utils.error_print('Activity name could not be found, '
-                              'invalid package name?!')
-    return False
 
   return True
 
@@ -222,6 +219,9 @@ def run(readahead: str,
   print_utils.debug_print('==========================================')
   print_utils.debug_print('=====             START              =====')
   print_utils.debug_print('==========================================')
+
+  # Kill any existing process of this app
+  adb_utils.pkill(package)
 
   if readahead != 'warm':
     print_utils.debug_print('Drop caches for non-warm start.')
