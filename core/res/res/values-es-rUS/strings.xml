@@ -291,7 +291,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar y ver mensajes SMS"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envíe y vea SMS?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Espacio de almacenamiento"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Almacenamiento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceder a las fotos, el contenido multimedia y los archivos"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a las fotos, el contenido multimedia y los archivos de tu dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrófono"</string>
@@ -601,7 +601,7 @@
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permite que la aplicación consulte las estadísticas de sincronización de una cuenta, por ejemplo, el historial de eventos sincronizados y la cantidad de datos sincronizados."</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"ver almacenamiento compartido"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Ver almacenamiento compartido"</string>
-    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"Cambia/borra almac. compartido"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"cambiar o borrar contenido de almacenamiento compartido"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Editar almacen. compartido"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"realizar/recibir llamadas SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que la aplicación realice y reciba llamadas SIP."</string>

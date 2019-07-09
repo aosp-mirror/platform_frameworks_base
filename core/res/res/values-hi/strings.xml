@@ -783,7 +783,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"दोस्त"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"मैनेजर"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"मां"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"अभिभावक"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"सहयोगी"</string>
@@ -903,7 +903,7 @@
     <string name="granularity_label_line" msgid="5764267235026120888">"पंक्ति"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"फ़ैक्‍ट्री परीक्षण विफल"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST का काम केवल /system/app में इंस्‍टॉल किए गए पैकेज के लिए ही हो सकता है."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई प्रदान करता हो."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई मुहैया करवाता हो."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"रीबूट करें"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पेज दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -1283,7 +1283,7 @@
     <item msgid="75483255295529161">"वाई-फ़ाई"</item>
     <item msgid="6862614801537202646">"ब्लूटूथ"</item>
     <item msgid="5447331121797802871">"ईथरनेट"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
+    <item msgid="8257233890381651999">"वीपीएन"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"अज्ञात नेटवर्क प्रकार"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाई-फ़ाई  से कनेक्‍ट नहीं हो सका"</string>
