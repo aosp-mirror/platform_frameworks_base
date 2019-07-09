@@ -407,6 +407,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Поўная\nцішыня"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Толькі\nпрыярытэтныя"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Толькі\nбудзільнікі"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе бесправадная зарадка (да поўнага зараду засталося <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"Ідзе зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"Ідзе хуткая зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"Ідзе павольная зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
