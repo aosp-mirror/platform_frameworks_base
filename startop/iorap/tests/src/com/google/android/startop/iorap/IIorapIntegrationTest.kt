@@ -14,6 +14,7 @@
 
 package com.google.android.startop.iorap
 
+import android.net.Uri
 import android.os.ServiceManager
 import androidx.test.filters.MediumTest
 import org.junit.Test
@@ -85,6 +86,9 @@ class IIorapIntegrationTest {
 
     @Test
     fun testOnPackageEvent() {
+        // FIXME (b/137134253): implement PackageEvent parsing on the C++ side.
+        // This is currently (silently: b/137135024) failing because IIorap is 'oneway' and the
+        // C++ PackageEvent un-parceling fails since its not implemented fully.
         /*
         testAnyMethod { requestId : RequestId ->
             iorapService.onPackageEvent(requestId,
@@ -92,7 +96,6 @@ class IIorapIntegrationTest {
                             Uri.parse("https://www.google.com"), "com.fake.package"))
         }
         */
-        // FIXME: Broken for some reason. C++ side never sees this call.
     }
 
     @Test
@@ -107,7 +110,7 @@ class IIorapIntegrationTest {
     @Test
     fun testOnAppLaunchEvent() {
         testAnyMethod { requestId : RequestId ->
-            // iorapService.onAppLaunchEvent(requestId, AppLaunchEvent.IntentStarted())
+            iorapService.onAppLaunchEvent(requestId, AppLaunchEvent.IntentFailed(/*sequenceId*/123))
         }
     }
 
