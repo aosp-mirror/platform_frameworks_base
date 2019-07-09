@@ -120,6 +120,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mCurrentBoundedUserId = -1;
     private float mNavBarButtonAlpha;
     private boolean mInputFocusTransferStarted;
+    private float mInputFocusTransferStartY;
+    private long mInputFocusTransferStartMillis;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
@@ -180,12 +182,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
                             mInputFocusTransferStarted = true;
-
+                            mInputFocusTransferStartY = event.getY();
+                            mInputFocusTransferStartMillis = event.getEventTime();
+                            bar.onInputFocusTransfer(mInputFocusTransferStarted, 0 /* velocity */);
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
+                            bar.onInputFocusTransfer(mInputFocusTransferStarted,
+                                    (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis));
                         }
-                        bar.onInputFocusTransfer(mInputFocusTransferStarted);
                         event.recycle();
                     }
                 });
@@ -596,7 +602,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                 if (bar != null) {
                     mInputFocusTransferStarted = false;
-                    bar.onInputFocusTransfer(false);
+                    bar.onInputFocusTransfer(false, 0 /* velocity */);
                 }
             });
         }
