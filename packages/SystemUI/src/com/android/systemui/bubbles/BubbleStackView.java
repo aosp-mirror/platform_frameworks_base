@@ -717,6 +717,7 @@ public class BubbleStackView extends FrameLayout {
         int removedIndex = mBubbleContainer.indexOfChild(bubble.getIconView());
         if (removedIndex >= 0) {
             mBubbleContainer.removeViewAt(removedIndex);
+            bubble.cleanupExpandedState();
             logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
@@ -1319,64 +1320,71 @@ public class BubbleStackView extends FrameLayout {
     void animateInFlyoutForBubble(Bubble bubble) {
         final CharSequence updateMessage = bubble.getUpdateMessage(getContext());
 
-        // Show the message if one exists, and we're not expanded or animating expansion.
-        if (updateMessage != null
-                && !isExpanded()
-                && !mIsExpansionAnimating
-                && !mIsGestureInProgress
-                && bubble.showFlyoutForBubble()) {
-            if (bubble.getIconView() != null) {
-                // Temporarily suppress the dot while the flyout is visible.
-                bubble.getIconView().setSuppressDot(
-                        true /* suppressDot */, false /* animate */);
+        if (!bubble.showFlyoutForBubble()) {
+            // In case flyout was suppressed for this update, reset now.
+            bubble.setSuppressFlyout(false);
+            return;
+        }
 
-                mFlyoutDragDeltaX = 0f;
-                mFlyout.setAlpha(0f);
+        if (updateMessage == null
+                || isExpanded()
+                || mIsExpansionAnimating
+                || mIsGestureInProgress) {
+            // Skip the message if none exists, we're expanded or animating expansion.
+            return;
+        }
 
-                if (mAfterFlyoutHides != null) {
-                    mAfterFlyoutHides.run();
-                }
+        if (bubble.getIconView() != null) {
+            // Temporarily suppress the dot while the flyout is visible.
+            bubble.getIconView().setSuppressDot(
+                    true /* suppressDot */, false /* animate */);
 
-                mAfterFlyoutHides = () -> {
-                    if (bubble.getIconView() == null) {
-                        return;
-                    }
+            mFlyoutDragDeltaX = 0f;
+            mFlyout.setAlpha(0f);
 
-                    final boolean suppressDot = !bubble.showBubbleDot();
-                    // If we're going to suppress the dot, make it visible first so it'll
-                    // visibly animate away.
-                    if (suppressDot) {
-                        bubble.getIconView().setSuppressDot(
-                                false /* suppressDot */, false /* animate */);
-                    }
-                    // Reset dot suppression. If we're not suppressing due to DND, then
-                    // stop suppressing it with no animation (since the flyout has
-                    // transformed into the dot). If we are suppressing due to DND, animate
-                    // it away.
-                    bubble.getIconView().setSuppressDot(
-                            suppressDot /* suppressDot */,
-                            suppressDot /* animate */);
-                };
-
-                // Post in case layout isn't complete and getWidth returns 0.
-                post(() -> {
-                    // An auto-expanding bubble could have been posted during the time it takes to
-                    // layout.
-                    if (isExpanded()) {
-                        return;
-                    }
-
-                    mFlyout.showFlyout(
-                            updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
-                            mStackAnimationController.isStackOnLeftSide(),
-                            bubble.getIconView().getBadgeColor(), mAfterFlyoutHides);
-                });
+            if (mAfterFlyoutHides != null) {
+                mAfterFlyoutHides.run();
             }
 
-            mFlyout.removeCallbacks(mHideFlyout);
-            mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
-            logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
+            mAfterFlyoutHides = () -> {
+                if (bubble.getIconView() == null) {
+                    return;
+                }
+
+                final boolean suppressDot = !bubble.showBubbleDot();
+                // If we're going to suppress the dot, make it visible first so it'll
+                // visibly animate away.
+                if (suppressDot) {
+                    bubble.getIconView().setSuppressDot(
+                            false /* suppressDot */, false /* animate */);
+                }
+                // Reset dot suppression. If we're not suppressing due to DND, then
+                // stop suppressing it with no animation (since the flyout has
+                // transformed into the dot). If we are suppressing due to DND, animate
+                // it away.
+                bubble.getIconView().setSuppressDot(
+                        suppressDot /* suppressDot */,
+                        suppressDot /* animate */);
+            };
+
+            // Post in case layout isn't complete and getWidth returns 0.
+            post(() -> {
+                // An auto-expanding bubble could have been posted during the time it takes to
+                // layout.
+                if (isExpanded()) {
+                    return;
+                }
+
+                mFlyout.showFlyout(
+                        updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
+                        mStackAnimationController.isStackOnLeftSide(),
+                        bubble.getIconView().getBadgeColor(), mAfterFlyoutHides);
+            });
         }
+
+        mFlyout.removeCallbacks(mHideFlyout);
+        mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
+        logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
     }
 
     /** Hide the flyout immediately and cancel any pending hide runnables. */
