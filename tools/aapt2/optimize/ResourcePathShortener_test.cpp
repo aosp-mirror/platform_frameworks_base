@@ -75,6 +75,9 @@ TEST(ResourcePathShortenerTest, SkipColorFileRefPaths) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .AddFileReference("android:color/colorlist", "res/color/colorlist.xml")
+          .AddFileReference("android:color/colorlist",
+                            "res/color-mdp-v21/colorlist.xml",
+                            test::ParseConfigOrDie("mdp-v21"))
           .Build();
 
   std::map<std::string, std::string> path_map;
@@ -82,6 +85,7 @@ TEST(ResourcePathShortenerTest, SkipColorFileRefPaths) {
 
   // Expect that the path map to not contain the ColorStateList
   ASSERT_THAT(path_map.find("res/color/colorlist.xml"), Eq(path_map.end()));
+  ASSERT_THAT(path_map.find("res/color-mdp-v21/colorlist.xml"), Eq(path_map.end()));
 }
 
 TEST(ResourcePathShortenerTest, KeepExtensions) {
