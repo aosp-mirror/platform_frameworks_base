@@ -247,13 +247,9 @@ public class InvocationLightsView extends View
      * To render corners that aren't circular, override this method in a subclass.
      */
     protected CornerPathRenderer createCornerPathRenderer(Context context) {
-        int displayWidth = DisplayUtils.getWidth(context);
-        int displayHeight = DisplayUtils.getHeight(context);
-        int cornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
-        int cornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
-        return new CircularCornerPathRenderer(
-                cornerRadiusBottom, cornerRadiusTop, displayWidth, displayHeight);
+        return new CircularCornerPathRenderer(context);
     }
+
     /**
      * Receives an intensity from 0 (lightest) to 1 (darkest) and sets the handle color
      * appropriately. Intention is to match the home handle color.
