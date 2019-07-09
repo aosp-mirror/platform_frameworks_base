@@ -1826,9 +1826,9 @@ public class PreferencesHelper implements RankingConfig {
         for (int index = 0; index < mBubblesEnabled.size(); index++) {
             int userId = mBubblesEnabled.keyAt(index);
             final boolean oldValue = mBubblesEnabled.get(userId);
-            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.NOTIFICATION_BUBBLES,
-                    DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0;
+            final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.NOTIFICATION_BUBBLES,
+                    DEFAULT_ALLOW_BUBBLE ? 1 : 0) != 0;
             mBubblesEnabled.put(userId, newValue);
             changed |= oldValue != newValue;
         }
@@ -1844,9 +1844,9 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (mBubblesEnabled.indexOfKey(userId) < 0) {
             mBubblesEnabled.put(userId,
-                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                            Settings.Secure.NOTIFICATION_BUBBLES,
-                            DEFAULT_ALLOW_BUBBLE ? 1 : 0, userId) != 0);
+                    Settings.Global.getInt(mContext.getContentResolver(),
+                            Settings.Global.NOTIFICATION_BUBBLES,
+                            DEFAULT_ALLOW_BUBBLE ? 1 : 0) != 0);
         }
         return mBubblesEnabled.get(userId, DEFAULT_ALLOW_BUBBLE);
     }
