@@ -53,6 +53,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -79,7 +80,6 @@ import com.android.systemui.statusbar.phone.StatusBarTest.TestableNotificationEn
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -164,7 +164,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(ActivityStarterDelegate.class),
                 mock(StatusBarStateController.class),
                 mHeadsUpManager,
-                mKeyguardBypassController);
+                mKeyguardBypassController,
+                new FalsingManagerFake());
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);

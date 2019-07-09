@@ -19,8 +19,8 @@ package com.android.systemui;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
-import android.annotation.Nullable;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -29,17 +29,15 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
 
-
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
@@ -69,8 +67,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.AsyncSensorManager;
-import com.android.systemui.util.InjectionInflationController;
-import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
@@ -78,7 +74,6 @@ import java.util.function.Consumer;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 
@@ -116,7 +111,7 @@ public class SystemUIFactory {
     public SystemUIFactory() {}
 
     protected void init(Context context) {
-        initWithRootComponent(DaggerSystemUIFactory_SystemUIRootComponent.builder()
+        initWithRootComponent(DaggerSystemUIRootComponent.builder()
                 .systemUIFactory(this)
                 .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
@@ -143,9 +138,10 @@ public class SystemUIFactory {
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils,  ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
-            KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
+            FalsingManager falsingManager) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
+                dismissCallbackRegistry, falsingManager,
                 expansionCallback, UnlockMethodCache.getInstance(context),
                 KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
     }
@@ -275,30 +271,5 @@ public class SystemUIFactory {
         public Context provideContext() {
             return mContext;
         }
-    }
-
-    @Singleton
-    @Component(modules = {SystemUIFactory.class, DependencyProvider.class, DependencyBinder.class,
-            ContextHolder.class})
-    public interface SystemUIRootComponent {
-        @Singleton
-        Dependency.DependencyInjector createDependency();
-
-        @Singleton
-        StatusBar.StatusBarInjector getStatusBarInjector();
-
-        /**
-         * FragmentCreator generates all Fragments that need injection.
-         */
-        @Singleton
-        FragmentService.FragmentCreator createFragmentCreator();
-
-        /**
-         * ViewCreator generates all Views that need injection.
-         */
-        InjectionInflationController.ViewCreator createViewCreator();
-
-        @Singleton
-        GarbageMonitor createGarbageMonitor();
     }
 }
