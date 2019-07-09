@@ -312,10 +312,14 @@ class ApexManager {
             int sessionId, @NonNull int[] childSessionIds, @NonNull ApexInfoList apexInfoList) {
         if (!isApexSupported()) return false;
         try {
-            return mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+            mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+            return true;
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to contact apexservice", re);
             throw new RuntimeException(re);
+        } catch (Exception e) {
+            Slog.e(TAG, "apexd verification failed", e);
+            return false;
         }
     }
 
