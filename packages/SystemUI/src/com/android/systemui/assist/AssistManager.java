@@ -82,7 +82,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         void processBundle(Bundle hints);
 
         /**
-         * Hides the UI.
+         * Hides any SysUI for the assistant, but _does not_ close the assistant itself.
          */
         void hide();
     }
