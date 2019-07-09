@@ -570,7 +570,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Pārvietojiet tālruni pa kreisi."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Pārvietojiet tālruni pa labi."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lūdzu, tiešāk skatieties uz savu ierīci."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Jūsu seja nav redzama. Paskatieties uz tālruni."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Novietojiet savu seju tieši pretī tālrunim."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Seju vairs nevar atpazīt. Mēģiniet vēlreiz."</string>

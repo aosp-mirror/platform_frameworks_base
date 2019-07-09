@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"휴대전화를 왼쪽으로 이동하세요."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"휴대전화를 오른쪽으로 이동하세요."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"기기에서 더 똑바로 바라보세요."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"얼굴이 보이지 않습니다. 휴대전화를 바라보세요."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"휴대전화가 얼굴 정면을 향하도록 두세요."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"더 이상 얼굴을 인식할 수 없습니다. 다시 시도하세요."</string>

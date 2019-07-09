@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"請以更直視的角度看著裝置。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不到您的臉。請看著手機。"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"將手機對準您的臉孔正面。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"裝置不夠穩定。請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊臉孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"無法再識別臉孔。請再試一次。"</string>

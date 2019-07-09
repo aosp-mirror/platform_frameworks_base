@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ફોનને ડાબી બાજુ ખસેડો."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ફોનને જમણી બાજુ ખસેડો."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"કૃપા કરીને તમારા ડિવાઇસ તરફ સીધું જુઓ."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"તમારો ચહેરો દેખાતો નથી. ફોનની સામે જુઓ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"તમારો ચહેરો તમારા ફોનની બિલકુલ સામે રાખો."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ડિવાઇસ અસ્થિર છે. ફોનને સ્થિર રાખો."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ચહેરો ઓળખી શકાતો નથી. ફરી પ્રયાસ કરો."</string>

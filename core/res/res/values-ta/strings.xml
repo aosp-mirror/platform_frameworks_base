@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"மொபைலை இடப்புறம் நகர்த்தவும்."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"மொபைலை வலப்புறம் நகர்த்தவும்."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"முகம் சரியாகத் தெரியவில்லை. மொபைலைப் பார்க்கவும்."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"முகத்தை மொபைலுக்கு நேராக வைக்கவும்."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"அதிகமாக அசைகிறது. மொபைலை அசைக்காமல் பிடிக்கவும்."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"உங்கள் முகத்தை மீண்டும் பதிவுசெய்யுங்கள்."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
