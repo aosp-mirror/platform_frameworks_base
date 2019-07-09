@@ -58,7 +58,6 @@ import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnService;
@@ -105,7 +104,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -114,7 +112,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -133,31 +130,6 @@ public class Vpn {
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle whitelist during service launch and VPN bootstrap.
     private static final long VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS = 60 * 1000;
-
-    // Settings for how much of the address space should be routed so that Vpn considers
-    // "most" of the address space is routed. This is used to determine whether this Vpn
-    // should be marked with the INTERNET capability.
-    private static final long MOST_IPV4_ADDRESSES_COUNT;
-    private static final BigInteger MOST_IPV6_ADDRESSES_COUNT;
-    static {
-        // 85% of the address space must be routed for Vpn to consider this VPN to provide
-        // INTERNET access.
-        final int howManyPercentIsMost = 85;
-
-        final long twoPower32 = 1L << 32;
-        MOST_IPV4_ADDRESSES_COUNT = twoPower32 * howManyPercentIsMost / 100;
-        final BigInteger twoPower128 = BigInteger.ONE.shiftLeft(128);
-        MOST_IPV6_ADDRESSES_COUNT = twoPower128
-                .multiply(BigInteger.valueOf(howManyPercentIsMost))
-                .divide(BigInteger.valueOf(100));
-    }
-    // How many routes to evaluate before bailing and declaring this Vpn should provide
-    // the INTERNET capability. This is necessary because computing the address space is
-    // O(n²) and this is running in the system service, so a limit is needed to alleviate
-    // the risk of attack.
-    // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
-    // is actually O(n²)+O(n²).
-    private static final int MAX_ROUTES_TO_EVALUATE = 150;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -256,7 +228,7 @@ public class Vpn {
     }
 
     /**
-     * Update current state, dispaching event to listeners.
+     * Update current state, dispatching event to listeners.
      */
     @VisibleForTesting
     protected void updateState(DetailedState detailedState, String reason) {
@@ -301,7 +273,7 @@ public class Vpn {
     }
 
     @VisibleForTesting
-    public static void applyUnderlyingCapabilities(
+    static void applyUnderlyingCapabilities(
             ConnectivityManager cm,
             Network[] underlyingNetworks,
             NetworkCapabilities caps,
@@ -415,7 +387,7 @@ public class Vpn {
         PackageManager pm = mContext.getPackageManager();
         ApplicationInfo appInfo = null;
         try {
-            appInfo = pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+            appInfo = pm.getApplicationInfoAsUser(packageName, 0 /* flags */, mUserHandle);
         } catch (NameNotFoundException unused) {
             Log.w(TAG, "Can't find \"" + packageName + "\" when checking always-on support");
         }
@@ -576,7 +548,7 @@ public class Vpn {
             final String alwaysOnPackage = mSystemServices.settingsSecureGetStringForUser(
                     Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
             final boolean alwaysOnLockdown = mSystemServices.settingsSecureGetIntForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserHandle) != 0;
+                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /* default */, mUserHandle) != 0;
             final String whitelistString = mSystemServices.settingsSecureGetStringForUser(
                     Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST, mUserHandle);
             final List<String> whitelistedPackages = TextUtils.isEmpty(whitelistString)
@@ -828,7 +800,7 @@ public class Vpn {
         PackageManager pm = mContext.getPackageManager();
         try {
             ApplicationInfo appInfo =
-                    pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+                    pm.getApplicationInfoAsUser(packageName, 0 /* flags */, mUserHandle);
             return appInfo.targetSdkVersion >= VERSION_CODES.Q;
         } catch (NameNotFoundException unused) {
             Log.w(TAG, "Can't find \"" + packageName + "\"");
@@ -899,38 +871,6 @@ public class Vpn {
         // TODO: Stop setting the MTU in jniCreate and set it here.
 
         return lp;
-    }
-
-    /**
-     * Analyzes the passed LinkedProperties to figure out whether it routes to most of the IP space.
-     *
-     * This returns true if the passed LinkedProperties contains routes to either most of the IPv4
-     * space or to most of the IPv6 address space, where "most" is defined by the value of the
-     * MOST_IPV{4,6}_ADDRESSES_COUNT constants : if more than this number of addresses are matched
-     * by any of the routes, then it's decided that most of the space is routed.
-     * @hide
-     */
-    @VisibleForTesting
-    static boolean providesRoutesToMostDestinations(LinkProperties lp) {
-        final List<RouteInfo> routes = lp.getAllRoutes();
-        if (routes.size() > MAX_ROUTES_TO_EVALUATE) return true;
-        final Comparator<IpPrefix> prefixLengthComparator = IpPrefix.lengthComparator();
-        TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
-        TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
-        for (final RouteInfo route : routes) {
-            if (route.getType() == RouteInfo.RTN_UNREACHABLE) continue;
-            IpPrefix destination = route.getDestination();
-            if (destination.isIPv4()) {
-                ipv4Prefixes.add(destination);
-            } else {
-                ipv6Prefixes.add(destination);
-            }
-        }
-        if (NetworkUtils.routedIPv4AddressCount(ipv4Prefixes) > MOST_IPV4_ADDRESSES_COUNT) {
-            return true;
-        }
-        return NetworkUtils.routedIPv6AddressCount(ipv6Prefixes)
-                .compareTo(MOST_IPV6_ADDRESSES_COUNT) >= 0;
     }
 
     /**
@@ -1658,8 +1598,8 @@ public class Vpn {
          */
         public PendingIntent pendingIntentGetActivityAsUser(
                 Intent intent, int flags, UserHandle user) {
-            return PendingIntent.getActivityAsUser(mContext, 0 /*request*/, intent, flags,
-                    null /*options*/, user);
+            return PendingIntent.getActivityAsUser(mContext, 0 /* request */, intent, flags,
+                    null /* options */, user);
         }
 
         /**
@@ -1765,7 +1705,7 @@ public class Vpn {
             byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecServerCert);
             serverCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
-        if (privateKey == null || userCert == null || caCert == null || serverCert == null) {
+        if (userCert == null || caCert == null || serverCert == null) {
             throw new IllegalStateException("Cannot load credentials");
         }
 
@@ -1884,7 +1824,7 @@ public class Vpn {
      * Return the information of the current ongoing legacy VPN.
      * Callers are responsible for checking permissions if needed.
      */
-    public synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
+    private synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
         if (mLegacyVpnRunner == null) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
@@ -2038,7 +1978,6 @@ public class Vpn {
 
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
-            boolean initFinished = false;
             try {
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
@@ -2057,7 +1996,6 @@ public class Vpn {
                     throw new IllegalStateException("Cannot delete the state");
                 }
                 new File("/data/misc/vpn/abort").delete();
-                initFinished = true;
 
                 // Check if we need to restart any of the daemons.
                 boolean restart = false;
