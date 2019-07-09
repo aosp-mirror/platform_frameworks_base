@@ -26,8 +26,13 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -786,6 +791,58 @@ public class DisplayContentTests extends WindowTestsBase {
         final Region expected = Region.obtain();
         expected.set(20, 30, 40, 50);
         assertEquals(expected, dc.calculateSystemGestureExclusion());
+    }
+
+    @Test
+    public void testCalculateSystemGestureExclusion_modal() throws Exception {
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "base");
+        win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win.setSystemGestureExclusion(Collections.singletonList(new Rect(0, 0, 1000, 1000)));
+
+        final WindowState win2 = createWindow(null, TYPE_APPLICATION, dc, "modal");
+        win2.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win2.getAttrs().privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        win2.getAttrs().width = 10;
+        win2.getAttrs().height = 10;
+        win2.setSystemGestureExclusion(Collections.emptyList());
+
+        dc.setLayoutNeeded();
+        dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        win.setHasSurface(true);
+        win2.setHasSurface(true);
+
+        final Region expected = Region.obtain();
+        assertEquals(expected, dc.calculateSystemGestureExclusion());
+    }
+
+    @Test
+    public void testCalculateSystemGestureExclusion_immersiveStickyLegacyWindow() throws Exception {
+        synchronized (mWm.mGlobalLock) {
+            mWm.mSystemGestureExcludedByPreQStickyImmersive = true;
+
+            final DisplayContent dc = createNewDisplay();
+            final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+            win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+            win.getAttrs().layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            win.getAttrs().privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+            win.getAttrs().subtreeSystemUiVisibility = win.mSystemUiVisibility =
+                    SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            win.mAppToken.mTargetSdk = P;
+
+            dc.setLayoutNeeded();
+            dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+            win.setHasSurface(true);
+
+            final Region expected = Region.obtain();
+            expected.set(dc.getBounds());
+            assertEquals(expected, dc.calculateSystemGestureExclusion());
+
+            win.setHasSurface(false);
+        }
     }
 
     @Test
