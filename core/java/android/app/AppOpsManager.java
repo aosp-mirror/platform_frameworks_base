@@ -2507,7 +2507,7 @@ public class AppOpsManager {
         }
 
         /**
-         * @return The duration of the operation in milliseconds.
+         * @return The duration of the operation in milliseconds. The duration is in wall time.
          */
         public long getDuration() {
             return getLastDuration(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
@@ -2515,7 +2515,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op while
-         * in the foreground.
+         * in the foreground. The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -2534,7 +2534,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op while
-         * in the background.
+         * in the background. The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -2553,7 +2553,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op for
-         * a given range of UID states.
+         * a given range of UID states. The duration is in wall time.
          *
          * @param fromUidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
@@ -3968,6 +3968,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) in the foreground.
+         * The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -3986,6 +3987,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) in the background.
+         * The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -4004,7 +4006,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) for a given
-         * range of UID states.
+         * range of UID states. The duration is in wall time.
          *
          * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
