@@ -158,9 +158,9 @@ abstract class ApexManager {
      * applied at next reboot.
      *
      * @param sessionId the identifier of the {@link PackageInstallerSession} being marked as ready.
-     * @return true upon success, false if the session is unknown.
+     * @throws PackageManagerException if call to apexd fails
      */
-    abstract boolean markStagedSessionReady(int sessionId);
+    abstract void markStagedSessionReady(int sessionId) throws PackageManagerException;
 
     /**
      * Marks a staged session as successful.
@@ -402,12 +402,16 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean markStagedSessionReady(int sessionId) {
+        void markStagedSessionReady(int sessionId) throws PackageManagerException {
             try {
-                return mApexService.markStagedSessionReady(sessionId);
+                mApexService.markStagedSessionReady(sessionId);
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 throw new RuntimeException(re);
+            } catch (Exception e) {
+                throw new PackageManagerException(
+                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Failed to mark apexd session as ready : " + e.getMessage());
             }
         }
 
@@ -576,7 +580,7 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean markStagedSessionReady(int sessionId) {
+        void markStagedSessionReady(int sessionId) {
             throw new UnsupportedOperationException();
         }
 

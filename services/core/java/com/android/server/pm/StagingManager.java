@@ -278,10 +278,14 @@ public class StagingManager {
         // session as ready), then if a device gets rebooted right after the call to apexd, only
         // apex part of the train will be applied, leaving device in an inconsistent state.
         session.setStagedSessionReady();
-        if (hasApex && !mApexManager.markStagedSessionReady(session.sessionId)) {
-            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "APEX staging failed, check logcat messages from apexd for more "
-                            + "details.");
+        if (!hasApex) {
+            // Session doesn't contain apex, nothing to do.
+            return;
+        }
+        try {
+            mApexManager.markStagedSessionReady(session.sessionId);
+        } catch (PackageManagerException e) {
+            session.setStagedSessionFailed(e.error, e.getMessage());
         }
     }
 
