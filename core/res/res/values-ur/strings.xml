@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"فون کو بائیں جانب لے جائيں۔"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"فون کو دائیں جانب لے جائیں۔"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"براہ کرم اپنے آلہ کی طرف چہرے کو سیدھا رکھیں۔"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"آپ کا چہرہ دکھائی نہیں دے رہا۔ فون کی طرف دیکھیں۔"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"اپنے چہرے کو براہ راست فون کے سامنے رکھیں۔"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"کافی حرکت ہو رہی ہے۔ فون کو مضبوطی سے پکڑیں۔"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"براہ کرم اپنے چہرے کو دوبارہ مندرج کریں۔"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"اب چہرے کی شناخت نہیں کر سکتے۔ پھر آزمائيں۔"</string>

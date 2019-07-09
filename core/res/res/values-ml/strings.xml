@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"നിങ്ങളുടെ മുഖം കാണാനാവുന്നില്ല. ഫോണിലേക്ക് നോക്കൂ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"നിങ്ങളുടെ മുഖം ക്യാമറയ്‌ക്ക് നേരെയാക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ഇനി മുഖം തിരിച്ചറിയാനാവില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>

@@ -579,7 +579,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"يُرجى نقل الهاتف إلى اليمين."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"يُرجى نقل الهاتف إلى اليسار."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"يتعذّر رؤية وجهك. يُرجى النظر إلى الهاتف."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ضع وجهك أمام الهاتف مباشرة."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"لم يعُد يمكن التعرّف على الوجه. حاول مرة أخرى."</string>

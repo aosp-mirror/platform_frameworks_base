@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"تلفن را به‌سمت چپ حرکت دهید."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"تلفن را به سمت راست حرکت دهید."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"لطفاً مستقیم به دستگاه نگه کنید."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"چهره‌تان دیده نمی‌شود. به تلفن نگاه کنید."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"صورتتان را مستقیماً روبروی تلفن قرار دهید."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
