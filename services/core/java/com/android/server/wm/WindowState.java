@@ -2063,7 +2063,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (wasVisible) {
                 final DisplayContent displayContent = getDisplayContent();
                 if (displayContent.updateOrientationFromAppTokens()) {
-                    displayContent.sendNewConfiguration();
+                    displayContent.postNewConfigurationToHandler();
                 }
             }
             mWmService.updateFocusedWindowLocked(isFocused()

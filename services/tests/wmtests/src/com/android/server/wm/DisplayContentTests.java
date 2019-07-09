@@ -668,8 +668,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 dc.onDescendantOrientationChanged(window.mToken.token, activityRecord));
 
         final ArgumentCaptor<Configuration> captor = ArgumentCaptor.forClass(Configuration.class);
-        verify(mWm.mAtmService).updateDisplayOverrideConfigurationLocked(captor.capture(),
-                same(activityRecord), anyBoolean(), eq(dc.getDisplayId()));
+        verify(dc.mAcitvityDisplay).updateDisplayOverrideConfigurationLocked(captor.capture(),
+                same(activityRecord), anyBoolean(), same(null));
         final Configuration newDisplayConfig = captor.getValue();
         assertEquals(Configuration.ORIENTATION_PORTRAIT, newDisplayConfig.orientation);
     }
@@ -693,8 +693,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse("Display shouldn't rotate to handle orientation request if fixed to"
                         + " user rotation.",
                 dc.onDescendantOrientationChanged(window.mToken.token, activityRecord));
-        verify(mWm.mAtmService, never()).updateDisplayOverrideConfigurationLocked(any(),
-                eq(activityRecord), anyBoolean(), eq(dc.getDisplayId()));
+        verify(dc.mAcitvityDisplay, never()).updateDisplayOverrideConfigurationLocked(any(),
+                eq(activityRecord), anyBoolean(), same(null));
     }
 
     @Test

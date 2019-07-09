@@ -317,11 +317,6 @@ class RootActivityContainer extends ConfigurationContainer
         return activityDisplay;
     }
 
-    /** Check if display with specified id is added to the list. */
-    boolean isDisplayAdded(int displayId) {
-        return getActivityDisplayOrCreate(displayId) != null;
-    }
-
     ActivityRecord getDefaultDisplayHomeActivity() {
         return getDefaultDisplayHomeActivityForUser(mCurrentUser);
     }
@@ -656,9 +651,13 @@ class RootActivityContainer extends ConfigurationContainer
             starting.frozenBeforeDestroy = true;
         }
 
-        // Update the configuration of the activities on the display.
-        return mService.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
-                displayId);
+        if (displayContent != null && displayContent.mAcitvityDisplay != null) {
+            // Update the configuration of the activities on the display.
+            return displayContent.mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(config,
+                    starting, deferResume, null /* result */);
+        } else {
+            return true;
+        }
     }
 
     /**

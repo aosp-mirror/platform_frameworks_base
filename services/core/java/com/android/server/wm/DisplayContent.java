@@ -1213,8 +1213,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /** Notify the configuration change of this display. */
-    void sendNewConfiguration() {
+    void postNewConfigurationToHandler() {
         mWmService.mH.obtainMessage(SEND_NEW_CONFIGURATION, this).sendToTarget();
+    }
+
+    void sendNewConfiguration() {
+        synchronized (mWmService.mGlobalLock) {
+            final boolean configUpdated = mAcitvityDisplay
+                    .updateDisplayOverrideConfigurationLocked();
+            if (!configUpdated) {
+                // Something changed (E.g. device rotation), but no configuration update is needed.
+                // E.g. changing device rotation by 180 degrees. Go ahead and perform surface
+                // placement to unfreeze the display since we froze it when the rotation was updated
+                // in DisplayContent#updateRotationUnchecked.
+                if (mWaitingForConfig) {
+                    mWaitingForConfig = false;
+                    mWmService.mLastFinishedFreezeSource = "config-unchanged";
+                    setLayoutNeeded();
+                    mWmService.mWindowPlacerLocked.performSurfacePlacement();
+                }
+            }
+        }
     }
 
     @Override
@@ -1232,8 +1251,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (handled && requestingContainer instanceof ActivityRecord) {
             final ActivityRecord activityRecord = (ActivityRecord) requestingContainer;
-            final boolean kept = mWmService.mAtmService.updateDisplayOverrideConfigurationLocked(
-                    config, activityRecord, false /* deferResume */, getDisplayId());
+            final boolean kept = mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(
+                    config, activityRecord, false /* deferResume */, null /* result */);
             activityRecord.frozenBeforeDestroy = true;
             if (!kept) {
                 mWmService.mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
@@ -1241,8 +1260,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             // We have a new configuration to push so we need to update ATMS for now.
             // TODO: Clean up display configuration push between ATMS and WMS after unification.
-            mWmService.mAtmService.updateDisplayOverrideConfigurationLocked(
-                    config, null /* starting */, false /* deferResume */, getDisplayId());
+            mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(
+                    config, null /* starting */, false /* deferResume */, null);
         }
         return handled;
     }
@@ -1332,7 +1351,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean updateRotationAndSendNewConfigIfNeeded() {
         final boolean changed = updateRotationUnchecked(false /* forceUpdate */);
         if (changed) {
-            sendNewConfiguration();
+            postNewConfigurationToHandler();
         }
         return changed;
     }
@@ -1351,7 +1370,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Update rotation of the DisplayContent with an option to force the update. This updates
      * the container's perception of rotation and, depending on the top activities, will freeze
      * the screen or start seamless rotation. The display itself gets rotated in
-     * {@link #applyRotationLocked} during {@link WindowManagerService#sendNewConfiguration}.
+     * {@link #applyRotationLocked} during {@link DisplayContent#sendNewConfiguration}.
      *
      * @param forceUpdate Force the rotation update. Sometimes in WM we might skip updating
      *                    orientation because we're waiting for some rotation to finish or display
@@ -3711,7 +3730,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                 if (updateOrientationFromAppTokens()) {
                     setLayoutNeeded();
-                    sendNewConfiguration();
+                    postNewConfigurationToHandler();
                 }
             }
 

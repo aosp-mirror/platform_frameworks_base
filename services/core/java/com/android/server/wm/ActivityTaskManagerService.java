@@ -459,7 +459,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean mSuppressResizeConfigChanges;
 
-    private final UpdateConfigurationResult mTmpUpdateConfigurationResult =
+    final UpdateConfigurationResult mTmpUpdateConfigurationResult =
             new UpdateConfigurationResult();
 
     static final class UpdateConfigurationResult {
@@ -631,7 +631,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** If non-null, we are tracking the time the user spends in the currently focused app. */
     AppTimeTracker mCurAppTimeTracker;
 
-    private AppWarnings mAppWarnings;
+    AppWarnings mAppWarnings;
 
     /**
      * Packages that the user has asked to have run in screen size
@@ -4388,46 +4388,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public boolean updateDisplayOverrideConfiguration(Configuration values, int displayId) {
-        mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateDisplayOverrideConfiguration()");
-
-        synchronized (mGlobalLock) {
-            // Check if display is initialized in AM.
-            if (!mRootActivityContainer.isDisplayAdded(displayId)) {
-                // Call might come when display is not yet added or has already been removed.
-                if (DEBUG_CONFIGURATION) {
-                    Slog.w(TAG, "Trying to update display configuration for non-existing displayId="
-                            + displayId);
-                }
-                return false;
-            }
-
-            if (values == null && mWindowManager != null) {
-                // sentinel: fetch the current configuration from the window manager
-                values = mWindowManager.computeNewConfiguration(displayId);
-            }
-
-            if (mWindowManager != null) {
-                final Message msg = PooledLambda.obtainMessage(
-                        ActivityManagerInternal::updateOomLevelsForDisplay, mAmInternal, displayId);
-                mH.sendMessage(msg);
-            }
-
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                if (values != null) {
-                    Settings.System.clearConfiguration(values);
-                }
-                updateDisplayOverrideConfigurationLocked(values, null /* starting */,
-                        false /* deferResume */, displayId, mTmpUpdateConfigurationResult);
-                return mTmpUpdateConfigurationResult.changes != 0;
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-        }
-    }
-
-    @Override
     public boolean updateConfiguration(Configuration values) {
         mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 
@@ -5165,8 +5125,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** Update default (global) configuration and notify listeners about changes. */
-    private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
+    int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
+
+        final ActivityDisplay defaultDisplay =
+                mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
+
         mTempConfig.setTo(getGlobalConfiguration());
         final int changes = mTempConfig.updateFrom(values);
         if (changes == 0) {
@@ -5174,7 +5138,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
             // performDisplayOverrideConfigUpdate in order to send the new display configuration
             // (even if there are no actual changes) to unfreeze the window.
-            performDisplayOverrideConfigUpdate(values, deferResume, DEFAULT_DISPLAY);
+            defaultDisplay.performDisplayOverrideConfigUpdate(values, deferResume);
             return 0;
         }
 
@@ -5272,79 +5236,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         // Override configuration of the default display duplicates global config, so we need to
         // update it also. This will also notify WindowManager about changes.
-        performDisplayOverrideConfigUpdate(mRootActivityContainer.getConfiguration(), deferResume,
-                DEFAULT_DISPLAY);
+        defaultDisplay.performDisplayOverrideConfigUpdate(mRootActivityContainer.getConfiguration(),
+                deferResume);
 
-        return changes;
-    }
-
-    boolean updateDisplayOverrideConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean deferResume, int displayId) {
-        return updateDisplayOverrideConfigurationLocked(values, starting, deferResume /* deferResume */,
-                displayId, null /* result */);
-    }
-
-    /**
-     * Updates override configuration specific for the selected display. If no config is provided,
-     * new one will be computed in WM based on current display info.
-     */
-    boolean updateDisplayOverrideConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean deferResume, int displayId,
-            ActivityTaskManagerService.UpdateConfigurationResult result) {
-        int changes = 0;
-        boolean kept = true;
-
-        if (mWindowManager != null) {
-            mWindowManager.deferSurfaceLayout();
-        }
-        try {
-            if (values != null) {
-                if (displayId == DEFAULT_DISPLAY) {
-                    // Override configuration of the default display duplicates global config, so
-                    // we're calling global config update instead for default display. It will also
-                    // apply the correct override config.
-                    changes = updateGlobalConfigurationLocked(values, false /* initLocale */,
-                            false /* persistent */, UserHandle.USER_NULL /* userId */, deferResume);
-                } else {
-                    changes = performDisplayOverrideConfigUpdate(values, deferResume, displayId);
-                }
-            }
-
-            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
-        } finally {
-            if (mWindowManager != null) {
-                mWindowManager.continueSurfaceLayout();
-            }
-        }
-
-        if (result != null) {
-            result.changes = changes;
-            result.activityRelaunched = !kept;
-        }
-        return kept;
-    }
-
-    private int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume,
-            int displayId) {
-        mTempConfig.setTo(mRootActivityContainer.getDisplayOverrideConfiguration(displayId));
-        final int changes = mTempConfig.updateFrom(values);
-        if (changes != 0) {
-            Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
-                    + mTempConfig + " for displayId=" + displayId);
-            mRootActivityContainer.setDisplayOverrideConfiguration(mTempConfig, displayId);
-
-            final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-            if (isDensityChange && displayId == DEFAULT_DISPLAY) {
-                mAppWarnings.onDensityChanged();
-
-                // Post message to start process to avoid possible deadlock of calling into AMS with
-                // the ATMS lock held.
-                final Message msg = PooledLambda.obtainMessage(
-                        ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
-                        N, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
-                mH.sendMessage(msg);
-            }
-        }
         return changes;
     }
 
@@ -5786,7 +5680,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** Applies latest configuration and/or visibility updates if needed. */
-    private boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
+    boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
         boolean kept = true;
         final ActivityStack mainStack = mRootActivityContainer.getTopDisplayFocusedStack();
         // mainStack is null during startup.
