@@ -315,15 +315,15 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Berührte Elemente werden laut vorgelesen und der Bildschirm kann über Gesten erkundet werden."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Berührte Elemente werden laut vorgelesen und der Bildschirm kann über Touch-Gesten erkundet werden."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Text bei der Eingabe beobachten"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich personenbezogener Daten wie Kreditkartennummern und Passwörter."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Displayvergrößerung festlegen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gesten möglich"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Gesten möglich."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bewegungen auf dem Fingerabdrucksensor"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Erfasst Bewegungen auf dem Fingerabdrucksensor des Geräts."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Touch-Gesten möglich"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Touch-Gesten möglich."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingerabdrucksensor-Gesten"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"Statusleiste darstellen"</string>
@@ -970,8 +970,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"Anfrage senden"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Sprachsuche"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"\"Tippen &amp; Entdecken\" aktivieren?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> fordert die Aktivierung von \"Tippen &amp; Entdecken\" an. Wenn \"Tippen &amp; Entdecken\" aktiviert ist, kannst du Beschreibungen dessen hören oder sehen, was sich unter deinen Fingern befindet, oder Gesten ausführen, um mit dem Tablet zu kommunizieren."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> fordert die Aktivierung von \"Tippen &amp; Entdecken\" an. Wenn \"Tippen &amp; Entdecken\" aktiviert ist, kannst du Beschreibungen dessen hören oder sehen, was sich unter deinen Fingern befindet, oder Gesten ausführen, um mit dem Telefon zu kommunizieren."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> fordert die Aktivierung von \"Tippen &amp; Entdecken\" an. Wenn \"Tippen &amp; Entdecken\" aktiviert ist, kannst du Beschreibungen dessen hören oder sehen, was sich unter deinen Fingern befindet, oder über Touch-Gesten mit dem Tablet kommunizieren."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> fordert die Aktivierung von \"Tippen &amp; Entdecken\" an. Wenn \"Tippen &amp; Entdecken\" aktiviert ist, kannst du Beschreibungen dessen hören oder sehen, was sich unter deinen Fingern befindet, oder über Touch-Gesten mit dem Telefon kommunizieren."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Vor 1 Monat"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vor mehr als 1 Monat"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1669,8 +1669,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> wurde durch die Bedienungshilfenverknüpfung deaktiviert"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Halten Sie beide Lautstärketasten drei Sekunden lang gedrückt, um <xliff:g id="SERVICE_NAME">%1$s</xliff:g> zu verwenden"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Wähle den Dienst aus, der verwendet werden soll, wenn du auf die Schaltfläche für die Bedienungshilfen tippst:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wähle den Dienst aus, der mit der Bewegung für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wähle den Dienst aus, der mit der Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Wähle den Dienst aus, der mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Wähle den Dienst aus, der mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Wenn du zwischen den Diensten wechseln möchtest, halte die Schaltfläche für die Bedienungshilfen gedrückt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Wenn du zwischen den Diensten wechseln möchtest, wische mit zwei Fingern nach oben und halte sie gedrückt."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Wenn du zwischen den Diensten wechseln möchtest, wische mit drei Fingern nach oben und halte sie gedrückt."</string>

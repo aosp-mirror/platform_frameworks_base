@@ -660,8 +660,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清空此用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定电视或清空此用户的所有数据。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定手机或清空此用户的所有数据。"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"更改锁屏密码"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"更改锁屏密码。"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"更改锁屏方式"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"更改锁屏方式。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"锁定屏幕"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"控制屏幕锁定的方式和时间。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有数据"</string>

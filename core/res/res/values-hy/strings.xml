@@ -104,7 +104,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"Ֆաքս"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Չհամաժամեցված"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"Համաժամել"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"Համաժամացնել"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Փաթեթ"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"Հարթակ"</string>
     <string name="roamingText0" msgid="7170335472198694945">"Ռոումինգի ցուցիչը միացված է"</string>
@@ -169,8 +169,8 @@
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Չհաջողվեց գտնել հարցվող ֆայլը:"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Չափից շատ հարցումներ են մշակվում: Փորձեք կրկին ավելի ուշ:"</string>
     <string name="notification_title" msgid="8967710025036163822">"Մուտք գործելու սխալ` <xliff:g id="ACCOUNT">%1$s</xliff:g>-ի համար"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"Համաժամեցնել"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Չի հաջողվում համաժամեցնել"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"Համաժամացնել"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Չի հաջողվում համաժամացնել"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Հետևյալ ծառայությունից չափազանց շատ տարրեր եք ջնջել՝ <xliff:g id="CONTENT_TYPE">%s</xliff:g>:"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Պլանշետի պահոցը լիքն է: Ջնջեք մի քանի ֆայլ` տարածք ազատելու համար:"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Ժամացույցի ֆայլերի պահեստը լիքն է: Ջնջեք որոշ ֆայլեր՝ տարածք ազատելու համար:"</string>
@@ -345,7 +345,7 @@
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"կարդալ բջջային զեկուցվող հաղորդագրությունները"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Թույլ է տալիս հավելվածին կարդալ ձեր սարքի կողմից ստացված բջջային հեռարձակվող հաղորդագրությունները: Բջջային հեռարձակվող զգուշացումները ուղարկվում են որոշ վայրերում` արտակարգ իրավիճակների մասին ձեզ զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի արդյունավետությանը կամ շահագործմանը, երբ ստացվում է արտակարգ իրավիճակի մասին բջջային հաղորդում:"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"կարդալ բաժանորդագրված հոսքերը"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Թույլ է տալիս հավելվածին մանրամասներ ստանալ ընթացիկ համաժամեցված հոսքերի մասին:"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Թույլ է տալիս հավելվածին մանրամասներ ստանալ ընթացիկ համաժամացված հոսքերի մասին:"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS հաղորդագրությունների ուղարկում և ընթերցում"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Թույլ է տալիս հավելվածին ուղարկել SMS հաղորդագրություններ: Այն կարող է անսպասելի ծախսերի պատճառ դառնալ: Վնասարար հավելվածները կարող են ձեր հաշվից գումար ծախսել` ուղարկելով հաղորդագրություններ`  առանց ձեր հաստատման:"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"կարդալ ձեր տեքստային հաղորդագրությունները (SMS կամ MMS)"</string>
@@ -593,12 +593,12 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"Դեմքի պատկերակ"</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"կարդալ համաժամեցման կարգավորումները"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Թույլ է տալիս հավելվածին կարդալ համաժամեցման կարգավորումները հաշվի համար: Օրինակ` այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամեցված է հաշվի հետ:"</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"համաժամեցումը փոխարկել միացվածի և անջատվածի"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Թույլ է տալիս հավելվածին փոփոխել համաժամեցման կարգավորումները հաշվի համար: Օրինակ, այն կարող է օգտագործվել` միացնելու Մարդիկ հավելվածի համաժամեցումը հաշվի հետ:"</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"կարդալ համաժամեցման վիճակագրությունը"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Թույլ է տալիս հավելվածին կարդալ հաշվի համաժամեցման վիճակագրությունը, այդ թվում` համաժամեցման իրադարձությունների պատմությունը և թե որքան տվյալ է համաժամեցված:"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"կարդալ համաժամացման կարգավորումները"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Թույլ է տալիս հավելվածին կարդալ համաժամացման կարգավորումները հաշվի համար: Օրինակ` այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամացված է հաշվի հետ:"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"համաժամացումը փոխարկել միացվածի և անջատվածի"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Թույլ է տալիս հավելվածին փոփոխել համաժամացման կարգավորումները հաշվի համար: Օրինակ, այն կարող է օգտագործվել` միացնելու Մարդիկ հավելվածի համաժամացումը հաշվի հետ:"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"կարդալ համաժամացման վիճակագրությունը"</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Թույլ է տալիս հավելվածին կարդալ հաշվի համաժամացման վիճակագրությունը, այդ թվում` համաժամացման իրադարձությունների պատմությունը և թե որքան տվյալ է համաժամացված:"</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"կարդալ ձեր ընդհանուր հիշողության պարունակությունը"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Հավելվածին թույլ է տալիս կարդալ ձեր ընդհանուր հիշողության պարունակությունը:"</string>
     <string name="permlab_sdcardWrite" msgid="9220937740184960897">"փոփոխել կամ ջնջել ձեր ընդհանուր հիշողության բովանդակությունը"</string>
@@ -1452,7 +1452,7 @@
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Դուք օգտագործում եք այս հավելվածը ձեր աշխատանքային պրոֆիլից դուրս"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Դուք օգտագործում եք այս հավելվածը ձեր աշխատանքային պրոֆիլում"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Ներածման եղանակը"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"Համաժամել"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Համաժամացնել"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Մատչելիությունը"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Պաստառ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Փոխել պաստառը"</string>
