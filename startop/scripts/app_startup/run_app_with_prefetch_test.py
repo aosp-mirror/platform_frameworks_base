@@ -206,72 +206,76 @@ def _mocked_run_shell_command(*args, **kwargs):
   else:
     return (True, 'a1=b1\nc1=d1=d2\ne1=f1')
 
-def test_run_no_vm_cache_drop():
-  with patch('lib.cmd_utils.run_shell_command',
-             new_callable=Mock) as mock_run_shell_command:
-    mock_run_shell_command.side_effect = _mocked_run_shell_command
-    run.run('warm',
-            'music',
-            'MainActivity',
-            timeout=10,
-            simulate=False,
-            debug=False)
+@patch('lib.adb_utils.blocking_wait_for_logcat_displayed_time')
+@patch('lib.cmd_utils.run_shell_command')
+def test_run_no_vm_cache_drop(mock_run_shell_command,
+                              mock_blocking_wait_for_logcat_displayed_time):
+  mock_run_shell_command.side_effect = _mocked_run_shell_command
+  mock_blocking_wait_for_logcat_displayed_time.return_value = 123
 
-    calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-             call('adb shell "kill 9999"'),
-             call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
-             call(
-               'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}" | '
-               '"{DIR}/parse_metrics" --package {package} --activity {activity} '
-               '--timestamp "{timestamp}"'
-                 .format(timeout=10,
-                         DIR=run.DIR,
-                         package='music',
-                         activity='MainActivity',
-                         timestamp='2019-07-02 23:20:06.972674825')),
-             call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-             call('adb shell "kill 9999"')]
-    mock_run_shell_command.assert_has_calls(calls)
+  run.run('warm',
+          'music',
+          'MainActivity',
+          timeout=10,
+          simulate=False,
+          debug=False)
 
-def test_run_with_vm_cache_drop_and_post_launch_cleanup():
-  with patch('lib.cmd_utils.run_shell_command',
-             new_callable=Mock) as mock_run_shell_command:
-    mock_run_shell_command.side_effect = _mocked_run_shell_command
-    run.run('fadvise',
-            'music',
-            'MainActivity',
-            timeout=10,
-            simulate=False,
-            debug=False)
+  calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+           call('adb shell "kill 9999"'),
+           call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
+           call(
+             'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}"'
+               .format(timeout=10,
+                       DIR=run.DIR,
+                       package='music',
+                       activity='MainActivity',
+                       timestamp='2019-07-02 23:20:06.972674825')),
+           call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+           call('adb shell "kill 9999"')]
+  mock_run_shell_command.assert_has_calls(calls)
 
-    calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-             call('adb shell "kill 9999"'),
-             call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
-             call('bash -c "source {}; iorapd_readahead_enable"'.
-                  format(run.IORAP_COMMON_BASH_SCRIPT)),
-             call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
-             call(
-               'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}" | '
-               '"{DIR}/parse_metrics" --package {package} --activity {activity} '
-               '--timestamp "{timestamp}"'
-                 .format(timeout=10,
-                         DIR=run.DIR,
-                         package='music',
-                         activity='MainActivity',
-                         timestamp='2019-07-02 23:20:06.972674825')),
-             call(
-               'bash -c "source {script_path}; '
-               'iorapd_readahead_wait_until_finished '
-               '\'{package}\' \'{activity}\' \'{timestamp}\' \'{timeout}\'"'.
-                 format(timeout=10,
-                        package='music',
-                        activity='MainActivity',
-                        timestamp='2019-07-02 23:20:06.972674825',
-                        script_path=run.IORAP_COMMON_BASH_SCRIPT)),
-             call('bash -c "source {}; iorapd_readahead_disable"'.
-                    format(run.IORAP_COMMON_BASH_SCRIPT)),
-             call('adb shell ps | grep "music" | awk \'{print $2;}\''),
-             call('adb shell "kill 9999"')]
+@patch('lib.adb_utils.blocking_wait_for_logcat_displayed_time')
+@patch('lib.cmd_utils.run_shell_command')
+def test_run_with_vm_cache_drop_and_post_launch_cleanup(
+    mock_run_shell_command,
+    mock_blocking_wait_for_logcat_displayed_time):
+  mock_run_shell_command.side_effect = _mocked_run_shell_command
+  mock_blocking_wait_for_logcat_displayed_time.return_value = 123
+
+  run.run('fadvise',
+          'music',
+          'MainActivity',
+          timeout=10,
+          simulate=False,
+          debug=False)
+
+  calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+           call('adb shell "kill 9999"'),
+           call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
+           call('bash -c "source {}; iorapd_readahead_enable"'.
+                format(run.IORAP_COMMON_BASH_SCRIPT)),
+           call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
+           call(
+             'timeout {timeout} "{DIR}/launch_application" '
+             '"{package}" "{activity}"'
+               .format(timeout=10,
+                       DIR=run.DIR,
+                       package='music',
+                       activity='MainActivity',
+                       timestamp='2019-07-02 23:20:06.972674825')),
+           call(
+             'bash -c "source {script_path}; '
+             'iorapd_readahead_wait_until_finished '
+             '\'{package}\' \'{activity}\' \'{timestamp}\' \'{timeout}\'"'.
+               format(timeout=10,
+                      package='music',
+                      activity='MainActivity',
+                      timestamp='2019-07-02 23:20:06.972674825',
+                      script_path=run.IORAP_COMMON_BASH_SCRIPT)),
+           call('bash -c "source {}; iorapd_readahead_disable"'.
+                format(run.IORAP_COMMON_BASH_SCRIPT)),
+           call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+           call('adb shell "kill 9999"')]
   mock_run_shell_command.assert_has_calls(calls)
 
 if __name__ == '__main__':
