@@ -261,6 +261,23 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
         mNotificationGroupManager = groupManager;
+        mNotificationGroupManager.addOnGroupChangeListener(
+                new NotificationGroupManager.OnGroupChangeListener() {
+                    @Override
+                    public void onGroupSuppressionChanged(
+                            NotificationGroupManager.NotificationGroup group,
+                            boolean suppressed) {
+                        // More notifications could be added causing summary to no longer
+                        // be suppressed -- in this case need to remove the key.
+                        final String groupKey = group.summary != null
+                                ? group.summary.notification.getGroupKey()
+                                : null;
+                        if (!suppressed && groupKey != null
+                                && mBubbleData.isSummarySuppressed(groupKey)) {
+                            mBubbleData.removeSuppressedSummary(groupKey);
+                        }
+                    }
+                });
 
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
@@ -746,6 +763,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             if (update.selectionChanged) {
                 mStackView.setSelectedBubble(update.selectedBubble);
+                if (update.selectedBubble != null) {
+                    mNotificationGroupManager.updateSuppression(
+                            update.selectedBubble.getEntry());
+                }
             }
 
             // Expanding? Apply this last.
