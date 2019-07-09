@@ -64,7 +64,7 @@
     <string name="always_use_accessory" msgid="3257892669444535154">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB arazketa onartu?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren erreferentzia-gako digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Eman beti ordenagailu honetatik arazteko baimena"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita duen erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Handiagotu pantaila betetzeko"</string>
@@ -399,6 +399,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Isiltasun\nosoa"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Lehentasunezkoak\nsoilik"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmak\nsoilik"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hari gabe kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatzeko)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatzeko)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bizkor kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatzeko)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatzeko)"</string>

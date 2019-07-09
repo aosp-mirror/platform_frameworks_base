@@ -120,8 +120,6 @@ interface IConnectivityManager
 
     LegacyVpnInfo getLegacyVpnInfo(int userId);
 
-    VpnInfo[] getAllVpnInfo();
-
     boolean updateLockdownVpn();
     boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
     boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
