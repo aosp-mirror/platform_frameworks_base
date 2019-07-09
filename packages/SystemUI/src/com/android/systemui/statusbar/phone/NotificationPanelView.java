@@ -61,7 +61,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.FalsingManager;
@@ -290,7 +289,11 @@ public class NotificationPanelView extends PanelView implements
     private boolean mIsFullWidth;
     private boolean mBlockingExpansionForCurrentTouch;
 
-    private boolean mExpectingOpenPanelGesture;
+    /**
+     * Following variables maintain state of events when input focus transfer may occur.
+     */
+    private boolean mExpectingSynthesizedDown; // expecting to see synthesized DOWN event
+    private boolean mLastEventSynthesizedDown; // last event was synthesized DOWN event
 
     /**
      * Current dark amount that follows regular interpolation curve of animation.
@@ -377,11 +380,12 @@ public class NotificationPanelView extends PanelView implements
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
-            KeyguardBypassController bypassController) {
+            KeyguardBypassController bypassController,
+            FalsingManager falsingManager) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
+        mFalsingManager = falsingManager;
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeUpCoordinator = coordinator;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -606,7 +610,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void initBottomArea() {
-        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext(), mFalsingManager);
         mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
@@ -1059,6 +1063,15 @@ public class NotificationPanelView extends PanelView implements
             mDownY = event.getY();
             mCollapsedOnDown = isFullyCollapsed();
             mListenForHeadsUp = mCollapsedOnDown && mHeadsUpManager.hasPinnedHeadsUp();
+            if (mExpectingSynthesizedDown) {
+                mLastEventSynthesizedDown = true;
+            } else {
+                // down but not synthesized motion event.
+                mLastEventSynthesizedDown = false;
+            }
+        } else {
+            // not down event at all.
+            mLastEventSynthesizedDown = false;
         }
     }
 
@@ -1124,12 +1137,18 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
 
-        initDownStates(event);
         // Make sure the next touch won't the blocked after the current ends.
         if (event.getAction() == MotionEvent.ACTION_UP
                 || event.getAction() == MotionEvent.ACTION_CANCEL) {
             mBlockingExpansionForCurrentTouch = false;
         }
+        // When touch focus transfer happens, ACTION_DOWN->ACTION_UP may happen immediately
+        // without any ACTION_MOVE event.
+        // In such case, simply expand the panel instead of being stuck at the bottom bar.
+        if (mLastEventSynthesizedDown && event.getAction() == MotionEvent.ACTION_UP) {
+            expand(true /* animate */);
+        }
+        initDownStates(event);
         if (!mIsExpanding && !shouldQuickSettingsIntercept(mDownX, mDownY, 0)
                 && mPulseExpansionHandler.onTouchEvent(event)) {
             // We're expanding all the other ones shouldn't get this anymore
@@ -1255,17 +1274,28 @@ public class NotificationPanelView extends PanelView implements
         if (!isFullyCollapsed()) {
             return;
         }
-        mExpectingOpenPanelGesture = true;
+        mExpectingSynthesizedDown = true;
         onTrackingStarted();
     }
 
     /**
-     * Input focus transfer has already happened as this view decided to intercept
-     * very first down event.
+     * Called when this view is no longer waiting for input focus transfer.
+     *
+     * There are two scenarios behind this function call. First, input focus transfer
+     * has successfully happened and this view already received synthetic DOWN event.
+     * (mExpectingSynthesizedDown == false). Do nothing.
+     *
+     * Second, before input focus transfer finished, user may have lifted finger
+     * in previous window and this window never received synthetic DOWN event.
+     * (mExpectingSynthesizedDown == true).
+     * In this case, we use the velocity to trigger fling event.
+     *
+     * @param velocity unit is in px / millis
      */
-    public void stopWaitingForOpenPanelGesture() {
-        if (mExpectingOpenPanelGesture) {
-            mExpectingOpenPanelGesture = false;
+    public void stopWaitingForOpenPanelGesture(float velocity) {
+        if (mExpectingSynthesizedDown) {
+            mExpectingSynthesizedDown = false;
+            fling(velocity > 1f ? 1000f * velocity : 0, true /* animate */);
             onTrackingStopped(false);
         }
     }
@@ -1283,8 +1313,8 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean shouldGestureWaitForTouchSlop() {
-        if (mExpectingOpenPanelGesture) {
-            mExpectingOpenPanelGesture = false;
+        if (mExpectingSynthesizedDown) {
+            mExpectingSynthesizedDown = false;
             return false;
         }
         return isFullyCollapsed() || mBarState != StatusBarState.SHADE;

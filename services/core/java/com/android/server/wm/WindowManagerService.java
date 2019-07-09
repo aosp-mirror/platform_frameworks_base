@@ -1607,10 +1607,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.isVisibleOrAdding() && displayContent.updateOrientationFromAppTokens()) {
                 reportNewConfig = true;
             }
-        }
 
-        if (reportNewConfig) {
-            sendNewConfiguration(displayId);
+            if (reportNewConfig) {
+                displayContent.sendNewConfiguration();
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -1648,7 +1648,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Display display = mDisplayManager.getDisplay(displayId);
 
             if (display != null) {
-                displayContent = mRoot.createDisplayContent(display, null /* controller */);
+                displayContent = mRoot.createDisplayContent(display, null /* activityDisplay */);
             }
         }
 
@@ -2290,13 +2290,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
             }
             win.mInRelayout = false;
+
+            if (configChanged) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                        "relayoutWindow: postNewConfigurationToHandler");
+                displayContent.sendNewConfiguration();
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
         }
 
-        if (configChanged) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: sendNewConfiguration");
-            sendNewConfiguration(displayId);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
         Binder.restoreCallingIdentity(origId);
         return result;
     }
@@ -3747,7 +3749,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         layoutNeeded = true;
                     }
                     if (rotationChanged || alwaysSendConfiguration) {
-                        displayContent.sendNewConfiguration();
+                        displayContent.postNewConfigurationToHandler();
                     }
                 }
 
@@ -4289,34 +4291,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Instruct the Activity Manager to fetch and update the current display's configuration and
-     * broadcast them to config-changed listeners if appropriate.
-     * NOTE: Can't be called with the window manager lock held since it call into activity manager.
-     */
-    void sendNewConfiguration(int displayId) {
-        try {
-            final boolean configUpdated = mActivityTaskManager.updateDisplayOverrideConfiguration(
-                    null /* values */, displayId);
-            if (!configUpdated) {
-                // Something changed (E.g. device rotation), but no configuration update is needed.
-                // E.g. changing device rotation by 180 degrees. Go ahead and perform surface
-                // placement to unfreeze the display since we froze it when the rotation was updated
-                // in DisplayContent#updateRotationUnchecked.
-                synchronized (mGlobalLock) {
-                    final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                    if (dc != null && dc.mWaitingForConfig) {
-                        dc.mWaitingForConfig = false;
-                        mLastFinishedFreezeSource = "config-unchanged";
-                        dc.setLayoutNeeded();
-                        mWindowPlacerLocked.performSurfacePlacement();
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-        }
-    }
-
     public Configuration computeNewConfiguration(int displayId) {
         synchronized (mGlobalLock) {
             return computeNewConfigurationLocked(displayId);
@@ -4740,7 +4714,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     removeMessages(SEND_NEW_CONFIGURATION, displayContent);
                     if (displayContent.isReady()) {
-                        sendNewConfiguration(displayContent.getDisplayId());
+                        displayContent.sendNewConfiguration();
                     } else {
                         // Message could come after display has already been removed.
                         if (DEBUG_CONFIGURATION) {
@@ -5224,7 +5198,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.mWaitingForConfig = true;
             startFreezingDisplayLocked(0 /* exitAnim */,
                     0 /* enterAnim */, displayContent);
-            displayContent.sendNewConfiguration();
+            displayContent.postNewConfigurationToHandler();
         }
 
         mWindowPlacerLocked.performSurfacePlacement();
@@ -5571,7 +5545,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (configChanged) {
-            displayContent.sendNewConfiguration();
+            displayContent.postNewConfigurationToHandler();
         }
         mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
     }
@@ -6884,7 +6858,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final long origId = Binder.clearCallingIdentity();
                 try {
                     // direct call since lock is shared.
-                    sendNewConfiguration(displayId);
+                    displayContent.sendNewConfiguration();
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }

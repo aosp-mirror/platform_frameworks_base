@@ -17,12 +17,15 @@
 #pragma once
 
 #include <SkSurface.h>
+#include <SkDocument.h>
+#include <SkMultiPictureDocument.h>
 #include "Lighting.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/IRenderPipeline.h"
 
 class SkPictureRecorder;
+struct SkSharingSerialContext;
 
 namespace android {
 namespace uirenderer {
@@ -60,9 +63,12 @@ public:
 
     void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque);
 
+    // Sets the recording callback to the provided function and the recording mode
+    // to CallbackAPI
     void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) override {
         mPictureCapturedCallback = callback;
+        mCaptureMode = callback ? CaptureMode::CallbackAPI : CaptureMode::None;
     }
 
 protected:
@@ -92,8 +98,18 @@ private:
      */
     void renderVectorDrawableCache();
 
+    // Called every frame. Normally returns early with screen canvas.
+    // But when capture is enabled, returns an nwaycanvas where commands are also recorded.
     SkCanvas* tryCapture(SkSurface* surface);
+    // Called at the end of every frame, closes the recording if necessary.
     void endCapture(SkSurface* surface);
+    // Determine if a new file-based capture should be started.
+    // If so, sets mCapturedFile and mCaptureSequence and returns true.
+    // Should be called every frame when capture is enabled.
+    // sets mCaptureMode.
+    bool shouldStartNewFileCapture();
+    // Set up a multi frame capture.
+    bool setupMultiFrameCapture();
 
     std::vector<sk_sp<SkImage>> mPinnedImages;
 
@@ -103,22 +119,46 @@ private:
     std::vector<VectorDrawableRoot*> mVectorDrawables;
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
+    // There are three possible ways of recording drawing commands.
+    enum class CaptureMode {
+        // return to this mode when capture stops.
+        None,
+        // A mode where every frame is recorded into an SkPicture and sent to a provided callback,
+        // until that callback is cleared
+        CallbackAPI,
+        // A mode where a finite number of frames are recorded to a file with
+        // SkMultiPictureDocument
+        MultiFrameSKP,
+        // A mode which records a single frame to a normal SKP file.
+        SingleFrameSKP,
+    };
+  CaptureMode mCaptureMode = CaptureMode::None;
+
     /**
-     * mCapturedFile is used to enforce we don't capture more than once for a given name (cause
-     * permissions don't allow to reset a property from render thread).
+     * mCapturedFile - the filename to write a recorded SKP to in either MultiFrameSKP or
+     * SingleFrameSKP mode.
      */
     std::string mCapturedFile;
     /**
-     *  mCaptureSequence counts how many frames are left to take in the sequence.
+     * mCaptureSequence counts down how many frames are left to take in the sequence. Applicable
+     * only to MultiFrameSKP or SingleFrameSKP mode.
      */
     int mCaptureSequence = 0;
 
+    // Multi frame serialization stream and writer used when serializing more than one frame.
+    std::unique_ptr<SkFILEWStream> mOpenMultiPicStream;
+    sk_sp<SkDocument> mMultiPic;
+    std::unique_ptr<SkSharingSerialContext> mSerialContext;
+
     /**
-     *  mRecorder holds the current picture recorder. We could store it on the stack to support
-     *  parallel tryCapture calls (not really needed).
+     * mRecorder holds the current picture recorder when serializing in either SingleFrameSKP or
+     * CallbackAPI modes.
      */
     std::unique_ptr<SkPictureRecorder> mRecorder;
     std::unique_ptr<SkNWayCanvas> mNwayCanvas;
+
+    // Set by setPictureCapturedCallback and when set, CallbackAPI mode recording is ongoing.
+    // Not used in other recording modes.
     std::function<void(sk_sp<SkPicture>&&)> mPictureCapturedCallback;
 };
 

@@ -28,8 +28,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -41,7 +41,7 @@ public class DozeFactory {
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
-    public DozeMachine assembleMachine(DozeService dozeService) {
+    public DozeMachine assembleMachine(DozeService dozeService, FalsingManager falsingManager) {
         Context context = dozeService;
         SensorManager sensorManager = Dependency.get(AsyncSensorManager.class);
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
@@ -63,7 +63,7 @@ public class DozeFactory {
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager, params.getPolicy()),
-                new DozeFalsingManagerAdapter(FalsingManagerFactory.getInstance(context)),
+                new DozeFalsingManagerAdapter(falsingManager),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine, dockManager),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),

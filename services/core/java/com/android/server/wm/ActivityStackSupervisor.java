@@ -2072,7 +2072,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         r.mLaunchTaskBehind = false;
         mRecentTasks.add(task);
         mService.getTaskChangeNotificationController().notifyTaskStackChanged();
-        r.setVisibility(false);
+        stack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly

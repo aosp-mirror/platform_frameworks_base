@@ -27,7 +27,6 @@ import android.view.ViewConfiguration;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -59,7 +58,7 @@ public class KeyguardAffordanceHelper {
     private KeyguardAffordanceView mLeftIcon;
     private KeyguardAffordanceView mRightIcon;
     private Animator mSwipeAnimator;
-    private FalsingManager mFalsingManager;
+    private final FalsingManager mFalsingManager;
     private int mMinBackgroundRadius;
     private boolean mMotionCancelled;
     private int mTouchTargetSize;
@@ -80,12 +79,13 @@ public class KeyguardAffordanceHelper {
         }
     };
 
-    KeyguardAffordanceHelper(Callback callback, Context context) {
+    KeyguardAffordanceHelper(Callback callback, Context context, FalsingManager falsingManager) {
         mContext = context;
         mCallback = callback;
         initIcons();
         updateIcon(mLeftIcon, 0.0f, mLeftIcon.getRestingAlpha(), false, false, true, false);
         updateIcon(mRightIcon, 0.0f, mRightIcon.getRestingAlpha(), false, false, true, false);
+        mFalsingManager = falsingManager;
         initDimens();
     }
 
@@ -102,7 +102,6 @@ public class KeyguardAffordanceHelper {
         mHintGrowAmount =
                 mContext.getResources().getDimensionPixelSize(R.dimen.hint_grow_amount_sideways);
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.4f);
-        mFalsingManager = FalsingManagerFactory.getInstance(mContext);
     }
 
     private void initIcons() {
