@@ -126,7 +126,7 @@ public class HidProfile implements LocalBluetoothProfile {
 
     public boolean isPreferred(BluetoothDevice device) {
         if (mService == null) return false;
-        return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
+        return mService.getPriority(device) != BluetoothProfile.PRIORITY_OFF;
     }
 
     public int getPreferred(BluetoothDevice device) {
