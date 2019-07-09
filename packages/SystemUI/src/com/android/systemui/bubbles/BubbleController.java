@@ -424,14 +424,21 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
-     * Whether (1) there is a bubble associated with the provided key and
-     *         (2) if the notification for that bubble is hidden from the shade.
+     * True if either:
+     * (1) There is a bubble associated with the provided key and if its notification is hidden
+     *     from the shade.
+     * (2) There is a group summary associated with the provided key that is hidden from the shade
+     *     because it has been dismissed but still has child bubbles active.
      *
-     * False if there isn't a bubble or if the notification for that bubble appears in the shade.
+     * False otherwise.
      */
     public boolean isBubbleNotificationSuppressedFromShade(String key) {
-        return mBubbleData.hasBubbleWithKey(key)
+        boolean isBubbleAndSuppressed = mBubbleData.hasBubbleWithKey(key)
                 && !mBubbleData.getBubbleWithKey(key).showInShadeWhenBubble();
+        NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
+        String groupKey = entry != null ? entry.notification.getGroupKey() : null;
+        boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
+        return isSuppressedSummary || isBubbleAndSuppressed;
     }
 
     void selectBubble(Bubble bubble) {
@@ -515,10 +522,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
 
                 boolean inBubbleData = mBubbleData.hasBubbleWithKey(key);
+                boolean isSuppressedSummary = (mBubbleData.isSummarySuppressed(groupKey)
+                        && mBubbleData.getSummaryKey(groupKey).equals(key));
                 boolean isSummary = entry != null
                         && entry.notification.getNotification().isGroupSummary();
-                boolean isSummaryOfBubbles = isSummary && bubbleChildren != null
-                        && !bubbleChildren.isEmpty();
+                boolean isSummaryOfBubbles = (isSuppressedSummary || isSummary)
+                        && bubbleChildren != null && !bubbleChildren.isEmpty();
 
                 if (!inBubbleData && !isSummaryOfBubbles) {
                     return false;
@@ -585,8 +594,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // because apps can't cancel it; so we only intercept & suppress real summaries.
             boolean isAutogroupSummary = (summary.notification.getNotification().flags
                     & FLAG_AUTOGROUP_SUMMARY) != 0;
+            if (!isAutogroupSummary) {
+                mBubbleData.addSummaryToSuppress(summary.notification.getGroupKey(),
+                        summary.key);
+                // Tell shade to update for the suppression
+                mNotificationEntryManager.updateNotifications();
+            }
             return !isAutogroupSummary;
         } else {
+            // If it's not a user dismiss it's a cancel.
+            mBubbleData.removeSuppressedSummary(groupKey);
+
             // Remove any associated bubble children.
             for (int i = 0; i < bubbleChildren.size(); i++) {
                 Bubble bubbleChild = bubbleChildren.get(i);
@@ -684,6 +702,24 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         } catch (RemoteException e) {
                             // Bad things have happened
                         }
+                    }
+
+                    // Check if removed bubble has an associated suppressed group summary that needs
+                    // to be removed now.
+                    final String groupKey = bubble.getEntry().notification.getGroupKey();
+                    if (mBubbleData.isSummarySuppressed(groupKey)
+                            && mBubbleData.getBubblesInGroup(groupKey).isEmpty()) {
+                        // Time to actually remove the summary.
+                        String notifKey = mBubbleData.getSummaryKey(groupKey);
+                        mBubbleData.removeSuppressedSummary(groupKey);
+                        NotificationEntry entry =
+                                mNotificationEntryManager.getNotificationData().get(notifKey);
+                        if (entry == null) {
+                            Log.w("mady", "WTF summary isn't in data... " + notifKey);
+                            return;
+                        }
+                        mNotificationEntryManager.performRemoveNotification(
+                                entry.notification, UNDEFINED_DISMISS_REASON);
                     }
 
                     // Check if summary should be removed from NoManGroup
