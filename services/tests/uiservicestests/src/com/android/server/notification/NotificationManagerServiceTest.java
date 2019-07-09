@@ -421,7 +421,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private void setUpPrefsForBubbles(boolean globalEnabled, boolean pkgEnabled,
             boolean channelEnabled) {
         mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.bubblesEnabled(any())).thenReturn(globalEnabled);
+        when(mPreferencesHelper.bubblesEnabled()).thenReturn(globalEnabled);
         when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(pkgEnabled);
         when(mPreferencesHelper.getNotificationChannel(
                 anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
