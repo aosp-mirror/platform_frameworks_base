@@ -140,7 +140,7 @@ import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
-import static com.android.server.wm.utils.RegionUtils.forEachRect;
+import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
 
 import android.animation.AnimationHandler;
@@ -5257,13 +5257,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         r.op(edge, Op.INTERSECT);
 
         final int[] remaining = {limit};
-        forEachRect(r, rect -> {
+        forEachRectReverse(r, rect -> {
             if (remaining[0] <= 0) {
                 return;
             }
             final int height = rect.height();
             if (height > remaining[0]) {
-                rect.bottom = rect.top + remaining[0];
+                rect.top = rect.bottom - remaining[0];
             }
             remaining[0] -= height;
             global.op(rect, Op.UNION);
