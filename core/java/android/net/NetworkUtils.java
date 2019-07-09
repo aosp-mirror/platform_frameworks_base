@@ -16,10 +16,15 @@
 
 package android.net;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
