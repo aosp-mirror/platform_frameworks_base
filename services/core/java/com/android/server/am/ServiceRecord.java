@@ -19,9 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.app.INotificationManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +31,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -621,6 +618,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app != null) {
             app.updateBoundClientUids();
         }
+    }
+
+    /**
+     * @return {@code true} if the killed service which was started by {@link Context#startService}
+     *         has no reason to start again. Note this condition doesn't consider the bindings.
+     */
+    boolean canStopIfKilled(boolean isStartCanceled) {
+        return startRequested && (stopIfKilled || isStartCanceled) && pendingStarts.isEmpty();
     }
 
     void updateHasBindingWhitelistingBgActivityStarts() {

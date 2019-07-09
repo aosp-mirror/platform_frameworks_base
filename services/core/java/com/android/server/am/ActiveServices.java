@@ -2318,9 +2318,8 @@ public final class ActiveServices {
         return true;
     }
 
+    /** @return {@code true} if the restart is scheduled. */
     private final boolean scheduleServiceRestartLocked(ServiceRecord r, boolean allowCancel) {
-        boolean canceled = false;
-
         if (mAm.mAtmInternal.isShuttingDown()) {
             Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortInstanceName
                     + " - system is shutting down");
@@ -2337,10 +2336,12 @@ public final class ActiveServices {
 
         final long now = SystemClock.uptimeMillis();
 
+        final String reason;
         if ((r.serviceInfo.applicationInfo.flags
                 &ApplicationInfo.FLAG_PERSISTENT) == 0) {
             long minDuration = mAm.mConstants.SERVICE_RESTART_DURATION;
             long resetTime = mAm.mConstants.SERVICE_RESET_RUN_DURATION;
+            boolean canceled = false;
 
             // Any delivered but not yet finished starts should be put back
             // on the pending list.
@@ -2365,6 +2366,17 @@ public final class ActiveServices {
                     }
                 }
                 r.deliveredStarts.clear();
+            }
+
+            if (allowCancel) {
+                final boolean shouldStop = r.canStopIfKilled(canceled);
+                if (shouldStop && !r.hasAutoCreateConnections()) {
+                    // Nothing to restart.
+                    return false;
+                }
+                reason = (r.startRequested && !shouldStop) ? "start-requested" : "connection";
+            } else {
+                reason = "always";
             }
 
             r.totalRestartCount++;
@@ -2418,6 +2430,7 @@ public final class ActiveServices {
             r.restartCount = 0;
             r.restartDelay = 0;
             r.nextRestartTime = now;
+            reason = "persistent";
         }
 
         if (!mRestartingServices.contains(r)) {
@@ -2432,11 +2445,11 @@ public final class ActiveServices {
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
         Slog.w(TAG, "Scheduling restart of crashed service "
-                + r.shortInstanceName + " in " + r.restartDelay + "ms");
+                + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
 
-        return canceled;
+        return true;
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -3651,22 +3664,21 @@ public final class ActiveServices {
                     || !mAm.mUserController.isUserRunning(sr.userId, 0)) {
                 bringDownServiceLocked(sr);
             } else {
-                boolean canceled = scheduleServiceRestartLocked(sr, true);
+                final boolean scheduled = scheduleServiceRestartLocked(sr, true /* allowCancel */);
 
                 // Should the service remain running?  Note that in the
                 // extreme case of so many attempts to deliver a command
                 // that it failed we also will stop it here.
-                if (sr.startRequested && (sr.stopIfKilled || canceled)) {
-                    if (sr.pendingStarts.size() == 0) {
-                        sr.startRequested = false;
-                        if (sr.tracker != null) {
-                            sr.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
-                                    SystemClock.uptimeMillis());
-                        }
-                        if (!sr.hasAutoCreateConnections()) {
-                            // Whoops, no reason to restart!
-                            bringDownServiceLocked(sr);
-                        }
+                if (!scheduled) {
+                    bringDownServiceLocked(sr);
+                } else if (sr.canStopIfKilled(false /* isStartCanceled */)) {
+                    // Update to stopped state because the explicit start is gone. The service is
+                    // scheduled to restart for other reason (e.g. connections) so we don't bring
+                    // down it.
+                    sr.startRequested = false;
+                    if (sr.tracker != null) {
+                        sr.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
+                                SystemClock.uptimeMillis());
                     }
                 }
             }
