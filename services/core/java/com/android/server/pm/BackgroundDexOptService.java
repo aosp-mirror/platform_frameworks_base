@@ -254,9 +254,16 @@ public class BackgroundDexOptService extends JobService {
             @Override
             public void run() {
                 int result = idleOptimization(pm, pkgs, BackgroundDexOptService.this);
-                if (result != OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+                if (result == OPTIMIZE_PROCESSED) {
+                    Log.i(TAG, "Idle optimizations completed.");
+                } else if (result == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
                     Log.w(TAG, "Idle optimizations aborted because of space constraints.");
-                    // If we didn't abort we ran to completion (or stopped because of space).
+                } else if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+                    Log.w(TAG, "Idle optimizations aborted by job scheduler.");
+                } else {
+                    Log.w(TAG, "Idle optimizations ended with unexpected code: " + result);
+                }
+                if (result != OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                     // Abandon our timeslice and do not reschedule.
                     jobFinished(jobParams, /* reschedule */ false);
                 }
@@ -339,6 +346,7 @@ public class BackgroundDexOptService extends JobService {
             long lowStorageThreshold, boolean isForPrimaryDex) {
         ArraySet<String> updatedPackages = new ArraySet<>();
         Set<String> unusedPackages = pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+        boolean hadSomeLowSpaceFailure = false;
         Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
         // Only downgrade apps when space is low on device.
         // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
@@ -359,6 +367,7 @@ public class BackgroundDexOptService extends JobService {
             } else {
                 if (abort_code == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
                     // can't dexopt because of low space.
+                    hadSomeLowSpaceFailure = true;
                     continue;
                 }
                 dex_opt_performed = optimizePackage(pm, pkg, isForPrimaryDex);
@@ -369,7 +378,7 @@ public class BackgroundDexOptService extends JobService {
         }
 
         notifyPinService(updatedPackages);
-        return OPTIMIZE_PROCESSED;
+        return hadSomeLowSpaceFailure ? OPTIMIZE_ABORT_NO_SPACE_LEFT : OPTIMIZE_PROCESSED;
     }
 
 
