@@ -399,6 +399,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Teljes\nnémítás"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Csak\nprioritás"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Csak\nriasztások"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Vezeték nélküli töltés folyamatban (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> a teljes feltöltésig)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Töltés (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> a teljes töltöttségig)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Gyors töltés (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> a teljes töltöttségig)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lassú töltés (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> a teljes töltöttségig)"</string>
