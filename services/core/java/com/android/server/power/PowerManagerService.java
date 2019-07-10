@@ -128,6 +128,8 @@ public final class PowerManagerService extends SystemService
     private static final int MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 3;
     // Message: Polling to look for long held wake locks.
     private static final int MSG_CHECK_FOR_LONG_WAKELOCKS = 4;
+    // Message: Sent when an attentive timeout occurs to update the power state.
+    private static final int MSG_ATTENTIVE_TIMEOUT = 5;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -157,6 +159,8 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_QUIESCENT = 1 << 12;
     // Dirty bit: VR Mode enabled changed
     private static final int DIRTY_VR_MODE_CHANGED = 1 << 13;
+    // Dirty bit: attentive timer may have timed out
+    private static final int DIRTY_ATTENTIVE = 1 << 14;
 
     // Summarizes the state of all active wakelocks.
     private static final int WAKE_LOCK_CPU = 1 << 0;
@@ -248,6 +252,8 @@ public final class PowerManagerService extends SystemService
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
+
+    private InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
 
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_POWER);
 
@@ -381,6 +387,9 @@ public final class PowerManagerService extends SystemService
     // True if the device should suspend when the screen is off due to proximity.
     private boolean mSuspendWhenScreenOffDueToProximityConfig;
 
+    // Default value for attentive timeout.
+    private int mAttentiveTimeoutConfig;
+
     // True if dreams are supported on this device.
     private boolean mDreamsSupportedConfig;
 
@@ -441,8 +450,15 @@ public final class PowerManagerService extends SystemService
     // The screen off timeout setting value in milliseconds.
     private long mScreenOffTimeoutSetting;
 
+    // Default for attentive warning duration.
+    private long mAttentiveWarningDurationConfig;
+
     // The sleep timeout setting value in milliseconds.
     private long mSleepTimeoutSetting;
+
+    // How long to show a warning message to user before the device goes to sleep
+    // after long user inactivity, even if wakelocks are held.
+    private long mAttentiveTimeoutSetting;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
@@ -735,6 +751,10 @@ public final class PowerManagerService extends SystemService
         AmbientDisplayConfiguration createAmbientDisplayConfiguration(Context context) {
             return new AmbientDisplayConfiguration(context);
         }
+
+        InattentiveSleepWarningController createInattentiveSleepWarningController() {
+            return new InattentiveSleepWarningController();
+        }
     }
 
     final Constants mConstants;
@@ -778,6 +798,9 @@ public final class PowerManagerService extends SystemService
                 mBatterySavingStats);
         mBatterySaverStateMachine = new BatterySaverStateMachine(
                 mLock, mContext, mBatterySaverController);
+
+        mInattentiveSleepWarningOverlayController =
+                mInjector.createInattentiveSleepWarningController();
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker =
@@ -902,6 +925,9 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.SLEEP_TIMEOUT),
                 false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.ATTENTIVE_TIMEOUT),
+                false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN),
                 false, mSettingsObserver, UserHandle.USER_ALL);
@@ -966,6 +992,10 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
+        mAttentiveTimeoutConfig = resources.getInteger(
+                com.android.internal.R.integer.config_attentiveTimeout);
+        mAttentiveWarningDurationConfig = resources.getInteger(
+                com.android.internal.R.integer.config_attentiveWarningDuration);
         mDreamsSupportedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsSupported);
         mDreamsEnabledByDefaultConfig = resources.getBoolean(
@@ -1014,6 +1044,9 @@ public final class PowerManagerService extends SystemService
                 UserHandle.USER_CURRENT);
         mSleepTimeoutSetting = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.SLEEP_TIMEOUT, DEFAULT_SLEEP_TIMEOUT,
+                UserHandle.USER_CURRENT);
+        mAttentiveTimeoutSetting = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ATTENTIVE_TIMEOUT, mAttentiveTimeoutConfig,
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
@@ -1700,6 +1733,7 @@ public final class PowerManagerService extends SystemService
 
                 updateWakeLockSummaryLocked(dirtyPhase1);
                 updateUserActivitySummaryLocked(now, dirtyPhase1);
+                updateAttentiveStateLocked(now, dirtyPhase1);
                 if (!updateWakefulnessLocked(dirtyPhase1)) {
                     break;
                 }
@@ -2042,8 +2076,10 @@ public final class PowerManagerService extends SystemService
             if (mWakefulness == WAKEFULNESS_AWAKE
                     || mWakefulness == WAKEFULNESS_DREAMING
                     || mWakefulness == WAKEFULNESS_DOZING) {
-                final long sleepTimeout = getSleepTimeoutLocked();
-                final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+                final long attentiveTimeout = getAttentiveTimeoutLocked();
+                final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
+                final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
+                        attentiveTimeout);
                 final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
                 final boolean userInactiveOverride = mUserInactiveOverrideFromWindowManager;
                 final long nextProfileTimeout = getNextProfileTimeoutLocked(now);
@@ -2134,6 +2170,12 @@ public final class PowerManagerService extends SystemService
         mHandler.sendMessageAtTime(msg, timeMs);
     }
 
+    private void scheduleAttentiveTimeout(long timeMs) {
+        final Message msg = mHandler.obtainMessage(MSG_ATTENTIVE_TIMEOUT);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageAtTime(msg, timeMs);
+    }
+
     /**
      * Finds the next profile timeout time or returns -1 if there are no profiles to be locked.
      */
@@ -2148,6 +2190,69 @@ public final class PowerManagerService extends SystemService
             }
         }
         return nextTimeout;
+    }
+
+    private void updateAttentiveStateLocked(long now, int dirty) {
+        long attentiveTimeout = getAttentiveTimeoutLocked();
+        long goToSleepTime = mLastUserActivityTime + attentiveTimeout;
+        long showWarningTime = goToSleepTime - mAttentiveWarningDurationConfig;
+
+        boolean warningDismissed = maybeHideInattentiveSleepWarningLocked(now, showWarningTime);
+
+        if (attentiveTimeout >= 0 && (warningDismissed
+                || (dirty & (DIRTY_ATTENTIVE | DIRTY_STAY_ON | DIRTY_SCREEN_BRIGHTNESS_BOOST
+                | DIRTY_PROXIMITY_POSITIVE | DIRTY_WAKEFULNESS | DIRTY_BOOT_COMPLETED
+                | DIRTY_SETTINGS)) != 0)) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "Updating attentive state");
+            }
+
+            mHandler.removeMessages(MSG_ATTENTIVE_TIMEOUT);
+
+            if (isBeingKeptFromShowingInattentiveSleepWarningLocked()) {
+                return;
+            }
+
+            long nextTimeout = -1;
+
+            if (now < showWarningTime) {
+                nextTimeout = showWarningTime;
+            } else if (now < goToSleepTime) {
+                if (DEBUG) {
+                    long timeToSleep = goToSleepTime - now;
+                    Slog.d(TAG, "Going to sleep in " + timeToSleep
+                            + "ms if there is no user activity");
+                }
+                mInattentiveSleepWarningOverlayController.show();
+                nextTimeout = goToSleepTime;
+            } else {
+                if (DEBUG && mWakefulness != WAKEFULNESS_ASLEEP) {
+                    Slog.i(TAG, "Going to sleep now due to long user inactivity");
+                }
+            }
+
+            if (nextTimeout >= 0) {
+                scheduleAttentiveTimeout(nextTimeout);
+            }
+        }
+    }
+
+    private boolean maybeHideInattentiveSleepWarningLocked(long now, long showWarningTime) {
+        long attentiveTimeout = getAttentiveTimeoutLocked();
+
+        if (mInattentiveSleepWarningOverlayController.isShown() && (attentiveTimeout < 0
+                || isBeingKeptFromShowingInattentiveSleepWarningLocked()
+                || now < showWarningTime)) {
+            mInattentiveSleepWarningOverlayController.dismiss();
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isAttentiveTimeoutExpired(long now) {
+        long attentiveTimeout = getAttentiveTimeoutLocked();
+        return attentiveTimeout >= 0 && now > mLastUserActivityTime + attentiveTimeout;
     }
 
     /**
@@ -2169,15 +2274,38 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private long getSleepTimeoutLocked() {
-        final long timeout = mSleepTimeoutSetting;
+    private void handleAttentiveTimeout() { // runs on handler thread
+        synchronized (mLock) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "handleAttentiveTimeout");
+            }
+
+            mDirty |= DIRTY_ATTENTIVE;
+            updatePowerStateLocked();
+        }
+    }
+
+    private long getAttentiveTimeoutLocked() {
+        long timeout = mAttentiveTimeoutSetting;
         if (timeout <= 0) {
             return -1;
+        }
+
+        return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
+    }
+
+    private long getSleepTimeoutLocked(long attentiveTimeout) {
+        long timeout = mSleepTimeoutSetting;
+        if (timeout <= 0) {
+            return -1;
+        }
+        if (attentiveTimeout >= 0) {
+            timeout = Math.min(timeout, attentiveTimeout);
         }
         return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
     }
 
-    private long getScreenOffTimeoutLocked(long sleepTimeout) {
+    private long getScreenOffTimeoutLocked(long sleepTimeout, long attentiveTimeout) {
         long timeout = mScreenOffTimeoutSetting;
         if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
             timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
@@ -2187,6 +2315,9 @@ public final class PowerManagerService extends SystemService
         }
         if (sleepTimeout >= 0) {
             timeout = Math.min(timeout, sleepTimeout);
+        }
+        if (attentiveTimeout >= 0) {
+            timeout = Math.min(timeout, attentiveTimeout);
         }
         return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
     }
@@ -2209,13 +2340,16 @@ public final class PowerManagerService extends SystemService
         boolean changed = false;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_BOOT_COMPLETED
                 | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE
-                | DIRTY_DOCK_STATE)) != 0) {
+                | DIRTY_DOCK_STATE | DIRTY_ATTENTIVE)) != 0) {
             if (mWakefulness == WAKEFULNESS_AWAKE && isItBedTimeYetLocked()) {
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateWakefulnessLocked: Bed time...");
                 }
                 final long time = SystemClock.uptimeMillis();
-                if (shouldNapAtBedTimeLocked()) {
+                if (isAttentiveTimeoutExpired(time)) {
+                    changed = goToSleepNoUpdateLocked(time, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
+                } else if (shouldNapAtBedTimeLocked()) {
                     changed = napNoUpdateLocked(time, Process.SYSTEM_UID);
                 } else {
                     changed = goToSleepNoUpdateLocked(time,
@@ -2242,7 +2376,16 @@ public final class PowerManagerService extends SystemService
      * to being fully awake or else go to sleep for good.
      */
     private boolean isItBedTimeYetLocked() {
-        return mBootCompleted && !isBeingKeptAwakeLocked();
+        if (!mBootCompleted) {
+            return false;
+        }
+
+        long now = SystemClock.uptimeMillis();
+        if (isAttentiveTimeoutExpired(now)) {
+            return !isBeingKeptFromInattentiveSleepLocked();
+        } else {
+            return !isBeingKeptAwakeLocked();
+        }
     }
 
     /**
@@ -2263,11 +2406,29 @@ public final class PowerManagerService extends SystemService
     }
 
     /**
+     * Returns true if the device is prevented from going into inattentive sleep by the stay on
+     * while powered setting. We also keep the device awake when the proximity sensor returns a
+     * positive result so that the device does not lock while in a phone call. This function only
+     * controls whether the device will go to sleep which is independent of whether it will be
+     * allowed to suspend.
+     */
+    private boolean isBeingKeptFromInattentiveSleepLocked() {
+        return mStayOn || mScreenBrightnessBoostInProgress || mProximityPositive
+                || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
+                | USER_ACTIVITY_SCREEN_DIM)) != 0;
+    }
+
+    private boolean isBeingKeptFromShowingInattentiveSleepWarningLocked() {
+        return mStayOn || mScreenBrightnessBoostInProgress || mProximityPositive || !mBootCompleted;
+    }
+
+    /**
      * Determines whether to post a message to the sandman to update the dream state.
      */
     private void updateDreamLocked(int dirty, boolean displayBecameReady) {
         if ((dirty & (DIRTY_WAKEFULNESS
                 | DIRTY_USER_ACTIVITY
+                | DIRTY_ATTENTIVE
                 | DIRTY_WAKE_LOCKS
                 | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS
@@ -2350,6 +2511,7 @@ public final class PowerManagerService extends SystemService
             }
 
             // Determine whether the dream should continue.
+            long now = SystemClock.uptimeMillis();
             if (wakefulness == WAKEFULNESS_DREAMING) {
                 if (isDreaming && canDreamLocked()) {
                     if (mDreamsBatteryLevelDrainCutoffConfig >= 0
@@ -2371,11 +2533,15 @@ public final class PowerManagerService extends SystemService
 
                 // Dream has ended or will be stopped.  Update the power state.
                 if (isItBedTimeYetLocked()) {
-                    goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0, Process.SYSTEM_UID);
+                    int flags = 0;
+                    if (isAttentiveTimeoutExpired(now)) {
+                        flags |= PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE;
+                    }
+                    goToSleepNoUpdateLocked(now, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, flags,
+                            Process.SYSTEM_UID);
                     updatePowerStateLocked();
                 } else {
-                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis(),
+                    wakeUpNoUpdateLocked(now,
                             PowerManager.WAKE_REASON_UNKNOWN,
                             "android.server.power:DREAM_FINISHED", Process.SYSTEM_UID,
                             mContext.getOpPackageName(), Process.SYSTEM_UID);
@@ -2387,7 +2553,7 @@ public final class PowerManagerService extends SystemService
                 }
 
                 // Doze has ended or will be stopped.  Update the power state.
-                reallyGoToSleepNoUpdateLocked(SystemClock.uptimeMillis(), Process.SYSTEM_UID);
+                reallyGoToSleepNoUpdateLocked(now, Process.SYSTEM_UID);
                 updatePowerStateLocked();
             }
         }
@@ -3474,6 +3640,9 @@ public final class PowerManagerService extends SystemService
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
             pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
             pw.println("  mMaximumScreenDimRatioConfig=" + mMaximumScreenDimRatioConfig);
+            pw.println("  mAttentiveTimeoutConfig=" + mAttentiveTimeoutConfig);
+            pw.println("  mAttentiveTimeoutSetting=" + mAttentiveTimeoutSetting);
+            pw.println("  mAttentiveWarningDurationConfig=" + mAttentiveWarningDurationConfig);
             pw.println("  mScreenOffTimeoutSetting=" + mScreenOffTimeoutSetting);
             pw.println("  mSleepTimeoutSetting=" + mSleepTimeoutSetting);
             pw.println("  mMaximumScreenOffTimeoutFromDeviceAdmin="
@@ -3501,10 +3670,12 @@ public final class PowerManagerService extends SystemService
             pw.println("  mForegroundProfile=" + mForegroundProfile);
             pw.println("  mUserId=" + mUserId);
 
-            final long sleepTimeout = getSleepTimeoutLocked();
-            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+            final long attentiveTimeout = getAttentiveTimeoutLocked();
+            final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
+            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout, attentiveTimeout);
             final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
             pw.println();
+            pw.println("Attentive timeout: " + attentiveTimeout + " ms");
             pw.println("Sleep timeout: " + sleepTimeout + " ms");
             pw.println("Screen off timeout: " + screenOffTimeout + " ms");
             pw.println("Screen dim duration: " + screenDimDuration + " ms");
@@ -3772,6 +3943,16 @@ public final class PowerManagerService extends SystemService
                     PowerServiceSettingsAndConfigurationDumpProto.SLEEP_TIMEOUT_SETTING_MS,
                     mSleepTimeoutSetting);
             proto.write(
+                    PowerServiceSettingsAndConfigurationDumpProto.ATTENTIVE_TIMEOUT_SETTING_MS,
+                    mAttentiveTimeoutSetting);
+            proto.write(
+                    PowerServiceSettingsAndConfigurationDumpProto.ATTENTIVE_TIMEOUT_CONFIG_MS,
+                    mAttentiveTimeoutConfig);
+            proto.write(
+                    PowerServiceSettingsAndConfigurationDumpProto
+                            .ATTENTIVE_WARNING_DURATION_CONFIG_MS,
+                    mAttentiveWarningDurationConfig);
+            proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .MAXIMUM_SCREEN_OFF_TIMEOUT_FROM_DEVICE_ADMIN_MS,
                     // Clamp to int32
@@ -3853,9 +4034,11 @@ public final class PowerManagerService extends SystemService
                     mIsVrModeEnabled);
             proto.end(settingsAndConfigurationToken);
 
-            final long sleepTimeout = getSleepTimeoutLocked();
-            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+            final long attentiveTimeout = getAttentiveTimeoutLocked();
+            final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
+            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout, attentiveTimeout);
             final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            proto.write(PowerManagerServiceDumpProto.ATTENTIVE_TIMEOUT_MS, attentiveTimeout);
             proto.write(PowerManagerServiceDumpProto.SLEEP_TIMEOUT_MS, sleepTimeout);
             proto.write(PowerManagerServiceDumpProto.SCREEN_OFF_TIMEOUT_MS, screenOffTimeout);
             proto.write(PowerManagerServiceDumpProto.SCREEN_DIM_DURATION_MS, screenDimDuration);
@@ -4008,6 +4191,9 @@ public final class PowerManagerService extends SystemService
                     break;
                 case MSG_CHECK_FOR_LONG_WAKELOCKS:
                     checkForLongWakeLocks();
+                    break;
+                case MSG_ATTENTIVE_TIMEOUT:
+                    handleAttentiveTimeout();
                     break;
             }
         }

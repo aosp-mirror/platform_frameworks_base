@@ -605,6 +605,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
+                 Settings.Secure.ATTENTIVE_TIMEOUT,
                  Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,

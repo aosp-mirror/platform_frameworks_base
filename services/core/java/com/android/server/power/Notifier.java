@@ -536,6 +536,7 @@ public class Notifier {
             case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN;
             case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+            case PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
             default:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_USER;

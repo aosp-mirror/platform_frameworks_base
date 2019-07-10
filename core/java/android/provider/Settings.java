@@ -7677,6 +7677,20 @@ public final class Settings {
         public static final String SLEEP_TIMEOUT = "sleep_timeout";
 
         /**
+         * The timeout in milliseconds before the device goes to sleep due to user inattentiveness,
+         * even if the system is holding wakelocks. It should generally be longer than {@code
+         * config_attentiveWarningDuration}, as otherwise the device will show the attentive
+         * warning constantly. Small timeouts are discouraged, as they will cause the device to
+         * go to sleep quickly after waking up.
+         * <p>
+         * Use -1 to disable this timeout.
+         * </p>
+         *
+         * @hide
+         */
+        public static final String ATTENTIVE_TIMEOUT = "attentive_timeout";
+
+        /**
          * Controls whether double tap to wake is enabled.
          * @hide
          */

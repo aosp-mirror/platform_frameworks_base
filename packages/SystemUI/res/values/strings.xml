@@ -2501,4 +2501,11 @@
     <!-- Notification content text when switching to a default launcher that supports gesture navigation [CHAR LIMIT=NONE] -->
     <string name="notification_content_gesture_nav_available">Go to Settings to update system navigation</string>
 
+    <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
+    <string name="inattentive_sleep_warning_title">Standby</string>
+    <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
+    <string name="inattentive_sleep_warning_message" product="tv">The Android TV device will soon turn off; press a button to keep it on.</string>
+    <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
+    <string name="inattentive_sleep_warning_message" product="default">The device will soon turn off; press to keep it on.</string>
+
 </resources>

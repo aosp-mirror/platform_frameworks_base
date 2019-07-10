@@ -188,4 +188,14 @@ oneway interface IStatusBar
      * @param types the internal insets types of the bars are about to abort the transient state.
      */
     void abortTransient(int displayId, in int[] types);
+
+    /**
+     * Show a warning that the device is about to go to sleep due to user inactivity.
+     */
+    void showInattentiveSleepWarning();
+
+    /**
+     * Dismiss the warning that the device is about to go to sleep due to user inactivity.
+     */
+    void dismissInattentiveSleepWarning();
 }
