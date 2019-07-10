@@ -570,7 +570,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mutați telefonul spre stânga."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mutați telefonul spre dreapta."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Priviți mai direct spre dispozitiv."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nu vi se vede fața. Uitați-vă la telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Stați cu capul direct în fața telefonului."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Prea multă mișcare. Țineți telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Reînregistrați-vă chipul."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nu se mai poate recunoaște fața. Încercați din nou."</string>

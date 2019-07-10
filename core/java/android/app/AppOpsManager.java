@@ -240,7 +240,8 @@ public class AppOpsManager {
     public @interface UidState {}
 
     /**
-     * Uid state: The UID is a foreground persistent app.
+     * Uid state: The UID is a foreground persistent app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -248,7 +249,8 @@ public class AppOpsManager {
     public static final int UID_STATE_PERSISTENT = 100;
 
     /**
-     * Uid state: The UID is top foreground app.
+     * Uid state: The UID is top foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -257,6 +259,7 @@ public class AppOpsManager {
 
     /**
      * Uid state: The UID is running a foreground service of location type.
+     * The lower the UID state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -264,7 +267,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
 
     /**
-     * Uid state: The UID is running a foreground service.
+     * Uid state: The UID is running a foreground service. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -279,7 +283,8 @@ public class AppOpsManager {
     public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
 
     /**
-     * Uid state: The UID is a foreground app.
+     * Uid state: The UID is a foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -287,7 +292,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND = 500;
 
     /**
-     * Uid state: The UID is a background app.
+     * Uid state: The UID is a background app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -295,7 +301,8 @@ public class AppOpsManager {
     public static final int UID_STATE_BACKGROUND = 600;
 
     /**
-     * Uid state: The UID is a cached app.
+     * Uid state: The UID is a cached app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -2507,7 +2514,7 @@ public class AppOpsManager {
         }
 
         /**
-         * @return The duration of the operation in milliseconds.
+         * @return The duration of the operation in milliseconds. The duration is in wall time.
          */
         public long getDuration() {
             return getLastDuration(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
@@ -2515,7 +2522,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op while
-         * in the foreground.
+         * in the foreground. The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -2534,7 +2541,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op while
-         * in the background.
+         * in the background. The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -2553,7 +2560,7 @@ public class AppOpsManager {
 
         /**
          * Return the duration in milliseconds the app accessed this op for
-         * a given range of UID states.
+         * a given range of UID states. The duration is in wall time.
          *
          * @param fromUidState The UID state for which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
@@ -3968,6 +3975,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) in the foreground.
+         * The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -3986,6 +3994,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) in the background.
+         * The duration is in wall time.
          *
          * @param flags The flags which are any combination of
          * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
@@ -4004,7 +4013,7 @@ public class AppOpsManager {
 
         /**
          * Gets the total duration the app op was accessed (performed) for a given
-         * range of UID states.
+         * range of UID states. The duration is in wall time.
          *
          * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},

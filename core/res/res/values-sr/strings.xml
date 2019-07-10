@@ -570,7 +570,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Померите телефон улево."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Померите телефон удесно."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Гледајте право у уређај."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не види се лице. Гледајте у телефон."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Поставите лице директно испред телефона"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Много се померате. Држите телефон мирно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Поново региструјте лице."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Више не може да се препозна лице. Пробајте поново."</string>

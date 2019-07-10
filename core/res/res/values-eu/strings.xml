@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mugitu telefonoa ezkerretara."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mugitu telefonoa eskuinetara."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Begiratu zuzenago gailuari."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ez da hautematen aurpegia. Begiratu telefonoari."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Ipini aurrez aurre aurpegia eta telefonoa."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Mugimendu gehiegi dago. Eutsi tinko telefonoari."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Erregistratu berriro aurpegia."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ez dugu ezagutzen aurpegi hori. Saiatu berriro."</string>
@@ -1550,7 +1550,7 @@
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB bidezko unitatea"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> enpresaren USB bidezko unitatea"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB bidezko memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
     <string name="data_usage_warning_title" msgid="6499834033204801605">"Datuen erabileraren abisua"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"<xliff:g id="APP">%s</xliff:g> erabili dituzu"</string>
