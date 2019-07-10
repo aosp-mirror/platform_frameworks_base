@@ -20,8 +20,8 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.MergedConfiguration;
 import android.util.Log;
+import android.util.MergedConfiguration;
 import android.view.IWindowSession;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 * By parcelling the root surface, the app can offer another app content for embedding.
 * @hide
 */
-class WindowlessWindowManager extends IWindowSession.Default {
+class WindowlessWindowManager implements IWindowSession {
     private final static String TAG = "WindowlessWindowManager";
 
     /**
@@ -83,6 +83,17 @@ class WindowlessWindowManager extends IWindowSession.Default {
     }
 
     @Override
+    public int addToDisplayWithoutInputChannel(android.view.IWindow window, int seq,
+            android.view.WindowManager.LayoutParams attrs, int viewVisibility, int layerStackId,
+            android.graphics.Rect outContentInsets, android.graphics.Rect outStableInsets,
+            android.view.InsetsState insetsState) {
+        return 0;
+    }
+
+    @Override
+    public void remove(android.view.IWindow window) {}
+
+    @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
@@ -105,5 +116,155 @@ class WindowlessWindowManager extends IWindowSession.Default {
         mergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
 
         return 0;
+    }
+
+    @Override
+    public void prepareToReplaceWindows(android.os.IBinder appToken, boolean childrenOnly) {
+    }
+
+    @Override
+    public boolean outOfMemory(android.view.IWindow window) {
+        return false;
+    }
+
+    @Override
+    public void setTransparentRegion(android.view.IWindow window, android.graphics.Region region) {
+    }
+
+    @Override
+    public void setInsets(android.view.IWindow window, int touchableInsets,
+            android.graphics.Rect contentInsets, android.graphics.Rect visibleInsets,
+            android.graphics.Region touchableRegion) {
+    }
+
+    @Override
+    public void getDisplayFrame(android.view.IWindow window,
+            android.graphics.Rect outDisplayFrame) {
+    }
+
+    @Override
+    public void finishDrawing(android.view.IWindow window,
+            android.view.SurfaceControl.Transaction postDrawTransaction) {
+    }
+
+    @Override
+    public void setInTouchMode(boolean showFocus) {
+    }
+
+    @Override
+    public boolean getInTouchMode() {
+        return false;
+    }
+
+    @Override
+    public boolean performHapticFeedback(int effectId, boolean always) {
+        return false;
+    }
+
+    @Override
+    public android.os.IBinder performDrag(android.view.IWindow window, int flags,
+            android.view.SurfaceControl surface, int touchSource, float touchX, float touchY,
+            float thumbCenterX, float thumbCenterY, android.content.ClipData data) {
+        return null;
+    }
+
+    @Override
+    public void reportDropResult(android.view.IWindow window, boolean consumed) {
+    }
+
+    @Override
+    public void cancelDragAndDrop(android.os.IBinder dragToken, boolean skipAnimation) {
+    }
+
+    @Override
+    public void dragRecipientEntered(android.view.IWindow window) {
+    }
+
+    @Override
+    public void dragRecipientExited(android.view.IWindow window) {
+    }
+
+    @Override
+    public void setWallpaperPosition(android.os.IBinder windowToken, float x, float y,
+            float xstep, float ystep) {
+    }
+
+    @Override
+    public void wallpaperOffsetsComplete(android.os.IBinder window) {
+    }
+
+    @Override
+    public void setWallpaperDisplayOffset(android.os.IBinder windowToken, int x, int y) {
+    }
+
+    @Override
+    public android.os.Bundle sendWallpaperCommand(android.os.IBinder window,
+            java.lang.String action, int x, int y, int z, android.os.Bundle extras, boolean sync) {
+        return null;
+    }
+
+    @Override
+    public void wallpaperCommandComplete(android.os.IBinder window, android.os.Bundle result) {
+    }
+
+    @Override
+    public void onRectangleOnScreenRequested(android.os.IBinder token,
+            android.graphics.Rect rectangle) {
+    }
+
+    @Override
+    public android.view.IWindowId getWindowId(android.os.IBinder window) {
+        return null;
+    }
+
+    @Override
+    public void pokeDrawLock(android.os.IBinder window) {
+    }
+
+    @Override
+    public boolean startMovingTask(android.view.IWindow window, float startX, float startY) {
+        return false;
+    }
+
+    @Override
+    public void finishMovingTask(android.view.IWindow window) {
+    }
+
+    @Override
+    public void updatePointerIcon(android.view.IWindow window) {
+    }
+
+    @Override
+    public void reparentDisplayContent(android.view.IWindow window, android.view.SurfaceControl sc,
+            int displayId) {
+    }
+
+    @Override
+    public void updateDisplayContentLocation(android.view.IWindow window, int x, int y,
+            int displayId) {
+    }
+
+    @Override
+    public void updateTapExcludeRegion(android.view.IWindow window, int regionId,
+            android.graphics.Region region) {
+    }
+
+    @Override
+    public void insetsModified(android.view.IWindow window, android.view.InsetsState state) {
+    }
+
+    @Override
+    public void reportSystemGestureExclusionChanged(android.view.IWindow window,
+            java.util.List<android.graphics.Rect> exclusionRects) {
+    }
+
+    @Override
+    public void blessInputSurface(int displayId, SurfaceControl surface,
+            InputChannel outInputChannel) {
+    }
+
+    @Override
+    public android.os.IBinder asBinder() {
+        return null;
     }
 }
