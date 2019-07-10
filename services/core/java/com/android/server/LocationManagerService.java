@@ -97,6 +97,7 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.ActivityRecognitionProxy;
@@ -1039,25 +1040,29 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @GuardedBy("mLock")
-        public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
-            pw.print("  " + mName + " provider");
+        public void dumpLocked(FileDescriptor fd, IndentingPrintWriter pw, String[] args) {
+            pw.print(mName + " provider");
             if (isMock()) {
                 pw.print(" [mock]");
             }
             pw.println(":");
 
-            pw.println("    useable=" + mUseable);
+            pw.increaseIndent();
+
+            pw.println("useable=" + mUseable);
             if (!mUseable) {
-                pw.println("    attached=" + (mProvider != null));
+                pw.println("attached=" + (mProvider != null));
                 if (mIsManagedBySettings) {
-                    pw.println("    allowed=" + mAllowed);
+                    pw.println("allowed=" + mAllowed);
                 }
-                pw.println("    enabled=" + mEnabled);
+                pw.println("enabled=" + mEnabled);
             }
 
-            pw.println("    properties=" + mProperties);
+            pw.println("properties=" + mProperties);
 
             if (mProvider != null) {
+                // in order to be consistent with other provider APIs, this should be run on the
+                // location thread... but this likely isn't worth it just for dumping info.
                 long identity = Binder.clearCallingIdentity();
                 try {
                     mProvider.dump(fd, pw, args);
@@ -1065,6 +1070,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
+
+            pw.decreaseIndent();
         }
 
         @GuardedBy("mLock")
@@ -2916,6 +2923,12 @@ public class LocationManagerService extends ILocationManager.Stub {
             mCallerIdentity = callerIdentity;
             mListenerName = listenerName;
         }
+
+        @Override
+        public String toString() {
+            return mListenerName + "[" + mCallerIdentity.mPackageName + "(" + mCallerIdentity.mPid
+                    + ")]";
+        }
     }
 
     private static class LinkedListener<TListener> extends LinkedListenerBase {
@@ -3671,6 +3684,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+
         synchronized (mLock) {
             if (args.length > 0 && args[0].equals("--gnssmetrics")) {
                 if (mGnssMetricsProvider != null) {
@@ -3678,115 +3693,133 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 return;
             }
-            pw.println("Current Location Manager state:");
-            pw.print("  Current System Time: "
+
+            ipw.println("Location Manager State:");
+            ipw.increaseIndent();
+            ipw.print("Current System Time: "
                     + TimeUtils.logTimeOfDay(System.currentTimeMillis()));
-            pw.println(", Current Elapsed Time: "
+            ipw.println(", Current Elapsed Time: "
                     + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
-            pw.println("  Current user: " + mCurrentUserId + " " + Arrays.toString(
+            ipw.println("Current user: " + mCurrentUserId + " " + Arrays.toString(
                     mCurrentUserProfiles));
-            pw.println("  Location mode: " + isLocationEnabled());
-            pw.println("  Battery Saver Location Mode: "
+            ipw.println("Location Mode: " + isLocationEnabled());
+            ipw.println("Battery Saver Location Mode: "
                     + locationPowerSaveModeToString(mBatterySaverMode));
-            pw.println("  Location Listeners:");
+
+            ipw.println("Location Listeners:");
+            ipw.increaseIndent();
             for (Receiver receiver : mReceivers.values()) {
-                pw.println("    " + receiver);
+                ipw.println(receiver);
             }
-            pw.println("  Active Records by Provider:");
+            ipw.decreaseIndent();
+
+            ipw.println("Active Records by Provider:");
+            ipw.increaseIndent();
             for (Map.Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
-                pw.println("    " + entry.getKey() + ":");
+                ipw.println(entry.getKey() + ":");
+                ipw.increaseIndent();
                 for (UpdateRecord record : entry.getValue()) {
-                    pw.println("      " + record);
+                    ipw.println(record);
                 }
+                ipw.decreaseIndent();
             }
+            ipw.decreaseIndent();
 
-            pw.println("  Active GnssMeasurement Listeners:");
-            dumpGnssDataListenersLocked(pw, mGnssMeasurementsListeners);
-            pw.println("  Active GnssNavigationMessage Listeners:");
-            dumpGnssDataListenersLocked(pw, mGnssNavigationMessageListeners);
-            pw.println("  Active GnssStatus Listeners:");
-            dumpGnssDataListenersLocked(pw, mGnssStatusListeners);
+            ipw.println("GnssMeasurement Listeners:");
+            ipw.increaseIndent();
+            for (LinkedListenerBase listener : mGnssMeasurementsListeners.values()) {
+                ipw.println(listener + ": " + isThrottlingExemptLocked(listener.mCallerIdentity));
+            }
+            ipw.decreaseIndent();
 
-            pw.println("  Historical Records by Provider:");
+            ipw.println("GnssNavigationMessage Listeners:");
+            ipw.increaseIndent();
+            for (LinkedListenerBase listener : mGnssNavigationMessageListeners.values()) {
+                ipw.println(listener + ": " + isThrottlingExemptLocked(listener.mCallerIdentity));
+            }
+            ipw.decreaseIndent();
+
+            ipw.println("GnssStatus Listeners:");
+            ipw.increaseIndent();
+            for (LinkedListenerBase listener : mGnssStatusListeners.values()) {
+                ipw.println(listener + ": " + isThrottlingExemptLocked(listener.mCallerIdentity));
+            }
+            ipw.decreaseIndent();
+
+            ipw.println("Historical Records by Provider:");
+            ipw.increaseIndent();
             for (Map.Entry<PackageProviderKey, PackageStatistics> entry
                     : mRequestStatistics.statistics.entrySet()) {
                 PackageProviderKey key = entry.getKey();
-                PackageStatistics stats = entry.getValue();
-                pw.println("    " + key.packageName + ": " + key.providerName + ": " + stats);
+                ipw.println(key.packageName + ": " + key.providerName + ": " + entry.getValue());
             }
-            pw.println("  Last Known Locations:");
-            for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {
-                String provider = entry.getKey();
-                Location location = entry.getValue();
-                pw.println("    " + provider + ": " + location);
-            }
+            ipw.decreaseIndent();
 
-            pw.println("  Last Known Locations Coarse Intervals:");
-            for (Map.Entry<String, Location> entry : mLastLocationCoarseInterval.entrySet()) {
-                String provider = entry.getKey();
-                Location location = entry.getValue();
-                pw.println("    " + provider + ": " + location);
+            ipw.println("Last Known Locations:");
+            ipw.increaseIndent();
+            for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {
+                ipw.println(entry.getKey() + ": " + entry.getValue());
             }
+            ipw.decreaseIndent();
+
+            ipw.println("Last Known Coarse Locations:");
+            ipw.increaseIndent();
+            for (Map.Entry<String, Location> entry : mLastLocationCoarseInterval.entrySet()) {
+                ipw.println(entry.getKey() + ": " + entry.getValue());
+            }
+            ipw.decreaseIndent();
 
             if (mGeofenceManager != null) {
-                mGeofenceManager.dump(pw);
-            } else {
-                pw.println("  Geofences: null");
+                ipw.println("Geofences:");
+                ipw.increaseIndent();
+                mGeofenceManager.dump(ipw);
+                ipw.decreaseIndent();
             }
           
             if (mBlacklist != null) {
-                pw.append("  ");
-                mBlacklist.dump(pw);
-            } else {
-                pw.println("  mBlacklist=null");
+                mBlacklist.dump(ipw);
             }
 
             if (mExtraLocationControllerPackage != null) {
-                pw.println(" Location controller extra package: " + mExtraLocationControllerPackage
-                        + " enabled: " + mExtraLocationControllerPackageEnabled);
+                ipw.println("Location Controller Extra Package: " + mExtraLocationControllerPackage
+                        + (mExtraLocationControllerPackageEnabled ? " [enabled]" : "[disabled]"));
             }
 
             if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
-                pw.println("  Throttling Whitelisted Packages:");
+                ipw.println("Throttling Whitelisted Packages:");
+                ipw.increaseIndent();
                 for (String packageName : mBackgroundThrottlePackageWhitelist) {
-                    pw.println("    " + packageName);
+                    ipw.println(packageName);
                 }
+                ipw.decreaseIndent();
             }
 
             if (!mIgnoreSettingsPackageWhitelist.isEmpty()) {
-                pw.println("  Bypass Whitelisted Packages:");
+                ipw.println("Bypass Whitelisted Packages:");
+                ipw.increaseIndent();
                 for (String packageName : mIgnoreSettingsPackageWhitelist) {
-                    pw.println("    " + packageName);
+                    ipw.println(packageName);
                 }
+                ipw.decreaseIndent();
             }
 
             if (mLocationFudger != null) {
-                pw.append("  fudger: ");
-                mLocationFudger.dump(fd, pw, args);
-            } else {
-                pw.println("  fudger: null");
+                ipw.println("Location Fudger:");
+                ipw.increaseIndent();
+                mLocationFudger.dump(fd, ipw, args);
+                ipw.decreaseIndent();
             }
 
-            if (args.length > 0 && "short".equals(args[0])) {
-                return;
-            }
+            ipw.println("Location Providers:");
+            ipw.increaseIndent();
             for (LocationProvider provider : mProviders) {
-                provider.dumpLocked(fd, pw, args);
+                provider.dumpLocked(fd, ipw, args);
             }
-            if (mGnssBatchingInProgress) {
-                pw.println("  GNSS batching in progress");
-            }
-        }
-    }
+            ipw.decreaseIndent();
 
-    @GuardedBy("mLock")
-    private void dumpGnssDataListenersLocked(PrintWriter pw,
-            ArrayMap<IBinder, ? extends LinkedListenerBase> gnssDataListeners) {
-        for (LinkedListenerBase listener : gnssDataListeners.values()) {
-            CallerIdentity callerIdentity = listener.mCallerIdentity;
-            pw.println("    " + callerIdentity.mPid + " " + callerIdentity.mUid + " "
-                    + callerIdentity.mPackageName + ": "
-                    + isThrottlingExemptLocked(callerIdentity));
+            if (mGnssBatchingInProgress) {
+                ipw.println("GNSS batching in progress");
+            }
         }
     }
 }
