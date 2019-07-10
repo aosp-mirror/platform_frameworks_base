@@ -18,7 +18,6 @@ package com.android.systemui.bubbles;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.verify;
 
@@ -57,16 +56,19 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
 
     @Test
     public void testShowFlyout_isVisible() {
-        mFlyout.showFlyout("Hello", new PointF(100, 100), 500, true, Color.WHITE, null);
+        mFlyout.setupFlyoutStartingAsDot(
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null);
+        mFlyout.setVisibility(View.VISIBLE);
+
         assertEquals("Hello", mFlyoutText.getText());
         assertEquals(View.VISIBLE, mFlyout.getVisibility());
-        assertEquals(1f, mFlyoutText.getAlpha(), .01f);
     }
 
     @Test
     public void testFlyoutHide_runsCallback() {
         Runnable after = Mockito.mock(Runnable.class);
-        mFlyout.showFlyout("Hello", new PointF(100, 100), 500, true, Color.WHITE, after);
+        mFlyout.setupFlyoutStartingAsDot(
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, after);
         mFlyout.hideFlyout();
 
         verify(after).run();
@@ -74,19 +76,16 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
 
     @Test
     public void testSetCollapsePercent() {
-        mFlyout.showFlyout("Hello", new PointF(100, 100), 500, true, Color.WHITE, null);
-
-        float initialTranslationZ = mFlyout.getTranslationZ();
+        mFlyout.setupFlyoutStartingAsDot(
+                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null);
+        mFlyout.setVisibility(View.VISIBLE);
 
         mFlyout.setCollapsePercent(1f);
         assertEquals(0f, mFlyoutText.getAlpha(), 0.01f);
         assertNotSame(0f, mFlyoutText.getTranslationX()); // Should have moved to collapse.
-        assertTrue(mFlyout.getTranslationZ() < initialTranslationZ); // Should be descending.
 
         mFlyout.setCollapsePercent(0f);
         assertEquals(1f, mFlyoutText.getAlpha(), 0.01f);
         assertEquals(0f, mFlyoutText.getTranslationX());
-        assertEquals(initialTranslationZ, mFlyout.getTranslationZ());
-
     }
 }

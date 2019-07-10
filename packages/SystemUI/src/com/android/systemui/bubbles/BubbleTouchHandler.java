@@ -192,9 +192,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                                 }
                             });
                 } else if (isFlyout) {
-                    // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
                     if (!mBubbleData.isExpanded() && !mMovedEnough) {
-                        mBubbleData.setExpanded(true);
+                        mStack.onFlyoutTapped();
                     }
                 } else if (mMovedEnough) {
                     if (isStack) {
