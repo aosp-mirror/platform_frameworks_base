@@ -27,6 +27,7 @@ import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -1075,6 +1076,21 @@ public class CarStatusBar extends StatusBar implements
             Drawable background = mNotificationView.getBackground();
 
             background.setAlpha((int) (alpha * 255));
+        }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        super.onConfigChanged(newConfig);
+
+        int uiModeNightMask = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK);
+
+        boolean dayNightModeChanged = uiModeNightMask == Configuration.UI_MODE_NIGHT_YES
+                || uiModeNightMask == Configuration.UI_MODE_NIGHT_NO;
+
+        if (dayNightModeChanged) {
+            mNotificationView.setBackgroundColor(
+                    mContext.getColor(R.color.notification_shade_background_color));
         }
     }
 
