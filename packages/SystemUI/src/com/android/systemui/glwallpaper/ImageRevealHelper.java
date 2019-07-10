@@ -84,7 +84,17 @@ class ImageRevealHelper {
     void updateAwake(boolean awake, long duration) {
         mAwake = awake;
         mAnimator.setDuration(duration);
-        animate();
+        if (!mAwake && duration == 0) {
+            // We are transiting from home to aod,
+            // since main thread is waiting for rendering finished, we only need draw
+            // the last state directly, which is a black screen.
+            mReveal = MIN_REVEAL;
+            mRevealListener.onRevealStart();
+            mRevealListener.onRevealStateChanged();
+            mRevealListener.onRevealEnd();
+        } else {
+            animate();
+        }
     }
 
     /**
