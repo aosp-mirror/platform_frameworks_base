@@ -132,6 +132,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Xml;
+import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
@@ -173,6 +174,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -348,12 +350,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mHandler = mService.new WorkerHandler(mTestableLooper.getLooper());
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         mContext.setMockPackageManager(mPackageManagerClient);
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.uid = mUid;
+
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt()))
-                .thenReturn(applicationInfo);
+                .thenAnswer((Answer<ApplicationInfo>) invocation -> {
+                    Object[] args = invocation.getArguments();
+                    return getApplicationInfo((String) args[0], mUid);
+                });
         when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenReturn(applicationInfo);
+                .thenAnswer((Answer<ApplicationInfo>) invocation -> {
+                    Object[] args = invocation.getArguments();
+                    return getApplicationInfo((String) args[0], mUid);
+                });
         when(mPackageManagerClient.getPackageUidAsUser(any(), anyInt())).thenReturn(mUid);
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
@@ -389,7 +396,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
-
         mService.init(mTestableLooper.getLooper(),
                 mPackageManager, mPackageManagerClient, mockLightsManager,
                 mListeners, mAssistants, mConditionProviders,
@@ -413,10 +419,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @After
     public void tearDown() throws Exception {
-        mFile.delete();
+        if (mFile != null) mFile.delete();
         clearDeviceConfig();
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().dropShellPermissionIdentity();
+    }
+
+    private ApplicationInfo getApplicationInfo(String pkg, int uid) {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = uid;
+        switch (pkg) {
+            case PKG_N_MR1:
+                applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+                break;
+            case PKG_O:
+                applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+                break;
+            case PKG_P:
+                applicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
+                break;
+            default:
+                applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+                break;
+        }
+        return applicationInfo;
     }
 
     public void waitForIdle() {
@@ -5121,5 +5147,67 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+    }
+
+    @Test
+    public void testRemoveLargeRemoteViews() throws Exception {
+        int removeSize = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
+
+        RemoteViews rv = mock(RemoteViews.class);
+        when(rv.estimateMemoryUsage()).thenReturn(removeSize);
+        when(rv.clone()).thenReturn(rv);
+        RemoteViews rv1 = mock(RemoteViews.class);
+        when(rv1.estimateMemoryUsage()).thenReturn(removeSize);
+        when(rv1.clone()).thenReturn(rv1);
+        RemoteViews rv2 = mock(RemoteViews.class);
+        when(rv2.estimateMemoryUsage()).thenReturn(removeSize);
+        when(rv2.clone()).thenReturn(rv2);
+        RemoteViews rv3 = mock(RemoteViews.class);
+        when(rv3.estimateMemoryUsage()).thenReturn(removeSize);
+        when(rv3.clone()).thenReturn(rv3);
+        RemoteViews rv4 = mock(RemoteViews.class);
+        when(rv4.estimateMemoryUsage()).thenReturn(removeSize);
+        when(rv4.clone()).thenReturn(rv4);
+        // note: different!
+        RemoteViews rv5 = mock(RemoteViews.class);
+        when(rv5.estimateMemoryUsage()).thenReturn(removeSize - 1);
+        when(rv5.clone()).thenReturn(rv5);
+
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomContentView(rv)
+                .setCustomBigContentView(rv1)
+                .setCustomHeadsUpContentView(rv2)
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomContentView(rv3)
+                .setCustomBigContentView(rv4)
+                .setCustomHeadsUpContentView(rv5)
+                .setPublicVersion(np)
+                .build();
+
+        assertNotNull(np.contentView);
+        assertNotNull(np.bigContentView);
+        assertNotNull(np.headsUpContentView);
+
+        assertTrue(n.publicVersion.extras.containsKey(Notification.EXTRA_CONTAINS_CUSTOM_VIEW));
+        assertNotNull(n.publicVersion.contentView);
+        assertNotNull(n.publicVersion.bigContentView);
+        assertNotNull(n.publicVersion.headsUpContentView);
+
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        assertNull(n.contentView);
+        assertNull(n.bigContentView);
+        assertNotNull(n.headsUpContentView);
+        assertNull(n.publicVersion.contentView);
+        assertNull(n.publicVersion.bigContentView);
+        assertNull(n.publicVersion.headsUpContentView);
+
+        verify(mUsageStats, times(5)).registerImageRemoved(PKG);
     }
 }
