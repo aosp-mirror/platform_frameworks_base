@@ -200,6 +200,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     private int mPendingReportDraws;
 
     private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
+    private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -338,7 +339,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
         updateSurface();
         if (mSurfaceControl != null) {
-            mSurfaceControl.remove();
+            mTmpTransaction.remove(mSurfaceControl).apply();
         }
         mSurfaceControl = null;
 
@@ -533,13 +534,14 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     private void releaseSurfaces() {
         if (mSurfaceControl != null) {
-            mSurfaceControl.remove();
+            mTmpTransaction.remove(mSurfaceControl);
             mSurfaceControl = null;
         }
         if (mBackgroundControl != null) {
-            mBackgroundControl.remove();
+            mTmpTransaction.remove(mBackgroundControl);
             mBackgroundControl = null;
         }
+        mTmpTransaction.apply();
     }
 
     /** @hide */
@@ -848,7 +850,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         if (mDeferredDestroySurfaceControl != null) {
-            mDeferredDestroySurfaceControl.remove();
+            mTmpTransaction.remove(mDeferredDestroySurfaceControl).apply();
             mDeferredDestroySurfaceControl = null;
         }
 
