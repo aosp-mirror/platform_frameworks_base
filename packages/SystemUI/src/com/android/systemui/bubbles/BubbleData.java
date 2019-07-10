@@ -190,8 +190,9 @@ public class BubbleData {
         } else if (mSelectedBubble == null) {
             setSelectedBubbleInternal(bubble);
         }
-        bubble.setShowInShadeWhenBubble(!mExpanded || mSelectedBubble != bubble);
-        bubble.setShowBubbleDot(true);
+        boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
+        bubble.setShowInShadeWhenBubble(!isBubbleExpandedAndSelected);
+        bubble.setShowBubbleDot(!isBubbleExpandedAndSelected);
         dispatchPendingChanges();
     }
 
