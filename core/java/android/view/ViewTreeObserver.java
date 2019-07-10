@@ -1074,7 +1074,7 @@ public final class ViewTreeObserver {
      * be called manually if you are forcing the drawing on a View or a hierarchy of Views
      * that are not attached to a Window or in the GONE state.
      *
-     * @return True if the current draw should be canceled and resceduled, false otherwise.
+     * @return True if the current draw should be canceled and rescheduled, false otherwise.
      */
     @SuppressWarnings("unchecked")
     public final boolean dispatchOnPreDraw() {

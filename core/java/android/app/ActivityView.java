@@ -120,6 +120,7 @@ public class ActivityView extends ViewGroup {
 
         mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
+        mSurfaceView.setUseAlpha();
         mSurfaceView.setAlpha(0f);
         mSurfaceCallback = new SurfaceCallback();
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
