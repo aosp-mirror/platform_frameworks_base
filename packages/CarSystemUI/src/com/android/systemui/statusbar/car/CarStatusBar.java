@@ -1232,13 +1232,6 @@ public class CarStatusBar extends StatusBar implements
             setNotificationViewClipBounds((int) event2.getRawY());
             return true;
         }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            mClosingVelocity = DEFAULT_FLING_VELOCITY;
-            close();
-            super.onLongPress(e);
-        }
     }
 
     /**

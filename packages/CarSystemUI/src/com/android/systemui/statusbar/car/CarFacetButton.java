@@ -20,6 +20,7 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -122,7 +123,7 @@ public class CarFacetButton extends LinearLayout {
                         new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
             });
 
-            if (longPressIntentString != null) {
+            if (longPressIntentString != null && (Build.IS_ENG || Build.IS_USERDEBUG)) {
                 final Intent longPressIntent = Intent.parseUri(longPressIntentString,
                         Intent.URI_INTENT_SCHEME);
                 setOnLongClickListener(v -> {
