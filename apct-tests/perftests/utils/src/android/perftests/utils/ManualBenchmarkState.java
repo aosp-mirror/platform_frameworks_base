@@ -19,8 +19,13 @@ package android.perftests.utils;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -71,6 +76,8 @@ public final class ManualBenchmarkState {
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
+    private long mWarmupDurationNs = WARMUP_DURATION_NS;
+    private long mTargetTestDurationNs = TARGET_TEST_DURATION_NS;
     private long mWarmupStartTime = 0;
     private int mWarmupIterations = 0;
 
@@ -79,12 +86,30 @@ public final class ManualBenchmarkState {
     // Individual duration in nano seconds.
     private ArrayList<Long> mResults = new ArrayList<>();
 
+    /** @see #addExtraResult(String, long) */
+    private ArrayMap<String, ArrayList<Long>> mExtraResults;
+
     // Statistics. These values will be filled when the benchmark has finished.
     // The computation needs double precision, but long int is fine for final reporting.
     private Stats mStats;
 
+    void configure(ManualBenchmarkTest testAnnotation) {
+        if (testAnnotation == null) {
+            return;
+        }
+
+        final long warmupDurationNs = testAnnotation.warmupDurationNs();
+        if (warmupDurationNs >= 0) {
+            mWarmupDurationNs = warmupDurationNs;
+        }
+        final long targetTestDurationNs = testAnnotation.targetTestDurationNs();
+        if (targetTestDurationNs >= 0) {
+            mTargetTestDurationNs = targetTestDurationNs;
+        }
+    }
+
     private void beginBenchmark(long warmupDuration, int iterations) {
-        mMaxIterations = (int) (TARGET_TEST_DURATION_NS / (warmupDuration / iterations));
+        mMaxIterations = (int) (mTargetTestDurationNs / (warmupDuration / iterations));
         mMaxIterations = Math.min(MAX_TEST_ITERATIONS,
                 Math.max(mMaxIterations, MIN_TEST_ITERATIONS));
         mState = RUNNING;
@@ -108,7 +133,7 @@ public final class ManualBenchmarkState {
                 final long timeSinceStartingWarmup = System.nanoTime() - mWarmupStartTime;
                 ++mWarmupIterations;
                 if (mWarmupIterations >= WARMUP_MIN_ITERATIONS
-                        && timeSinceStartingWarmup >= WARMUP_DURATION_NS) {
+                        && timeSinceStartingWarmup >= mWarmupDurationNs) {
                     beginBenchmark(timeSinceStartingWarmup, mWarmupIterations);
                 }
                 return true;
@@ -129,31 +154,69 @@ public final class ManualBenchmarkState {
         }
     }
 
-    private String summaryLine() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Summary: ");
-        sb.append("median=").append(mStats.getMedian()).append("ns, ");
-        sb.append("mean=").append(mStats.getMean()).append("ns, ");
-        sb.append("min=").append(mStats.getMin()).append("ns, ");
-        sb.append("max=").append(mStats.getMax()).append("ns, ");
-        sb.append("sigma=").append(mStats.getStandardDeviation()).append(", ");
-        sb.append("iteration=").append(mResults.size()).append(", ");
-        sb.append("values=").append(mResults.toString());
+    /**
+     * Adds additional result while this benchmark is running. It is used when a sequence of
+     * operations is executed consecutively, the duration of each operation can also be recorded.
+     */
+    public void addExtraResult(String key, long duration) {
+        if (mState != RUNNING) {
+            return;
+        }
+        if (mExtraResults == null) {
+            mExtraResults = new ArrayMap<>();
+        }
+        mExtraResults.computeIfAbsent(key, k -> new ArrayList<>()).add(duration);
+    }
+
+    private static String summaryLine(String key, Stats stats, ArrayList<Long> results) {
+        final StringBuilder sb = new StringBuilder(key);
+        sb.append(" Summary: ");
+        sb.append("median=").append(stats.getMedian()).append("ns, ");
+        sb.append("mean=").append(stats.getMean()).append("ns, ");
+        sb.append("min=").append(stats.getMin()).append("ns, ");
+        sb.append("max=").append(stats.getMax()).append("ns, ");
+        sb.append("sigma=").append(stats.getStandardDeviation()).append(", ");
+        sb.append("iteration=").append(results.size()).append(", ");
+        sb.append("values=");
+        if (results.size() > 100) {
+            sb.append(results.subList(0, 100)).append(" ...");
+        } else {
+            sb.append(results);
+        }
         return sb.toString();
+    }
+
+    private static void fillStatus(Bundle status, String key, Stats stats) {
+        status.putLong(key + "_median", stats.getMedian());
+        status.putLong(key + "_mean", (long) stats.getMean());
+        status.putLong(key + "_percentile90", stats.getPercentile90());
+        status.putLong(key + "_percentile95", stats.getPercentile95());
+        status.putLong(key + "_stddev", (long) stats.getStandardDeviation());
     }
 
     public void sendFullStatusReport(Instrumentation instrumentation, String key) {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
-        Log.i(TAG, key + summaryLine());
+        Log.i(TAG, summaryLine(key, mStats, mResults));
         final Bundle status = new Bundle();
-        status.putLong(key + "_median", mStats.getMedian());
-        status.putLong(key + "_mean", (long) mStats.getMean());
-        status.putLong(key + "_percentile90", mStats.getPercentile90());
-        status.putLong(key + "_percentile95", mStats.getPercentile95());
-        status.putLong(key + "_stddev", (long) mStats.getStandardDeviation());
+        fillStatus(status, key, mStats);
+        if (mExtraResults != null) {
+            for (int i = 0; i < mExtraResults.size(); i++) {
+                final String subKey = key + "_" + mExtraResults.keyAt(i);
+                final Stats stats = new Stats(mExtraResults.valueAt(i));
+                Log.i(TAG, summaryLine(subKey, mStats, mResults));
+                fillStatus(status, subKey, stats);
+            }
+        }
         instrumentation.sendStatus(Activity.RESULT_OK, status);
     }
-}
 
+    /** The annotation to customize the test, e.g. the duration of warm-up and target test. */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ManualBenchmarkTest {
+        long warmupDurationNs() default -1;
+        long targetTestDurationNs() default -1;
+    }
+}
