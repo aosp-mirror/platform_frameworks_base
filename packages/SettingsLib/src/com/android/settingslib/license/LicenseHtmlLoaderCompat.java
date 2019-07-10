@@ -38,7 +38,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
             "/odm/etc/NOTICE.xml.gz",
             "/oem/etc/NOTICE.xml.gz",
             "/product/etc/NOTICE.xml.gz",
-            "/product_services/etc/NOTICE.xml.gz"};
+            "/system_ext/etc/NOTICE.xml.gz"};
     static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
 
     private final Context mContext;

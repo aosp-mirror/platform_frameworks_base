@@ -23,6 +23,7 @@
 
 #include "ResourceTable.h"
 #include "ValueVisitor.h"
+#include "util/Util.h"
 
 
 static const std::string base64_chars =
@@ -95,8 +96,8 @@ bool ResourcePathShortener::Consume(IAaptContext* context, ResourceTable* table)
     android::StringPiece res_subdir, actual_filename, extension;
     util::ExtractResFilePathParts(*file_ref->path, &res_subdir, &actual_filename, &extension);
 
-    // Android detects ColorStateLists via pathname, skip res/color/*
-    if (res_subdir == android::StringPiece("res/color/"))
+    // Android detects ColorStateLists via pathname, skip res/color*
+    if (util::StartsWith(res_subdir, "res/color"))
       continue;
 
     std::string shortened_filename = ShortenFileName(*file_ref->path, num_chars);

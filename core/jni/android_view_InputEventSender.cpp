@@ -141,6 +141,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                 event->getClassification(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),
+                event->getRawXCursorPosition(), event->getRawYCursorPosition(),
                 event->getDownTime(), event->getHistoricalEventTime(i),
                 event->getPointerCount(), event->getPointerProperties(),
                 event->getHistoricalRawPointerCoords(0, i));
