@@ -228,7 +228,6 @@ import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -9403,12 +9402,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-
-        // TODO When InputMethodManager supports per user calls remove this restriction.
-        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
-                && !checkCallerIsCurrentUserOrProfile()) {
-            return false;
-        }
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (packageList != null) {
             List<InputMethodInfo> enabledImes = InputMethodManagerInternal.get()
@@ -9464,26 +9457,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
             List<String> result = null;
-            // If we have multiple profiles we return the intersection of the
-            // permitted lists. This can happen in cases where we have a device
-            // and profile owner.
-            int[] profileIds = InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
-                    ? new int[]{callingUserId}
-                    : mUserManager.getProfileIdsWithDisabled(callingUserId);
-            for (int profileId : profileIds) {
-                // Just loop though all admins, only device or profiles
-                // owners can have permitted lists set.
-                DevicePolicyData policy = getUserDataUnchecked(profileId);
-                final int N = policy.mAdminList.size();
-                for (int j = 0; j < N; j++) {
-                    ActiveAdmin admin = policy.mAdminList.get(j);
-                    List<String> fromAdmin = admin.permittedInputMethods;
-                    if (fromAdmin != null) {
-                        if (result == null) {
-                            result = new ArrayList<String>(fromAdmin);
-                        } else {
-                            result.retainAll(fromAdmin);
-                        }
+            // Only device or profile owners can have permitted lists set.
+            DevicePolicyData policy = getUserDataUnchecked(callingUserId);
+            for (int i = 0; i < policy.mAdminList.size(); i++) {
+                ActiveAdmin admin = policy.mAdminList.get(i);
+                List<String> fromAdmin = admin.permittedInputMethods;
+                if (fromAdmin != null) {
+                    if (result == null) {
+                        result = new ArrayList<String>(fromAdmin);
+                    } else {
+                        result.retainAll(fromAdmin);
                     }
                 }
             }
