@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Flytt telefonen til venstre."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Flytt telefonen til høyre."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Se mer direkte på enheten din."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Kan ikke se ansiktet ditt. Se på telefonen."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Hold ansiktet ditt rett foran telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"For mye bevegelse. Hold telefonen stødig."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer ansiktet ditt på nytt."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Kan ikke gjenkjenne ansiktet lenger. Prøv igjen."</string>

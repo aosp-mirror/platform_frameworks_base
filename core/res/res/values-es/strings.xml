@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mueve el teléfono hacia la izquierda."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mueve el teléfono hacia la derecha."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira de forma más directa al dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se detecta tu cara. Mira al teléfono."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Coloca la cara directamente frente al teléfono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"El teléfono se mueve demasiado. Mantenlo quieto."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vuelve a registrar tu cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"No puede reconocer tu cara. Vuelve a intentarlo."</string>

@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ስልክን ወደ ግራ ያንቀሳቅሱ።"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ስልክን ወደ ቀኝ ያንቀሳቅሱ።"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"እባክዎ መሣሪያዎን ይበልጥ በቀጥታ ይመልከቱ።"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"የእርስዎን ፊት መመልከት አይችልም። ስልኩ ላይ ይመልከቱ።"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"መልክዎን በቀጥታ ከስልኩ ፊት ያድርጉት።"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ከልክ በላይ ብዙ እንቅስቃሴ። ስልኩን ቀጥ አድርገው ይያዙት።"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"እባክዎ ፊትዎን እንደገና ያስመዝግቡ"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ከእንግዲህ ፊትን ለይቶ ማወቅ አይችልም። እንደገና ይሞክሩ።"</string>

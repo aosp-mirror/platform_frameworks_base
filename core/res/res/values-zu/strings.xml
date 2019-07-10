@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Hambisa ifoni ngakwesokunxele."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Hambisa ifoni ngakwesokudla."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ayikwazi ukubona ubuso bakho. Bheka ifoni"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Beka ubuso bakho ngqo phambi kwefoni."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Ukunyakaza okuningi kakhulu. Bamba ifoni iqine."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Sicela uphinde ubhalise ubuso bakho."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ayisakwazi ukubona ubuso. Zama futhi."</string>

@@ -307,28 +307,22 @@ public class ActivityManagerWrapper {
         }
         final ActivityOptions finalOptions = options;
 
-        // Execute this from another thread such that we can do other things (like caching the
-        // bitmap for the thumbnail) while AM is busy starting our activity.
-        mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                boolean result = false;
-                try {
-                    result = startActivityFromRecents(taskKey.id, finalOptions);
-                } catch (Exception e) {
-                    // Fall through
+
+        boolean result = false;
+        try {
+            result = startActivityFromRecents(taskKey.id, finalOptions);
+        } catch (Exception e) {
+            // Fall through
+        }
+        final boolean finalResult = result;
+        if (resultCallback != null) {
+            resultCallbackHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    resultCallback.accept(finalResult);
                 }
-                final boolean finalResult = result;
-                if (resultCallback != null) {
-                    resultCallbackHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            resultCallback.accept(finalResult);
-                        }
-                    });
-                }
-            }
-        });
+            });
+        }
     }
 
     /**

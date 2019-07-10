@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Liigutage telefoni vasakule."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Liigutage telefoni paremale."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Vaadake otse oma seadmesse."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Teie nägu ei ole näha. Vaadake telefoni poole."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Hoidke oma nägu otse telefoni ees."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreerige oma nägu uuesti."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nägu ei õnnestu enam tuvastada. Proovige uuesti."</string>
