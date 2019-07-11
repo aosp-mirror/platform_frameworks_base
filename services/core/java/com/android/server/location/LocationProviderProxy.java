@@ -168,7 +168,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     }
 
     @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
+    public void onSetRequest(ProviderRequest request, WorkSource source) {
         synchronized (mRequestLock) {
             mRequest = request;
             mWorkSource = source;
@@ -206,7 +206,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     }
 
     @Override
-    public void sendExtraCommand(String command, Bundle extras) {
+    public void onSendExtraCommand(int uid, int pid, String command, Bundle extras) {
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
             service.sendExtraCommand(command, extras);
