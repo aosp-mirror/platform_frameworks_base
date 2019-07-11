@@ -1113,6 +1113,8 @@
     <dimen name="individual_bubble_size">60dp</dimen>
     <!-- Size of bubble icon bitmap. -->
     <dimen name="bubble_icon_bitmap_size">52dp</dimen>
+    <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
+    <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
     <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- How much to inset the icon in the circle -->
@@ -1157,6 +1159,7 @@
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 </resources>
