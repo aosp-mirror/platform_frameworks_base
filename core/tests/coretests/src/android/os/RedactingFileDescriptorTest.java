@@ -64,7 +64,7 @@ public class RedactingFileDescriptorTest {
     @Test
     public void testSingleByte() throws Exception {
         final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
-                new long[] { 10, 11 }).getFileDescriptor();
+                new long[] { 10, 11 }, new long[] {}).getFileDescriptor();
 
         final byte[] buf = new byte[1_000];
         assertEquals(buf.length, Os.read(fd, buf, 0, buf.length));
@@ -80,7 +80,7 @@ public class RedactingFileDescriptorTest {
     @Test
     public void testRanges() throws Exception {
         final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
-                new long[] { 100, 200, 300, 400 }).getFileDescriptor();
+                new long[] { 100, 200, 300, 400 }, new long[] {}).getFileDescriptor();
 
         final byte[] buf = new byte[10];
         assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 90));
@@ -102,7 +102,7 @@ public class RedactingFileDescriptorTest {
     @Test
     public void testEntireFile() throws Exception {
         final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_ONLY,
-                new long[] { 0, 5_000_000 }).getFileDescriptor();
+                new long[] { 0, 5_000_000 }, new long[] {}).getFileDescriptor();
 
         try (FileInputStream in = new FileInputStream(fd)) {
             int val;
@@ -115,7 +115,7 @@ public class RedactingFileDescriptorTest {
     @Test
     public void testReadWrite() throws Exception {
         final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
-                new long[] { 100, 200, 300, 400 }).getFileDescriptor();
+                new long[] { 100, 200, 300, 400 }, new long[] {}).getFileDescriptor();
 
         // Redacted at first
         final byte[] buf = new byte[10];
@@ -167,5 +167,77 @@ public class RedactingFileDescriptorTest {
                 removeRange(new long[] { 100, 200, 300, 400 }, 125, 175));
         assertArrayEquals(new long[] { 100, 200 },
                 removeRange(new long[] { 100, 200 }, 150, 150));
+    }
+
+    @Test
+    public void testFreeAtStart() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 10 }, new long[] {1}).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, (byte) 'f', (byte) 'r', (byte) 'e', (byte) 'e', 0, 0, 0, 0, 0 },
+                buf);
+    }
+
+    @Test
+    public void testFreeAtOffset() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 10 }, new long[] {3}).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, 0, 0, (byte) 'f', (byte) 'r', (byte) 'e', (byte) 'e', 0, 0, 0 },
+                buf);
+    }
+
+    @Test
+    public void testFreeAcrossRedactionStart() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 10 }, new long[] {0}).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, (byte) 'r', (byte) 'e', (byte) 'e', 0, 0, 0, 0, 0, 0 },
+                buf);
+    }
+
+    @Test
+    public void testFreeAcrossRedactionEnd() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 3 }, new long[] {2}).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, 0, (byte) 'f', 64, 64, 64, 64, 64, 64, 64 },
+                buf);
+    }
+
+    @Test
+    public void testFreeOutsideRedaction() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 8 }, new long[] { 8 }).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, 0, 0, 0, 0, 0, 0, 0, 64, 64 },
+                buf);
+    }
+
+    @Test
+    public void testFreeMultipleRedactions() throws Exception {
+        final FileDescriptor fd = RedactingFileDescriptor.open(mContext, mFile, MODE_READ_WRITE,
+                new long[] { 1, 2, 3, 4 }, new long[] { 0 }).getFileDescriptor();
+
+        final byte[] buf = new byte[10];
+        assertEquals(buf.length, Os.pread(fd, buf, 0, 10, 0));
+        assertArrayEquals(
+                new byte[] { 64, (byte) 'r', 64, (byte) 'e', 64, 64, 64, 64, 64, 64 },
+                buf);
     }
 }
