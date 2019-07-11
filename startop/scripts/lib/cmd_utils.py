@@ -44,10 +44,16 @@ def run_shell_func(script_path: str,
     A tuple of running status (True=succeeded, False=failed or timed out) and
     std output (string contents of stdout with trailing whitespace removed) .
   """
-  cmd = 'bash -c "source {script_path}; {func} {args}"'.format(
-    script_path=script_path,
-    func=func,
-    args=' '.join("'{}'".format(arg) for arg in args))
+  if args:
+    cmd = 'bash -c "source {script_path}; {func} {args}"'.format(
+      script_path=script_path,
+      func=func,
+      args=' '.join("'{}'".format(arg) for arg in args))
+  else:
+    cmd = 'bash -c "source {script_path}; {func}"'.format(
+      script_path=script_path,
+      func=func)
+
   print_utils.debug_print(cmd)
   return run_shell_command(cmd)
 

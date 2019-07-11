@@ -86,3 +86,28 @@ def wait_for_iorapd_finish(package: str,
                                        [package, activity, logcat_timestamp,
                                         str(timeout)])
   return passed
+
+
+def enable_iorapd_readahead() -> bool:
+  """
+  Disable readahead. Subsequent launches of an application will be sped up
+  by iorapd readahead prefetching.
+
+  Returns:
+    A bool indicates whether the enabling is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_readahead_enable', [])
+  return passed
+
+def disable_iorapd_readahead() -> bool:
+  """
+  Disable readahead. Subsequent launches of an application will be not be sped
+  up by iorapd readahead prefetching.
+
+  Returns:
+    A bool indicates whether the disabling is done successfully or not.
+  """
+  passed, _ = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                       'iorapd_readahead_disable', [])
+  return passed
