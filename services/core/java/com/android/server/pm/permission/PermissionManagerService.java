@@ -2957,10 +2957,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Install and runtime permissions are stored in different places,
             // so figure out what permission changed and persist the change.
             if (permissionsState.getInstallPermissionState(permName) != null) {
-                callback.onInstallPermissionUpdated();
+                callback.onInstallPermissionUpdatedNotifyListener(pkg.applicationInfo.uid);
             } else if (permissionsState.getRuntimePermissionState(permName, userId) != null
                     || hadState) {
-                callback.onPermissionUpdated(new int[] { userId }, false);
+                callback.onPermissionUpdatedNotifyListener(new int[] { userId }, false,
+                        pkg.applicationInfo.uid);
             }
         }
     }
@@ -2994,6 +2995,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionsState permissionsState = ps.getPermissionsState();
             changed |= permissionsState.updatePermissionFlagsForAllPermissions(
                     userId, flagMask, flagValues);
+            callback.onPermissionUpdatedNotifyListener(new int[] { userId }, false,
+                    pkg.applicationInfo.uid);
         }
         return changed;
     }

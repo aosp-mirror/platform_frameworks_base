@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2018 The Android Open Source Project
+Copyright (C) 2015 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,21 +13,15 @@ Copyright (C) 2018 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="vector"
-    android:width="640dp"
-    android:height="640dp"
-    android:viewportWidth="64"
-    android:viewportHeight="64">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
     <path
-        android:name="bg"
-        android:pathData="M 27 43 L 32 43 C 38.075 43 43 38.075 43 32 C 43 25.925 38.075 21 32 21 C 25.925 21 21 25.925 21 32 L 21 64"
-        android:strokeColor="#6823a1"
-        android:strokeWidth="16"/>
+        android:fillColor="#FF000000"
+        android:pathData="M19.45,22.89l-10.250001,-10.249999l-2.6599998,2.6599998l-1.77,-1.7600002l4.43,-4.4300003l12.0199995,12.0199995l-1.7699986,1.7600002z"/>
     <path
-        android:name="fg"
-        android:pathData="M 29 43 L 32 43 C 38.075 43 43 38.075 43 32 C 43 25.925 38.075 21 32 21 C 25.925 21 21 25.925 21 32 L 21 64"
-        android:strokeColor="#ff0000"
-        android:strokeWidth="8"/>
+        android:fillColor="#FF000000"
+        android:pathData="M12,6a6,6 0,1 1,-6 6,6 6,0 0,1 6,-6m0,-2.5A8.5,8.5 0,1 0,20.5 12,8.51 8.51,0 0,0 12,3.5Z"/>
 </vector>

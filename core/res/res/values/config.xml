@@ -4210,6 +4210,14 @@
          one bar higher than they actually are -->
     <bool name="config_inflateSignalStrength">false</bool>
 
+    <!-- Trigger a warning for notifications with RemoteView objects that are larger in bytes than
+    this value (default 1MB)-->
+    <integer name="config_notificationWarnRemoteViewSizeBytes">1000000</integer>
+
+    <!-- Strip notification RemoteView objects that are larger in bytes than this value (also log)
+    (default 2MB) -->
+    <integer name="config_notificationStripRemoteViewSizeBytes">2000000</integer>
+
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>
 
@@ -4217,4 +4225,8 @@
     the default implementation of ACTION_FACTORY_RESET does not work, so it is needed to re-route
     this intent to this package. This is being used in MasterClearReceiver.java. -->
     <string name="config_factoryResetPackage" translatable="false"></string>
+
+    <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
+         of known compatibility issues. -->
+    <string-array name="config_highRefreshRateBlacklist"></string-array>
 </resources>

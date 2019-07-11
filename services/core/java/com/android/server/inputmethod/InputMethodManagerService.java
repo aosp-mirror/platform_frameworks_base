@@ -17,7 +17,6 @@ package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.inputmethod.InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -1036,9 +1035,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // sender userId can be a real user ID or USER_ALL.
                 final int senderUserId = pendingResult.getSendingUserId();
                 if (senderUserId != UserHandle.USER_ALL) {
-                    final int resolvedUserId = PER_PROFILE_IME_ENABLED
-                            ? senderUserId : mUserManagerInternal.getProfileParentId(senderUserId);
-                    if (resolvedUserId != mSettings.getCurrentUserId()) {
+                    if (senderUserId != mSettings.getCurrentUserId()) {
                         // A background user is trying to hide the dialog. Ignore.
                         return;
                     }
@@ -1660,9 +1657,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return true;
         }
         if (userId == mSettings.getCurrentUserId()) {
-            return true;
-        }
-        if (!PER_PROFILE_IME_ENABLED && mSettings.isCurrentProfile(userId)) {
             return true;
         }
 
@@ -3005,7 +2999,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_USER;
         }
 
-        if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
+        if (userId != mSettings.getCurrentUserId()) {
             switchUserLocked(userId);
         }
         // Master feature flag that overrides other conditions and forces IME preRendering.

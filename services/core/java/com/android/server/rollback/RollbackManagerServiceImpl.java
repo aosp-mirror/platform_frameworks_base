@@ -86,9 +86,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private static final String TAG = "RollbackManager";
 
-    // Rollbacks expire after 48 hours.
+    // Rollbacks expire after 14 days.
     private static final long DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS =
-            TimeUnit.HOURS.toMillis(48);
+            TimeUnit.DAYS.toMillis(14);
 
     // Lock used to synchronize accesses to in-memory rollback data
     // structures. By convention, methods with the suffix "Locked" require
