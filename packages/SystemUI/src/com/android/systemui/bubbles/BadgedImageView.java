@@ -43,7 +43,7 @@ public class BadgedImageView extends ImageView {
     private boolean mOnLeft;
 
     /** Same as value in Launcher3 IconShape */
-    private static final int DEFAULT_PATH_SIZE = 100;
+    static final int DEFAULT_PATH_SIZE = 100;
 
     public BadgedImageView(Context context) {
         this(context, null);
