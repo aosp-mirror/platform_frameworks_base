@@ -2203,6 +2203,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (DEBUG) Log.d(TAG, "handleKeyguardBouncerChanged(" + bouncer + ")");
         boolean isBouncer = (bouncer == 1);
         mBouncer = isBouncer;
+
+        if (isBouncer) {
+            // If the bouncer is shown, always clear this flag. This can happen in the following
+            // situations: 1) Default camera with SHOW_WHEN_LOCKED is not chosen yet. 2) Secure
+            // camera requests dismiss keyguard (tapping on photos for example). When these happen,
+            // face auth should resume.
+            mSecureCameraLaunched = false;
+        }
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2649,6 +2658,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    enabledByUser=" + mFaceSettingEnabledForUser);
+            pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
     }
 }
