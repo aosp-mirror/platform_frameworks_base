@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फ़ोन को बाईं ओर घुमाएं."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फ़ोन को दाईं ओर घुमाएं."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"कृपया अपने डिवाइस की तरफ़ सीधे देखें."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"आपका चेहरा नहीं दिखाई दे रहा. फ़ोन की तरफ़ देखें."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"अपने चेहरे को फोन के ठीक सामने लाएं."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"डिवाइस बहुत ज़्यादा हिल रहा है. फ़ोन को बिना हिलाएं पकड़ें."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया फिर से अपने चेहरे की पहचान कराएं."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"अब चेहरे की पहचान नहीं कर पा रहा. फिर से कोशिश करें."</string>
@@ -783,7 +783,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"दोस्त"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"मैनेजर"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"मां"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"अभिभावक"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"सहयोगी"</string>
@@ -903,7 +903,7 @@
     <string name="granularity_label_line" msgid="5764267235026120888">"पंक्ति"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"फ़ैक्‍ट्री परीक्षण विफल"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST का काम केवल /system/app में इंस्‍टॉल किए गए पैकेज के लिए ही हो सकता है."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई प्रदान करता हो."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई मुहैया करवाता हो."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"रीबूट करें"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पेज दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -1084,7 +1084,7 @@
     <string name="undo" msgid="7905788502491742328">"वापस लाएं"</string>
     <string name="redo" msgid="7759464876566803888">"फिर से करें"</string>
     <string name="autofill" msgid="3035779615680565188">"ऑटोमैटिक भरना"</string>
-    <string name="textSelectionCABTitle" msgid="5236850394370820357">"लेख चयन"</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"टेक्स्ट चुनें"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"शब्दकोश में जोड़ें"</string>
     <string name="deleteText" msgid="6979668428458199034">"मिटाएं"</string>
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट विधि"</string>
@@ -1130,14 +1130,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"इसमें खोलें"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s में खोलें"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"खोलें"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"इसे इस्तेमाल करके <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलें"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"इसे इस्तेमाल करके लिंक खोलें"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"<xliff:g id="APPLICATION">%1$s</xliff:g> इस्तेमाल करके लिंक खोलें"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"<xliff:g id="APPLICATION">%2$s</xliff:g> इस्तेमाल करके <xliff:g id="HOST">%1$s</xliff:g> लिंक खोलें"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"एक्सेस दें"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"इसके ज़रिये बदलाव करें"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s की मदद से बदलाव करें"</string>
@@ -1287,7 +1283,7 @@
     <item msgid="75483255295529161">"वाई-फ़ाई"</item>
     <item msgid="6862614801537202646">"ब्लूटूथ"</item>
     <item msgid="5447331121797802871">"ईथरनेट"</item>
-    <item msgid="8257233890381651999">"VPN"</item>
+    <item msgid="8257233890381651999">"वीपीएन"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"अज्ञात नेटवर्क प्रकार"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाई-फ़ाई  से कनेक्‍ट नहीं हो सका"</string>
@@ -1589,8 +1585,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउज़र लॉन्च करें?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"\'हमेशा खुला रखें\' पर सेट करें"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"सेटिंग"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s वर्क प्रोफ़ाइल का समर्थन नहीं करता"</string>
