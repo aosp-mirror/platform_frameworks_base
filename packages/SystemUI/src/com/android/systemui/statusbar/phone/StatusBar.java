@@ -1941,6 +1941,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (start) {
             mNotificationPanel.startWaitingForOpenPanelGesture();
+            setPanelExpanded(true);
         } else {
             mNotificationPanel.stopWaitingForOpenPanelGesture(velocity);
         }
