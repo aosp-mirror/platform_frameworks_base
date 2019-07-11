@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.Log;
 import android.util.Pools;
 import android.view.DisplayCutout;
@@ -76,7 +77,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private int[] mTmpTwoArray = new int[2];
     private boolean mHeadsUpGoingAway;
     private int mStatusBarState;
-    private Rect mTouchableRegion = new Rect();
+    private Region mTouchableRegion = new Region();
 
     private AnimationStateHandler mAnimationStateHandler;
 
@@ -299,10 +300,11 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         info.touchableRegion.set(calculateTouchableRegion());
     }
 
-    public Rect calculateTouchableRegion() {
+    public Region calculateTouchableRegion() {
         if (!hasPinnedHeadsUp()) {
             mTouchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
             updateRegionForNotch(mTouchableRegion);
+
         } else {
             NotificationEntry topEntry = getTopEntry();
             if (topEntry.isChildInGroup()) {
@@ -322,7 +324,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         return mTouchableRegion;
     }
 
-    private void updateRegionForNotch(Rect region) {
+    private void updateRegionForNotch(Region region) {
         DisplayCutout cutout = mStatusBarWindowView.getRootWindowInsets().getDisplayCutout();
         if (cutout == null) {
             return;
@@ -390,6 +392,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         super.dumpInternal(fd, pw, args);
         pw.print("  mBarState=");
         pw.println(mStatusBarState);
+        pw.print("  mTouchableRegion=");
+        pw.println(mTouchableRegion);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
