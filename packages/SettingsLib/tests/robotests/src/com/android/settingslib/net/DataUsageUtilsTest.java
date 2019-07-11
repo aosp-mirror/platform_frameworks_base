@@ -44,7 +44,6 @@ import java.util.List;
 public class DataUsageUtilsTest {
 
     private static final int SUB_ID = 1;
-    private static final int SUB_ID_2 = 2;
     private static final String SUBSCRIBER_ID = "Test Subscriber";
     private static final String SUBSCRIBER_ID_2 = "Test Subscriber 2";
 
@@ -67,11 +66,11 @@ public class DataUsageUtilsTest {
 
         mContext = spy(RuntimeEnvironment.application);
         when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID)).thenReturn(mTelephonyManager);
         when(mContext.getSystemService(SubscriptionManager.class)).thenReturn(mSubscriptionManager);
         when(mTelephonyManager.getSubscriberId(SUB_ID)).thenReturn(SUBSCRIBER_ID);
-        when(mTelephonyManager.getSubscriberId(SUB_ID_2)).thenReturn(SUBSCRIBER_ID_2);
-        when(mInfo1.getSubscriptionId()).thenReturn(SUB_ID);
-        when(mInfo2.getSubscriptionId()).thenReturn(SUB_ID_2);
+        when(mTelephonyManager.getMergedSubscriberIds()).thenReturn(
+                new String[]{SUBSCRIBER_ID, SUBSCRIBER_ID_2});
 
         mInfos = new ArrayList<>();
         mInfos.add(mInfo1);
@@ -89,17 +88,7 @@ public class DataUsageUtilsTest {
     }
 
     @Test
-    public void getMobileTemplate_groupUuidNull_returnMobileAll() {
-        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
-        when(mInfo1.getGroupUuid()).thenReturn(null);
-
-        final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
-        assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID_2)).isFalse();
-    }
-
-    @Test
-    public void getMobileTemplate_groupUuidExist_returnMobileMerged() {
+    public void getMobileTemplate_infoExisted_returnMobileMerged() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(mParcelUuid);
 

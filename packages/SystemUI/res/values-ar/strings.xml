@@ -463,7 +463,7 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"تم تفعيل ميزة توفير شحن البطارية"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"لخفض مستوى الأداء وبيانات الخلفية"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"إيقاف ميزة توفير شحن البطارية"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"أثناء التسجيل أو الإرسال، يمكن لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> تسجيل أي معلومات حساسة يتم عرضها على الشاشة أو تشغيلها من جهازك، بما فيها المعلومات الحساسة مثل الصوت الذي تشغّله وكلمات المرور ومعلومات الدفع والصور والرسائل."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"أثناء التسجيل أو البث، يمكن لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> تسجيل أي معلومات حسّاسة يتم عرضها على الشاشة أو تشغيلها من جهازك، بما فيها المعلومات الحسّاسة مثل المقاطع الصوتية وكلمات المرور ومعلومات الدفع والصور والرسائل."</string>
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"أثناء التسجيل أو الإرسال، يمكن للخدمة التي تقدّم هذه الوظيفة تسجيل أي معلومات حساسة يتم عرضها على الشاشة أو تشغيلها من جهازك، بما فيها المعلومات الحساسة مثل الصوت الذي تشغّله وكلمات المرور ومعلومات الدفع والصور والرسائل."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"عرض معلومات حسّاسة أثناء الإرسال/التسجيل"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
