@@ -292,7 +292,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar y ver mensajes SMS"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envíe y vea SMS?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Espacio de almacenamiento"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Almacenamiento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceder a las fotos, el contenido multimedia y los archivos"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda a las fotos, el contenido multimedia y los archivos de tu dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrófono"</string>
@@ -568,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mueve el teléfono hacia la izquierda."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mueve el teléfono hacia la derecha."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira directamente al dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se ve tu cara. Mira el teléfono."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Ubica el rostro directamente frente al teléfono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Te estás moviendo demasiado. No muevas el teléfono"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vuelve a registrar tu cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ya no se reconoce la cara. Vuelve a intentarlo."</string>
@@ -602,7 +602,7 @@
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permite que la aplicación consulte las estadísticas de sincronización de una cuenta, por ejemplo, el historial de eventos sincronizados y la cantidad de datos sincronizados."</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"ver almacenamiento compartido"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Ver almacenamiento compartido"</string>
-    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"Cambia/borra almac. compartido"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"cambiar o borrar contenido de almacenamiento compartido"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Editar almacen. compartido"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"realizar/recibir llamadas SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que la aplicación realice y reciba llamadas SIP."</string>
@@ -1131,14 +1131,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Abrir con"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Abrir con %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Abrir"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Abrir vínculos de <xliff:g id="HOST">%1$s</xliff:g> con"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"Abrir vínculos con"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Abrir vínculos con <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Abrir vínculos de <xliff:g id="HOST">%1$s</xliff:g> con <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Otorgar acceso"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Editar con"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
@@ -1590,8 +1586,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Deseas iniciar el navegador?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Siempre"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Establecer en \"abrir siempre\""</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una vez"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Configuración"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s no admite perfiles de trabajo."</string>
