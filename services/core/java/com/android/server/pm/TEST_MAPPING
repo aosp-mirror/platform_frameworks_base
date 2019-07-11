@@ -8,6 +8,14 @@
     },
     {
       "name": "CtsCompilationTestCases"
+    },
+    {
+      "name": "CtsPermissionTestCases",
+      "options": [
+        {
+            "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
+        }
+      ]
     }
   ],
   "imports": [
