@@ -20,6 +20,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.Notification.CATEGORY_CALL;
+import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
@@ -439,14 +440,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         return sbn;
     }
 
+
     private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
             String groupKey, boolean isSummary) {
+        return generateNotificationRecord(channel, id, groupKey, isSummary, false /* isBubble */);
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
+            String groupKey, boolean isSummary, boolean isBubble) {
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setGroup(groupKey)
                 .setGroupSummary(isSummary);
-
+        if (isBubble) {
+            nb.setBubbleMetadata(getBasicBubbleMetadataBuilder().build());
+        }
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", mUid, 0,
                 nb.build(), new UserHandle(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
@@ -540,6 +549,52 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         return new Notification.BubbleMetadata.Builder()
                 .setIntent(pi)
                 .setIcon(Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon));
+    }
+
+    private NotificationRecord addGroupWithBubblesAndValidateAdded(boolean summaryAutoCancel)
+            throws RemoteException {
+
+        // Notification that has bubble metadata
+        NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel, 1,
+                "BUBBLE_GROUP", false /* isSummary */, true /* isBubble */);
+
+        // Make the package foreground so that we're allowed to be a bubble
+        when(mActivityManager.getPackageImportance(nrBubble.sbn.getPackageName())).thenReturn(
+                IMPORTANCE_FOREGROUND);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nrBubble.sbn.getId(), nrBubble.sbn.getNotification(), nrBubble.sbn.getUserId());
+        waitForIdle();
+
+        // Make sure we are a bubble
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertTrue((notifsAfter[0].getNotification().flags & FLAG_BUBBLE) != 0);
+
+        // Plain notification without bubble metadata
+        NotificationRecord nrPlain = generateNotificationRecord(mTestNotificationChannel, 2,
+                "BUBBLE_GROUP", false /* isSummary */, false /* isBubble */);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nrPlain.sbn.getId(), nrPlain.sbn.getNotification(), nrPlain.sbn.getUserId());
+        waitForIdle();
+
+        notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(2, notifsAfter.length);
+
+        // Summary notification for both of those
+        NotificationRecord nrSummary = generateNotificationRecord(mTestNotificationChannel, 3,
+                "BUBBLE_GROUP", true /* isSummary */, false /* isBubble */);
+        if (summaryAutoCancel) {
+            nrSummary.getNotification().flags |= FLAG_AUTO_CANCEL;
+        }
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nrSummary.sbn.getId(), nrSummary.sbn.getNotification(), nrSummary.sbn.getUserId());
+        waitForIdle();
+
+        notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(3, notifsAfter.length);
+
+        return nrSummary;
     }
 
     @Test
@@ -5191,5 +5246,49 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Our flags should have failed since we are foreground
         assertTrue(notif.getBubbleMetadata().getAutoExpandBubble());
         assertTrue(notif.getBubbleMetadata().isNotificationSuppressed());
+    }
+
+    @Test
+    public void testNotificationBubbles_bubbleChildrenStay_whenGroupSummaryDismissed()
+            throws Exception {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+
+        NotificationRecord nrSummary = addGroupWithBubblesAndValidateAdded(
+                true /* summaryAutoCancel */);
+
+        // Dismiss summary
+        final NotificationVisibility nv = NotificationVisibility.obtain(nrSummary.getKey(), 1, 2,
+                true);
+        mService.mNotificationDelegate.onNotificationClear(mUid, 0, PKG, nrSummary.sbn.getTag(),
+                nrSummary.sbn.getId(), nrSummary.getUserId(), nrSummary.getKey(),
+                NotificationStats.DISMISSAL_SHADE,
+                NotificationStats.DISMISS_SENTIMENT_NEUTRAL, nv);
+        waitForIdle();
+
+        // The bubble should still exist
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+    }
+
+    @Test
+    public void testNotificationBubbles_bubbleChildrenStay_whenGroupSummaryClicked()
+            throws Exception {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
+
+        NotificationRecord nrSummary = addGroupWithBubblesAndValidateAdded(
+                true /* summaryAutoCancel */);
+
+        // Click summary
+        final NotificationVisibility nv = NotificationVisibility.obtain(nrSummary.getKey(), 1, 2,
+                true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                nrSummary.getKey(), nv);
+        waitForIdle();
+
+        // The bubble should still exist
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
     }
 }

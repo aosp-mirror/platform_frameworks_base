@@ -5249,12 +5249,26 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
+                    // Bubbled children get to stick around if the summary was manually cancelled
+                    // (user removed) from systemui.
+                    FlagChecker childrenFlagChecker = null;
+                    if (mReason == REASON_CANCEL
+                            || mReason == REASON_CLICK
+                            || mReason == REASON_CANCEL_ALL) {
+                        childrenFlagChecker = (flags) -> {
+                            if ((flags & FLAG_BUBBLE) != 0) {
+                                return false;
+                            }
+                            return true;
+                        };
+                    }
+
                     // Cancel the notification.
                     boolean wasPosted = removeFromNotificationListsLocked(r);
                     cancelNotificationLocked(
                             r, mSendDelete, mReason, mRank, mCount, wasPosted, listenerName);
                     cancelGroupChildrenLocked(r, mCallingUid, mCallingPid, listenerName,
-                            mSendDelete, null);
+                            mSendDelete, childrenFlagChecker);
                     updateLightsLocked();
                 } else {
                     // No notification was found, assume that it is snoozed and cancel it.
