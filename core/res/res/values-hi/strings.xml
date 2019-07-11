@@ -1084,7 +1084,7 @@
     <string name="undo" msgid="7905788502491742328">"वापस लाएं"</string>
     <string name="redo" msgid="7759464876566803888">"फिर से करें"</string>
     <string name="autofill" msgid="3035779615680565188">"ऑटोमैटिक भरना"</string>
-    <string name="textSelectionCABTitle" msgid="5236850394370820357">"लेख चयन"</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"टेक्स्ट चुनें"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"शब्दकोश में जोड़ें"</string>
     <string name="deleteText" msgid="6979668428458199034">"मिटाएं"</string>
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट विधि"</string>
