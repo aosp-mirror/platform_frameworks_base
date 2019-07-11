@@ -44,7 +44,7 @@ final class UsageStatsProto {
 
         final long token = proto.start(IntervalStatsProto.STRINGPOOL);
         List<String> stringPool;
-        if (proto.isNextField(IntervalStatsProto.StringPool.SIZE)) {
+        if (proto.nextField(IntervalStatsProto.StringPool.SIZE)) {
             stringPool = new ArrayList(proto.readInt(IntervalStatsProto.StringPool.SIZE));
         } else {
             stringPool = new ArrayList();
@@ -66,12 +66,12 @@ final class UsageStatsProto {
 
         final long token = proto.start(fieldId);
         UsageStats stats;
-        if (proto.isNextField(IntervalStatsProto.UsageStats.PACKAGE_INDEX)) {
+        if (proto.nextField(IntervalStatsProto.UsageStats.PACKAGE_INDEX)) {
             // Fast path reading the package name index. Most cases this should work since it is
             // written first
             stats = statsOut.getOrCreateUsageStats(
                     stringPool.get(proto.readInt(IntervalStatsProto.UsageStats.PACKAGE_INDEX) - 1));
-        } else if (proto.isNextField(IntervalStatsProto.UsageStats.PACKAGE)) {
+        } else if (proto.nextField(IntervalStatsProto.UsageStats.PACKAGE)) {
             // No package index, try package name instead
             stats = statsOut.getOrCreateUsageStats(
                     proto.readString(IntervalStatsProto.UsageStats.PACKAGE));
@@ -177,7 +177,7 @@ final class UsageStatsProto {
         }
         String action = null;
         ArrayMap<String, Integer> counts;
-        if (proto.isNextField(IntervalStatsProto.UsageStats.ChooserAction.NAME)) {
+        if (proto.nextField(IntervalStatsProto.UsageStats.ChooserAction.NAME)) {
             // Fast path reading the action name. Most cases this should work since it is written
             // first
             action = proto.readString(IntervalStatsProto.UsageStats.ChooserAction.NAME);
@@ -244,7 +244,7 @@ final class UsageStatsProto {
         boolean configActive = false;
         final Configuration config = new Configuration();
         ConfigurationStats configStats;
-        if (proto.isNextField(IntervalStatsProto.Configuration.CONFIG)) {
+        if (proto.nextField(IntervalStatsProto.Configuration.CONFIG)) {
             // Fast path reading the configuration. Most cases this should work since it is
             // written first
             config.readFromProto(proto, IntervalStatsProto.Configuration.CONFIG);
