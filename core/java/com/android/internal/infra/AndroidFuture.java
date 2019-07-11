@@ -115,6 +115,20 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
         }
     }
 
+    /**
+     * Create a completed future with the given value.
+     *
+     * @param value the value for the completed future
+     * @param <U> the type of the value
+     * @return the completed future
+     */
+    @NonNull
+    public static <U> AndroidFuture<U> completedFuture(U value) {
+        AndroidFuture<U> future = new AndroidFuture<>();
+        future.complete(value);
+        return future;
+    }
+
     @Override
     public boolean complete(@Nullable T value) {
         boolean changed = super.complete(value);
