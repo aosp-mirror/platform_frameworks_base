@@ -3443,7 +3443,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.resetViews(dozingAnimated);
 
         updateQsExpansionEnabled();
-        mKeyguardViewMediator.setAodShowing(mDozing);
+        mKeyguardViewMediator.setDozing(mDozing);
 
         mEntryManager.updateNotifications();
         updateDozingState();
