@@ -333,10 +333,14 @@ class ApexManager {
     boolean markStagedSessionReady(int sessionId) {
         if (!isApexSupported()) return false;
         try {
-            return mApexService.markStagedSessionReady(sessionId);
+            mApexService.markStagedSessionReady(sessionId);
+            return true;
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to contact apexservice", re);
             throw new RuntimeException(re);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to mark session " + sessionId + " ready", e);
+            return false;
         }
     }
 
