@@ -366,7 +366,7 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.STREAM_MUSIC,       // STREAM_MUSIC
         AudioSystem.STREAM_MUSIC,       // STREAM_ALARM
         AudioSystem.STREAM_MUSIC,       // STREAM_NOTIFICATION
-        AudioSystem.STREAM_MUSIC,       // STREAM_BLUETOOTH_SCO
+        AudioSystem.STREAM_BLUETOOTH_SCO,       // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_MUSIC,       // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_MUSIC,       // STREAM_DTMF
         AudioSystem.STREAM_MUSIC,       // STREAM_TTS
