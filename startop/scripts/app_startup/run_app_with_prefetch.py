@@ -30,7 +30,7 @@ import argparse
 import os
 import sys
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 # local imports
 import lib.adb_utils as adb_utils
@@ -39,6 +39,8 @@ import lib.adb_utils as adb_utils
 DIR = os.path.abspath(os.path.dirname(__file__))
 IORAP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
                                                          '../iorap/common'))
+APP_STARTUP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
+                                                               'lib/common'))
 
 sys.path.append(os.path.dirname(DIR))
 import lib.print_utils as print_utils
@@ -101,6 +103,9 @@ def validate_options(opts: argparse.Namespace) -> bool:
                            not os.path.exists(opts.input)):
     print_utils.error_print('--input not specified!')
     return False
+
+  if opts.simulate:
+    opts.activity = 'act'
 
   if not opts.activity:
     _, opts.activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
@@ -181,9 +186,6 @@ def parse_metrics_output(input: str,
   Returns:
     A list of tuples that including metric name, metric value and rest info.
   """
-  if simulate:
-    return [('TotalTime', '123')]
-
   all_metrics = []
   for line in input.split('\n'):
     if not line:
@@ -204,6 +206,33 @@ def parse_metrics_output(input: str,
 
     all_metrics.append((metric_name, metric_value))
   return all_metrics
+
+def _parse_total_time(am_start_output: str) -> Optional[str]:
+  """Parses the total time from 'adb shell am start pkg' output.
+
+  Returns:
+    the total time of app startup.
+  """
+  for line in am_start_output.split('\n'):
+    if 'TotalTime:' in line:
+      return line[len('TotalTime:'):].strip()
+  return None
+
+def blocking_parse_all_metrics(am_start_output: str, package: str,
+                               pre_launch_timestamp: str,
+                               timeout: int) -> str:
+  """Parses the metric after app startup by reading from logcat in a blocking
+  manner until all metrics have been found".
+
+  Returns:
+    the total time and displayed time of app startup.
+    For example: "TotalTime=123\nDisplayedTime=121
+  """
+  total_time = _parse_total_time(am_start_output)
+  displayed_time = adb_utils.blocking_wait_for_logcat_displayed_time(
+    pre_launch_timestamp, package, timeout)
+
+  return 'TotalTime={}\nDisplayedTime={}'.format(total_time, displayed_time)
 
 def run(readahead: str,
         package: str,
@@ -238,21 +267,22 @@ def run(readahead: str,
   passed, output = cmd_utils.run_shell_command('timeout {timeout} '
                                                '"{DIR}/launch_application" '
                                                '"{package}" '
-                                               '"{activity}" | '
-                                               '"{DIR}/parse_metrics" '
-                                               '--package {package} '
-                                               '--activity {activity} '
-                                               '--timestamp "{timestamp}"'
-                                                 .format(timeout=timeout,
-                                                         DIR=DIR,
-                                                         package=package,
-                                                         activity=activity,
-                                                         timestamp=pre_launch_timestamp))
-
-  if not output and not simulate:
+                                               '"{activity}"'
+                                                .format(timeout=timeout,
+                                                        DIR=DIR,
+                                                        package=package,
+                                                        activity=activity))
+  if not passed and not simulate:
     return None
 
-  results = parse_metrics_output(output, simulate)
+  if simulate:
+    results = [('TotalTime', '123')]
+  else:
+    output = blocking_parse_all_metrics(output,
+                                        package,
+                                        pre_launch_timestamp,
+                                        timeout)
+    results = parse_metrics_output(output, simulate)
 
   passed = perform_post_launch_cleanup(
     readahead, package, activity, timeout, debug, pre_launch_timestamp)
