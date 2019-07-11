@@ -413,15 +413,15 @@ final class UiModeManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     if (mNightMode != mode) {
-                        if (UserManager.get(getContext()).isPrimaryUser()) {
-                            SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME,
-                                    Integer.toString(mode));
-                        }
-
                         // Only persist setting if not in car mode
                         if (!mCarModeEnabled) {
                             Secure.putIntForUser(getContext().getContentResolver(),
                                     Secure.UI_NIGHT_MODE, mode, user);
+
+                            if (UserManager.get(getContext()).isPrimaryUser()) {
+                                SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME,
+                                        Integer.toString(mode));
+                            }
                         }
 
                         mNightMode = mode;
