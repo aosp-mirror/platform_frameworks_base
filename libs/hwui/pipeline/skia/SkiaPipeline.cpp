@@ -313,8 +313,7 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
         case CaptureMode::CallbackAPI:
         case CaptureMode::SingleFrameSKP:
             mRecorder.reset(new SkPictureRecorder());
-            pictureCanvas = mRecorder->beginRecording(surface->width(), surface->height(),
-                nullptr, SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+            pictureCanvas = mRecorder->beginRecording(surface->width(), surface->height());
             break;
         case CaptureMode::MultiFrameSKP:
             // If a multi frame recording is active, initialize recording for a single frame of a
