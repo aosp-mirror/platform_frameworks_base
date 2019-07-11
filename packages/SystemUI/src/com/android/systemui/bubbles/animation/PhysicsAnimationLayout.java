@@ -619,7 +619,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * End actions to call when both TRANSLATION_X and TRANSLATION_Y animations have completed,
          * if {@link #position} was used to animate TRANSLATION_X and TRANSLATION_Y simultaneously.
          */
-        private Runnable[] mPositionEndActions;
+        @Nullable private Runnable[] mPositionEndActions;
 
         /**
          * All of the properties that have been set and will animate when {@link #start} is called.
@@ -1086,6 +1086,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
             mDampingRatio = -1;
             mEndActionsForProperty.clear();
             mPathAnimator = null;
+            mPositionEndActions = null;
         }
 
         /**
