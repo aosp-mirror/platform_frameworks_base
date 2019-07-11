@@ -960,6 +960,7 @@ public class RollbackTest {
     }
 
     @Test
+    @Ignore("b/136605788")
     public void testEnableRollbackTimeoutFailsRollback() throws Exception {
         try {
             RollbackTestUtils.adoptShellPermissionIdentity(
