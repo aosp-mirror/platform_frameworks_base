@@ -200,7 +200,7 @@ def test_parse_metrics_output():
 
 def _mocked_run_shell_command(*args, **kwargs):
   if args[0] == 'adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"':
-    return (True, "123:123")
+    return (True, "2019-07-02 23:20:06.972674825")
   elif args[0] == 'adb shell ps | grep "music" | awk \'{print $2;}\'':
     return (True, '9999')
   else:
@@ -217,7 +217,9 @@ def test_run_no_vm_cache_drop():
             simulate=False,
             debug=False)
 
-    calls = [call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
+    calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+             call('adb shell "kill 9999"'),
+             call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
              call(
                'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}" | '
                '"{DIR}/parse_metrics" --package {package} --activity {activity} '
@@ -226,7 +228,7 @@ def test_run_no_vm_cache_drop():
                          DIR=run.DIR,
                          package='music',
                          activity='MainActivity',
-                         timestamp='123:123')),
+                         timestamp='2019-07-02 23:20:06.972674825')),
              call('adb shell ps | grep "music" | awk \'{print $2;}\''),
              call('adb shell "kill 9999"')]
     mock_run_shell_command.assert_has_calls(calls)
@@ -242,9 +244,11 @@ def test_run_with_vm_cache_drop_and_post_launch_cleanup():
             simulate=False,
             debug=False)
 
-    calls = [call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
+    calls = [call('adb shell ps | grep "music" | awk \'{print $2;}\''),
+             call('adb shell "kill 9999"'),
+             call('adb shell "echo 3 > /proc/sys/vm/drop_caches"'),
              call('bash -c "source {}; iorapd_readahead_enable"'.
-                    format(run.IORAP_COMMON_BASH_SCRIPT)),
+                  format(run.IORAP_COMMON_BASH_SCRIPT)),
              call('adb shell "date -u +\'%Y-%m-%d %H:%M:%S.%N\'"'),
              call(
                'timeout {timeout} "{DIR}/launch_application" "{package}" "{activity}" | '
@@ -254,7 +258,7 @@ def test_run_with_vm_cache_drop_and_post_launch_cleanup():
                          DIR=run.DIR,
                          package='music',
                          activity='MainActivity',
-                         timestamp='123:123')),
+                         timestamp='2019-07-02 23:20:06.972674825')),
              call(
                'bash -c "source {script_path}; '
                'iorapd_readahead_wait_until_finished '
@@ -262,7 +266,7 @@ def test_run_with_vm_cache_drop_and_post_launch_cleanup():
                  format(timeout=10,
                         package='music',
                         activity='MainActivity',
-                        timestamp='123:123',
+                        timestamp='2019-07-02 23:20:06.972674825',
                         script_path=run.IORAP_COMMON_BASH_SCRIPT)),
              call('bash -c "source {}; iorapd_readahead_disable"'.
                     format(run.IORAP_COMMON_BASH_SCRIPT)),
