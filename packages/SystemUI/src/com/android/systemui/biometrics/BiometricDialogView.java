@@ -282,6 +282,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         if (mRestoredState == null) {
             updateState(STATE_AUTHENTICATING);
+            mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
             final int hint = getHintStringResourceId();
             if (hint != 0) {
                 mErrorText.setText(hint);
@@ -318,8 +319,6 @@ public abstract class BiometricDialogView extends LinearLayout {
             mDescriptionText.setVisibility(View.VISIBLE);
             mDescriptionText.setText(descriptionText);
         }
-
-        mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
         if (requiresConfirmation() && mRestoredState == null) {
             mPositiveButton.setVisibility(View.VISIBLE);
@@ -474,6 +473,8 @@ public abstract class BiometricDialogView extends LinearLayout {
             mHandler.removeMessages(MSG_RESET_MESSAGE);
             mErrorText.setTextColor(mTextColor);
             mErrorText.setText(R.string.biometric_dialog_tap_confirm);
+            mErrorText.setContentDescription(
+                    getResources().getString(R.string.biometric_dialog_tap_confirm));
             mErrorText.setVisibility(View.VISIBLE);
             announceAccessibilityEvent();
             mPositiveButton.setVisibility(View.VISIBLE);
@@ -487,6 +488,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         if (newState == STATE_PENDING_CONFIRMATION || newState == STATE_AUTHENTICATED) {
             mNegativeButton.setText(R.string.cancel);
+            mNegativeButton.setContentDescription(getResources().getString(R.string.cancel));
         }
 
         updateIcon(mState, newState);
