@@ -71,7 +71,6 @@ cc_defaults {
         "src/config/ConfigManager.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
-        "src/external/Perfprofd.cpp",
         "src/external/StatsPuller.cpp",
         "src/external/StatsCallbackPuller.cpp",
         "src/external/StatsCompanionServicePuller.cpp",
@@ -109,8 +108,6 @@ cc_defaults {
         "src/socket/StatsSocketListener.cpp",
         "src/shell/ShellSubscriber.cpp",
         "src/shell/shell_config.proto",
-
-        ":perfprofd_aidl",
     ],
 
     local_include_dirs: [
