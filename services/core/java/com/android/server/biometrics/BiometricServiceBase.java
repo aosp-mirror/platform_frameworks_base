@@ -497,9 +497,9 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    private final class BiometricTaskStackListener extends TaskStackListener {
+    private final Runnable mOnTaskStackChangedRunnable = new Runnable() {
         @Override
-        public void onTaskStackChanged() {
+        public void run() {
             try {
                 if (!(mCurrentClient instanceof AuthenticationClient)) {
                     return;
@@ -514,14 +514,21 @@ public abstract class BiometricServiceBase extends SystemService
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                     if (!topPackage.contentEquals(currentClient)
                             && !mCurrentClient.isAlreadyDone()) {
-                        Slog.e(getTag(), "Stopping background authentication, top: " + topPackage
-                                + " currentClient: " + currentClient);
+                        Slog.e(getTag(), "Stopping background authentication, top: "
+                                + topPackage + " currentClient: " + currentClient);
                         mCurrentClient.stop(false /* initiatedByClient */);
                     }
                 }
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Unable to get running tasks", e);
             }
+        }
+    };
+
+    private final class BiometricTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() {
+            mHandler.post(mOnTaskStackChangedRunnable);
         }
     }
 
