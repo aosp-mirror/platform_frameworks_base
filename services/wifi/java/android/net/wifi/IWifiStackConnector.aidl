@@ -16,5 +16,7 @@
 package android.net.wifi;
 
 /** @hide */
-oneway interface IWifiStackConnector {
+interface IWifiStackConnector {
+     IBinder retrieveApiServiceImpl(String serviceName);
+     boolean startApiService(String serviceName);
 }

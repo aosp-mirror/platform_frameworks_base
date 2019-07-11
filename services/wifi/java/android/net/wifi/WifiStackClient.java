@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityModuleConnector;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -54,7 +55,14 @@ public class WifiStackClient {
         @Override
         public void onModuleServiceConnected(IBinder service) {
             Log.i(TAG, "Wifi stack connected");
+
             registerWifiStackService(service);
+            IWifiStackConnector connector = IWifiStackConnector.Stub.asInterface(service);
+            registerApiServiceAndStart(connector, Context.WIFI_SERVICE);
+            registerApiServiceAndStart(connector, Context.WIFI_SCANNING_SERVICE);
+            registerApiServiceAndStart(connector, Context.WIFI_P2P_SERVICE);
+            registerApiServiceAndStart(connector, Context.WIFI_AWARE_SERVICE);
+            registerApiServiceAndStart(connector, Context.WIFI_RTT_RANGING_SERVICE);
         }
     }
 
@@ -63,6 +71,32 @@ public class WifiStackClient {
                 false /* allowIsolated */,
                 DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
         Log.i(TAG, "Wifi stack service registered");
+    }
+
+    private void registerApiServiceAndStart(
+            IWifiStackConnector stackConnector, String serviceName) {
+        IBinder service = null;
+        try {
+            service = stackConnector.retrieveApiServiceImpl(serviceName);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to retrieve service impl " + serviceName, e);
+        }
+        if (service == null) {
+            Log.i(TAG, "Service " + serviceName + " not available");
+            return;
+        }
+        Log.i(TAG, "Registering " + serviceName);
+        ServiceManager.addService(serviceName, service);
+
+        boolean success = false;
+        try {
+            success = stackConnector.startApiService(serviceName);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to start service " + serviceName, e);
+        }
+        if (!success) {
+            throw new RuntimeException("Service " + serviceName + " start failed");
+        }
     }
 
     /**
