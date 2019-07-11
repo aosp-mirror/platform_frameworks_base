@@ -913,6 +913,7 @@ public class BubbleStackView extends FrameLayout {
 
     private void animateCollapse() {
         mIsExpanded = false;
+        final Bubble previouslySelected = mExpandedBubble;
         beforeExpandedViewAnimation();
 
         mBubbleContainer.cancelAllAnimations();
@@ -922,6 +923,7 @@ public class BubbleStackView extends FrameLayout {
                 () -> {
                     mBubbleContainer.setActiveController(mStackAnimationController);
                     afterExpandedViewAnimation();
+                    previouslySelected.setContentVisibility(false);
                 });
 
         mExpandedViewXAnim.animateToFinalPosition(getCollapsedX());
