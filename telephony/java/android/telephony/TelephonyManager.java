@@ -10788,7 +10788,6 @@ public class TelephonyManager {
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
      *                 for more details. Pass null if don't care about the result.
-     *
      */
     public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
             @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
@@ -10796,6 +10795,12 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null) {
+                if (executor == null || callback == null) {
+                    return;
+                }
+                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                    callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                }));
                 return;
             }
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -10877,9 +10882,16 @@ public class TelephonyManager {
                 if (executor == null || callback == null) {
                     return;
                 }
-                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                    callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
-                }));
+                if (iOpportunisticNetworkService == null) {
+                    /* Todo<b/130595455> passing unknown due to lack of good error codes */
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                    }));
+                } else {
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                    }));
+                }
                 return;
             }
             IUpdateAvailableNetworksCallback callbackStub =

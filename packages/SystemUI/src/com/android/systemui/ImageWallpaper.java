@@ -46,6 +46,8 @@ public class ImageWallpaper extends WallpaperService {
     // We delayed destroy render context that subsequent render requests have chance to cancel it.
     // This is to avoid destroying then recreating render context in a very short time.
     private static final int DELAY_FINISH_RENDERING = 1000;
+    private static final int INTERVAL_WAIT_FOR_RENDERING = 100;
+    private static final int PATIENCE_WAIT_FOR_RENDERING = 5;
     private HandlerThread mWorker;
 
     @Override
@@ -80,7 +82,10 @@ public class ImageWallpaper extends WallpaperService {
         private StatusBarStateController mController;
         private final Runnable mFinishRenderingTask = this::finishRendering;
         private final boolean mNeedTransition;
+        private final Object mMonitor = new Object();
         private boolean mNeedRedraw;
+        // This variable can only be accessed in synchronized block.
+        private boolean mWaitingForRendering;
 
         GLEngine(Context context) {
             mNeedTransition = ActivityManager.isHighEndGfx()
@@ -122,6 +127,27 @@ public class ImageWallpaper extends WallpaperService {
             long duration = mNeedTransition || animationDuration != 0 ? animationDuration : 0;
             mWorker.getThreadHandler().post(
                     () -> mRenderer.updateAmbientMode(inAmbientMode, duration));
+            if (inAmbientMode && duration == 0) {
+                // This means that we are transiting from home to aod, to avoid
+                // race condition between window visibility and transition,
+                // we don't return until the transition is finished. See b/136643341.
+                waitForBackgroundRendering();
+            }
+        }
+
+        private void waitForBackgroundRendering() {
+            synchronized (mMonitor) {
+                try {
+                    mWaitingForRendering = true;
+                    for (int patience = 1; mWaitingForRendering; patience++) {
+                        mMonitor.wait(INTERVAL_WAIT_FOR_RENDERING);
+                        mWaitingForRendering &= patience < PATIENCE_WAIT_FOR_RENDERING;
+                    }
+                } catch (InterruptedException ex) {
+                } finally {
+                    mWaitingForRendering = false;
+                }
+            }
         }
 
         @Override
@@ -178,7 +204,8 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void preRender() {
-            mWorker.getThreadHandler().post(this::preRenderInternal);
+            // This method should only be invoked from worker thread.
+            preRenderInternal();
         }
 
         private void preRenderInternal() {
@@ -212,7 +239,8 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void requestRender() {
-            mWorker.getThreadHandler().post(this::requestRenderInternal);
+            // This method should only be invoked from worker thread.
+            requestRenderInternal();
         }
 
         private void requestRenderInternal() {
@@ -234,7 +262,21 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void postRender() {
-            mWorker.getThreadHandler().post(this::scheduleFinishRendering);
+            // This method should only be invoked from worker thread.
+            notifyWaitingThread();
+            scheduleFinishRendering();
+        }
+
+        private void notifyWaitingThread() {
+            synchronized (mMonitor) {
+                if (mWaitingForRendering) {
+                    try {
+                        mWaitingForRendering = false;
+                        mMonitor.notify();
+                    } catch (IllegalMonitorStateException ex) {
+                    }
+                }
+            }
         }
 
         private void cancelFinishRenderingTask() {
