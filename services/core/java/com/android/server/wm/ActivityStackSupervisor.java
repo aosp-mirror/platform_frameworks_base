@@ -813,8 +813,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     newIntents = r.newIntents;
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                        "Launching: " + r + " icicle=" + r.icicle + " with results=" + results
-                                + " newIntents=" + newIntents + " andResume=" + andResume);
+                        "Launching: " + r + " savedState=" + r.getSavedState()
+                                + " with results=" + results + " newIntents=" + newIntents
+                                + " andResume=" + andResume);
                 EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.mUserId,
                         System.identityHashCode(r), task.taskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
@@ -836,7 +837,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         proc.getConfiguration(), r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
-                logIfTransactionTooLarge(r.intent, r.icicle);
+                logIfTransactionTooLarge(r.intent, r.getSavedState());
 
 
                 // Create activity launch transaction.
@@ -851,7 +852,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getGlobalConfiguration(),
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
-                        r.icicle, r.persistentState, results, newIntents,
+                        r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
                         dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded(),
                                 r.assistToken));
 

@@ -36,6 +36,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
@@ -62,6 +63,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
@@ -200,7 +203,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testRestartProcessIfVisible() {
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
         mActivity.visible = true;
-        mActivity.haveState = false;
+        mActivity.setSavedState(null /* savedState */);
         mActivity.setState(ActivityStack.ActivityState.RESUMED, "testRestart");
         prepareFixedAspectRatioUnresizableActivity();
 
@@ -624,6 +627,58 @@ public class ActivityRecordTests extends ActivityTestsBase {
         ActivityRecord chooserActivity = new ActivityBuilder(mService).setComponent(
                 chooserComponent).build();
         assertThat(mActivity.canLaunchHomeActivity(NOBODY_UID, chooserActivity)).isTrue();
+    }
+
+    /**
+     * Verify that an {@link ActivityRecord} reports that it has saved state after creation, and
+     * that it is cleared after activity is resumed.
+     */
+    @Test
+    public void testHasSavedState() {
+        assertTrue(mActivity.hasSavedState());
+
+        ActivityRecord.activityResumedLocked(mActivity.appToken);
+        assertFalse(mActivity.hasSavedState());
+        assertNull(mActivity.getSavedState());
+    }
+
+    /** Verify the behavior of {@link ActivityRecord#setSavedState(Bundle)}. */
+    @Test
+    public void testUpdateSavedState() {
+        mActivity.setSavedState(null /* savedState */);
+        assertFalse(mActivity.hasSavedState());
+        assertNull(mActivity.getSavedState());
+
+        final Bundle savedState = new Bundle();
+        savedState.putString("test", "string");
+        mActivity.setSavedState(savedState);
+        assertTrue(mActivity.hasSavedState());
+        assertEquals(savedState, mActivity.getSavedState());
+    }
+
+    /** Verify the correct updates of saved state when activity client reports stop. */
+    @Test
+    public void testUpdateSavedState_activityStopped() {
+        final Bundle savedState = new Bundle();
+        savedState.putString("test", "string");
+        final PersistableBundle persistentSavedState = new PersistableBundle();
+        persistentSavedState.putString("persist", "string");
+
+        // Set state to STOPPING, or ActivityRecord#activityStoppedLocked() call will be ignored.
+        mActivity.setState(STOPPING, "test");
+        mActivity.activityStoppedLocked(savedState, persistentSavedState, "desc");
+        assertTrue(mActivity.hasSavedState());
+        assertEquals(savedState, mActivity.getSavedState());
+        assertEquals(persistentSavedState, mActivity.getPersistentSavedState());
+
+        // Sending 'null' for saved state can only happen due to timeout, so previously stored saved
+        // states should not be overridden.
+        mActivity.setState(STOPPING, "test");
+        mActivity.activityStoppedLocked(null /* savedState */, null /* persistentSavedState */,
+                "desc");
+        assertTrue(mActivity.hasSavedState());
+        assertEquals(savedState, mActivity.getSavedState());
+        assertEquals(persistentSavedState, mActivity.getPersistentSavedState());
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */

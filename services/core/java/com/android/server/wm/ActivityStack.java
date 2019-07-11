@@ -78,7 +78,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAIN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -1499,8 +1498,6 @@ class ActivityStack extends ConfigurationContainer {
                 + " callers=" + Debug.getCallers(5));
         r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
-                "Launch completed; removing icicle of " + r.icicle);
     }
 
     private void clearLaunchTime(ActivityRecord r) {
@@ -3983,7 +3980,7 @@ class ActivityStack extends ConfigurationContainer {
         r.results = null;
         r.pendingResults = null;
         r.newIntents = null;
-        r.icicle = null;
+        r.setSavedState(null /* savedState */);
     }
 
     /**
@@ -4800,7 +4797,7 @@ class ActivityStack extends ConfigurationContainer {
                         // it has failed more than twice. Skip activities that's already finishing
                         // cleanly by itself.
                         remove = false;
-                    } else if ((!r.haveState && !r.stateNotNeeded
+                    } else if ((!r.hasSavedState() && !r.stateNotNeeded
                             && !r.isState(ActivityState.RESTARTING_PROCESS)) || r.finishing) {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
@@ -4820,7 +4817,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (remove) {
                         if (DEBUG_ADD_REMOVE || DEBUG_CLEANUP) Slog.i(TAG_ADD_REMOVE,
                                 "Removing activity " + r + " from stack at " + i
-                                + ": haveState=" + r.haveState
+                                + ": hasSavedState=" + r.hasSavedState()
                                 + " stateNotNeeded=" + r.stateNotNeeded
                                 + " finishing=" + r.finishing
                                 + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
@@ -4843,11 +4840,6 @@ class ActivityStack extends ConfigurationContainer {
                         // This is needed when user later tap on the dead window, we need to stop
                         // other apps when user transfers focus to the restarted activity.
                         r.nowVisible = r.visible;
-                        if (!r.haveState) {
-                            if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
-                                    "App died, clearing saved state of " + r);
-                            r.icicle = null;
-                        }
                     }
                     cleanUpActivityLocked(r, true, true);
                     if (remove) {

@@ -317,10 +317,15 @@ final class ActivityRecord extends ConfigurationContainer {
     UriPermissionOwner uriPermissions; // current special URI access perms.
     WindowProcessController app;      // if non-null, hosting application
     private ActivityState mState;    // current state we are in
-    Bundle  icicle;         // last saved activity state
-    PersistableBundle persistentState; // last persistently saved activity state
+    private Bundle mIcicle;         // last saved activity state
+    private PersistableBundle mPersistentState; // last persistently saved activity state
+    private boolean mHaveState = true; // Indicates whether the last saved state of activity is
+                                       // preserved. This starts out 'true', since the initial state
+                                       // of an activity is that we have everything, and we should
+                                       // never consider it lacking in state to be removed if it
+                                       // dies. After an activity is launched it follows the value
+                                       // of #mIcicle.
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
-    boolean haveState;      // have we gotten the last activity state?
     boolean stopped;        // is activity pause finished?
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
@@ -550,8 +555,8 @@ final class ActivityRecord extends ConfigurationContainer {
                 if (lastLaunchTime == 0) pw.print("0");
                 else TimeUtils.formatDuration(lastLaunchTime, now, pw);
                 pw.println();
-        pw.print(prefix); pw.print("haveState="); pw.print(haveState);
-                pw.print(" icicle="); pw.println(icicle);
+        pw.print(prefix); pw.print("mHaveState="); pw.print(mHaveState);
+                pw.print(" mIcicle="); pw.println(mIcicle);
         pw.print(prefix); pw.print("state="); pw.print(mState);
                 pw.print(" stopped="); pw.print(stopped);
                 pw.print(" delayedResume="); pw.print(delayedResume);
@@ -610,6 +615,34 @@ final class ActivityRecord extends ConfigurationContainer {
                 pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
             }
         }
+    }
+
+    /** Update the saved state of an activity. */
+    void setSavedState(@Nullable Bundle savedState) {
+        mIcicle = savedState;
+        mHaveState = mIcicle != null;
+    }
+
+    /**
+     * Get the actual Bundle instance of the saved state.
+     * @see #hasSavedState() for checking if the record has saved state.
+     */
+    @Nullable Bundle getSavedState() {
+        return mIcicle;
+    }
+
+    /**
+     * Check if the activity has saved state.
+     * @return {@code true} if the client reported a non-empty saved state from last onStop(), or
+     *         if this record was just created and the client is yet to be launched and resumed.
+     */
+    boolean hasSavedState() {
+        return mHaveState;
+    }
+
+    /** @return The actual PersistableBundle instance of the saved persistent state. */
+    @Nullable PersistableBundle getPersistentSavedState() {
+        return mPersistentState;
     }
 
     void updateApplicationInfo(ApplicationInfo aInfo) {
@@ -968,10 +1001,6 @@ final class ActivityRecord extends ConfigurationContainer {
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
-
-        // This starts out true, since the initial state of an activity is that we have everything,
-        // and we shouldn't never consider it lacking in state to be removed if it dies.
-        haveState = true;
 
         // If the class name in the intent doesn't match that of the target, this is
         // probably an alias. We have to create a new ComponentName object to keep track
@@ -2182,8 +2211,7 @@ final class ActivityRecord extends ConfigurationContainer {
             // been removed (e.g. destroy timeout), so the token could be null.
             return;
         }
-        r.icicle = null;
-        r.haveState = false;
+        r.setSavedState(null /* savedState */);
 
         final ActivityDisplay display = r.getDisplay();
         if (display != null) {
@@ -2256,19 +2284,18 @@ final class ActivityRecord extends ConfigurationContainer {
             return;
         }
         if (newPersistentState != null) {
-            persistentState = newPersistentState;
+            mPersistentState = newPersistentState;
             mAtmService.notifyTaskPersisterLocked(task, false);
         }
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + icicle);
 
         if (newIcicle != null) {
             // If icicle is null, this is happening due to a timeout, so we haven't really saved
             // the state.
-            icicle = newIcicle;
-            haveState = true;
+            setSavedState(newIcicle);
             launchCount = 0;
             updateTaskDescription(description);
         }
+        if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + mIcicle);
         if (!stopped) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + this + " (stop complete)");
             stack.mHandler.removeMessages(STOP_TIMEOUT_MSG, this);
@@ -2588,7 +2615,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         final ActivityStack stack = getActivityStack();
         if (stack == null || this == stack.getResumedActivity() || this == stack.mPausingActivity
-                || !haveState || !stopped) {
+                || !mHaveState || !stopped) {
             // We're not ready for this kind of thing.
             return false;
         }
@@ -3523,7 +3550,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // The restarting state avoids removing this record when process is died.
         setState(RESTARTING_PROCESS, "restartActivityProcess");
 
-        if (!visible || haveState) {
+        if (!visible || mHaveState) {
             // Kill its process immediately because the activity should be in background.
             // The activity state will be update to {@link #DESTROYED} in
             // {@link ActivityStack#cleanUpActivityLocked} when handling process died.
@@ -3612,9 +3639,9 @@ final class ActivityRecord extends ConfigurationContainer {
         intent.saveToXml(out);
         out.endTag(null, TAG_INTENT);
 
-        if (isPersistable() && persistentState != null) {
+        if (isPersistable() && mPersistentState != null) {
             out.startTag(null, TAG_PERSISTABLEBUNDLE);
-            persistentState.saveToXml(out);
+            mPersistentState.saveToXml(out);
             out.endTag(null, TAG_PERSISTABLEBUNDLE);
         }
     }
@@ -3695,7 +3722,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
                 stackSupervisor, null /* options */, null /* sourceRecord */);
 
-        r.persistentState = persistentState;
+        r.mPersistentState = persistentState;
         r.taskDescription = taskDescription;
         r.createTime = createTime;
 
