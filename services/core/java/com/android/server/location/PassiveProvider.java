@@ -68,6 +68,6 @@ public class PassiveProvider extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" report location=" + mReportLocation);
+        pw.println("report location=" + mReportLocation);
     }
 }

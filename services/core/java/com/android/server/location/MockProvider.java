@@ -81,7 +81,7 @@ public class MockProvider extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" last location=" + mLocation);
+        pw.println("last location=" + mLocation);
     }
 
     @Override
