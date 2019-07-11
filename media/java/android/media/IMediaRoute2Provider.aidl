@@ -23,7 +23,8 @@ import android.media.IMediaRoute2ProviderClient;
  * {@hide}
  */
 oneway interface IMediaRoute2Provider {
-    void registerClient(IMediaRoute2ProviderClient client);
-    void selectRoute(IMediaRoute2ProviderClient client, int uid, String id);
-    void notifyControlRequestSent(IMediaRoute2ProviderClient client, String id, in Intent request);
+    void setClient(IMediaRoute2ProviderClient client);
+    void selectRoute(String packageName, String id);
+    void unselectRoute(String packageName, String id);
+    void notifyControlRequestSent(String id, in Intent request);
 }

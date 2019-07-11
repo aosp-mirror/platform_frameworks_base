@@ -22,6 +22,5 @@ import android.media.MediaRoute2ProviderInfo;
  * @hide
  */
 oneway interface IMediaRoute2ProviderClient {
-    void notifyRouteSelected(int uid, String routeId);
     void notifyProviderInfoUpdated(in MediaRoute2ProviderInfo info);
 }

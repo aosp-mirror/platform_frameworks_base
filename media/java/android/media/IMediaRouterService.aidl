@@ -48,8 +48,8 @@ interface IMediaRouterService {
     /**
      * Changes the selected route of the client.
      *
-     * @param client Client to change it's selected route.
-     * @param route Route to be selected.
+     * @param client the client that changes it's selected route
+     * @param route the route to be selected
      */
     void selectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
     void setControlCategories(IMediaRouter2Client client, in List<String> categories);
@@ -60,10 +60,10 @@ interface IMediaRouterService {
     /**
      * Changes the selected route of an application.
      *
-     * @param manager Manager that calls the method
-     * @param uid UID of the client that will change the selected route.
-     * @param route Route to be selected.
+     * @param manager the manager that calls the method
+     * @param packageName the package name of the client that will change the selected route
+     * @param route the route to be selected
      */
-    void selectClientRoute2(IMediaRouter2Manager manager, int clientUid,
+    void selectClientRoute2(IMediaRouter2Manager manager, String packageName,
             in @nullable MediaRoute2Info route);
 }

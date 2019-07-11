@@ -36,7 +36,6 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     private final Handler mHandler;
     private ProviderStub mStub;
-    //TODO: Should allow multiple clients
     private IMediaRoute2ProviderClient mClient;
     private MediaRoute2ProviderInfo mProviderInfo;
 
@@ -46,6 +45,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        //TODO: Allow binding from media router service only?
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             if (mStub == null) {
                 mStub = new ProviderStub();
@@ -58,49 +58,37 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Called when selectRoute is called on a route of the provider.
      *
-     * @param uid The target application uid
-     * @param routeId The id of the target route
+     * @param packageName the package name of the application that selected the route
+     * @param routeId the id of the route being selected
      */
-    public abstract void onSelect(int uid, String routeId);
+    public abstract void onSelectRoute(String packageName, String routeId);
 
     /**
-     * Called when sendControlRequest is called on a route of the provider.
+     * Called when unselectRoute is called on a route of the provider.
      *
-     * @param routeId The id of the target route
-     * @param request The media control request intent
+     * @param packageName the package name of the application that has selected the route.
+     * @param routeId the id of the route being unselected
+     */
+    public abstract void onUnselectRoute(String packageName, String routeId);
+
+    /**
+     * Called when sendControlRequest is called on a route of the provider
+     *
+     * @param routeId the id of the target route
+     * @param request the media control request intent
      */
     //TODO: Discuss what to use for request (e.g., Intent? Request class?)
     public abstract void onControlRequest(String routeId, Intent request);
 
     /**
-     * Updates provider info from selected route and application.
-     *
-     * TODO: When provider descriptor is defined, this should update the descriptor correctly.
-     *
-     * @param uid
-     * @param routeId
-     */
-    public void updateProvider(int uid, String routeId) {
-        if (mClient != null) {
-            try {
-                //TODO: After publishState() is fully implemented, delete this.
-                mClient.notifyRouteSelected(uid, routeId);
-            } catch (RemoteException ex) {
-                Log.d(TAG, "Failed to update provider");
-            }
-        }
-        publishState();
-    }
-
-    /**
-     * Updates provider info and publish routes
+     * Updates provider info and publishes routes
      */
     public final void setProviderInfo(MediaRoute2ProviderInfo info) {
         mProviderInfo = info;
         publishState();
     }
 
-    void registerClient(IMediaRoute2ProviderClient client) {
+    void setClient(IMediaRoute2ProviderClient client) {
         mClient = client;
         publishState();
     }
@@ -120,20 +108,25 @@ public abstract class MediaRoute2ProviderService extends Service {
         ProviderStub() { }
 
         @Override
-        public void registerClient(IMediaRoute2ProviderClient client) {
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::registerClient,
+        public void setClient(IMediaRoute2ProviderClient client) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::setClient,
                     MediaRoute2ProviderService.this, client));
         }
 
         @Override
-        public void selectRoute(IMediaRoute2ProviderClient client, int uid, String id) {
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelect,
-                    MediaRoute2ProviderService.this, uid, id));
+        public void selectRoute(String packageName, String id) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
+                    MediaRoute2ProviderService.this, packageName, id));
         }
 
         @Override
-        public void notifyControlRequestSent(IMediaRoute2ProviderClient client, String id,
-                Intent request) {
+        public void unselectRoute(String packageName, String id) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onUnselectRoute,
+                    MediaRoute2ProviderService.this, packageName, id));
+        }
+
+        @Override
+        public void notifyControlRequestSent(String id, Intent request) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onControlRequest,
                     MediaRoute2ProviderService.this, id, request));
         }
