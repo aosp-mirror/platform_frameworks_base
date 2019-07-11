@@ -182,6 +182,7 @@ public class BubbleStackView extends FrameLayout {
 
     private int mBubbleSize;
     private int mBubblePaddingTop;
+    private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
@@ -326,6 +327,7 @@ public class BubbleStackView extends FrameLayout {
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
         mExpandedAnimateXDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
@@ -1453,6 +1455,11 @@ public class BubbleStackView extends FrameLayout {
             if (mBubbleContainer.getChildCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
             }
+            // Increase the touch target size of the bubble
+            outRect.top -= mBubbleTouchPadding;
+            outRect.left -= mBubbleTouchPadding;
+            outRect.right += mBubbleTouchPadding;
+            outRect.bottom += mBubbleTouchPadding;
         } else {
             mBubbleContainer.getBoundsOnScreen(outRect);
         }
@@ -1474,14 +1481,6 @@ public class BubbleStackView extends FrameLayout {
                             : 0);
         }
 
-        return 0;
-    }
-
-    private int getBottomInset() {
-        if (getRootWindowInsets() != null) {
-            WindowInsets insets = getRootWindowInsets();
-            return insets.getSystemWindowInsetBottom();
-        }
         return 0;
     }
 

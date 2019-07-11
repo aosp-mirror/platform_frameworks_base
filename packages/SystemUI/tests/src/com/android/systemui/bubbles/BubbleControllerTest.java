@@ -334,7 +334,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().key).showBubbleDot());
 
         // Expand
-        BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleController.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);

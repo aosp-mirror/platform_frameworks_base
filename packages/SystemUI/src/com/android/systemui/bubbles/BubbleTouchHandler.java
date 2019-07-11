@@ -18,7 +18,6 @@ package com.android.systemui.bubbles;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -65,11 +64,10 @@ class BubbleTouchHandler implements View.OnTouchListener {
     private int mTouchSlopSquared;
     private VelocityTracker mVelocityTracker;
 
-    private boolean mInDismissTarget;
-    private Handler mHandler = new Handler();
-
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
+    /** Whether the current touched view is in the dismiss target. */
+    private boolean mInDismissTarget;
 
     BubbleTouchHandler(BubbleStackView stackView,
             BubbleData bubbleData, Context context) {
