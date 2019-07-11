@@ -181,6 +181,7 @@ public class BubbleStackView extends FrameLayout {
     private float mVerticalPosPercentBeforeRotation = -1;
 
     private int mBubbleSize;
+    private int mIconBitmapSize;
     private int mBubblePaddingTop;
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
@@ -359,8 +360,8 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-        int iconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-        mBubbleIconFactory = new BubbleIconFactory(context, iconBitmapSize);
+        mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleIconFactory = new BubbleIconFactory(context, mIconBitmapSize);
 
         mExpandedViewContainer = new FrameLayout(context);
         mExpandedViewContainer.setElevation(elevation);
@@ -479,7 +480,10 @@ public class BubbleStackView extends FrameLayout {
      * Handle theme changes.
      */
     public void onThemeChanged() {
+        // Recreate icon factory to update default adaptive icon scale.
+        mBubbleIconFactory = new BubbleIconFactory(mContext, mIconBitmapSize);
         for (Bubble b: mBubbleData.getBubbles()) {
+            b.getIconView().setBubbleIconFactory(mBubbleIconFactory);
             b.getIconView().updateViews();
             b.getExpandedView().applyThemeAttrs();
         }
