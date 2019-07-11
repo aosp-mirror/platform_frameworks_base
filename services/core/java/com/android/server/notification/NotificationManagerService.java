@@ -5122,23 +5122,25 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // snoozed apps
-        if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
-            MetricsLogger.action(r.getLogMaker()
-                    .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
-                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
-            if (DBG) {
-                Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
+        synchronized (mNotificationLock) {
+            // snoozed apps
+            if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
+                MetricsLogger.action(r.getLogMaker()
+                        .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                        .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
+                if (DBG) {
+                    Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
+                }
+                mSnoozeHelper.update(userId, r);
+                handleSavePolicyFile();
+                return false;
             }
-            mSnoozeHelper.update(userId, r);
-            handleSavePolicyFile();
-            return false;
-        }
 
 
-        // blocked apps
-        if (isBlocked(r, mUsageStats)) {
-            return false;
+            // blocked apps
+            if (isBlocked(r, mUsageStats)) {
+                return false;
+            }
         }
 
         return true;
