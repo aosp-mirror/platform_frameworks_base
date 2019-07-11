@@ -1440,6 +1440,11 @@ public class AccountManagerService
 
     @Override
     public void onServiceChanged(AuthenticatorDescription desc, int userId, boolean removed) {
+        UserInfo user = getUserManager().getUserInfo(userId);
+        if (user == null) {
+            Log.w(TAG, "onServiceChanged: ignore removed user " + userId);
+            return;
+        }
         validateAccountsInternal(getUserAccounts(userId), false /* invalidateAuthenticatorCache */);
     }
 
