@@ -22,7 +22,7 @@ from datetime import datetime
 from typing import Optional, Pattern
 
 # local import
-import print_utils
+import lib.print_utils as print_utils
 
 def parse_logcat_datetime(timestamp: str) -> Optional[datetime]:
   """Parses the timestamp of logcat.
@@ -61,7 +61,7 @@ async def _blocking_wait_for_logcat_pattern(timestamp: datetime,
                                             pattern: Pattern,
                                             timeout: datetime) -> Optional[str]:
   # Show the year in the timestampe.
-  logcat_cmd = 'adb logcat -v year -v threadtime -T'.split()
+  logcat_cmd = 'adb logcat -v UTC -v year -v threadtime -T'.split()
   logcat_cmd.append(str(timestamp))
   print_utils.debug_print('[LOGCAT]:' + ' '.join(logcat_cmd))
 
