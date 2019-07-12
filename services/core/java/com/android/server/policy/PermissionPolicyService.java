@@ -798,7 +798,7 @@ public final class PermissionPolicyService extends SystemService {
         @Override
         public boolean checkStartActivity(@NonNull Intent intent, int callingUid,
                 @Nullable String callingPackage) {
-            if (callingPackage != null && isActionRemovedForCallingPackage(intent.getAction(),
+            if (callingPackage != null && isActionRemovedForCallingPackage(intent, callingUid,
                     callingPackage)) {
                 Slog.w(LOG_TAG, "Action Removed: starting " + intent.toString() + " from "
                         + callingPackage + " (uid=" + callingUid + ")");
@@ -811,8 +811,9 @@ public final class PermissionPolicyService extends SystemService {
          * Check if the intent action is removed for the calling package (often based on target SDK
          * version). If the action is removed, we'll silently cancel the activity launch.
          */
-        private boolean isActionRemovedForCallingPackage(@Nullable String action,
+        private boolean isActionRemovedForCallingPackage(@NonNull Intent intent, int callingUid,
                 @NonNull String callingPackage) {
+            String action = intent.getAction();
             if (action == null) {
                 return false;
             }
@@ -821,15 +822,19 @@ public final class PermissionPolicyService extends SystemService {
                 case Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT: {
                     ApplicationInfo applicationInfo;
                     try {
-                        applicationInfo = getContext().getPackageManager().getApplicationInfo(
-                                callingPackage, 0);
+                        applicationInfo = getContext().getPackageManager().getApplicationInfoAsUser(
+                                callingPackage, 0, UserHandle.getUserId(callingUid));
+                        if (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+                            // Applications targeting Q or higher should use
+                            // RoleManager.createRequestRoleIntent() instead.
+                            return true;
+                        }
                     } catch (PackageManager.NameNotFoundException e) {
                         Slog.i(LOG_TAG, "Cannot find application info for " + callingPackage);
-                        return false;
                     }
-                    // Applications targeting Q should use RoleManager.createRequestRoleIntent()
-                    // instead.
-                    return applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q;
+                    // Make sure RequestRoleActivity can know the calling package if we allow it.
+                    intent.putExtra(Intent.EXTRA_CALLING_PACKAGE, callingPackage);
+                    return false;
                 }
                 default:
                     return false;
