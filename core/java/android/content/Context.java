@@ -4665,10 +4665,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.telephony.ims.RcsManager}.
+     * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
      */
-    public static final String TELEPHONY_RCS_SERVICE = "ircs";
+    public static final String TELEPHONY_RCS_MESSAGE_SERVICE = "ircsmessage";
 
      /**
      * Use with {@link #getSystemService(String)} to retrieve an

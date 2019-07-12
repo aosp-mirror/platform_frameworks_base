@@ -565,7 +565,7 @@ java_defaults {
         "telephony/java/android/telephony/ims/aidl/IImsServiceController.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
-        "telephony/java/android/telephony/ims/aidl/IRcs.aidl",
+        "telephony/java/android/telephony/ims/aidl/IRcsMessage.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsGroupCallSessionCallback.aidl",
