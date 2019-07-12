@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premido un elemento e arrástrao para engadir atallos"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Para reorganizar os atallos, mantenos premidos e arrástraos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra o elemento ata aquí para eliminalo"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Como mínimo ten que haber 6 atallos"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Como mínimo ten que haber <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> mosaicos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">

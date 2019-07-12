@@ -89,7 +89,7 @@
     <string name="screenrecord_share_label" msgid="4197867360204019389">"Bagikan"</string>
     <string name="screenrecord_delete_label" msgid="7893716870917824013">"Hapus"</string>
     <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Rekaman layar dibatalkan"</string>
-    <string name="screenrecord_save_message" msgid="4733982661301846778">"Rekaman layar disimpan, tap untuk melihat"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Rekaman layar disimpan, ketuk untuk melihat"</string>
     <string name="screenrecord_delete_description" msgid="5743190456090354585">"Rekaman layar dihapus"</string>
     <string name="screenrecord_delete_error" msgid="8154904464563560282">"Error saat menghapus rekaman layar"</string>
     <string name="screenrecord_permission_error" msgid="1526755299469001000">"Gagal mendapatkan izin"</string>
@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tahan dan tarik untuk menambahkan kartu"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Tahan dan tarik untuk mengatur ulang kartu"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Tarik ke sini untuk menghapus"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Anda membutuhkan setidaknya 6 tile"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Anda membutuhkan setidaknya <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kartu"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Waktu"</string>
   <string-array name="clock_options">
@@ -836,7 +836,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tarik ke bawah untuk menutup"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> adalah picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="5619512781514343311">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, ketuk untuk membuka setelan dan menonaktifkannya."</string>
     <string name="pip_play" msgid="1417176722760265888">"Putar"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Jeda"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Lewati ke berikutnya"</string>
