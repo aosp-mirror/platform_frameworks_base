@@ -856,7 +856,8 @@ public class ResourcesImpl {
             stack.push(id);
             try {
                 if (file.endsWith(".xml")) {
-                    if (file.startsWith("res/color/")) {
+                    final String typeName = getResourceTypeName(id);
+                    if (typeName != null && typeName.equals("color")) {
                         dr = loadColorOrXmlDrawable(wrapper, value, id, density, file);
                     } else {
                         dr = loadXmlDrawable(wrapper, value, id, density, file);
