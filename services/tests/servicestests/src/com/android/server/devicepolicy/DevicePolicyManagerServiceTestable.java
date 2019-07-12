@@ -37,6 +37,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.permission.IPermissionManager;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -196,6 +197,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         IPackageManager getIPackageManager() {
             return services.ipackageManager;
+        }
+
+        @Override
+        IPermissionManager getIPermissionManager() {
+            return services.ipermissionManager;
         }
 
         @Override

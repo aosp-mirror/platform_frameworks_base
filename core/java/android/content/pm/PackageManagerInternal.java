@@ -742,17 +742,6 @@ public abstract class PackageManagerInternal {
     public abstract boolean filterAppAccess(
             @Nullable PackageParser.Package pkg, int callingUid, int userId);
 
-    /*
-     * NOTE: The following methods are temporary until permissions are extracted from
-     * the package manager into a component specifically for handling permissions.
-     */
-    /** Returns the flags for the given permission. */
-    public abstract @Nullable int getPermissionFlagsTEMP(@NonNull String permName,
-            @NonNull String packageName, int userId);
-    /** Updates the flags for the given permission. */
-    public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
-            @NonNull String packageName, int flagMask, int flagValues, int userId);
-
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
 
@@ -1006,4 +995,22 @@ public abstract class PackageManagerInternal {
      * the settings have been written.
      */
     public abstract void writeSettings(boolean async);
+
+    /**
+     * Writes all permission settings for the given set of users to disk. If {@code async}
+     * is {@code true}, the settings are written at some point in the future. Otherwise,
+     * the call blocks until the settings have been written.
+     */
+    public abstract void writePermissionSettings(@NonNull @UserIdInt int[] userIds, boolean async);
+
+    /**
+     * Returns the target SDK for the given UID. Will return {@code 0} if there is no
+     * package associated with the UID or if the package has not been installed for
+     * the user. Will return the highest target SDK if the UID references packages with
+     * a shared user id.
+     */
+    public abstract int getTargetSdk(int uid);
+
+    /** HACK. Remove when listeners move to the permission manager */
+    public abstract void onPermissionsChangedTEMP(int uid);
 }

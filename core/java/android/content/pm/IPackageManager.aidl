@@ -108,13 +108,6 @@ interface IPackageManager {
 
     void resetRuntimePermissions();
 
-    int getPermissionFlags(String permissionName, String packageName, int userId);
-
-    void updatePermissionFlags(String permissionName, String packageName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
-
-    void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
-
     List<String> getWhitelistedRestrictedPermissions(String packageName, int flags,
             int userId);
 
