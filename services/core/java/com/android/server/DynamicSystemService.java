@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.gsi.GsiInstallParams;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
+import android.gsi.IGsid;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -61,7 +62,9 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
          * re-initialized in this case.
          */
         binder.linkToDeath(recipient, 0);
-        return IGsiService.Stub.asInterface(binder);
+
+        IGsid gsid = IGsid.Stub.asInterface(binder);
+        return gsid.getClient();
     }
 
     /** implements DeathRecipient */
@@ -159,7 +162,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
             isInUse = getGsiService().isGsiRunning();
         } finally {
             if (!gsidWasRunning && !isInUse) {
-                SystemProperties.set("ctl.stop", "gsid");
+                mGsiService = null;
             }
         }
 
