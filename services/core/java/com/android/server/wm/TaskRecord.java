@@ -1418,8 +1418,8 @@ class TaskRecord extends ConfigurationContainer {
                 mActivities.remove(activityNdx);
                 --activityNdx;
                 --numActivities;
-            } else if (mStack.finishActivityLocked(r, Activity.RESULT_CANCELED, null,
-                    reason, false, pauseImmediately)) {
+            } else if (r.finishActivityLocked(Activity.RESULT_CANCELED, null,
+                    reason, false /* oomAdj */, pauseImmediately)) {
                 --activityNdx;
                 --numActivities;
             }
@@ -1473,8 +1473,8 @@ class TaskRecord extends ConfigurationContainer {
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
-                    if (mStack != null && mStack.finishActivityLocked(
-                            r, Activity.RESULT_CANCELED, null, "clear-task-stack", false)) {
+                    if (r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                            "clear-task-stack", false /* oomAdj */)) {
                         --activityNdx;
                         --numActivities;
                     }
@@ -1487,10 +1487,8 @@ class TaskRecord extends ConfigurationContainer {
                         && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0
                         && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
                     if (!ret.finishing) {
-                        if (mStack != null) {
-                            mStack.finishActivityLocked(
-                                    ret, Activity.RESULT_CANCELED, null, "clear-task-top", false);
-                        }
+                        ret.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                                "clear-task-top", false /* oomAdj */);
                         return null;
                     }
                 }

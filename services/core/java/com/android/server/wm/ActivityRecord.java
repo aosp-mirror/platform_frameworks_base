@@ -92,6 +92,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 
 import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
@@ -103,6 +105,7 @@ import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -116,18 +119,29 @@ import static com.android.server.wm.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.wm.ActivityStack.PAUSE_TIMEOUT_MSG;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STOP_TIMEOUT_MSG;
+import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONTAINERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SAVED_STATE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -151,6 +165,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -194,6 +209,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
@@ -215,10 +231,13 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.AppTimeTracker;
+import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
+
+import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -240,11 +259,16 @@ import java.util.Objects;
 final class ActivityRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_ATM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+    private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
+    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
+    private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
+    private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
+    private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
-    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
 
     private static final String ATTR_ID = "id";
     private static final String TAG_INTENT = "intent";
@@ -1554,6 +1578,278 @@ final class ActivityRecord extends ConfigurationContainer {
             mAtmService.setResumedActivityUncheckLocked(this, reason);
         }
         return true;
+    }
+
+    /** Finish all activities in the task with the same affinity as this one. */
+    void finishActivityAffinity() {
+        final ArrayList<ActivityRecord> activities = getTaskRecord().mActivities;
+        for (int index = activities.indexOf(this); index >= 0; --index) {
+            final ActivityRecord cur = activities.get(index);
+            if (!Objects.equals(cur.taskAffinity, taskAffinity)) {
+                break;
+            }
+            cur.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                    "request-affinity", true /* oomAdj */);
+        }
+    }
+
+    /**
+     * Sets the result for activity that started this one, clears the references to activities
+     * started for result from this one, and clears new intents.
+     */
+    void finishActivityResults(int resultCode, Intent resultData) {
+        // Send the result if needed
+        if (resultTo != null) {
+            if (DEBUG_RESULTS) {
+                Slog.v(TAG_RESULTS, "Adding result to " + resultTo
+                        + " who=" + resultWho + " req=" + requestCode
+                        + " res=" + resultCode + " data=" + resultData);
+            }
+            if (resultTo.mUserId != mUserId) {
+                if (resultData != null) {
+                    resultData.prepareToLeaveUser(mUserId);
+                }
+            }
+            if (info.applicationInfo.uid > 0) {
+                mAtmService.mUgmInternal.grantUriPermissionFromIntent(info.applicationInfo.uid,
+                        resultTo.packageName, resultData,
+                        resultTo.getUriPermissionsLocked(), resultTo.mUserId);
+            }
+            resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
+            resultTo = null;
+        } else if (DEBUG_RESULTS) {
+            Slog.v(TAG_RESULTS, "No result destination from " + this);
+        }
+
+        // Make sure this HistoryRecord is not holding on to other resources,
+        // because clients have remote IPC references to this object so we
+        // can't assume that will go away and want to avoid circular IPC refs.
+        results = null;
+        pendingResults = null;
+        newIntents = null;
+        setSavedState(null /* savedState */);
+    }
+
+    /**
+     * See {@link #finishActivityLocked(int, Intent, String, boolean, boolean)}
+     */
+    boolean finishActivityLocked(int resultCode, Intent resultData, String reason, boolean oomAdj) {
+        return finishActivityLocked(resultCode, resultData, reason, oomAdj, !PAUSE_IMMEDIATELY);
+    }
+
+    /**
+     * @return Returns true if this activity has been removed from the history
+     * list, or false if it is still in the list and will be removed later.
+     */
+    boolean finishActivityLocked(int resultCode, Intent resultData, String reason, boolean oomAdj,
+            boolean pauseImmediately) {
+        if (finishing) {
+            Slog.w(TAG, "Duplicate finish request for " + this);
+            return false;
+        }
+
+        mAtmService.mWindowManager.deferSurfaceLayout();
+        try {
+            makeFinishingLocked();
+            final TaskRecord task = getTaskRecord();
+            EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
+                    mUserId, System.identityHashCode(this),
+                    task.taskId, shortComponentName, reason);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            final int index = activities.indexOf(this);
+            if (index < (activities.size() - 1)) {
+                if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
+                    // If the caller asked that this activity (and all above it)
+                    // be cleared when the task is reset, don't lose that information,
+                    // but propagate it up to the next activity.
+                    final ActivityRecord next = activities.get(index + 1);
+                    next.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                }
+            }
+
+            pauseKeyDispatchingLocked();
+
+            final ActivityStack stack = getActivityStack();
+            stack.adjustFocusedActivityStack(this, "finishActivity");
+
+            finishActivityResults(resultCode, resultData);
+
+            final boolean endTask = index <= 0 && !task.isClearingToReuseTask();
+            final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
+            if (stack.getResumedActivity() == this) {
+                if (DEBUG_VISIBILITY || DEBUG_TRANSITION) {
+                    Slog.v(TAG_TRANSITION, "Prepare close transition: finishing " + this);
+                }
+                if (endTask) {
+                    mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
+                            task.getTaskInfo());
+                }
+                getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+
+                // When finishing the activity preemptively take the snapshot before the app window
+                // is marked as hidden and any configuration changes take place
+                if (mAtmService.mWindowManager.mTaskSnapshotController != null) {
+                    final ArraySet<Task> tasks = Sets.newArraySet(task.mTask);
+                    mAtmService.mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
+                    mAtmService.mWindowManager.mTaskSnapshotController
+                            .addSkipClosingAppSnapshotTasks(tasks);
+                }
+
+                // Tell window manager to prepare for this one to be removed.
+                setVisibility(false);
+
+                if (stack.mPausingActivity == null) {
+                    if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish needs to pause: " + this);
+                    if (DEBUG_USER_LEAVING) {
+                        Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
+                    }
+                    stack.startPausingLocked(false, false, null, pauseImmediately);
+                }
+
+                if (endTask) {
+                    mAtmService.getLockTaskController().clearLockedTask(task);
+                }
+            } else if (!isState(PAUSING)) {
+                // If the activity is PAUSING, we will complete the finish once
+                // it is done pausing; else we can just directly finish it here.
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish not pausing: " + this);
+                if (visible) {
+                    prepareActivityHideTransitionAnimation(transit);
+                }
+
+                final int finishMode = (visible || nowVisible) ? FINISH_AFTER_VISIBLE
+                        : FINISH_AFTER_PAUSE;
+                final boolean removedActivity = finishCurrentActivityLocked(finishMode, oomAdj,
+                        "finishActivityLocked") == null;
+
+                // The following code is an optimization. When the last non-task overlay activity
+                // is removed from the task, we remove the entire task from the stack. However,
+                // since that is done after the scheduled destroy callback from the activity, that
+                // call to change the visibility of the task overlay activities would be out of
+                // sync with the activity visibility being set for this finishing activity above.
+                // In this case, we can set the visibility of all the task overlay activities when
+                // we detect the last one is finishing to keep them in sync.
+                if (task.onlyHasTaskOverlayActivities(true /* excludeFinishing */)) {
+                    for (ActivityRecord taskOverlay : task.mActivities) {
+                        if (!taskOverlay.mTaskOverlay) {
+                            continue;
+                        }
+                        taskOverlay.prepareActivityHideTransitionAnimation(transit);
+                    }
+                }
+                return removedActivity;
+            } else {
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + this);
+            }
+
+            return false;
+        } finally {
+            mAtmService.mWindowManager.continueSurfaceLayout();
+        }
+    }
+
+    private void prepareActivityHideTransitionAnimation(int transit) {
+        final DisplayContent dc = getDisplay().mDisplayContent;
+        dc.prepareAppTransition(transit, false);
+        setVisibility(false);
+        dc.executeAppTransition();
+    }
+
+    static final int FINISH_IMMEDIATELY = 0;
+    private static final int FINISH_AFTER_PAUSE = 1;
+    static final int FINISH_AFTER_VISIBLE = 2;
+
+    ActivityRecord finishCurrentActivityLocked(int mode, boolean oomAdj, String reason) {
+        // First things first: if this activity is currently visible,
+        // and the resumed activity is not yet visible, then hold off on
+        // finishing until the resumed one becomes visible.
+
+        // The activity that we are finishing may be over the lock screen. In this case, we do not
+        // want to consider activities that cannot be shown on the lock screen as running and should
+        // proceed with finishing the activity if there is no valid next top running activity.
+        // Note that if this finishing activity is floating task, we don't need to wait the
+        // next activity resume and can destroy it directly.
+        final ActivityStack stack = getActivityStack();
+        final ActivityDisplay display = getDisplay();
+        final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
+        final boolean isFloating = getConfiguration().windowConfiguration.tasksAreFloating();
+
+        if (mode == FINISH_AFTER_VISIBLE && (visible || nowVisible)
+                && next != null && !next.nowVisible && !isFloating) {
+            if (!mStackSupervisor.mStoppingActivities.contains(this)) {
+                stack.addToStopping(this, false /* scheduleIdle */, false /* idleDelayed */,
+                        "finishCurrentActivityLocked");
+            }
+            if (DEBUG_STATES) {
+                Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (finish requested)");
+            }
+            setState(STOPPING, "finishCurrentActivityLocked");
+            if (oomAdj) {
+                mAtmService.updateOomAdj();
+            }
+            return this;
+        }
+
+        // make sure the record is cleaned out of other places.
+        mStackSupervisor.mStoppingActivities.remove(this);
+        mStackSupervisor.mGoingToSleepActivities.remove(this);
+        final ActivityState prevState = getState();
+        if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + this);
+
+        setState(FINISHING, "finishCurrentActivityLocked");
+
+        // Don't destroy activity immediately if the display contains home stack, although there is
+        // no next activity at the moment but another home activity should be started later. Keep
+        // this activity alive until next home activity is resumed then user won't see a temporary
+        // black screen.
+        final boolean noRunningStack = next == null && display.topRunningActivity() == null
+                && display.getHomeStack() == null;
+        final boolean noFocusedStack = stack != display.getFocusedStack();
+        final boolean finishingInNonFocusedStackOrNoRunning = mode == FINISH_AFTER_VISIBLE
+                && prevState == PAUSED && (noFocusedStack || noRunningStack);
+
+        if (mode == FINISH_IMMEDIATELY
+                || (prevState == PAUSED && (mode == FINISH_AFTER_PAUSE || inPinnedWindowingMode()))
+                || finishingInNonFocusedStackOrNoRunning
+                || prevState == STARTED
+                || prevState == STOPPING
+                || prevState == STOPPED
+                || prevState == ActivityState.INITIALIZING) {
+            makeFinishingLocked();
+            boolean activityRemoved = stack.destroyActivityLocked(this, true /* removeFromApp */,
+                    "finish-imm:" + reason);
+
+            if (finishingInNonFocusedStackOrNoRunning) {
+                // Finishing activity that was in paused state and it was in not currently focused
+                // stack, need to make something visible in its place. Also if the display does not
+                // have running activity, the configuration may need to be updated for restoring
+                // original orientation of the display.
+                mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
+                        false /* markFrozenIfConfigChanged */, true /* deferResume */);
+            }
+            if (activityRemoved) {
+                mRootActivityContainer.resumeFocusedStacksTopActivities();
+            }
+            if (DEBUG_CONTAINERS) {
+                Slog.d(TAG_CONTAINERS, "destroyActivityLocked: finishCurrentActivityLocked r="
+                        + this + " destroy returned removed=" + activityRemoved);
+            }
+            return activityRemoved ? null : this;
+        }
+
+        // Need to go through the full pause cycle to get this
+        // activity into the stopped state and then finish it.
+        if (DEBUG_ALL) Slog.v(TAG, "Enqueueing pending finish: " + this);
+        mStackSupervisor.mFinishingActivities.add(this);
+        resumeKeyDispatchingLocked();
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        // If activity was not paused at this point - explicitly pause it to start finishing
+        // process. Finishing will be completed once it reports pause back.
+        if (isState(RESUMED) && stack.mPausingActivity != null) {
+            stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    next /* resuming */, false /* dontWait */);
+        }
+        return this;
     }
 
     void makeFinishingLocked() {

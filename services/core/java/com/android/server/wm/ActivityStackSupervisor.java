@@ -1340,8 +1340,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final ActivityStack stack = r.getActivityStack();
             if (stack != null) {
                 if (r.finishing) {
-                    stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false,
-                            "activityIdleInternalLocked");
+                    r.finishCurrentActivityLocked(ActivityRecord.FINISH_IMMEDIATELY,
+                            false /* oomAdj */, "activityIdleInternalLocked");
                 } else {
                     stack.stopActivityLocked(r);
                 }

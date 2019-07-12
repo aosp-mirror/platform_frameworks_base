@@ -1230,7 +1230,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 final ActivityStack stack = mStacks.get(stackNdx);
                 // Always finish non-standard type stacks.
                 if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
-                    stack.finishAllActivitiesLocked(true /* immediately */);
+                    stack.finishAllActivitiesImmediately();
                 } else {
                     // If default display is in split-window mode, set windowing mode of the stack
                     // to split-screen secondary. Otherwise, set the windowing mode to undefined by
