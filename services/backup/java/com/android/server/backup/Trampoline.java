@@ -202,11 +202,10 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
-    // A user is ready for a backup if it's unlocked and is not suppressed by a device
-    // admin (device owner or profile owner).
+    // This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
+    // it's used in multiple places where I/O waits would cause system lock-ups.
     private boolean isUserReadyForBackup(int userId) {
-        return mService != null && mService.getServiceUsers().get(userId) != null
-                && isBackupActivatedForUser(userId);
+        return mService != null && mService.isAbleToServeUser(userId);
     }
 
     /**

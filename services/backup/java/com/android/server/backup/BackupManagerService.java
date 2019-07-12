@@ -194,6 +194,11 @@ public class BackupManagerService {
         }
     }
 
+    boolean isAbleToServeUser(int userId) {
+        return getServiceUsers().get(UserHandle.USER_SYSTEM) != null
+                && getServiceUsers().get(userId) != null;
+    }
+
     /**
      *  Returns a lst of users currently unlocked that have a
      *  {@link UserBackupManagerService} registered.
