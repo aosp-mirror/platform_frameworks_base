@@ -777,6 +777,7 @@ static void Image_unlockIfLocked(JNIEnv* env, jobject thiz) {
         status_t res = buffer->unlock();
         if (res != OK) {
             jniThrowRuntimeException(env, "unlock buffer failed");
+            return;
         }
         ALOGV("Successfully unlocked the image");
     }
@@ -872,7 +873,7 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
     // and we don't set them here.
 }
 
-static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
+static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
         int32_t writerFormat, uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride) {
     ALOGV("%s", __FUNCTION__);
 
@@ -881,7 +882,9 @@ static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
                              "Pixel format: 0x%x is unsupported", buffer->flexFormat);
+        return false;
     }
+    return true;
 }
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
@@ -920,8 +923,10 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     PublicFormat publicWriterFormat = static_cast<PublicFormat>(writerFormat);
     writerFormat = mapPublicFormatToHalFormat(publicWriterFormat);
     for (int i = 0; i < numPlanes; i++) {
-        Image_getLockedImageInfo(env, &lockedImg, i, writerFormat,
-                &pData, &dataSize, &pixelStride, &rowStride);
+        if (!Image_getLockedImageInfo(env, &lockedImg, i, writerFormat,
+                &pData, &dataSize, &pixelStride, &rowStride)) {
+            return NULL;
+        }
         byteBuffer = env->NewDirectByteBuffer(pData, dataSize);
         if ((byteBuffer == NULL) && (env->ExceptionCheck() == false)) {
             jniThrowException(env, "java/lang/IllegalStateException",

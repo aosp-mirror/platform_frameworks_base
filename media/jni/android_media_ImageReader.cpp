@@ -416,11 +416,13 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                           "Failed to set buffer consumer default format 0x%x", nativeFormat);
+        return;
     }
     res = bufferConsumer->setDefaultBufferDataSpace(nativeDataspace);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                           "Failed to set buffer consumer default dataSpace 0x%x", nativeDataspace);
+        return;
     }
 }
 
@@ -704,7 +706,7 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
     // and we don't set them here.
 }
 
-static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
+static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
         int32_t writerFormat, uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride) {
     ALOGV("%s", __FUNCTION__);
 
@@ -713,7 +715,9 @@ static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
                              "Pixel format: 0x%x is unsupported", buffer->flexFormat);
+        return false;
     }
+    return true;
 }
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
@@ -756,8 +760,10 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     }
     // Create all SurfacePlanes
     for (int i = 0; i < numPlanes; i++) {
-        Image_getLockedImageInfo(env, &lockedImg, i, halReaderFormat,
-                &pData, &dataSize, &pixelStride, &rowStride);
+        if (!Image_getLockedImageInfo(env, &lockedImg, i, halReaderFormat,
+                &pData, &dataSize, &pixelStride, &rowStride)) {
+            return NULL;
+        }
         byteBuffer = env->NewDirectByteBuffer(pData, dataSize);
         if ((byteBuffer == NULL) && (env->ExceptionCheck() == false)) {
             jniThrowException(env, "java/lang/IllegalStateException",
