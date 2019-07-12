@@ -594,9 +594,6 @@ interface IPackageManager {
     ParceledListSlice getIntentFilterVerifications(String packageName);
     ParceledListSlice getAllIntentFilters(String packageName);
 
-    boolean setDefaultBrowserPackageName(String packageName, int userId);
-    String getDefaultBrowserPackageName(int userId);
-
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
@@ -628,15 +625,6 @@ interface IPackageManager {
     KeySet getSigningKeySet(String packageName);
     boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
     boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
-
-    void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
-    void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
-    void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
-    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 

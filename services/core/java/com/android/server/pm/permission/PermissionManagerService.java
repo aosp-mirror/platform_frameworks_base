@@ -118,6 +118,9 @@ import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
@@ -249,6 +252,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @GuardedBy("mLock")
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
+
+    @GuardedBy("mLock")
+    private DefaultBrowserProvider mDefaultBrowserProvider;
+
+    @GuardedBy("mLock")
+    private DefaultDialerProvider mDefaultDialerProvider;
+
+    @GuardedBy("mLock")
+    private DefaultHomeProvider mDefaultHomeProvider;
 
     // TODO: Take a look at the methods defined in the callback.
     // The callback was initially created to support the split between permission
@@ -1607,6 +1619,127 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPackageManagerInt.writePermissionSettings(syncUpdatedUsers.toArray(), false);
         mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
+    }
+
+    @Override
+    public String getDefaultBrowser(int userId) {
+        final int callingUid = Binder.getCallingUid();
+        if (UserHandle.getUserId(callingUid) != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        synchronized (mLock) {
+            return mDefaultBrowserProvider == null
+                    ? null : mDefaultBrowserProvider.getDefaultBrowser(userId);
+        }
+    }
+
+    @Override
+    public boolean setDefaultBrowser(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+        return setDefaultBrowserInternal(packageName, false, true, userId);
+    }
+
+    private boolean setDefaultBrowserInternal(String packageName, boolean async,
+            boolean doGrant, int userId) {
+        synchronized (mLock) {
+            if (userId == UserHandle.USER_ALL) {
+                return false;
+            }
+            if (mDefaultBrowserProvider == null) {
+                return false;
+            }
+            if (async) {
+                mDefaultBrowserProvider.setDefaultBrowserAsync(packageName, userId);
+            } else {
+                if (!mDefaultBrowserProvider.setDefaultBrowser(packageName, userId)) {
+                    return false;
+                }
+            }
+            if (doGrant && packageName != null) {
+                mDefaultPermissionGrantPolicy
+                        .grantDefaultPermissionsToDefaultBrowser(packageName, userId);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils
+                .enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId));
+        }
+    }
+
+    @Override
+    public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
+                "grantDefaultPermissionsToEnabledImsServices", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .grantDefaultPermissionsToEnabledImsServices(packageNames, userId));
+        }
+    }
+
+    @Override
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
+                "grantDefaultPermissionsToEnabledTelephonyDataServices", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .grantDefaultPermissionsToEnabledTelephonyDataServices(
+                            packageNames, userId));
+        }
+    }
+
+    @Override
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
+                "revokeDefaultPermissionsFromDisabledTelephonyDataServices", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+                            packageNames, userId));
+        }
+    }
+
+    @Override
+    public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils
+                .enforceSystemOrPhoneCaller("grantDefaultPermissionsToActiveLuiApp", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .grantDefaultPermissionsToActiveLuiApp(packageName, userId));
+        }
+    }
+
+    @Override
+    public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils
+                .enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromLuiApps", callingUid);
+        synchronized (mLock) {
+            Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                    .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
+        }
     }
 
     /**
@@ -3714,6 +3847,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
+
+        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
+        for (int userId : UserManagerService.getInstance().getUserIds()) {
+            if (!mPackageManagerInt.areDefaultRuntimePermissionsGranted(userId)) {
+                grantPermissionsUserIds = ArrayUtils.appendInt(
+                        grantPermissionsUserIds, userId);
+            }
+        }
+        // If we upgraded grant all default permissions before kicking off.
+        for (int userId : grantPermissionsUserIds) {
+            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
+        }
+        if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
+            // If we did not grant default permissions, we preload from this the
+            // default permission exceptions lazily to ensure we don't hit the
+            // disk on a new user creation.
+            mDefaultPermissionGrantPolicy.scheduleReadDefaultPermissionExceptions();
+        }
     }
 
     private static String getVolumeUuidForPackage(PackageParser.Package pkg) {
@@ -3882,10 +4033,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return mSettings;
         }
         @Override
-        public DefaultPermissionGrantPolicy getDefaultPermissionGrantPolicy() {
-            return mDefaultPermissionGrantPolicy;
-        }
-        @Override
         public BasePermission getPermissionTEMP(String permName) {
             synchronized (PermissionManagerService.this.mLock) {
                 return mSettings.getPermissionLocked(permName);
@@ -3956,6 +4103,168 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 mCheckPermissionDelegate = delegate;
             }
         }
+
+        @Override
+        public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
+            synchronized (mLock) {
+                mDefaultBrowserProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultBrowser(String packageName, boolean async, boolean doGrant,
+                int userId) {
+            setDefaultBrowserInternal(packageName, async, doGrant, userId);
+        }
+
+        @Override
+        public void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider) {
+            synchronized (mLock) {
+                mDefaultDialerProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider) {
+            synchronized (mLock) {
+                mDefaultHomeProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultHome(String packageName, int userId, Consumer<Boolean> callback) {
+            synchronized (mLock) {
+                if (userId == UserHandle.USER_ALL) {
+                    return;
+                }
+                if (mDefaultHomeProvider == null) {
+                    return;
+                }
+                mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId, callback);
+            }
+        }
+
+        @Override
+        public void setDialerAppPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setLocationExtraPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setLocationExtraPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setLocationPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setLocationPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setSimCallManagerPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setSmsAppPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setSmsAppPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setSyncAdapterPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setUseOpenWifiAppPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.setVoiceInteractionPackagesProvider(provider);
+            }
+        }
+
+        @Override
+        public String getDefaultBrowser(int userId) {
+            synchronized (mLock) {
+                return mDefaultBrowserProvider == null
+                        ? null : mDefaultBrowserProvider.getDefaultBrowser(userId);
+            }
+        }
+
+        @Override
+        public String getDefaultDialer(int userId) {
+            synchronized (mLock) {
+                return mDefaultDialerProvider == null
+                        ? null : mDefaultDialerProvider.getDefaultDialer(userId);
+            }
+        }
+
+        @Override
+        public String getDefaultHome(int userId) {
+            synchronized (mLock) {
+                return mDefaultHomeProvider == null
+                        ? null : mDefaultHomeProvider.getDefaultHome(userId);
+            }
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy
+                        .grantDefaultPermissionsToDefaultSimCallManager(packageName, userId);
+            }
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy
+                        .grantDefaultPermissionsToDefaultUseOpenWifiApp(packageName, userId);
+            }
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy
+                        .grantDefaultPermissionsToDefaultBrowser(packageName, userId);
+            }
+        }
+
+        @Override
+        public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
+            synchronized (mLock) {
+                return mDefaultPermissionGrantPolicy.wereDefaultPermissionsGrantedSinceBoot(userId);
+            }
+        }
+
+        @Override
+        public void onNewUserCreated(int userId) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
+                // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+                PermissionManagerService.this.updateAllPermissions(
+                        StorageManager.UUID_PRIVATE_INTERNAL, true, mDefaultPermissionCallback);
+            }
+        }
+
         @Override
         public void notifyPermissionsChangedTEMP(int uid) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);

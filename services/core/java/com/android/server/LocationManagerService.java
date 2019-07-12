@@ -42,7 +42,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.res.Resources;
@@ -121,6 +120,7 @@ import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
 import com.android.server.location.RemoteListenerHelper;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -282,12 +282,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // Let the package manager query which are the default location
         // providers as they get certain permissions granted by default.
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.setLocationPackagesProvider(
+        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+                PermissionManagerServiceInternal.class);
+        permissionManagerInternal.setLocationPackagesProvider(
                 userId -> mContext.getResources().getStringArray(
                         com.android.internal.R.array.config_locationProviderPackageNames));
-        packageManagerInternal.setLocationExtraPackagesProvider(
+        permissionManagerInternal.setLocationExtraPackagesProvider(
                 userId -> mContext.getResources().getStringArray(
                       com.android.internal.R.array.config_locationExtraPackageNames));
 

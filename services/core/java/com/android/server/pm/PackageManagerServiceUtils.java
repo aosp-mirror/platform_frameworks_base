@@ -390,6 +390,17 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Enforces that the caller must be either the system process or the phone process.
+     * If not, throws a {@link SecurityException}.
+     */
+    public static void enforceSystemOrPhoneCaller(String methodName, int callingUid) {
+        if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "Cannot call " + methodName + " from UID " + callingUid);
+        }
+    }
+
+    /**
      * Derive the value of the {@code cpuAbiOverride} based on the provided
      * value and an optional stored value from the package settings.
      */

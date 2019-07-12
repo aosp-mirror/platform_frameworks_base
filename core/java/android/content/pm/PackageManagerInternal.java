@@ -84,139 +84,6 @@ public abstract class PackageManagerInternal {
     }
 
     /**
-     * Provider for package names.
-     */
-    public interface PackagesProvider {
-
-        /**
-         * Gets the packages for a given user.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        public String[] getPackages(int userId);
-    }
-
-    /**
-     * Provider for package names.
-     */
-    public interface SyncAdapterPackagesProvider {
-
-        /**
-         * Gets the sync adapter packages for given authority and user.
-         * @param authority The authority.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        public String[] getPackages(String authority, int userId);
-    }
-
-    /**
-     * Provider for default browser
-     */
-    public interface DefaultBrowserProvider {
-
-        /**
-         * Get the package name of the default browser.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default browser, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultBrowser(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         *
-         * @return whether the default browser was successfully set.
-         */
-        boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser asynchronously.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         */
-        void setDefaultBrowserAsync(@Nullable String packageName, @UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default dialer
-     */
-    public interface DefaultDialerProvider {
-
-        /**
-         * Get the package name of the default dialer.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default dialer, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultDialer(@UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default home
-     */
-    public interface DefaultHomeProvider {
-
-        /**
-         * Get the package name of the default home.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default home, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultHome(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default home.
-         *
-         * @param packageName package name of the default home, or {@code null} to remove
-         * @param userId the user id
-         * @param callback the callback made after the default home as been updated
-         */
-        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
-                @NonNull Consumer<Boolean> callback);
-    }
-
-    /**
-     * Sets the location provider packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setLocationPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Set the location extra packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract  void setLocationExtraPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the voice interaction packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the Use Open Wifi packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the sync adapter packages provider.
-     * @param provider The provider.
-     */
-    public abstract void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider);
-
-    /**
      * Called when the package for the default SMS handler changed
      *
      * @param packageName the new sms package
@@ -231,14 +98,6 @@ public abstract class PackageManagerInternal {
      * @param userId user for which the change was made
      */
     public void onDefaultSimCallManagerAppChanged(String packageName, int userId) {}
-
-    /**
-     * Requests granting of the default permissions to the current default Use Open Wifi app.
-     * @param packageName The default use open wifi package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName,
-            int userId);
 
     /**
      * Sets a list of apps to keep in PM's internal data structures and as APKs even if no user has
@@ -872,27 +731,6 @@ public abstract class PackageManagerInternal {
     public abstract String removeLegacyDefaultBrowserPackageName(int userId);
 
     /**
-     * Sets the default browser provider.
-     *
-     * @param provider the provider
-     */
-    public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
-
-    /**
-     * Sets the default dialer provider.
-     *
-     * @param provider the provider
-     */
-    public abstract void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider);
-
-    /**
-     * Sets the default home provider.
-     *
-     * @param provider the provider
-     */
-    public abstract void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider);
-
-    /**
      * Returns {@code true} if given {@code packageName} is an apex package.
      */
     public abstract boolean isApexPackage(String packageName);
@@ -908,15 +746,6 @@ public abstract class PackageManagerInternal {
      */
     public abstract void uninstallApex(String packageName, long versionCode, int userId,
             IntentSender intentSender);
-
-    /**
-     * Whether default permission grants have been performed for a user
-     * since the device booted.
-     *
-     * @param userId The user id.
-     * @return true if default permissions
-     */
-    public abstract boolean wereDefaultPermissionsGrantedSinceBoot(int userId);
 
     /**
      * Get fingerprint of build that updated the runtime permissions for a user.
@@ -960,4 +789,7 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isCallerInstallerOfRecord(
             @NonNull PackageParser.Package pkg, int callingUid);
+
+    /** Returns whether or not default runtime permissions are granted for the given user */
+    public abstract boolean areDefaultRuntimePermissionsGranted(@UserIdInt int userId);
 }

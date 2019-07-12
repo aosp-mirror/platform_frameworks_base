@@ -2049,7 +2049,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public String getDefaultBrowserPackageNameAsUser(int userId) {
         try {
-            return mPM.getDefaultBrowserPackageName(userId);
+            return mPermissionManager.getDefaultBrowser(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2058,7 +2058,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         try {
-            return mPM.setDefaultBrowserPackageName(packageName, userId);
+            return mPermissionManager.setDefaultBrowser(packageName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -34,8 +34,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManagerInternal.PackagesProvider;
-import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -69,6 +67,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.PackagesProvider;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.SyncAdapterPackagesProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
