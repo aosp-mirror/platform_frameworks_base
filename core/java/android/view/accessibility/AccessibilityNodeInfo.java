@@ -1688,6 +1688,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Instead it represents the result of {@link View#getParentForAccessibility()},
      * which returns the closest ancestor where {@link View#isImportantForAccessibility()} is true.
      * So this method is not reliable.
+     * <p>
+     * When magnification is enabled, the bounds in parent are also scaled up by magnification
+     * scale. For example, it returns Rect(20, 20, 200, 200) for original bounds
+     * Rect(10, 10, 100, 100), when the magnification scale is 2.
+     * <p/>
      *
      * @param outBounds The output node bounds.
      * @deprecated Use {@link #getBoundsInScreen(Rect)} instead.
@@ -1725,6 +1730,12 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets the node bounds in screen coordinates.
+     * <p>
+     * When magnification is enabled, the bounds in screen are scaled up by magnification scale
+     * and the positions are also adjusted according to the offset of magnification viewport.
+     * For example, it returns Rect(-180, -180, 0, 0) for original bounds Rect(10, 10, 100, 100),
+     * when the magnification scale is 2 and offsets for X and Y are both 200.
+     * <p/>
      *
      * @param outBounds The output node bounds.
      */
@@ -1861,6 +1872,12 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets whether this node is visible to the user.
+     * <p>
+     * Between {@link Build.VERSION_CODES#JELLY_BEAN API 16} and
+     * {@link Build.VERSION_CODES#Q API 29}, this method may incorrectly return false when
+     * magnification is enabled. On other versions, a node is considered visible even if it is not
+     * on the screen because magnification is active.
+     * </p>
      *
      * @return Whether the node is visible to the user.
      */
