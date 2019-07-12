@@ -412,8 +412,6 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.bringToFront();
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
-            final int keyboardHeight = insets.getSystemWindowInsetBottom()
-                    - insets.getStableInsetBottom();
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
@@ -507,18 +505,6 @@ public class BubbleStackView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        float x = ev.getRawX();
-        float y = ev.getRawY();
-        // If we're expanded only intercept if the tap is outside of the widget container
-        if (mIsExpanded && isIntersecting(mExpandedViewContainer, x, y)) {
-            return false;
-        } else {
-            return isIntersecting(mBubbleContainer, x, y);
-        }
     }
 
     @Override
@@ -831,21 +817,23 @@ public class BubbleStackView extends FrameLayout {
         float y = event.getRawY();
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
+                // Could be tapping or dragging a bubble while expanded
                 for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
                     BubbleView view = (BubbleView) mBubbleContainer.getChildAt(i);
                     if (isIntersecting(view, x, y)) {
                         return view;
                     }
                 }
-            } else if (isIntersecting(mExpandedViewContainer, x, y)) {
-                return mExpandedViewContainer;
             }
-            // Outside parts of view we care about.
+            BubbleExpandedView bev = (BubbleExpandedView) mExpandedViewContainer.getChildAt(0);
+            if (bev.intersectingTouchableContent((int) x, (int) y)) {
+                return bev;
+            }
+            // Outside of the parts we care about.
             return null;
         } else if (mFlyout.getVisibility() == VISIBLE && isIntersecting(mFlyout, x, y)) {
             return mFlyout;
         }
-
         // If it wasn't an individual bubble in the expanded state, or the flyout, it's the stack.
         return this;
     }

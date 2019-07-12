@@ -95,6 +95,15 @@ class BubbleTouchHandler implements View.OnTouchListener {
             return false;
         }
 
+        if (!(mTouchedView instanceof BubbleView)
+                && !(mTouchedView instanceof BubbleStackView)
+                && !(mTouchedView instanceof BubbleFlyoutView)) {
+            // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
+            // of expanded view).
+            resetForNextGesture();
+            return false;
+        }
+
         final boolean isStack = mStack.equals(mTouchedView);
         final boolean isFlyout = mStack.getFlyoutView().equals(mTouchedView);
         final float rawX = event.getRawX();
