@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm;
+package android.permission;
 
 /**
  * Listener for changes in the permissions for installed packages.

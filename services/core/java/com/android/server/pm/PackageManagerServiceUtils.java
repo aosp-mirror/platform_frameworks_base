@@ -62,6 +62,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.permission.PermissionsState;
 
 import dalvik.system.VMRuntime;
 
@@ -884,5 +885,17 @@ public class PackageManagerServiceUtils {
         } finally {
             IoUtils.closeQuietly(source);
         }
+    }
+
+    /**
+     * Returns the {@link PermissionsState} for the given package. If the {@link PermissionsState}
+     * could not be found, {@code null} will be returned.
+     */
+    public static PermissionsState getPermissionsState(PackageParser.Package pkg) {
+        final PackageSetting packageSetting = (PackageSetting) pkg.mExtras;
+        if (packageSetting == null) {
+            return null;
+        }
+        return packageSetting.getPermissionsState();
     }
 }

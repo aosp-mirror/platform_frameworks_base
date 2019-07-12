@@ -1997,15 +1997,15 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         if (grant) {
-            mInterface.grantRuntimePermission(pkg, perm, userId);
+            mPermissionManager.grantRuntimePermission(pkg, perm, userId);
         } else {
-            mInterface.revokeRuntimePermission(pkg, perm, userId);
+            mPermissionManager.revokeRuntimePermission(pkg, perm, userId);
         }
         return 0;
     }
 
     private int runResetPermissions() throws RemoteException {
-        mInterface.resetRuntimePermissions();
+        mPermissionManager.resetRuntimePermissions();
         return 0;
     }
 
