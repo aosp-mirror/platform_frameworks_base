@@ -501,15 +501,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
         return NULL;
     }
 
-    int colorFormat = getColorFormat(env, params);
 
-    std::vector<sp<IMemory> > frames;
-    status_t err = retriever->getFrameAtIndex(&frames, frameIndex, numFrames, colorFormat);
-    if (err != OK || frames.size() == 0) {
-        jniThrowException(env,
-                "java/lang/IllegalStateException", "No frames from retriever");
-        return NULL;
-    }
     jobject arrayList = env->NewObject(fields.arrayListClazz, fields.arrayListInit);
     if (arrayList == NULL) {
         jniThrowException(env,
@@ -517,18 +509,29 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
         return NULL;
     }
 
+    int colorFormat = getColorFormat(env, params);
     SkColorType outColorType = setOutColorType(env, colorFormat, params);
-
-    for (size_t i = 0; i < frames.size(); i++) {
-        if (frames[i] == NULL || frames[i]->pointer() == NULL) {
+    size_t i = 0;
+    for (; i < numFrames; i++) {
+        sp<IMemory> frame = retriever->getFrameAtIndex(frameIndex + i, colorFormat);
+        if (frame == NULL || frame->pointer() == NULL) {
             ALOGE("video frame at index %zu is a NULL pointer", frameIndex + i);
-            continue;
+            break;
         }
-        VideoFrame *videoFrame = static_cast<VideoFrame *>(frames[i]->pointer());
+        VideoFrame *videoFrame = static_cast<VideoFrame *>(frame->pointer());
         jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
         env->CallBooleanMethod(arrayList, fields.arrayListAdd, bitmapObj);
         env->DeleteLocalRef(bitmapObj);
     }
+
+    if (i == 0) {
+        env->DeleteLocalRef(arrayList);
+
+        jniThrowException(env,
+                "java/lang/IllegalStateException", "No frames from retriever");
+        return NULL;
+    }
+
     return arrayList;
 }
 
