@@ -126,6 +126,19 @@ public class BubbleData {
     @Nullable
     private Listener mListener;
 
+    /**
+     * We track groups with summaries that aren't visibly displayed but still kept around because
+     * the bubble(s) associated with the summary still exist.
+     *
+     * The summary must be kept around so that developers can cancel it (and hence the bubbles
+     * associated with it). This list is used to check if the summary should be hidden from the
+     * shade.
+     *
+     * Key: group key of the NotificationEntry
+     * Value: key of the NotificationEntry
+     */
+    private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
+
     @Inject
     public BubbleData(Context context) {
         mContext = context;
@@ -227,6 +240,40 @@ public class BubbleData {
             }
         }
         dispatchPendingChanges();
+    }
+
+    /**
+     * Adds a group key indicating that the summary for this group should be suppressed.
+     *
+     * @param groupKey the group key of the group whose summary should be suppressed.
+     * @param notifKey the notification entry key of that summary.
+     */
+    void addSummaryToSuppress(String groupKey, String notifKey) {
+        mSuppressedGroupKeys.put(groupKey, notifKey);
+    }
+
+    /**
+     * Retrieves the notif entry key of the summary associated with the provided group key.
+     *
+     * @param groupKey the group to look up
+     * @return the key for the {@link NotificationEntry} that is the summary of this group.
+     */
+    String getSummaryKey(String groupKey) {
+        return mSuppressedGroupKeys.get(groupKey);
+    }
+
+    /**
+     * Removes a group key indicating that summary for this group should no longer be suppressed.
+     */
+    void removeSuppressedSummary(String groupKey) {
+        mSuppressedGroupKeys.remove(groupKey);
+    }
+
+    /**
+     * Whether the summary for the provided group key is suppressed.
+     */
+    boolean isSummarySuppressed(String groupKey) {
+        return mSuppressedGroupKeys.containsKey(groupKey);
     }
 
     /**
@@ -621,6 +668,10 @@ public class BubbleData {
         pw.print("count:    "); pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
             bubble.dump(fd, pw, args);
+        }
+        pw.print("summaryKeys: "); pw.println(mSuppressedGroupKeys.size());
+        for (String key : mSuppressedGroupKeys.keySet()) {
+            pw.println("   suppressing: " + key);
         }
     }
 }
