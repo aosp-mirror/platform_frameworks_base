@@ -881,7 +881,7 @@ static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
             pixelStride, rowStride);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
-                             "Pixel format: 0x%x is unsupported", buffer->flexFormat);
+                             "Pixel format: 0x%x is unsupported", writerFormat);
         return false;
     }
     return true;
