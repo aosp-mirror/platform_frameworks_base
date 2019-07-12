@@ -78,14 +78,18 @@ static jobject throw_exception(JNIEnv* env, ImageDecoder::Error error, const cha
     return nullptr;
 }
 
-static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobject source) {
+static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
+        jobject source, jboolean preferAnimation) {
     if (!stream.get()) {
         return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
                                nullptr, source);
     }
     std::unique_ptr<ImageDecoder> decoder(new ImageDecoder);
     SkCodec::Result result;
-    auto codec = SkCodec::MakeFromStream(std::move(stream), &result, decoder->mPeeker.get());
+    auto codec = SkCodec::MakeFromStream(
+            std::move(stream), &result, decoder->mPeeker.get(),
+            preferAnimation ? SkCodec::SelectionPolicy::kPreferAnimation
+                            : SkCodec::SelectionPolicy::kPreferStillImage);
     if (jthrowable jexception = get_and_clear_exception(env)) {
         return throw_exception(env, ImageDecoder::kSourceException, "", jexception, source);
     }
@@ -124,7 +128,7 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobj
 }
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
-        jobject fileDescriptor, jobject source) {
+        jobject fileDescriptor, jboolean preferAnimation, jobject source) {
     int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     struct stat fdStat;
@@ -142,11 +146,11 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
     }
 
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
-    return native_create(env, std::move(fileStream), source);
+    return native_create(env, std::move(fileStream), source, preferAnimation);
 }
 
 static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
-        jobject is, jbyteArray storage, jobject source) {
+        jobject is, jbyteArray storage, jboolean preferAnimation, jobject source) {
     std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage, false));
 
     if (!stream.get()) {
@@ -157,31 +161,33 @@ static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
     std::unique_ptr<SkStream> bufferedStream(
         SkFrontBufferedStream::Make(std::move(stream),
         SkCodec::MinBufferedBytesNeeded()));
-    return native_create(env, std::move(bufferedStream), source);
+    return native_create(env, std::move(bufferedStream), source, preferAnimation);
 }
 
-static jobject ImageDecoder_nCreateAsset(JNIEnv* env, jobject /*clazz*/, jlong assetPtr,
-                                         jobject source) {
+static jobject ImageDecoder_nCreateAsset(JNIEnv* env, jobject /*clazz*/,
+        jlong assetPtr, jboolean preferAnimation, jobject source) {
     Asset* asset = reinterpret_cast<Asset*>(assetPtr);
     std::unique_ptr<SkStream> stream(new AssetStreamAdaptor(asset));
-    return native_create(env, std::move(stream), source);
+    return native_create(env, std::move(stream), source, preferAnimation);
 }
 
-static jobject ImageDecoder_nCreateByteBuffer(JNIEnv* env, jobject /*clazz*/, jobject jbyteBuffer,
-                                              jint initialPosition, jint limit, jobject source) {
+static jobject ImageDecoder_nCreateByteBuffer(JNIEnv* env, jobject /*clazz*/,
+        jobject jbyteBuffer, jint initialPosition, jint limit,
+        jboolean preferAnimation, jobject source) {
     std::unique_ptr<SkStream> stream = CreateByteBufferStreamAdaptor(env, jbyteBuffer,
                                                                      initialPosition, limit);
     if (!stream) {
         return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to read ByteBuffer",
                                nullptr, source);
     }
-    return native_create(env, std::move(stream), source);
+    return native_create(env, std::move(stream), source, preferAnimation);
 }
 
-static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/, jbyteArray byteArray,
-                                             jint offset, jint length, jobject source) {
+static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/,
+        jbyteArray byteArray, jint offset, jint length,
+        jboolean preferAnimation, jobject source) {
     std::unique_ptr<SkStream> stream(CreateByteArrayStreamAdaptor(env, byteArray, offset, length));
-    return native_create(env, std::move(stream), source);
+    return native_create(env, std::move(stream), source, preferAnimation);
 }
 
 jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas) {
@@ -514,11 +520,11 @@ static jobject ImageDecoder_nGetColorSpace(JNIEnv* env, jobject /*clazz*/, jlong
 }
 
 static const JNINativeMethod gImageDecoderMethods[] = {
-    { "nCreate",        "(JLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;",    (void*) ImageDecoder_nCreateAsset },
-    { "nCreate",        "(Ljava/nio/ByteBuffer;IILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
-    { "nCreate",        "([BIILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
-    { "nCreate",        "(Ljava/io/InputStream;[BLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
-    { "nCreate",        "(Ljava/io/FileDescriptor;Landroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
+    { "nCreate",        "(JZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;",    (void*) ImageDecoder_nCreateAsset },
+    { "nCreate",        "(Ljava/nio/ByteBuffer;IIZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
+    { "nCreate",        "([BIIZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
+    { "nCreate",        "(Ljava/io/InputStream;[BZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
+    { "nCreate",        "(Ljava/io/FileDescriptor;ZLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
     { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZJZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },
