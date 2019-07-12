@@ -21,7 +21,6 @@ import static android.app.ActivityManager.UID_OBSERVER_GONE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
@@ -59,24 +58,23 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
-
 import com.android.server.wm.ActivityTaskManagerInternal;
+
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
-import java.io.FileDescriptor;
 import java.io.Closeable;
-import java.io.InputStream;
 import java.io.DataInputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.List;
 import java.util.ArrayList;
-
-import java.util.zip.ZipFile;
+import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * <p>PinnerService pins important files for key processes in memory.</p>
@@ -573,17 +571,9 @@ public final class PinnerService extends SystemService {
         }
 
         // determine the ABI from either ApplicationInfo or Build
-        String arch = "arm";
-        if (appInfo.primaryCpuAbi != null) {
-            if (VMRuntime.is64BitAbi(appInfo.primaryCpuAbi)) {
-                arch = arch + "64";
-            }
-        } else {
-            if (VMRuntime.is64BitAbi(Build.SUPPORTED_ABIS[0])) {
-                arch = arch + "64";
-            }
-        }
-
+        String abi = appInfo.primaryCpuAbi != null ? appInfo.primaryCpuAbi :
+                Build.SUPPORTED_ABIS[0];
+        String arch = VMRuntime.getInstructionSet(abi);
         // get the path to the odex or oat file
         String baseCodePath = appInfo.getBaseCodePath();
         String[] files = null;
