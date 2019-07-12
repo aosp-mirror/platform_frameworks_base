@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -27,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
+import android.util.PathParser;
 import android.widget.FrameLayout;
 
 import com.android.internal.graphics.ColorUtils;
@@ -193,7 +195,6 @@ public class BubbleView extends FrameLayout {
             if (showDot) {
                 mBadgedImageView.setShowDot(true);
             }
-
             mBadgedImageView.clearAnimation();
             mBadgedImageView.animate().setDuration(200)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
@@ -217,6 +218,7 @@ public class BubbleView extends FrameLayout {
         if (mBubble == null || mBubbleIconFactory == null) {
             return;
         }
+        // Update icon.
         Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
         Notification n = mBubble.getEntry().notification.getNotification();
         Icon ic = metadata.getIcon();
@@ -224,19 +226,30 @@ public class BubbleView extends FrameLayout {
 
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
-            AdaptiveIconDrawable adaptiveIconDrawable = buildIconWithTint(iconDrawable, n.color);
-            Path iconPath = adaptiveIconDrawable.getIconMask();
-            mBadgedImageView.drawDot(iconPath);
-            iconDrawable = adaptiveIconDrawable;
+            iconDrawable = buildIconWithTint(iconDrawable, n.color);
         }
         BitmapInfo bitmapInfo = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
                 null /* user */,
                 true /* shrinkNonAdaptiveIcons */);
         mBadgedImageView.setImageBitmap(bitmapInfo.icon);
 
+        // Update badge.
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgeColor = badgeColor;
         mBadgedImageView.setDotColor(badgeColor);
+
+        // Update dot.
+        Path iconPath = PathParser.createPathFromPathData(
+                getResources().getString(com.android.internal.R.string.config_icon_mask));
+        Matrix matrix = new Matrix();
+        float scale = mBubbleIconFactory.getNormalizer().getScale(iconDrawable,
+                null /* outBounds */, null /* path */, null /* outMaskShape */);
+        float radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f;
+        matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
+                radius /* pivot y */);
+        iconPath.transform(matrix);
+        mBadgedImageView.drawDot(iconPath);
+
         animateDot(mBubble.showInShadeWhenBubble() /* showDot */, null /* after */);
     }
 
