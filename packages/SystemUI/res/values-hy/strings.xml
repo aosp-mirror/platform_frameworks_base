@@ -130,7 +130,7 @@
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Դեմքի ճանաչում…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Դեմքի պատկերակ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Համատեղելիության խոշորացման կոճակը:"</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Դիտափոխել փոքրից ավելի մեծ էկրան:"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Մասշտաբը մեծացնել փոքրից ավելի մեծ էկրան:"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-ը միացված է:"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-ն անջատված է:"</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Մարտկոց չկա:"</string>
@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Պահեք և քաշեք՝ սալիկներ ավելացնելու համար"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Պահեք և քաշեք՝ սալիկները վերադասավորելու համար"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Քաշեք այստեղ՝ հեռացնելու համար"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Հարկավոր է առնվազն 6 սալիկ"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Հարկավոր է առնվազն <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> սալիկ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Փոփոխել"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Ժամ"</string>
   <string-array name="clock_options">

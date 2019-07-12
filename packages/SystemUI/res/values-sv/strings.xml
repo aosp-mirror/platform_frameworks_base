@@ -779,7 +779,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Lägg till rutor genom att trycka och dra"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Ordna om rutor genom att trycka och dra"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Ta bort genom att dra här"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Minst sex rutor måste finnas kvar"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Minst <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> rutor måste finnas kvar"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Redigera"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Tid"</string>
   <string-array name="clock_options">
