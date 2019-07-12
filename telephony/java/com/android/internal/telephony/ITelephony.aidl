@@ -1087,6 +1087,11 @@ interface ITelephony {
     String[] getMergedSubscriberIds(int subId, String callingPackage);
 
     /**
+     * @hide
+     */
+    String[] getMergedSubscriberIdsFromGroup(int subId, String callingPackage);
+
+    /**
      * Override the operator branding for the current ICCID.
      *
      * Once set, whenever the SIM is present in the device, the service
