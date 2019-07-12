@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -625,7 +626,6 @@ public class SettingsBackupTest {
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
-                 Settings.Secure.DISPLAY_DENSITY_FORCED,
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
@@ -742,9 +742,12 @@ public class SettingsBackupTest {
 
     @Test
     public void secureSettingsBackedUpOrBlacklisted() {
+        HashSet<String> keys = new HashSet<String>();
+        Collections.addAll(keys, Settings.Secure.SETTINGS_TO_BACKUP);
+        Collections.addAll(keys, Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
         checkSettingsBackedUpOrBlacklisted(
                 getCandidateSettings(Settings.Secure.class),
-                newHashSet(Settings.Secure.SETTINGS_TO_BACKUP),
+                keys,
             BACKUP_BLACKLISTED_SECURE_SETTINGS);
     }
 
@@ -758,9 +761,9 @@ public class SettingsBackupTest {
                 is(empty()));
 
         assertThat(
-            "blacklisted settings backed up",
-            intersect(settingsToBackup, blacklist),
-            is(empty()));
+                "blacklisted settings backed up",
+                intersect(settingsToBackup, blacklist),
+                is(empty()));
     }
 
     private static Set<String> getCandidateSettings(Class<? extends Settings.NameValueTable> clazz) {

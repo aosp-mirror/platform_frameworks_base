@@ -9,7 +9,10 @@ android_app {
         "telephony-common",
         "ims-common",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "SettingsLib",
+    ],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
@@ -21,11 +24,18 @@ android_test {
     // because this test is not an instrumentation test. (because the target runs in the system process.)
     srcs: [
         "test/**/*.java",
+        "src/com/android/providers/settings/SettingsBackupAgent.java",
         "src/com/android/providers/settings/SettingsState.java",
         "src/com/android/providers/settings/SettingsHelper.java",
     ],
-    static_libs: ["androidx.test.rules"],
-    libs: ["android.test.base"],
+    static_libs: [
+        "androidx.test.rules",
+        "SettingsLib",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.mock",
+    ],
     resource_dirs: ["res"],
     aaptflags: [
         "--auto-add-overlay",
