@@ -49,6 +49,15 @@ public class QuickStepContract {
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
+    // Action sent by a system app to switch to gesture nav
+    public static final String ACTION_ENABLE_GESTURE_NAV =
+            "com.android.systemui.ENABLE_GESTURE_NAV";
+    // Action for the intent to receive the result
+    public static final String ACTION_ENABLE_GESTURE_NAV_RESULT =
+            "com.android.systemui.action.ENABLE_GESTURE_NAV_RESULT";
+    // Extra containing the pending intent to receive the result
+    public static final String EXTRA_RESULT_INTENT = "com.android.systemui.EXTRA_RESULT_INTENT";
+
     // Overview is disabled, either because the device is in lock task mode, or because the device
     // policy has disabled the feature
     public static final int SYSUI_STATE_SCREEN_PINNING = 1 << 0;

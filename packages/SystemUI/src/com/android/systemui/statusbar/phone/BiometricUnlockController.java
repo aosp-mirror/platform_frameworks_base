@@ -261,6 +261,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                 biometricSourceType);
         if (unlockAllowed) {
             startWakeAndUnlock(biometricSourceType);
+        } else {
+            Log.d(TAG, "onBiometricAuthenticated aborted by bypass controller");
         }
     }
 

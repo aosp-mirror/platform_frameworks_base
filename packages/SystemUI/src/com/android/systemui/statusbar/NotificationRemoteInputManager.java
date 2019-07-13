@@ -398,7 +398,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
         }
 
-        if (!riv.isAttachedToWindow()) {
+        if (riv != null && !riv.isAttachedToWindow()) {
             // the remoteInput isn't attached to the window anymore :/ Let's focus on the expanded
             // one instead if it's available
             riv = null;
