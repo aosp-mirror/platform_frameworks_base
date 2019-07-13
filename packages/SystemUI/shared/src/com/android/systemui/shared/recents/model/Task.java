@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -75,7 +76,7 @@ public class Task {
 
         private int mHashCode;
 
-        public TaskKey(ActivityManager.RecentTaskInfo t) {
+        public TaskKey(TaskInfo t) {
             ComponentName sourceComponent = t.origActivity != null
                     // Activity alias if there is one
                     ? t.origActivity
@@ -224,6 +225,17 @@ public class Task {
 
     public Task() {
         // Do nothing
+    }
+
+    /**
+     * Creates a task object from the provided task info
+     */
+    public static Task from(TaskKey taskKey, TaskInfo taskInfo, boolean isLocked) {
+        ActivityManager.TaskDescription td = taskInfo.taskDescription;
+        return new Task(taskKey,
+                td != null ? td.getPrimaryColor() : 0,
+                td != null ? td.getBackgroundColor() : 0,
+                taskInfo.supportsSplitScreenMultiWindow, isLocked, td, taskInfo.topActivity);
     }
 
     public Task(TaskKey key) {
