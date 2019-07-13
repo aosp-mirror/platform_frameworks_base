@@ -29,9 +29,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%2$s</xliff:g> të mbetura bazuar në përdorimin tënd"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%2$s</xliff:g> të mbetura"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Ka mbetur edhe <xliff:g id="PERCENTAGE">%s</xliff:g>. \"Kursyesi i baterisë\" është i aktivizuar."</string>
-    <string name="invalid_charger" msgid="2741987096648693172">"Nuk mund të ngarkohet përmes USB-së. Përdor ngarkuesin që ke marrë me pajisjen."</string>
+    <string name="invalid_charger" msgid="2741987096648693172">"Nuk mund të karikohet përmes USB-së. Përdor karikuesin që ke marrë me pajisjen."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"Nuk mund të ngarkohet përmes USB-së"</string>
-    <string name="invalid_charger_text" msgid="6480624964117840005">"Përdor ngarkuesin që ke marrë me pajisjen"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Përdor karikuesin që ke marrë me pajisjen"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Cilësimet"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Të aktivizohet \"Kursyesi i baterisë\"?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2090922638411744540">"Rreth \"Kursyesit të baterisë\""</string>
