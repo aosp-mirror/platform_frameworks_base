@@ -52,6 +52,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
@@ -97,6 +98,7 @@ public class MockSystemServices {
     public ActivityManagerInternal activityManagerInternal;
     public ActivityTaskManagerInternal activityTaskManagerInternal;
     public final IPackageManager ipackageManager;
+    public final IPermissionManager ipermissionManager;
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
@@ -137,6 +139,7 @@ public class MockSystemServices {
         activityManagerInternal = mock(ActivityManagerInternal.class);
         activityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
         ipackageManager = mock(IPackageManager.class);
+        ipermissionManager = mock(IPermissionManager.class);
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);

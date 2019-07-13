@@ -16,12 +16,18 @@
 
 """Helper util libraries for calling adb command line."""
 
+import datetime
 import os
+import re
 import sys
+import time
+from typing import Optional
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(
   os.path.abspath(__file__)))))
 import lib.cmd_utils as cmd_utils
+import lib.logcat_utils as logcat_utils
+
 
 def logcat_save_timestamp() -> str:
   """Gets the current logcat timestamp.
@@ -54,10 +60,48 @@ def disable_selinux():
   cmd_utils.run_shell_command('adb wait-for-device')
 
 def pkill(procname: str):
-  """Kills a process in device by its package name."""
+  """Kills a process on device specified by the substring pattern in procname"""
   _, pids = cmd_utils.run_shell_command('adb shell ps | grep "{}" | '
                                         'awk \'{{print $2;}}\''.
                                           format(procname))
 
   for pid in pids.split('\n'):
-    cmd_utils.run_adb_shell_command('kill {}'.format(pid))
+    pid = pid.strip()
+    if pid:
+      passed,_ = cmd_utils.run_adb_shell_command('kill {}'.format(pid))
+      time.sleep(1)
+
+def parse_time_to_milliseconds(time: str) -> int:
+  """Parses the time string to milliseconds."""
+  # Example: +1s56ms, +56ms
+  regex = r'\+((?P<second>\d+?)s)?(?P<millisecond>\d+?)ms'
+  result = re.search(regex, time)
+  second = 0
+  if result.group('second'):
+    second = int(result.group('second'))
+  ms = int(result.group('millisecond'))
+  return second * 1000 + ms
+
+def blocking_wait_for_logcat_displayed_time(timestamp: datetime.datetime,
+                                            package: str,
+                                            timeout: int) -> Optional[int]:
+  """Parses the displayed time in the logcat.
+
+  Returns:
+    the displayed time.
+  """
+  pattern = re.compile('.*ActivityTaskManager: Displayed {}.*'.format(package))
+  # 2019-07-02 22:28:34.469453349 -> 2019-07-02 22:28:34.469453
+  timestamp = datetime.datetime.strptime(timestamp[:-3],
+                                         '%Y-%m-%d %H:%M:%S.%f')
+  timeout_dt = timestamp + datetime.timedelta(0, timeout)
+  # 2019-07-01 14:54:21.946 27365 27392 I ActivityTaskManager:
+  # Displayed com.android.settings/.Settings: +927ms
+  result = logcat_utils.blocking_wait_for_logcat_pattern(timestamp,
+                                                         pattern,
+                                                         timeout_dt)
+  if not result or not '+' in result:
+    return None
+  displayed_time = result[result.rfind('+'):]
+
+  return parse_time_to_milliseconds(displayed_time)

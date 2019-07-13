@@ -34,7 +34,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageManager;
@@ -82,6 +81,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -626,7 +626,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkPermission(String permName, String pkgName) {
         try {
-            return mPM.checkPermission(permName, pkgName, getUserId());
+            return mPermissionManager.checkPermission(permName, pkgName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -707,46 +707,47 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permissionName,
-            UserHandle user) {
+    public void revokeRuntimePermission(String packageName, String permName, UserHandle user) {
         if (DEBUG_TRACE_GRANTS
-                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
             Log.i(TAG, "App " + mContext.getPackageName() + " is revoking "
-                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+                    + permName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
-            mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
+            mPermissionManager
+                    .revokeRuntimePermission(packageName, permName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
-    public int getPermissionFlags(String permissionName, String packageName, UserHandle user) {
+    public int getPermissionFlags(String permName, String packageName, UserHandle user) {
         try {
-            return mPM.getPermissionFlags(permissionName, packageName, user.getIdentifier());
+            return mPermissionManager
+                    .getPermissionFlags(permName, packageName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
-    public void updatePermissionFlags(String permissionName, String packageName,
+    public void updatePermissionFlags(String permName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
         if (DEBUG_TRACE_GRANTS
-                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
             Log.i(TAG, "App " + mContext.getPackageName() + " is updating flags for "
-                    + permissionName + " for user " + user.getIdentifier() + ": "
+                    + permName + " for user " + user.getIdentifier() + ": "
                     + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
                     + " := " + DebugUtils.flagsToString(
                             PackageManager.class, "FLAG_PERMISSION_", flagValues),
                     new RuntimeException());
         }
         try {
-            mPM.updatePermissionFlags(permissionName, packageName, flagMask,
-                    flagValues,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q,
-                    user.getIdentifier());
+            final boolean checkAdjustPolicyFlagPermission =
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
+            mPermissionManager.updatePermissionFlags(permName, packageName, flagMask,
+                    flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -754,10 +755,11 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public @NonNull Set<String> getWhitelistedRestrictedPermissions(
-            @NonNull String packageName, @PermissionWhitelistFlags int whitelistFlags) {
+            @NonNull String packageName, @PermissionWhitelistFlags int flags) {
         try {
-            final List<String> whitelist = mPM.getWhitelistedRestrictedPermissions(
-                    packageName, whitelistFlags, getUserId());
+            final int userId = getUserId();
+            final List<String> whitelist = mPermissionManager
+                    .getWhitelistedRestrictedPermissions(packageName, flags, userId);
             if (whitelist != null) {
                 return new ArraySet<>(whitelist);
             }
@@ -769,10 +771,11 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+            @NonNull String permName, @PermissionWhitelistFlags int flags) {
         try {
-            return mPM.addWhitelistedRestrictedPermission(packageName, permission,
-                    whitelistFlags, getUserId());
+            final int userId = getUserId();
+            return mPermissionManager
+                    .addWhitelistedRestrictedPermission(packageName, permName, flags, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -780,10 +783,11 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+            @NonNull String permName, @PermissionWhitelistFlags int flags) {
         try {
-            return mPM.removeWhitelistedRestrictedPermission(packageName, permission,
-                    whitelistFlags, getUserId());
+            final int userId = getUserId();
+            return mPermissionManager
+                    .removeWhitelistedRestrictedPermission(packageName, permName, flags, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1623,7 +1627,7 @@ public class ApplicationPackageManager extends PackageManager {
             OnPermissionsChangeListenerDelegate delegate =
                     new OnPermissionsChangeListenerDelegate(listener, Looper.getMainLooper());
             try {
-                mPM.addOnPermissionsChangeListener(delegate);
+                mPermissionManager.addOnPermissionsChangeListener(delegate);
                 mPermissionListeners.put(listener, delegate);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1637,7 +1641,7 @@ public class ApplicationPackageManager extends PackageManager {
             IOnPermissionsChangeListener delegate = mPermissionListeners.get(listener);
             if (delegate != null) {
                 try {
-                    mPM.removeOnPermissionsChangeListener(delegate);
+                    mPermissionManager.removeOnPermissionsChangeListener(delegate);
                     mPermissionListeners.remove(listener);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();

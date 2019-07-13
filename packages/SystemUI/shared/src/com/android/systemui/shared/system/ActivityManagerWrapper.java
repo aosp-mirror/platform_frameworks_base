@@ -30,10 +30,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
+import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.ActivityType;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -499,5 +501,13 @@ public class ActivityManagerWrapper {
                 && (context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                 || freeformDevOption);
+    }
+
+    /**
+     * Returns true if the running task represents the home task
+     */
+    public static boolean isHomeTask(RunningTaskInfo info) {
+        return info.configuration.windowConfiguration.getActivityType()
+                == WindowConfiguration.ACTIVITY_TYPE_HOME;
     }
 }

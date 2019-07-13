@@ -77,20 +77,6 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * Call this method to report a new location. May be called from any thread.
-     */
-    protected void reportLocation(Location location) {
-        mLocationProviderManager.onReportLocation(location);
-    }
-
-    /**
-     * Call this method to report a new location. May be called from any thread.
-     */
-    protected void reportLocation(List<Location> locations) {
-        mLocationProviderManager.onReportLocation(locations);
-    }
-
-    /**
      * Call this method to report a change in provider enabled/disabled status. May be called from
      * any thread.
      */
@@ -106,24 +92,50 @@ public abstract class AbstractLocationProvider {
         mLocationProviderManager.onSetProperties(properties);
     }
 
-    /** Returns list of packages currently associated with this provider. */
+    /**
+     * Call this method to report a new location. May be called from any thread.
+     */
+    protected void reportLocation(Location location) {
+        mLocationProviderManager.onReportLocation(location);
+    }
+
+    /**
+     * Call this method to report a new location. May be called from any thread.
+     */
+    protected void reportLocation(List<Location> locations) {
+        mLocationProviderManager.onReportLocation(locations);
+    }
+
+    /**
+     * Invoked by the location service to return a list of packages currently associated with this
+     * provider. May be called from any thread.
+     */
     public List<String> getProviderPackages() {
         return Collections.singletonList(mContext.getPackageName());
     }
 
     /**
-     * Called when the location service delivers a new request for fulfillment to the provider.
-     * Replaces any previous requests completely.
+     * Invoked by the location service to deliver a new request for fulfillment to the provider.
+     * Replaces any previous requests completely. Will always be invoked from the location service
+     * thread with a cleared binder identity.
      */
-    public abstract void setRequest(ProviderRequest request, WorkSource source);
+    public abstract void onSetRequest(ProviderRequest request, WorkSource source);
 
     /**
-     * Called to dump debug or log information.
+     * Invoked by the location service to deliver a custom command to this provider. Will always be
+     * invoked from the location service thread with a cleared binder identity.
+     */
+    public void onSendExtraCommand(int uid, int pid, String command, Bundle extras) {}
+
+    /**
+     * Invoked by the location service to dump debug or log information. May be invoked from any
+     * thread.
      */
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
     /**
-     * Retrieves the current status of the provider.
+     * Invoked by the location service to retrieve the current status of the provider. May be
+     * invoked from any thread.
      *
      * @deprecated Will be removed in a future release.
      */
@@ -133,7 +145,8 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * Retrieves the last update time of the status of the provider.
+     * Invoked by the location service to retrieve the last update time of the status of the
+     * provider. May be invoked from any thread.
      *
      * @deprecated Will be removed in a future release.
      */
@@ -141,10 +154,4 @@ public abstract class AbstractLocationProvider {
     public long getStatusUpdateTime() {
         return 0;
     }
-
-    /**
-     * Sends a custom command to this provider. Called with the original binder identity of the
-     * caller.
-     */
-    public abstract void sendExtraCommand(String command, Bundle extras);
 }

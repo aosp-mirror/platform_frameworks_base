@@ -43,6 +43,14 @@ import java.util.Objects;
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
+    /** @hide */
+    public static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
+            "permissions revoked";
+    /** @hide */
+    public static final String KILL_APP_REASON_GIDS_CHANGED =
+            "permission grant or revoke changed gids";
+
+
     /**
      * {@link android.content.pm.PackageParser} needs access without having a {@link Context}.
      *

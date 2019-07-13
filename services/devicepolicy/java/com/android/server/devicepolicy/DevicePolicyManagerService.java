@@ -196,6 +196,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract.QuickContact;
@@ -492,6 +493,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
+    final IPermissionManager mIPermissionManager;
     final UserManager mUserManager;
     final UserManagerInternal mUserManagerInternal;
     final UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -1974,6 +1976,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return AppGlobals.getPackageManager();
         }
 
+        IPermissionManager getIPermissionManager() {
+            return AppGlobals.getPermissionManager();
+        }
+
         IBackupManager getIBackupManager() {
             return IBackupManager.Stub.asInterface(
                     ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -2217,6 +2223,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUsageStatsManagerInternal = Preconditions.checkNotNull(
                 injector.getUsageStatsManagerInternal());
         mIPackageManager = Preconditions.checkNotNull(injector.getIPackageManager());
+        mIPermissionManager = Preconditions.checkNotNull(injector.getIPermissionManager());
         mTelephonyManager = Preconditions.checkNotNull(injector.getTelephonyManager());
 
         mLocalService = new LocalService();
@@ -8217,7 +8224,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         saveSettingsLocked(userId);
 
         try {
-            mIPackageManager.updatePermissionFlagsForAllApps(
+            mIPermissionManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userId);
             pushUserRestrictions(userId);

@@ -1937,6 +1937,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (start) {
             mNotificationPanel.startWaitingForOpenPanelGesture();
+            setPanelExpanded(true);
         } else {
             mNotificationPanel.stopWaitingForOpenPanelGesture(velocity);
         }
@@ -2383,6 +2384,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
+        }
+
+        if (mKeyguardBypassController != null) {
+            mKeyguardBypassController.dump(pw);
         }
 
         if (mKeyguardUpdateMonitor != null) {
@@ -3434,7 +3439,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.resetViews(dozingAnimated);
 
         updateQsExpansionEnabled();
-        mKeyguardViewMediator.setAodShowing(mDozing);
+        mKeyguardViewMediator.setDozing(mDozing);
 
         mEntryManager.updateNotifications();
         updateDozingState();

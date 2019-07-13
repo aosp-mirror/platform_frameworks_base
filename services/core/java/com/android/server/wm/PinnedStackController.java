@@ -350,7 +350,7 @@ class PinnedStackController {
             // Calculate the stack bounds in the new orientation to the same same fraction along the
             // rotated movement bounds.
             final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
-                    false /* adjustForIme */, false /* adjustForShelf */);
+                    false /* adjustForIme */);
             mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                     snapFraction);
             if (mIsMinimized) {
@@ -540,8 +540,7 @@ class PinnedStackController {
      */
     private Rect getMovementBounds(Rect stackBounds) {
         synchronized (mService.mGlobalLock) {
-            return getMovementBounds(stackBounds, true /* adjustForIme */,
-                    true /* adjustForShelf */);
+            return getMovementBounds(stackBounds, true /* adjustForIme */);
         }
     }
 
@@ -549,15 +548,16 @@ class PinnedStackController {
      * @return the movement bounds for the given {@param stackBounds} and the current state of the
      *         controller.
      */
-    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme, boolean adjustForShelf) {
+    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
         synchronized (mService.mGlobalLock) {
             final Rect movementBounds = new Rect();
             getInsetBounds(movementBounds);
 
-            // Apply the movement bounds adjustments based on the current state
+            // Apply the movement bounds adjustments based on the current state.
+            // Note that shelf offset does not affect the movement bounds here
+            // since it's been taken care of in system UI.
             mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                    Math.max((adjustForIme && mIsImeShowing) ? mImeHeight : 0,
-                            (adjustForShelf && mIsShelfShowing) ? mShelfHeight : 0));
+                    (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
             return movementBounds;
         }
     }

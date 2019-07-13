@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2012, The Android Open Source Project
+/*
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package android.net.wifi.p2p;
+package android.permission;
 
-parcelable WifiP2pGroupList;
+/**
+ * Listener for changes in the permissions for installed packages.
+ * {@hide}
+ */
+oneway interface IOnPermissionsChangeListener {
+    void onPermissionsChanged(int uid);
+}

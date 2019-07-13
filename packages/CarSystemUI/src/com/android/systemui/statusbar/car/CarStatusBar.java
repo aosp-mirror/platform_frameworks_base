@@ -27,6 +27,7 @@ import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -1078,6 +1079,21 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        super.onConfigChanged(newConfig);
+
+        int uiModeNightMask = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK);
+
+        boolean dayNightModeChanged = uiModeNightMask == Configuration.UI_MODE_NIGHT_YES
+                || uiModeNightMask == Configuration.UI_MODE_NIGHT_NO;
+
+        if (dayNightModeChanged) {
+            mNotificationView.setBackgroundColor(
+                    mContext.getColor(R.color.notification_shade_background_color));
+        }
+    }
+
     private void calculatePercentageFromBottom(float height) {
         if (mNotificationView.getHeight() > 0) {
             mPercentageFromBottom = (int) Math.abs(
@@ -1231,13 +1247,6 @@ public class CarStatusBar extends StatusBar implements
             calculatePercentageFromBottom(event2.getRawY());
             setNotificationViewClipBounds((int) event2.getRawY());
             return true;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            mClosingVelocity = DEFAULT_FLING_VELOCITY;
-            close();
-            super.onLongPress(e);
         }
     }
 

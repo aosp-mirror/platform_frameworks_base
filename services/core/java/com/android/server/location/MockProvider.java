@@ -81,11 +81,11 @@ public class MockProvider extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" last location=" + mLocation);
+        pw.println("last location=" + mLocation);
     }
 
     @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {}
+    public void onSetRequest(ProviderRequest request, WorkSource source) {}
 
     @Override
     public int getStatus(Bundle extras) {
@@ -101,7 +101,4 @@ public class MockProvider extends AbstractLocationProvider {
     public long getStatusUpdateTime() {
         return mStatusUpdateTime;
     }
-
-    @Override
-    public void sendExtraCommand(String command, Bundle extras) {}
 }

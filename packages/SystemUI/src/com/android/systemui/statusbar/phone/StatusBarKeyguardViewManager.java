@@ -720,7 +720,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * animation didn't finish yet.
      */
     public boolean bouncerIsOrWillBeShowing() {
-        return mBouncer.isShowing() || mBouncer.willShowSoon();
+        return mBouncer.isShowing() || mBouncer.inTransit();
     }
 
     public boolean isFullscreenBouncer() {

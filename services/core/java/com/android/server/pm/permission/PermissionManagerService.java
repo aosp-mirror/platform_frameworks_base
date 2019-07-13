@@ -16,6 +16,7 @@
 
 package com.android.server.pm.permission;
 
+import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
@@ -33,12 +34,15 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
+import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PERMISSIONS;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.permission.PermissionManagerService.killUid;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -48,7 +52,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ApplicationPackageManager;
+import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionGroupInfoFlags;
@@ -65,7 +71,11 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -73,16 +83,19 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -93,6 +106,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IntPair;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -112,7 +127,6 @@ import libcore.util.EmptyArray;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -123,6 +137,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * Manages all permissions and handles permissions related tasks.
@@ -229,6 +244,70 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     final private ArrayList<OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
 
+    @GuardedBy("mLock")
+    private CheckPermissionDelegate mCheckPermissionDelegate;
+
+    @GuardedBy("mLock")
+    private final OnPermissionChangeListeners mOnPermissionChangeListeners;
+
+    // TODO: Take a look at the methods defined in the callback.
+    // The callback was initially created to support the split between permission
+    // manager and the package manager. However, it's started to be used for other
+    // purposes. It may make sense to keep as an abstraction, but, the methods
+    // necessary to be overridden may be different than what was initially needed
+    // for the split.
+    private PermissionCallback mDefaultPermissionCallback = new PermissionCallback() {
+        @Override
+        public void onGidsChanged(int appId, int userId) {
+            mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED));
+        }
+        @Override
+        public void onPermissionGranted(int uid, int userId) {
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+
+            // Not critical; if this is lost, the application has to request again.
+            mPackageManagerInt.writeSettings(true);
+        }
+        @Override
+        public void onInstallPermissionGranted() {
+            mPackageManagerInt.writeSettings(true);
+        }
+        @Override
+        public void onPermissionRevoked(int uid, int userId) {
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+
+            // Critical; after this call the application should never have the permission
+            mPackageManagerInt.writeSettings(false);
+            final int appId = UserHandle.getAppId(uid);
+            killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+        }
+        @Override
+        public void onInstallPermissionRevoked() {
+            mPackageManagerInt.writeSettings(true);
+        }
+        @Override
+        public void onPermissionUpdated(int[] userIds, boolean sync) {
+            mPackageManagerInt.writePermissionSettings(userIds, !sync);
+        }
+        @Override
+        public void onInstallPermissionUpdated() {
+            mPackageManagerInt.writeSettings(true);
+        }
+        @Override
+        public void onPermissionRemoved() {
+            mPackageManagerInt.writeSettings(false);
+        }
+        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
+                int uid) {
+            onPermissionUpdated(updatedUserIds, sync);
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+        }
+        public void onInstallPermissionUpdatedNotifyListener(int uid) {
+            onInstallPermissionUpdated();
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+        }
+    };
+
     PermissionManagerService(Context context,
             @NonNull Object externalLock) {
         mContext = context;
@@ -248,6 +327,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
+        mOnPermissionChangeListeners = new OnPermissionChangeListeners(FgThread.get().getLooper());
 
         // propagate permission configuration
         final ArrayMap<String, SystemConfig.PermissionEntry> permConfig =
@@ -296,6 +376,29 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ServiceManager.addService("permissionmgr", permissionService);
         }
         return LocalServices.getService(PermissionManagerServiceInternal.class);
+    }
+
+    /**
+     * This method should typically only be used when granting or revoking
+     * permissions, since the app may immediately restart after this call.
+     * <p>
+     * If you're doing surgery on app code/data, use {@link PackageFreezer} to
+     * guard your work against the app being relaunched.
+     */
+    public static void killUid(int appId, int userId, String reason) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            IActivityManager am = ActivityManager.getService();
+            if (am != null) {
+                try {
+                    am.killUid(appId, userId, reason);
+                } catch (RemoteException e) {
+                    /* ignore - same process */
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Nullable BasePermission getPermission(String permName) {
@@ -456,12 +559,232 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private int checkPermission(String permName, String pkgName, int callingUid, int userId) {
+    @Override
+    public int getPermissionFlags(String permName, String packageName, int userId) {
+        final int callingUid = getCallingUid();
+        return getPermissionFlagsInternal(permName, packageName, callingUid, userId);
+    }
+
+    private int getPermissionFlagsInternal(
+            String permName, String packageName, int callingUid, int userId) {
+        if (!mUserManagerInt.exists(userId)) {
+            return 0;
+        }
+
+        enforceGrantRevokeGetRuntimePermissionPermissions("getPermissionFlags");
+        enforceCrossUserPermission(callingUid, userId,
+                true,  // requireFullPermission
+                false, // checkShell
+                false, // requirePermissionWhenSameUser
+                "getPermissionFlags");
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null || pkg.mExtras == null) {
+            return 0;
+        }
+        synchronized (mLock) {
+            if (mSettings.getPermissionLocked(permName) == null) {
+                return 0;
+            }
+        }
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
+            return 0;
+        }
+        final PackageSetting ps = (PackageSetting) pkg.mExtras;
+        PermissionsState permissionsState = ps.getPermissionsState();
+        return permissionsState.getPermissionFlags(permName, userId);
+    }
+
+    @Override
+    public void updatePermissionFlags(String permName, String packageName, int flagMask,
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
+        final int callingUid = getCallingUid();
+        boolean overridePolicy = false;
+
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                    if (checkAdjustPolicyFlagPermission) {
+                        mContext.enforceCallingOrSelfPermission(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                                "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
+                                        + " to change policy flags");
+                    } else if (mPackageManagerInt.getTargetSdk(callingUid)
+                            >= Build.VERSION_CODES.Q) {
+                        throw new IllegalArgumentException(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
+                                        + " to be checked for packages targeting "
+                                        + Build.VERSION_CODES.Q + " or later when changing policy "
+                                        + "flags");
+                    }
+                    overridePolicy = true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        updatePermissionFlagsInternal(
+                permName, packageName, flagMask, flagValues, callingUid, userId,
+                overridePolicy, mDefaultPermissionCallback);
+    }
+
+    private void updatePermissionFlagsInternal(String permName, String packageName, int flagMask,
+            int flagValues, int callingUid, int userId, boolean overridePolicy,
+            PermissionCallback callback) {
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is updating flags for "
+                            + permName + " for user " + userId  + " "
+                            + DebugUtils.flagsToString(
+                                    PackageManager.class, "FLAG_PERMISSION_", flagMask)
+                            + " := "
+                            + DebugUtils.flagsToString(
+                                    PackageManager.class, "FLAG_PERMISSION_", flagValues)
+                            + " on behalf of uid " + callingUid
+                            + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
+
+        if (!mUserManagerInt.exists(userId)) {
+            return;
+        }
+
+        enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlags");
+
+        enforceCrossUserPermission(callingUid, userId,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
+                "updatePermissionFlags");
+
+        if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0 && !overridePolicy) {
+            throw new SecurityException("updatePermissionFlags requires "
+                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+        }
+
+        // Only the system can change these flags and nothing else.
+        if (callingUid != Process.SYSTEM_UID) {
+            flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+            flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+        }
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null || pkg.mExtras == null) {
+            Log.e(TAG, "Unknown package: " + packageName);
+            return;
+        }
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+
+        final BasePermission bp;
+        synchronized (mLock) {
+            bp = mSettings.getPermissionLocked(permName);
+        }
+        if (bp == null) {
+            throw new IllegalArgumentException("Unknown permission: " + permName);
+        }
+
+        final PackageSetting ps = (PackageSetting) pkg.mExtras;
+        final PermissionsState permissionsState = ps.getPermissionsState();
+        final boolean hadState =
+                permissionsState.getRuntimePermissionState(permName, userId) != null;
+        final boolean permissionUpdated =
+                permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues);
+        if (permissionUpdated && bp.isRuntime()) {
+            notifyRuntimePermissionStateChanged(packageName, userId);
+        }
+        if (permissionUpdated && callback != null) {
+            // Install and runtime permissions are stored in different places,
+            // so figure out what permission changed and persist the change.
+            if (permissionsState.getInstallPermissionState(permName) != null) {
+                callback.onInstallPermissionUpdatedNotifyListener(pkg.applicationInfo.uid);
+            } else if (permissionsState.getRuntimePermissionState(permName, userId) != null
+                    || hadState) {
+                callback.onPermissionUpdatedNotifyListener(new int[] { userId }, false,
+                        pkg.applicationInfo.uid);
+            }
+        }
+    }
+
+    /**
+     * Update the permission flags for all packages and runtime permissions of a user in order
+     * to allow device or profile owner to remove POLICY_FIXED.
+     */
+    @Override
+    public void updatePermissionFlagsForAllApps(int flagMask, int flagValues,
+            final int userId) {
+        final int callingUid = getCallingUid();
+        if (!mUserManagerInt.exists(userId)) {
+            return;
+        }
+
+        enforceGrantRevokeRuntimePermissionPermissions(
+                "updatePermissionFlagsForAllApps");
+        enforceCrossUserPermission(callingUid, userId,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
+                "updatePermissionFlagsForAllApps");
+
+        // Only the system can change system fixed flags.
+        final int effectiveFlagMask = (callingUid != Process.SYSTEM_UID)
+                ? flagMask : flagMask & ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+        final int effectiveFlagValues = (callingUid != Process.SYSTEM_UID)
+                ? flagValues : flagValues & ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+
+        final boolean[] changed = new boolean[1];
+        mPackageManagerInt.forEachPackage(new Consumer<PackageParser.Package>() {
+            @Override
+            public void accept(Package pkg) {
+                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                if (ps == null) {
+                    return;
+                }
+                final PermissionsState permissionsState = ps.getPermissionsState();
+                changed[0] |= permissionsState.updatePermissionFlagsForAllPermissions(
+                        userId, effectiveFlagMask, effectiveFlagValues);
+                mOnPermissionChangeListeners.onPermissionsChanged(pkg.applicationInfo.uid);
+            }
+        });
+
+        if (changed[0]) {
+            mPackageManagerInt.writePermissionSettings(new int[] { userId }, true);
+        }
+    }
+
+    @Override
+    public int checkPermission(String permName, String pkgName, int userId) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkPermissionImpl(permName, pkgName, userId);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
+                PermissionManagerService.this::checkPermissionImpl);
+    }
+
+    private int checkPermissionImpl(String permName, String pkgName, int userId) {
+        return checkPermissionInternal(permName, pkgName, getCallingUid(), userId);
+    }
+
+    private int checkPermissionInternal(String permName, String packageName, int callingUid,
+            int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(pkgName);
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
         if (pkg != null && pkg.mExtras != null) {
             if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
                 return PackageManager.PERMISSION_DENIED;
@@ -485,12 +808,38 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return PackageManager.PERMISSION_GRANTED;
             }
         }
-
         return PackageManager.PERMISSION_DENIED;
     }
 
-    private int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
-            int callingUid) {
+    @Override
+    public int checkUidPermission(String permName, int uid) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkUidPermissionImpl(permName, uid);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkUidPermission(permName, uid,
+                PermissionManagerService.this::checkUidPermissionImpl);
+    }
+
+    private int checkUidPermissionImpl(@NonNull String permName, int uid) {
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(uid);
+        synchronized (mLock) {
+            return checkUidPermissionInternal(permName, pkg, uid, getCallingUid());
+        }
+    }
+
+    /**
+     * Checks whether or not the given package has been granted the specified
+     * permission. If the given package is {@code null}, we instead check the
+     * system permissions for the given UID.
+     *
+     * @see SystemConfig#getSystemPermissions()
+     */
+    private int checkUidPermissionInternal(@NonNull String permName,
+            @Nullable PackageParser.Package pkg, int uid, int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp =
                 mPackageManagerInt.getInstantAppPackageName(callingUid) != null;
@@ -536,6 +885,728 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         return PackageManager.PERMISSION_DENIED;
+    }
+
+    @Override
+    public void addOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
+                "addOnPermissionsChangeListener");
+
+        synchronized (mLock) {
+            mOnPermissionChangeListeners.addListenerLocked(listener);
+        }
+    }
+
+    @Override
+    public void removeOnPermissionsChangeListener(IOnPermissionsChangeListener listener) {
+        if (mPackageManagerInt.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+            throw new SecurityException("Instant applications don't have access to this method");
+        }
+        synchronized (mLock) {
+            mOnPermissionChangeListeners.removeListenerLocked(listener);
+        }
+    }
+
+    @Override
+    @Nullable public List<String> getWhitelistedRestrictedPermissions(@NonNull String packageName,
+            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkFlagsArgument(flags,
+                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+        Preconditions.checkArgumentNonNegative(userId, null);
+
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    "getWhitelistedRestrictedPermissions for user " + userId);
+        }
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null) {
+            return null;
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, UserHandle.getCallingUserId())) {
+            return null;
+        }
+        final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                        == PackageManager.PERMISSION_GRANTED;
+        final boolean isCallerInstallerOnRecord =
+                mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
+
+        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
+                && !isCallerPrivileged) {
+            throw new SecurityException("Querying system whitelist requires "
+                    + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+        }
+
+        if ((flags & (PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) != 0) {
+            if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                throw new SecurityException("Querying upgrade or installer whitelist"
+                        + " requires being installer on record or "
+                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+            }
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final PermissionsState permissionsState =
+                    PackageManagerServiceUtils.getPermissionsState(pkg);
+            if (permissionsState == null) {
+                return null;
+            }
+
+            int queryFlags = 0;
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0) {
+                queryFlags |= PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
+                queryFlags |= PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
+                queryFlags |=  PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+            }
+
+            ArrayList<String> whitelistedPermissions = null;
+
+            final int permissionCount = pkg.requestedPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                final String permissionName = pkg.requestedPermissions.get(i);
+                final int currentFlags =
+                        permissionsState.getPermissionFlags(permissionName, userId);
+                if ((currentFlags & queryFlags) != 0) {
+                    if (whitelistedPermissions == null) {
+                        whitelistedPermissions = new ArrayList<>();
+                    }
+                    whitelistedPermissions.add(permissionName);
+                }
+            }
+
+            return whitelistedPermissions;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permName, @PermissionWhitelistFlags int flags,
+            @UserIdInt int userId) {
+        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
+        Preconditions.checkNotNull(permName);
+
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permName)) {
+            return false;
+        }
+
+        List<String> permissions =
+                getWhitelistedRestrictedPermissions(packageName, flags, userId);
+        if (permissions == null) {
+            permissions = new ArrayList<>(1);
+        }
+        if (permissions.indexOf(permName) < 0) {
+            permissions.add(permName);
+            return setWhitelistedRestrictedPermissionsInternal(packageName, permissions,
+                    flags, userId);
+        }
+        return false;
+    }
+
+    private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
+            @NonNull String permName) {
+        synchronized (mLock) {
+            final BasePermission bp = mSettings.getPermissionLocked(permName);
+            if (bp == null) {
+                Slog.w(TAG, "No such permissions: " + permName);
+                return false;
+            }
+            if (bp.isHardOrSoftRestricted() && bp.isImmutablyRestricted()
+                    && mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Cannot modify whitelisting of an immutably "
+                        + "restricted permission: " + permName);
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permName, @PermissionWhitelistFlags int flags,
+            @UserIdInt int userId) {
+        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
+        Preconditions.checkNotNull(permName);
+
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permName)) {
+            return false;
+        }
+
+        final List<String> permissions =
+                getWhitelistedRestrictedPermissions(packageName, flags, userId);
+        if (permissions != null && permissions.remove(permName)) {
+            return setWhitelistedRestrictedPermissionsInternal(packageName, permissions,
+                    flags, userId);
+        }
+        return false;
+    }
+
+    private boolean setWhitelistedRestrictedPermissionsInternal(@NonNull String packageName,
+            @Nullable List<String> permissions, @PermissionWhitelistFlags int flags,
+            @UserIdInt int userId) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkFlagsArgument(flags,
+                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+        Preconditions.checkArgument(Integer.bitCount(flags) == 1);
+        Preconditions.checkArgumentNonNegative(userId, null);
+
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS,
+                    "setWhitelistedRestrictedPermissions for user " + userId);
+        }
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null) {
+            return false;
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, UserHandle.getCallingUserId())) {
+            return false;
+        }
+
+        final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                        == PackageManager.PERMISSION_GRANTED;
+        final boolean isCallerInstallerOnRecord =
+                mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
+
+        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
+                && !isCallerPrivileged) {
+            throw new SecurityException("Modifying system whitelist requires "
+                    + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+        }
+
+        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
+            if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                throw new SecurityException("Modifying upgrade whitelist requires"
+                        + " being installer on record or "
+                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+            }
+            final List<String> whitelistedPermissions =
+                    getWhitelistedRestrictedPermissions(pkg.packageName, flags, userId);
+            if (permissions == null || permissions.isEmpty()) {
+                if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
+                    return true;
+                }
+            } else {
+                // Only the system can add and remove while the installer can only remove.
+                final int permissionCount = permissions.size();
+                for (int i = 0; i < permissionCount; i++) {
+                    if ((whitelistedPermissions == null
+                            || !whitelistedPermissions.contains(permissions.get(i)))
+                            && !isCallerPrivileged) {
+                        throw new SecurityException("Adding to upgrade whitelist requires"
+                                + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                    }
+                }
+            }
+
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
+                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                    throw new SecurityException("Modifying installer whitelist requires"
+                            + " being installer on record or "
+                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                }
+            }
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            setWhitelistedRestrictedPermissionsForUser(
+                    pkg, userId, permissions, Process.myUid(), flags, mDefaultPermissionCallback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void grantRuntimePermission(String packageName, String permName, final int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final boolean overridePolicy =
+                checkUidPermission(ADJUST_RUNTIME_PERMISSIONS_POLICY, callingUid)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        grantRuntimePermissionInternal(permName, packageName, overridePolicy,
+                callingUid, userId, mDefaultPermissionCallback);
+    }
+
+    // TODO swap permission name and package name
+    private void grantRuntimePermissionInternal(String permName, String packageName,
+            boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is granting "
+                    + permName + " for user " + userId + " on behalf of uid " + callingUid
+                    + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
+        if (!mUserManagerInt.exists(userId)) {
+            Log.e(TAG, "No such user:" + userId);
+            return;
+        }
+
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                "grantRuntimePermission");
+
+        enforceCrossUserPermission(callingUid, userId,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
+                "grantRuntimePermission");
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null || pkg.mExtras == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        final BasePermission bp;
+        synchronized (mLock) {
+            bp = mSettings.getPermissionLocked(permName);
+        }
+        if (bp == null) {
+            throw new IllegalArgumentException("Unknown permission: " + permName);
+        }
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+
+        bp.enforceDeclaredUsedAndRuntimeOrDevelopment(pkg);
+
+        // If a permission review is required for legacy apps we represent
+        // their permissions as always granted runtime ones since we need
+        // to keep the review required permission flag per user while an
+        // install permission's state is shared across all users.
+        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                && bp.isRuntime()) {
+            return;
+        }
+
+        final int uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
+
+        final PackageSetting ps = (PackageSetting) pkg.mExtras;
+        final PermissionsState permissionsState = ps.getPermissionsState();
+
+        final int flags = permissionsState.getPermissionFlags(permName, userId);
+        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+            Log.e(TAG, "Cannot grant system fixed permission "
+                    + permName + " for package " + packageName);
+            return;
+        }
+        if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+            Log.e(TAG, "Cannot grant policy fixed permission "
+                    + permName + " for package " + packageName);
+            return;
+        }
+
+        if (bp.isHardRestricted()
+                && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
+            Log.e(TAG, "Cannot grant hard restricted non-exempt permission "
+                    + permName + " for package " + packageName);
+            return;
+        }
+
+        if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
+                pkg.applicationInfo, UserHandle.of(userId), permName).canBeGranted()) {
+            Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
+                    + packageName);
+            return;
+        }
+
+        if (bp.isDevelopment()) {
+            // Development permissions must be handled specially, since they are not
+            // normal runtime permissions.  For now they apply to all users.
+            if (permissionsState.grantInstallPermission(bp)
+                    != PERMISSION_OPERATION_FAILURE) {
+                if (callback != null) {
+                    callback.onInstallPermissionGranted();
+                }
+            }
+            return;
+        }
+
+        if (ps.getInstantApp(userId) && !bp.isInstant()) {
+            throw new SecurityException("Cannot grant non-ephemeral permission"
+                    + permName + " for package " + packageName);
+        }
+
+        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+            Slog.w(TAG, "Cannot grant runtime permission to a legacy app");
+            return;
+        }
+
+        final int result = permissionsState.grantRuntimePermission(bp, userId);
+        switch (result) {
+            case PERMISSION_OPERATION_FAILURE: {
+                return;
+            }
+
+            case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
+                if (callback != null) {
+                    callback.onGidsChanged(UserHandle.getAppId(pkg.applicationInfo.uid), userId);
+                }
+            }
+            break;
+        }
+
+        if (bp.isRuntime()) {
+            logPermission(MetricsEvent.ACTION_PERMISSION_GRANTED, permName, packageName);
+        }
+
+        if (callback != null) {
+            callback.onPermissionGranted(uid, userId);
+        }
+
+        if (bp.isRuntime()) {
+            notifyRuntimePermissionStateChanged(packageName, userId);
+        }
+
+        // Only need to do this if user is initialized. Otherwise it's a new user
+        // and there are no processes running as the user yet and there's no need
+        // to make an expensive call to remount processes for the changed permissions.
+        if (READ_EXTERNAL_STORAGE.equals(permName)
+                || WRITE_EXTERNAL_STORAGE.equals(permName)) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mUserManagerInt.isUserInitialized(userId)) {
+                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                            StorageManagerInternal.class);
+                    storageManagerInternal.onExternalStoragePolicyChanged(uid, packageName);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+    }
+
+    @Override
+    public void revokeRuntimePermission(String packageName, String permName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final boolean overridePolicy =
+                checkUidPermission(ADJUST_RUNTIME_PERMISSIONS_POLICY, callingUid)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        revokeRuntimePermissionInternal(permName, packageName, overridePolicy, callingUid, userId,
+                mDefaultPermissionCallback);
+    }
+
+    // TODO swap permission name and package name
+    private void revokeRuntimePermissionInternal(String permName, String packageName,
+            boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is revoking "
+                            + permName + " for user " + userId + " on behalf of uid " + callingUid
+                            + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
+        if (!mUserManagerInt.exists(userId)) {
+            Log.e(TAG, "No such user:" + userId);
+            return;
+        }
+
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                "revokeRuntimePermission");
+
+        enforceCrossUserPermission(callingUid, userId,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
+                "revokeRuntimePermission");
+
+        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
+        if (pkg == null || pkg.mExtras == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        final BasePermission bp = mSettings.getPermissionLocked(permName);
+        if (bp == null) {
+            throw new IllegalArgumentException("Unknown permission: " + permName);
+        }
+
+        bp.enforceDeclaredUsedAndRuntimeOrDevelopment(pkg);
+
+        // If a permission review is required for legacy apps we represent
+        // their permissions as always granted runtime ones since we need
+        // to keep the review required permission flag per user while an
+        // install permission's state is shared across all users.
+        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                && bp.isRuntime()) {
+            return;
+        }
+
+        final PackageSetting ps = (PackageSetting) pkg.mExtras;
+        final PermissionsState permissionsState = ps.getPermissionsState();
+
+        final int flags = permissionsState.getPermissionFlags(permName, userId);
+        // Only the system may revoke SYSTEM_FIXED permissions.
+        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
+                && UserHandle.getCallingAppId() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-System UID cannot revoke system fixed permission "
+                    + permName + " for package " + packageName);
+        }
+        if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+            throw new SecurityException("Cannot revoke policy fixed permission "
+                    + permName + " for package " + packageName);
+        }
+
+        if (bp.isDevelopment()) {
+            // Development permissions must be handled specially, since they are not
+            // normal runtime permissions.  For now they apply to all users.
+            if (permissionsState.revokeInstallPermission(bp)
+                    != PERMISSION_OPERATION_FAILURE) {
+                if (callback != null) {
+                    mDefaultPermissionCallback.onInstallPermissionRevoked();
+                }
+            }
+            return;
+        }
+
+        // Permission is already revoked, no need to do anything.
+        if (!permissionsState.hasRuntimePermission(permName, userId)) {
+            return;
+        }
+
+        if (permissionsState.revokeRuntimePermission(bp, userId)
+                == PERMISSION_OPERATION_FAILURE) {
+            return;
+        }
+
+        if (bp.isRuntime()) {
+            logPermission(MetricsEvent.ACTION_PERMISSION_REVOKED, permName, packageName);
+        }
+
+        if (callback != null) {
+            callback.onPermissionRevoked(pkg.applicationInfo.uid, userId);
+        }
+
+        if (bp.isRuntime()) {
+            notifyRuntimePermissionStateChanged(packageName, userId);
+        }
+    }
+
+    @Override
+    public void resetRuntimePermissions() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                "revokeRuntimePermission");
+
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "resetRuntimePermissions");
+        }
+
+        updateAllPermissions(
+                StorageManager.UUID_PRIVATE_INTERNAL, false, mDefaultPermissionCallback);
+        for (final int userId : UserManagerService.getInstance().getUserIds()) {
+            mPackageManagerInt.forEachPackage(
+                    (PackageParser.Package pkg) -> resetRuntimePermissionsInternal(pkg, userId));
+        }
+    }
+
+    /**
+     * Reverts user permission state changes (permissions and flags).
+     *
+     * @param ps The package for which to reset.
+     * @param userId The device user for which to do a reset.
+     */
+    @GuardedBy("mPackages")
+    private void resetRuntimePermissionsInternal(final PackageParser.Package pkg,
+            final int userId) {
+        final String packageName = pkg.packageName;
+
+        // These are flags that can change base on user actions.
+        final int userSettableMask = FLAG_PERMISSION_USER_SET
+                | FLAG_PERMISSION_USER_FIXED
+                | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+                | FLAG_PERMISSION_REVIEW_REQUIRED;
+
+        final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
+                | FLAG_PERMISSION_POLICY_FIXED;
+
+        // Delay and combine non-async permission callbacks
+        final int permissionCount = pkg.requestedPermissions.size();
+        final boolean[] permissionRemoved = new boolean[1];
+        final ArraySet<Long> revokedPermissions = new ArraySet<>();
+        final IntArray syncUpdatedUsers = new IntArray(permissionCount);
+        final IntArray asyncUpdatedUsers = new IntArray(permissionCount);
+
+        PermissionCallback delayingPermCallback = new PermissionCallback() {
+            public void onGidsChanged(int appId, int userId) {
+                mDefaultPermissionCallback.onGidsChanged(appId, userId);
+            }
+
+            public void onPermissionChanged() {
+                mDefaultPermissionCallback.onPermissionChanged();
+            }
+
+            public void onPermissionGranted(int uid, int userId) {
+                mDefaultPermissionCallback.onPermissionGranted(uid, userId);
+            }
+
+            public void onInstallPermissionGranted() {
+                mDefaultPermissionCallback.onInstallPermissionGranted();
+            }
+
+            public void onPermissionRevoked(int uid, int userId) {
+                revokedPermissions.add(IntPair.of(uid, userId));
+
+                syncUpdatedUsers.add(userId);
+            }
+
+            public void onInstallPermissionRevoked() {
+                mDefaultPermissionCallback.onInstallPermissionRevoked();
+            }
+
+            public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
+                for (int userId : updatedUserIds) {
+                    if (sync) {
+                        syncUpdatedUsers.add(userId);
+                        asyncUpdatedUsers.remove(userId);
+                    } else {
+                        // Don't override sync=true by sync=false
+                        if (syncUpdatedUsers.indexOf(userId) == -1) {
+                            asyncUpdatedUsers.add(userId);
+                        }
+                    }
+                }
+            }
+
+            public void onPermissionRemoved() {
+                permissionRemoved[0] = true;
+            }
+
+            public void onInstallPermissionUpdated() {
+                mDefaultPermissionCallback.onInstallPermissionUpdated();
+            }
+        };
+
+        for (int i = 0; i < permissionCount; i++) {
+            final String permName = pkg.requestedPermissions.get(i);
+            final BasePermission bp;
+            synchronized (mLock) {
+                bp = mSettings.getPermissionLocked(permName);
+            }
+            if (bp == null) {
+                continue;
+            }
+
+            if (bp.isRemoved()) {
+                continue;
+            }
+
+            // If shared user we just reset the state to which only this app contributed.
+            final String sharedUserId =
+                    mPackageManagerInt.getSharedUserIdForPackage(pkg.packageName);
+            final String[] pkgNames =
+                    mPackageManagerInt.getPackagesForSharedUserId(sharedUserId, userId);
+            if (pkgNames != null && pkgNames.length > 0) {
+                boolean used = false;
+                final int packageCount = pkgNames.length;
+                for (int j = 0; j < packageCount; j++) {
+                    final String sharedPkgName = pkgNames[j];
+                    final PackageParser.Package sharedPkg =
+                            mPackageManagerInt.getPackage(sharedPkgName);
+                    if (sharedPkg != null && !sharedPkg.packageName.equals(packageName)
+                            && sharedPkg.requestedPermissions.contains(permName)) {
+                        used = true;
+                        break;
+                    }
+                }
+                if (used) {
+                    continue;
+                }
+            }
+
+            final int oldFlags =
+                    getPermissionFlagsInternal(permName, packageName, Process.SYSTEM_UID, userId);
+
+            // Always clear the user settable flags.
+            // If permission review is enabled and this is a legacy app, mark the
+            // permission as requiring a review as this is the initial state.
+            final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
+            final int targetSdk = mPackageManagerInt.getTargetSdk(uid);
+            final int flags = (targetSdk < Build.VERSION_CODES.M && bp.isRuntime())
+                    ? FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+                    : 0;
+
+            updatePermissionFlagsInternal(
+                    permName, packageName, userSettableMask, flags, Process.SYSTEM_UID, userId,
+                    false, delayingPermCallback);
+
+            // Below is only runtime permission handling.
+            if (!bp.isRuntime()) {
+                continue;
+            }
+
+            // Never clobber system or policy.
+            if ((oldFlags & policyOrSystemFlags) != 0) {
+                continue;
+            }
+
+            // If this permission was granted by default, make sure it is.
+            if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
+                grantRuntimePermissionInternal(permName, packageName, false,
+                        Process.SYSTEM_UID, userId, delayingPermCallback);
+            // If permission review is enabled the permissions for a legacy apps
+            // are represented as constantly granted runtime ones, so don't revoke.
+            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+                // Otherwise, reset the permission.
+                revokeRuntimePermissionInternal(permName, packageName, false, Process.SYSTEM_UID,
+                        userId, delayingPermCallback);
+            }
+        }
+
+        // Execute delayed callbacks
+        if (permissionRemoved[0]) {
+            mDefaultPermissionCallback.onPermissionRemoved();
+        }
+
+        // Slight variation on the code in mPermissionCallback.onPermissionRevoked() as we cannot
+        // kill uid while holding mPackages-lock
+        if (!revokedPermissions.isEmpty()) {
+            int numRevokedPermissions = revokedPermissions.size();
+            for (int i = 0; i < numRevokedPermissions; i++) {
+                int revocationUID = IntPair.first(revokedPermissions.valueAt(i));
+                int revocationUserId = IntPair.second(revokedPermissions.valueAt(i));
+
+                mOnPermissionChangeListeners.onPermissionsChanged(revocationUID);
+
+                // Kill app later as we are holding mPackages
+                mHandler.post(() -> killUid(UserHandle.getAppId(revocationUID), revocationUserId,
+                        KILL_APP_REASON_PERMISSIONS_REVOKED));
+            }
+        }
+
+        mPackageManagerInt.writePermissionSettings(syncUpdatedUsers.toArray(), false);
+        mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
     }
 
     /**
@@ -717,6 +1788,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
 
+        final int callingUid = Binder.getCallingUid();
         final int numNewPackagePermissions = newPackage.permissions.size();
         for (int newPermissionNum = 0; newPermissionNum < numNewPackagePermissions;
                 newPermissionNum++) {
@@ -741,9 +1813,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         final int numPackages = allPackageNames.size();
                         for (int packageNum = 0; packageNum < numPackages; packageNum++) {
                             final String packageName = allPackageNames.get(packageNum);
-
-                            if (checkPermission(permissionName, packageName, UserHandle.USER_SYSTEM,
-                                    userId) == PackageManager.PERMISSION_GRANTED) {
+                            final int permissionState = checkPermissionInternal(
+                                    permissionName, packageName, UserHandle.USER_SYSTEM, userId);
+                            if (permissionState == PackageManager.PERMISSION_GRANTED) {
                                 EventLog.writeEvent(0x534e4554, "72710897",
                                         newPackage.applicationInfo.uid,
                                         "Revoking permission " + permissionName +
@@ -752,8 +1824,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         " to " + newPermissionGroupName);
 
                                 try {
-                                    revokeRuntimePermission(permissionName, packageName, false,
-                                            userId, permissionCallback);
+                                    revokeRuntimePermissionInternal(permissionName, packageName,
+                                            false, callingUid, userId, permissionCallback);
                                 } catch (IllegalArgumentException e) {
                                     Slog.e(TAG, "Could not revoke " + permissionName + " from "
                                             + packageName, e);
@@ -2001,7 +3073,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             for (int userId : mUserManagerInt.getUserIds()) {
                 if (disabledPs.getPermissionsState().hasRuntimePermission(permission, userId)) {
-                    grantRuntimePermission(
+                    grantRuntimePermissionInternal(
                             permission, pkg.packageName, false, callingUid, userId, callback);
                 }
             }
@@ -2013,54 +3085,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int userId : userIds) {
             grantRequestedRuntimePermissionsForUser(pkg, userId, grantedPermissions, callingUid,
                     callback);
-        }
-    }
-
-    private @Nullable List<String> getWhitelistedRestrictedPermissions(
-            @NonNull PackageParser.Package pkg, @PermissionWhitelistFlags int whitelistFlags,
-            @UserIdInt int userId) {
-        final PackageSetting packageSetting = (PackageSetting) pkg.mExtras;
-        if (packageSetting == null) {
-            return null;
-        }
-
-        final PermissionsState permissionsState = packageSetting.getPermissionsState();
-
-        int queryFlags = 0;
-        if ((whitelistFlags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0) {
-            queryFlags |= PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-        }
-        if ((whitelistFlags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
-            queryFlags |= PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-        }
-        if ((whitelistFlags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
-            queryFlags |=  PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-        }
-
-        ArrayList<String> whitelistedPermissions = null;
-
-        final int permissionCount = pkg.requestedPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            final String permissionName = pkg.requestedPermissions.get(i);
-            final int currentFlags = permissionsState.getPermissionFlags(permissionName, userId);
-            if ((currentFlags & queryFlags) != 0) {
-                if (whitelistedPermissions == null) {
-                    whitelistedPermissions = new ArrayList<>();
-                }
-                whitelistedPermissions.add(permissionName);
-            }
-        }
-
-        return whitelistedPermissions;
-    }
-
-    private void setWhitelistedRestrictedPermissions(@NonNull PackageParser.Package pkg,
-            @NonNull int[] userIds, @Nullable List<String> permissions, int callingUid,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags,
-            @NonNull PermissionCallback callback) {
-        for (int userId : userIds) {
-            setWhitelistedRestrictedPermissionsForUser(pkg, userId, permissions,
-                    callingUid, whitelistFlags, callback);
         }
     }
 
@@ -2095,14 +3119,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (supportsRuntimePermissions) {
                     // Installer cannot change immutable permissions.
                     if ((flags & immutableFlags) == 0) {
-                        grantRuntimePermission(permission, pkg.packageName, false, callingUid,
-                                userId, callback);
+                        grantRuntimePermissionInternal(permission, pkg.packageName, false,
+                                callingUid, userId, callback);
                     }
                 } else {
                     // In permission review mode we clear the review flag when we
                     // are asked to install the app with all permissions granted.
                     if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                        updatePermissionFlags(permission, pkg.packageName,
+                        updatePermissionFlagsInternal(permission, pkg.packageName,
                                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED, 0, callingUid,
                                 userId, false, callback);
                     }
@@ -2111,261 +3135,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private void grantRuntimePermission(String permName, String packageName, boolean overridePolicy,
-            int callingUid, final int userId, PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is granting "
-                    + permName + " for user " + userId + " on behalf of uid " + callingUid
-                    + " " + mPackageManagerInt.getNameForUid(callingUid),
-                    new RuntimeException());
-        }
-        if (!mUserManagerInt.exists(userId)) {
-            Log.e(TAG, "No such user:" + userId);
-            return;
-        }
-
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-                "grantRuntimePermission");
-
-        enforceCrossUserPermission(callingUid, userId,
-                true,  // requireFullPermission
-                true,  // checkShell
-                false, // requirePermissionWhenSameUser
-                "grantRuntimePermission");
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
-        if (pkg == null || pkg.mExtras == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        final BasePermission bp;
-        synchronized(mLock) {
-            bp = mSettings.getPermissionLocked(permName);
-        }
-        if (bp == null) {
-            throw new IllegalArgumentException("Unknown permission: " + permName);
-        }
-        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-
-        bp.enforceDeclaredUsedAndRuntimeOrDevelopment(pkg);
-
-        // If a permission review is required for legacy apps we represent
-        // their permissions as always granted runtime ones since we need
-        // to keep the review required permission flag per user while an
-        // install permission's state is shared across all users.
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
-                && bp.isRuntime()) {
-            return;
-        }
-
-        final int uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
-
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        final PermissionsState permissionsState = ps.getPermissionsState();
-
-        final int flags = permissionsState.getPermissionFlags(permName, userId);
-        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-            Log.e(TAG, "Cannot grant system fixed permission "
-                    + permName + " for package " + packageName);
-            return;
-        }
-        if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
-            Log.e(TAG, "Cannot grant policy fixed permission "
-                    + permName + " for package " + packageName);
-            return;
-        }
-
-        if (bp.isHardRestricted()
-                && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
-            Log.e(TAG, "Cannot grant hard restricted non-exempt permission "
-                    + permName + " for package " + packageName);
-            return;
-        }
-
-        if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
-                pkg.applicationInfo, UserHandle.of(userId), permName).canBeGranted()) {
-            Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
-                    + packageName);
-            return;
-        }
-
-        if (bp.isDevelopment()) {
-            // Development permissions must be handled specially, since they are not
-            // normal runtime permissions.  For now they apply to all users.
-            if (permissionsState.grantInstallPermission(bp) !=
-                    PERMISSION_OPERATION_FAILURE) {
-                if (callback != null) {
-                    callback.onInstallPermissionGranted();
-                }
-            }
-            return;
-        }
-
-        if (ps.getInstantApp(userId) && !bp.isInstant()) {
-            throw new SecurityException("Cannot grant non-ephemeral permission"
-                    + permName + " for package " + packageName);
-        }
-
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-            Slog.w(TAG, "Cannot grant runtime permission to a legacy app");
-            return;
-        }
-
-        final int result = permissionsState.grantRuntimePermission(bp, userId);
-        switch (result) {
-            case PERMISSION_OPERATION_FAILURE: {
-                return;
-            }
-
-            case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
-                if (callback != null) {
-                    callback.onGidsChanged(UserHandle.getAppId(pkg.applicationInfo.uid), userId);
-                }
-            }
-            break;
-        }
-
-        if (bp.isRuntime()) {
-            logPermission(MetricsEvent.ACTION_PERMISSION_GRANTED, permName, packageName);
-        }
-
-        if (callback != null) {
-            callback.onPermissionGranted(uid, userId);
-        }
-
-        if (bp.isRuntime()) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
-
-        // Only need to do this if user is initialized. Otherwise it's a new user
-        // and there are no processes running as the user yet and there's no need
-        // to make an expensive call to remount processes for the changed permissions.
-        if (READ_EXTERNAL_STORAGE.equals(permName)
-                || WRITE_EXTERNAL_STORAGE.equals(permName)) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (mUserManagerInt.isUserInitialized(userId)) {
-                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                            StorageManagerInternal.class);
-                    storageManagerInternal.onExternalStoragePolicyChanged(uid, packageName);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-    }
-
-    private void revokeRuntimePermission(String permName, String packageName,
-            boolean overridePolicy, int userId, PermissionCallback callback) {
-        int callingUid = Binder.getCallingUid();
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is revoking "
-                            + permName + " for user " + userId + " on behalf of uid " + callingUid
-                            + " " + mPackageManagerInt.getNameForUid(callingUid),
-                    new RuntimeException());
-        }
-        if (!mUserManagerInt.exists(userId)) {
-            Log.e(TAG, "No such user:" + userId);
-            return;
-        }
-
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-                "revokeRuntimePermission");
-
-        enforceCrossUserPermission(callingUid, userId,
-                true,  // requireFullPermission
-                true,  // checkShell
-                false, // requirePermissionWhenSameUser
-                "revokeRuntimePermission");
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
-        if (pkg == null || pkg.mExtras == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        final BasePermission bp = mSettings.getPermissionLocked(permName);
-        if (bp == null) {
-            throw new IllegalArgumentException("Unknown permission: " + permName);
-        }
-
-        bp.enforceDeclaredUsedAndRuntimeOrDevelopment(pkg);
-
-        // If a permission review is required for legacy apps we represent
-        // their permissions as always granted runtime ones since we need
-        // to keep the review required permission flag per user while an
-        // install permission's state is shared across all users.
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
-                && bp.isRuntime()) {
-            return;
-        }
-
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        final PermissionsState permissionsState = ps.getPermissionsState();
-
-        final int flags = permissionsState.getPermissionFlags(permName, userId);
-        // Only the system may revoke SYSTEM_FIXED permissions.
-        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
-                && UserHandle.getCallingAppId() != Process.SYSTEM_UID) {
-            throw new SecurityException("Non-System UID cannot revoke system fixed permission "
-                    + permName + " for package " + packageName);
-        }
-        if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
-            throw new SecurityException("Cannot revoke policy fixed permission "
-                    + permName + " for package " + packageName);
-        }
-
-        if (bp.isDevelopment()) {
-            // Development permissions must be handled specially, since they are not
-            // normal runtime permissions.  For now they apply to all users.
-            if (permissionsState.revokeInstallPermission(bp) !=
-                    PERMISSION_OPERATION_FAILURE) {
-                if (callback != null) {
-                    callback.onInstallPermissionRevoked();
-                }
-            }
-            return;
-        }
-
-        // Permission is already revoked, no need to do anything.
-        if (!permissionsState.hasRuntimePermission(permName, userId)) {
-            return;
-        }
-
-        if (permissionsState.revokeRuntimePermission(bp, userId) ==
-                PERMISSION_OPERATION_FAILURE) {
-            return;
-        }
-
-        if (bp.isRuntime()) {
-            logPermission(MetricsEvent.ACTION_PERMISSION_REVOKED, permName, packageName);
-        }
-
-        if (callback != null) {
-            callback.onPermissionRevoked(pkg.applicationInfo.uid, userId);
-        }
-
-        if (bp.isRuntime()) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
-    }
-
     private void setWhitelistedRestrictedPermissionsForUser(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId, @Nullable List<String> permissions, int callingUid,
             @PermissionWhitelistFlags int whitelistFlags, PermissionCallback callback) {
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        if (ps == null) {
+        final PermissionsState permissionsState =
+                PackageManagerServiceUtils.getPermissionsState(pkg);
+        if (permissionsState == null) {
             return;
         }
-
-        final PermissionsState permissionsState = ps.getPermissionsState();
 
         ArraySet<String> oldGrantedRestrictedPermissions = null;
         boolean updatePermissions = false;
@@ -2454,7 +3231,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 newFlags |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             }
 
-            updatePermissionFlags(permissionName, pkg.packageName, mask, newFlags,
+            updatePermissionFlagsInternal(permissionName, pkg.packageName, mask, newFlags,
                     callingUid, userId, false, null /*callback*/);
         }
 
@@ -2468,7 +3245,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 for (int i = 0; i < oldGrantedCount; i++) {
                     final String permission = oldGrantedRestrictedPermissions.valueAt(i);
                     // Sometimes we create a new permission state instance during update.
-                    if (!ps.getPermissionsState().hasPermission(permission, userId)) {
+                    final PermissionsState newPermissionsState =
+                            PackageManagerServiceUtils.getPermissionsState(pkg);
+                    if (!newPermissionsState.hasPermission(permission, userId)) {
                         callback.onPermissionRevoked(pkg.applicationInfo.uid, userId);
                         break;
                     }
@@ -2541,37 +3320,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return runtimePermissionChangedUserIds;
     }
 
-    private int getPermissionFlags(
-            String permName, String packageName, int callingUid, int userId) {
-        if (!mUserManagerInt.exists(userId)) {
-            return 0;
-        }
-
-        enforceGrantRevokeGetRuntimePermissionPermissions("getPermissionFlags");
-
-        enforceCrossUserPermission(callingUid, userId,
-                true,  // requireFullPermission
-                false, // checkShell
-                false, // requirePermissionWhenSameUser
-                "getPermissionFlags");
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
-        if (pkg == null || pkg.mExtras == null) {
-            return 0;
-        }
-        synchronized (mLock) {
-            if (mSettings.getPermissionLocked(permName) == null) {
-                return 0;
-            }
-        }
-        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
-            return 0;
-        }
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        PermissionsState permissionsState = ps.getPermissionsState();
-        return permissionsState.getPermissionFlags(permName, userId);
-    }
-
     /**
      * Update permissions when a package changed.
      *
@@ -2586,16 +3334,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param callback Callback to call after permission changes
      */
     private void updatePermissions(@NonNull String packageName, @Nullable PackageParser.Package pkg,
-            @NonNull Collection<PackageParser.Package> allPackages,
             @NonNull PermissionCallback callback) {
         final int flags =
                 (pkg != null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG : 0);
         updatePermissions(
-                packageName, pkg, getVolumeUuidForPackage(pkg), flags, allPackages, callback);
+                packageName, pkg, getVolumeUuidForPackage(pkg), flags, callback);
         if (pkg != null && pkg.childPackages != null) {
             for (PackageParser.Package childPkg : pkg.childPackages) {
                 updatePermissions(childPkg.packageName, childPkg,
-                        getVolumeUuidForPackage(childPkg), flags, allPackages, callback);
+                        getVolumeUuidForPackage(childPkg), flags, callback);
             }
         }
     }
@@ -2613,13 +3360,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param callback Callback to call after permission changes
      */
     private void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
-            @NonNull Collection<PackageParser.Package> allPackages,
             @NonNull PermissionCallback callback) {
         final int flags = UPDATE_PERMISSIONS_ALL |
                 (sdkUpdated
                         ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                         : 0);
-        updatePermissions(null, null, volumeUuid, flags, allPackages, callback);
+        updatePermissions(null, null, volumeUuid, flags, callback);
     }
 
     /**
@@ -2697,11 +3443,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param allPackages All currently known packages
      * @param callback Callback to call after permission changes
      */
-    private void updatePermissions(@Nullable String changingPkgName,
-            @Nullable PackageParser.Package changingPkg, @Nullable String replaceVolumeUuid,
+    private void updatePermissions(final @Nullable String changingPkgName,
+            final @Nullable PackageParser.Package changingPkg,
+            final @Nullable String replaceVolumeUuid,
             @UpdatePermissionFlags int flags,
-            @NonNull Collection<PackageParser.Package> allPackages,
-            @Nullable PermissionCallback callback) {
+            final @Nullable PermissionCallback callback) {
         // TODO: Most of the methods exposing BasePermission internals [source package name,
         // etc..] shouldn't be needed. Instead, when we've parsed a permission that doesn't
         // have package settings, we should make note of it elsewhere [map between
@@ -2730,15 +3476,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "restorePermissionState");
         // Now update the permissions for all packages.
         if ((flags & UPDATE_PERMISSIONS_ALL) != 0) {
-            for (PackageParser.Package pkg : allPackages) {
-                if (pkg != changingPkg) {
-                    // Only replace for packages on requested volume
-                    final String volumeUuid = getVolumeUuidForPackage(pkg);
-                    final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_ALL) != 0)
-                            && Objects.equals(replaceVolumeUuid, volumeUuid);
-                    restorePermissionState(pkg, replace, changingPkgName, callback);
+            final boolean replaceAll = ((flags & UPDATE_PERMISSIONS_REPLACE_ALL) != 0);
+            mPackageManagerInt.forEachPackage((Package pkg) -> {
+                if (pkg == changingPkg) {
+                    return;
                 }
-            }
+                // Only replace for packages on requested volume
+                final String volumeUuid = getVolumeUuidForPackage(pkg);
+                final boolean replace = replaceAll && Objects.equals(replaceVolumeUuid, volumeUuid);
+                restorePermissionState(pkg, replace, changingPkgName, callback);
+            });
         }
 
         if (changingPkg != null) {
@@ -2876,127 +3623,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     mSettings.removePermissionLocked(bp.getName());
                 }
             }
-        }
-        return changed;
-    }
-
-    private void updatePermissionFlags(String permName, String packageName, int flagMask,
-            int flagValues, int callingUid, int userId, boolean overridePolicy,
-            PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is updating flags for "
-                            + permName + " for user " + userId  + " "
-                            + DebugUtils.flagsToString(
-                                    PackageManager.class, "FLAG_PERMISSION_", flagMask)
-                            + " := "
-                            + DebugUtils.flagsToString(
-                                    PackageManager.class, "FLAG_PERMISSION_", flagValues)
-                            + " on behalf of uid " + callingUid
-                            + " " + mPackageManagerInt.getNameForUid(callingUid),
-                    new RuntimeException());
-        }
-
-        if (!mUserManagerInt.exists(userId)) {
-            return;
-        }
-
-        enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlags");
-
-        enforceCrossUserPermission(callingUid, userId,
-                true,  // requireFullPermission
-                true,  // checkShell
-                false, // requirePermissionWhenSameUser
-                "updatePermissionFlags");
-
-        if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0 && !overridePolicy) {
-            throw new SecurityException("updatePermissionFlags requires "
-                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
-        }
-
-        // Only the system can change these flags and nothing else.
-        if (callingUid != Process.SYSTEM_UID) {
-            flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-            flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-        }
-
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
-        if (pkg == null || pkg.mExtras == null) {
-            Log.e(TAG, "Unknown package: " + packageName);
-            return;
-        }
-        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-
-        final BasePermission bp;
-        synchronized (mLock) {
-            bp = mSettings.getPermissionLocked(permName);
-        }
-        if (bp == null) {
-            throw new IllegalArgumentException("Unknown permission: " + permName);
-        }
-
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        final PermissionsState permissionsState = ps.getPermissionsState();
-        final boolean hadState =
-                permissionsState.getRuntimePermissionState(permName, userId) != null;
-        final boolean permissionUpdated =
-                permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues);
-        if (permissionUpdated && bp.isRuntime()) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
-        if (permissionUpdated && callback != null) {
-            // Install and runtime permissions are stored in different places,
-            // so figure out what permission changed and persist the change.
-            if (permissionsState.getInstallPermissionState(permName) != null) {
-                callback.onInstallPermissionUpdatedNotifyListener(pkg.applicationInfo.uid);
-            } else if (permissionsState.getRuntimePermissionState(permName, userId) != null
-                    || hadState) {
-                callback.onPermissionUpdatedNotifyListener(new int[] { userId }, false,
-                        pkg.applicationInfo.uid);
-            }
-        }
-    }
-
-    private boolean updatePermissionFlagsForAllApps(int flagMask, int flagValues, int callingUid,
-            int userId, Collection<Package> packages, PermissionCallback callback) {
-        if (!mUserManagerInt.exists(userId)) {
-            return false;
-        }
-
-        enforceGrantRevokeRuntimePermissionPermissions(
-                "updatePermissionFlagsForAllApps");
-        enforceCrossUserPermission(callingUid, userId,
-                true,  // requireFullPermission
-                true,  // checkShell
-                false, // requirePermissionWhenSameUser
-                "updatePermissionFlagsForAllApps");
-
-        // Only the system can change system fixed flags.
-        if (callingUid != Process.SYSTEM_UID) {
-            flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
-        }
-
-        boolean changed = false;
-        for (PackageParser.Package pkg : packages) {
-            final PackageSetting ps = (PackageSetting) pkg.mExtras;
-            if (ps == null) {
-                continue;
-            }
-            PermissionsState permissionsState = ps.getPermissionsState();
-            changed |= permissionsState.updatePermissionFlagsForAllPermissions(
-                    userId, flagMask, flagValues);
-            callback.onPermissionUpdatedNotifyListener(new int[] { userId }, false,
-                    pkg.applicationInfo.uid);
         }
         return changed;
     }
@@ -3153,10 +3779,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void revokeRuntimePermissionsIfGroupChanged(
                 @NonNull PackageParser.Package newPackage,
                 @NonNull PackageParser.Package oldPackage,
-                @NonNull ArrayList<String> allPackageNames,
-                @NonNull PermissionCallback permissionCallback) {
+                @NonNull ArrayList<String> allPackageNames) {
             PermissionManagerService.this.revokeRuntimePermissionsIfGroupChanged(newPackage,
-                    oldPackage, allPackageNames, permissionCallback);
+                    oldPackage, allPackageNames, mDefaultPermissionCallback);
         }
         @Override
         public void addAllPermissions(Package pkg, boolean chatty) {
@@ -3171,57 +3796,50 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionManagerService.this.removeAllPermissions(pkg, chatty);
         }
         @Override
-        public void grantRuntimePermission(String permName, String packageName,
-                boolean overridePolicy, int callingUid, int userId,
-                PermissionCallback callback) {
-            PermissionManagerService.this.grantRuntimePermission(
-                    permName, packageName, overridePolicy, callingUid, userId, callback);
-        }
-        @Override
         public void grantRequestedRuntimePermissions(PackageParser.Package pkg, int[] userIds,
-                String[] grantedPermissions, int callingUid, PermissionCallback callback) {
+                String[] grantedPermissions, int callingUid) {
             PermissionManagerService.this.grantRequestedRuntimePermissions(
-                    pkg, userIds, grantedPermissions, callingUid, callback);
-        }
-        @Override
-        public List<String> getWhitelistedRestrictedPermissions(PackageParser.Package pkg,
-                @PackageManager.PermissionWhitelistFlags int whitelistFlags, int userId) {
-            return PermissionManagerService.this.getWhitelistedRestrictedPermissions(pkg,
-                    whitelistFlags, userId);
+                    pkg, userIds, grantedPermissions, callingUid, mDefaultPermissionCallback);
         }
         @Override
         public void setWhitelistedRestrictedPermissions(@NonNull PackageParser.Package pkg,
                 @NonNull int[] userIds, @Nullable List<String> permissions, int callingUid,
-                @PackageManager.PermissionWhitelistFlags int whitelistFlags,
-                @NonNull PermissionCallback callback) {
-            PermissionManagerService.this.setWhitelistedRestrictedPermissions(
-                    pkg, userIds, permissions, callingUid, whitelistFlags, callback);
+                @PackageManager.PermissionWhitelistFlags int flags) {
+            for (int userId : userIds) {
+                setWhitelistedRestrictedPermissionsForUser(pkg, userId, permissions,
+                        callingUid, flags, mDefaultPermissionCallback);
+            }
+        }
+        @Override
+        public void setWhitelistedRestrictedPermissions(String packageName,
+                List<String> permissions, int flags, int userId) {
+            PermissionManagerService.this.setWhitelistedRestrictedPermissionsInternal(
+                    packageName, permissions, flags, userId);
         }
         @Override
         public void grantRuntimePermissionsGrantedToDisabledPackage(PackageParser.Package pkg,
-                int callingUid, PermissionCallback callback) {
+                int callingUid) {
             PermissionManagerService.this.grantRuntimePermissionsGrantedToDisabledPackageLocked(
-                    pkg, callingUid, callback);
+                    pkg, callingUid, mDefaultPermissionCallback);
         }
         @Override
-        public void revokeRuntimePermission(String permName, String packageName,
-                boolean overridePolicy, int userId, PermissionCallback callback) {
-            PermissionManagerService.this.revokeRuntimePermission(permName, packageName,
-                    overridePolicy, userId, callback);
+        public void updatePermissions(@NonNull String packageName, @Nullable Package pkg) {
+            PermissionManagerService.this
+                    .updatePermissions(packageName, pkg, mDefaultPermissionCallback);
         }
         @Override
-        public void updatePermissions(@NonNull String packageName, @Nullable Package pkg,
-                @NonNull Collection<PackageParser.Package> allPackages,
-                @NonNull PermissionCallback callback) {
-            PermissionManagerService.this.updatePermissions(
-                    packageName, pkg, allPackages, callback);
+        public void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated) {
+            PermissionManagerService.this
+                    .updateAllPermissions(volumeUuid, sdkUpdated, mDefaultPermissionCallback);
         }
         @Override
-        public void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
-                @NonNull Collection<PackageParser.Package> allPackages,
-                @NonNull PermissionCallback callback) {
-            PermissionManagerService.this.updateAllPermissions(
-                    volumeUuid, sdkUpdated, allPackages, callback);
+        public void resetRuntimePermissions(Package pkg, int userId) {
+            PermissionManagerService.this.resetRuntimePermissionsInternal(pkg, userId);
+        }
+        @Override
+        public void resetAllRuntimePermissions(final int userId) {
+            mPackageManagerInt.forEachPackage(
+                    (PackageParser.Package pkg) -> resetRuntimePermissionsInternal(pkg, userId));
         }
         @Override
         public String[] getAppOpPermissionPackages(String permName, int callingUid) {
@@ -3231,22 +3849,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int getPermissionFlags(String permName, String packageName, int callingUid,
                 int userId) {
-            return PermissionManagerService.this.getPermissionFlags(permName, packageName,
-                    callingUid, userId);
+            return PermissionManagerService.this
+                    .getPermissionFlagsInternal(permName, packageName, callingUid, userId);
         }
         @Override
         public void updatePermissionFlags(String permName, String packageName, int flagMask,
                 int flagValues, int callingUid, int userId, boolean overridePolicy,
                 PermissionCallback callback) {
-            PermissionManagerService.this.updatePermissionFlags(
+            PermissionManagerService.this.updatePermissionFlagsInternal(
                     permName, packageName, flagMask, flagValues, callingUid, userId,
                     overridePolicy, callback);
-        }
-        @Override
-        public boolean updatePermissionFlagsForAllApps(int flagMask, int flagValues, int callingUid,
-                int userId, Collection<Package> packages, PermissionCallback callback) {
-            return PermissionManagerService.this.updatePermissionFlagsForAllApps(
-                    flagMask, flagValues, callingUid, userId, packages, callback);
         }
         @Override
         public void enforceCrossUserPermission(int callingUid, int userId,
@@ -3264,17 +3876,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void enforceGrantRevokeRuntimePermissionPermissions(String message) {
             PermissionManagerService.this.enforceGrantRevokeRuntimePermissionPermissions(message);
-        }
-        @Override
-        public int checkPermission(String permName, String packageName, int callingUid,
-                int userId) {
-            return PermissionManagerService.this.checkPermission(
-                    permName, packageName, callingUid, userId);
-        }
-        @Override
-        public int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
-                int callingUid) {
-            return PermissionManagerService.this.checkUidPermission(permName, pkg, uid, callingUid);
         }
         @Override
         public PermissionSettings getPermissionSettings() {
@@ -3340,6 +3941,77 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 OnRuntimePermissionStateChangedListener listener) {
             PermissionManagerService.this.removeOnRuntimePermissionStateChangedListener(
                     listener);
+        }
+
+        @Override
+        public CheckPermissionDelegate getCheckPermissionDelegate() {
+            synchronized (mLock) {
+                return mCheckPermissionDelegate;
+            }
+        }
+
+        @Override
+        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
+            synchronized (mLock) {
+                mCheckPermissionDelegate = delegate;
+            }
+        }
+        @Override
+        public void notifyPermissionsChangedTEMP(int uid) {
+            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+        }
+    }
+
+    private static final class OnPermissionChangeListeners extends Handler {
+        private static final int MSG_ON_PERMISSIONS_CHANGED = 1;
+
+        private final RemoteCallbackList<IOnPermissionsChangeListener> mPermissionListeners =
+                new RemoteCallbackList<>();
+
+        OnPermissionChangeListeners(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_PERMISSIONS_CHANGED: {
+                    final int uid = msg.arg1;
+                    handleOnPermissionsChanged(uid);
+                } break;
+            }
+        }
+
+        public void addListenerLocked(IOnPermissionsChangeListener listener) {
+            mPermissionListeners.register(listener);
+
+        }
+
+        public void removeListenerLocked(IOnPermissionsChangeListener listener) {
+            mPermissionListeners.unregister(listener);
+        }
+
+        public void onPermissionsChanged(int uid) {
+            if (mPermissionListeners.getRegisteredCallbackCount() > 0) {
+                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
+            }
+        }
+
+        private void handleOnPermissionsChanged(int uid) {
+            final int count = mPermissionListeners.beginBroadcast();
+            try {
+                for (int i = 0; i < count; i++) {
+                    IOnPermissionsChangeListener callback = mPermissionListeners
+                            .getBroadcastItem(i);
+                    try {
+                        callback.onPermissionsChanged(uid);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Permission listener is dead", e);
+                    }
+                }
+            } finally {
+                mPermissionListeners.finishBroadcast();
+            }
         }
     }
 }

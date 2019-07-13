@@ -826,18 +826,19 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
         }
     }
 
-    uint32_t changes = 0;
+    bool pointerGesturesEnabledChanged = false;
     { // acquire lock
         AutoMutex _l(mLock);
 
         if (mLocked.pointerGesturesEnabled != newPointerGesturesEnabled) {
             mLocked.pointerGesturesEnabled = newPointerGesturesEnabled;
-            changes |= InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT;
+            pointerGesturesEnabledChanged = true;
         }
     } // release lock
 
-    if (changes) {
-        mInputManager->getReader()->requestRefreshConfiguration(changes);
+    if (pointerGesturesEnabledChanged) {
+        mInputManager->getReader()->requestRefreshConfiguration(
+                InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT);
     }
 }
 

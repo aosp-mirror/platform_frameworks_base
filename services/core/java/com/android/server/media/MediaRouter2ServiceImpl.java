@@ -183,11 +183,11 @@ class MediaRouter2ServiceImpl {
     }
 
     public void selectClientRoute2(@NonNull IMediaRouter2Manager manager,
-            int clientUid, @Nullable MediaRoute2Info route) {
+            String packageName, @Nullable MediaRoute2Info route) {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                selectClientRoute2Locked(manager, clientUid, route);
+                selectClientRoute2Locked(manager, packageName, route);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -267,8 +267,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void selectRoute2Locked(IMediaRouter2Client client,
-            MediaRoute2Info route) {
+    private void selectRoute2Locked(IMediaRouter2Client client, MediaRoute2Info route) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
             MediaRoute2Info oldRoute = clientRecord.mSelectedRoute;
@@ -364,10 +363,10 @@ class MediaRouter2ServiceImpl {
     }
 
     private void selectClientRoute2Locked(IMediaRouter2Manager manager,
-            int clientUid, MediaRoute2Info route) {
+            String packageName, MediaRoute2Info route) {
         ManagerRecord managerRecord = mAllManagerRecords.get(manager.asBinder());
         if (managerRecord != null) {
-            ClientRecord clientRecord = managerRecord.mUserRecord.findClientRecordByUid(clientUid);
+            ClientRecord clientRecord = managerRecord.mUserRecord.findClientRecord(packageName);
             if (clientRecord == null) {
                 Slog.w(TAG, "Ignoring route selection for unknown client.");
             }
@@ -413,9 +412,11 @@ class MediaRouter2ServiceImpl {
             mHandler = new UserHandler(MediaRouter2ServiceImpl.this, this);
         }
 
-        ClientRecord findClientRecordByUid(int uid) {
+        ClientRecord findClientRecord(String packageName) {
             for (ClientRecord clientRecord : mClientRecords) {
-                if (clientRecord.mUid == uid) return clientRecord;
+                if (TextUtils.equals(clientRecord.mPackageName, packageName)) {
+                    return clientRecord;
+                }
             }
             return null;
         }
@@ -501,8 +502,7 @@ class MediaRouter2ServiceImpl {
         static final int MSG_STOP = 2;
 
         static final int MSG_UPDATE_CLIENT_USAGE = 11;
-        static final int MSG_UPDATE_MANAGER_STATE = 12;
-        static final int MSG_SEND_CONTROL_REQUEST = 13;
+        static final int MSG_SEND_CONTROL_REQUEST = 12;
 
         private final WeakReference<MediaRouter2ServiceImpl> mServiceRef;
         private final UserRecord mUserRecord;
@@ -537,10 +537,6 @@ class MediaRouter2ServiceImpl {
                 }
                 case MSG_UPDATE_CLIENT_USAGE: {
                     updateClientUsage((ClientRecord) msg.obj);
-                    break;
-                }
-                case MSG_UPDATE_MANAGER_STATE: {
-                    updateManagerState();
                     break;
                 }
                 case MSG_SEND_CONTROL_REQUEST: {
@@ -585,20 +581,24 @@ class MediaRouter2ServiceImpl {
             scheduleUpdateManagerState();
         }
 
-        private void unselectRoute(ClientRecord clientRecord, MediaRoute2Info route) {
+        private void selectRoute(ClientRecord clientRecord, MediaRoute2Info route) {
             if (route != null) {
                 MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
-                if (provider != null) {
-                    provider.setSelectedRoute(clientRecord.mUid, null);
+                if (provider == null) {
+                    Log.w(TAG, "Ignoring to select route of unknown provider " + route);
+                } else {
+                    provider.selectRoute(clientRecord.mPackageName, route.getId());
                 }
             }
         }
 
-        private void selectRoute(ClientRecord clientRecord, MediaRoute2Info route) {
+        private void unselectRoute(ClientRecord clientRecord, MediaRoute2Info route) {
             if (route != null) {
                 MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
-                if (provider != null) {
-                    provider.setSelectedRoute(clientRecord.mUid, route.getId());
+                if (provider == null) {
+                    Log.w(TAG, "Ignoring to unselect route of unknown provider " + route);
+                } else {
+                    provider.unselectRoute(clientRecord.mPackageName, route.getId());
                 }
             }
         }
@@ -613,7 +613,7 @@ class MediaRouter2ServiceImpl {
         private void scheduleUpdateManagerState() {
             if (!mManagerStateUpdateScheduled) {
                 mManagerStateUpdateScheduled = true;
-                sendEmptyMessage(MSG_UPDATE_MANAGER_STATE);
+                post(this::updateManagerState);
             }
         }
 
@@ -670,8 +670,9 @@ class MediaRouter2ServiceImpl {
             }
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyRouteSelected(clientRecord.mUid, clientRecord.mSelectedRoute);
-                    manager.notifyControlCategoriesChanged(clientRecord.mUid,
+                    manager.notifyRouteSelected(clientRecord.mPackageName,
+                            clientRecord.mSelectedRoute);
+                    manager.notifyControlCategoriesChanged(clientRecord.mPackageName,
                             clientRecord.mControlCategories);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to update client usage. Manager probably died.", ex);

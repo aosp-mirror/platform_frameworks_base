@@ -26,7 +26,6 @@ import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -73,27 +72,19 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract boolean isPermissionsReviewRequired(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId);
 
-    public abstract void grantRuntimePermission(
-            @NonNull String permName, @NonNull String packageName, boolean overridePolicy,
-            int callingUid, int userId, @Nullable PermissionCallback callback);
     public abstract void grantRuntimePermissionsGrantedToDisabledPackage(
-            @NonNull PackageParser.Package pkg, int callingUid,
-            @Nullable PermissionCallback callback);
+            @NonNull PackageParser.Package pkg, int callingUid);
     public abstract void grantRequestedRuntimePermissions(
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
-            @NonNull String[] grantedPermissions, int callingUid,
-            @Nullable PermissionCallback callback);
-    public abstract @Nullable List<String> getWhitelistedRestrictedPermissions(
-            @NonNull PackageParser.Package pkg,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags, int userId);
+            @NonNull String[] grantedPermissions, int callingUid);
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
             @NonNull List<String> permissions, int callingUid,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags,
-            @Nullable PermissionCallback callback);
-    public abstract void revokeRuntimePermission(@NonNull String permName,
-            @NonNull String packageName, boolean overridePolicy, int userId,
-            @Nullable PermissionCallback callback);
+            @PackageManager.PermissionWhitelistFlags int whitelistFlags);
+    /** Sets the whitelisted, restricted permissions for the given package. */
+    public abstract void setWhitelistedRestrictedPermissions(
+            @NonNull String packageName, @NonNull List<String> permissions,
+            @PackageManager.PermissionWhitelistFlags int flags, @NonNull int userId);
 
     /**
      * Update permissions when a package changed.
@@ -109,9 +100,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param callback Callback to call after permission changes
      */
     public abstract void updatePermissions(@NonNull String packageName,
-            @Nullable PackageParser.Package pkg,
-            @NonNull Collection<PackageParser.Package> allPackages,
-            @NonNull PermissionCallback callback);
+            @Nullable PackageParser.Package pkg);
 
     /**
      * Update all permissions for all apps.
@@ -125,9 +114,22 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param allPackages All currently known packages
      * @param callback Callback to call after permission changes
      */
-    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate,
-            @NonNull Collection<PackageParser.Package> allPackages,
-            @NonNull PermissionCallback callback);
+    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
+
+    /**
+     * Resets any user permission state changes (eg. permissions and flags) of all
+     * packages installed for the given user.
+     *
+     * @see #resetRuntimePermissions(android.content.pm.PackageParser.Package, int)
+     */
+    public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
+
+    /**
+     * Resets any user permission state changes (eg. permissions and flags) of the
+     * specified package for the given user.
+     */
+    public abstract void resetRuntimePermissions(@NonNull PackageParser.Package pkg,
+            @UserIdInt int userId);
 
     /**
      * We might auto-grant permissions if any permission of the group is already granted. Hence if
@@ -137,13 +139,11 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param newPackage The new package that was installed
      * @param oldPackage The old package that was updated
      * @param allPackageNames All packages
-     * @param permissionCallback Callback for permission changed
      */
     public abstract void revokeRuntimePermissionsIfGroupChanged(
             @NonNull PackageParser.Package newPackage,
             @NonNull PackageParser.Package oldPackage,
-            @NonNull ArrayList<String> allPackageNames,
-            @NonNull PermissionCallback permissionCallback);
+            @NonNull ArrayList<String> allPackageNames);
 
     /**
      * Add all permissions in the given package.
@@ -169,18 +169,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void updatePermissionFlags(@NonNull String permName,
             @NonNull String packageName, int flagMask, int flagValues, int callingUid, int userId,
             boolean overridePolicy, @Nullable PermissionCallback callback);
-    /**
-     * Updates the flags for all applications by replacing the flags in the specified mask
-     * with the provided flag values.
-     */
-    public abstract boolean updatePermissionFlagsForAllApps(int flagMask, int flagValues,
-            int callingUid, int userId, @NonNull Collection<PackageParser.Package> packages,
-            @Nullable PermissionCallback callback);
-
-    public abstract int checkPermission(@NonNull String permName, @NonNull String packageName,
-            int callingUid, int userId);
-    public abstract int checkUidPermission(@NonNull String permName,
-            @Nullable PackageParser.Package pkg, int uid, int callingUid);
 
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
@@ -205,8 +193,25 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+    /** HACK HACK notify the permission listener; this shouldn't be needed after permissions
+     *  are fully removed from the package manager */
+    public abstract void notifyPermissionsChangedTEMP(int uid);
 
     /** Get all permission that have a certain protection level */
     public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
             @PermissionInfo.Protection int protectionLevel);
+
+    /**
+     * Returns the delegate used to influence permission checking.
+     *
+     * @return The delegate instance.
+     */
+    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
+
+    /**
+     * Sets the delegate used to influence permission checking.
+     *
+     * @param delegate A delegate instance or {@code null} to clear.
+     */
+    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
 }

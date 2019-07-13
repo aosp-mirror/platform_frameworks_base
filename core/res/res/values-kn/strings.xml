@@ -568,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ಫೋನ್ ಅನ್ನು ಎಡಕ್ಕೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ಫೋನ್ ಅನ್ನು ಬಲಕ್ಕೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಹೆಚ್ಚಿನದ್ದನ್ನು ನೇರವಾಗಿ ನೋಡಿ."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ನಿಮ್ಮ ಮುಖ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ಫೋನ್ ಕಡೆಗೆ ನೋಡಿ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ನಿಮ್ಮ ಮುಖವನ್ನು ಫೋನ್‌ಗೆ ನೇರವಾಗಿ ಇರಿಸಿ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ತುಂಬಾ ಅಲುಗಾಡುತ್ತಿದೆ ಫೋನ್ ಅನ್ನು ಸ್ಥಿರವಾಗಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ಮುಖ ಗುರುತಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1131,14 +1131,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ತೆರೆ"</string>
-    <!-- no translation found for whichOpenHostLinksWith (3788174881117226583) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWith (6392123355599572804) -->
-    <skip />
-    <!-- no translation found for whichOpenLinksWithApp (8225991685366651614) -->
-    <skip />
-    <!-- no translation found for whichOpenHostLinksWithApp (3464470639011045589) -->
-    <skip />
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"ಇವುಗಳ ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"ಇವುಗಳ ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"<xliff:g id="APPLICATION">%1$s</xliff:g> ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"<xliff:g id="APPLICATION">%2$s</xliff:g> ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"ಪ್ರವೇಶ ಅನುಮತಿಸಿ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ಇವರ ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
@@ -1591,8 +1587,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ಬ್ರೌಸರ್ ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ಯಾವಾಗಲೂ"</string>
-    <!-- no translation found for activity_resolver_set_always (1422574191056490585) -->
-    <skip />
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"ಯಾವಾಗಲೂ ತೆರೆಯುವುದಕ್ಕೆ ಹೊಂದಿಸಿ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>

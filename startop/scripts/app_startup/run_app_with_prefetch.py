@@ -30,8 +30,7 @@ import argparse
 import os
 import sys
 import time
-from typing import List, Tuple
-from pathlib import Path
+from typing import List, Tuple, Optional, NamedTuple
 
 # local imports
 import lib.adb_utils as adb_utils
@@ -40,16 +39,28 @@ import lib.adb_utils as adb_utils
 DIR = os.path.abspath(os.path.dirname(__file__))
 IORAP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
                                                          '../iorap/common'))
+APP_STARTUP_COMMON_BASH_SCRIPT = os.path.realpath(os.path.join(DIR,
+                                                               'lib/common'))
 
 sys.path.append(os.path.dirname(DIR))
 import lib.print_utils as print_utils
 import lib.cmd_utils as cmd_utils
 import iorap.lib.iorapd_utils as iorapd_utils
 
+RunCommandArgs = NamedTuple('RunCommandArgs',
+                            [('package', str),
+                             ('readahead', str),
+                             ('activity', Optional[str]),
+                             ('compiler_filter', Optional[str]),
+                             ('timeout', Optional[int]),
+                             ('debug', bool),
+                             ('simulate', bool),
+                             ('input', Optional[str])])
+
 def parse_options(argv: List[str] = None):
   """Parses command line arguments and return an argparse Namespace object."""
   parser = argparse.ArgumentParser(
-    description='Run an Android application once and measure startup time.'
+      description='Run an Android application once and measure startup time.'
   )
 
   required_named = parser.add_argument_group('required named arguments')
@@ -90,42 +101,44 @@ def parse_options(argv: List[str] = None):
 
   return parser.parse_args(argv)
 
-def validate_options(opts: argparse.Namespace) -> bool:
+def validate_options(args: argparse.Namespace) -> Tuple[bool, RunCommandArgs]:
   """Validates the activity and trace file if needed.
 
   Returns:
     A bool indicates whether the activity is valid and trace file exists if
     necessary.
   """
-  needs_trace_file = (opts.readahead != 'cold' and opts.readahead != 'warm')
-  if needs_trace_file and (opts.input is None or
-                           not os.path.exists(opts.input)):
+  needs_trace_file = (args.readahead != 'cold' and args.readahead != 'warm')
+  if needs_trace_file and (args.input is None or
+                           not os.path.exists(args.input)):
     print_utils.error_print('--input not specified!')
-    return False
+    return False, args
 
-  # Install necessary trace file.
+  if args.simulate:
+    args = args._replace(activity='act')
+
+  if not args.activity:
+    _, activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
+                                           'get_activity_name',
+                                           [args.package])
+    args = args._replace(activity=activity)
+
+  if not args.activity:
+    print_utils.error_print('Activity name could not be found, '
+                            'invalid package name?!')
+    return False, args
+
+  # Install necessary trace file. This must be after the activity checking.
   if needs_trace_file:
     passed = iorapd_utils.iorapd_compiler_install_trace_file(
-      opts.package, opts.activity, opts.input)
+        args.package, args.activity, args.input)
     if not cmd_utils.SIMULATE and not passed:
       print_utils.error_print('Failed to install compiled TraceFile.pb for '
                               '"{}/{}"'.
-                                format(opts.package, opts.activity))
-      return False
+                                format(args.package, args.activity))
+      return False, args
 
-  if opts.activity is not None:
-    return True
-
-  _, opts.activity = cmd_utils.run_shell_func(IORAP_COMMON_BASH_SCRIPT,
-                                              'get_activity_name',
-                                              [opts.package])
-
-  if not opts.activity:
-    print_utils.error_print('Activity name could not be found, '
-                              'invalid package name?!')
-    return False
-
-  return True
+  return True, args
 
 def set_up_adb_env():
   """Sets up adb environment."""
@@ -147,17 +160,18 @@ def configure_compiler_filter(compiler_filter: str, package: str,
 
   passed, current_compiler_filter_info = \
     cmd_utils.run_shell_command(
-      '{} --package {}'.format(os.path.join(DIR, 'query_compiler_filter.py'),
-                               package))
+        '{} --package {}'.format(os.path.join(DIR, 'query_compiler_filter.py'),
+                                 package))
 
   if passed != 0:
     return passed
 
   # TODO: call query_compiler_filter directly as a python function instead of
   #  these shell calls.
-  current_compiler_filter, current_reason, current_isa = current_compiler_filter_info.split(' ')
+  current_compiler_filter, current_reason, current_isa = \
+    current_compiler_filter_info.split(' ')
   print_utils.debug_print('Compiler Filter={} Reason={} Isa={}'.format(
-    current_compiler_filter, current_reason, current_isa))
+      current_compiler_filter, current_reason, current_isa))
 
   # Don't trust reasons that aren't 'unknown' because that means
   #  we didn't manually force the compilation filter.
@@ -184,9 +198,6 @@ def parse_metrics_output(input: str,
   Returns:
     A list of tuples that including metric name, metric value and rest info.
   """
-  if simulate:
-    return [('TotalTime', '123')]
-
   all_metrics = []
   for line in input.split('\n'):
     if not line:
@@ -203,10 +214,37 @@ def parse_metrics_output(input: str,
     print_utils.debug_print('metric: "{metric_name}", '
                             'value: "{metric_value}" '.
                               format(metric_name=metric_name,
-                                     metric_value=metric_value))
+                                   metric_value=metric_value))
 
     all_metrics.append((metric_name, metric_value))
   return all_metrics
+
+def _parse_total_time(am_start_output: str) -> Optional[str]:
+  """Parses the total time from 'adb shell am start pkg' output.
+
+  Returns:
+    the total time of app startup.
+  """
+  for line in am_start_output.split('\n'):
+    if 'TotalTime:' in line:
+      return line[len('TotalTime:'):].strip()
+  return None
+
+def blocking_parse_all_metrics(am_start_output: str, package: str,
+                               pre_launch_timestamp: str,
+                               timeout: int) -> str:
+  """Parses the metric after app startup by reading from logcat in a blocking
+  manner until all metrics have been found".
+
+  Returns:
+    the total time and displayed time of app startup.
+    For example: "TotalTime=123\nDisplayedTime=121
+  """
+  total_time = _parse_total_time(am_start_output)
+  displayed_time = adb_utils.blocking_wait_for_logcat_displayed_time(
+      pre_launch_timestamp, package, timeout)
+
+  return 'TotalTime={}\nDisplayedTime={}'.format(total_time, displayed_time)
 
 def run(readahead: str,
         package: str,
@@ -223,10 +261,16 @@ def run(readahead: str,
   print_utils.debug_print('=====             START              =====')
   print_utils.debug_print('==========================================')
 
+  # Kill any existing process of this app
+  adb_utils.pkill(package)
+
   if readahead != 'warm':
     print_utils.debug_print('Drop caches for non-warm start.')
     # Drop all caches to get cold starts.
     adb_utils.vm_drop_cache()
+
+  if readahead != 'warm' and readahead != 'cold':
+    iorapd_utils.enable_iorapd_readahead()
 
   print_utils.debug_print('Running with timeout {}'.format(timeout))
 
@@ -235,24 +279,25 @@ def run(readahead: str,
   passed, output = cmd_utils.run_shell_command('timeout {timeout} '
                                                '"{DIR}/launch_application" '
                                                '"{package}" '
-                                               '"{activity}" | '
-                                               '"{DIR}/parse_metrics" '
-                                               '--package {package} '
-                                               '--activity {activity} '
-                                               '--timestamp "{timestamp}"'
+                                               '"{activity}"'
                                                  .format(timeout=timeout,
-                                                         DIR=DIR,
-                                                         package=package,
-                                                         activity=activity,
-                                                         timestamp=pre_launch_timestamp))
-
-  if not output and not simulate:
+                                                       DIR=DIR,
+                                                       package=package,
+                                                       activity=activity))
+  if not passed and not simulate:
     return None
 
-  results = parse_metrics_output(output, simulate)
+  if simulate:
+    results = [('TotalTime', '123')]
+  else:
+    output = blocking_parse_all_metrics(output,
+                                        package,
+                                        pre_launch_timestamp,
+                                        timeout)
+    results = parse_metrics_output(output, simulate)
 
   passed = perform_post_launch_cleanup(
-    readahead, package, activity, timeout, debug, pre_launch_timestamp)
+      readahead, package, activity, timeout, debug, pre_launch_timestamp)
   if not passed and not simulate:
     print_utils.error_print('Cannot perform post launch cleanup!')
     return None
@@ -272,25 +317,30 @@ def perform_post_launch_cleanup(readahead: str,
     A bool indicates whether the cleanup succeeds or not.
   """
   if readahead != 'warm' and readahead != 'cold':
-    return iorapd_utils.wait_for_iorapd_finish(package,
-                                               activity,
-                                               timeout,
-                                               debug,
-                                               logcat_timestamp)
-    return passed
+    passed = iorapd_utils.wait_for_iorapd_finish(package,
+                                                 activity,
+                                                 timeout,
+                                                 debug,
+                                                 logcat_timestamp)
+
+    if not passed:
+      return passed
+
+    return iorapd_utils.disable_iorapd_readahead()
+
   # Don't need to do anything for warm or cold.
   return True
 
-def run_test(opts: argparse.Namespace) -> List[Tuple[str, str]]:
+def run_test(args: RunCommandArgs) -> List[Tuple[str, str]]:
   """Runs one test using given options.
 
   Returns:
-    A list of tuples that including metric name, metric value and anything left.
+    A list of tuples that including metric name, metric value.
   """
-  print_utils.DEBUG = opts.debug
-  cmd_utils.SIMULATE = opts.simulate
+  print_utils.DEBUG = args.debug
+  cmd_utils.SIMULATE = args.simulate
 
-  passed = validate_options(opts)
+  passed, args = validate_options(args)
   if not passed:
     return None
 
@@ -299,15 +349,22 @@ def run_test(opts: argparse.Namespace) -> List[Tuple[str, str]]:
   # Ensure the APK is currently compiled with whatever we passed in
   # via --compiler-filter.
   # No-op if this option was not passed in.
-  if not configure_compiler_filter(opts.compiler_filter, opts.package,
-                                   opts.activity):
+  if not configure_compiler_filter(args.compiler_filter, args.package,
+                                   args.activity):
     return None
 
-  return run(opts.readahead, opts.package, opts.activity, opts.timeout,
-             opts.simulate, opts.debug)
+  return run(args.readahead, args.package, args.activity, args.timeout,
+             args.simulate, args.debug)
+
+def get_args_from_opts(opts: argparse.Namespace) -> RunCommandArgs:
+  kwargs = {}
+  for field in RunCommandArgs._fields:
+    kwargs[field] = getattr(opts, field)
+  return RunCommandArgs(**kwargs)
 
 def main():
-  args = parse_options()
+  opts = parse_options()
+  args = get_args_from_opts(opts)
   result = run_test(args)
 
   if result is None:

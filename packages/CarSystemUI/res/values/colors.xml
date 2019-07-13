@@ -35,7 +35,7 @@
     <drawable name="system_bar_background">@android:color/transparent</drawable>
 
     <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">#DD000000</color>
+    <color name="notification_shade_background_color">#D6000000</color>
 
     <!-- The background color of the car volume dialog -->
     <color name="car_volume_dialog_background_color">@color/system_bar_background_opaque</color>

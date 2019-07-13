@@ -16,11 +16,6 @@
 
 package com.android.server.location;
 
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -43,6 +38,11 @@ import android.util.Slog;
 
 import com.android.server.LocationManagerService;
 import com.android.server.PendingIntentUtils;
+
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
     private static final String TAG = "GeofenceManager";
@@ -79,13 +79,13 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private final GeofenceHandler mHandler;
     private final LocationBlacklist mBlacklist;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     // access to members below is synchronized on mLock
     /**
      * A list containing all registered geofences.
      */
-    private List<GeofenceState> mFences = new LinkedList<GeofenceState>();
+    private List<GeofenceState> mFences = new LinkedList<>();
 
     /**
      * This is set true when we have an active request for {@link Location} updates via
@@ -272,8 +272,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     // Runs on the handler.
     private void updateFences() {
-        List<PendingIntent> enterIntents = new LinkedList<PendingIntent>();
-        List<PendingIntent> exitIntents = new LinkedList<PendingIntent>();
+        List<PendingIntent> enterIntents = new LinkedList<>();
+        List<PendingIntent> exitIntents = new LinkedList<>();
 
         synchronized (mLock) {
             mPendingUpdate = false;
@@ -446,14 +446,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("  Geofences:");
-
         for (GeofenceState state : mFences) {
-            pw.append("    ");
-            pw.append(state.mPackageName);
-            pw.append(" ");
-            pw.append(state.mFence.toString());
-            pw.append("\n");
+            pw.println(state.mPackageName + " " + state.mFence);
         }
     }
 

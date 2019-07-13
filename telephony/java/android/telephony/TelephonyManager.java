@@ -3983,14 +3983,41 @@ public class TelephonyManager {
      * The returned set of subscriber IDs will include the subscriber ID corresponding to this
      * TelephonyManager's subId.
      *
+     * This is deprecated and {@link #getMergedSubscriberIdsFromGroup()} should be used for data
+     * usage merging purpose.
+     * TODO: remove this API.
+     *
      * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public @Nullable String[] getMergedSubscriberIds() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge subscriberIds based on
+     * subscription grouping: subscriberId of those in the same group will all be returned.
+     *
+     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String[] getMergedSubscriberIdsFromGroup() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getMergedSubscriberIdsFromGroup(getSubId(), getOpPackageName());
+            }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4901,7 +4928,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_ACTIVITY_NONE;
-            return telephony.getDataActivity();
+            return telephony.getDataActivityForSubId(
+                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_ACTIVITY_NONE;
@@ -4949,7 +4977,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_DISCONNECTED;
-            return telephony.getDataState();
+            return telephony.getDataStateForSubId(
+                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;

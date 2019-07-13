@@ -1028,7 +1028,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
+    public void onSetRequest(ProviderRequest request, WorkSource source) {
         sendMessage(SET_REQUEST, 0, new GpsRequest(request, source));
     }
 
@@ -1165,7 +1165,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @Override
-    public void sendExtraCommand(String command, Bundle extras) {
+    public void onSendExtraCommand(int uid, int pid, String command, Bundle extras) {
 
         long identity = Binder.clearCallingIdentity();
         try {
@@ -2171,18 +2171,18 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
-        s.append("  mStarted=").append(mStarted).append("   (changed ");
+        s.append("mStarted=").append(mStarted).append("   (changed ");
         TimeUtils.formatDuration(SystemClock.elapsedRealtime()
                 - mStartedChangedElapsedRealtime, s);
         s.append(" ago)").append('\n');
-        s.append("  mFixInterval=").append(mFixInterval).append('\n');
-        s.append("  mLowPowerMode=").append(mLowPowerMode).append('\n');
-        s.append("  mGnssMeasurementsProvider.isRegistered()=")
+        s.append("mFixInterval=").append(mFixInterval).append('\n');
+        s.append("mLowPowerMode=").append(mLowPowerMode).append('\n');
+        s.append("mGnssMeasurementsProvider.isRegistered()=")
                 .append(mGnssMeasurementsProvider.isRegistered()).append('\n');
-        s.append("  mGnssNavigationMessageProvider.isRegistered()=")
+        s.append("mGnssNavigationMessageProvider.isRegistered()=")
                 .append(mGnssNavigationMessageProvider.isRegistered()).append('\n');
-        s.append("  mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
-        s.append("  mTopHalCapabilities=0x").append(Integer.toHexString(mTopHalCapabilities));
+        s.append("mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
+        s.append("mTopHalCapabilities=0x").append(Integer.toHexString(mTopHalCapabilities));
         s.append(" ( ");
         if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHEDULING ");
         if (hasCapability(GPS_CAPABILITY_MSB)) s.append("MSB ");
@@ -2199,12 +2199,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
         s.append(")\n");
         if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
-            s.append("  SubHal=MEASUREMENT_CORRECTIONS[");
+            s.append("SubHal=MEASUREMENT_CORRECTIONS[");
             s.append(mGnssMeasurementCorrectionsProvider.toStringCapabilities());
             s.append("]\n");
         }
         s.append(mGnssMetrics.dumpGnssMetricsAsText());
-        s.append("  native internal state: ").append(native_get_internal_state());
+        s.append("native internal state: \n");
+        s.append("  ").append(native_get_internal_state());
         s.append("\n");
         pw.append(s);
     }

@@ -130,7 +130,7 @@
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Դեմքի ճանաչում…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Դեմքի պատկերակ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Համատեղելիության խոշորացման կոճակը:"</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Դիտափոխել փոքրից ավելի մեծ էկրան:"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Մասշտաբը մեծացնել փոքրից ավելի մեծ էկրան:"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-ը միացված է:"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-ն անջատված է:"</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Մարտկոց չկա:"</string>

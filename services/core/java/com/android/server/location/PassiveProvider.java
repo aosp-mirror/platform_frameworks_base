@@ -19,7 +19,6 @@ package com.android.server.location;
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
-import android.os.Bundle;
 import android.os.WorkSource;
 
 import com.android.internal.location.ProviderProperties;
@@ -53,7 +52,7 @@ public class PassiveProvider extends AbstractLocationProvider {
     }
 
     @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
+    public void onSetRequest(ProviderRequest request, WorkSource source) {
         mReportLocation = request.reportLocation;
     }
 
@@ -64,10 +63,7 @@ public class PassiveProvider extends AbstractLocationProvider {
     }
 
     @Override
-    public void sendExtraCommand(String command, Bundle extras) {}
-
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" report location=" + mReportLocation);
+        pw.println("report location=" + mReportLocation);
     }
 }

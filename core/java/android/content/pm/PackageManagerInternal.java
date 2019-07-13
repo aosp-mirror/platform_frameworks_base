@@ -32,13 +32,10 @@ import android.os.PersistableBundle;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.internal.util.function.TriFunction;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -84,32 +81,6 @@ public abstract class PackageManagerInternal {
         default void onPackageChanged(@NonNull String packageName, int uid) {}
         /** A package was removed from the system. */
         void onPackageRemoved(@NonNull String packageName, int uid);
-    }
-
-    /** Interface to override permission checks via composition */
-    public interface CheckPermissionDelegate {
-        /**
-         * Allows overriding check permission behavior.
-         *
-         * @param permName The permission to check.
-         * @param pkgName The package for which to check.
-         * @param userId The user for which to check.
-         * @param superImpl The super implementation.
-         * @return The check permission result.
-         */
-        int checkPermission(String permName, String pkgName, int userId,
-                TriFunction<String, String, Integer, Integer> superImpl);
-
-        /**
-         * Allows overriding check UID permission behavior.
-         *
-         * @param permName The permission to check.
-         * @param uid The UID for which to check.
-         * @param superImpl The super implementation.
-         * @return The check permission result.
-         */
-        int checkUidPermission(String permName, int uid,
-                BiFunction<String, Integer, Integer> superImpl);
     }
 
     /**
@@ -464,26 +435,6 @@ public abstract class PackageManagerInternal {
     public abstract boolean wasPackageEverLaunched(String packageName, int userId);
 
     /**
-     * Grants a runtime permission
-     * @param packageName The package name.
-     * @param name The name of the permission.
-     * @param userId The userId for which to grant the permission.
-     * @param overridePolicy If true, grant this permission even if it is fixed by policy.
-     */
-    public abstract void grantRuntimePermission(String packageName, String name, int userId,
-            boolean overridePolicy);
-
-    /**
-     * Revokes a runtime permission
-     * @param packageName The package name.
-     * @param name The name of the permission.
-     * @param userId The userId for which to revoke the permission.
-     * @param overridePolicy If true, revoke this permission even if it is fixed by policy.
-     */
-    public abstract void revokeRuntimePermission(String packageName, String name, int userId,
-            boolean overridePolicy);
-
-    /**
      * Retrieve the official name associated with a uid. This name is
      * guaranteed to never change, though it is possible for the underlying
      * uid to be changed. That is, if you are storing information about
@@ -668,6 +619,12 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
 
     /**
+     * Returns a package for the given UID. If the UID is part of a shared user ID, one
+     * of the packages will be chosen to be returned.
+     */
+    public abstract @Nullable PackageParser.Package getPackage(int uid);
+
+    /**
      * Returns a list without a change observer.
      *
      * @see #getPackageList(PackageListObserver)
@@ -742,17 +699,6 @@ public abstract class PackageManagerInternal {
     public abstract boolean filterAppAccess(
             @Nullable PackageParser.Package pkg, int callingUid, int userId);
 
-    /*
-     * NOTE: The following methods are temporary until permissions are extracted from
-     * the package manager into a component specifically for handling permissions.
-     */
-    /** Returns the flags for the given permission. */
-    public abstract @Nullable int getPermissionFlagsTEMP(@NonNull String permName,
-            @NonNull String packageName, int userId);
-    /** Updates the flags for the given permission. */
-    public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
-            @NonNull String packageName, int flagMask, int flagValues, int userId);
-
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
 
@@ -780,20 +726,6 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
             @PackageParser.SigningDetails.CertCapabilities int capability);
-
-    /**
-     * Get the delegate to influence permission checking.
-     *
-     * @return The delegate instance or null to clear.
-     */
-    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
-
-    /**
-     * Set a delegate to influence permission checking.
-     *
-     * @param delegate A delegate instance or null to clear.
-     */
-    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
 
     /**
      * Get appIds of all available apps which specified android:sharedUserId in the manifest.
@@ -1006,4 +938,26 @@ public abstract class PackageManagerInternal {
      * the settings have been written.
      */
     public abstract void writeSettings(boolean async);
+
+    /**
+     * Writes all permission settings for the given set of users to disk. If {@code async}
+     * is {@code true}, the settings are written at some point in the future. Otherwise,
+     * the call blocks until the settings have been written.
+     */
+    public abstract void writePermissionSettings(@NonNull @UserIdInt int[] userIds, boolean async);
+
+    /**
+     * Returns the target SDK for the given UID. Will return {@code 0} if there is no
+     * package associated with the UID or if the package has not been installed for
+     * the user. Will return the highest target SDK if the UID references packages with
+     * a shared user id.
+     */
+    public abstract int getTargetSdk(int uid);
+
+    /**
+     * Returns {@code true} if the caller is the installer of record for the given package.
+     * Otherwise, {@code false}.
+     */
+    public abstract boolean isCallerInstallerOfRecord(
+            @NonNull PackageParser.Package pkg, int callingUid);
 }

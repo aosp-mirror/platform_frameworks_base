@@ -253,12 +253,14 @@ public final class ProtoInputStream extends ProtoStream {
     }
 
     /**
-     * Attempt to guess the next field. If there is a match, the field data will be ready to read.
-     * If there is no match, nextField will need to be called to get the field number
+     * Reads the tag of the next field from the stream. If previous field value was not read, its
+     * data will be skipped over. If {@code fieldId} matches the next field ID, the field data will
+     * be ready to read. If it does not match, {@link #nextField()} or {@link #nextField(long)} will
+     * need to be called again before the field data can be read.
      *
      * @return true if fieldId matches the next field, false if not
      */
-    public boolean isNextField(long fieldId) throws IOException {
+    public boolean nextField(long fieldId) throws IOException {
         if (nextField() == (int) fieldId) {
             return true;
         }

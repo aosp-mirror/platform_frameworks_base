@@ -19,6 +19,7 @@ package android.permission;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.permission.IOnPermissionsChangeListener;
 
 /**
  * Interface to communicate directly with the permission manager service.
@@ -39,4 +40,34 @@ interface IPermissionManager {
     boolean addPermission(in PermissionInfo info, boolean async);
 
     void removePermission(String name);
+
+    int getPermissionFlags(String permName, String packageName, int userId);
+
+    void updatePermissionFlags(String permName, String packageName, int flagMask,
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
+
+    void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
+
+    int checkPermission(String permName, String pkgName, int userId);
+
+    int checkUidPermission(String permName, int uid);
+
+    void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+
+    void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
+
+    List<String> getWhitelistedRestrictedPermissions(String packageName,
+            int flags, int userId);
+
+    boolean addWhitelistedRestrictedPermission(String packageName, String permName,
+            int flags, int userId);
+
+    boolean removeWhitelistedRestrictedPermission(String packageName, String permName,
+            int flags, int userId);
+
+    void grantRuntimePermission(String packageName, String permName, int userId);
+
+    void revokeRuntimePermission(String packageName, String permName, int userId);
+
+    void resetRuntimePermissions();
 }

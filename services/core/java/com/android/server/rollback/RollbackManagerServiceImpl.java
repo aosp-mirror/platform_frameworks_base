@@ -1247,7 +1247,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
 
     private boolean packageVersionsEqual(VersionedPackage a, VersionedPackage b) {
-        return a.getPackageName().equals(b.getPackageName())
+        return a != null && b != null
+            && a.getPackageName().equals(b.getPackageName())
             && a.getLongVersionCode() == b.getLongVersionCode();
     }
 

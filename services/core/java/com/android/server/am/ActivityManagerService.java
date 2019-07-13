@@ -210,7 +210,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
@@ -270,6 +269,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
@@ -352,6 +352,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
@@ -1561,6 +1562,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final HiddenApiSettings mHiddenApiBlacklist;
 
     PackageManagerInternal mPackageManagerInt;
+    PermissionManagerServiceInternal mPermissionManagerInt;
 
     /**
      * Whether to force background check on all apps (for battery saver) or not.
@@ -7205,6 +7207,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPackageManagerInt;
+    }
+
+    private PermissionManagerServiceInternal getPermissionManagerInternalLocked() {
+        if (mPermissionManagerInt == null) {
+            mPermissionManagerInt =
+                    LocalServices.getService(PermissionManagerServiceInternal.class);
+        }
+        return mPermissionManagerInt;
     }
 
     @Override
@@ -15937,7 +15947,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Can't call out of the system process with a lock held, so post a message.
             if (instr.mUiAutomationConnection != null) {
                 mAppOpsService.setAppOpsServiceDelegate(null);
-                getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
+                getPermissionManagerInternalLocked().setCheckPermissionDelegate(null);
                 mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                         instr.mUiAutomationConnection).sendToTarget();
             }
@@ -18893,7 +18903,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (ActivityManagerService.this) {
             // If there is a delegate it should be the same instance for app ops and permissions.
             if (mAppOpsService.getAppOpsServiceDelegate()
-                    != getPackageManagerInternalLocked().getCheckPermissionDelegate()) {
+                    != getPermissionManagerInternalLocked().getCheckPermissionDelegate()) {
                 throw new IllegalStateException("Bad shell delegate state");
             }
 
@@ -18928,7 +18938,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ShellDelegate shellDelegate = new ShellDelegate(
                         instr.mTargetInfo.packageName, delegateUid, permissions);
                 mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
-                getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
+                getPermissionManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
                 return;
             }
         }
@@ -18942,7 +18952,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         synchronized (ActivityManagerService.this) {
             mAppOpsService.setAppOpsServiceDelegate(null);
-            getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
+            getPermissionManagerInternalLocked().setCheckPermissionDelegate(null);
         }
     }
 
