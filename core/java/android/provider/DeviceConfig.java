@@ -336,6 +336,15 @@ public final class DeviceConfig {
         @TestApi
         String KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE =
                 "system_gestures_excluded_by_pre_q_sticky_immersive";
+
+        /**
+         * Key for controlling which packages are explicitly blocked from running at refresh rates
+         * higher than 60hz.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
+         * @hide
+         */
+        String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
     }
 
     private static final Object sLock = new Object();

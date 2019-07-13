@@ -416,7 +416,7 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Consente all\'app di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'app di interferire con il funzionamento del GPS o di altre fonti di geolocalizzazione."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"accesso alla posizione esatta solo in primo piano"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Questa app può recuperare la tua posizione esatta solo quando è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli. Potrebbe aumentare il consumo della batteria."</string>
-    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"Accesso alla posizione approssimativa (in base alla rete) solo in primo piano"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"accesso alla posizione approssimativa (in base alla rete) solo in primo piano"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Questa app può recuperare la tua posizione tramite fonti di rete quali ripetitori di telefonia mobile e reti Wi-Fi, ma soltanto quando l\'app è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul tablet affinché l\'app possa usarli."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Questa app può recuperare la tua posizione tramite fonti di rete quali ripetitori di telefonia mobile e reti Wi-Fi, ma soltanto quando l\'app è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sulla TV affinché l\'app possa usarli."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Questa app può recuperare la tua posizione tramite fonti di rete quali ripetitori di telefonia mobile e reti Wi-Fi, ma soltanto quando l\'app è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli."</string>
@@ -504,7 +504,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Consente all\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"disattivazione blocco schermo"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
-    <string name="permlab_requestPasswordComplexity" msgid="202650535669249674">"richiedi complessità del blocco schermo"</string>
+    <string name="permlab_requestPasswordComplexity" msgid="202650535669249674">"richiesta di complessità del blocco schermo"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Consente all\'app di conoscere il livello di complessità del blocco schermo (alto, medio, basso o nessuno), che indica l\'intervallo di caratteri possibile e il tipo di blocco schermo. L\'app può inoltre suggerire agli utenti di aggiornare il blocco schermo a un livello specifico di complessità, ma gli utenti possono ignorare liberamente il suggerimento e uscire. Tieni presente che il blocco schermo non viene memorizzato come testo non crittografato, quindi l\'app non conosce la password esatta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilizzo di hardware biometrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Consente all\'app di utilizzare hardware biometrico per eseguire l\'autenticazione"</string>
@@ -514,11 +514,11 @@
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte digitali per eseguire l\'autenticazione"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"modifica della tua raccolta musicale"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Consente all\'app di modificare la tua raccolta musicale."</string>
-    <string name="permlab_videoWrite" msgid="128769316366746446">"Modifica della tua raccolta di video"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"modifica della tua raccolta di video"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"Consente all\'app di modificare la tua raccolta di video."</string>
-    <string name="permlab_imagesWrite" msgid="3391306186247235510">"Modifica della tua raccolta di foto"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"modifica della tua raccolta di foto"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Consente all\'app di modificare la tua raccolta di foto."</string>
-    <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lettura delle posizioni dalla tua raccolta multimediale"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"lettura delle posizioni dalla tua raccolta multimediale"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
     <string name="biometric_dialog_default_title" msgid="881952973720613213">"Verifica la tua identità"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrico non disponibile"</string>
@@ -550,9 +550,9 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona dell\'impronta digitale"</string>
-    <string name="permlab_manageFace" msgid="7262837876352591553">"gestisci l\'hardware per Sblocco col sorriso"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gestione dell\'hardware per Sblocco col sorriso"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
-    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilizza l\'hardware per Sblocco col sorriso"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilizzo dell\'hardware per Sblocco col sorriso"</string>
     <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Consente all\'app di utilizzare hardware per l\'autenticazione con Sblocco col sorriso"</string>
     <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Sblocco col sorriso"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registra di nuovo il volto"</string>
@@ -601,7 +601,7 @@
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Consente a un\'applicazione di leggere le statistiche di sincronizzazione per un account, incluse la cronologia degli eventi di sincronizzazione e la quantità di dati sincronizzati."</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"lettura dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"Consente all\'app di leggere i contenuti del tuo archivio condiviso."</string>
-    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"modificare/eliminare i contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardWrite" msgid="9220937740184960897">"modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"invio/ricezione di chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>

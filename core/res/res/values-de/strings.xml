@@ -567,7 +567,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Beweg das Smartphone nach links."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Beweg das Smartphone nach rechts."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Richte die Smartphone-Kamera auf dein Gesicht."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Halte dein Gesicht direkt vor dein Smartphone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
