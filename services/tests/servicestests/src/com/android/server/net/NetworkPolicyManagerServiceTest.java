@@ -559,7 +559,25 @@ public class NetworkPolicyManagerServiceTest {
                 .build();
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
 
-        // RestrictBackground should be on, following its previous state
+        // RestrictBackground should be on, as before.
+        assertTrue(mService.getRestrictBackground());
+
+        stateOn = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(true)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
+
+        // RestrictBackground should be on.
+        assertTrue(mService.getRestrictBackground());
+
+        stateOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should be on, as it was enabled manually before battery saver.
         assertTrue(mService.getRestrictBackground());
     }
 
@@ -585,6 +603,20 @@ public class NetworkPolicyManagerServiceTest {
 
         // RestrictBackground should be off, following its previous state
         assertFalse(mService.getRestrictBackground());
+
+        PowerSaveState stateOnRestrictOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(false)
+                .build();
+
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOnRestrictOff);
+
+        assertFalse(mService.getRestrictBackground());
+
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should still be off.
+        assertFalse(mService.getRestrictBackground());
     }
 
     @Test
@@ -602,11 +634,49 @@ public class NetworkPolicyManagerServiceTest {
 
         // User turns off RestrictBackground manually
         setRestrictBackground(false);
-        PowerSaveState stateOff = new PowerSaveState.Builder().setBatterySaverEnabled(
-                false).build();
+        // RestrictBackground should be off because user changed it manually
+        assertFalse(mService.getRestrictBackground());
+
+        PowerSaveState stateOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(false)
+                .build();
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
 
-        // RestrictBackground should be off because user changes it manually
+        // RestrictBackground should remain off.
+        assertFalse(mService.getRestrictBackground());
+    }
+
+    @Test
+    public void updateRestrictBackgroundByLowPowerMode_RestrictOnWithGlobalOff()
+            throws Exception {
+        setRestrictBackground(false);
+        PowerSaveState stateOn = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(true)
+                .build();
+
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
+
+        // RestrictBackground should be turned on because of battery saver.
+        assertTrue(mService.getRestrictBackground());
+
+        PowerSaveState stateRestrictOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(true)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateRestrictOff);
+
+        // RestrictBackground should be off, returning to its state before battery saver's change.
+        assertFalse(mService.getRestrictBackground());
+
+        PowerSaveState stateOff = new PowerSaveState.Builder()
+                .setGlobalBatterySaverEnabled(false)
+                .setBatterySaverEnabled(false)
+                .build();
+        mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
+
+        // RestrictBackground should still be off, back in its pre-battery saver state.
         assertFalse(mService.getRestrictBackground());
     }
 
