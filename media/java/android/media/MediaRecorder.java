@@ -1624,6 +1624,9 @@ public class MediaRecorder implements AudioRouting,
      * @hide
      */
     public int getPortId() {
+        if (mNativeContext == 0) {
+            return 0;
+        }
         return native_getPortId();
     }
 
