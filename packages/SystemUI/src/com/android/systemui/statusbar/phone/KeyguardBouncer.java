@@ -346,10 +346,10 @@ public class KeyguardBouncer {
     }
 
     /**
-     * {@link #show(boolean)} was called but we're not showing yet.
+     * {@link #show(boolean)} was called but we're not showing yet, or being dragged.
      */
-    public boolean willShowSoon() {
-        return mShowingSoon;
+    public boolean inTransit() {
+        return mShowingSoon || mExpansion != EXPANSION_HIDDEN;
     }
 
     /**
