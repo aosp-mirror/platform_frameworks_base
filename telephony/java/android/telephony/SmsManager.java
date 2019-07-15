@@ -48,7 +48,6 @@ import com.android.internal.telephony.SmsRawData;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -1555,15 +1554,13 @@ public final class SmsManager {
     public boolean
     deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
-        byte[] pdu = new byte[SMS_RECORD_LENGTH-1];
-        Arrays.fill(pdu, (byte)0xff);
 
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
                 success = iSms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
-                        messageIndex, STATUS_ON_ICC_FREE, pdu);
+                        messageIndex, STATUS_ON_ICC_FREE, null /* pdu */);
             }
         } catch (RemoteException ex) {
             // ignore it
