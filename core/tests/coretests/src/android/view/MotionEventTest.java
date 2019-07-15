@@ -17,7 +17,10 @@
 package android.view;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.TOOL_TYPE_FINGER;
+
+import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -76,5 +79,63 @@ public class MotionEventTest {
                 pointerCount, properties, coords,
                 0, 0, 0, 0, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, displayId, 0);
         assertNull(motionEvent);
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForTouchscreenEvents() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+
+        assertTrue(Float.isNaN(event.getXCursorPosition()));
+        assertTrue(Float.isNaN(event.getYCursorPosition()));
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForSimpleMouseEvents() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+
+        assertEquals(30, event.getXCursorPosition(), 0.1);
+        assertEquals(50, event.getYCursorPosition(), 0.1);
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForSimpleMouseEventsWithOffset() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.offsetLocation(10 /* deltaX */, 20 /* deltaY */);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+
+        assertEquals(40, event.getXCursorPosition(), 0.1);
+        assertEquals(70, event.getYCursorPosition(), 0.1);
+    }
+
+
+    @Test
+    public void testCalculatesCursorPositionForMultiTouchMouseEvents() {
+        final int pointerCount = 2;
+        final PointerProperties[] properties = new PointerProperties[pointerCount];
+        final PointerCoords[] coords = new PointerCoords[pointerCount];
+
+        for (int i = 0; i < pointerCount; ++i) {
+            properties[i] = new PointerProperties();
+            properties[i].id = i;
+            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+            coords[i] = new PointerCoords();
+            coords[i].x = 20 + i * 20;
+            coords[i].y = 60 - i * 20;
+        }
+
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */,
+                0 /* eventTime */, ACTION_POINTER_DOWN, pointerCount, properties, coords,
+                0 /* metaState */, 0 /* buttonState */, 1 /* xPrecision */, 1 /* yPrecision */,
+                0 /* deviceId */, 0 /* edgeFlags */, InputDevice.SOURCE_MOUSE,
+                0 /* flags */);
+
+        assertEquals(30, event.getXCursorPosition(), 0.1);
+        assertEquals(50, event.getYCursorPosition(), 0.1);
     }
 }
