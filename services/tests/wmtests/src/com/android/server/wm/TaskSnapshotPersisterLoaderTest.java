@@ -64,6 +64,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertTrueForFiles(files, File::exists, " must exist");
         final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, false /* reduced */);
         assertNotNull(snapshot);
+        assertEquals(MOCK_SNAPSHOT_ID, snapshot.getId());
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());

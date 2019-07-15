@@ -310,6 +310,7 @@ class TaskSnapshotController {
         }
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         return new TaskSnapshot(
+                System.currentTimeMillis() /* id */,
                 appWindowToken.mActivityComponent, screenshotBuffer.getGraphicBuffer(),
                 screenshotBuffer.getColorSpace(),
                 appWindowToken.getTask().getConfiguration().orientation,
@@ -404,7 +405,9 @@ class TaskSnapshotController {
 
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
-        return new TaskSnapshot(topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
+        return new TaskSnapshot(
+                System.currentTimeMillis() /* id */,
+                topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
                 hwBitmap.getColorSpace(), topChild.getTask().getConfiguration().orientation,
                 getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* reduced */,
                 mFullSnapshotScale, false /* isRealSnapshot */, task.getWindowingMode(),

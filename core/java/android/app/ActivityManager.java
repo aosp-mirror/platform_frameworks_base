@@ -1822,7 +1822,8 @@ public class ActivityManager {
      * @hide
      */
     public static class TaskSnapshot implements Parcelable {
-
+        // Identifier of this snapshot
+        private final long mId;
         // Top activity in task when snapshot was taken
         private final ComponentName mTopActivityComponent;
         private final GraphicBuffer mSnapshot;
@@ -1841,10 +1842,12 @@ public class ActivityManager {
         // Must be one of the named color spaces, otherwise, always use SRGB color space.
         private final ColorSpace mColorSpace;
 
-        public TaskSnapshot(@NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
+        public TaskSnapshot(long id,
+                @NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
                 @NonNull ColorSpace colorSpace, int orientation, Rect contentInsets,
                 boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode,
                 int systemUiVisibility, boolean isTranslucent) {
+            mId = id;
             mTopActivityComponent = topActivityComponent;
             mSnapshot = snapshot;
             mColorSpace = colorSpace.getId() < 0
@@ -1860,6 +1863,7 @@ public class ActivityManager {
         }
 
         private TaskSnapshot(Parcel source) {
+            mId = source.readLong();
             mTopActivityComponent = ComponentName.readFromParcel(source);
             mSnapshot = source.readParcelable(null /* classLoader */);
             int colorSpaceId = source.readInt();
@@ -1874,6 +1878,13 @@ public class ActivityManager {
             mWindowingMode = source.readInt();
             mSystemUiVisibility = source.readInt();
             mIsTranslucent = source.readBoolean();
+        }
+
+        /**
+         * @return Identifier of this snapshot.
+         */
+        public long getId() {
+            return mId;
         }
 
         /**
@@ -1970,6 +1981,7 @@ public class ActivityManager {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(mId);
             ComponentName.writeToParcel(mTopActivityComponent, dest);
             dest.writeParcelable(mSnapshot, 0);
             dest.writeInt(mColorSpace.getId());
@@ -1988,6 +2000,7 @@ public class ActivityManager {
             final int width = mSnapshot != null ? mSnapshot.getWidth() : 0;
             final int height = mSnapshot != null ? mSnapshot.getHeight() : 0;
             return "TaskSnapshot{"
+                    + " mId=" + mId
                     + " mTopActivityComponent=" + mTopActivityComponent.flattenToShortString()
                     + " mSnapshot=" + mSnapshot + " (" + width + "x" + height + ")"
                     + " mColorSpace=" + mColorSpace.toString()
