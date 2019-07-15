@@ -1526,6 +1526,9 @@ public final class ProcessList {
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
+            if ("1".equals(SystemProperties.get("debug.ignoreappsignalhandler"))) {
+                runtimeFlags |= Zygote.DEBUG_IGNORE_APP_SIGNAL_HANDLER;
+            }
             if (mService.mNativeDebuggingApp != null
                     && mService.mNativeDebuggingApp.equals(app.processName)) {
                 // Enable all debug flags required by the native debugger.
