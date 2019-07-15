@@ -123,6 +123,8 @@ import com.android.internal.annotations.GuardedBy;
     /*package*/ void onAudioServerDied() {
         // Restore forced usage for communications and record
         synchronized (mDeviceStateLock) {
+            AudioSystem.setParameters(
+                    "BT_SCO=" + (mForcedUseForComm == AudioSystem.FORCE_BT_SCO ? "on" : "off"));
             onSetForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, "onAudioServerDied");
             onSetForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm, "onAudioServerDied");
         }
