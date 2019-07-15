@@ -30,6 +30,7 @@ import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
 import static android.net.ConnectivityManager.TETHERING_INVALID;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
+import static android.net.ConnectivityManager.TETHERING_WIFI_P2P;
 import static android.net.ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_SERVICE_UNAVAIL;
@@ -77,6 +78,9 @@ import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.net.util.VersionedBroadcastListener;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -290,6 +294,7 @@ public class Tethering extends BaseNetworkObserver {
         filter.addAction(CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
         filter = new IntentFilter();
@@ -354,6 +359,8 @@ public class Tethering extends BaseNetworkObserver {
 
         if (cfg.isWifi(iface)) {
             return TETHERING_WIFI;
+        } else if (cfg.isWifiP2p(iface)) {
+            return TETHERING_WIFI_P2P;
         } else if (cfg.isUsb(iface)) {
             return TETHERING_USB;
         } else if (cfg.isBluetooth(iface)) {
@@ -514,6 +521,7 @@ public class Tethering extends BaseNetworkObserver {
 
     public void untetherAll() {
         stopTethering(TETHERING_WIFI);
+        stopTethering(TETHERING_WIFI_P2P);
         stopTethering(TETHERING_USB);
         stopTethering(TETHERING_BLUETOOTH);
     }
@@ -700,6 +708,8 @@ public class Tethering extends BaseNetworkObserver {
                 handleConnectivityAction(intent);
             } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 handleWifiApAction(intent);
+            } else if (action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
+                handleWifiP2pAction(intent);
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 mLog.log("OBSERVED configuration changed");
                 updateConfiguration();
@@ -776,6 +786,39 @@ public class Tethering extends BaseNetworkObserver {
                 }
             }
         }
+
+        private void handleWifiP2pAction(Intent intent) {
+            if (mConfig.isWifiP2pLegacyTetheringMode()) return;
+
+            final WifiP2pInfo p2pInfo =
+                    (WifiP2pInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
+            final WifiP2pGroup group =
+                    (WifiP2pGroup) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP);
+
+            if (VDBG) {
+                Log.d(TAG, "WifiP2pAction: P2pInfo: " + p2pInfo + " Group: " + group);
+            }
+
+            if (p2pInfo == null) return;
+            // When a p2p group is disconnected, p2pInfo would be cleared.
+            // group is still valid for detecting whether this device is group owner.
+            if (group == null || !group.isGroupOwner()
+                    || TextUtils.isEmpty(group.getInterface())) return;
+
+            synchronized (Tethering.this.mPublicSync) {
+                // Enter below only if this device is Group Owner with a valid interface.
+                if (p2pInfo.groupFormed) {
+                    TetherState tetherState = mTetherStates.get(group.getInterface());
+                    if (tetherState == null
+                            || (tetherState.lastState != IpServer.STATE_TETHERED
+                                && tetherState.lastState != IpServer.STATE_LOCAL_ONLY)) {
+                        enableWifiIpServingLocked(group.getInterface(), IFACE_IP_MODE_LOCAL_ONLY);
+                    }
+                } else {
+                    disableWifiP2pIpServingLocked(group.getInterface());
+                }
+            }
+        }
     }
 
     @VisibleForTesting
@@ -810,14 +853,11 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    private void disableWifiIpServingLocked(String ifname, int apState) {
-        mLog.log("Canceling WiFi tethering request - AP_STATE=" + apState);
-
-        // Regardless of whether we requested this transition, the AP has gone
-        // down.  Don't try to tether again unless we're requested to do so.
-        // TODO: Remove this altogether, once Wi-Fi reliably gives us an
-        // interface name with every broadcast.
-        mWifiTetherRequested = false;
+    private void disableWifiIpServingLockedCommon(int tetheringType, String ifname, int apState) {
+        mLog.log("Canceling WiFi tethering request -"
+                + " type=" + tetheringType
+                + " interface=" + ifname
+                + " state=" + apState);
 
         if (!TextUtils.isEmpty(ifname)) {
             final TetherState ts = mTetherStates.get(ifname);
@@ -829,7 +869,7 @@ public class Tethering extends BaseNetworkObserver {
 
         for (int i = 0; i < mTetherStates.size(); i++) {
             final IpServer ipServer = mTetherStates.valueAt(i).ipServer;
-            if (ipServer.interfaceType() == TETHERING_WIFI) {
+            if (ipServer.interfaceType() == tetheringType) {
                 ipServer.unwanted();
                 return;
             }
@@ -838,6 +878,20 @@ public class Tethering extends BaseNetworkObserver {
         mLog.log("Error disabling Wi-Fi IP serving; " +
                 (TextUtils.isEmpty(ifname) ? "no interface name specified"
                                            : "specified interface: " + ifname));
+    }
+
+    private void disableWifiIpServingLocked(String ifname, int apState) {
+        // Regardless of whether we requested this transition, the AP has gone
+        // down.  Don't try to tether again unless we're requested to do so.
+        // TODO: Remove this altogether, once Wi-Fi reliably gives us an
+        // interface name with every broadcast.
+        mWifiTetherRequested = false;
+
+        disableWifiIpServingLockedCommon(TETHERING_WIFI, ifname, apState);
+    }
+
+    private void disableWifiP2pIpServingLocked(String ifname) {
+        disableWifiIpServingLockedCommon(TETHERING_WIFI_P2P, ifname, /* dummy */ 0);
     }
 
     private void enableWifiIpServingLocked(String ifname, int wifiIpMode) {
@@ -857,7 +911,7 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         if (!TextUtils.isEmpty(ifname)) {
-            maybeTrackNewInterfaceLocked(ifname, TETHERING_WIFI);
+            maybeTrackNewInterfaceLocked(ifname);
             changeInterfaceState(ifname, ipServingMode);
         } else {
             mLog.e(String.format(
