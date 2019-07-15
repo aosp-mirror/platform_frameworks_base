@@ -104,8 +104,8 @@ public class DisplayCutoutTest {
 
     @Test
     public void testExtractBoundsFromList_top_and_bottom() {
-        Rect safeInsets = new Rect(0, 1, 0, 10);
-        Rect boundTop = new Rect(80, 0, 120, 10);
+        Rect safeInsets = new Rect(0, 10, 0, 10);
+        Rect boundTop = new Rect(0, 0, 120, 10);
         Rect boundBottom = new Rect(80, 190, 120, 200);
         assertThat(extractBoundsFromList(safeInsets,
                 Arrays.asList(new Rect[]{boundTop, boundBottom})),
