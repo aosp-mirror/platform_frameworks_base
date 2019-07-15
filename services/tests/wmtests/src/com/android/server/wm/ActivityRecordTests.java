@@ -31,6 +31,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -679,6 +682,73 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(mActivity.hasSavedState());
         assertEquals(savedState, mActivity.getSavedState());
         assertEquals(persistentSavedState, mActivity.getPersistentSavedState());
+    }
+
+    /**
+     * Verify that activity finish request is not performed if activity is finishing or is in
+     * incorrect state.
+     */
+    @Test
+    public void testFinishActivityLocked_cancelled() {
+        // Mark activity as finishing
+        mActivity.finishing = true;
+        assertEquals("Duplicate finish request must be ignored", FINISH_RESULT_CANCELLED,
+                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
+                        false /* oomAdj */));
+        assertTrue(mActivity.finishing);
+        assertTrue(mActivity.isInStackLocked());
+
+        // Remove activity from task
+        mActivity.finishing = false;
+        mActivity.setTask(null);
+        assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_CANCELLED,
+                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
+                        false /* oomAdj */));
+        assertFalse(mActivity.finishing);
+    }
+
+    /**
+     * Verify that activity finish request is requested, but not executed immediately if activity is
+     * not ready yet.
+     */
+    @Test
+    public void testFinishActivityLocked_requested() {
+        mActivity.finishing = false;
+        assertEquals("Currently resumed activity be paused removal", FINISH_RESULT_REQUESTED,
+                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
+                        false /* oomAdj */));
+        assertTrue(mActivity.finishing);
+        assertTrue(mActivity.isInStackLocked());
+
+        // First request to finish activity must schedule a "destroy" request to the client.
+        // Activity must be removed from history after the client reports back or after timeout.
+        mActivity.finishing = false;
+        mActivity.setState(STOPPED, "test");
+        assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REQUESTED,
+                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
+                        false /* oomAdj */));
+        assertTrue(mActivity.finishing);
+        assertTrue(mActivity.isInStackLocked());
+    }
+
+    /**
+     * Verify that activity finish request removes activity immediately if it's ready.
+     */
+    @Test
+    public void testFinishActivityLocked_removed() {
+        // Prepare the activity record to be ready for immediate removal. It should be invisible and
+        // have no process. Otherwise, request to finish it will send a message to client first.
+        mActivity.setState(STOPPED, "test");
+        mActivity.visible = false;
+        mActivity.nowVisible = false;
+        // Set process to 'null' to allow immediate removal, but don't call mActivity.setProcess() -
+        // this will cause NPE when updating task's process.
+        mActivity.app = null;
+        assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REMOVED,
+                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
+                        false /* oomAdj */));
+        assertTrue(mActivity.finishing);
+        assertFalse(mActivity.isInStackLocked());
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */

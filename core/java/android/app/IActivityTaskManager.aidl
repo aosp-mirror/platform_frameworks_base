@@ -153,6 +153,7 @@ interface IActivityTaskManager {
     void moveTaskToFront(in IApplicationThread app, in String callingPackage, int task,
             int flags, in Bundle options);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
+    /** Finish all activities that were started for result from the specified activity. */
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
     boolean willActivityBeVisible(in IBinder token);

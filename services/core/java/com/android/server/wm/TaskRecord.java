@@ -66,6 +66,7 @@ import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
@@ -1419,7 +1420,7 @@ class TaskRecord extends ConfigurationContainer {
                 --activityNdx;
                 --numActivities;
             } else if (r.finishActivityLocked(Activity.RESULT_CANCELED, null,
-                    reason, false /* oomAdj */, pauseImmediately)) {
+                    reason, false /* oomAdj */, pauseImmediately) == FINISH_RESULT_REMOVED) {
                 --activityNdx;
                 --numActivities;
             }
@@ -1474,7 +1475,7 @@ class TaskRecord extends ConfigurationContainer {
                         ret.updateOptionsLocked(opts);
                     }
                     if (r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                            "clear-task-stack", false /* oomAdj */)) {
+                            "clear-task-stack", false /* oomAdj */) == FINISH_RESULT_REMOVED) {
                         --activityNdx;
                         --numActivities;
                     }
