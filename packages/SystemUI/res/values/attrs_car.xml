@@ -62,6 +62,8 @@
         <attr name="unselectedAlpha" />
         <!-- icon to be rendered when in selected state -->
         <attr name="selectedIcon" />
+        <!-- icon to be rendered (drawable) -->
+        <attr name="icon"/>
     </declare-styleable>
 
     <!-- Custom attributes to configure hvac values -->
