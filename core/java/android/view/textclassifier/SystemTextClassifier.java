@@ -151,6 +151,7 @@ public final class SystemTextClassifier implements TextClassifier {
         Utils.checkMainThread();
 
         try {
+            event.setUserId(mUserId);
             mManagerService.onSelectionEvent(mSessionId, event);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error reporting selection event.", e);
@@ -163,6 +164,12 @@ public final class SystemTextClassifier implements TextClassifier {
         Utils.checkMainThread();
 
         try {
+            final TextClassificationContext tcContext = event.getEventContext() == null
+                    ? new TextClassificationContext.Builder(mPackageName, WIDGET_TYPE_UNKNOWN)
+                            .build()
+                    : event.getEventContext();
+            tcContext.setUserId(mUserId);
+            event.setEventContext(tcContext);
             mManagerService.onTextClassifierEvent(mSessionId, event);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error reporting textclassifier event.", e);
