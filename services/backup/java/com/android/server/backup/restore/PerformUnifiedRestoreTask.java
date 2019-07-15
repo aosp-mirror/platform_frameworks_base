@@ -26,6 +26,7 @@ import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAG
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
@@ -222,7 +223,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 try {
                     PackageManager pm = backupManagerService.getPackageManager();
                     PackageInfo info = pm.getPackageInfoAsUser(filterSet[i], 0, mUserId);
-                    if ("android".equals(info.packageName)) {
+                    if (PLATFORM_PACKAGE_NAME.equals(info.packageName)) {
                         hasSystem = true;
                         continue;
                     }
@@ -241,7 +242,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             if (hasSystem) {
                 try {
                     mAcceptSet.add(0, backupManagerService.getPackageManager().getPackageInfoAsUser(
-                                    "android", 0, mUserId));
+                                    PLATFORM_PACKAGE_NAME, 0, mUserId));
                 } catch (NameNotFoundException e) {
                     // won't happen; we know a priori that it's valid
                 }
@@ -681,7 +682,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // an optimization: we know there's no widget data hosted/published by that
         // package, and this way we avoid doing a spurious copy of MB-sized wallpaper
         // data following the download.
-        boolean staging = !packageName.equals("android");
+        boolean staging = !packageName.equals(PLATFORM_PACKAGE_NAME);
         ParcelFileDescriptor stage;
         File downloadFile = (staging) ? mStageName : mBackupDataName;
         boolean startedAgentRestore = false;
