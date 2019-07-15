@@ -25,9 +25,12 @@ import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
+import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
+import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
+import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
@@ -1644,6 +1647,15 @@ public class NotificationManagerService extends SystemService {
             void onPolicyChanged() {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
                 mRankingHandler.requestSort();
+            }
+
+            @Override
+            void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {
+                Intent intent = new Intent(ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED);
+                intent.setPackage(pkg);
+                intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, id);
+                intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, status);
+                getContext().sendBroadcastAsUser(intent, UserHandle.of(userId));
             }
         });
         mPreferencesHelper = new PreferencesHelper(getContext(),

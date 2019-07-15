@@ -16,6 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
+
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.Notification;
@@ -351,6 +355,12 @@ public class ZenModeHelper {
                             "Cannot update rules not owned by your condition provider");
                 }
             }
+            if (rule.enabled != automaticZenRule.isEnabled()) {
+                dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.pkg, ruleId,
+                        automaticZenRule.isEnabled()
+                                ? AUTOMATIC_RULE_STATUS_ENABLED : AUTOMATIC_RULE_STATUS_DISABLED);
+            }
+
             populateZenRule(automaticZenRule, rule, false);
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
@@ -370,6 +380,8 @@ public class ZenModeHelper {
                 throw new SecurityException(
                         "Cannot delete rules not owned by your condition provider");
             }
+            dispatchOnAutomaticRuleStatusChanged(
+                    mConfig.user, rule.pkg, id, AUTOMATIC_RULE_STATUS_REMOVED);
             return setConfigLocked(newConfig, reason, null, true);
         }
     }
@@ -1120,6 +1132,13 @@ public class ZenModeHelper {
         }
     }
 
+    private void dispatchOnAutomaticRuleStatusChanged(int userId, String pkg, String id,
+            int status) {
+        for (Callback callback : mCallbacks) {
+            callback.onAutomaticRuleStatusChanged(userId, pkg, id, status);
+        }
+    }
+
     private ZenModeConfig readDefaultConfig(Resources resources) {
         XmlResourceParser parser = null;
         try {
@@ -1509,5 +1528,6 @@ public class ZenModeHelper {
         void onZenModeChanged() {}
         void onPolicyChanged() {}
         void onConsolidatedPolicyChanged() {}
+        void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {}
     }
 }
