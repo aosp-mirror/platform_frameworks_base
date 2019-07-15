@@ -58,8 +58,17 @@ public class MediaRouterManagerTest {
     public static final String ROUTE_NAME1 = "Sample Route 1";
     public static final String ROUTE_ID2 = "route_id2";
     public static final String ROUTE_NAME2 = "Sample Route 2";
+
+    public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
+    public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
+
     public static final String ACTION_REMOVE_ROUTE =
             "com.android.mediarouteprovider.action_remove_route";
+
+    public static final String CATEGORY_SAMPLE =
+            "com.android.mediarouteprovider.CATEGORY_SAMPLE";
+    public static final String CATEGORY_SPECIAL =
+            "com.android.mediarouteprovider.CATEGORY_SPECIAL";
 
     private static final int TIMEOUT_MS = 5000;
 
@@ -69,12 +78,13 @@ public class MediaRouterManagerTest {
     private Executor mExecutor;
     private String mPackageName;
 
-    private static final List<String> TEST_CONTROL_CATEGORIES = new ArrayList();
-    private static final String CONTROL_CATEGORY_1 = "android.media.mediarouter.MEDIA1";
-    private static final String CONTROL_CATEGORY_2 = "android.media.mediarouter.MEDIA2";
+    private static final List<String> CONTROL_CATEGORIES_ALL = new ArrayList();
+    private static final List<String> CONTROL_CATEGORIES_SPECIAL = new ArrayList();
     static {
-        TEST_CONTROL_CATEGORIES.add(CONTROL_CATEGORY_1);
-        TEST_CONTROL_CATEGORIES.add(CONTROL_CATEGORY_2);
+        CONTROL_CATEGORIES_ALL.add(CATEGORY_SAMPLE);
+        CONTROL_CATEGORIES_ALL.add(CATEGORY_SPECIAL);
+
+        CONTROL_CATEGORIES_SPECIAL.add(CATEGORY_SPECIAL);
     }
 
     @Before
@@ -125,7 +135,7 @@ public class MediaRouterManagerTest {
         // (Control requests shouldn't be used in this way.)
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 (Runnable) () -> {
-                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, mockRouterCallback);
                     mRouter.sendControlRequest(
                             new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2).build(),
                             new Intent(ACTION_REMOVE_ROUTE));
@@ -138,8 +148,11 @@ public class MediaRouterManagerTest {
         mManager.removeCallback(mockCallback);
     }
 
+    /**
+     * Tests if we get proper routes for application that has special control category.
+     */
     @Test
-    public void controlCategoryTest() throws Exception {
+    public void testControlCategory() throws Exception {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.addCallback(mExecutor, mockCallback);
 
@@ -147,12 +160,19 @@ public class MediaRouterManagerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> {
-                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                    mRouter.addCallback(CONTROL_CATEGORIES_SPECIAL,
+                            mExecutor, mockRouterCallback);
                     mRouter.removeCallback(mockRouterCallback);
                 }
         );
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onControlCategoriesChanged(mPackageName, TEST_CONTROL_CATEGORIES);
+        verify(mockCallback, timeout(TIMEOUT_MS))
+                .onRouteListChanged(argThat(routes -> routes.size() > 0));
+
+        Map<String, MediaRoute2Info> routes =
+                createRouteMap(mManager.getAvailableRoutes(mPackageName));
+
+        Assert.assertEquals(1, routes.size());
+        Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
 
         mManager.removeCallback(mockCallback);
     }
@@ -164,7 +184,7 @@ public class MediaRouterManagerTest {
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> {
-                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, mockRouterCallback);
                 }
         );
 
@@ -197,10 +217,10 @@ public class MediaRouterManagerTest {
         mManager.removeCallback(managerCallback);
     }
 
-    @Test
     /**
      * Tests selecting and unselecting routes of a single provider.
      */
+    @Test
     public void testSingleProviderSelect() {
         MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
         MediaRouter2.Callback routerCallback = mock(MediaRouter2.Callback.class);
@@ -208,7 +228,7 @@ public class MediaRouterManagerTest {
         mManager.addCallback(mExecutor, managerCallback);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> {
-                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, routerCallback);
+                    mRouter.addCallback(CONTROL_CATEGORIES_ALL, mExecutor, routerCallback);
                 }
         );
         verify(managerCallback, timeout(TIMEOUT_MS))
@@ -218,7 +238,8 @@ public class MediaRouterManagerTest {
                 createRouteMap(mManager.getAvailableRoutes(mPackageName));
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
-        verify(managerCallback, timeout(TIMEOUT_MS))
+        verify(managerCallback, timeout(TIMEOUT_MS)
+        )
                 .onRouteChanged(argThat(routeInfo -> TextUtils.equals(ROUTE_ID1, routeInfo.getId())
                         && TextUtils.equals(routeInfo.getClientPackageName(), mPackageName)));
 
