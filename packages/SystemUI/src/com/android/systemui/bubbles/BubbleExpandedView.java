@@ -35,6 +35,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
@@ -93,6 +94,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private int mPointerWidth;
     private int mPointerHeight;
     private ShapeDrawable mPointerDrawable;
+    private Rect mTempRect = new Rect();
+    private int[] mTempLoc = new int[2];
+    private int mExpandedViewTouchSlop;
 
     private Bubble mBubble;
     private PackageManager mPm;
@@ -166,9 +170,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getSize(mDisplaySize);
-        mMinHeight = getResources().getDimensionPixelSize(
-                R.dimen.bubble_expanded_default_height);
-        mPointerMargin = getResources().getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+        Resources res = getResources();
+        mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
+        mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
+        mExpandedViewTouchSlop = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_slop);
     }
 
     @Override
@@ -372,6 +377,35 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private int getMaxExpandedHeight() {
         int[] windowLocation = mActivityView.getLocationOnScreen();
         return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight;
+    }
+
+    /**
+     * Whether the provided x, y values (in raw coordinates) are in a touchable area of the
+     * expanded view.
+     *
+     * The touchable areas are the ActivityView (plus some slop around it) and the manage button.
+     */
+    boolean intersectingTouchableContent(int rawX, int rawY) {
+        mTempRect.setEmpty();
+        if (mActivityView != null) {
+            mTempLoc = mActivityView.getLocationOnScreen();
+            mTempRect.set(mTempLoc[0] - mExpandedViewTouchSlop,
+                    mTempLoc[1] - mExpandedViewTouchSlop,
+                    mTempLoc[0] + mActivityView.getWidth() + mExpandedViewTouchSlop,
+                    mTempLoc[1] + mActivityView.getHeight() + mExpandedViewTouchSlop);
+        }
+        if (mTempRect.contains(rawX, rawY)) {
+            return true;
+        }
+        mTempLoc = mSettingsIcon.getLocationOnScreen();
+        mTempRect.set(mTempLoc[0],
+                mTempLoc[1],
+                mTempLoc[0] + mSettingsIcon.getWidth(),
+                mTempLoc[1] + mSettingsIcon.getHeight());
+        if (mTempRect.contains(rawX, rawY)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
