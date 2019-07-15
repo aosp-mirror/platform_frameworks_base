@@ -57,7 +57,7 @@ struct OptimizeOptions {
   std::unordered_set<std::string> kept_artifacts;
 
   // Whether or not to shorten resource paths in the APK.
-  bool shorten_resource_paths;
+  bool shorten_resource_paths = false;
 
   // Path to the output map of original resource paths to shortened paths.
   Maybe<std::string> shortened_paths_map_path;
