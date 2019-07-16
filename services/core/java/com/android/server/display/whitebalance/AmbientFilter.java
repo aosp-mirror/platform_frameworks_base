@@ -36,7 +36,7 @@ import java.util.Arrays;
  * - {@link WeightedMovingAverageAmbientFilter}
  *   A weighted average prioritising recent changes.
  */
-abstract class AmbientFilter {
+abstract public class AmbientFilter {
 
     protected static final boolean DEBUG = false; // Enable for verbose logs.
 
@@ -156,8 +156,7 @@ abstract class AmbientFilter {
     /**
      * A weighted average prioritising recent changes.
      */
-    @VisibleForTesting
-    public static class WeightedMovingAverageAmbientFilter extends AmbientFilter {
+    static class WeightedMovingAverageAmbientFilter extends AmbientFilter {
 
         // How long the latest ambient value change is predicted to last.
         private static final int PREDICTION_TIME = 100; // Milliseconds
