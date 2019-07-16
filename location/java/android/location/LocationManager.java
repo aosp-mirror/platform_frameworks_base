@@ -1543,44 +1543,19 @@ public class LocationManager {
     /**
      * This method has no effect as provider status has been deprecated and is no longer supported.
      *
-     * @param provider the provider name
-     * @param status the mock status
-     * @param extras a Bundle containing mock extras
-     * @param updateTime the mock update time
-     *
-     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
-     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
-     * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
-     *
      * @deprecated This method has no effect.
      */
     @Deprecated
     public void setTestProviderStatus(
-            @NonNull String provider, int status, @Nullable Bundle extras, long updateTime) {
-        try {
-            mService.setTestProviderStatus(provider, status, extras, updateTime,
-                    mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+            @NonNull String provider, int status, @Nullable Bundle extras, long updateTime) {}
 
     /**
      * This method has no effect as provider status has been deprecated and is no longer supported.
      *
-     * @param provider the provider name
-     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
-     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
-     * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
-     *
      * @deprecated This method has no effect.
      */
     @Deprecated
-    public void clearTestProviderStatus(@NonNull String provider) {
-        setTestProviderStatus(provider, LocationProvider.AVAILABLE, null, 0L);
-    }
+    public void clearTestProviderStatus(@NonNull String provider) {}
 
     /**
      * Get the last list of {@link LocationRequest}s sent to the provider.

@@ -308,7 +308,6 @@ public class SettingsBackupTest {
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
-                    Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS,
                     Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
                     Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
                     Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
