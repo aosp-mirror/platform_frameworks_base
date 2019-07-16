@@ -16,7 +16,6 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include "GraphicsJNI.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -33,6 +32,7 @@
 #include <SkBitmap.h>
 
 #include "core_jni_helpers.h"
+#include "android/graphics/Bitmap.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OpenGLUtil"
@@ -42,6 +42,10 @@
 #include "poly.h"
 
 namespace android {
+
+static void doThrowIAE(JNIEnv* env, const char* msg = nullptr) {
+    jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+}
 
 static inline
 void mx4transform(float x, float y, float z, float w, const float* pM, float* pDest) {
@@ -706,7 +710,7 @@ static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
         jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
+    bitmap::toSkBitmap(bitmapPtr, &nativeBitmap);
     return getInternalFormat(nativeBitmap.colorType());
 }
 
@@ -714,7 +718,7 @@ static jint util_getType(JNIEnv *env, jclass clazz,
         jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
+    bitmap::toSkBitmap(bitmapPtr, &nativeBitmap);
     return getType(nativeBitmap.colorType());
 }
 
@@ -723,7 +727,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jlong bitmapPtr, jint type, jint border)
 {
     SkBitmap bitmap;
-    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
+    bitmap::toSkBitmap(bitmapPtr, &bitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
         internalformat = getInternalFormat(colorType);
@@ -751,7 +755,7 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jlong bitmapPtr, jint format, jint type)
 {
     SkBitmap bitmap;
-    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
+    bitmap::toSkBitmap(bitmapPtr, &bitmap);
     SkColorType colorType = bitmap.colorType();
     int internalFormat = getInternalFormat(colorType);
     if (format < 0) {

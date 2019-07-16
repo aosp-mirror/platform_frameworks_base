@@ -21,10 +21,10 @@
 #include "android_util_Binder.h"
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android/graphics/Bitmap.h"
-#include "android/graphics/GraphicsJNI.h"
 #include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 
+#include <android_runtime/AndroidRuntime.h>
 #include <android-base/chrono_utils.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
@@ -49,6 +49,14 @@
 // ----------------------------------------------------------------------------
 
 namespace android {
+
+static void doThrowNPE(JNIEnv* env) {
+    jniThrowNullPointerException(env, NULL);
+}
+
+static void doThrowIAE(JNIEnv* env, const char* msg = nullptr) {
+    jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+}
 
 static const char* const OutOfResourcesException =
     "android/view/Surface$OutOfResourcesException";
