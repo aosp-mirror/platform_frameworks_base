@@ -98,6 +98,7 @@ Result<std::unique_ptr<std::vector<std::string>>> FindApkFiles(const std::vector
 }
 
 std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
+  // clang-format off
   static const std::vector<std::pair<std::string, std::string>> values = {
       {"/odm/", kPolicyOdm},
       {"/oem/", kPolicyOem},
@@ -106,6 +107,7 @@ std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
       {"/system_ext/", kPolicySystem},
       {"/vendor/", kPolicyVendor},
   };
+  // clang-format on
 
   std::vector<std::string> fulfilled_policies = {kPolicyPublic};
   for (auto const& pair : values) {
