@@ -4998,6 +4998,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *  - the cmd arg isn't the flattened component name of an existing activity:
      *    dump all activity whose component contains the cmd as a substring
      *  - A hex number of the ActivityRecord object instance.
+     * <p>
+     * The caller should not hold lock when calling this method because it will wait for the
+     * activities to complete the dump.
      *
      *  @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
      *  @param dumpFocusedStackOnly dump activity with {@param name} only if in the focused stack
@@ -5050,29 +5053,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
             final ActivityRecord r, String[] args, boolean dumpAll) {
         String innerPrefix = prefix + "  ";
+        IApplicationThread appThread = null;
         synchronized (mGlobalLock) {
             pw.print(prefix); pw.print("ACTIVITY "); pw.print(r.shortComponentName);
             pw.print(" "); pw.print(Integer.toHexString(System.identityHashCode(r)));
             pw.print(" pid=");
-            if (r.hasProcess()) pw.println(r.app.getPid());
-            else pw.println("(not running)");
+            if (r.hasProcess()) {
+                pw.println(r.app.getPid());
+                appThread = r.app.getThread();
+            } else {
+                pw.println("(not running)");
+            }
             if (dumpAll) {
                 r.dump(pw, innerPrefix);
             }
         }
-        if (r.attachedToProcess()) {
+        if (appThread != null) {
             // flush anything that is already in the PrintWriter since the thread is going
             // to write to the file descriptor directly
             pw.flush();
-            try {
-                TransferPipe tp = new TransferPipe();
-                try {
-                    r.app.getThread().dumpActivity(tp.getWriteFd(),
-                            r.appToken, innerPrefix, args);
-                    tp.go(fd);
-                } finally {
-                    tp.kill();
-                }
+            try (TransferPipe tp = new TransferPipe()) {
+                appThread.dumpActivity(tp.getWriteFd(), r.appToken, innerPrefix, args);
+                tp.go(fd);
             } catch (IOException e) {
                 pw.println(innerPrefix + "Failure while dumping the activity: " + e);
             } catch (RemoteException e) {
@@ -7181,10 +7183,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
                 boolean dumpFocusedStackOnly) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti,
-                        dumpAll, dumpVisibleStacksOnly, dumpFocusedStackOnly);
-            }
+            return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
+                    dumpVisibleStacksOnly, dumpFocusedStackOnly);
         }
 
         @Override
