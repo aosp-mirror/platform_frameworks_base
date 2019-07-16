@@ -115,8 +115,7 @@ public class DisplayWhiteBalanceFactory {
      * Creates a BrightnessFilter which functions as a weighted moving average buffer for recent
      * brightness values.
      */
-    @VisibleForTesting
-    static AmbientFilter createBrightnessFilter(Resources resources) {
+    public static AmbientFilter createBrightnessFilter(Resources resources) {
         final int horizon = resources.getInteger(
                 com.android.internal.R.integer.config_displayWhiteBalanceBrightnessFilterHorizon);
         final float intercept = getFloat(resources,
@@ -128,7 +127,6 @@ public class DisplayWhiteBalanceFactory {
         throw new IllegalArgumentException("missing configurations: "
                 + "expected config_displayWhiteBalanceBrightnessFilterIntercept");
     }
-
 
     /**
      * Creates an ambient color sensor instance to redirect sensor data to callbacks.

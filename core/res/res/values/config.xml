@@ -4145,8 +4145,27 @@
          for higher refresh rates to be automatically used out of the box -->
     <integer name="config_defaultPeakRefreshRate">60</integer>
 
-    <!-- The default brightness threshold that allows to switch to higher refresh rate -->
-    <integer name="config_brightnessThresholdOfPeakRefreshRate">-1</integer>
+    <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
+         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         flicker could be observed at switch time. The issue is worse at the gamma lower end.
+         In addition, human eyes are more sensitive to the flicker at darker environment.
+         To prevent flicker, we only support higher refresh rates if the display brightness is above
+         a threshold. And the darker environment could have higher threshold.
+         For example, no higher refresh rate if
+             display brightness <= disp0 && ambient brightness <= amb0
+             || display brightness <= disp1 && ambient brightness <= amb1 -->
+    <integer-array translatable="false" name="config_brightnessThresholdsOfPeakRefreshRate">
+         <!--
+           <item>disp0</item>
+           <item>disp1</item>
+        -->
+    </integer-array>
+    <integer-array translatable="false" name="config_ambientThresholdsOfPeakRefreshRate">
+         <!--
+           <item>amb0</item>
+           <item>amb1</item>
+        -->
+    </integer-array>
 
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
