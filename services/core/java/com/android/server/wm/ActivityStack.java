@@ -565,7 +565,6 @@ class ActivityStack extends ConfigurationContainer {
                     + reason);
             setResumedActivity(record, reason + " - onActivityStateChanged");
             if (record == mRootActivityContainer.getTopResumedActivity()) {
-                // TODO(b/111361570): Support multiple focused apps in WM
                 mService.setResumedActivityUncheckLocked(record, reason);
             }
             mStackSupervisor.mRecentTasks.add(record.getTaskRecord());
@@ -3711,9 +3710,6 @@ class ActivityStack extends ConfigurationContainer {
         if (nextFocusableStack != null) {
             final ActivityRecord top = nextFocusableStack.topRunningActivityLocked();
             if (top != null && top == mRootActivityContainer.getTopResumedActivity()) {
-                // TODO(b/111361570): Remove this and update focused app per-display in
-                // WindowManager every time an activity becomes resumed in
-                // ActivityTaskManagerService#setResumedActivityUncheckLocked().
                 mService.setResumedActivityUncheckLocked(top, reason);
             }
             return;
@@ -5651,7 +5647,6 @@ class ActivityStack extends ConfigurationContainer {
         // If the original state is resumed, there is no state change to update focused app.
         // So here makes sure the activity focus is set if it is the top.
         if (origState == RESUMED && r == mRootActivityContainer.getTopResumedActivity()) {
-            // TODO(b/111361570): Support multiple focused apps in WM
             mService.setResumedActivityUncheckLocked(r, reason);
         }
     }

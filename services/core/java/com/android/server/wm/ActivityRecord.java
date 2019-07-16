@@ -1523,7 +1523,6 @@ final class ActivityRecord extends ConfigurationContainer {
         stack.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
         if (mRootActivityContainer.getTopResumedActivity() == this) {
-            // TODO(b/111361570): Support multiple focused apps in WM
             mAtmService.setResumedActivityUncheckLocked(this, reason);
         }
         return true;
