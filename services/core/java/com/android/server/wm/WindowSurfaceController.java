@@ -39,6 +39,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
+import android.view.WindowManager;
 
 import com.android.server.protolog.common.ProtoLog;
 
@@ -109,6 +110,13 @@ class WindowSurfaceController {
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, ownerUid);
+
+        if ((win.getAttrs().privateFlags &
+                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0) {
+            b.setContainerLayer();
+        }
+
+
         mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }

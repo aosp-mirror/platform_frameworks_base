@@ -117,6 +117,7 @@ cc_library_shared {
                 "android_view_RenderNodeAnimator.cpp",
                 "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
+                "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",
                 "android_view_VelocityTracker.cpp",

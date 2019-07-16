@@ -200,7 +200,10 @@ public final class SurfaceControl implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
-    long mNativeObject; // package visibility only for Surface.java access
+    /**
+     * @hide
+     */
+    public long mNativeObject;
 
     // TODO: Move this to native.
     private final Object mSizeLock = new Object();
@@ -317,6 +320,11 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int FX_SURFACE_CONTAINER = 0x00080000;
+
+    /**
+     * @hide
+     */
+    public static final int FX_SURFACE_BLAST = 0x00040000;
 
     /**
      * Mask used for FX values above.
@@ -691,6 +699,14 @@ public final class SurfaceControl implements Parcelable {
 
         private boolean isColorLayerSet() {
             return  (mFlags & FX_SURFACE_DIM) == FX_SURFACE_DIM;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setBLASTLayer() {
+            unsetBufferSize();
+            return setFlags(FX_SURFACE_BLAST, FX_SURFACE_MASK);
         }
 
         /**
@@ -2066,7 +2082,10 @@ public final class SurfaceControl implements Parcelable {
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
                 Transaction.class.getClassLoader(),
                 nativeGetNativeTransactionFinalizer(), 512);
-        private long mNativeObject;
+        /**
+         * @hide
+         */
+        public long mNativeObject;
 
         private final ArrayMap<SurfaceControl, Point> mResizedSurfaces = new ArrayMap<>();
         Runnable mFreeNativeResources;
