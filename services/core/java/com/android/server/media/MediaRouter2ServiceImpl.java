@@ -32,16 +32,15 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -204,13 +203,15 @@ class MediaRouter2ServiceImpl {
 
                 UserRecord oldUser = mUserRecords.get(oldUserId);
                 if (oldUser != null) {
-                    oldUser.mHandler.sendEmptyMessage(MediaRouterService.UserHandler.MSG_STOP);
+                    oldUser.mHandler.sendMessage(
+                            obtainMessage(UserHandler::stop, oldUser.mHandler));
                     disposeUserIfNeededLocked(oldUser); // since no longer current user
                 }
 
                 UserRecord newUser = mUserRecords.get(userId);
                 if (newUser != null) {
-                    newUser.mHandler.sendEmptyMessage(MediaRouterService.UserHandler.MSG_START);
+                    newUser.mHandler.sendMessage(
+                            obtainMessage(UserHandler::start, newUser.mHandler));
                 }
             }
         }
@@ -296,8 +297,9 @@ class MediaRouter2ServiceImpl {
         if (clientRecord != null) {
             clientRecord.mControlCategories = categories;
 
-            clientRecord.mUserRecord.mHandler.obtainMessage(
-                    UserHandler.MSG_UPDATE_CLIENT_USAGE, clientRecord).sendToTarget();
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::updateClientUsage,
+                            clientRecord.mUserRecord.mHandler, clientRecord));
         }
     }
 
@@ -307,9 +309,9 @@ class MediaRouter2ServiceImpl {
         ClientRecord clientRecord = mAllClientRecords.get(binder);
 
         if (clientRecord != null) {
-            Pair<MediaRoute2Info, Intent> obj = new Pair<>(route, request);
-            clientRecord.mUserRecord.mHandler.obtainMessage(
-                    UserHandler.MSG_SEND_CONTROL_REQUEST, obj).sendToTarget();
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::sendControlRequest,
+                            clientRecord.mUserRecord.mHandler, route, request));
         }
     }
 
@@ -346,8 +348,9 @@ class MediaRouter2ServiceImpl {
             final int count = userRecord.mClientRecords.size();
             for (int i = 0; i < count; i++) {
                 ClientRecord clientRecord = userRecord.mClientRecords.get(i);
-                clientRecord.mUserRecord.mHandler.obtainMessage(
-                        UserHandler.MSG_UPDATE_CLIENT_USAGE, clientRecord).sendToTarget();
+                clientRecord.mUserRecord.mHandler.sendMessage(
+                        obtainMessage(UserHandler::updateClientUsage,
+                            clientRecord.mUserRecord.mHandler, clientRecord));
             }
         }
     }
@@ -381,7 +384,8 @@ class MediaRouter2ServiceImpl {
             Slog.d(TAG, userRecord + ": Initialized");
         }
         if (userRecord.mUserId == mCurrentUserId) {
-            userRecord.mHandler.sendEmptyMessage(UserHandler.MSG_START);
+            userRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::start, userRecord.mHandler));
         }
     }
 
@@ -497,13 +501,6 @@ class MediaRouter2ServiceImpl {
             MediaRoute2ProviderWatcher.Callback,
             MediaRoute2ProviderProxy.Callback {
 
-        //TODO: Use PooledLambda instead.
-        static final int MSG_START = 1;
-        static final int MSG_STOP = 2;
-
-        static final int MSG_UPDATE_CLIENT_USAGE = 11;
-        static final int MSG_SEND_CONTROL_REQUEST = 12;
-
         private final WeakReference<MediaRouter2ServiceImpl> mServiceRef;
         private final UserRecord mUserRecord;
         private final MediaRoute2ProviderWatcher mWatcher;
@@ -522,28 +519,6 @@ class MediaRouter2ServiceImpl {
             mUserRecord = userRecord;
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_START: {
-                    start();
-                    break;
-                }
-                case MSG_STOP: {
-                    stop();
-                    break;
-                }
-                case MSG_UPDATE_CLIENT_USAGE: {
-                    updateClientUsage((ClientRecord) msg.obj);
-                    break;
-                }
-                case MSG_SEND_CONTROL_REQUEST: {
-                    Pair<MediaRoute2Info, Intent> obj = (Pair<MediaRoute2Info, Intent>) msg.obj;
-                    sendControlRequest(obj.first, obj.second);
-                }
-            }
         }
 
         private void start() {
@@ -613,7 +588,7 @@ class MediaRouter2ServiceImpl {
         private void scheduleUpdateManagerState() {
             if (!mManagerStateUpdateScheduled) {
                 mManagerStateUpdateScheduled = true;
-                post(this::updateManagerState);
+                sendMessage(PooledLambda.obtainMessage(UserHandler::updateManagerState, this));
             }
         }
 
