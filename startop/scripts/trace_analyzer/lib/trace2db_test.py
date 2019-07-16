@@ -32,17 +32,10 @@ See also https://docs.pytest.org/en/latest/usage.html
 """
 
 # global imports
-from contextlib import contextmanager
 import io
-import shlex
-import sys
-import typing
-
 from copy import deepcopy
 
 # pip imports
-import pytest
-
 # local imports
 from trace2db import *
 
@@ -196,6 +189,33 @@ NonUserFacing6-5246  ( 1322) [005] .... 16138.357581: mm_filemap_add_to_page_cac
   # dev 253:6 ino 9a64 page=000000006e0f8322 pfn=797894 ofs=4096
   assert_eq_ignore_id(MmFilemapAddToPageCache(dev=64774, dev_major=253, dev_minor=6,
       ino=0x9a64, page=0x000000006e0f8322, pfn=797894, ofs=4096), second_to_last_row)
+
+def test_timestamp_filter():
+  test_contents = """
+    MediaStoreImpor-27212 (27176) [000] .... 16136.595194: mm_filemap_add_to_page_cache: dev 253:6 ino 7580 page=0000000060e990c7 pfn=677646 ofs=159744
+    NonUserFacing6-5246  ( 1322) [005] .... 16139.357581: mm_filemap_add_to_page_cache: dev 253:6 ino 9a64 page=000000006e0f8322 pfn=797894 ofs=4096
+    MediaStoreImpor-27212 (27176) [000] .... 16136.604126: mm_filemap_add_to_page_cache: dev 253:6 ino b1d8 page=0000000098d4d2e2 pfn=829676 ofs=0
+  """
+
+  t2d = parse_trace_file_to_db(test_contents)
+  session = t2d.session
+
+  end_time = 16137.0
+
+  results = session.query(MmFilemapAddToPageCache).join(
+      MmFilemapAddToPageCache.raw_ftrace_entry).filter(
+      RawFtraceEntry.timestamp <= end_time).order_by(
+      MmFilemapAddToPageCache.id).all()
+
+  assert len(results) == 2
+  assert_eq_ignore_id(
+      MmFilemapAddToPageCache(dev=64774, dev_major=253, dev_minor=6,
+                              ino=0x7580, page=0x0000000060e990c7, pfn=677646,
+                              ofs=159744), results[0])
+  assert_eq_ignore_id(
+      MmFilemapAddToPageCache(dev=64774, dev_major=253, dev_minor=6,
+                              ino=0xb1d8, page=0x0000000098d4d2e2, pfn=829676,
+                              ofs=0), results[1])
 
 
 if __name__ == '__main__':
