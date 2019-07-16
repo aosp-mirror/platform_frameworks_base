@@ -147,3 +147,6 @@ option java_package com.android.server.am
 
 # An activity been add into stopping list
 30066 am_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
+
+# Keyguard status changed
++30067 am_set_keyguard_shown (keyguardShowing|1),(aodShowing|1),(keyguardGoingAway|1),(Reason|3)
