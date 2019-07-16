@@ -938,8 +938,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
             if (expandedBubble.getDisplayId() == displayId) {
                 mBubbleData.setExpanded(false);
-            }
-            if (expandedBubble.getExpandedView() != null) {
                 expandedBubble.getExpandedView().notifyDisplayEmpty();
             }
         }
