@@ -312,6 +312,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         mContext.registerReceiver(this, filter, null, mReceiverHandler);
         mListening = true;
@@ -512,6 +513,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     // emergency state.
                     recalculateEmergency();
                 }
+                break;
+            case Intent.ACTION_BOOT_COMPLETED:
+                mWifiSignalController.handleBootCompleted();
                 break;
             case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
                 mConfig = Config.readConfig(mContext);

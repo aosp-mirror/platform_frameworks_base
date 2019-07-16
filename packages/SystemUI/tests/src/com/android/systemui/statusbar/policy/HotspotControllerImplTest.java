@@ -73,6 +73,7 @@ public class HotspotControllerImplTest extends SysuiTestCase {
                 any(Handler.class));
 
         mController = new HotspotControllerImpl(mContext, new Handler(mLooper.getLooper()));
+        mController.handleSetListening(true);
     }
 
     @Test
