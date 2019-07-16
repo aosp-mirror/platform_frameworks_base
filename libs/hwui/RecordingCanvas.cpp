@@ -274,7 +274,12 @@ struct DrawDrawable final : Op {
     }
     sk_sp<SkDrawable> drawable;
     SkMatrix matrix = SkMatrix::I();
-    void draw(SkCanvas* c, const SkMatrix&) const { c->drawDrawable(drawable.get(), &matrix); }
+    // It is important that we call drawable->draw(c) here instead of c->drawDrawable(drawable).
+    // Drawables are mutable and in cases, like RenderNodeDrawable, are not expected to produce the
+    // same content if retained outside the duration of the frame. Therefore we resolve
+    // them now and do not allow the canvas to take a reference to the drawable and potentially
+    // keep it alive for longer than the frames duration (e.g. SKP serialization).
+    void draw(SkCanvas* c, const SkMatrix&) const { drawable->draw(c, &matrix); }
 };
 struct DrawPicture final : Op {
     static const auto kType = Type::DrawPicture;

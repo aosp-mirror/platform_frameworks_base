@@ -1096,10 +1096,8 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
         int getDrawCounter() { return mDrawCounter; }
 
         virtual void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
-            // expect to draw 2 RenderNodeDrawable, 1 StartReorderBarrierDrawable,
-            // 1 EndReorderBarrierDrawable
-            mDrawCounter++;
-            SkCanvas::onDrawDrawable(drawable, matrix);
+            // Do not expect this to be called. See RecordingCanvas.cpp DrawDrawable for context.
+            EXPECT_TRUE(false);
         }
 
         virtual void didTranslate(SkScalar dx, SkScalar dy) override {
@@ -1159,8 +1157,8 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
     // create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
     ShadowTestCanvas canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     RenderNodeDrawable drawable(parent.get(), &canvas, false);
-    canvas.drawDrawable(&drawable);
-    EXPECT_EQ(9, canvas.getDrawCounter());
+    drawable.draw(&canvas);
+    EXPECT_EQ(5, canvas.getDrawCounter());
 }
 
 // Draw a vector drawable twice but with different bounds and verify correct bounds are used.

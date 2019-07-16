@@ -171,6 +171,78 @@ public class NotificationManager {
             "android.app.action.NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED";
 
     /**
+     * Intent that is broadcast when the status of an {@link AutomaticZenRule} has changed.
+     *
+     * <p>Use this to know whether you need to continue monitor to device state in order to
+     * provide up-to-date states (with {@link #setAutomaticZenRuleState(String, Condition)}) for
+     * this rule.</p>
+     *
+     * Input: nothing
+     * Output: {@link #EXTRA_AUTOMATIC_ZEN_RULE_ID}
+     * Output: {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS}
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED =
+            "android.app.action.AUTOMATIC_ZEN_RULE_STATUS_CHANGED";
+
+    /**
+     * Integer extra for {@link #ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED} containing the state of
+     * the {@link AutomaticZenRule}.
+     *
+     * <p>
+     *     The value will be one of {@link #AUTOMATIC_RULE_STATUS_ENABLED},
+     *     {@link #AUTOMATIC_RULE_STATUS_DISABLED}, {@link #AUTOMATIC_RULE_STATUS_REMOVED},
+     *     {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
+     * </p>
+     */
+    public static final String EXTRA_AUTOMATIC_ZEN_RULE_STATUS =
+            "android.app.extra.AUTOMATIC_ZEN_RULE_STATUS";
+
+    /**
+     * String extra for {@link #ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED} containing the id of the
+     * {@link AutomaticZenRule} (see {@link #addAutomaticZenRule(AutomaticZenRule)}) that has
+     * changed.
+     */
+    public static final String EXTRA_AUTOMATIC_ZEN_RULE_ID =
+            "android.app.extra.AUTOMATIC_ZEN_RULE_ID";
+
+    /** @hide */
+    @IntDef(prefix = { "AUTOMATIC_RULE_STATUS" }, value = {
+            AUTOMATIC_RULE_STATUS_ENABLED, AUTOMATIC_RULE_STATUS_DISABLED,
+            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutomaticZenRuleStatus {}
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the current status of the
+     * rule is unknown at your target sdk version, and you should continue to provide state changes
+     * via {@link #setAutomaticZenRuleState(String, Condition)}.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_UNKNOWN = -1;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule currently
+     * exists and is enabled. You should continue to provide state changes via
+     * {@link #setAutomaticZenRuleState(String, Condition)}.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_ENABLED = 1;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule currently
+     * exists but is disabled. You do not need to continue to provide state changes via
+     * {@link #setAutomaticZenRuleState(String, Condition)} until the rule is reenabled.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_DISABLED = 2;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * deleted. Further calls to {@link #setAutomaticZenRuleState(String, Condition)} will be
+     * ignored.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_REMOVED = 3;
+
+    /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
      * This broadcast is only sent to registered receivers.
      *
