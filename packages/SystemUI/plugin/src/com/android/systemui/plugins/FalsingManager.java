@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
-    int VERSION = 1;
+    int VERSION = 2;
 
     void onSucccessfulUnlock();
 
@@ -103,4 +103,6 @@ public interface FalsingManager {
     void onTouchEvent(MotionEvent ev, int width, int height);
 
     void dump(PrintWriter pw);
+
+    void cleanup();
 }
