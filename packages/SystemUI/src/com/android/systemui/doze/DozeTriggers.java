@@ -314,6 +314,9 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE_PULSE_DONE:
                 mDozeSensors.requestTemporaryDisable();
+                // A pulse will temporarily disable sensors that require a touch screen.
+                // Let's make sure that they are re-enabled when the pulse is over.
+                mDozeSensors.updateListening();
                 break;
             case FINISH:
                 mBroadcastReceiver.unregister(mContext);
