@@ -101,7 +101,6 @@ import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.MultiClientInputMethodManagerService;
-import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
@@ -1569,8 +1568,9 @@ public final class SystemServer {
             mSystemServiceManager.startService(ColorDisplayService.class);
             t.traceEnd();
 
+            // TODO(aml-jobscheduler): Think about how to do it properly.
             t.traceBegin("StartJobScheduler");
-            mSystemServiceManager.startService(JobSchedulerService.class);
+            mSystemServiceManager.startService(JOB_SCHEDULER_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("StartSoundTrigger");

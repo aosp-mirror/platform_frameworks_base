@@ -39,6 +39,7 @@ android_test {
         "platformprotosnano",
         "hamcrest-library",
         "servicestests-utils",
+        "jobscheduler-service",
     ],
 
     aidl: {
