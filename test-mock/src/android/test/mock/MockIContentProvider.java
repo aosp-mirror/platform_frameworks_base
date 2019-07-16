@@ -16,12 +16,14 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.EntityIterator;
 import android.content.IContentProvider;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
@@ -143,5 +145,11 @@ public class MockIContentProvider implements IContentProvider {
     public boolean refresh(String callingPkg, Uri url, Bundle args,
             ICancellationSignal cancellationSignal) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(String callingPkg, Uri uri, int uid, int modeFlags) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
     }
 }

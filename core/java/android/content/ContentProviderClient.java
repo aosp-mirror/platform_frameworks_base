@@ -307,6 +307,25 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
         }
     }
 
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
+            throws RemoteException {
+        Preconditions.checkNotNull(uri, "uri");
+
+        beforeRemote();
+        try {
+            return mContentProvider.checkUriPermission(mPackageName, uri, uid, modeFlags);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        } finally {
+            afterRemote();
+        }
+    }
+
     /** See {@link ContentProvider#insert ContentProvider.insert} */
     @Override
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)

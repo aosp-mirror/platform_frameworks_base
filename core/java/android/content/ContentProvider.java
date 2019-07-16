@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.AppOpsManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
@@ -576,6 +577,22 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             try {
                 return mInterface.refresh(uri, args,
                         CancellationSignal.fromTransport(cancellationSignal));
+            } finally {
+                setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
+            }
+        }
+
+        @Override
+        public int checkUriPermission(String callingPkg, Uri uri, int uid, int modeFlags) {
+            uri = validateIncomingUri(uri);
+            uri = maybeGetUriWithoutUserId(uri);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "checkUriPermission");
+            final String original = setCallingPackage(callingPkg);
+            try {
+                return mInterface.checkUriPermission(uri, uid, modeFlags);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -1414,6 +1431,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     public boolean refresh(Uri uri, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) {
         return false;
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
+        return PackageManager.PERMISSION_DENIED;
     }
 
     /**
