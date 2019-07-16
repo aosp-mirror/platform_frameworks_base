@@ -12,13 +12,9 @@ cc_library {
     ],
     sdk_version: "current",
     stl: "c++_static",
-    include_dirs: [
-        // NDK headers aren't available in platform NDK builds.
-        "libnativehelper/include_jni",
-        // Use ScopedUtfChars.
-        "libnativehelper/header_only_include",
-    ],
     header_libs: [
+        // Use ScopedUtfChars.
+        "libnativehelper_header_only",
         "libopenjdkjvmti_headers",
     ],
     compile_multilib: "both",
@@ -32,13 +28,9 @@ cc_binary_host {
         "libz",
         "slicer",
     ],
-    include_dirs: [
-        // NDK headers aren't available in platform NDK builds.
-        "libnativehelper/include_jni",
-        // Use ScopedUtfChars.
-        "libnativehelper/header_only_include",
-    ],
     header_libs: [
+        // Use ScopedUtfChars.
+        "libnativehelper_header_only",
         "libopenjdkjvmti_headers",
     ],
 }
