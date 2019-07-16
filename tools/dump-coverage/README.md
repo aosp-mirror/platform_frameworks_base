@@ -16,7 +16,7 @@ adb shell 'mkdir /data/data/com.android.deskclock/folder-to-use'
 Then we can run the command to dump the data:
 
 ```
-adb shell 'am attach-agent com.android.deskclock /system/lib/libdumpcoverage.so=dump:/data/data/com.android.deskclock/folder-to-use'
+adb shell 'am attach-agent com.android.deskclock /system/lib/libdumpcoverage.so=dump:/data/data/com.android.deskclock/folder-to-use/coverage-file.ec'
 ```
 
 We can also reset the coverage information with
@@ -28,10 +28,10 @@ adb shell 'am attach-agent com.android.deskclock /system/lib/libdumpcoverage.so=
 then perform more actions, then dump the data again. To get the files, we can get
 
 ```
-adb pull /data/data/com.android.deskclock/folder-to-use ~/path-on-your-computer
+adb pull /data/data/com.android.deskclock/folder-to-use/coverage-file.ec ~/path-on-your-computer
 ```
 
-And you should have timestamped `.exec` files on your machine under the folder `~/path-on-your-computer`
+And you should have `coverage-file.ec` on your machine under the folder `~/path-on-your-computer`
 
 # Details
 
