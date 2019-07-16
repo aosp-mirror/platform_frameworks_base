@@ -3571,7 +3571,7 @@ public abstract class PackageManager {
     /**
      * Retrieve all of the information we know about a particular permission.
      *
-     * @param permissionName The fully qualified name (i.e. com.google.permission.LOGIN)
+     * @param permName The fully qualified name (i.e. com.google.permission.LOGIN)
      *            of the permission you are interested in.
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a {@link PermissionInfo} containing information about the
@@ -3579,7 +3579,7 @@ public abstract class PackageManager {
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      */
-    public abstract PermissionInfo getPermissionInfo(@NonNull String permissionName,
+    public abstract PermissionInfo getPermissionInfo(@NonNull String permName,
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
@@ -3620,7 +3620,7 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular group of
      * permissions.
      *
-     * @param permissionName The fully qualified name (i.e.
+     * @param permName The fully qualified name (i.e.
      *            com.google.permission_group.APPS) of the permission you are
      *            interested in.
      * @param flags Additional option flags to modify the data returned.
@@ -3630,7 +3630,7 @@ public abstract class PackageManager {
      *             found on the system.
      */
     @NonNull
-    public abstract PermissionGroupInfo getPermissionGroupInfo(@NonNull String permissionName,
+    public abstract PermissionGroupInfo getPermissionGroupInfo(@NonNull String permName,
             @PermissionGroupInfoFlags int flags) throws NameNotFoundException;
 
     /**
@@ -3858,7 +3858,7 @@ public abstract class PackageManager {
      * Check whether a particular package has been granted a particular
      * permission.
      *
-     * @param permissionName The name of the permission you are checking for.
+     * @param permName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.
      *
      * @return If the package has the permission, PERMISSION_GRANTED is
@@ -3870,7 +3870,7 @@ public abstract class PackageManager {
      */
     @CheckResult
     @PermissionResult
-    public abstract int checkPermission(@NonNull String permissionName,
+    public abstract int checkPermission(@NonNull String permName,
             @NonNull String packageName);
 
     /**
@@ -3880,13 +3880,13 @@ public abstract class PackageManager {
      * permissions, hence the only way for an app to get such a permission
      * is by a policy change.
      *
-     * @param permissionName The name of the permission you are checking for.
+     * @param permName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.
      *
      * @return Whether the permission is restricted by policy.
      */
     @CheckResult
-    public abstract boolean isPermissionRevokedByPolicy(@NonNull String permissionName,
+    public abstract boolean isPermissionRevokedByPolicy(@NonNull String permName,
             @NonNull String packageName);
 
     /**
@@ -3949,14 +3949,14 @@ public abstract class PackageManager {
      * -- you are only allowed to remove permissions that you are allowed
      * to add.
      *
-     * @param permissionName The name of the permission to remove.
+     * @param permName The name of the permission to remove.
      *
      * @throws SecurityException if you are not allowed to remove the
      * given permission name.
      *
      * @see #addPermission(PermissionInfo)
      */
-    public abstract void removePermission(@NonNull String permissionName);
+    public abstract void removePermission(@NonNull String permName);
 
     /**
      * Permission flags set when granting or revoking a permission.
@@ -3998,7 +3998,7 @@ public abstract class PackageManager {
      * </p>
      *
      * @param packageName The package to which to grant the permission.
-     * @param permissionName The permission name to grant.
+     * @param permName The permission name to grant.
      * @param user The user for which to grant the permission.
      *
      * @see #revokeRuntimePermission(String, String, android.os.UserHandle)
@@ -4009,7 +4009,7 @@ public abstract class PackageManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
     public abstract void grantRuntimePermission(@NonNull String packageName,
-            @NonNull String permissionName, @NonNull UserHandle user);
+            @NonNull String permName, @NonNull UserHandle user);
 
     /**
      * Revoke a runtime permission that was previously granted by {@link
@@ -4025,7 +4025,7 @@ public abstract class PackageManager {
      * </p>
      *
      * @param packageName The package from which to revoke the permission.
-     * @param permissionName The permission name to revoke.
+     * @param permName The permission name to revoke.
      * @param user The user for which to revoke the permission.
      *
      * @see #grantRuntimePermission(String, String, android.os.UserHandle)
@@ -4036,12 +4036,12 @@ public abstract class PackageManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public abstract void revokeRuntimePermission(@NonNull String packageName,
-            @NonNull String permissionName, @NonNull UserHandle user);
+            @NonNull String permName, @NonNull UserHandle user);
 
     /**
      * Gets the state flags associated with a permission.
      *
-     * @param permissionName The permission for which to get the flags.
+     * @param permName The permission for which to get the flags.
      * @param packageName The package name for which to get the flags.
      * @param user The user for which to get permission flags.
      * @return The permission flags.
@@ -4056,14 +4056,14 @@ public abstract class PackageManager {
             android.Manifest.permission.GET_RUNTIME_PERMISSIONS
     })
     @PermissionFlags
-    public abstract int getPermissionFlags(@NonNull String permissionName,
+    public abstract int getPermissionFlags(@NonNull String permName,
             @NonNull String packageName, @NonNull UserHandle user);
 
     /**
      * Updates the flags associated with a permission by replacing the flags in
      * the specified mask with the provided flag values.
      *
-     * @param permissionName The permission for which to update the flags.
+     * @param permName The permission for which to update the flags.
      * @param packageName The package name for which to update the flags.
      * @param flagMask The flags which to replace.
      * @param flagValues The flags with which to replace.
@@ -4077,7 +4077,7 @@ public abstract class PackageManager {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
     })
-    public abstract void updatePermissionFlags(@NonNull String permissionName,
+    public abstract void updatePermissionFlags(@NonNull String permName,
             @NonNull String packageName, @PermissionFlags int flagMask,
             @PermissionFlags int flagValues, @NonNull UserHandle user);
 
@@ -4164,7 +4164,7 @@ public abstract class PackageManager {
      * provided ones.
      *
      * @param packageName The app for which to get whitelisted permissions.
-     * @param permission The whitelisted permission to add.
+     * @param permName The whitelisted permission to add.
      * @param whitelistFlags The whitelists to which to add. Passing multiple flags
      * updates all specified whitelists.
      * @return Whether the permission was added to the whitelist.
@@ -4180,7 +4180,7 @@ public abstract class PackageManager {
     @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
             conditional = true)
     public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+            @NonNull String permName, @PermissionWhitelistFlags int whitelistFlags) {
         return false;
     }
 
@@ -4218,7 +4218,7 @@ public abstract class PackageManager {
      * provided ones.
      *
      * @param packageName The app for which to get whitelisted permissions.
-     * @param permission The whitelisted permission to remove.
+     * @param permName The whitelisted permission to remove.
      * @param whitelistFlags The whitelists from which to remove. Passing multiple flags
      * updates all specified whitelists.
      * @return Whether the permission was removed from the whitelist.
@@ -4234,7 +4234,7 @@ public abstract class PackageManager {
     @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
         conditional = true)
     public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
-        @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+            @NonNull String permName, @PermissionWhitelistFlags int whitelistFlags) {
         return false;
     }
 
@@ -4244,13 +4244,13 @@ public abstract class PackageManager {
      * which the permission is requested does not clearly communicate to the user
      * what would be the benefit from grating this permission.
      *
-     * @param permissionName A permission your app wants to request.
+     * @param permName A permission your app wants to request.
      * @return Whether you can show permission rationale UI.
      *
      * @hide
      */
     @UnsupportedAppUsage
-    public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permissionName);
+    public abstract boolean shouldShowRequestPermissionRationale(@NonNull String permName);
 
     /**
      * Returns an {@link android.content.Intent} suitable for passing to

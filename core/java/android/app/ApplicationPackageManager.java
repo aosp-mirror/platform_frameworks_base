@@ -635,7 +635,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
         try {
-            return mPM.isPermissionRevokedByPolicy(permName, pkgName, getUserId());
+            return mPermissionManager.isPermissionRevokedByPolicy(permName, pkgName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -795,10 +795,11 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     @UnsupportedAppUsage
-    public boolean shouldShowRequestPermissionRationale(String permission) {
+    public boolean shouldShowRequestPermissionRationale(String permName) {
         try {
-            return mPM.shouldShowRequestPermissionRationale(permission,
-                    mContext.getPackageName(), getUserId());
+            final String packageName = mContext.getPackageName();
+            return mPermissionManager
+                    .shouldShowRequestPermissionRationale(permName, packageName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

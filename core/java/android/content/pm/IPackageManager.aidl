@@ -94,8 +94,6 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
-    boolean shouldShowRequestPermissionRationale(String permName,
-            String packageName, int userId);
 
     boolean isProtectedBroadcast(String actionName);
 
@@ -600,9 +598,6 @@ interface IPackageManager {
     boolean isOnlyCoreApps();
     boolean isDeviceUpgrading();
 
-    void setPermissionEnforced(String permission, boolean enforced);
-    boolean isPermissionEnforced(String permission);
-
     /** Reflects current DeviceStorageMonitorService state */
     @UnsupportedAppUsage
     boolean isStorageLow();
@@ -625,8 +620,6 @@ interface IPackageManager {
     KeySet getSigningKeySet(String packageName);
     boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
     boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
-
-    boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
     @UnsupportedAppUsage
     String getPermissionControllerPackageName();

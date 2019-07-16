@@ -33,6 +33,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTAL
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
@@ -1739,6 +1740,105 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         synchronized (mLock) {
             Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
                     .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
+        }
+    }
+
+    @Override
+    public void setPermissionEnforced(String permName, boolean enforced) {
+        // TODO: Now that we no longer change GID for storage, this should to away.
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                "setPermissionEnforced");
+        if (READ_EXTERNAL_STORAGE.equals(permName)) {
+            mPackageManagerInt.setReadExternalStorageEnforced(enforced);
+            // kill any non-foreground processes so we restart them and
+            // grant/revoke the GID.
+            final IActivityManager am = ActivityManager.getService();
+            if (am != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    am.killProcessesBelowForeground("setPermissionEnforcement");
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("No selective enforcement for " + permName);
+        }
+    }
+
+    /** @deprecated */
+    @Override
+    @Deprecated
+    public boolean isPermissionEnforced(String permName) {
+        // allow instant applications
+        return true;
+    }
+
+    @Override
+    public boolean shouldShowRequestPermissionRationale(String permName,
+            String packageName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "canShowRequestPermissionRationale for user " + userId);
+        }
+
+        final int uid =
+                mPackageManagerInt.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
+        if (UserHandle.getAppId(callingUid) != UserHandle.getAppId(uid)) {
+            return false;
+        }
+
+        if (checkPermission(permName, packageName, userId)
+                == PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        final int flags;
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            flags = getPermissionFlagsInternal(permName, packageName, callingUid, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+                | PackageManager.FLAG_PERMISSION_POLICY_FIXED
+                | PackageManager.FLAG_PERMISSION_USER_FIXED;
+
+        if ((flags & fixedFlags) != 0) {
+            return false;
+        }
+
+        return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+    }
+
+    @Override
+    public boolean isPermissionRevokedByPolicy(String permName, String packageName, int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "isPermissionRevokedByPolicy for user " + userId);
+        }
+
+        if (checkPermission(permName, packageName, userId) == PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        if (mPackageManagerInt.filterAppAccess(packageName, callingUid, userId)) {
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int flags = getPermissionFlagsInternal(permName, packageName, callingUid, userId);
+            return (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -3998,20 +4098,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     .getAppOpPermissionPackagesInternal(permName, callingUid);
         }
         @Override
-        public int getPermissionFlags(String permName, String packageName, int callingUid,
-                int userId) {
-            return PermissionManagerService.this
-                    .getPermissionFlagsInternal(permName, packageName, callingUid, userId);
-        }
-        @Override
-        public void updatePermissionFlags(String permName, String packageName, int flagMask,
-                int flagValues, int callingUid, int userId, boolean overridePolicy,
-                PermissionCallback callback) {
-            PermissionManagerService.this.updatePermissionFlagsInternal(
-                    permName, packageName, flagMask, flagValues, callingUid, userId,
-                    overridePolicy, callback);
-        }
-        @Override
         public void enforceCrossUserPermission(int callingUid, int userId,
                 boolean requireFullPermission, boolean checkShell, String message) {
             PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
@@ -4263,11 +4349,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 PermissionManagerService.this.updateAllPermissions(
                         StorageManager.UUID_PRIVATE_INTERNAL, true, mDefaultPermissionCallback);
             }
-        }
-
-        @Override
-        public void notifyPermissionsChangedTEMP(int uid) {
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
         }
     }
 

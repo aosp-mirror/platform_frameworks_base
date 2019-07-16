@@ -556,7 +556,15 @@ public abstract class PackageManagerInternal {
      * @see #canAccessInstantApps
      */
     public abstract boolean filterAppAccess(
-            @Nullable PackageParser.Package pkg, int callingUid, int userId);
+            @NonNull PackageParser.Package pkg, int callingUid, int userId);
+
+    /**
+     * Returns whether or not access to the application should be filtered.
+     *
+     * @see #filterAppAccess(android.content.pm.PackageParser.Package, int, int)
+     */
+    public abstract boolean filterAppAccess(
+            @NonNull String packageName, int callingUid, int userId);
 
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
@@ -792,4 +800,7 @@ public abstract class PackageManagerInternal {
 
     /** Returns whether or not default runtime permissions are granted for the given user */
     public abstract boolean areDefaultRuntimePermissionsGranted(@UserIdInt int userId);
+
+    /** Sets the enforcement of reading external storage */
+    public abstract void setReadExternalStorageEnforced(boolean enforced);
 }

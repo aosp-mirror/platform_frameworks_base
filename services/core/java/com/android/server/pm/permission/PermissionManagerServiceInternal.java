@@ -263,17 +263,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract @Nullable String[] getAppOpPermissionPackages(
             @NonNull String permName, int callingUid);
 
-    public abstract int getPermissionFlags(@NonNull String permName,
-            @NonNull String packageName, int callingUid, int userId);
-
-    /**
-     * Updates the flags associated with a permission by replacing the flags in
-     * the specified mask with the provided flag values.
-     */
-    public abstract void updatePermissionFlags(@NonNull String permName,
-            @NonNull String packageName, int flagMask, int flagValues, int callingUid, int userId,
-            boolean overridePolicy, @Nullable PermissionCallback callback);
-
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userid} is not for the caller.
@@ -300,9 +289,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
-    /** HACK HACK notify the permission listener; this shouldn't be needed after permissions
-     *  are fully removed from the package manager */
-    public abstract void notifyPermissionsChangedTEMP(int uid);
 
     /** Get all permission that have a certain protection level */
     public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(

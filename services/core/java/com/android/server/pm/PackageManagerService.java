@@ -5486,40 +5486,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "isPermissionRevokedByPolicy for user " + userId);
-        }
-
-        if (checkPermission(permission, packageName, userId)
-                == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            if (!isCallerSameApp(packageName, callingUid)) {
-                return false;
-            }
-        } else {
-            if (isInstantApp(packageName, userId)) {
-                return false;
-            }
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final int flags = mPermissionManager
-                    .getPermissionFlags(permission, packageName, Binder.getCallingUid(), userId);
-            return (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
     public String getPermissionControllerPackageName() {
         synchronized (mPackages) {
             return mRequiredPermissionControllerPackage;
@@ -5572,46 +5538,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // go through the permission manager service AIDL
             mPermissionManagerService.grantRuntimePermission(packageName, permName, userId);
         } catch (RemoteException ignore) { }
-    }
-
-    @Override
-    public boolean shouldShowRequestPermissionRationale(String permName,
-            String packageName, int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "canShowRequestPermissionRationale for user " + userId);
-        }
-
-        final int uid = getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
-        if (UserHandle.getAppId(getCallingUid()) != UserHandle.getAppId(uid)) {
-            return false;
-        }
-
-        if (checkPermission(permName, packageName, userId)
-                == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-
-        final int flags;
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            flags = mPermissionManager
-                    .getPermissionFlags(permName, packageName, Binder.getCallingUid(), userId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
-                | PackageManager.FLAG_PERMISSION_POLICY_FIXED
-                | PackageManager.FLAG_PERMISSION_USER_FIXED;
-
-        if ((flags & fixedFlags) != 0) {
-            return false;
-        }
-
-        return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
     }
 
     @Override
@@ -22830,44 +22756,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void setPermissionEnforced(String permission, boolean enforced) {
-        // TODO: Now that we no longer change GID for storage, this should to away.
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-                "setPermissionEnforced");
-        if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            synchronized (mPackages) {
-                if (mSettings.mReadExternalStorageEnforced == null
-                        || mSettings.mReadExternalStorageEnforced != enforced) {
-                    mSettings.mReadExternalStorageEnforced =
-                            enforced ? Boolean.TRUE : Boolean.FALSE;
-                    mSettings.writeLPr();
-                }
-            }
-            // kill any non-foreground processes so we restart them and
-            // grant/revoke the GID.
-            final IActivityManager am = ActivityManager.getService();
-            if (am != null) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    am.killProcessesBelowForeground("setPermissionEnforcement");
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("No selective enforcement for " + permission);
-        }
-    }
-
-    @Override
-    @Deprecated
-    public boolean isPermissionEnforced(String permission) {
-        // allow instant applications
-        return true;
-    }
-
-    @Override
     public boolean isStorageLow() {
         // allow instant applications
         final long token = Binder.clearCallingIdentity();
@@ -23331,8 +23219,20 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(PackageParser.Package pkg, int callingUid, int userId) {
             synchronized (mPackages) {
-                return PackageManagerService.this.filterAppAccessLPr(
-                        (PackageSetting) pkg.mExtras, callingUid, userId);
+                return PackageManagerService.this
+                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
+            }
+        }
+
+        @Override
+        public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+            synchronized (mPackages) {
+                final PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return false;
+                }
+                return PackageManagerService.this
+                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
             }
         }
 
@@ -24080,6 +23980,18 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean areDefaultRuntimePermissionsGranted(int userId) {
             synchronized (mPackages) {
                 return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+            }
+        }
+
+        @Override
+        public void setReadExternalStorageEnforced(boolean enforced) {
+            synchronized (mPackages) {
+                if (mSettings.mReadExternalStorageEnforced != null
+                        && mSettings.mReadExternalStorageEnforced == enforced) {
+                    return;
+                }
+                mSettings.mReadExternalStorageEnforced = enforced ? Boolean.TRUE : Boolean.FALSE;
+                mSettings.writeLPr();
             }
         }
     }
