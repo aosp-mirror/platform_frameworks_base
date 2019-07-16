@@ -8,7 +8,9 @@
     },
     {
       "name": "CtsCompilationTestCases"
-    },
+    }
+  ],
+  "postsubmit": [
     {
       "name": "CtsPermissionTestCases",
       "options": [
