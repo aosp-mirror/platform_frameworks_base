@@ -996,6 +996,14 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA = 13;
 
+    /**
+     * <p>The camera device is only accessible by Android's system components and privileged
+     * applications. Processes need to have the android.permission.SYSTEM_CAMERA in
+     * addition to android.permission.CAMERA in order to connect to this camera device.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA = 14;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //

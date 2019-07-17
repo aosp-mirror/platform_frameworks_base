@@ -1955,6 +1955,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA LOGICAL_MULTI_CAMERA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA SECURE_IMAGE_DATA}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA SYSTEM_CAMERA}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1973,6 +1974,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA
      */
     @PublicKey
     @NonNull

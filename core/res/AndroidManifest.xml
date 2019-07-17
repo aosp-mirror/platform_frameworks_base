@@ -1264,6 +1264,15 @@
         android:description="@string/permdesc_camera"
         android:protectionLevel="dangerous|instant" />
 
+      <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
+           system only camera devices.
+           <p>Protection level: system|signature
+           @hide -->
+    <permission android:name="android.permission.SYSTEM_CAMERA"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_systemCamera"
+        android:description="@string/permdesc_systemCamera"
+        android:protectionLevel="system|signature" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
