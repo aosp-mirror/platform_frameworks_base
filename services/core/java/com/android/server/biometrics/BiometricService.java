@@ -521,8 +521,8 @@ public class BiometricService extends SystemService {
             List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notify(BiometricSourceType.FACE,
-                        mFaceEnabledOnKeyguard.getOrDefault(userId,
-                                DEFAULT_KEYGUARD_ENABLED));
+                        mFaceEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
+                        userId);
             }
         }
     }
@@ -540,9 +540,9 @@ public class BiometricService extends SystemService {
             }
         }
 
-        void notify(BiometricSourceType sourceType, boolean enabled) {
+        void notify(BiometricSourceType sourceType, boolean enabled, int userId) {
             try {
-                mCallback.onChanged(sourceType, enabled);
+                mCallback.onChanged(sourceType, enabled, userId);
             } catch (DeadObjectException e) {
                 Slog.w(TAG, "Death while invoking notify", e);
                 mEnabledOnKeyguardCallbacks.remove(this);
@@ -796,7 +796,8 @@ public class BiometricService extends SystemService {
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
                 callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard());
+                        mSettingObserver.getFaceEnabledOnKeyguard(),
+                        UserHandle.getCallingUserId());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }

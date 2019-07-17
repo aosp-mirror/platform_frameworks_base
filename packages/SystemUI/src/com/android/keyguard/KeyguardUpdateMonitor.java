@@ -377,14 +377,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     };
 
-    private boolean mFaceSettingEnabledForUser;
+    private SparseBooleanArray mFaceSettingEnabledForUser = new SparseBooleanArray();
     private BiometricManager mBiometricManager;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledCallback =
             new IBiometricEnabledOnKeyguardCallback.Stub() {
         @Override
-        public void onChanged(BiometricSourceType type, boolean enabled) throws RemoteException {
+        public void onChanged(BiometricSourceType type, boolean enabled, int userId)
+                throws RemoteException {
             if (type == BiometricSourceType.FACE) {
-                mFaceSettingEnabledForUser = enabled;
+                mFaceSettingEnabledForUser.put(userId, enabled);
                 updateFaceListeningState();
             }
         }
@@ -1711,7 +1712,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && !mSecureCameraLaunched;
     }
@@ -1783,13 +1784,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * If face hardware is available and user has enrolled. Not considering encryption or
-     * lockdown state.
+     * If face hardware is available, user has enrolled and enabled auth via setting.
+     * Not considering encryption or lock down state.
      */
     public boolean isUnlockWithFacePossible(int userId) {
         return mFaceManager != null && mFaceManager.isHardwareDetected()
                 && !isFaceDisabled(userId)
-                && mFaceManager.hasEnrolledTemplates(userId);
+                && mFaceManager.hasEnrolledTemplates(userId)
+                && mFaceSettingEnabledForUser.get(userId);
     }
 
     private void stopListeningForFingerprint() {
@@ -2657,7 +2659,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    possible=" + isUnlockWithFacePossible(userId));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
-            pw.println("    enabledByUser=" + mFaceSettingEnabledForUser);
+            pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
     }

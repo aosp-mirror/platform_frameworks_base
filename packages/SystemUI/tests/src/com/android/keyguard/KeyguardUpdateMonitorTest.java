@@ -103,7 +103,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(context.getPackageManager()).thenReturn(mPackageManager);
         doAnswer(invocation -> {
             IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
-            callback.onChanged(BiometricSourceType.FACE, true /* enabled */);
+            callback.onChanged(BiometricSourceType.FACE, true /* enabled */,
+                    KeyguardUpdateMonitor.getCurrentUser());
             return null;
         }).when(mBiometricManager).registerEnabledOnKeyguardCallback(any());
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
