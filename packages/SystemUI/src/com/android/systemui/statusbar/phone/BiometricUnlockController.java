@@ -260,6 +260,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         boolean unlockAllowed = mKeyguardBypassController.onBiometricAuthenticated(
                 biometricSourceType);
         if (unlockAllowed) {
+            mKeyguardViewMediator.userActivity();
             startWakeAndUnlock(biometricSourceType);
         } else {
             Log.d(TAG, "onBiometricAuthenticated aborted by bypass controller");
@@ -466,8 +467,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing() && unlockingAllowed) {
-                return bypass && !mKeyguardBypassController.canPlaySubtleWindowAnimations()
-                        ? MODE_UNLOCK_COLLAPSING : MODE_UNLOCK_FADING;
+                if (bypass && mKeyguardBypassController.canPlaySubtleWindowAnimations()) {
+                    return MODE_UNLOCK_FADING;
+                } else {
+                    return MODE_DISMISS_BOUNCER;
+                }
             } else if (unlockingAllowed) {
                 return bypass ? MODE_UNLOCK_FADING : MODE_NONE;
             } else {

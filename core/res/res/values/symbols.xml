@@ -3192,6 +3192,8 @@
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
   <java-symbol type="integer" name="config_accessibilityColorMode" />
+  <java-symbol type="array" name="config_displayCompositionColorModes" />
+  <java-symbol type="array" name="config_displayCompositionColorSpaces" />
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_displayWhiteBalanceEnabledDefault" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMin" />
@@ -3788,7 +3790,8 @@
 
   <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
-  <java-symbol type="integer" name="config_brightnessThresholdOfPeakRefreshRate" />
+  <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
+  <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
 
   <!-- For Auto-Brightness -->
   <java-symbol type="string" name="config_displayLightSensorType" />
