@@ -114,10 +114,10 @@
     <!-- Car notification shade-->
     <dimen name="notification_shade_handle_bar_height">10dp</dimen>
     <dimen name="notification_shade_handle_bar_radius">20dp</dimen>
-    <dimen name="notification_shade_handle_bar_margin_start">500dp</dimen>
-    <dimen name="notification_shade_handle_bar_margin_end">500dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_start">200dp</dimen>
+    <dimen name="notification_shade_handle_bar_margin_end">200dp</dimen>
     <dimen name="notification_shade_handle_bar_margin_top">20dp</dimen>
     <dimen name="notification_shade_handle_bar_margin_bottom">10dp</dimen>
-    <dimen name="notification_shade_list_padding_bottom">0dp</dimen>
+    <dimen name="notification_shade_list_padding_bottom">50dp</dimen>
 
 </resources>
