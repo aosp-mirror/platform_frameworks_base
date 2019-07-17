@@ -480,7 +480,7 @@ public class EditorInfo implements InputType, Parcelable {
      * matter what user ID the calling process has.
      *
      * <p>Note: This field will be silently ignored when
-     * {@link android.view.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
+     * {@link com.android.server.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
      * {@code true}.</p>
      *
      * <p>Note also that pseudo handles such as {@link UserHandle#ALL} are not supported.</p>

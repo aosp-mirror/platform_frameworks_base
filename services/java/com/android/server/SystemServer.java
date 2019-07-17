@@ -67,7 +67,6 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureManager;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -100,6 +99,7 @@ import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
+import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.inputmethod.MultiClientInputMethodManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;

@@ -58,7 +58,7 @@ oneway interface IStatusBar
 
     void topAppWindowChanged(int displayId, boolean menuVisible);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+            boolean showImeSwitcher, boolean isMultiClientImeEnabled);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
