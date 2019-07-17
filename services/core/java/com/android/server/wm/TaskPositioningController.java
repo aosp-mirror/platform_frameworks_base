@@ -126,6 +126,11 @@ class TaskPositioningController {
             synchronized (mService.mGlobalLock) {
                 final Task task = displayContent.findTaskForResizePoint(x, y);
                 if (task != null) {
+                    if (!task.isResizeable()) {
+                        // The task is not resizable, so don't do anything when the user drags the
+                        // the resize handles.
+                        return;
+                    }
                     if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
                             task.preserveOrientationOnResize(), x, y)) {
                         return;

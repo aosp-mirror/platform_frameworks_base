@@ -8803,6 +8803,13 @@ public final class Settings {
         public static final String DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS =
                 "force_desktop_mode_on_external_displays";
 
+        /**
+         * Whether to allow non-resizable apps to be freeform.
+         * @hide
+         */
+        public static final String DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM =
+                "enable_sizecompat_freeform";
+
        /**
         * Whether user has enabled development settings.
         */

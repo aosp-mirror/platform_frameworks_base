@@ -2319,29 +2319,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Region region = inputWindowHandle.touchableRegion;
         setTouchableRegionCropIfNeeded(inputWindowHandle);
 
-        final Rect appOverrideBounds = mActivityRecord != null
-                ? mActivityRecord.getResolvedOverrideBounds() : null;
-        if (appOverrideBounds != null && !appOverrideBounds.isEmpty()) {
-            // There may have touchable letterboxes around the activity, so in order to let the
-            // letterboxes are able to receive touch event and slip to activity, the activity with
-            // compatibility bounds cannot occupy full screen touchable region.
-            if (modal) {
-                // A modal window uses the whole compatibility bounds.
-                flags |= FLAG_NOT_TOUCH_MODAL;
-                mTmpRect.set(0, 0, appOverrideBounds.width(), appOverrideBounds.height());
-            } else {
-                // Non-modal uses the application based frame.
-                mTmpRect.set(mWindowFrames.mCompatFrame);
-            }
-            // The offset of compatibility bounds is applied to surface of {@link #ActivityRecord}
-            // and frame, so it is unnecessary to translate twice in surface based coordinates.
-            final int surfaceOffsetX = mActivityRecord.hasSizeCompatBounds()
-                    ? mActivityRecord.getBounds().left : 0;
-            mTmpRect.offset(surfaceOffsetX - mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
-            region.set(mTmpRect);
-            return flags;
-        }
-
         if (modal && mActivityRecord != null) {
             // Limit the outer touch to the activity stack region.
             flags |= FLAG_NOT_TOUCH_MODAL;
@@ -2397,6 +2374,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         // Translate to surface based coordinates.
         region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
+
+        // TODO(b/139804591): sizecompat layout needs to be reworked. Currently mFrame is post-
+        // scaling but the existing logic doesn't expect that. The result is that the already-
+        // scaled region ends up getting sent to surfaceflinger which then applies the scale
+        // (again). Until this is resolved, apply an inverse-scale here.
+        if (mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
+                && mGlobalScale != 1.f) {
+            region.scale(mInvGlobalScale);
+        }
 
         return flags;
     }

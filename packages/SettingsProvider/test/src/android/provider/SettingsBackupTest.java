@@ -222,6 +222,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
+                    Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
                     Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,

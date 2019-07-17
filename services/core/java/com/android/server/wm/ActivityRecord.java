@@ -299,10 +299,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -6599,14 +6599,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             // The role of CompatDisplayInsets is like the override bounds.
             final ActivityDisplay display = getDisplay();
-            if (display != null && display.mDisplayContent != null) {
-                mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent);
+            if (display != null) {
+                if (display.inFreeformWindowingMode()) {
+                    // in freeform, apps in compat mode still launch in windows so don't want to
+                    // use display bounds, but rather use TaskRecord bounds.
+                    if (getTaskRecord() != null) {
+                        mCompatDisplayInsets = new CompatDisplayInsets(getTaskRecord());
+                    }
+                } else if (display.mDisplayContent != null) {
+                    mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent);
+                }
             }
         } else {
             // We must base this on the parent configuration, because we set our override
             // configuration's appBounds based on the result of this method. If we used our own
             // configuration, it would be influenced by past invocations.
-            computeBounds(mTmpBounds, getParent().getWindowConfiguration().getAppBounds());
+
+            // inherits from parent by default
+            mTmpBounds.set(getRequestedOverrideBounds());
+            applyAspectRatio(mTmpBounds, getParent().getWindowConfiguration().getAppBounds());
 
             if (mTmpBounds.equals(getRequestedOverrideBounds())) {
                 // The bounds is not changed or the activity is resizable (both the 2 bounds are
@@ -6673,12 +6684,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // fixed orientation.
             orientation = parentOrientation;
         } else {
-            if (!resolvedBounds.isEmpty()
-                    // The decor insets may be different according to the rotation.
-                    && getWindowConfiguration().getRotation() == parentRotation) {
-                // Keep the computed resolved override configuration.
-                return;
-            }
             final int requestedOrientation = getRequestedConfigurationOrientation();
             if (requestedOrientation != ORIENTATION_UNDEFINED) {
                 orientation = requestedOrientation;
@@ -6687,57 +6692,53 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         super.resolveOverrideConfiguration(newParentConfiguration);
 
-        boolean useParentOverrideBounds = false;
-        final Rect displayBounds = mTmpBounds;
-        final Rect containingAppBounds = new Rect();
-        if (task.handlesOrientationChangeFromDescendant()) {
-            // Prefer to use the orientation which is determined by this activity to calculate
-            // bounds because the parent will follow the requested orientation.
-            mCompatDisplayInsets.getDisplayBoundsByOrientation(displayBounds, orientation);
-        } else {
-            // The parent hierarchy doesn't handle the orientation changes. This is usually because
-            // the aspect ratio of display is close to square or the display rotation is fixed.
-            // In this case, task will compute override bounds to fit the app with respect to the
-            // requested orientation. So here we perform similar calculation to have consistent
-            // bounds even the original parent hierarchies were changed.
-            final int baseOrientation = task.getParent().getConfiguration().orientation;
-            mCompatDisplayInsets.getDisplayBoundsByOrientation(displayBounds, baseOrientation);
-            task.computeFullscreenBounds(containingAppBounds, this, displayBounds, baseOrientation);
-            useParentOverrideBounds = !containingAppBounds.isEmpty();
-        }
+        Rect containingAppBounds = new Rect();
+        Rect parentBounds = new Rect(newParentConfiguration.windowConfiguration.getBounds());
 
-        // The offsets will be non-zero if the parent has override bounds.
-        final int containingOffsetX = containingAppBounds.left;
-        final int containingOffsetY = containingAppBounds.top;
-        if (!useParentOverrideBounds) {
-            containingAppBounds.set(displayBounds);
-        }
+        // Use compat insets to lock width and height. We should not use the parent width and height
+        // because apps in compat mode should have a constant width and height. The compat insets
+        // are locked when the app is first launched and are never changed after that, so we can
+        // rely on them to contain the original and unchanging width and height of the app.
+        final Rect compatDisplayBounds = mTmpBounds;
+        mCompatDisplayInsets.getDisplayBoundsByOrientation(compatDisplayBounds, orientation);
+        containingAppBounds.set(0, 0, compatDisplayBounds.width(), compatDisplayBounds.height());
+
+        resolvedBounds.set(containingAppBounds);
+
         if (parentRotation != ROTATION_UNDEFINED) {
-            // Ensure the container bounds won't overlap with the decors.
-            TaskRecord.intersectWithInsetsIfFits(containingAppBounds, displayBounds,
+            // Ensure the parent and container bounds won't overlap with insets.
+            TaskRecord.intersectWithInsetsIfFits(containingAppBounds, compatDisplayBounds,
+                    mCompatDisplayInsets.mNonDecorInsets[parentRotation]);
+            TaskRecord.intersectWithInsetsIfFits(parentBounds, compatDisplayBounds,
                     mCompatDisplayInsets.mNonDecorInsets[parentRotation]);
         }
 
-        computeBounds(resolvedBounds, containingAppBounds);
-        if (resolvedBounds.isEmpty()) {
-            // Use the entire available bounds because there is no restriction.
-            resolvedBounds.set(useParentOverrideBounds ? containingAppBounds : displayBounds);
-        } else {
-            // The offsets are included in width and height by {@link #computeBounds}, so we have to
-            // restore it.
-            resolvedBounds.left += containingOffsetX;
-            resolvedBounds.top += containingOffsetY;
-        }
+        applyAspectRatio(resolvedBounds, containingAppBounds);
+
+        // Center horizontally in parent and align to top of parent - this is a UX choice
+        final int left = parentBounds.left + parentBounds.width() / 2 - resolvedBounds.width() / 2;
+        resolvedBounds.set(left, parentBounds.top, left + resolvedBounds.width(),
+                parentBounds.top + resolvedBounds.height());
+
+        // We want to get as much of the app on the screen even if insets cover it. This is because
+        // insets change but an app's bounds are more permanent after launch. After computing insets
+        // and horizontally centering resolvedBounds, the resolvedBounds may end up outside parent
+        // bounds. This is okay only if the resolvedBounds exceed their parent on the bottom and
+        // right, because that is clipped when the final bounds are computed. To reach this state,
+        // we first try and push the app as much inside the parent towards the top and left (the
+        // min). The app may then end up outside the parent by going too far left and top, so we
+        // push it back into the parent by taking the max with parent left and top.
+        Rect fullParentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        resolvedBounds.offsetTo(Math.max(fullParentBounds.left,
+                Math.min(fullParentBounds.right - resolvedBounds.width(), resolvedBounds.left)),
+                Math.max(fullParentBounds.top,
+                        Math.min(fullParentBounds.bottom - resolvedBounds.height(),
+                                resolvedBounds.top)));
+
+        // Use resolvedBounds to compute other override configurations such as appBounds
         task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                 mCompatDisplayInsets);
 
-        // The horizontal inset included in width is not needed if the activity cannot fill the
-        // parent, because the offset will be applied by {@link ActivityRecord#mSizeCompatBounds}.
-        final Rect resolvedAppBounds = resolvedConfig.windowConfiguration.getAppBounds();
-        final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
-        if (resolvedBounds.width() < parentAppBounds.width()) {
-            resolvedBounds.right -= resolvedAppBounds.left;
-        }
         // Use parent orientation if it cannot be decided by bounds, so the activity can fit inside
         // the parent bounds appropriately.
         if (resolvedConfig.screenWidthDp == resolvedConfig.screenHeightDp) {
@@ -6918,11 +6919,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Computes the bounds to fit the Activity within the bounds of the {@link Configuration}.
+     * Applies aspect ratio restrictions to outBounds. If no restrictions, then no change is
+     * made to outBounds.
      */
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void computeBounds(Rect outBounds, Rect containingAppBounds) {
-        outBounds.setEmpty();
+    private void applyAspectRatio(Rect outBounds, Rect containingAppBounds) {
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getActivityStack();
         final float minAspectRatio = info.minAspectRatio;
@@ -6991,12 +6992,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (containingAppWidth <= activityWidth && containingAppHeight <= activityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
-            // Return the existing bounds. If this method is running for the first time,
-            // {@link #getRequestedOverrideBounds()} will be empty (representing no override). If
-            // the method has run before, then effect of {@link #getRequestedOverrideBounds()} will
-            // already have been applied to the value returned from {@link getConfiguration}. Refer
-            // to {@link TaskRecord#computeConfigResourceOverrides()}.
-            outBounds.set(getRequestedOverrideBounds());
             return;
         }
 
@@ -7773,6 +7768,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 policy.getNonDecorInsetsLw(rotation, dw, dh, cutout, mNonDecorInsets[rotation]);
                 mStableInsets[rotation].set(mNonDecorInsets[rotation]);
                 policy.convertNonDecorInsetsToStableInsets(mStableInsets[rotation], rotation);
+            }
+        }
+
+        /**
+         * Sets bounds to {@link TaskRecord} bounds. For apps in freeform, the task bounds are the
+         * parent bounds from the app's perspective. No insets because within a window.
+         */
+        CompatDisplayInsets(TaskRecord taskRecord) {
+            Rect taskBounds = taskRecord.getConfiguration().windowConfiguration.getBounds();
+            mDisplayWidth = taskBounds.width();
+            mDisplayHeight = taskBounds.height();
+            for (int rotation = 0; rotation < 4; rotation++) {
+                mNonDecorInsets[rotation] = new Rect();
+                mStableInsets[rotation] = new Rect();
             }
         }
 

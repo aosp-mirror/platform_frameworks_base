@@ -519,18 +519,7 @@ class TaskRecord extends ConfigurationContainer {
         mAtmService.deferWindowLayout();
 
         try {
-            if (!isResizeable()) {
-                Slog.w(TAG, "resizeTask: task " + this + " not resizeable.");
-                return true;
-            }
-
-            // If this is a forced resize, let it go through even if the bounds is not changing,
-            // as we might need a relayout due to surface size change (to/from fullscreen).
             final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
-            if (equivalentRequestedOverrideBounds(bounds) && !forced) {
-                // Nothing to do here...
-                return true;
-            }
 
             if (mTask == null) {
                 // Task doesn't exist in window manager yet (e.g. was restored from recents).
