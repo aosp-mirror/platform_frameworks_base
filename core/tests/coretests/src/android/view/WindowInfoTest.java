@@ -91,7 +91,7 @@ public class WindowInfoTest {
         assertFalse(w.focused);
         assertFalse(w.inPictureInPicture);
         assertFalse(w.hasFlagWatchOutsideTouch);
-        assertTrue(w.boundsInScreen.isEmpty());
+        assertTrue(w.regionInScreen.isEmpty());
     }
 
     @SmallTest
@@ -114,7 +114,7 @@ public class WindowInfoTest {
         equality &= w1.childTokens.equals(w2.childTokens);
         equality &= w1.parentToken == w2.parentToken;
         equality &= w1.activityToken == w2.activityToken;
-        equality &= w1.boundsInScreen.equals(w2.boundsInScreen);
+        equality &= w1.regionInScreen.equals(w2.regionInScreen);
         return equality;
     }
 
@@ -132,6 +132,6 @@ public class WindowInfoTest {
         windowInfo.focused = true;
         windowInfo.inPictureInPicture = true;
         windowInfo.hasFlagWatchOutsideTouch = true;
-        windowInfo.boundsInScreen.set(0, 0, 1080, 1080);
+        windowInfo.regionInScreen.set(0, 0, 1080, 1080);
     }
 }

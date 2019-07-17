@@ -622,6 +622,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window's bounds changed.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#R R}, this event implies the window's
+     * region changed. It's also possible that region changed but bounds doesn't.
+     * </p>
      */
     public static final int WINDOWS_CHANGE_BOUNDS = 0x00000008;
 

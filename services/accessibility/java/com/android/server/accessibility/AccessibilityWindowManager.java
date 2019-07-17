@@ -23,7 +23,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
 import android.os.Handler;
@@ -277,7 +276,7 @@ public class AccessibilityWindowManager
         } else if (!oldWindow.activityToken.equals(newWindow.activityToken)) {
             return true;
         }
-        if (!oldWindow.boundsInScreen.equals(newWindow.boundsInScreen)) {
+        if (!oldWindow.regionInScreen.equals(newWindow.regionInScreen)) {
             return true;
         }
         if (oldWindow.childTokens != null && newWindow.childTokens != null
@@ -755,20 +754,20 @@ public class AccessibilityWindowManager
         boolean windowInteractiveRegionChanged = false;
 
         final int windowCount = mWindows.size();
-        final Rect currentWindowBounds = new Rect();
+        final Region currentWindowRegions = new Region();
         for (int i = windowCount - 1; i >= 0; i--) {
             AccessibilityWindowInfo currentWindow = mWindows.get(i);
             if (windowInteractiveRegion == null) {
                 if (currentWindow.getId() == windowId) {
-                    currentWindow.getBoundsInScreen(currentWindowBounds);
-                    outRegion.set(currentWindowBounds);
+                    currentWindow.getRegionInScreen(currentWindowRegions);
+                    outRegion.set(currentWindowRegions);
                     windowInteractiveRegion = outRegion;
                     continue;
                 }
             } else if (currentWindow.getType()
                     != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
-                currentWindow.getBoundsInScreen(currentWindowBounds);
-                if (windowInteractiveRegion.op(currentWindowBounds, Region.Op.DIFFERENCE)) {
+                currentWindow.getRegionInScreen(currentWindowRegions);
+                if (windowInteractiveRegion.op(currentWindowRegions, Region.Op.DIFFERENCE)) {
                     windowInteractiveRegionChanged = true;
                 }
             }
@@ -1115,7 +1114,7 @@ public class AccessibilityWindowManager
         reportedWindow.setType(getTypeForWindowManagerWindowType(window.type));
         reportedWindow.setLayer(window.layer);
         reportedWindow.setFocused(window.focused);
-        reportedWindow.setBoundsInScreen(window.boundsInScreen);
+        reportedWindow.setRegionInScreen(window.regionInScreen);
         reportedWindow.setTitle(window.title);
         reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
         reportedWindow.setPictureInPicture(window.inPictureInPicture);
