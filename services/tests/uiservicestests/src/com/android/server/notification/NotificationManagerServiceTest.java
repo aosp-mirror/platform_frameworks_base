@@ -34,6 +34,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 
@@ -106,6 +107,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.testing.TestablePermissions;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -3144,5 +3146,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
 
         assertEquals(0, captor.getValue().getNotification().flags);
+    }
+
+    @Test
+    public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
+        try {
+            mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                    mUid + UserHandle.PER_USER_RANGE);
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                mUid + UserHandle.PER_USER_RANGE);
     }
 }

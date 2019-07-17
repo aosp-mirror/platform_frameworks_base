@@ -93,6 +93,8 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
 
+import dalvik.system.VMRuntime;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -103,6 +105,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -1484,6 +1487,48 @@ public class TelephonyManager {
      */
     public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate if the SIM combination in DSDS has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios.
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
+            "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
+
+    /** @hide */
+    @IntDef({
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE,
+            EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SimCombinationWarningType{}
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no SIM combination warning.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate two active SIMs are both CDMA hence there might be functional limitation.
+     * @hide
+     */
+    public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
+
+    /**
+     * String intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate what's the name of SIM combination it has limitation or compatible issue.
+     * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios, and the
+     * name will be "operator1 & operator2".
+     *
+     * @hide
+     */
+    public static final String EXTRA_SIM_COMBINATION_NAMES =
+            "android.telephony.extra.SIM_COMBINATION_NAMES";
     //
     //
     // Device Info
@@ -2417,7 +2462,7 @@ public class TelephonyManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getNetworkType() {
-        return getNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -2500,7 +2545,7 @@ public class TelephonyManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getDataNetworkType() {
-        return getDataNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getDataNetworkType(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -4732,7 +4777,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_ACTIVITY_NONE;
-            return telephony.getDataActivity();
+            return telephony.getDataActivityForSubId(
+                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_ACTIVITY_NONE;
@@ -4780,7 +4826,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_DISCONNECTED;
-            return telephony.getDataState();
+            return telephony.getDataStateForSubId(
+                    getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;
@@ -5222,18 +5269,30 @@ public class TelephonyManager {
      * Returns the MMS user agent.
      */
     public String getMmsUserAgent() {
-        if (mContext == null) return null;
-        return mContext.getResources().getString(
-                com.android.internal.R.string.config_mms_user_agent);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getMmsUserAgent(getSubId());
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
     }
 
     /**
      * Returns the MMS user agent profile URL.
      */
     public String getMmsUAProfUrl() {
-        if (mContext == null) return null;
-        return mContext.getResources().getString(
-                com.android.internal.R.string.config_mms_user_agent_profile_url);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getMmsUAProfUrl(getSubId());
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
     }
 
     /**
@@ -7232,7 +7291,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7998,7 +8057,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 return telephony.isDataConnectivityPossible(getSubId(SubscriptionManager
-                        .getDefaultDataSubscriptionId()));
+                        .getActiveDataSubscriptionId()));
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isDataAllowed", e);
         }
@@ -9111,6 +9170,10 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+        } catch (NullPointerException e) {
+            AnomalyReporter.reportAnomaly(
+                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    "getServiceStateForSubscriber " + subId + " NPE");
         }
         return null;
     }
@@ -10957,5 +11020,53 @@ public class TelephonyManager {
             }
         }
         return true;
+    }
+
+    /**
+     * Set allowing mobile data during voice call.
+     *
+     * @param allow {@code true} if allowing using data during voice call, {@code false} if
+     * disallowed
+     *
+     * @return {@code false} if the setting is changed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setDataAllowedDuringVoiceCall(boolean allow) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setDataAllowedDuringVoiceCall(getSubId(), allow);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether data is allowed during voice call. Note this is for dual sim device that
+     * data might be disabled on non-default data subscription but explicitly turned on by settings.
+     *
+     * @return {@code true} if data is allowed during voice call.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isDataAllowedInVoiceCall() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isDataAllowedInVoiceCall(getSubId());
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
     }
 }

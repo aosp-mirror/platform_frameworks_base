@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -333,25 +334,25 @@ public final class IpSecConfig implements Parcelable {
                 }
             };
 
-    @VisibleForTesting
-    /** Equals method used for testing */
-    public static boolean equals(IpSecConfig lhs, IpSecConfig rhs) {
-        if (lhs == null || rhs == null) return (lhs == rhs);
-        return (lhs.mMode == rhs.mMode
-                && lhs.mSourceAddress.equals(rhs.mSourceAddress)
-                && lhs.mDestinationAddress.equals(rhs.mDestinationAddress)
-                && ((lhs.mNetwork != null && lhs.mNetwork.equals(rhs.mNetwork))
-                        || (lhs.mNetwork == rhs.mNetwork))
-                && lhs.mEncapType == rhs.mEncapType
-                && lhs.mEncapSocketResourceId == rhs.mEncapSocketResourceId
-                && lhs.mEncapRemotePort == rhs.mEncapRemotePort
-                && lhs.mNattKeepaliveInterval == rhs.mNattKeepaliveInterval
-                && lhs.mSpiResourceId == rhs.mSpiResourceId
-                && IpSecAlgorithm.equals(lhs.mEncryption, rhs.mEncryption)
-                && IpSecAlgorithm.equals(lhs.mAuthenticatedEncryption, rhs.mAuthenticatedEncryption)
-                && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication)
-                && lhs.mMarkValue == rhs.mMarkValue
-                && lhs.mMarkMask == rhs.mMarkMask
-                && lhs.mXfrmInterfaceId == rhs.mXfrmInterfaceId);
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (!(other instanceof IpSecConfig)) return false;
+        final IpSecConfig rhs = (IpSecConfig) other;
+        return (mMode == rhs.mMode
+                && mSourceAddress.equals(rhs.mSourceAddress)
+                && mDestinationAddress.equals(rhs.mDestinationAddress)
+                && ((mNetwork != null && mNetwork.equals(rhs.mNetwork))
+                        || (mNetwork == rhs.mNetwork))
+                && mEncapType == rhs.mEncapType
+                && mEncapSocketResourceId == rhs.mEncapSocketResourceId
+                && mEncapRemotePort == rhs.mEncapRemotePort
+                && mNattKeepaliveInterval == rhs.mNattKeepaliveInterval
+                && mSpiResourceId == rhs.mSpiResourceId
+                && IpSecAlgorithm.equals(mEncryption, rhs.mEncryption)
+                && IpSecAlgorithm.equals(mAuthenticatedEncryption, rhs.mAuthenticatedEncryption)
+                && IpSecAlgorithm.equals(mAuthentication, rhs.mAuthentication)
+                && mMarkValue == rhs.mMarkValue
+                && mMarkMask == rhs.mMarkMask
+                && mXfrmInterfaceId == rhs.mXfrmInterfaceId);
     }
 }

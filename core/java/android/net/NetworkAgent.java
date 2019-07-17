@@ -433,7 +433,32 @@ public abstract class NetworkAgent extends Handler {
      * {@link #saveAcceptUnvalidated} to respect the user's choice.
      */
     public void explicitlySelected(boolean acceptUnvalidated) {
-        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, acceptUnvalidated ? 1 : 0, 0);
+        explicitlySelected(true /* explicitlySelected */, acceptUnvalidated);
+    }
+
+    /**
+     * Called by the bearer to indicate whether the network was manually selected by the user.
+     * This should be called before the NetworkInfo is marked CONNECTED so that this
+     * Network can be given special treatment at that time.
+     *
+     * If {@code explicitlySelected} is {@code true}, and {@code acceptUnvalidated} is {@code true},
+     * then the system will switch to this network. If {@code explicitlySelected} is {@code true}
+     * and {@code acceptUnvalidated} is {@code false}, and the  network cannot be validated, the
+     * system will ask the user whether to switch to this network.  If the user confirms and selects
+     * "don't ask again", then the system will call {@link #saveAcceptUnvalidated} to persist the
+     * user's choice. Thus, if the transport ever calls this method with {@code explicitlySelected}
+     * set to {@code true} and {@code acceptUnvalidated} set to {@code false}, it must also
+     * implement {@link #saveAcceptUnvalidated} to respect the user's choice.
+     *
+     * If  {@code explicitlySelected} is {@code false} and {@code acceptUnvalidated} is
+     * {@code true}, the system will interpret this as the user having accepted partial connectivity
+     * on this network. Thus, the system will switch to the network and consider it validated even
+     * if it only provides partial connectivity, but the network is not otherwise treated specially.
+     */
+    public void explicitlySelected(boolean explicitlySelected, boolean acceptUnvalidated) {
+        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED,
+                explicitlySelected ? 1 : 0,
+                acceptUnvalidated ? 1 : 0);
     }
 
     /**
@@ -510,7 +535,6 @@ public abstract class NetworkAgent extends Handler {
      * override this method.
      */
     protected void addKeepalivePacketFilter(Message msg) {
-        onSocketKeepaliveEvent(msg.arg1, SocketKeepalive.ERROR_UNSUPPORTED);
     }
 
     /**
@@ -519,7 +543,6 @@ public abstract class NetworkAgent extends Handler {
      * must override this method.
      */
     protected void removeKeepalivePacketFilter(Message msg) {
-        onSocketKeepaliveEvent(msg.arg1, SocketKeepalive.ERROR_UNSUPPORTED);
     }
 
     /**

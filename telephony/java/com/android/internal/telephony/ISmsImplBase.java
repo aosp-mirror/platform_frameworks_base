@@ -188,4 +188,10 @@ public class ISmsImplBase extends ISms.Stub {
     public String createAppSpecificSmsToken(int subId, String callingPkg, PendingIntent intent) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public int checkSmsShortCodeDestination(
+            int subid, String callingApk, String destAddress, String countryIso) {
+        throw new UnsupportedOperationException();
+    }
 }

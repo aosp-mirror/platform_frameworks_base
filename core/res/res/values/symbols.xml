@@ -271,9 +271,14 @@
   <java-symbol type="bool" name="config_dynamic_bind_ims" />
   <java-symbol type="string" name="config_wwan_network_service_package" />
   <java-symbol type="string" name="config_wlan_network_service_package" />
+  <java-symbol type="string" name="config_wwan_network_service_class" />
+  <java-symbol type="string" name="config_wlan_network_service_class" />
   <java-symbol type="string" name="config_wwan_data_service_package" />
   <java-symbol type="string" name="config_wlan_data_service_package" />
+  <java-symbol type="string" name="config_wwan_data_service_class" />
+  <java-symbol type="string" name="config_wlan_data_service_class" />
   <java-symbol type="string" name="config_qualified_networks_service_package" />
+  <java-symbol type="string" name="config_qualified_networks_service_class" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />

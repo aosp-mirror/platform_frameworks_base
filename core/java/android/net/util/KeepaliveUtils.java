@@ -34,9 +34,6 @@ public final class KeepaliveUtils {
 
     public static final String TAG = "KeepaliveUtils";
 
-    // Minimum supported keepalive count per transport if the network supports keepalive.
-    public static final int MIN_SUPPORTED_KEEPALIVE_COUNT = 3;
-
     public static class KeepaliveDeviceConfigurationException extends AndroidRuntimeException {
         public KeepaliveDeviceConfigurationException(final String msg) {
             super(msg);
@@ -84,10 +81,7 @@ public final class KeepaliveUtils {
                 throw new KeepaliveDeviceConfigurationException("Invalid transport " + transport);
             }
 
-            // Customized values should be either 0 to indicate the network doesn't support
-            // keepalive offload, or a positive value that is at least
-            // MIN_SUPPORTED_KEEPALIVE_COUNT if supported.
-            if (supported != 0 && supported < MIN_SUPPORTED_KEEPALIVE_COUNT) {
+            if (supported < 0) {
                 throw new KeepaliveDeviceConfigurationException(
                         "Invalid supported count " + supported + " for "
                                 + NetworkCapabilities.transportNameOf(transport));

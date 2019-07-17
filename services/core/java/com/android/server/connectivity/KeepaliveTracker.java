@@ -216,6 +216,7 @@ public class KeepaliveTracker {
 
         public String toString() {
             return "KeepaliveInfo ["
+                    + " type=" + mType
                     + " network=" + mNai.network
                     + " startedState=" + startedStateString(mStartedState)
                     + " "
@@ -561,7 +562,7 @@ public class KeepaliveTracker {
         if (KeepaliveInfo.STARTING == ki.mStartedState) {
             if (SUCCESS == reason) {
                 // Keepalive successfully started.
-                if (DBG) Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
+                Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
                 ki.mStartedState = KeepaliveInfo.STARTED;
                 try {
                     ki.mCallback.onStarted(slot);

@@ -1,10 +1,10 @@
 package android.net.metrics
 
-import android.net.metrics.DhcpErrorEvent.errorCodeWithOption
 import android.net.metrics.DhcpErrorEvent.DHCP_INVALID_OPTION_LENGTH
+import android.net.metrics.DhcpErrorEvent.errorCodeWithOption
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.internal.util.TestUtils.parcelingRoundTrip
+import com.android.testutils.parcelingRoundTrip
 import java.lang.reflect.Modifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

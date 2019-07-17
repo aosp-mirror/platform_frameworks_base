@@ -25,6 +25,7 @@ import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import static com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
+import static com.android.testutils.MiscAssertsKt.assertContainsAll;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +52,6 @@ import android.net.LinkProperties;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -63,6 +63,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -90,6 +91,7 @@ public class OffloadControllerTest {
     private static final String IPV6_DISCARD_PREFIX = "100::/64";
     private static final String USB_PREFIX = "192.168.42.0/24";
     private static final String WIFI_PREFIX = "192.168.43.0/24";
+    private static final long WAIT_FOR_IDLE_TIMEOUT = 2 * 1000;
 
     @Mock private OffloadHardwareInterface mHardware;
     @Mock private ApplicationInfo mApplicationInfo;
@@ -131,9 +133,7 @@ public class OffloadControllerTest {
     }
 
     private void waitForIdle() {
-        ConditionVariable cv = new ConditionVariable();
-        new Handler(Looper.getMainLooper()).post(() -> { cv.open(); });
-        cv.block();
+        HandlerUtilsKt.waitForIdle(new Handler(Looper.getMainLooper()), WAIT_FOR_IDLE_TIMEOUT);
     }
 
     private OffloadController makeOffloadController() throws Exception {
@@ -245,7 +245,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).setLocalPrefixes(mStringArrayCaptor.capture());
         ArrayList<String> localPrefixes = mStringArrayCaptor.getValue();
         assertEquals(4, localPrefixes.size());
-        assertArrayListContains(localPrefixes,
+        assertContainsAll(localPrefixes,
                 "127.0.0.0/8", "192.0.2.0/24", "fe80::/64", "2001:db8::/64");
         inOrder.verifyNoMoreInteractions();
 
@@ -361,7 +361,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).setLocalPrefixes(mStringArrayCaptor.capture());
         localPrefixes = mStringArrayCaptor.getValue();
         assertEquals(6, localPrefixes.size());
-        assertArrayListContains(localPrefixes,
+        assertContainsAll(localPrefixes,
                 "127.0.0.0/8", "192.0.2.0/24", "fe80::/64", "2001:db8::/64",
                 "2001:db8::6173:7369:676e:6564/128", "2001:db8::7261:6e64:6f6d/128");
         // The relevant parts of the LinkProperties have not changed, but at the
@@ -718,7 +718,7 @@ public class OffloadControllerTest {
         verify(mHardware, times(1)).setLocalPrefixes(mStringArrayCaptor.capture());
         ArrayList<String> localPrefixes = mStringArrayCaptor.getValue();
         assertEquals(4, localPrefixes.size());
-        assertArrayListContains(localPrefixes,
+        assertContainsAll(localPrefixes,
                 // TODO: The logic to find and exclude downstream IP prefixes
                 // is currently in Tethering's OffloadWrapper but must be moved
                 // into OffloadController proper. After this, also check for:
@@ -731,9 +731,4 @@ public class OffloadControllerTest {
         verifyNoMoreInteractions(mHardware);
     }
 
-    private static void assertArrayListContains(ArrayList<String> list, String... elems) {
-        for (String element : elems) {
-            assertTrue(element + " not in list", list.contains(element));
-        }
-    }
 }

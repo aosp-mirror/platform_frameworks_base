@@ -556,7 +556,7 @@ public class PackageInfo implements Parcelable {
      * @hide
      */
     public PackageInfo(ApexInfo apexInfo) {
-        packageName = apexInfo.packageName;
+        packageName = apexInfo.moduleName;
         setLongVersionCode(apexInfo.versionCode);
         isApex = true;
     }

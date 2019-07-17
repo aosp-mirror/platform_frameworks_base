@@ -237,6 +237,11 @@ static const char* ENABLE_APEX_IMAGE = "enable_apex_image";
 // Flag to pass to the runtime when using the apex image.
 static const char* kApexImageOption = "-Ximage:/system/framework/apex.art";
 
+// Feature flag name for disabling lock profiling.
+static const char* DISABLE_LOCK_PROFILING = "disable_lock_profiling";
+// Runtime option disabling lock profiling.
+static const char* kLockProfThresholdRuntimeOption = "-Xlockprofthreshold:0";
+
 static AndroidRuntime* gCurRuntime = NULL;
 
 /*
@@ -613,7 +618,7 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
  *
  * Returns 0 on success.
  */
-int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
+int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool primary_zygote)
 {
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
@@ -685,6 +690,17 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         ALOGI("Using default boot image");
     }
 
+    std::string disable_lock_profiling =
+        server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                             DISABLE_LOCK_PROFILING,
+                                                             /*default_value=*/ "");
+    if (disable_lock_profiling == "true") {
+        addOption(kLockProfThresholdRuntimeOption);
+        ALOGI("Disabling lock profiling: '%s'\n", kLockProfThresholdRuntimeOption);
+    } else {
+        ALOGI("Leaving lock profiling enabled");
+    }
+
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -732,6 +748,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     //addOption("-verbose:jni");
     addOption("-verbose:gc");
     //addOption("-verbose:class");
+
+    if (primary_zygote) {
+        addOption("-Xprimaryzygote");
+    }
 
     /*
      * The default starting and maximum size of the heap.  Larger
@@ -866,20 +886,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         addOption("-Ximage-compiler-option");
         addOption("--compiler-filter=speed-profile");
     } else {
-        // Make sure there is a preloaded-classes file.
-        if (!hasFile("/system/etc/preloaded-classes")) {
-            ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
-                  strerror(errno));
-            return -1;
-        }
-        addOption("-Ximage-compiler-option");
-        addOption("--image-classes=/system/etc/preloaded-classes");
+        ALOGE("Missing boot-image.prof file, /system/etc/boot-image.prof not found: %s\n",
+              strerror(errno));
+        return -1;
+    }
 
-        // If there is a dirty-image-objects file, push it.
-        if (hasFile("/system/etc/dirty-image-objects")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
-        }
+
+    // If there is a dirty-image-objects file, push it.
+    if (hasFile("/system/etc/dirty-image-objects")) {
+        addOption("-Ximage-compiler-option");
+        addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
     }
 
     property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
@@ -1094,6 +1110,8 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
             className != NULL ? className : "(unknown)", getuid());
 
     static const String8 startSystemServer("start-system-server");
+    // Whether this is the primary zygote, meaning the zygote which will fork system server.
+    bool primary_zygote = false;
 
     /*
      * 'startSystemServer == true' means runtime is obsolete and not run from
@@ -1101,6 +1119,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
      */
     for (size_t i = 0; i < options.size(); ++i) {
         if (options[i] == startSystemServer) {
+            primary_zygote = true;
            /* track our progress through the boot sequence */
            const int LOG_BOOT_PROGRESS_START = 3000;
            LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,  ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
@@ -1136,7 +1155,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     JniInvocation jni_invocation;
     jni_invocation.Init(NULL);
     JNIEnv* env;
-    if (startVm(&mJavaVM, &env, zygote) != 0) {
+    if (startVm(&mJavaVM, &env, zygote, primary_zygote) != 0) {
         return;
     }
     onVmCreated(env);

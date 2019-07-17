@@ -273,7 +273,7 @@ java_defaults {
         "core/java/android/service/euicc/IRetainSubscriptionsForFactoryResetCallback.aidl",
         "core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl",
         "core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl",
-        "core/java/android/service/gatekeeper/IGateKeeperService.aidl",
+        ":gatekeeper_aidl",
         "core/java/android/service/notification/INotificationListener.aidl",
         "core/java/android/service/notification/IStatusBarNotificationHolder.aidl",
         "core/java/android/service/notification/IConditionListener.aidl",
@@ -507,7 +507,7 @@ java_defaults {
         "telephony/java/android/telephony/ims/aidl/IImsServiceController.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
-        "telephony/java/android/telephony/ims/aidl/IRcs.aidl",
+        "telephony/java/android/telephony/ims/aidl/IRcsMessage.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsGroupCallSessionCallback.aidl",
@@ -549,6 +549,7 @@ java_defaults {
         "telephony/java/com/android/ims/ImsConfigListener.aidl",
         "telephony/java/com/android/internal/telephony/IApnSourceService.aidl",
         "telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl",
+        "telephony/java/com/android/internal/telephony/IIntegerConsumer.aidl",
         "telephony/java/com/android/internal/telephony/IMms.aidl",
         "telephony/java/com/android/internal/telephony/INumberVerificationCallback.aidl",
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
@@ -662,6 +663,7 @@ java_defaults {
             "frameworks/av/camera/aidl",
             "frameworks/av/media/libaudioclient/aidl",
             "frameworks/native/aidl/gui",
+            "system/core/gatekeeperd/binder",
             "system/core/storaged/binder",
             "system/vold/binder",
             "system/gsid/aidl",
@@ -669,7 +671,7 @@ java_defaults {
             "system/security/keystore/binder",
         ],
 
-        generate_get_transaction_name: true
+        generate_get_transaction_name: true,
     },
 
     exclude_srcs: [
@@ -677,7 +679,7 @@ java_defaults {
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     libs: [
         "ext",
     ],
@@ -686,6 +688,7 @@ java_defaults {
 
     static_libs: [
         "apex_aidl_interface-java",
+        "suspend_control_aidl_interface-java",
         "framework-protos",
         "game-driver-protos",
         "android.hidl.base-V1.0-java",
@@ -733,6 +736,7 @@ filegroup {
         "core/java/android/os/IIncidentManager.aidl",
         "core/java/android/os/IIncidentReportStatusListener.aidl",
     ],
+    path: "core/java",
 }
 
 filegroup {
@@ -741,6 +745,7 @@ filegroup {
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
     ],
+    path: "core/java",
 }
 
 java_library {
@@ -752,19 +757,27 @@ java_library {
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
+    installable: false,
     // Use UsedByApps annotation processor
     plugins: ["unsupportedappusage-annotation-processor"],
 }
 
-// A host library including just UnsupportedAppUsage.java so that the annotation
-// processor can also use this annotation.
-java_library_host {
+// A library including just UnsupportedAppUsage.java classes.
+//
+// Provided for target so that libraries can use it without depending on
+// the whole of framework or the core platform API.
+//
+// Built for host so that the annotation processor can also use this annotation.
+java_library {
     name: "unsupportedappusage-annotation",
+    host_supported: true,
     srcs: [
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         ":unsupportedappusage_annotation_files",
     ],
+
+    sdk_version: "core_current",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
@@ -791,7 +804,7 @@ gensrcs {
     name: "framework-javastream-protos",
     depfile: true,
 
-    tool_files: [ "tools/genprotos.sh", ],
+    tool_files: ["tools/genprotos.sh"],
     tools: [
         "aprotoc",
         "protoc-gen-javastream",
@@ -802,13 +815,13 @@ gensrcs {
     // end up with a command that is extremely long, potentially going passed MAX_ARG_STRLEN due to
     // the way sbox rewrites the command. See b/70221552.
     cmd: "$(location tools/genprotos.sh) " +
-              " $(location aprotoc) " +
-              " $(location protoc-gen-javastream) " +
-              " $(location soong_zip) " +
-              " $(genDir) " +
-              " $(depfile) " +
-              " $(in) " +
-              " $(out)",
+        " $(location aprotoc) " +
+        " $(location protoc-gen-javastream) " +
+        " $(location soong_zip) " +
+        " $(genDir) " +
+        " $(depfile) " +
+        " $(in) " +
+        " $(out)",
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
@@ -826,7 +839,7 @@ filegroup {
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
-    ]
+    ],
 }
 
 filegroup {
@@ -847,7 +860,7 @@ filegroup {
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/android/net/shared/*.java",
-    ]
+    ],
 }
 
 // Build ext.jar
@@ -855,7 +868,7 @@ filegroup {
 java_library {
     name: "ext",
     installable: true,
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     static_libs: [
         "libphonenumber-platform",
         "nist-sip",
@@ -883,7 +896,7 @@ java_library_host {
         type: "full",
     },
     errorprone: {
-        javacflags: ["-Xep:MissingOverride:OFF"],  // b/72714520
+        javacflags: ["-Xep:MissingOverride:OFF"], // b/72714520
     },
 }
 
@@ -1014,7 +1027,7 @@ optional_subdirs = [
 // updated to use hwbinder.stubs.
 java_library {
     name: "hwbinder",
-    no_framework_libs: true,
+    sdk_version: "core_platform",
 
     srcs: [
         "core/java/android/os/HidlSupport.java",
@@ -1102,12 +1115,30 @@ filegroup {
     ],
 }
 
+// Make the api/system-current.txt file available for use by modules in other
+// directories.
+filegroup {
+    name: "frameworks-base-api-system-current.txt",
+    srcs: [
+        "api/system-current.txt",
+    ],
+}
+
+// Make the api/system-removed.txt file available for use by modules in other
+// directories.
+filegroup {
+    name: "frameworks-base-api-system-removed.txt",
+    srcs: [
+        "api/system-removed.txt",
+    ],
+}
+
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
-     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-     "-overview $(location core/java/overview.html) " +
-     // Federate Support Library references against local API file.
-     "-federate SupportLib https://developer.android.com " +
-     "-federationapi SupportLib $(location :current-support-api) "
+    "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
+    "-overview $(location core/java/overview.html) " +
+    // Federate Support Library references against local API file.
+    "-federate SupportLib https://developer.android.com " +
+    "-federationapi SupportLib $(location :current-support-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -1155,7 +1186,22 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
+
+// http://b/129765390 Rewrite links to "platform" or "technotes" folders
+// which are siblings (and thus outside of) {@docRoot}.
+//
+// We have to escape \ as \\ and $ as $$ here because they get resolved by
+// different layers of the build tooling. The arguments are wrapped in '' so
+// that the shell doesn't add yet another level of escaping.
+metalava_framework_docs_args += " --replace-documentation " +
+    // packages whose descendants to apply replacement to (all packages from
+    // libcore/ojluni/src/main/java that contribute to documentation).
+    "com.sun:java:javax:jdk.net:sun " +
+    // regex of the string to replace
+    "'(<a\\s+href\\s?=[\\*\\s]*\")(?:(?:\\{@docRoot\\}/\\.\\./)|(?:(?:\\.\\./)+))((?:platform|technotes).+)\">' " +
+    // replacement (with $1, $2 backreferences to the regex groups)
+    "'$$1https://docs.oracle.com/javase/8/docs/$$2\">' "
 
 stubs_defaults {
     name: "framework-doc-stubs-default",
@@ -1189,7 +1235,7 @@ stubs_defaults {
 doc_defaults {
     name: "framework-docs-default",
     libs: framework_docs_only_libs +
-         ["stub-annotations"],
+        ["stub-annotations"],
     html_dirs: [
         "docs/html",
     ],
@@ -1321,8 +1367,8 @@ droiddoc {
         "android.whichdoc offline",
     ],
     proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
-    args: framework_docs_only_args  + " -hide 101 -hide 104 -hide 108" +
-        " -offlinemode -title \"Android System SDK\" -referenceonly",
+    args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
+    " -offlinemode -title \"Android System SDK\" -referenceonly",
     write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
@@ -1339,7 +1385,7 @@ droiddoc {
         "android.hasSamples true",
     ],
     proofread_file: "online-sdk-docs-proofrerad.txt",
-    args: framework_docs_only_args  +
+    args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
@@ -1432,10 +1478,10 @@ droiddoc {
     ],
     proofread_file: "ds-static-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -staticonly " +
-          " -toroot / " +
-          " -devsite " +
-          " -ignoreJdLinks ",
+        " -staticonly " +
+        " -toroot / " +
+        " -devsite " +
+        " -ignoreJdLinks ",
 }
 
 droiddoc {
@@ -1449,9 +1495,9 @@ droiddoc {
     ],
     proofread_file: "ds-ref-navtree-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -toroot / " +
-          " -atLinksNavtree " +
-          " -navtreeonly ",
+        " -toroot / " +
+        " -atLinksNavtree " +
+        " -navtreeonly ",
 }
 
 droiddoc {
@@ -1491,8 +1537,8 @@ droiddoc {
     ],
     proofread_file: "hidden-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -referenceonly " +
-          " -title \"Android SDK - Including hidden APIs.\"",
+        " -referenceonly " +
+        " -title \"Android SDK - Including hidden APIs.\"",
 }
 
 droidstubs {
@@ -1514,7 +1560,7 @@ droidstubs {
         "core/java/android/util/AndroidException.java",
     ],
     installable: false,
-    no_framework_libs: true,
+    sdk_version: "core_platform",
     annotations_enabled: true,
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
@@ -1544,9 +1590,8 @@ droidstubs {
     args: metalava_framework_docs_args +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi "
+        " --show-annotation android.annotation.TestApi ",
 }
-
 
 droidstubs {
     name: "hiddenapi-mappings",
@@ -1566,7 +1611,7 @@ droidstubs {
         " --hide UnhiddenSystemApi " +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi "
+        " --show-annotation android.annotation.TestApi ",
 }
 
 filegroup {
@@ -1670,5 +1715,15 @@ filegroup {
 aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: [":framework-defaults"],
-    output: "framework-aidl-mappings.txt"
+    output: "framework-aidl-mappings.txt",
+}
+
+genrule {
+    name: "framework-annotation-proc-index",
+    srcs: [":framework-annotation-proc"],
+    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
+    out: ["unsupportedappusage_index.csv"],
+    dist: {
+        targets: ["droidcore"],
+    },
 }

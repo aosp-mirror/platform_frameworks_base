@@ -18,7 +18,11 @@ package android.net;
 
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
-import android.os.Parcel;
+import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
+import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
+import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
+import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
@@ -109,47 +113,37 @@ public class RouteInfoTest extends TestCase {
         assertFalse(ipv4Default.matches(Address("2001:db8::f00")));
     }
 
-    private void assertAreEqual(Object o1, Object o2) {
-        assertTrue(o1.equals(o2));
-        assertTrue(o2.equals(o1));
-    }
-
-    private void assertAreNotEqual(Object o1, Object o2) {
-        assertFalse(o1.equals(o2));
-        assertFalse(o2.equals(o1));
-    }
-
     public void testEquals() {
         // IPv4
         RouteInfo r1 = new RouteInfo(Prefix("2001:db8:ace::/48"), Address("2001:db8::1"), "wlan0");
         RouteInfo r2 = new RouteInfo(Prefix("2001:db8:ace::/48"), Address("2001:db8::1"), "wlan0");
-        assertAreEqual(r1, r2);
+        assertEqualBothWays(r1, r2);
 
         RouteInfo r3 = new RouteInfo(Prefix("2001:db8:ace::/49"), Address("2001:db8::1"), "wlan0");
         RouteInfo r4 = new RouteInfo(Prefix("2001:db8:ace::/48"), Address("2001:db8::2"), "wlan0");
         RouteInfo r5 = new RouteInfo(Prefix("2001:db8:ace::/48"), Address("2001:db8::1"), "rmnet0");
-        assertAreNotEqual(r1, r3);
-        assertAreNotEqual(r1, r4);
-        assertAreNotEqual(r1, r5);
+        assertNotEqualEitherWay(r1, r3);
+        assertNotEqualEitherWay(r1, r4);
+        assertNotEqualEitherWay(r1, r5);
 
         // IPv6
         r1 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.1"), "wlan0");
         r2 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.1"), "wlan0");
-        assertAreEqual(r1, r2);
+        assertEqualBothWays(r1, r2);
 
         r3 = new RouteInfo(Prefix("192.0.2.0/24"), Address("192.0.2.1"), "wlan0");
         r4 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.2"), "wlan0");
         r5 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.1"), "rmnet0");
-        assertAreNotEqual(r1, r3);
-        assertAreNotEqual(r1, r4);
-        assertAreNotEqual(r1, r5);
+        assertNotEqualEitherWay(r1, r3);
+        assertNotEqualEitherWay(r1, r4);
+        assertNotEqualEitherWay(r1, r5);
 
         // Interfaces (but not destinations or gateways) can be null.
         r1 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.1"), null);
         r2 = new RouteInfo(Prefix("192.0.2.0/25"), Address("192.0.2.1"), null);
         r3 = new RouteInfo(Prefix("192.0.2.0/24"), Address("192.0.2.1"), "wlan0");
-        assertAreEqual(r1, r2);
-        assertAreNotEqual(r1, r3);
+        assertEqualBothWays(r1, r2);
+        assertNotEqualEitherWay(r1, r3);
     }
 
     public void testHostAndDefaultRoutes() {
@@ -257,25 +251,6 @@ public class RouteInfoTest extends TestCase {
       // No exceptions? Good.
     }
 
-    public RouteInfo passThroughParcel(RouteInfo r) {
-        Parcel p = Parcel.obtain();
-        RouteInfo r2 = null;
-        try {
-            r.writeToParcel(p, 0);
-            p.setDataPosition(0);
-            r2 = RouteInfo.CREATOR.createFromParcel(p);
-        } finally {
-            p.recycle();
-        }
-        assertNotNull(r2);
-        return r2;
-    }
-
-    public void assertParcelingIsLossless(RouteInfo r) {
-      RouteInfo r2 = passThroughParcel(r);
-      assertEquals(r, r2);
-    }
-
     public void testParceling() {
         RouteInfo r;
 
@@ -283,6 +258,6 @@ public class RouteInfoTest extends TestCase {
         assertParcelingIsLossless(r);
 
         r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
-        assertParcelingIsLossless(r);
+        assertParcelSane(r, 6);
     }
 }
