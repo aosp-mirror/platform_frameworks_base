@@ -167,4 +167,8 @@ class KeyguardBypassController {
         pw.print("  qSExpanded: "); pw.println(qSExpanded)
         pw.print("  bouncerShowing: "); pw.println(bouncerShowing)
     }
+
+    companion object {
+        const val BYPASS_PANEL_FADE_DURATION = 67
+    }
 }
