@@ -198,7 +198,10 @@ public class DozeSensors {
         updateListening();
     }
 
-    private void updateListening() {
+    /**
+     * Registers/unregisters sensors based on internal state.
+     */
+    public void updateListening() {
         boolean anyListening = false;
         for (TriggerSensor s : mSensors) {
             // We don't want to be listening while we're PAUSED (prox sensor is covered)
@@ -231,7 +234,7 @@ public class DozeSensors {
 
     public void onUserSwitched() {
         for (TriggerSensor s : mSensors) {
-            s.updateListener();
+            s.updateListening();
         }
     }
 
@@ -246,7 +249,7 @@ public class DozeSensors {
                 return;
             }
             for (TriggerSensor s : mSensors) {
-                s.updateListener();
+                s.updateListening();
             }
         }
     };
@@ -409,22 +412,22 @@ public class DozeSensors {
         public void setListening(boolean listen) {
             if (mRequested == listen) return;
             mRequested = listen;
-            updateListener();
+            updateListening();
         }
 
         public void setDisabled(boolean disabled) {
             if (mDisabled == disabled) return;
             mDisabled = disabled;
-            updateListener();
+            updateListening();
         }
 
         public void ignoreSetting(boolean ignored) {
             if (mIgnoresSetting == ignored) return;
             mIgnoresSetting = ignored;
-            updateListener();
+            updateListening();
         }
 
-        public void updateListener() {
+        public void updateListening() {
             if (!mConfigured || mSensor == null) return;
             if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)
                     && !mRegistered) {
@@ -480,7 +483,7 @@ public class DozeSensors {
                 mCallback.onSensorPulse(mPulseReason, mSensorPerformsProxCheck, screenX, screenY,
                         event.values);
                 if (!mRegistered) {
-                    updateListener();  // reregister, this sensor only fires once
+                    updateListening();  // reregister, this sensor only fires once
                 }
             }));
         }
@@ -541,7 +544,7 @@ public class DozeSensors {
         }
 
         @Override
-        public void updateListener() {
+        public void updateListening() {
             if (!mConfigured) return;
             AsyncSensorManager asyncSensorManager = (AsyncSensorManager) mSensorManager;
             if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)
