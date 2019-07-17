@@ -82,7 +82,10 @@ public class DozeScreenState implements DozeMachine.Part {
         boolean messagePending = mHandler.hasCallbacks(mApplyPendingScreenState);
         boolean pulseEnding = oldState  == DozeMachine.State.DOZE_PULSE_DONE
                 && newState == DozeMachine.State.DOZE_AOD;
-        if (messagePending || oldState == DozeMachine.State.INITIALIZED || pulseEnding) {
+        boolean turningOn = (oldState == DozeMachine.State.DOZE_AOD_PAUSED
+                || oldState  == DozeMachine.State.DOZE) && newState == DozeMachine.State.DOZE_AOD;
+        boolean justInitialized = oldState == DozeMachine.State.INITIALIZED;
+        if (messagePending || justInitialized || pulseEnding || turningOn) {
             // During initialization, we hide the navigation bar. That is however only applied after
             // a traversal; setting the screen state here is immediate however, so it can happen
             // that the screen turns on again before the navigation bar is hidden. To work around
@@ -91,7 +94,7 @@ public class DozeScreenState implements DozeMachine.Part {
 
             // Delay screen state transitions even longer while animations are running.
             boolean shouldDelayTransition = newState == DozeMachine.State.DOZE_AOD
-                    && mParameters.shouldControlScreenOff();
+                    && mParameters.shouldControlScreenOff() && !turningOn;
 
             if (shouldDelayTransition) {
                 mWakeLock.setAcquired(true);

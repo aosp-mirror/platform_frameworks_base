@@ -201,7 +201,7 @@ public class DozeTriggers implements DozeMachine.Part {
             // Let's prepare the display to wake-up by drawing black.
             // This will cover the hardware wake-up sequence, where the display
             // becomes black for a few frames.
-            mDozeHost.setAodDimmingScrim(255f);
+            mDozeHost.setAodDimmingScrim(1f);
         }
         mMachine.wakeUp();
     }
