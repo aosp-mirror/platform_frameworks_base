@@ -154,12 +154,8 @@
     <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
 
-    <!-- The number of milliseconds before the ambient notification auto-dismisses. This will
-         override the default pulse length. -->
-    <integer name="heads_up_notification_decay_dozing">10000</integer>
-
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
-    <integer name="ambient_notification_extension_time">6000</integer>
+    <integer name="ambient_notification_extension_time">10000</integer>
 
     <!-- In multi-window, determines whether the stack where recents lives should grow from
          the smallest position when being launched. -->
