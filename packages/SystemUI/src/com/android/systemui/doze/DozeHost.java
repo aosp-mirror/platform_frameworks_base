@@ -50,8 +50,22 @@ public interface DozeHost {
      */
     void onSlpiTap(float x, float y);
 
+    /**
+     * Artificially dim down the the display by changing scrim opacities.
+     * @param scrimOpacity opacity from 0 to 1.
+     */
     default void setAodDimmingScrim(float scrimOpacity) {}
+
+    /**
+     * Sets the actual display brightness.
+     * @param value from 0 to 255.
+     */
     void setDozeScreenBrightness(int value);
+
+    /**
+     * Makes scrims black and changes animation durations.
+     */
+    default void prepareForGentleWakeUp() {}
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
