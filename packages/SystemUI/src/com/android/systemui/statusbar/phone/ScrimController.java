@@ -511,7 +511,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      */
     public void prepareForGentleWakeUp() {
         if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
-            mCurrentInFrontAlpha = 1f;
+            mInFrontAlpha = 1f;
             mAnimateChange = false;
             updateScrims();
             mAnimateChange = true;
@@ -990,6 +990,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
                 mBehindAlpha = newBehindAlpha;
                 updateScrims();
             }
+        }
+    }
+
+    public void setUnlockIsFading(boolean unlockFading) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setUnlockIsFading(unlockFading);
         }
     }
 
