@@ -4807,7 +4807,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Re-parent IME's SurfaceControl when MagnificationSpec changed.
         updateImeParent();
 
-        applyMagnificationSpec(getPendingTransaction(), spec);
+        if (spec.scale != 1.0) {
+            applyMagnificationSpec(getPendingTransaction(), spec);
+        } else {
+            clearMagnificationSpec(getPendingTransaction());
+        }
         getPendingTransaction().apply();
     }
 
