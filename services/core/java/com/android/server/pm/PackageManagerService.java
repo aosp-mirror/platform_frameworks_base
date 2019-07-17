@@ -168,8 +168,8 @@ import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -259,7 +259,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -299,8 +298,6 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
-import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
@@ -336,6 +333,7 @@ import dalvik.system.CloseGuard;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -380,7 +378,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -9007,6 +9004,20 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * Enforces that only the system UID or root's UID or shell's UID can call
+     * a method exposed via Binder.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or shell
+     */
+    private static void enforceSystemOrRootOrShell(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
+            throw new SecurityException(message);
+        }
+    }
+
     @Override
     public void performFstrimIfNeeded() {
         enforceSystemOrRoot("Only the system can request fstrim");
@@ -9501,7 +9512,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
+        enforceSystemOrRootOrShell("runBackgroundDexoptJob");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private static List<SharedLibraryInfo> findSharedLibraries(PackageParser.Package p) {
@@ -9972,8 +9989,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         // lib signing cert could have rotated beyond the one expected, check to see
                         // if the new one has been blessed by the old
-                        if (!libPkg.mSigningDetails.hasSha256Certificate(
-                                ByteStringUtils.fromHexToByteArray(expectedCertDigests[0]))) {
+                        byte[] digestBytes = HexEncoding.decode(
+                                expectedCertDigests[0], false /* allowSingleChar */);
+                        if (!libPkg.mSigningDetails.hasSha256Certificate(digestBytes)) {
                             throw new PackageManagerException(
                                     INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                     "Package " + packageName + " requires differently signed" +
@@ -18307,6 +18325,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean isPackageDeviceAdminOnAnyUser(String packageName) {
         final int callingUid = Binder.getCallingUid();
+        if (checkUidPermission(android.Manifest.permission.MANAGE_USERS, callingUid)
+                != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "128599183", -1, "");
+            throw new SecurityException(android.Manifest.permission.MANAGE_USERS
+                    + " permission is required to call this API");
+        }
         if (getInstantAppPackageName(callingUid) != null
                 && !isCallerSameApp(packageName, callingUid)) {
             return false;

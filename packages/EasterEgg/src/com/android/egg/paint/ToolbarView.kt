@@ -17,19 +17,10 @@
 package com.android.egg.paint
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.drawable.Drawable
-import android.text.TextPaint
-import android.transition.ChangeBounds
 import android.transition.Transition
 import android.transition.TransitionListenerAdapter
-import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.*
-import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 
 class ToolbarView : FrameLayout {
@@ -44,15 +35,16 @@ class ToolbarView : FrameLayout {
     }
 
     constructor(context: Context) : super(context) {
-        init(null, 0)
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(attrs, 0)
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        init(attrs, defStyle)
+    constructor(
+        context: Context,
+        attrs: AttributeSet,
+        defStyle: Int
+    ) : super(context, attrs, defStyle) {
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets?): WindowInsets {
@@ -70,8 +62,4 @@ class ToolbarView : FrameLayout {
 
         return super.onApplyWindowInsets(insets)
     }
-
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
-    }
-
 }

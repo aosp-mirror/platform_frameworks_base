@@ -68,8 +68,8 @@ android_library {
     ],
 
     aaptflags: [
-        "--extra-packages",
-        "com.android.keyguard",
+        "--extra-packages com.android.keyguard",
+        "--legacy",
     ],
 }
 

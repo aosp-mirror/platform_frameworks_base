@@ -20,7 +20,7 @@
     package="com.android.cts.priv.ctsshim" >
 
     <uses-sdk android:minSdkVersion="24"
-        android:targetSdkVersion="24" />
+        android:targetSdkVersion="28" />
 
     <application
         android:hasCode="false"

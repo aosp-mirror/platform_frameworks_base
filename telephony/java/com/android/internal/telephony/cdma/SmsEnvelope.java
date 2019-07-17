@@ -97,6 +97,12 @@ public final class SmsEnvelope {
     public CdmaSmsSubaddress origSubaddress;
 
     /**
+     * The destination subaddress identifies the target of the SMS message.
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.4)
+     */
+    public CdmaSmsSubaddress destSubaddress;
+
+    /**
      * The 6-bit bearer reply parameter is used to request the return of a
      * SMS Acknowledge Message.
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.5)

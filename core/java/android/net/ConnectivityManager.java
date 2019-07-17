@@ -655,7 +655,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
+    @UnsupportedAppUsage
     public static final int TYPE_WIFI_P2P    = 13;
 
     /**

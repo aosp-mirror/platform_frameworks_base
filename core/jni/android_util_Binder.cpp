@@ -99,7 +99,9 @@ static struct sparseintarray_offsets_t
 
 static struct error_offsets_t
 {
-    jclass mClass;
+    jclass mError;
+    jclass mOutOfMemory;
+    jclass mStackOverflow;
 } gErrorOffsets;
 
 // ----------------------------------------------------------------------------
@@ -208,6 +210,16 @@ static JNIEnv* javavm_to_jnienv(JavaVM* vm)
     return vm->GetEnv((void **)&env, JNI_VERSION_1_4) >= 0 ? env : NULL;
 }
 
+static const char* GetErrorTypeName(JNIEnv* env, jthrowable error) {
+  if (env->IsInstanceOf(error, gErrorOffsets.mOutOfMemory)) {
+    return "OutOfMemoryError";
+  }
+  if (env->IsInstanceOf(error, gErrorOffsets.mStackOverflow)) {
+    return "StackOverflowError";
+  }
+  return nullptr;
+}
+
 // Report a java.lang.Error (or subclass). This will terminate the runtime by
 // calling FatalError with a message derived from the given error.
 static void report_java_lang_error_fatal_error(JNIEnv* env, jthrowable error,
@@ -217,7 +229,7 @@ static void report_java_lang_error_fatal_error(JNIEnv* env, jthrowable error,
 
     // Try to get the exception string. Sometimes logcat isn't available,
     // so try to add it to the abort message.
-    std::string exc_msg = "(Unknown exception message)";
+    std::string exc_msg;
     {
         ScopedLocalRef<jclass> exc_class(env, env->GetObjectClass(error));
         jmethodID method_id = env->GetMethodID(exc_class.get(), "toString",
@@ -226,13 +238,34 @@ static void report_java_lang_error_fatal_error(JNIEnv* env, jthrowable error,
                 env,
                 reinterpret_cast<jstring>(
                         env->CallObjectMethod(error, method_id)));
-        env->ExceptionClear();  // Just for good measure.
+        ScopedLocalRef<jthrowable> new_error(env, nullptr);
+        bool got_jstr = false;
+        if (env->ExceptionCheck()) {
+            new_error = ScopedLocalRef<jthrowable>(env, env->ExceptionOccurred());
+            env->ExceptionClear();
+        }
         if (jstr.get() != nullptr) {
             ScopedUtfChars jstr_utf(env, jstr.get());
             if (jstr_utf.c_str() != nullptr) {
                 exc_msg = jstr_utf.c_str();
+                got_jstr = true;
             } else {
+                new_error = ScopedLocalRef<jthrowable>(env, env->ExceptionOccurred());
                 env->ExceptionClear();
+            }
+        }
+        if (!got_jstr) {
+            exc_msg = "(Unknown exception message)";
+            const char* orig_type = GetErrorTypeName(env, error);
+            if (orig_type != nullptr) {
+                exc_msg = base::StringPrintf("%s (Error was %s)", exc_msg.c_str(), orig_type);
+            }
+            const char* new_type =
+                new_error == nullptr ? nullptr : GetErrorTypeName(env, new_error.get());
+            if (new_type != nullptr) {
+                exc_msg = base::StringPrintf("%s (toString() error was %s)",
+                                             exc_msg.c_str(),
+                                             new_type);
             }
         }
     }
@@ -292,7 +325,7 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         ALOGE("%s", msg);
     }
 
-    if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
+    if (env->IsInstanceOf(excep, gErrorOffsets.mError)) {
         report_java_lang_error(env, excep, msg);
     }
 }
@@ -1417,10 +1450,13 @@ const char* const kBinderProxyPathName = "android/os/BinderProxy";
 
 static int int_register_android_os_BinderProxy(JNIEnv* env)
 {
-    jclass clazz = FindClassOrDie(env, "java/lang/Error");
-    gErrorOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
+    gErrorOffsets.mError = MakeGlobalRefOrDie(env, FindClassOrDie(env, "java/lang/Error"));
+    gErrorOffsets.mOutOfMemory =
+        MakeGlobalRefOrDie(env, FindClassOrDie(env, "java/lang/OutOfMemoryError"));
+    gErrorOffsets.mStackOverflow =
+        MakeGlobalRefOrDie(env, FindClassOrDie(env, "java/lang/StackOverflowError"));
 
-    clazz = FindClassOrDie(env, kBinderProxyPathName);
+    jclass clazz = FindClassOrDie(env, kBinderProxyPathName);
     gBinderProxyOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderProxyOffsets.mGetInstance = GetStaticMethodIDOrDie(env, clazz, "getInstance",
             "(JJ)Landroid/os/BinderProxy;");

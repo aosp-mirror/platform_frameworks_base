@@ -39,7 +39,7 @@ using namespace android;
 class _ZipEntryRO {
 public:
     ZipEntry entry;
-    ZipString name;
+    std::string_view name;
     void *cookie;
 
     _ZipEntryRO() : cookie(NULL) {}
@@ -96,7 +96,7 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
     _ZipEntryRO* data = new _ZipEntryRO;
 
-    data->name = ZipString(entryName);
+    data->name = entryName;
 
     const int32_t error = FindEntry(mHandle, entryName, &(data->entry));
     if (error) {
@@ -194,14 +194,14 @@ int ZipFileRO::getEntryFileName(ZipEntryRO entry, char* buffer, size_t bufLen)
     const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
-    const uint16_t requiredSize = zipEntry->name.name_length + 1;
+    const uint16_t requiredSize = zipEntry->name.length() + 1;
 
     if (bufLen < requiredSize) {
         ALOGW("Buffer too short, requires %d bytes for entry name", requiredSize);
         return requiredSize;
     }
 
-    memcpy(buffer, zipEntry->name.name, requiredSize - 1);
+    memcpy(buffer, zipEntry->name.data(), requiredSize - 1);
     buffer[requiredSize - 1] = '\0';
 
     return 0;

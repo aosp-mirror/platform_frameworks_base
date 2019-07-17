@@ -353,7 +353,7 @@
          overridden by the device to present the capability of creating socket keepalives. -->
     <!-- An Array of "[NetworkCapabilities.TRANSPORT_*],[supported keepalives] -->
     <string-array translatable="false" name="config_networkSupportedKeepaliveCount">
-        <item>0,3</item>
+        <item>0,1</item>
         <item>1,3</item>
     </string-array>
 
@@ -2806,6 +2806,14 @@
          empty string is passed in -->
     <string name="config_wlan_data_service_package" translatable="false"></string>
 
+    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_class" translatable="false"></string>
+
+    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_class" translatable="false"></string>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
@@ -3543,13 +3551,21 @@
     <!-- Cellular network service package name to bind to by default. -->
     <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
 
+    <!-- Cellular network service class name to bind to by default.-->
+    <string name="config_wwan_network_service_class" translatable="false"></string>
+
     <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
     <string name="config_wlan_network_service_package" translatable="false"></string>
 
+    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_class" translatable="false"></string>
     <!-- Telephony qualified networks service package name to bind to by default. -->
     <string name="config_qualified_networks_service_package" translatable="false"></string>
 
+    <!-- Telephony qualified networks service class name to bind to by default. -->
+    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>

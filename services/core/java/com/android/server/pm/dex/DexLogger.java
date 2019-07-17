@@ -16,12 +16,12 @@
 
 package com.android.server.pm.dex;
 
+import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.RemoteException;
-
 import android.util.ArraySet;
-import android.util.ByteStringUtils;
 import android.util.EventLog;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -31,10 +31,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 
+import libcore.util.HexEncoding;
+
 import java.io.File;
 import java.util.Set;
-
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
 /**
  * This class is responsible for logging data about secondary dex files.
@@ -91,7 +91,7 @@ public class DexLogger implements DexManager.Listener {
         String message = PackageUtils.computeSha256Digest(dexFileName.getBytes());
         // Valid SHA256 will be 256 bits, 32 bytes.
         if (hash.length == 32) {
-            message = message + ' ' + ByteStringUtils.toHexString(hash);
+            message = message + ' ' + HexEncoding.encodeToString(hash);
         }
 
         writeDclEvent(ownerUid, message);

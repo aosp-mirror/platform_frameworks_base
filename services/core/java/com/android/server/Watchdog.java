@@ -91,16 +91,17 @@ public class Watchdog extends Thread {
     };
 
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
-        "android.hardware.audio@2.0::IDevicesFactory",
-        "android.hardware.audio@4.0::IDevicesFactory",
-        "android.hardware.bluetooth@1.0::IBluetoothHci",
-        "android.hardware.camera.provider@2.4::ICameraProvider",
-        "android.hardware.graphics.composer@2.1::IComposer",
-        "android.hardware.health@2.0::IHealth",
-        "android.hardware.media.omx@1.0::IOmx",
-        "android.hardware.media.omx@1.0::IOmxStore",
-        "android.hardware.sensors@1.0::ISensors",
-        "android.hardware.vr@1.0::IVr"
+            "android.hardware.audio@2.0::IDevicesFactory",
+            "android.hardware.audio@4.0::IDevicesFactory",
+            "android.hardware.bluetooth@1.0::IBluetoothHci",
+            "android.hardware.camera.provider@2.4::ICameraProvider",
+            "android.hardware.graphics.composer@2.1::IComposer",
+            "android.hardware.health@2.0::IHealth",
+            "android.hardware.media.omx@1.0::IOmx",
+            "android.hardware.media.omx@1.0::IOmxStore",
+            "android.hardware.sensors@1.0::ISensors",
+            "android.hardware.vr@1.0::IVr",
+            "android.system.suspend@1.0::ISystemSuspend"
     );
 
     static Watchdog sWatchdog;

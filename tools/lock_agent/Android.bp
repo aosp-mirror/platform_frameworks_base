@@ -12,11 +12,9 @@ cc_library {
     ],
     sdk_version: "current",
     stl: "c++_static",
-    include_dirs: [
-        // NDK headers aren't available in platform NDK builds.
-        "libnativehelper/include_jni",
-    ],
     header_libs: [
+        // Use ScopedUtfChars.
+        "libnativehelper_header_only",
         "libopenjdkjvmti_headers",
     ],
     compile_multilib: "both",
@@ -30,11 +28,9 @@ cc_binary_host {
         "libz",
         "slicer",
     ],
-    include_dirs: [
-        // NDK headers aren't available in platform NDK builds.
-        "libnativehelper/include_jni",
-    ],
     header_libs: [
+        // Use ScopedUtfChars.
+        "libnativehelper_header_only",
         "libopenjdkjvmti_headers",
     ],
 }
@@ -51,11 +47,22 @@ java_library {
     installable: true,
 }
 
+cc_binary {
+    name: "lockagent_crasher",
+    srcs: ["crasher.cpp"],
+    static_libs: ["libbase_ndk"],
+    shared_libs: ["liblog"],
+    sdk_version: "current",
+    stl: "c++_static",
+    compile_multilib: "first",
+}
+
 sh_binary {
     name: "start_with_lockagent",
     src: "start_with_lockagent.sh",
     required: [
         "liblockagent",
         "lockagent",
+        "lockagent_crasher",
     ],
 }

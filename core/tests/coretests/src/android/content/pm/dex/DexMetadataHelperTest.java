@@ -45,12 +45,12 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import libcore.testing.io.TestIoUtils;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 @SmallTest
@@ -59,21 +59,14 @@ public class DexMetadataHelperTest {
     private static final String APK_FILE_EXTENSION = ".apk";
     private static final String DEX_METADATA_FILE_EXTENSION = ".dm";
 
+    @Rule
+    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
+
     private File mTmpDir = null;
 
     @Before
-    public void setUp() {
-        mTmpDir = TestIoUtils.createTemporaryDirectory("DexMetadataHelperTest");
-    }
-
-    @After
-    public void tearDown() {
-        if (mTmpDir != null) {
-            File[] files = mTmpDir.listFiles();
-            for (File f : files) {
-                f.delete();
-            }
-        }
+    public void setUp() throws IOException {
+        mTmpDir = mTemporaryFolder.newFolder("DexMetadataHelperTest");
     }
 
     private File createDexMetadataFile(String apkFileName) throws IOException {

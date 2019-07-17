@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -848,15 +849,18 @@ public class TelecomManager {
 
     /**
      * Returns the current SIM call manager. Apps must be prepared for this method to return
-     * {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * {@code null}, indicating that there currently exists no SIM call manager {@link PhoneAccount}
+     * for the default voice subscription.
      *
-     * @return The phone account handle of the current sim call manager.
+     * @return The phone account handle of the current sim call manager for the default voice
+     * subscription.
+     * @see SubscriptionManager#getDefaultVoiceSubscriptionId()
      */
     public PhoneAccountHandle getSimCallManager() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getSimCallManager();
+                return getTelecomService().getSimCallManager(
+                        SubscriptionManager.getDefaultSubscriptionId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
@@ -865,9 +869,32 @@ public class TelecomManager {
     }
 
     /**
-     * Returns the current SIM call manager for the specified user. Apps must be prepared for this
-     * method to return {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * Returns current SIM call manager for the Telephony Subscription ID specified. Apps must be
+     * prepared for this method to return {@code null}, indicating that there currently exists no
+     * SIM call manager {@link PhoneAccount} for the subscription specified.
+     *
+     * @param subscriptionId The Telephony Subscription ID that the SIM call manager should be
+     *                       queried for.
+     * @return The phone account handle of the current sim call manager.
+     * @see SubscriptionManager#getActiveSubscriptionInfoList()
+     * @hide
+     */
+    public PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getSimCallManager(subscriptionId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
+        }
+        return null;
+    }
+
+    /**
+     * Returns the current SIM call manager for the user-chosen default Telephony Subscription ID
+     * (see {@link SubscriptionManager#getDefaultSubscriptionId()}) and the specified user. Apps
+     * must be prepared for this method to return {@code null}, indicating that there currently
+     * exists no SIM call manager {@link PhoneAccount} for the default voice subscription.
      *
      * @return The phone account handle of the current sim call manager.
      *
@@ -888,8 +915,8 @@ public class TelecomManager {
 
     /**
      * Returns the current connection manager. Apps must be prepared for this method to return
-     * {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * {@code null}, indicating that there currently exists no Connection Manager
+     * {@link PhoneAccount} for the default voice subscription.
      *
      * @return The phone account handle of the current connection manager.
      * @hide
@@ -1772,6 +1799,13 @@ public class TelecomManager {
      *
      * Self-managed {@link ConnectionService}s require permission
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
+     *
+     * <p class="note"><strong>Note:</strong> If this method is used to place an emergency call, it
+     * is not guaranteed that the call will be placed on the {@link PhoneAccount} provided in
+     * the {@link #EXTRA_PHONE_ACCOUNT_HANDLE} extra (if specified) and may be placed on another
+     * {@link PhoneAccount} with the {@link PhoneAccount#CAPABILITY_PLACE_EMERGENCY_CALLS}
+     * capability, depending on external factors, such as network conditions and Modem/SIM status.
+     * </p>
      *
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
