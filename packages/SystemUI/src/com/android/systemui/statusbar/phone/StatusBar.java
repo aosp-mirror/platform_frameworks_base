@@ -1213,6 +1213,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext),
                 new Handler(), mKeyguardUpdateMonitor, Dependency.get(TunerService.class));
+        putComponent(BiometricUnlockController.class, mBiometricUnlockController);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container));

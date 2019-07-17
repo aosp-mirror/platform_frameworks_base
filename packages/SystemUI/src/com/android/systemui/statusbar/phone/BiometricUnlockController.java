@@ -132,6 +132,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private BiometricSourceType mPendingAuthenticatedBioSourceType = null;
     private boolean mPendingShowBouncer;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
+    private boolean mFadedAwayAfterWakeAndUnlock;
 
     private final TunerService.Tunable mFaceDismissedKeyguardTunable = new TunerService.Tunable() {
         @Override
@@ -360,6 +361,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     @Override
     public void onStartedGoingToSleep(int why) {
         resetMode();
+        mFadedAwayAfterWakeAndUnlock = false;
         mPendingAuthenticatedUserId = -1;
         mPendingAuthenticatedBioSourceType = null;
     }
@@ -454,6 +456,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     public void finishKeyguardFadingAway() {
+        if (isWakeAndUnlock()) {
+            mFadedAwayAfterWakeAndUnlock = true;
+        }
         resetMode();
     }
 
@@ -501,6 +506,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         return mMode == MODE_WAKE_AND_UNLOCK
                 || mMode == MODE_WAKE_AND_UNLOCK_PULSING
                 || mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM;
+    }
+
+    /**
+     * Successful authentication with fingerprint, face, or iris that wakes up the device.
+     * This will return {@code true} even after the keyguard fades away.
+     */
+    public boolean unlockedByWakeAndUnlock() {
+        return  isWakeAndUnlock() || mFadedAwayAfterWakeAndUnlock;
     }
 
     /**
