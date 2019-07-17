@@ -29,6 +29,14 @@ android::StringPiece GetExtension(android::StringPiece path) {
   return android::StringPiece(iter, path.end() - iter);
 }
 
+void FillTable(aapt::test::ResourceTableBuilder& builder, int start, int end) {
+  for (int i=start; i<end; i++) {
+    builder.AddFileReference(
+        "android:drawable/xmlfile" + std::to_string(i),
+        "res/drawable/xmlfile" + std::to_string(i) + ".xml");
+  }
+}
+
 namespace aapt {
 
 TEST(ResourcePathShortenerTest, FileRefPathsChangedInResourceTable) {
@@ -112,6 +120,47 @@ TEST(ResourcePathShortenerTest, KeepExtensions) {
 
   EXPECT_THAT(GetExtension(path_map[original_xml_path]), Eq(android::StringPiece(".xml")));
   EXPECT_THAT(GetExtension(path_map[original_png_path]), Eq(android::StringPiece(".png")));
+}
+
+TEST(ResourcePathShortenerTest, DeterministicallyHandleCollisions) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  // 4000 resources is the limit at which the hash space is expanded to 3
+  // letters to reduce collisions, we want as many collisions as possible thus
+  // N-1.
+  const auto kNumResources = 3999;
+  const auto kNumTries = 5;
+
+  test::ResourceTableBuilder builder1;
+  FillTable(builder1, 0, kNumResources);
+  std::unique_ptr<ResourceTable> table1 = builder1.Build();
+  std::map<std::string, std::string> expected_mapping;
+  ASSERT_TRUE(ResourcePathShortener(expected_mapping).Consume(context.get(), table1.get()));
+
+  // We are trying to ensure lack of non-determinism, it is not simple to prove
+  // a negative, thus we must try the test a few times so that the test itself
+  // is non-flaky. Basically create the pathmap 5 times from the same set of
+  // resources but a different order of addition and then ensure they are always
+  // mapped to the same short path.
+  for (int i=0; i<kNumTries; i++) {
+    test::ResourceTableBuilder builder2;
+    // This loop adds resources to the resource table in the range of
+    // [0:kNumResources).  Adding the file references in different order makes
+    // non-determinism more likely to surface. Thus we add resources
+    // [start_index:kNumResources) first then [0:start_index). We also use a
+    // different start_index each run.
+    int start_index = (kNumResources/kNumTries)*i;
+    FillTable(builder2, start_index, kNumResources);
+    FillTable(builder2, 0, start_index);
+    std::unique_ptr<ResourceTable> table2 = builder2.Build();
+
+    std::map<std::string, std::string> actual_mapping;
+    ASSERT_TRUE(ResourcePathShortener(actual_mapping).Consume(context.get(), table2.get()));
+
+    for (auto& item : actual_mapping) {
+      ASSERT_THAT(expected_mapping[item.first], Eq(item.second));
+    }
+  }
 }
 
 }   // namespace aapt
