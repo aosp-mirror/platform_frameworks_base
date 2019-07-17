@@ -16,7 +16,6 @@
 
 package com.android.providers.settings;
 
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
@@ -41,6 +40,7 @@ import android.util.ArraySet;
 import android.util.BackupUtils;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.BufferedOutputStream;
@@ -586,15 +586,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         final String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = concat(Settings.Secure.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, Settings.Secure.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS);
             validators = Settings.Secure.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = concat(Settings.System.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, Settings.System.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
             validators = Settings.System.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = concat(Settings.Global.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, Settings.Global.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
             validators = Settings.Global.VALIDATORS;
         } else {
@@ -670,18 +670,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
         Validator validator = validators.get(key);
         return (validator != null) && validator.validate(value);
-    }
-
-    private final String[] concat(String[] first, @Nullable String[] second) {
-        if (second == null || second.length == 0) {
-            return first;
-        }
-        final int firstLen = first.length;
-        final int secondLen = second.length;
-        String[] both = new String[firstLen + secondLen];
-        System.arraycopy(first, 0, both, 0, firstLen);
-        System.arraycopy(second, 0, both, firstLen, secondLen);
-        return both;
     }
 
     /**
