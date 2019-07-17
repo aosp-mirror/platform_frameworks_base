@@ -237,6 +237,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     MIN_DRAG_SIZE, getResources().getDisplayMetrics())
                     && !mUpdateMonitor.isFaceDetectionRunning()) {
                 mUpdateMonitor.requestFaceAuth();
+                mCallback.userActivity();
                 showMessage(null, null);
             }
         }

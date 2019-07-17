@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
@@ -82,6 +83,9 @@ public interface IContentProvider extends IInterface {
     public Bundle call(String callingPkg, String authority, String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
 
+    public int checkUriPermission(String callingPkg, Uri uri, int uid, int modeFlags)
+            throws RemoteException;
+
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
     public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException;
@@ -116,4 +120,5 @@ public interface IContentProvider extends IInterface {
     static final int CANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 24;
     static final int UNCANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 25;
     static final int REFRESH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 26;
+    static final int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 27;
 }

@@ -165,6 +165,19 @@ public class LoggingContentInterface implements ContentInterface {
     }
 
     @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
+            throws RemoteException {
+        try (Logger l = new Logger("checkUriPermission", uri, uid, modeFlags)) {
+            try {
+                return l.setResult(delegate.checkUriPermission(uri, uid, modeFlags));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
+        }
+    }
+
+    @Override
     public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues)
             throws RemoteException {
         try (Logger l = new Logger("insert", uri, initialValues)) {

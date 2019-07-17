@@ -284,6 +284,8 @@ public class DisplayPolicy {
     /** See {@link #getNavigationBarFrameHeight} */
     private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
 
+    private boolean mIsFreeformWindowOverlappingWithNavBar;
+
     /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
     @Px private int mWindowOutsetBottom;
 
@@ -2379,6 +2381,7 @@ public class DisplayPolicy {
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
         mWindowSleepTokenNeeded = false;
+        mIsFreeformWindowOverlappingWithNavBar = false;
     }
 
     /**
@@ -2476,6 +2479,13 @@ public class DisplayPolicy {
             if (mTopDockedOpaqueOrDimmingWindowState == null) {
                 mTopDockedOpaqueOrDimmingWindowState = win;
             }
+        }
+
+        // Check if the freeform window overlaps with the navigation bar area.
+        final WindowState navBarWin = hasNavigationBar() ? mNavigationBar : null;
+        if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()
+                && isOverlappingWithNavBar(win, navBarWin)) {
+            mIsFreeformWindowOverlappingWithNavBar = true;
         }
 
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
@@ -3458,7 +3468,11 @@ public class DisplayPolicy {
             }
         } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
             if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
-                visibility = setNavBarOpaqueFlag(visibility);
+                if (mIsFreeformWindowOverlappingWithNavBar) {
+                    visibility = setNavBarTranslucentFlag(visibility);
+                } else {
+                    visibility = setNavBarOpaqueFlag(visibility);
+                }
             } else if (fullscreenDrawsBackground) {
                 visibility = setNavBarTransparentFlag(visibility);
             }
@@ -3746,5 +3760,15 @@ public class DisplayPolicy {
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         wm.removeView(mPointerLocationView);
         mPointerLocationView = null;
+    }
+
+    @VisibleForTesting
+    static boolean isOverlappingWithNavBar(WindowState targetWindow, WindowState navBarWindow) {
+        if (navBarWindow == null || !navBarWindow.isVisibleLw()
+                || targetWindow.mAppToken == null || !targetWindow.isVisibleLw()) {
+            return false;
+        }
+
+        return Rect.intersects(targetWindow.getFrameLw(), navBarWindow.getFrameLw());
     }
 }

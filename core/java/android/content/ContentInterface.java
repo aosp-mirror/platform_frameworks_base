@@ -56,6 +56,9 @@ public interface ContentInterface {
     public boolean refresh(@NonNull Uri uri, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException;
 
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
+            throws RemoteException;
+
     public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues)
             throws RemoteException;
 

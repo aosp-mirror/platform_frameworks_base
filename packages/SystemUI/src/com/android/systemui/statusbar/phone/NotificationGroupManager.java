@@ -464,7 +464,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
         }
-        if (!mHeadsUpManager.isAlerting(entry.key)) {
+        if (mHeadsUpManager != null && !mHeadsUpManager.isAlerting(entry.key)) {
             return false;
         }
         return (sbn.getNotification().fullScreenIntent != null

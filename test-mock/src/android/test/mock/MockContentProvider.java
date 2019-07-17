@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
@@ -23,6 +24,7 @@ import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.IContentProvider;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -154,6 +156,11 @@ public class MockContentProvider extends ContentProvider {
                 ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.refresh(url, args);
         }
+
+        @Override
+        public int checkUriPermission(String callingPkg, Uri uri, int uid, int modeFlags) {
+            return MockContentProvider.this.checkUriPermission(uri, uid, modeFlags);
+        }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();
 
@@ -263,6 +270,12 @@ public class MockContentProvider extends ContentProvider {
      * @hide
      */
     public boolean refresh(Uri url, Bundle args) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 
