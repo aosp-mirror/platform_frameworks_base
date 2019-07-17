@@ -16,6 +16,8 @@
 
 #include "RenderProxy.h"
 
+#include <gui/Surface.h>
+
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "Properties.h"

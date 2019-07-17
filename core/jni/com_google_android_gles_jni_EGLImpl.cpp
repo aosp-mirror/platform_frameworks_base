@@ -30,10 +30,6 @@
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 
-#include <GraphicsJNI.h>
-#include <SkBitmap.h>
-#include <SkPixelRef.h>
-
 #include <ui/ANativeObjectBase.h>
 
 namespace android {

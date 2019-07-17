@@ -15,7 +15,6 @@
  */
 
 #include "jni.h"
-#include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 
 #include <minikin/Layout.h>

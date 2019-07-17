@@ -17,7 +17,7 @@
 #ifndef _ANDROID_NIO_UTILS_H_
 #define _ANDROID_NIO_UTILS_H_
 
-#include <android_runtime/AndroidRuntime.h>
+#include <nativehelper/JNIHelp.h>
 
 namespace android {
 
@@ -68,12 +68,12 @@ private:
     AutoBufferPointer() = delete;
     AutoBufferPointer(AutoBufferPointer&) = delete;
     AutoBufferPointer& operator=(AutoBufferPointer&) = delete;
-    static void* operator new(std::size_t);
-    static void* operator new[](std::size_t);
-    static void* operator new(std::size_t, void*);
-    static void* operator new[](std::size_t, void*);
-    static void operator delete(void*, std::size_t);
-    static void operator delete[](void*, std::size_t);
+    static void* operator new(size_t);
+    static void* operator new[](size_t);
+    static void* operator new(size_t, void*);
+    static void* operator new[](size_t, void*);
+    static void operator delete(void*, size_t);
+    static void operator delete[](void*, size_t);
 };
 
 }   /* namespace android */

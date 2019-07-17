@@ -19,7 +19,6 @@
 
 #include <SkBitmap.h>
 #include <cutils/compiler.h>
-#include <gui/Surface.h>
 #include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"
@@ -30,6 +29,7 @@
 
 namespace android {
 class GraphicBuffer;
+class Surface;
 
 namespace uirenderer {
 
