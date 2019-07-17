@@ -71,7 +71,7 @@ import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkObjectProvider;
 import com.android.internal.util.test.FakeSettingsProvider;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -136,6 +136,7 @@ public class AccessibilityShortcutControllerTest {
 
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        FakeSettingsProvider.clearSettingsProvider();
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
         when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(anyInt()))
@@ -193,8 +194,9 @@ public class AccessibilityShortcutControllerTest {
         when(mTextToSpeech.getVoice()).thenReturn(mVoice);
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void cleanUpSettingsProvider() {
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     @Test
