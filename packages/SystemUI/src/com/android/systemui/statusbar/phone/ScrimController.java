@@ -487,6 +487,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     /**
+     * Set front scrim to black, cancelling animations, in order to prepare to fade them
+     * away once the display turns on.
+     */
+    public void prepareForGentleWakeUp() {
+        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
+            mCurrentInFrontAlpha = 1f;
+            mAnimateChange = false;
+            updateScrims();
+            mAnimateChange = true;
+            mAnimationDuration = ANIMATION_DURATION_LONG;
+        }
+    }
+
+    /**
      * If the lock screen sensor is active.
      */
     public void setWakeLockScreenSensorActive(boolean active) {

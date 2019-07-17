@@ -155,7 +155,7 @@ public class DozeTriggersTest extends SysuiTestCase {
                 false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
                 null /* rawValues */);
 
-        verify(mHost).setAodDimmingScrim(eq(255f));
+        verify(mHost).setAodDimmingScrim(eq(1f));
         verify(mMachine).wakeUp();
     }
 }

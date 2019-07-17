@@ -4118,6 +4118,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.setAodFrontScrimAlpha(scrimOpacity);
         }
 
+        @Override
+        public void prepareForGentleWakeUp() {
+            mScrimController.prepareForGentleWakeUp();
+        }
+
         private void dispatchTap(View view, float x, float y) {
             long now = SystemClock.elapsedRealtime();
             dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_DOWN);
