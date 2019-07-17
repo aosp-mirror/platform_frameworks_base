@@ -239,4 +239,8 @@ public class FalsingManagerFake implements FalsingManager {
     public void dump(PrintWriter pw) {
 
     }
+
+    @Override
+    public void cleanup() {
+    }
 }
