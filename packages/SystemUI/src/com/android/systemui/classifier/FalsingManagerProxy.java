@@ -65,6 +65,7 @@ public class FalsingManagerProxy implements FalsingManager {
             public void onPluginConnected(FalsingPlugin plugin, Context context) {
                 FalsingManager pluginFalsingManager = plugin.getFalsingManager(context);
                 if (pluginFalsingManager != null) {
+                    mInternalFalsingManager.cleanup();
                     mInternalFalsingManager = pluginFalsingManager;
                 }
             }
@@ -289,5 +290,10 @@ public class FalsingManagerProxy implements FalsingManager {
     @Override
     public void dump(PrintWriter pw) {
         mInternalFalsingManager.dump(pw);
+    }
+
+    @Override
+    public void cleanup() {
+        mInternalFalsingManager.cleanup();
     }
 }
