@@ -1980,8 +1980,8 @@ class ActivityStarter {
             // Also put noDisplay activities in the source task. These by itself can be placed
             // in any task/stack, however it could launch other activities like ResolverActivity,
             // and we want those to stay in the original task.
-            if ((mStartActivity.isResolverActivity() || mStartActivity.noDisplay) && mSourceRecord != null
-                    && mSourceRecord.inFreeformWindowingMode())  {
+            if ((mStartActivity.isResolverOrDelegateActivity() || mStartActivity.noDisplay)
+                    && mSourceRecord != null && mSourceRecord.inFreeformWindowingMode()) {
                 mAddingToTask = true;
             }
         }
