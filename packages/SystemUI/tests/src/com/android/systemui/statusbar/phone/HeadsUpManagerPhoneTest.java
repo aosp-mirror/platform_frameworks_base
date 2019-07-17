@@ -70,7 +70,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
             setUp(statusBarWindowView, groupManager, bar, vsManager);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mAutoDismissNotificationDecayDozing = TEST_AUTO_DISMISS_TIME;
         }
     }
 
@@ -134,13 +133,11 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testExtendHeadsUp() {
-        when(mStatusBarStateController.isDozing()).thenReturn(true);
         mHeadsUpManager.showNotification(mEntry);
         Runnable pastNormalTimeRunnable =
                 () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.key);
         mTestHandler.postDelayed(pastNormalTimeRunnable,
-                mHeadsUpManager.mAutoDismissNotificationDecayDozing +
-                        mHeadsUpManager.mExtensionTime / 2);
+                TEST_AUTO_DISMISS_TIME + mHeadsUpManager.mExtensionTime / 2);
         mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_TIMEOUT_TIME);
 
         mHeadsUpManager.extendHeadsUp();
