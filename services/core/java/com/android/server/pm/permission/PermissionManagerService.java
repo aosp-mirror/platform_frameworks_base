@@ -2746,9 +2746,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         } else if (pkg.isProduct()) {
             wlPermissions =
                     SystemConfig.getInstance().getProductPrivAppPermissions(pkg.packageName);
-        } else if (pkg.isProductServices()) {
+        } else if (pkg.isSystemExt()) {
             wlPermissions =
-                    SystemConfig.getInstance().getProductServicesPrivAppPermissions(
+                    SystemConfig.getInstance().getSystemExtPrivAppPermissions(
                             pkg.packageName);
         } else {
             wlPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
@@ -2782,9 +2782,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     } else if (pkg.isProduct()) {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getProductPrivAppDenyPermissions(pkg.packageName);
-                    } else if (pkg.isProductServices()) {
+                    } else if (pkg.isSystemExt()) {
                         deniedPermissions = SystemConfig.getInstance()
-                                .getProductServicesPrivAppDenyPermissions(pkg.packageName);
+                                .getSystemExtPrivAppDenyPermissions(pkg.packageName);
                     } else {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getPrivAppDenyPermissions(pkg.packageName);
