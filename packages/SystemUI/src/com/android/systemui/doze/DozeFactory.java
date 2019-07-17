@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -70,7 +71,7 @@ public class DozeFactory {
                 new DozeScreenState(wrappedService, handler, params, wakeLock),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
                         handler),
-                new DozeWallpaperState(context),
+                new DozeWallpaperState(context, getBiometricUnlockController(dozeService)),
                 new DozeDockHandler(context, machine, host, config, handler, dockManager)
         });
 
@@ -106,5 +107,11 @@ public class DozeFactory {
         Application appCandidate = service.getApplication();
         final SystemUIApplication app = (SystemUIApplication) appCandidate;
         return app.getComponent(DozeHost.class);
+    }
+
+    public static BiometricUnlockController getBiometricUnlockController(DozeService service) {
+        Application appCandidate = service.getApplication();
+        final SystemUIApplication app = (SystemUIApplication) appCandidate;
+        return app.getComponent(BiometricUnlockController.class);
     }
 }
