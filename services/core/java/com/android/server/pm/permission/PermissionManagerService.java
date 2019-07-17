@@ -2793,13 +2793,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             deniedPermissions == null || !deniedPermissions.contains(perm);
                     if (permissionViolation) {
                         Slog.w(TAG, "Privileged permission " + perm + " for package "
-                                + pkg.packageName + " - not in privapp-permissions whitelist");
+                                + pkg.packageName + " (" + pkg.codePath
+                                + ") not in privapp-permissions whitelist");
 
                         if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                             if (mPrivappPermissionsViolations == null) {
                                 mPrivappPermissionsViolations = new ArraySet<>();
                             }
-                            mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
+                            mPrivappPermissionsViolations.add(
+                                    pkg.packageName + " (" + pkg.codePath + "): " + perm);
                         }
                     } else {
                         return false;
