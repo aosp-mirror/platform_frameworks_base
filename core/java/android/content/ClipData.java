@@ -892,12 +892,6 @@ public class ClipData implements Parcelable {
         mItems.add(item);
     }
 
-    /** @removed use #addItem(ContentResolver, Item) instead */
-    @Deprecated
-    public void addItem(Item item, ContentResolver resolver) {
-        addItem(resolver, item);
-    }
-
     /**
      * Add a new Item to the overall ClipData container.
      * <p> Unlike {@link #addItem(Item)}, this method will update the list of available MIME types
