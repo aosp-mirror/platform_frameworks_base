@@ -266,4 +266,6 @@ def main(argv):
 
   return 0
 
-sys.exit(main(sys.argv))
+if __name__ == '__main__':
+  print(sys.argv)
+  sys.exit(main(sys.argv))
