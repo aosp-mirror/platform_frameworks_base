@@ -238,7 +238,7 @@ public class AccessibilityWindowManagerTest {
         windowInfo.type = AccessibilityWindowInfo.TYPE_APPLICATION;
         windowInfo.token = token.asBinder();
         windowInfo.layer = 0;
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        windowInfo.regionInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         mWindowInfos.set(0, windowInfo);
 
         mA11yWindowManager.onWindowsForAccessibilityChanged(SEND_ON_WINDOW_CHANGES, mWindowInfos);
@@ -305,67 +305,73 @@ public class AccessibilityWindowManagerTest {
     }
 
     @Test
-    public void computePartialInteractiveRegionForWindow_wholeWindowVisible_returnWholeRegion() {
+    public void computePartialInteractiveRegionForWindow_wholeVisible_returnWholeRegion() {
         // Updates top 2 z-order WindowInfo are whole visible.
         WindowInfo windowInfo = mWindowInfos.get(0);
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+        windowInfo.regionInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
         windowInfo = mWindowInfos.get(1);
-        windowInfo.boundsInScreen.set(0, SCREEN_HEIGHT / 2,
-                SCREEN_WIDTH, SCREEN_HEIGHT);
+        windowInfo.regionInScreen.set(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT);
         mA11yWindowManager.onWindowsForAccessibilityChanged(SEND_ON_WINDOW_CHANGES, mWindowInfos);
 
         final List<AccessibilityWindowInfo> a11yWindows = mA11yWindowManager.getWindowListLocked();
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(0).getId();
 
-        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(
-                windowId, outBounds);
+        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(windowId, outBounds);
         assertThat(outBounds.getBounds().width(), is(SCREEN_WIDTH));
         assertThat(outBounds.getBounds().height(), is(SCREEN_HEIGHT / 2));
 
         windowId = a11yWindows.get(1).getId();
 
-        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(
-                windowId, outBounds);
+        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(windowId, outBounds);
         assertThat(outBounds.getBounds().width(), is(SCREEN_WIDTH));
         assertThat(outBounds.getBounds().height(), is(SCREEN_HEIGHT / 2));
     }
 
     @Test
-    public void computePartialInteractiveRegionForWindow_halfWindowVisible_returnHalfRegion() {
+    public void computePartialInteractiveRegionForWindow_halfVisible_returnHalfRegion() {
         // Updates z-order #1 WindowInfo is half visible
         WindowInfo windowInfo = mWindowInfos.get(0);
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-        windowInfo = mWindowInfos.get(1);
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        windowInfo.regionInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
 
         mA11yWindowManager.onWindowsForAccessibilityChanged(SEND_ON_WINDOW_CHANGES, mWindowInfos);
         final List<AccessibilityWindowInfo> a11yWindows = mA11yWindowManager.getWindowListLocked();
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(1).getId();
 
-        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(
-                windowId, outBounds);
+        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(windowId, outBounds);
         assertThat(outBounds.getBounds().width(), is(SCREEN_WIDTH));
         assertThat(outBounds.getBounds().height(), is(SCREEN_HEIGHT / 2));
     }
 
     @Test
-    public void computePartialInteractiveRegionForWindow_windowNotVisible_returnEmptyRegion() {
-        // Updates z-order #1 WindowInfo is not visible
+    public void computePartialInteractiveRegionForWindow_notVisible_returnEmptyRegion() {
+        // Since z-order #0 WindowInfo is full screen, z-order #1 WindowInfo should be invisible.
+        final List<AccessibilityWindowInfo> a11yWindows = mA11yWindowManager.getWindowListLocked();
+        final Region outBounds = new Region();
+        int windowId = a11yWindows.get(1).getId();
+
+        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(windowId, outBounds);
+        assertTrue(outBounds.getBounds().isEmpty());
+    }
+
+    @Test
+    public void computePartialInteractiveRegionForWindow_partialVisible_returnVisibleRegion() {
+        // Updates z-order #0 WindowInfo to have two interact-able areas.
+        Region region = new Region(0, 0, SCREEN_WIDTH, 200);
+        region.op(0, SCREEN_HEIGHT - 200, SCREEN_WIDTH, SCREEN_HEIGHT, Region.Op.UNION);
         WindowInfo windowInfo = mWindowInfos.get(0);
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        windowInfo = mWindowInfos.get(1);
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        windowInfo.regionInScreen.set(region);
         mA11yWindowManager.onWindowsForAccessibilityChanged(SEND_ON_WINDOW_CHANGES, mWindowInfos);
 
         final List<AccessibilityWindowInfo> a11yWindows = mA11yWindowManager.getWindowListLocked();
         final Region outBounds = new Region();
         int windowId = a11yWindows.get(1).getId();
 
-        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(
-                windowId, outBounds);
-        assertTrue(outBounds.getBounds().isEmpty());
+        mA11yWindowManager.computePartialInteractiveRegionForWindowLocked(windowId, outBounds);
+        assertFalse(outBounds.getBounds().isEmpty());
+        assertThat(outBounds.getBounds().width(), is(SCREEN_WIDTH));
+        assertThat(outBounds.getBounds().height(), is(SCREEN_HEIGHT - 400));
     }
 
     @Test
@@ -588,7 +594,7 @@ public class AccessibilityWindowManagerTest {
         windowInfo.type = AccessibilityWindowInfo.TYPE_APPLICATION;
         windowInfo.token = windowToken.asBinder();
         windowInfo.layer = layer;
-        windowInfo.boundsInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        windowInfo.regionInScreen.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         mWindowInfos.add(windowInfo);
     }
 

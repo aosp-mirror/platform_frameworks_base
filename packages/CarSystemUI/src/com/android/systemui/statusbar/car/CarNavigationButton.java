@@ -70,13 +70,9 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
                 R.styleable.CarNavigationButton_unselectedAlpha, mUnselectedAlpha);
         mSelectedIconResourceId = typedArray.getResourceId(
                 R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
+        mIconResourceId = typedArray.getResourceId(
+                R.styleable.CarNavigationButton_icon, 0);
         typedArray.recycle();
-
-        // ImageView attrs
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.ImageView);
-        mIconResourceId = a.getResourceId(com.android.internal.R.styleable.ImageView_src, 0);
-        a.recycle();
     }
 
 

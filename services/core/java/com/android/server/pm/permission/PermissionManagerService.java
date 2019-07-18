@@ -2746,9 +2746,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         } else if (pkg.isProduct()) {
             wlPermissions =
                     SystemConfig.getInstance().getProductPrivAppPermissions(pkg.packageName);
-        } else if (pkg.isProductServices()) {
+        } else if (pkg.isSystemExt()) {
             wlPermissions =
-                    SystemConfig.getInstance().getProductServicesPrivAppPermissions(
+                    SystemConfig.getInstance().getSystemExtPrivAppPermissions(
                             pkg.packageName);
         } else {
             wlPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
@@ -2782,9 +2782,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     } else if (pkg.isProduct()) {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getProductPrivAppDenyPermissions(pkg.packageName);
-                    } else if (pkg.isProductServices()) {
+                    } else if (pkg.isSystemExt()) {
                         deniedPermissions = SystemConfig.getInstance()
-                                .getProductServicesPrivAppDenyPermissions(pkg.packageName);
+                                .getSystemExtPrivAppDenyPermissions(pkg.packageName);
                     } else {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getPrivAppDenyPermissions(pkg.packageName);
@@ -2793,13 +2793,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             deniedPermissions == null || !deniedPermissions.contains(perm);
                     if (permissionViolation) {
                         Slog.w(TAG, "Privileged permission " + perm + " for package "
-                                + pkg.packageName + " - not in privapp-permissions whitelist");
+                                + pkg.packageName + " (" + pkg.codePath
+                                + ") not in privapp-permissions whitelist");
 
                         if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                             if (mPrivappPermissionsViolations == null) {
                                 mPrivappPermissionsViolations = new ArraySet<>();
                             }
-                            mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
+                            mPrivappPermissionsViolations.add(
+                                    pkg.packageName + " (" + pkg.codePath + "): " + perm);
                         }
                     } else {
                         return false;

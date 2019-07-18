@@ -73,10 +73,6 @@ package android.app.usage {
 
 package android.content {
 
-  public class ClipData implements android.os.Parcelable {
-    method @Deprecated public void addItem(android.content.ClipData.Item, android.content.ContentResolver);
-  }
-
   public abstract class Context {
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(String);

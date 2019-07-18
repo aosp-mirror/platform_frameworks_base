@@ -54,7 +54,7 @@ public class Environment {
     private static final String ENV_ODM_ROOT = "ODM_ROOT";
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
     private static final String ENV_PRODUCT_ROOT = "PRODUCT_ROOT";
-    private static final String ENV_PRODUCT_SERVICES_ROOT = "PRODUCT_SERVICES_ROOT";
+    private static final String ENV_SYSTEM_EXT_ROOT = "SYSTEM_EXT_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -77,8 +77,8 @@ public class Environment {
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
     private static final File DIR_PRODUCT_ROOT = getDirectory(ENV_PRODUCT_ROOT, "/product");
-    private static final File DIR_PRODUCT_SERVICES_ROOT = getDirectory(ENV_PRODUCT_SERVICES_ROOT,
-                                                           "/product_services");
+    private static final File DIR_SYSTEM_EXT_ROOT = getDirectory(ENV_SYSTEM_EXT_ROOT,
+                                                           "/system_ext");
 
     @UnsupportedAppUsage
     private static UserEnvironment sCurrentUser;
@@ -222,11 +222,26 @@ public class Environment {
      * Return root directory of the "product_services" partition holding middleware
      * services if any. If present, the partition is mounted read-only.
      *
+     * @deprecated This directory is not guaranteed to exist.
+     *             Its name is changed to "system_ext" because the partition's purpose is changed.
+     *             {@link #getSystemExtDirectory()}
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static @NonNull File getProductServicesDirectory() {
-        return DIR_PRODUCT_SERVICES_ROOT;
+        return getDirectory("PRODUCT_SERVICES_ROOT", "/product_services");
+    }
+
+    /**
+     * Return root directory of the "system_ext" partition holding system partition's extension
+     * If present, the partition is mounted read-only.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static @NonNull File getSystemExtDirectory() {
+        return DIR_SYSTEM_EXT_ROOT;
     }
 
     /**

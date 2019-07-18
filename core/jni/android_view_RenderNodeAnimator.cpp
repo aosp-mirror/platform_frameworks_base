@@ -17,7 +17,6 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include "jni.h"
-#include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 

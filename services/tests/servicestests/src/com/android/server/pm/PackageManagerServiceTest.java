@@ -115,7 +115,7 @@ public class PackageManagerServiceTest {
 
     @Test
     public void testPartitions() throws Exception {
-        String[] partitions = { "system", "vendor", "odm", "oem", "product", "product_services" };
+        String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
             for (int j = 0; j < appdir.length; j++) {
@@ -128,7 +128,7 @@ public class PackageManagerServiceTest {
                 Assert.assertEquals(i == 1 || i == 2, PackageManagerService.locationIsVendor(path));
                 Assert.assertEquals(i == 3, PackageManagerService.locationIsOem(path));
                 Assert.assertEquals(i == 4, PackageManagerService.locationIsProduct(path));
-                Assert.assertEquals(i == 5, PackageManagerService.locationIsProductServices(path));
+                Assert.assertEquals(i == 5, PackageManagerService.locationIsSystemExt(path));
             }
         }
     }
