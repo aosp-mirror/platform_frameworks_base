@@ -551,9 +551,8 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                         return true;
                     }
 
-                    mActivityTaskManager.resizeStack(stackInfo.stackId, toBounds,
-                            false /* allowResizeInDockedMode */, true /* preserveWindows */,
-                            true /* animate */, duration);
+                    mActivityTaskManager.animateResizePinnedStack(stackInfo.stackId, toBounds,
+                            duration);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);

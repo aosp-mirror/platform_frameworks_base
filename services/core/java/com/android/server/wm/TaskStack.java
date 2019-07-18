@@ -859,7 +859,7 @@ public class TaskStack extends WindowContainer<Task> implements
         // When the home stack is resizable, should always have the same stack and task bounds
         if (isActivityTypeHome()) {
             final Task homeTask = findHomeTask();
-            if (homeTask != null && homeTask.isResizeable()) {
+            if (homeTask == null || homeTask.isResizeable()) {
                 // Calculate the home stack bounds when in docked mode and the home stack is
                 // resizeable.
                 getDisplayContent().mDividerControllerLocked
@@ -965,7 +965,7 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     void resetDockedStackToMiddle() {
-        if (inSplitScreenPrimaryWindowingMode()) {
+        if (!inSplitScreenPrimaryWindowingMode()) {
             throw new IllegalStateException("Not a docked stack=" + this);
         }
 
@@ -973,12 +973,12 @@ public class TaskStack extends WindowContainer<Task> implements
 
         final Rect bounds = new Rect();
         final Rect tempBounds = new Rect();
-        TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
-        Rect dockedBounds =
-                (dockedStack == null || dockedStack == this) ? null : dockedStack.getRawBounds();
-        getStackDockedModeBoundsLocked(mDisplayContent.getConfiguration(), dockedBounds,
+        getStackDockedModeBoundsLocked(mDisplayContent.getConfiguration(), null /* dockedBounds */,
                 null /* currentTempTaskBounds */, bounds, tempBounds);
-        mActivityStack.requestResize(bounds);
+        mActivityStack.mStackSupervisor.resizeDockedStackLocked(bounds, null /* tempTaskBounds */,
+                null /* tempTaskInsetBounds */, null /* tempOtherTaskBounds */,
+                null /* tempOtherTaskInsetBounds */, false /* preserveWindows */,
+                false /* deferResume */);
     }
 
     @Override

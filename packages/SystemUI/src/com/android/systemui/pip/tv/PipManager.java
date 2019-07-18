@@ -441,8 +441,8 @@ public class PipManager implements BasePipManager {
         }
         try {
             int animationDurationMs = -1;
-            mActivityTaskManager.resizeStack(mPinnedStackId, mCurrentPipBounds,
-                    true, true, true, animationDurationMs);
+            mActivityTaskManager.animateResizePinnedStack(mPinnedStackId, mCurrentPipBounds,
+                    animationDurationMs);
         } catch (RemoteException e) {
             Log.e(TAG, "resizeStack failed", e);
         }
