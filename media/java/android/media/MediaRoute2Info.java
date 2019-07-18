@@ -23,6 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -53,6 +56,8 @@ public final class MediaRoute2Info implements Parcelable {
     final String mDescription;
     @Nullable
     final String mClientPackageName;
+    @NonNull
+    final List<String> mSupportedCategories;
     @Nullable
     final Bundle mExtras;
 
@@ -62,6 +67,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = builder.mName;
         mDescription = builder.mDescription;
         mClientPackageName = builder.mClientPackageName;
+        mSupportedCategories = builder.mSupportedCategories;
         mExtras = builder.mExtras;
     }
 
@@ -71,6 +77,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = in.readString();
         mDescription = in.readString();
         mClientPackageName = in.readString();
+        mSupportedCategories = in.createStringArrayList();
         mExtras = in.readBundle();
     }
 
@@ -103,13 +110,14 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mDescription, other.mDescription)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
+                && Objects.equals(mSupportedCategories, other.mSupportedCategories)
                 //TODO: This will be evaluated as false in most cases. Try not to.
                 && Objects.equals(mExtras, other.mExtras);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mName, mDescription);
+        return Objects.hash(mId, mName, mDescription, mSupportedCategories);
     }
 
     @NonNull
@@ -146,9 +154,36 @@ public final class MediaRoute2Info implements Parcelable {
         return mClientPackageName;
     }
 
+    /**
+     * Gets the supported categories of the route.
+     */
+    @NonNull
+    public List<String> getSupportedCategories() {
+        return mSupportedCategories;
+    }
+
     @Nullable
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    //TODO: Move this if we re-define control category / selector things.
+    /**
+     * Returns true if the route supports at least one of the specified control categories
+     *
+     * @param controlCategories the list of control categories to consider
+     * @return true if the route supports at least one category
+     */
+    public boolean supportsControlCategory(@NonNull Collection<String> controlCategories) {
+        Objects.requireNonNull(controlCategories, "control categories must not be null");
+        for (String controlCategory : controlCategories) {
+            for (String supportedCategory : getSupportedCategories()) {
+                if (TextUtils.equals(controlCategory, supportedCategory)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -163,6 +198,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mDescription);
         dest.writeString(mClientPackageName);
+        dest.writeStringList(mSupportedCategories);
         dest.writeBundle(mExtras);
     }
 
@@ -187,6 +223,7 @@ public final class MediaRoute2Info implements Parcelable {
         String mName;
         String mDescription;
         String mClientPackageName;
+        List<String> mSupportedCategories;
         Bundle mExtras;
 
         public Builder(@NonNull String id, @NonNull String name) {
@@ -198,6 +235,7 @@ public final class MediaRoute2Info implements Parcelable {
             }
             setId(id);
             setName(name);
+            mSupportedCategories = new ArrayList<>();
         }
 
         public Builder(@NonNull MediaRoute2Info routeInfo) {
@@ -212,6 +250,7 @@ public final class MediaRoute2Info implements Parcelable {
             setName(routeInfo.mName);
             mDescription = routeInfo.mDescription;
             setClientPackageName(routeInfo.mClientPackageName);
+            setSupportedCategories(routeInfo.mSupportedCategories);
             if (routeInfo.mExtras != null) {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
@@ -269,6 +308,39 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setClientPackageName(@Nullable String packageName) {
             mClientPackageName = packageName;
+            return this;
+        }
+
+        /**
+         * Sets the supported categories of the route.
+         */
+        @NonNull
+        public Builder setSupportedCategories(@NonNull Collection<String> categories) {
+            mSupportedCategories = new ArrayList<>();
+            return addSupportedCategories(categories);
+        }
+
+        /**
+         * Adds supported categories for the route.
+         */
+        @NonNull
+        public Builder addSupportedCategories(@NonNull Collection<String> categories) {
+            Objects.requireNonNull(categories, "categories must not be null");
+            for (String category: categories) {
+                addSupportedCategory(category);
+            }
+            return this;
+        }
+
+        /**
+         * Add a supported category for the route.
+         */
+        @NonNull
+        public Builder addSupportedCategory(@NonNull String category) {
+            if (TextUtils.isEmpty(category)) {
+                throw new IllegalArgumentException("category must not be null or empty");
+            }
+            mSupportedCategories.add(category);
             return this;
         }
 

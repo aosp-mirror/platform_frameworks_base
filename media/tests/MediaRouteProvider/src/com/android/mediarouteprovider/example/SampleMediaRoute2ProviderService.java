@@ -32,19 +32,35 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_NAME1 = "Sample Route 1";
     public static final String ROUTE_ID2 = "route_id2";
     public static final String ROUTE_NAME2 = "Sample Route 2";
+
+    public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
+    public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
+
     public static final String ACTION_REMOVE_ROUTE =
             "com.android.mediarouteprovider.action_remove_route";
+
+    public static final String CATEGORY_SAMPLE =
+            "com.android.mediarouteprovider.CATEGORY_SAMPLE";
+    public static final String CATEGORY_SPECIAL =
+            "com.android.mediarouteprovider.CATEGORY_SPECIAL";
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
+                .addSupportedCategory(CATEGORY_SAMPLE)
                 .build();
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
+                .addSupportedCategory(CATEGORY_SAMPLE)
                 .build();
-
+        MediaRoute2Info routeSpecial =
+                new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_CATEGORY, ROUTE_NAME_SPECIAL_CATEGORY)
+                        .addSupportedCategory(CATEGORY_SAMPLE)
+                        .addSupportedCategory(CATEGORY_SPECIAL)
+                        .build();
         mRoutes.put(route1.getId(), route1);
         mRoutes.put(route2.getId(), route2);
+        mRoutes.put(routeSpecial.getId(), routeSpecial);
     }
 
     @Override
