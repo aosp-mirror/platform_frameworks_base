@@ -23,20 +23,18 @@
 # $> pip3 install --user protobuf sqlalchemy sqlite3
 #
 
-import collections
 import optparse
 import os
 import re
 import sys
+from typing import Iterable, Optional
 
-from typing import Iterable
-
-from lib.inode2filename import Inode2Filename
 from generated.TraceFile_pb2 import *
+from lib.inode2filename import Inode2Filename
 
 parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(parent_dir_name + "/trace_analyzer")
-from lib.trace2db import Trace2Db, MmFilemapAddToPageCache
+from lib.trace2db import Trace2Db, MmFilemapAddToPageCache, RawFtraceEntry
 
 _PAGE_SIZE = 4096 # adb shell getconf PAGESIZE ## size of a memory page in bytes.
 
@@ -165,9 +163,32 @@ def build_protobuf(page_runs, inode2filename, filters=[]):
 
   return trace_file
 
-def query_add_to_page_cache(trace2db: Trace2Db):
+def calc_trace_end_time(trace2db: Trace2Db,
+                        trace_duration: Optional[int]) -> float:
+  """
+  Calculates the end time based on the trace duration.
+  The start time is the first receiving mm file map event.
+  The end time is the start time plus the trace duration.
+  All of them are in milliseconds.
+  """
+  # If the duration is not set, assume all time is acceptable.
+  if trace_duration is None:
+    # float('inf')
+    return RawFtraceEntry.__table__.c.timestamp.type.python_type('inf')
+
+  first_event = trace2db.session.query(MmFilemapAddToPageCache).join(
+      MmFilemapAddToPageCache.raw_ftrace_entry).order_by(
+      RawFtraceEntry.timestamp).first()
+
+  return first_event.raw_ftrace_entry.timestamp + trace_duration
+
+def query_add_to_page_cache(trace2db: Trace2Db, trace_duration: Optional[int]):
+  end_time = calc_trace_end_time(trace2db, trace_duration)
   # SELECT * FROM tbl ORDER BY id;
-  return trace2db.session.query(MmFilemapAddToPageCache).order_by(MmFilemapAddToPageCache.id).all()
+  return trace2db.session.query(MmFilemapAddToPageCache).join(
+      MmFilemapAddToPageCache.raw_ftrace_entry).filter(
+      RawFtraceEntry.timestamp <= end_time).order_by(
+      MmFilemapAddToPageCache.id).all()
 
 def main(argv):
   parser = optparse.OptionParser(usage="Usage: %prog [options]", description="Compile systrace file into TraceFile.pb")
@@ -187,6 +208,9 @@ def main(argv):
 
   parser.add_option('-o', dest='output_file', metavar='FILE',
                     help='Output protobuf file')
+
+  parser.add_option('--duration', dest='trace_duration', action="store",
+                    type=int, help='The duration of trace in milliseconds.')
 
   options, categories = parser.parse_args(argv[1:])
 
@@ -217,7 +241,8 @@ def main(argv):
   # TODO: parse multiple trace files here.
   parse_count = trace2db.parse_file_into_db(options.trace_file)
 
-  mm_filemap_add_to_page_cache_rows = query_add_to_page_cache(trace2db)
+  mm_filemap_add_to_page_cache_rows = query_add_to_page_cache(trace2db,
+                                                              options.trace_duration)
   print("DONE. Parsed %d entries into sql db." %(len(mm_filemap_add_to_page_cache_rows)))
 
   page_runs = page_cache_entries_to_runs(mm_filemap_add_to_page_cache_rows)

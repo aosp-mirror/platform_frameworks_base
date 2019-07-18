@@ -19,6 +19,7 @@ import sys
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Date, Integer, Float, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 from sqlalchemy.orm import sessionmaker
 
@@ -42,6 +43,10 @@ class RawFtraceEntry(Base):
   timestamp = Column(Float, nullable=False)
   function = Column(String, nullable=False)
   function_args = Column(String, nullable=False)
+
+  # 1:1 relation with MmFilemapAddToPageCache.
+  mm_filemap_add_to_page_cache = relationship("MmFilemapAddToPageCache",
+                                              back_populates="raw_ftrace_entry")
 
   @staticmethod
   def parse_dict(line):
@@ -155,6 +160,9 @@ class MmFilemapAddToPageCache(Base):
   pfn = Column(Integer, nullable=False)
   ofs = Column(Integer, nullable=False)
 
+  # 1:1 relation with RawFtraceEntry.
+  raw_ftrace_entry = relationship("RawFtraceEntry", uselist=False)
+
   @staticmethod
   def parse_dict(function_args, id = None):
     # dev 253:6 ino b2c7 page=00000000ec787cd9 pfn=1478539 ofs=4096
@@ -251,6 +259,8 @@ def parse_file(filename: str, *args, **kwargs) -> int:
 def parse_file_buf(filebuf, session, engine, raw_ftrace_entry_filter, limit=None) -> int:
   global _FLUSH_LIMIT
   count = 0
+  # count and id are not equal, because count still increases for invalid lines.
+  id = 0
 
   pending_entries = []
   pending_sched_switch = []
@@ -305,9 +315,10 @@ def parse_file_buf(filebuf, session, engine, raw_ftrace_entry_filter, limit=None
       continue
 
     pending_entries.append(raw_ftrace_entry)
+    id = id + 1
 
     if raw_ftrace_entry['function'] == 'sched_switch':
-      sched_switch = SchedSwitch.parse_dict(raw_ftrace_entry['function_args'], count)
+      sched_switch = SchedSwitch.parse_dict(raw_ftrace_entry['function_args'], id)
 
       if not sched_switch:
         print("WARNING: Failed to parse sched_switch: " + l)
@@ -315,7 +326,7 @@ def parse_file_buf(filebuf, session, engine, raw_ftrace_entry_filter, limit=None
         pending_sched_switch.append(sched_switch)
 
     elif raw_ftrace_entry['function'] == 'sched_blocked_reason':
-      sbr = SchedBlockedReason.parse_dict(raw_ftrace_entry['function_args'], count)
+      sbr = SchedBlockedReason.parse_dict(raw_ftrace_entry['function_args'], id)
 
       if not sbr:
         print("WARNING: Failed to parse sched_blocked_reason: " + l)
@@ -323,7 +334,8 @@ def parse_file_buf(filebuf, session, engine, raw_ftrace_entry_filter, limit=None
         pending_sched_blocked_reasons.append(sbr)
 
     elif raw_ftrace_entry['function'] == 'mm_filemap_add_to_page_cache':
-      d = MmFilemapAddToPageCache.parse_dict(raw_ftrace_entry['function_args'], count)
+      d = MmFilemapAddToPageCache.parse_dict(raw_ftrace_entry['function_args'],
+                                             id)
       if not d:
         print("WARNING: Failed to parse mm_filemap_add_to_page_cache: " + l)
       else:
