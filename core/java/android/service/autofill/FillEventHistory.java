@@ -224,13 +224,21 @@ public final class FillEventHistory implements Parcelable {
          */
         public static final int TYPE_CONTEXT_COMMITTED = 4;
 
+        /**
+         * A dataset selector was shown.
+         *
+         * <p>This event is fired whenever the autofill UI was presented to the user.</p>
+         */
+        public static final int TYPE_DATASETS_SHOWN = 5;
+
         /** @hide */
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_DATASET_SELECTED,
                 TYPE_DATASET_AUTHENTICATION_SELECTED,
                 TYPE_AUTHENTICATION_SELECTED,
                 TYPE_SAVE_SHOWN,
-                TYPE_CONTEXT_COMMITTED
+                TYPE_CONTEXT_COMMITTED,
+                TYPE_DATASETS_SHOWN
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface EventIds{}
@@ -473,7 +481,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications) {
-            mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
+            mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_DATASETS_SHOWN,
                     "eventType");
             mDatasetId = datasetId;
             mClientState = clientState;
