@@ -76,6 +76,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -166,11 +167,11 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         LocalServices.addService(RoleManagerInternal.class, new Internal());
 
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
-        packageManagerInternal.setDefaultDialerProvider(new DefaultDialerProvider());
-        packageManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
+        PermissionManagerServiceInternal permissionManagerInternal =
+                LocalServices.getService(PermissionManagerServiceInternal.class);
+        permissionManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
+        permissionManagerInternal.setDefaultDialerProvider(new DefaultDialerProvider());
+        permissionManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
 
         registerUserRemovedReceiver();
     }
@@ -755,7 +756,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultBrowserProvider implements PackageManagerInternal.DefaultBrowserProvider {
+    private class DefaultBrowserProvider implements
+            PermissionManagerServiceInternal.DefaultBrowserProvider {
 
         @Nullable
         @Override
@@ -809,7 +811,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultDialerProvider implements PackageManagerInternal.DefaultDialerProvider {
+    private class DefaultDialerProvider implements
+            PermissionManagerServiceInternal.DefaultDialerProvider {
 
         @Nullable
         @Override
@@ -819,7 +822,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultHomeProvider implements PackageManagerInternal.DefaultHomeProvider {
+    private class DefaultHomeProvider implements
+            PermissionManagerServiceInternal.DefaultHomeProvider {
 
         @Nullable
         @Override

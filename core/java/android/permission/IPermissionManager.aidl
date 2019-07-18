@@ -70,4 +70,31 @@ interface IPermissionManager {
     void revokeRuntimePermission(String packageName, String permName, int userId);
 
     void resetRuntimePermissions();
+
+    boolean setDefaultBrowser(String packageName, int userId);
+
+    String getDefaultBrowser(int userId);
+
+    void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
+
+    void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
+
+    void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            in String[] packageNames, int userId);
+
+    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            in String[] packageNames, int userId);
+
+    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
+
+    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
+
+    void setPermissionEnforced(String permName, boolean enforced);
+
+    boolean isPermissionEnforced(String permName);
+
+    boolean shouldShowRequestPermissionRationale(String permName,
+            String packageName, int userId);
+
+    boolean isPermissionRevokedByPolicy(String permName, String packageName, int userId);
 }

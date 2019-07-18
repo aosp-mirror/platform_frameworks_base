@@ -2020,7 +2020,7 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no enforcement specified");
             return 1;
         }
-        mInterface.setPermissionEnforced(permission, Boolean.parseBoolean(enforcedRaw));
+        mPermissionManager.setPermissionEnforced(permission, Boolean.parseBoolean(enforcedRaw));
         return 0;
     }
 
