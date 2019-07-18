@@ -101,7 +101,7 @@ def parse_options(argv: List[str] = None):
 
   return parser.parse_args(argv)
 
-def validate_options(args: argparse.Namespace) -> Tuple[bool, RunCommandArgs]:
+def validate_options(args: RunCommandArgs) -> Tuple[bool, RunCommandArgs]:
   """Validates the activity and trace file if needed.
 
   Returns:

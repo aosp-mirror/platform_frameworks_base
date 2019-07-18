@@ -156,7 +156,8 @@ def test_main():
   args = '--package com.fake.package --activity act -s'
   opts = run.parse_options(shlex.split(args))
 
-  result = run.run_test(opts)
+  args = run.get_args_from_opts(opts)
+  result = run.run_test(args)
   assert result == [('TotalTime', '123')]
 
 def test_set_up_adb_env():
