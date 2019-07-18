@@ -571,6 +571,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     /**
+     * Successful authentication with fingerprint, face, or iris when the lockscreen fades away
+     */
+    public boolean isUnlockFading() {
+        return mMode == MODE_UNLOCK_FADING;
+    }
+
+    /**
      * Translates biometric source type for logging purpose.
      */
     private int toSubtype(BiometricSourceType biometricSourceType) {
