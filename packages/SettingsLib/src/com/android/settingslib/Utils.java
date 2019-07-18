@@ -218,6 +218,13 @@ public class Utils {
         return list.getDefaultColor();
     }
 
+    /**
+     * This method computes disabled color from normal color
+     *
+     * @param context
+     * @param inputColor normal color.
+     * @return disabled color.
+     */
     @ColorInt
     public static int getDisabled(Context context, int inputColor) {
         return applyAlphaAttr(context, android.R.attr.disabledAlpha, inputColor);
