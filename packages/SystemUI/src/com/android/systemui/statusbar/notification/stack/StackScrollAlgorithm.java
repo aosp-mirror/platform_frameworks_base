@@ -159,15 +159,13 @@ public class StackScrollAlgorithm {
         float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
                 + ambientState.getStackTranslation() + ambientState.getExpandAnimationTopChange()
                 : 0;
-        float previousNotificationEnd = 0;
-        float previousNotificationStart = 0;
+        float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState state = child.getViewState();
             if (!child.mustStayOnScreen() || state.headsUpIsVisible) {
-                previousNotificationEnd = Math.max(drawStart, previousNotificationEnd);
-                previousNotificationStart = Math.max(drawStart, previousNotificationStart);
+                clipStart = Math.max(drawStart, clipStart);
             }
             float newYTranslation = state.yTranslation;
             float newHeight = state.height;
@@ -175,10 +173,10 @@ public class StackScrollAlgorithm {
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) child).isPinned();
             if (mClipNotificationScrollToTop
-                    && !state.inShelf && newYTranslation < previousNotificationEnd
-                    && (!isHeadsUp || ambientState.isShadeExpanded())) {
+                    && (!state.inShelf || isHeadsUp)
+                    && newYTranslation < clipStart) {
                 // The previous view is overlapping on top, clip!
-                float overlapAmount = previousNotificationEnd - newYTranslation;
+                float overlapAmount = clipStart - newYTranslation;
                 state.clipTopAmount = (int) overlapAmount;
             } else {
                 state.clipTopAmount = 0;
@@ -187,8 +185,7 @@ public class StackScrollAlgorithm {
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
-                previousNotificationEnd = newNotificationEnd;
-                previousNotificationStart = newYTranslation;
+                clipStart = Math.max(clipStart, isHeadsUp ? newYTranslation : newNotificationEnd);
             }
         }
     }
