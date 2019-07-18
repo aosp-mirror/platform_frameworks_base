@@ -16071,7 +16071,7 @@ PLcom/android/server/wm/DisplayPolicy;->notifyDisplayReady()V
 PLcom/android/server/wm/DisplayPolicy;->offsetInputMethodWindowLw(Lcom/android/server/wm/WindowState;Lcom/android/server/wm/DisplayFrames;)V
 HSPLcom/android/server/wm/DisplayPolicy;->onConfigurationChanged()V
 PLcom/android/server/wm/DisplayPolicy;->onPowerKeyDown(Z)V
-HSPLcom/android/server/wm/DisplayPolicy;->prepareAddWindowLw(Lcom/android/server/wm/WindowState;Landroid/view/WindowManager$LayoutParams;)I
+HSPLcom/android/server/wm/DisplayPolicy;->validateAddingWindowLw(Landroid/view/WindowManager$LayoutParams;)I
 HSPLcom/android/server/wm/DisplayPolicy;->removeWindowLw(Lcom/android/server/wm/WindowState;)V
 HSPLcom/android/server/wm/DisplayPolicy;->requestTransientBars(Lcom/android/server/wm/WindowState;)V
 HSPLcom/android/server/wm/DisplayPolicy;->resetSystemUiVisibilityLw()V
