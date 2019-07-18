@@ -441,6 +441,43 @@ public final class BluetoothCodecConfig implements Parcelable {
     }
 
     /**
+     * Checks whether a value set presented by a bitmask has zero or single bit
+     *
+     * @param valueSet the value set presented by a bitmask
+     * @return true if the valueSet contains zero or single bit, otherwise false.
+     */
+    private static boolean hasSingleBit(int valueSet) {
+        return (valueSet == 0 || (valueSet & (valueSet - 1)) == 0);
+    }
+
+    /**
+     * Checks whether the object contains none or single sample rate.
+     *
+     * @return true if the object contains none or single sample rate, otherwise false.
+     */
+    public boolean hasSingleSampleRate() {
+        return hasSingleBit(mSampleRate);
+    }
+
+    /**
+     * Checks whether the object contains none or single bits per sample.
+     *
+     * @return true if the object contains none or single bits per sample, otherwise false.
+     */
+    public boolean hasSingleBitsPerSample() {
+        return hasSingleBit(mBitsPerSample);
+    }
+
+    /**
+     * Checks whether the object contains none or single channel mode.
+     *
+     * @return true if the object contains none or single channel mode, otherwise false.
+     */
+    public boolean hasSingleChannelMode() {
+        return hasSingleBit(mChannelMode);
+    }
+
+    /**
      * Checks whether the audio feeding parameters are same.
      *
      * @param other the codec config to compare against
@@ -450,5 +487,59 @@ public final class BluetoothCodecConfig implements Parcelable {
         return (other != null && other.mSampleRate == mSampleRate
                 && other.mBitsPerSample == mBitsPerSample
                 && other.mChannelMode == mChannelMode);
+    }
+
+    /**
+     * Checks whether another codec config has the similar feeding parameters.
+     * Any parameters with NONE value will be considered to be a wildcard matching.
+     *
+     * @param other the codec config to compare against
+     * @return true if the audio feeding parameters are similar, otherwise false.
+     */
+    public boolean similarCodecFeedingParameters(BluetoothCodecConfig other) {
+        if (other == null || mCodecType != other.mCodecType) {
+            return false;
+        }
+        int sampleRate = other.mSampleRate;
+        if (mSampleRate == BluetoothCodecConfig.SAMPLE_RATE_NONE
+                || sampleRate == BluetoothCodecConfig.SAMPLE_RATE_NONE) {
+            sampleRate = mSampleRate;
+        }
+        int bitsPerSample = other.mBitsPerSample;
+        if (mBitsPerSample == BluetoothCodecConfig.BITS_PER_SAMPLE_NONE
+                || bitsPerSample == BluetoothCodecConfig.BITS_PER_SAMPLE_NONE) {
+            bitsPerSample = mBitsPerSample;
+        }
+        int channelMode = other.mChannelMode;
+        if (mChannelMode == BluetoothCodecConfig.CHANNEL_MODE_NONE
+                || channelMode == BluetoothCodecConfig.CHANNEL_MODE_NONE) {
+            channelMode = mChannelMode;
+        }
+        return sameAudioFeedingParameters(new BluetoothCodecConfig(
+                mCodecType, /* priority */ 0, sampleRate, bitsPerSample, channelMode,
+                /* specific1 */ 0, /* specific2 */ 0, /* specific3 */ 0,
+                /* specific4 */ 0));
+    }
+
+    /**
+     * Checks whether the codec specific parameters are the same.
+     *
+     * @param other the codec config to compare against
+     * @return true if the codec specific parameters are the same, otherwise false.
+     */
+    public boolean sameCodecSpecificParameters(BluetoothCodecConfig other) {
+        if (other == null && mCodecType != other.mCodecType) {
+            return false;
+        }
+        // Currently we only care about the LDAC Playback Quality at CodecSpecific1
+        switch (mCodecType) {
+            case SOURCE_CODEC_TYPE_LDAC:
+                if (mCodecSpecific1 != other.mCodecSpecific1) {
+                    return false;
+                }
+                // fall through
+            default:
+                return true;
+        }
     }
 }
