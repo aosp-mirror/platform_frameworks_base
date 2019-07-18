@@ -16,7 +16,6 @@
 
 #include "optimize/ResourcePathShortener.h"
 
-#include <math.h>
 #include <unordered_set>
 
 #include "androidfw/StringPiece.h"
@@ -50,18 +49,15 @@ std::string ShortenFileName(const android::StringPiece& file_path, int output_le
 }
 
 
-// Calculate the optimal hash length such that an average of 10% of resources
-// collide in their shortened path.
+// Return the optimal hash length such that at most 10% of resources collide in
+// their shortened path.
 // Reference: http://matt.might.net/articles/counting-hash-collisions/
 int OptimalShortenedLength(int num_resources) {
-  int num_chars = 2;
-  double N = 64*64; // hash space when hash is 2 chars long
-  double max_collisions = num_resources * 0.1;
-  while (num_resources - N + N * pow((N - 1) / N, num_resources) > max_collisions) {
-    N *= 64;
-    num_chars++;
+  if (num_resources > 4000) {
+    return 3;
+  } else {
+    return 2;
   }
-  return num_chars;
 }
 
 std::string GetShortenedPath(const android::StringPiece& shortened_filename,
