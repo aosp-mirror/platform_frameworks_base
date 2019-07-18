@@ -436,4 +436,6 @@ interface IDevicePolicyManager {
     boolean isUnattendedManagedKiosk();
 
     boolean startViewCalendarEventInManagedProfile(String packageName, long eventId, long start, long end, boolean allDay, int flags);
+
+    boolean setKeyGrantForApp(in ComponentName admin, String callerPackage, String alias, String packageName, boolean hasGrant);
 }
