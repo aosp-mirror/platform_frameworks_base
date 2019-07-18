@@ -102,6 +102,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mWakeAndUnlockRunning;
     private boolean mKeyguardShowing;
     private boolean mShowingLaunchAffordance;
+    private boolean mKeyguardJustShown;
     private boolean mUpdatePending;
 
     private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
@@ -114,6 +115,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                     if (!wasShowing && mKeyguardShowing && mBlockUpdates) {
                         mBlockUpdates = false;
                         force = true;
+                    }
+                    if (!wasShowing && mKeyguardShowing) {
+                        mKeyguardJustShown = true;
                     }
                     update(force);
                 }
@@ -273,8 +277,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
         int state = getState();
         int lastState = mLastState;
+        boolean keyguardJustShown = mKeyguardJustShown;
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         mLastState = state;
+        mKeyguardJustShown = false;
 
         boolean shouldUpdate = lastState != state || mForceUpdate;
         if (mBlockUpdates && canBlockUpdates()) {
@@ -283,7 +289,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         if (shouldUpdate) {
             mForceUpdate = false;
             @LockAnimIndex final int lockAnimIndex = getAnimationIndexForTransition(lastState,
-                    state, mPulsing, mDozing);
+                    state, mPulsing, mDozing, keyguardJustShown);
             boolean isAnim = lockAnimIndex != -1;
             int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(state);
 
@@ -412,7 +418,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     private static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
-            boolean dozing) {
+            boolean dozing, boolean keyguardJustShown) {
 
         // Never animate when screen is off
         if (dozing && !pulsing) {
@@ -423,7 +429,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return ERROR;
         } else if (oldState != STATE_LOCK_OPEN && newState == STATE_LOCK_OPEN) {
             return UNLOCK;
-        } else if (oldState == STATE_LOCK_OPEN && newState == STATE_LOCKED) {
+        } else if (oldState == STATE_LOCK_OPEN && newState == STATE_LOCKED && !keyguardJustShown) {
             return LOCK;
         } else if (newState == STATE_SCANNING_FACE) {
             return SCANNING;
