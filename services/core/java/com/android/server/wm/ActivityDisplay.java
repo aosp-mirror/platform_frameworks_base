@@ -174,6 +174,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mDisplayId = display.getDisplayId();
         mDisplay = display;
         mDisplayContent = createDisplayContent();
+        mDisplayContent.reconfigureDisplayLocked();
         updateBounds();
     }
 

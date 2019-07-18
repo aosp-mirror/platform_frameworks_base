@@ -248,8 +248,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             dc.configureDisplayPolicy();
         }
 
-        mWmService.reconfigureDisplayLocked(dc);
-
         return dc;
     }
 
@@ -267,7 +265,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
 
             displayContent.initializeDisplayOverrideConfiguration();
-            mWmService.reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
 
             // We need to update global configuration as well if config of default display has
             // changed. Do it inline because ATMS#retrieveSettings() will soon update the

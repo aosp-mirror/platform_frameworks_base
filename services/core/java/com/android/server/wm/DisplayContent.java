@@ -122,7 +122,6 @@ import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
-import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
@@ -1212,27 +1211,45 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    /** Notify the configuration change of this display. */
-    void postNewConfigurationToHandler() {
-        mWmService.mH.obtainMessage(SEND_NEW_CONFIGURATION, this).sendToTarget();
+    void reconfigureDisplayLocked() {
+        if (!isReady()) {
+            return;
+        }
+        configureDisplayPolicy();
+        setLayoutNeeded();
+
+        boolean configChanged = updateOrientationFromAppTokens();
+        final Configuration currentDisplayConfig = getConfiguration();
+        mTmpConfiguration.setTo(currentDisplayConfig);
+        computeScreenConfiguration(mTmpConfiguration);
+        configChanged |= currentDisplayConfig.diff(mTmpConfiguration) != 0;
+
+        if (configChanged) {
+            mWaitingForConfig = true;
+            mWmService.startFreezingDisplayLocked(0 /* exitAnim */, 0 /* enterAnim */, this);
+            sendNewConfiguration();
+        }
+
+        mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
     void sendNewConfiguration() {
-        synchronized (mWmService.mGlobalLock) {
-            final boolean configUpdated = mAcitvityDisplay
-                    .updateDisplayOverrideConfigurationLocked();
-            if (!configUpdated) {
-                // Something changed (E.g. device rotation), but no configuration update is needed.
-                // E.g. changing device rotation by 180 degrees. Go ahead and perform surface
-                // placement to unfreeze the display since we froze it when the rotation was updated
-                // in DisplayContent#updateRotationUnchecked.
-                if (mWaitingForConfig) {
-                    mWaitingForConfig = false;
-                    mWmService.mLastFinishedFreezeSource = "config-unchanged";
-                    setLayoutNeeded();
-                    mWmService.mWindowPlacerLocked.performSurfacePlacement();
-                }
-            }
+        if (!isReady() || mAcitvityDisplay == null) {
+            return;
+        }
+        final boolean configUpdated = mAcitvityDisplay.updateDisplayOverrideConfigurationLocked();
+        if (configUpdated) {
+            return;
+        }
+        // Something changed (E.g. device rotation), but no configuration update is needed.
+        // E.g. changing device rotation by 180 degrees. Go ahead and perform surface placement to
+        // unfreeze the display since we froze it when the rotation was updated in
+        // DisplayContent#updateRotationUnchecked.
+        if (mWaitingForConfig) {
+            mWaitingForConfig = false;
+            mWmService.mLastFinishedFreezeSource = "config-unchanged";
+            setLayoutNeeded();
+            mWmService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
@@ -1351,7 +1368,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean updateRotationAndSendNewConfigIfNeeded() {
         final boolean changed = updateRotationUnchecked(false /* forceUpdate */);
         if (changed) {
-            postNewConfigurationToHandler();
+            sendNewConfiguration();
         }
         return changed;
     }
@@ -2292,7 +2309,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mInitialDisplayHeight = newHeight;
             mInitialDisplayDensity = newDensity;
             mInitialDisplayCutout = newCutout;
-            mWmService.reconfigureDisplayLocked(this);
+            reconfigureDisplayLocked();
         }
     }
 
@@ -2345,7 +2362,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
-            mWmService.reconfigureDisplayLocked(this);
+            reconfigureDisplayLocked();
         }
         if (updateCurrent) {
             // We are applying existing settings so no need to save it again.
@@ -2366,7 +2383,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplayScalingDisabled = (mode != FORCE_SCALING_MODE_AUTO);
         Slog.i(TAG_WM, "Using display scaling mode: " + (mDisplayScalingDisabled ? "off" : "auto"));
-        mWmService.reconfigureDisplayLocked(this);
+        reconfigureDisplayLocked();
 
         mWmService.mDisplayWindowSettings.setForcedScalingMode(this, mode);
     }
@@ -2385,7 +2402,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
         updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
-        mWmService.reconfigureDisplayLocked(this);
+        reconfigureDisplayLocked();
 
         if (clear) {
             width = height = 0;
@@ -3730,7 +3747,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                 if (updateOrientationFromAppTokens()) {
                     setLayoutNeeded();
-                    postNewConfigurationToHandler();
+                    sendNewConfiguration();
                 }
             }
 

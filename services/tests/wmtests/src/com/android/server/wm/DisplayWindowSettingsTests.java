@@ -23,7 +23,6 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeastOnce;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -624,11 +623,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertFalse(dc.mWaitingForConfig);
 
         // Notify WM that the displays are ready and check that they are reconfigured.
-        spyOn(mWm);
         mWm.displayReady();
         waitUntilHandlersIdle();
-        verify(mWm, atLeastOnce()).reconfigureDisplayLocked(eq(mPrimaryDisplay));
-        verify(mWm, atLeastOnce()).reconfigureDisplayLocked(eq(dc));
 
         final Configuration config = new Configuration();
         mPrimaryDisplay.computeScreenConfiguration(config);
