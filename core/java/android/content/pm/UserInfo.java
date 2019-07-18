@@ -22,8 +22,6 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.internal.os.RoSystemProperties;
-
 /**
  * Per-user information.
  * @hide
@@ -233,9 +231,7 @@ public class UserInfo implements Parcelable {
         if (isManagedProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        boolean splitOrHeadlessSystemUser = UserManager.isSplitSystemUser()
-                || RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
-        if (splitOrHeadlessSystemUser) {
+        if (UserManager.isSplitSystemUser() || UserManager.isHeadlessSystemUserMode()) {
             return id != UserHandle.USER_SYSTEM;
         } else {
             return id == UserHandle.USER_SYSTEM;
