@@ -72,8 +72,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private NotificationGroupManager mGroupManager;
     private VisualStabilityManager mVisualStabilityManager;
     private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
-    @VisibleForTesting
-    int mAutoDismissNotificationDecayDozing;
     private boolean mReleaseOnExpandFinish;
 
     private int mStatusBarHeight;
@@ -120,8 +118,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             KeyguardBypassController bypassController) {
         super(context);
         Resources resources = mContext.getResources();
-        mAutoDismissNotificationDecayDozing = resources.getInteger(
-                R.integer.heads_up_notification_decay_dozing);
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         mAutoHeadsUpNotificationDecay = resources.getInteger(
                 R.integer.auto_heads_up_notification_decay);
@@ -612,9 +608,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
 
         private int getDecayDuration() {
-            if (mStatusBarStateController.isDozing()) {
-                return mAutoDismissNotificationDecayDozing;
-            } else if (isAutoHeadsUp()) {
+            if (isAutoHeadsUp()) {
                 return getRecommendedHeadsUpTimeoutMs(mAutoHeadsUpNotificationDecay);
             } else {
                 return getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
