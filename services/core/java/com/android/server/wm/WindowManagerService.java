@@ -1911,10 +1911,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     mWindowPlacerLocked.performSurfacePlacement();
 
                     // We need to report touchable region changes to accessibility.
-                    if (mAccessibilityController != null
-                            && (w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY
-                                    || w.getDisplayContent().getParentWindow() != null)) {
-                        mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+                    if (mAccessibilityController != null) {
+                        mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+                                w.getDisplayContent().getDisplayId());
                     }
                 }
             }
@@ -2044,11 +2043,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mAppToken.checkKeyguardFlagsChanged();
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
-                        && (mAccessibilityController != null)
-                        && (win.getDisplayId() == DEFAULT_DISPLAY
-                                || win.getDisplayContent().getParentWindow() != null)) {
+                        && (mAccessibilityController != null)) {
                     // No move or resize, but the controller checks for title changes as well
-                    mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+                    mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+                            win.getDisplayContent().getDisplayId());
                 }
 
                 if ((flagChanges & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
@@ -4555,11 +4553,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     AccessibilityController accessibilityController = null;
 
                     synchronized (mGlobalLock) {
-                        // TODO(multidisplay): Accessibility supported only of default display and
-                        // embedded displays.
-                        if (mAccessibilityController != null
-                                && (displayContent.isDefaultDisplay
-                                || displayContent.getParentWindow() != null)) {
+                        if (mAccessibilityController != null) {
                             accessibilityController = mAccessibilityController;
                         }
 
@@ -4582,7 +4576,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // First notify the accessibility manager for the change so it has
                     // the windows before the newly focused one starts firing eventgs.
                     if (accessibilityController != null) {
-                        accessibilityController.onWindowFocusChangedNotLocked();
+                        accessibilityController.onWindowFocusChangedNotLocked(
+                                displayContent.getDisplayId());
                     }
 
                     if (newFocus != null) {
@@ -6757,6 +6752,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 getDisplayContentOrCreate(displayId, null).reparentDisplayContent(win, sc);
+                // Notifies AccessibilityController to re-compute the window observer of
+                // this embedded display
+                if (mAccessibilityController != null) {
+                    mAccessibilityController.handleWindowObserverOfEmbeddedDisplayLocked(displayId,
+                            win);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -7168,16 +7169,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setWindowsForAccessibilityCallback(WindowsForAccessibilityCallback callback) {
+        public boolean setWindowsForAccessibilityCallback(int displayId,
+                WindowsForAccessibilityCallback callback) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController == null) {
                     mAccessibilityController = new AccessibilityController(
                             WindowManagerService.this);
                 }
-                mAccessibilityController.setWindowsForAccessibilityCallback(callback);
+                final boolean result =
+                        mAccessibilityController.setWindowsForAccessibilityCallbackLocked(
+                        displayId, callback);
                 if (!mAccessibilityController.hasCallbacksLocked()) {
                     mAccessibilityController = null;
                 }
+                return result;
             }
         }
 
@@ -7343,13 +7348,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void computeWindowsForAccessibility() {
+        public void computeWindowsForAccessibility(int displayId) {
             final AccessibilityController accessibilityController;
             synchronized (mGlobalLock) {
                 accessibilityController = mAccessibilityController;
             }
             if (accessibilityController != null) {
-                accessibilityController.performComputeChangedWindowsNotLocked(true);
+                accessibilityController.performComputeChangedWindowsNotLocked(displayId, true);
             }
         }
 

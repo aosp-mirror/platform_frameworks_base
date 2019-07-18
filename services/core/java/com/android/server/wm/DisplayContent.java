@@ -5094,7 +5094,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!mLocationInParentWindow.equals(x, y)) {
             mLocationInParentWindow.set(x, y);
             if (mWmService.mAccessibilityController != null) {
-                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(mDisplayId);
             }
             notifyLocationInParentDisplayChanged();
         }

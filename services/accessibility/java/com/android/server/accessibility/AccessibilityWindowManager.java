@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.WindowInfo;
 import android.view.WindowManager;
@@ -311,7 +312,9 @@ public class AccessibilityWindowManager
                 // In some cases, onWindowsForAccessibilityChanged will be called immediately in
                 // setWindowsForAccessibilityCallback. We'll lost windows if flag is false.
                 mTrackingWindows = true;
-                mWindowManagerInternal.setWindowsForAccessibilityCallback(this);
+                // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
+                mWindowManagerInternal.setWindowsForAccessibilityCallback(Display.DEFAULT_DISPLAY,
+                        this);
             }
         }
     }
@@ -322,7 +325,9 @@ public class AccessibilityWindowManager
     public void stopTrackingWindows() {
         synchronized (mLock) {
             if (mTrackingWindows) {
-                mWindowManagerInternal.setWindowsForAccessibilityCallback(null);
+                // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
+                mWindowManagerInternal.setWindowsForAccessibilityCallback(Display.DEFAULT_DISPLAY,
+                        null);
                 mTrackingWindows = false;
                 clearWindowsLocked();
             }
@@ -521,7 +526,8 @@ public class AccessibilityWindowManager
                 }
             }
         }
-        mWindowManagerInternal.computeWindowsForAccessibility();
+        // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
+        mWindowManagerInternal.computeWindowsForAccessibility(Display.DEFAULT_DISPLAY);
         return windowId;
     }
 

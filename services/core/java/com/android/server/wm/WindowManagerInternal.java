@@ -263,11 +263,13 @@ public abstract class WindowManagerInternal {
 
     /**
      * Sets a callback for observing which windows are touchable for the purposes
-     * of accessibility.
+     * of accessibility on specified display.
      *
+     * @param displayId The logical display id.
      * @param callback The callback.
+     * @return {@code false} if display id is not valid.
      */
-    public abstract void setWindowsForAccessibilityCallback(
+    public abstract boolean setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback);
 
     /**
@@ -418,9 +420,11 @@ public abstract class WindowManagerInternal {
     public abstract boolean isStackVisibleLw(int windowingMode);
 
     /**
-     * Requests the window manager to resend the windows for accessibility.
+     * Requests the window manager to resend the windows for accessibility on specified display.
+     *
+     * @param displayId Display ID to be computed its windows for accessibility
      */
-    public abstract void computeWindowsForAccessibility();
+    public abstract void computeWindowsForAccessibility(int displayId);
 
     /**
      * Called after virtual display Id is updated by

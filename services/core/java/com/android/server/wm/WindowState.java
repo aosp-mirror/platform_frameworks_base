@@ -22,7 +22,6 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
@@ -1802,11 +1801,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             startMoveAnimation(left, top);
         }
 
-        // TODO (multidisplay): Accessibility supported only for the default display and
-        // embedded displays
-        if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
-                || getDisplayContent().getParentWindow() != null)) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+        if (mWmService.mAccessibilityController != null) {
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(getDisplayId());
         }
         updateLocationInParentDisplayIfNeeded();
 
@@ -3196,12 +3192,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         outsets, reportDraw, mergedConfiguration, reportOrientation, displayId,
                         displayCutout);
             }
-
-            // TODO (multidisplay): Accessibility supported only for the default display and
-            // embedded displays
-            if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
-                    || getDisplayContent().getParentWindow() != null)) {
-                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+            if (mWmService.mAccessibilityController != null) {
+                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+                        getDisplayId());
             }
             updateLocationInParentDisplayIfNeeded();
 
@@ -4296,12 +4289,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isSelfAnimating()) {
             return;
         }
-
-        // TODO (multidisplay): Accessibility supported only for the default display and
-        // embedded displays
-        if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
-                || getDisplayContent().getParentWindow() != null)) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+        if (mWmService.mAccessibilityController != null) {
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(getDisplayId());
         }
 
         if (!isSelfOrAncestorWindowAnimatingExit()) {
