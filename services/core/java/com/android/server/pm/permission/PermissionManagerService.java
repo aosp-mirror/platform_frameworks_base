@@ -53,6 +53,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -1434,7 +1435,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /**
      * Reverts user permission state changes (permissions and flags).
      *
-     * @param ps The package for which to reset.
+     * @param pkg The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
     @GuardedBy("mPackages")
@@ -1508,6 +1509,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         };
 
+        final AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
         for (int i = 0; i < permissionCount; i++) {
             final String permName = pkg.requestedPermissions.get(i);
             final BasePermission bp;
@@ -1575,6 +1577,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
                 grantRuntimePermissionInternal(permName, packageName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
+                // Allow app op later as we are holding mPackages
+                // PermissionPolicyService will handle the app op for foreground/background
+                // permissions.
+                String appOp = AppOpsManager.permissionToOp(permName);
+                if (appOp != null) {
+                    mHandler.post(() -> appOpsManager.setUidMode(appOp, uid,
+                            AppOpsManager.MODE_ALLOWED));
+                }
             // If permission review is enabled the permissions for a legacy apps
             // are represented as constantly granted runtime ones, so don't revoke.
             } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
