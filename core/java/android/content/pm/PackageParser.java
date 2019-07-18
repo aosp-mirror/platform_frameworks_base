@@ -254,6 +254,8 @@ public class PackageParser {
 
     /** @hide */
     public static final String APK_FILE_EXTENSION = ".apk";
+    /** @hide */
+    public static final String APEX_FILE_EXTENSION = ".apex";
 
     /** @hide */
     public static class NewPermissionInfo {
