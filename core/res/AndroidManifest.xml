@@ -4981,6 +4981,7 @@
         <service
                 android:name="com.android.server.autofill.AutofillCompatAccessibilityService"
                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                android:visibleToInstantApps="true"
                 android:exported="true">
             <meta-data
                     android:name="android.accessibilityservice"
