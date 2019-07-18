@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -55,6 +56,7 @@ class Bubble {
     private final String mKey;
     private final String mGroupId;
     private String mAppName;
+    private Drawable mUserBadgedAppIcon;
 
     private boolean mInflated;
     private BubbleView mIconView;
@@ -105,6 +107,8 @@ class Bubble {
             if (info != null) {
                 mAppName = String.valueOf(pm.getApplicationLabel(info));
             }
+            Drawable appIcon = pm.getApplicationIcon(mEntry.notification.getPackageName());
+            mUserBadgedAppIcon = pm.getUserBadgedIcon(appIcon, mEntry.notification.getUser());
         } catch (PackageManager.NameNotFoundException unused) {
             mAppName = mEntry.notification.getPackageName();
         }
@@ -161,6 +165,7 @@ class Bubble {
         mIconView = (BubbleView) inflater.inflate(
                 R.layout.bubble_view, stackView, false /* attachToRoot */);
         mIconView.setBubble(this);
+        mIconView.setAppIcon(mUserBadgedAppIcon);
 
         mExpandedView = (BubbleExpandedView) inflater.inflate(
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
