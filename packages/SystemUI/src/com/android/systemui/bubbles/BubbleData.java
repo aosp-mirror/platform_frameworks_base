@@ -465,7 +465,7 @@ public class BubbleData {
                     // bubble remains on top.
                     mBubbles.remove(mSelectedBubble);
                     mBubbles.add(0, mSelectedBubble);
-                    packGroup(0);
+                    mStateChange.orderChanged |= packGroup(0);
                 }
             }
         }
