@@ -16,10 +16,12 @@
 
 package com.android.systemui.classifier.brightline;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
 
@@ -31,8 +33,9 @@ import android.view.MotionEvent;
  */
 class ProximityClassifier extends FalsingClassifier {
 
-    private static final double PERCENT_COVERED_THRESHOLD = 0.1;
+    private static final float PERCENT_COVERED_THRESHOLD = 0.1f;
     private final DistanceClassifier mDistanceClassifier;
+    private final float mPercentCoveredThreshold;
 
     private boolean mNear;
     private long mGestureStartTimeNs;
@@ -44,6 +47,11 @@ class ProximityClassifier extends FalsingClassifier {
             FalsingDataProvider dataProvider) {
         super(dataProvider);
         this.mDistanceClassifier = distanceClassifier;
+
+        mPercentCoveredThreshold = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD,
+                PERCENT_COVERED_THRESHOLD);
     }
 
     @Override
@@ -107,7 +115,7 @@ class ProximityClassifier extends FalsingClassifier {
 
         logInfo("Percent of gesture in proximity: " + mPercentNear);
 
-        if (mPercentNear > PERCENT_COVERED_THRESHOLD) {
+        if (mPercentNear > mPercentCoveredThreshold) {
             return !mDistanceClassifier.isLongSwipe();
         }
 
