@@ -720,7 +720,7 @@ public class MediaRecorder implements AudioRouting,
 
     /**
      * Sets the width and height of the video to be captured.  Must be called
-     * after setVideoSource(). Call this after setOutFormat() but before
+     * after setVideoSource(). Call this after setOutputFormat() but before
      * prepare().
      *
      * @param width the width of the video to be captured
@@ -733,7 +733,7 @@ public class MediaRecorder implements AudioRouting,
 
     /**
      * Sets the frame rate of the video to be captured.  Must be called
-     * after setVideoSource(). Call this after setOutFormat() but before
+     * after setVideoSource(). Call this after setOutputFormat() but before
      * prepare().
      *
      * @param rate the number of frames per second of video to capture
@@ -748,7 +748,7 @@ public class MediaRecorder implements AudioRouting,
 
     /**
      * Sets the maximum duration (in ms) of the recording session.
-     * Call this after setOutFormat() but before prepare().
+     * Call this after setOutputFormat() but before prepare().
      * After recording reaches the specified duration, a notification
      * will be sent to the {@link android.media.MediaRecorder.OnInfoListener}
      * with a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_DURATION_REACHED}
@@ -769,7 +769,7 @@ public class MediaRecorder implements AudioRouting,
 
     /**
      * Sets the maximum filesize (in bytes) of the recording session.
-     * Call this after setOutFormat() but before prepare().
+     * Call this after setOutputFormat() but before prepare().
      * After recording reaches the specified filesize, a notification
      * will be sent to the {@link android.media.MediaRecorder.OnInfoListener}
      * with a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}
