@@ -33,6 +33,8 @@ java_library {
         "framework_media_annotation",
         "android_system_stubs_current",
     ],
+
+    plugins: ["java_api_finder"],
 }
 
 filegroup {
