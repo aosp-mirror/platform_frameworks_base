@@ -92,7 +92,7 @@ public class FalsingManagerProxy implements FalsingManager {
     @VisibleForTesting
     public void setupFalsingManager(Context context) {
         boolean brightlineEnabled = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, false);
+                DeviceConfig.NAMESPACE_SYSTEMUI, BRIGHTLINE_FALSING_MANAGER_ENABLED, true);
 
         if (mInternalFalsingManager != null) {
             mInternalFalsingManager.cleanup();
