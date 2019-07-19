@@ -36,6 +36,8 @@ DIR = os.path.abspath(os.path.dirname(__file__))
 TEXTCACHE = os.path.join(DIR, 'test_fixtures/compiler/common_textcache')
 SYSTRACE = os.path.join(DIR, 'test_fixtures/compiler/common_systrace')
 ARGV = [os.path.join(DIR, 'compiler.py'), '-i', TEXTCACHE, '-t', SYSTRACE]
+PERFETTO_TRACE = os.path.join(DIR,
+                              'test_fixtures/compiler/common_perfetto_trace.pb')
 
 def assert_compile_result(output, expected, *extra_argv):
   argv = ARGV + ['-o', output] + [args for args in extra_argv]
@@ -45,6 +47,18 @@ def assert_compile_result(output, expected, *extra_argv):
   with open(output, 'rb') as f1, open(expected, 'rb') as f2:
     assert f1.read() == f2.read()
 
+### Unit tests - testing compiler code directly
+def test_transform_perfetto_trace_to_systrace(tmpdir):
+  expected = os.path.join(DIR,
+                          'test_fixtures/compiler/test_result_systrace')
+  output = tmpdir.mkdir('compiler').join('tmp_systrace')
+
+  compiler.transform_perfetto_trace_to_systrace(PERFETTO_TRACE, str(output))
+
+  with open(output, 'rb') as f1, open(expected, 'rb') as f2:
+    assert f1.read() == f2.read()
+
+### Functional tests - calls 'compiler.py --args...'
 def test_compiler_main(tmpdir):
   output = tmpdir.mkdir('compiler').join('output')
 
