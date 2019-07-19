@@ -767,13 +767,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final long disableDuration = response.getDisableDuration();
         if (disableDuration > 0) {
             final int flags = response.getFlags();
-            if ((flags & FillResponse.FLAG_DISABLE_ACTIVITY_ONLY) != 0) {
+            final boolean disableActivityOnly =
+                    (flags & FillResponse.FLAG_DISABLE_ACTIVITY_ONLY) != 0;
+            notifyDisableAutofillToClient(disableDuration,
+                    disableActivityOnly ? mComponentName : null);
+
+            if (disableActivityOnly) {
                 mService.disableAutofillForActivity(mComponentName, disableDuration,
                         id, mCompatMode);
             } else {
                 mService.disableAutofillForApp(mComponentName.getPackageName(), disableDuration,
                         id, mCompatMode);
             }
+
             // Although "standard" autofill is disabled, it might still trigger augmented autofill
             if (triggerAugmentedAutofillLocked() != null) {
                 mForAugmentedAutofillOnly = true;
@@ -2550,6 +2556,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
+            }
+        }
+    }
+
+    private void notifyDisableAutofillToClient(long disableDuration, ComponentName componentName) {
+        synchronized (mLock) {
+            if (mCurrentViewId == null) return;
+            try {
+                mClient.notifyDisableAutofill(disableDuration, componentName);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error notifying client disable autofill: id=" + mCurrentViewId, e);
             }
         }
     }

@@ -807,6 +807,7 @@ public final class AutofillManagerService
                     packageName, versionCode, userId);
             final AutofillOptions options = new AutofillOptions(loggingLevel, compatModeEnabled);
             mAugmentedAutofillState.injectAugmentedAutofillInfo(options, userId, packageName);
+            injectDisableAppInfo(options, userId, packageName);
             return options;
         }
 
@@ -819,6 +820,19 @@ public final class AutofillManagerService
                 }
             }
             return false;
+        }
+
+        private void injectDisableAppInfo(@NonNull AutofillOptions options, int userId,
+                String packageName) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    options.appDisabledExpiration = service.getAppDisabledExpirationLocked(
+                            packageName);
+                    options.disabledActivities = service.getAppDisabledActivitiesLocked(
+                            packageName);
+                }
+            }
         }
     }
 
