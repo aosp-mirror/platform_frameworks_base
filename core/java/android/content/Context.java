@@ -3037,6 +3037,7 @@ public abstract class Context {
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
+            EUICC_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -3216,6 +3217,8 @@ public abstract class Context {
      * @see android.telephony.SubscriptionManager
      * @see #CARRIER_CONFIG_SERVICE
      * @see android.telephony.CarrierConfigManager
+     * @see #EUICC_SERVICE
+     * @see android.telephony.euicc.EuiccManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
