@@ -81,6 +81,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private static final long FLAGS_HAS_AUTOFILL_VALUE = 1L << 32;
     private static final long FLAGS_HAS_AUTOFILL_HINTS = 1L << 33;
     private static final long FLAGS_HAS_AUTOFILL_OPTIONS = 1L << 34;
+    private static final long FLAGS_HAS_HINT_ID_ENTRY = 1L << 35;
 
     /** Flags used to optimize what's written to the parcel */
     private long mFlags;
@@ -108,6 +109,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private int mMaxEms = -1;
     private int mMaxLength = -1;
     private String mTextIdEntry;
+    private String mHintIdEntry;
     private @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
     private String[] mAutofillHints;
     private AutofillValue mAutofillValue;
@@ -194,6 +196,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
             mAutofillOptions = parcel.readCharSequenceArray();
+        }
+        if ((nodeFlags & FLAGS_HAS_HINT_ID_ENTRY) != 0) {
+            mHintIdEntry = parcel.readString();
         }
     }
 
@@ -349,6 +354,11 @@ public final class ViewNode extends AssistStructure.ViewNode {
     @Override
     public String getHint() {
         return mText != null ? mText.mHint : null;
+    }
+
+    @Override
+    public String getHintIdEntry() {
+        return mHintIdEntry;
     }
 
     @Override
@@ -512,6 +522,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         if (mAutofillOptions != null) {
             nodeFlags |= FLAGS_HAS_AUTOFILL_OPTIONS;
         }
+        if (mHintIdEntry != null) {
+            nodeFlags |= FLAGS_HAS_HINT_ID_ENTRY;
+        }
         parcel.writeLong(nodeFlags);
 
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_ID) != 0) {
@@ -584,6 +597,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
             parcel.writeCharSequenceArray(mAutofillOptions);
+        }
+        if ((nodeFlags & FLAGS_HAS_HINT_ID_ENTRY) != 0) {
+            parcel.writeString(mHintIdEntry);
         }
     }
 
@@ -783,13 +799,18 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
 
         @Override
-        public void setTextIdEntry(String entryName) {
+        public void setTextIdEntry(@NonNull String entryName) {
             mNode.mTextIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
         public void setHint(CharSequence hint) {
             getNodeText().mHint = hint != null ? hint.toString() : null;
+        }
+
+        @Override
+        public void setHintIdEntry(String entryName) {
+            mNode.mHintIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
