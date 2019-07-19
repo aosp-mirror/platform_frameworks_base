@@ -301,12 +301,15 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     public Region calculateTouchableRegion() {
-        if (!hasPinnedHeadsUp()) {
+        NotificationEntry topEntry = getTopEntry();
+        // This call could be made in an inconsistent state while the pinnedMode hasn't been
+        // updated yet, but callbacks leading out of the headsUp manager, querying it. Let's
+        // therefore also check if the topEntry is null.
+        if (!hasPinnedHeadsUp() || topEntry == null) {
             mTouchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
             updateRegionForNotch(mTouchableRegion);
 
         } else {
-            NotificationEntry topEntry = getTopEntry();
             if (topEntry.isChildInGroup()) {
                 final NotificationEntry groupSummary =
                         mGroupManager.getGroupSummary(topEntry.notification);
