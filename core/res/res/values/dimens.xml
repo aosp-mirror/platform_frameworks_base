@@ -279,7 +279,7 @@
     <dimen name="notification_expand_button_padding_top">1dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">92dp</dimen>
+    <dimen name="notification_min_height">106dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
