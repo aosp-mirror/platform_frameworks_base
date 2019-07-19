@@ -112,7 +112,7 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">106dp</dimen>
+    <dimen name="notification_min_height">@*android:dimen/notification_min_height</dimen>
 
     <!-- Increased height of a small notification in the status bar -->
     <dimen name="notification_min_height_increased">146dp</dimen>
