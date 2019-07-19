@@ -414,6 +414,7 @@ public class PipMenuActivityController {
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
                 Intent intent = new Intent(mContext, PipMenuActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra(EXTRA_CONTROLLER_MESSENGER, mMessenger);
                 intent.putExtra(EXTRA_ACTIONS, resolveMenuActions());
                 if (stackBounds != null) {
