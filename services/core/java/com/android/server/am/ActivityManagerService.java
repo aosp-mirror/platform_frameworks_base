@@ -2399,7 +2399,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mLowMemDetector = null;
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
+        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
