@@ -57,8 +57,8 @@
 
 namespace android {
 
-static const char* const OutOfResourcesException =
-    "android/view/Surface$OutOfResourcesException";
+static const char* const IllegalArgumentException = "java/lang/IllegalArgumentException";
+static const char* const OutOfResourcesException = "android/view/Surface$OutOfResourcesException";
 
 static struct {
     jclass clazz;
@@ -155,7 +155,7 @@ static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
     if (producer == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
+        jniThrowException(env, IllegalArgumentException,
                 "SurfaceTexture has already been released");
         return 0;
     }
@@ -183,7 +183,7 @@ static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jlong nativeObject) {
 static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(sur)) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
         return JNI_FALSE;
     }
     int value = 0;
@@ -212,7 +212,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
         return 0;
     }
 
@@ -293,7 +293,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     // unlock surface
     status_t err = surface->unlockAndPost();
     if (err < 0) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
     }
 }
 
@@ -344,7 +344,7 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
-        doThrowNPE(env);
+        jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
@@ -385,7 +385,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
-        doThrowNPE(env);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));

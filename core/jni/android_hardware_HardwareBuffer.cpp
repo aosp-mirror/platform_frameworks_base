@@ -20,7 +20,6 @@
 #include <nativehelper/JNIHelp.h>
 
 #include "android_os_Parcel.h"
-#include "android/graphics/GraphicsJNI.h"
 #include "android/graphics/GraphicBuffer.h"
 
 #include <android/hardware_buffer.h>
