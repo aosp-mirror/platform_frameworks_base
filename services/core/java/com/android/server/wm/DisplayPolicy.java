@@ -879,27 +879,24 @@ public class DisplayPolicy {
     }
 
     /**
-     * Preflight adding a window to the system.
+     * Check if a window can be added to the system.
      *
-     * Currently enforces that three window types are singletons per display:
+     * Currently enforces that two window types are singletons per display:
      * <ul>
      * <li>{@link WindowManager.LayoutParams#TYPE_STATUS_BAR}</li>
      * <li>{@link WindowManager.LayoutParams#TYPE_NAVIGATION_BAR}</li>
      * </ul>
      *
-     * @param win The window to be added
-     * @param attrs Information about the window to be added
+     * @param attrs Information about the window to be added.
      *
      * @return If ok, WindowManagerImpl.ADD_OKAY.  If too many singletons,
      * WindowManagerImpl.ADD_MULTIPLE_SINGLETON
      */
-    public int prepareAddWindowLw(WindowState win, WindowManager.LayoutParams attrs) {
-
+    int validateAddingWindowLw(WindowManager.LayoutParams attrs) {
         if ((attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.STATUS_BAR_SERVICE,
                     "DisplayPolicy");
-            mScreenDecorWindows.add(win);
         }
 
         switch (attrs.type) {
@@ -912,6 +909,42 @@ public class DisplayPolicy {
                         return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                     }
                 }
+                break;
+            case TYPE_NAVIGATION_BAR:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "DisplayPolicy");
+                if (mNavigationBar != null) {
+                    if (mNavigationBar.isAlive()) {
+                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                    }
+                }
+                break;
+            case TYPE_NAVIGATION_BAR_PANEL:
+            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_VOICE_INTERACTION_STARTING:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "DisplayPolicy");
+                break;
+        }
+        return ADD_OKAY;
+    }
+
+    /**
+     * Called when a window is being added to the system.  Must not throw an exception.
+     *
+     * @param win The window being added.
+     * @param attrs Information about the window to be added.
+     */
+    void addWindowLw(WindowState win, WindowManager.LayoutParams attrs) {
+        if ((attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0) {
+            mScreenDecorWindows.add(win);
+        }
+
+        switch (attrs.type) {
+            case TYPE_STATUS_BAR:
                 mStatusBar = win;
                 mStatusBarController.setWindow(win);
                 if (mDisplayContent.isDefaultDisplay) {
@@ -927,14 +960,6 @@ public class DisplayPolicy {
                 mDisplayContent.setInsetProvider(TYPE_TOP_TAPPABLE_ELEMENT, win, frameProvider);
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
-                        "DisplayPolicy");
-                if (mNavigationBar != null) {
-                    if (mNavigationBar.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
-                }
                 mNavigationBar = win;
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
@@ -968,16 +993,7 @@ public class DisplayPolicy {
                         });
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
-            case TYPE_NAVIGATION_BAR_PANEL:
-            case TYPE_STATUS_BAR_PANEL:
-            case TYPE_STATUS_BAR_SUB_PANEL:
-            case TYPE_VOICE_INTERACTION_STARTING:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
-                        "DisplayPolicy");
-                break;
         }
-        return ADD_OKAY;
     }
 
     /**
@@ -986,7 +1002,7 @@ public class DisplayPolicy {
      *
      * @param win The window being removed.
      */
-    public void removeWindowLw(WindowState win) {
+    void removeWindowLw(WindowState win) {
         if (mStatusBar == win) {
             mStatusBar = null;
             mStatusBarController.setWindow(null);

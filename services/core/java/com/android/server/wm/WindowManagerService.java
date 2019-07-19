@@ -1431,7 +1431,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.getCallingUid());
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
-            res = displayPolicy.prepareAddWindowLw(win, attrs);
+            res = displayPolicy.validateAddingWindowLw(attrs);
             if (res != WindowManagerGlobal.ADD_OKAY) {
                 return res;
             }
@@ -1507,6 +1507,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean imMayMove = true;
 
             win.mToken.addWindow(win);
+            displayPolicy.addWindowLw(win, attrs);
             if (type == TYPE_INPUT_METHOD) {
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
