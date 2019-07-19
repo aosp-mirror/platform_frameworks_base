@@ -1565,7 +1565,7 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        @SystemApi
+        @SystemApi @TestApi
         public void setRequestDowngrade(boolean requestDowngrade) {
             if (requestDowngrade) {
                 installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
