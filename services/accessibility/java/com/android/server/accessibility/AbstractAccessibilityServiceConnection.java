@@ -17,7 +17,6 @@
 package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
@@ -37,6 +36,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,6 +49,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.View;
@@ -91,6 +92,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private final WindowManagerInternal mWindowManagerService;
     private final GlobalActionPerformer mGlobalActionPerformer;
     private final AccessibilityWindowManager mA11yWindowManager;
+    private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
 
     // Handler for scheduling method invocations on the main thread.
@@ -149,7 +151,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     // types as message types allowing us to remove messages per event type.
     public Handler mEventDispatchHandler;
 
-    final IBinder mOverlayWindowToken = new Binder();
+    final SparseArray<IBinder> mOverlayWindowTokens = new SparseArray();
 
 
     public interface SystemSupport {
@@ -222,6 +224,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mSystemSupport = systemSupport;
         mInvocationHandler = new InvocationHandler(mainHandler.getLooper());
         mA11yWindowManager = a11yWindowManager;
+        mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mEventDispatchHandler = new Handler(mainHandler.getLooper()) {
             @Override
@@ -928,21 +931,70 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void onAdded() {
+        final Display[] displays = mDisplayManager.getDisplays();
+        for (int i = 0; i < displays.length; i++) {
+            final int displayId = displays[i].getDisplayId();
+            onDisplayAdded(displayId);
+        }
+    }
+
+    /**
+     * Called whenever a logical display has been added to the system. Add a window token for adding
+     * an accessibility overlay.
+     *
+     * @param displayId The id of the logical display that was added.
+     */
+    public void onDisplayAdded(int displayId) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mWindowManagerService.addWindowToken(mOverlayWindowToken,
-                    TYPE_ACCESSIBILITY_OVERLAY, DEFAULT_DISPLAY);
+            final IBinder overlayWindowToken = new Binder();
+            mWindowManagerService.addWindowToken(overlayWindowToken, TYPE_ACCESSIBILITY_OVERLAY,
+                    displayId);
+            synchronized (mLock) {
+                mOverlayWindowTokens.put(displayId, overlayWindowToken);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     public void onRemoved() {
+        final Display[] displays = mDisplayManager.getDisplays();
+        for (int i = 0; i < displays.length; i++) {
+            final int displayId = displays[i].getDisplayId();
+            onDisplayRemoved(displayId);
+        }
+    }
+
+    /**
+     * Called whenever a logical display has been removed from the system. Remove a window token for
+     * removing an accessibility overlay.
+     *
+     * @param displayId The id of the logical display that was added.
+     */
+    public void onDisplayRemoved(int displayId) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mWindowManagerService.removeWindowToken(mOverlayWindowToken, true, DEFAULT_DISPLAY);
+            mWindowManagerService.removeWindowToken(mOverlayWindowTokens.get(displayId), true,
+                    displayId);
+            synchronized (mLock) {
+                mOverlayWindowTokens.remove(displayId);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Gets overlay window token by the display Id.
+     *
+     * @param displayId The id of the logical display that was added.
+     * @return window token.
+     */
+    @Override
+    public IBinder getOverlayWindowToken(int displayId) {
+        synchronized (mLock) {
+            return mOverlayWindowTokens.get(displayId);
         }
     }
 
