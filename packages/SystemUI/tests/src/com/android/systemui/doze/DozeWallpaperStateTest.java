@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import org.junit.Before;
@@ -44,12 +46,14 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
 
     private DozeWallpaperState mDozeWallpaperState;
     @Mock IWallpaperManager mIWallpaperManager;
+    @Mock BiometricUnlockController mBiometricUnlockController;
     @Mock DozeParameters mDozeParameters;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDozeWallpaperState = new DozeWallpaperState(mIWallpaperManager, mDozeParameters);
+        mDozeWallpaperState = new DozeWallpaperState(mIWallpaperManager, mBiometricUnlockController,
+                mDozeParameters);
     }
 
     @Test
@@ -96,6 +100,20 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
                 DozeMachine.State.DOZE_AOD);
         verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(0L));
+
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(0L));
+    }
+
+    @Test
+    public void testDoesNotAnimate_whenWakeAndUnlock() throws RemoteException {
+        // Pre-conditions
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        when(mBiometricUnlockController.unlockedByWakeAndUnlock()).thenReturn(true);
+
+        mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
+                DozeMachine.State.DOZE_AOD);
+        clearInvocations(mIWallpaperManager);
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
         verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(0L));
