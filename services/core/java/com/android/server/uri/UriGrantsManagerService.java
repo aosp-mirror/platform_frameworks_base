@@ -110,6 +110,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
     private static final int MAX_PERSISTED_URI_GRANTS = 128;
+    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -952,7 +953,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         // If this provider says that grants are always required, we need to
         // consult it directly to determine if the UID has permission
         final boolean forceMet;
-        if (pi.forceUriPermissions) {
+        if (ENABLE_DYNAMIC_PERMISSIONS && pi.forceUriPermissions) {
             final int providerUserId = UserHandle.getUserId(pi.applicationInfo.uid);
             final int clientUserId = UserHandle.getUserId(uid);
             if (providerUserId == clientUserId) {
