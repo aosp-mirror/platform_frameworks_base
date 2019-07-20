@@ -595,7 +595,7 @@
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Contactes estigui sincronitzada amb un compte."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet que una aplicació modifiqui la configuració de sincronització d\'un compte. Per exemple, aquesta acció es pot fer servir per activar la sincronització de l\'aplicació Persones amb un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"llegir les estadístiques de sincronització"</string>

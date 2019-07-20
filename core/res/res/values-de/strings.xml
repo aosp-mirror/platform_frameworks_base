@@ -429,7 +429,7 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Diese App kann jederzeit Audio über das Mikrofon aufnehmen."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"Befehle an die SIM senden"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ermöglicht der App das Senden von Befehlen an die SIM-Karte. Dies ist äußerst risikoreich."</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"körperlichen Aktivitäten erkennen"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"Körperliche Aktivitäten erkennen"</string>
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Diese App kann deine körperliche Aktivität erkennen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Diese App kann mit der Kamera jederzeit Bilder und Videos aufnehmen."</string>
