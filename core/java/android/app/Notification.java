@@ -8101,8 +8101,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews expanded = makeMediaBigContentView();
-            return expanded != null ? expanded : makeMediaContentView();
+            return makeMediaContentView();
         }
 
         /** @hide */
