@@ -644,6 +644,32 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    @Override
+    public Context createDisplayContext(Display display) {
+        final Context context = super.createDisplayContext(display);
+        final int displayId = display.getDisplayId();
+        setDefaultTokenInternal(context, displayId);
+        return context;
+    }
+
+    private void setDefaultTokenInternal(Context context, int displayId) {
+        final WindowManagerImpl wm = (WindowManagerImpl) context.getSystemService(WINDOW_SERVICE);
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        IBinder token = null;
+        if (connection != null) {
+            synchronized (mLock) {
+                try {
+                    token = connection.getOverlayWindowToken(displayId);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to get window token", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            wm.setDefaultToken(token);
+        }
+    }
+
     /**
      * Returns the magnification controller, which may be used to query and
      * modify the state of display magnification.

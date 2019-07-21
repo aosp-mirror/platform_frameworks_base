@@ -33,4 +33,5 @@
      bool is_translucent = 9;
      string top_activity_component = 10;
      float scale = 11;
+     int64 id = 12;
  }

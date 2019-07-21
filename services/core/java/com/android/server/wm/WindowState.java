@@ -1633,7 +1633,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || !mRelayoutCalled
                 || (atoken == null && mToken.isHidden())
                 || (atoken != null && atoken.hiddenRequested)
-                || isParentWindowHidden()
+                || isParentWindowGoneForLayout()
                 || (mAnimatingExit && !isAnimatingLw())
                 || mDestroying;
     }
@@ -2063,7 +2063,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (wasVisible) {
                 final DisplayContent displayContent = getDisplayContent();
                 if (displayContent.updateOrientationFromAppTokens()) {
-                    displayContent.postNewConfigurationToHandler();
+                    displayContent.sendNewConfiguration();
                 }
             }
             mWmService.updateFocusedWindowLocked(isFocused()
@@ -3846,6 +3846,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isParentWindowHidden() {
         final WindowState parent = getParentWindow();
         return parent != null && parent.mHidden;
+    }
+
+    private boolean isParentWindowGoneForLayout() {
+        final WindowState parent = getParentWindow();
+        return parent != null && parent.isGoneForLayoutLw();
     }
 
     void setWillReplaceWindow(boolean animate) {

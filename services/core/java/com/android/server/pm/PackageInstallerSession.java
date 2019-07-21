@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STOR
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
+import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
@@ -1484,7 +1485,29 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Too many files for apex install");
         }
 
-        mResolvedBaseFile = addedFiles[0];
+        try {
+            resolveStageDirLocked();
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to resolve stage location", e);
+        }
+
+        File addedFile = addedFiles[0]; // there is only one file
+
+        // Ensure file name has proper suffix
+        final String sourceName = addedFile.getName();
+        final String targetName = sourceName.endsWith(APEX_FILE_EXTENSION)
+                ? sourceName
+                : sourceName + APEX_FILE_EXTENSION;
+        if (!FileUtils.isValidExtFilename(targetName)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Invalid filename: " + targetName);
+        }
+
+        final File targetFile = new File(mResolvedStageDir, targetName);
+        resolveAndStageFile(addedFile, targetFile);
+
+        mResolvedBaseFile = targetFile;
     }
 
     /**

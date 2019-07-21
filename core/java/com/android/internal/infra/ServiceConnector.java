@@ -228,7 +228,7 @@ public interface ServiceConnector<I extends IInterface> {
         private final int mUserId;
         private final @Nullable Function<IBinder, I> mBinderAsInterface;
 
-        private I mService = null;
+        private volatile I mService = null;
         private boolean mBinding = false;
         private boolean mUnbinding = false;
 
@@ -506,11 +506,12 @@ public interface ServiceConnector<I extends IInterface> {
 
         void unbindJobThread() {
             cancelTimeout();
-            boolean wasBound = isBound();
+            I service = mService;
+            boolean wasBound = service != null;
             if (wasBound) {
-                onServiceConnectionStatusChanged(mService, false);
+                onServiceConnectionStatusChanged(service, false);
                 mContext.unbindService(mServiceConnection);
-                mService.asBinder().unlinkToDeath(this, 0);
+                service.asBinder().unlinkToDeath(this, 0);
                 mService = null;
             }
             mBinding = false;
@@ -543,7 +544,7 @@ public interface ServiceConnector<I extends IInterface> {
         }
 
         @Override
-        public void onServiceConnected(@NonNull ComponentName name, @NonNull IBinder service) {
+        public void onServiceConnected(@NonNull ComponentName name, @NonNull IBinder binder) {
             if (mUnbinding) {
                 Log.i(LOG_TAG, "Ignoring onServiceConnected due to ongoing unbinding: " + this);
                 return;
@@ -551,14 +552,15 @@ public interface ServiceConnector<I extends IInterface> {
             if (DEBUG) {
                 logTrace();
             }
-            mService = binderAsInterface(service);
+            I service = binderAsInterface(binder);
+            mService = service;
             mBinding = false;
             try {
-                service.linkToDeath(ServiceConnector.Impl.this, 0);
+                binder.linkToDeath(ServiceConnector.Impl.this, 0);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "onServiceConnected " + name + ": ", e);
             }
-            onServiceConnectionStatusChanged(mService, true);
+            onServiceConnectionStatusChanged(service, true);
             processQueue();
         }
 
@@ -568,8 +570,11 @@ public interface ServiceConnector<I extends IInterface> {
                 logTrace();
             }
             mBinding = true;
-            onServiceConnectionStatusChanged(mService, false);
-            mService = null;
+            I service = mService;
+            if (service != null) {
+                onServiceConnectionStatusChanged(service, false);
+                mService = null;
+            }
         }
 
         @Override

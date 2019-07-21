@@ -39,7 +39,6 @@ import android.widget.LinearLayout;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,9 +50,7 @@ import java.util.function.IntSupplier;
 
 @RunWith(Parameterized.class)
 @LargeTest
-public class RelayoutPerfTest {
-    private static final IWindowSession sSession = WindowManagerGlobal.getWindowSession();
-
+public class RelayoutPerfTest extends WindowManagerPerfTestBase {
     private int mIteration;
 
     @Rule
@@ -83,12 +80,6 @@ public class RelayoutPerfTest {
                 { "Gone~Visible", new int[] { View.GONE, View.VISIBLE } },
                 { "Gone~Invisible", new int[] { View.GONE, View.INVISIBLE } }
         });
-    }
-
-    @Before
-    public void setUp() {
-        getInstrumentation().getUiAutomation().executeShellCommand("input keyevent KEYCODE_WAKEUP");
-        getInstrumentation().getUiAutomation().executeShellCommand("wm dismiss-keyguard");
     }
 
     @Test
@@ -154,8 +145,9 @@ public class RelayoutPerfTest {
         }
 
         void runBenchmark(BenchmarkState state) throws RemoteException {
+            final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
-                sSession.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
+                session.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
                         mOutOverscanInsets, mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
                         mOutOutsets, mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,

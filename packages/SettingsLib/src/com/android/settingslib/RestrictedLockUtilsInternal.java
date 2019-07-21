@@ -663,7 +663,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         final SpannableStringBuilder sb = new SpannableStringBuilder(textView.getText());
         removeExistingRestrictedSpans(sb);
         if (disabled) {
-            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            final int disabledColor = Utils.getDisabled(context,
+                    textView.getCurrentTextColor());
             sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             textView.setCompoundDrawables(null, null, getRestrictedPadlock(context), null);

@@ -94,8 +94,6 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
-    boolean shouldShowRequestPermissionRationale(String permName,
-            String packageName, int userId);
 
     boolean isProtectedBroadcast(String actionName);
 
@@ -594,17 +592,11 @@ interface IPackageManager {
     ParceledListSlice getIntentFilterVerifications(String packageName);
     ParceledListSlice getAllIntentFilters(String packageName);
 
-    boolean setDefaultBrowserPackageName(String packageName, int userId);
-    String getDefaultBrowserPackageName(int userId);
-
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
     boolean isOnlyCoreApps();
     boolean isDeviceUpgrading();
-
-    void setPermissionEnforced(String permission, boolean enforced);
-    boolean isPermissionEnforced(String permission);
 
     /** Reflects current DeviceStorageMonitorService state */
     @UnsupportedAppUsage
@@ -628,17 +620,6 @@ interface IPackageManager {
     KeySet getSigningKeySet(String packageName);
     boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
     boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
-
-    void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
-    void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
-    void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
-    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
-
-    boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
     @UnsupportedAppUsage
     String getPermissionControllerPackageName();

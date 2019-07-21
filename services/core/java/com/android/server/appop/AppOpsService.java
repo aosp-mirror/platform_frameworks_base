@@ -198,6 +198,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     };
 
+    @GuardedBy("this")
     @VisibleForTesting
     final SparseArray<UidState> mUidStates = new SparseArray<>();
 
@@ -1187,7 +1188,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void pruneOp(Op op, int uid, String packageName) {
+    private void pruneOpLocked(Op op, int uid, String packageName) {
         if (!op.hasAnyTime()) {
             Ops ops = getOpsRawLocked(uid, packageName, false /* isPrivileged */, false /* edit */);
             if (ops != null) {
@@ -1396,7 +1397,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
                         // if there is nothing else interesting in it.
-                        pruneOp(op, uid, packageName);
+                        pruneOpLocked(op, uid, packageName);
                     }
                     scheduleFastWriteLocked();
                 }
@@ -2979,23 +2980,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                 out.startTag(null, "app-ops");
                 out.attribute(null, "v", String.valueOf(CURRENT_VERSION));
 
-                final int uidStateCount = mUidStates.size();
-                for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = mUidStates.valueAt(i);
-                    if (uidState.opModes != null && uidState.opModes.size() > 0) {
-                        out.startTag(null, "uid");
-                        out.attribute(null, "n", Integer.toString(uidState.uid));
-                        SparseIntArray uidOpModes = uidState.opModes;
-                        final int opCount = uidOpModes.size();
-                        for (int j = 0; j < opCount; j++) {
-                            final int op = uidOpModes.keyAt(j);
-                            final int mode = uidOpModes.valueAt(j);
-                            out.startTag(null, "op");
-                            out.attribute(null, "n", Integer.toString(op));
-                            out.attribute(null, "m", Integer.toString(mode));
-                            out.endTag(null, "op");
+                synchronized (this) {
+                    final int uidStateCount = mUidStates.size();
+                    for (int i = 0; i < uidStateCount; i++) {
+                        UidState uidState = mUidStates.valueAt(i);
+                        if (uidState.opModes != null && uidState.opModes.size() > 0) {
+                            out.startTag(null, "uid");
+                            out.attribute(null, "n", Integer.toString(uidState.uid));
+                            SparseIntArray uidOpModes = uidState.opModes;
+                            final int opCount = uidOpModes.size();
+                            for (int j = 0; j < opCount; j++) {
+                                final int op = uidOpModes.keyAt(j);
+                                final int mode = uidOpModes.valueAt(j);
+                                out.startTag(null, "op");
+                                out.attribute(null, "n", Integer.toString(op));
+                                out.attribute(null, "m", Integer.toString(mode));
+                                out.endTag(null, "op");
+                            }
+                            out.endTag(null, "uid");
                         }
-                        out.endTag(null, "uid");
                     }
                 }
 

@@ -435,7 +435,9 @@ class WindowTestsBase {
             // Display creation is driven by DisplayWindowController via ActivityStackSupervisor.
             // We skip those steps here.
             final ActivityDisplay mockAd = mock(ActivityDisplay.class);
-            return mWm.mRoot.createDisplayContent(display, mockAd);
+            final DisplayContent displayContent = mWm.mRoot.createDisplayContent(display, mockAd);
+            displayContent.reconfigureDisplayLocked();
+            return displayContent;
         }
     }
 

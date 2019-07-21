@@ -769,6 +769,19 @@ final class AutofillManagerServiceImpl
     }
 
     /**
+     * Updates the last fill response when a dataset is shown.
+     */
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (isValidEventLocked("logDatasetShown", sessionId)) {
+                mEventHistory.addEvent(
+                        new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+                                null, null, null, null, null));
+            }
+        }
+    }
+
+    /**
      * Updates the last fill response when an autofill context is committed.
      */
     @GuardedBy("mLock")

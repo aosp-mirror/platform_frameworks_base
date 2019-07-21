@@ -15,17 +15,13 @@
  */
 package com.android.settingslib;
 
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-
 import static com.android.settingslib.Utils.STORAGE_MANAGER_ENABLED_PROPERTY;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -45,7 +41,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -85,15 +80,11 @@ public class UtilsTest {
     }
 
     @Test
-    public void testUpdateLocationEnabled_sendBroadcast() {
+    public void testUpdateLocationEnabled() {
         int currentUserId = ActivityManager.getCurrentUser();
         Utils.updateLocationEnabled(mContext, true, currentUserId,
                 Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
 
-        verify(mContext).sendBroadcastAsUser(
-            argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
-            ArgumentMatchers.eq(UserHandle.of(currentUserId)),
-            ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
         assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
                 .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);

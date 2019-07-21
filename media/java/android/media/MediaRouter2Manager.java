@@ -38,6 +38,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
@@ -66,6 +68,8 @@ public class MediaRouter2Manager {
     List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
     @NonNull
     List<MediaRoute2Info> mRoutes = Collections.emptyList();
+    @NonNull
+    ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
@@ -160,6 +164,8 @@ public class MediaRouter2Manager {
         return -1;
     }
 
+    //TODO: Use cache not to create array. For now, it's unclear when to purge the cache.
+    //Do this when we finalize how to set control categories.
     /**
      * Gets available routes for an application.
      *
@@ -167,8 +173,17 @@ public class MediaRouter2Manager {
      */
     @NonNull
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
-        //TODO: filter irrelevant routes.
-        return Collections.unmodifiableList(mRoutes);
+        List<String> controlCategories = mControlCategoryMap.get(packageName);
+        if (controlCategories == null) {
+            return Collections.emptyList();
+        }
+        List<MediaRoute2Info> routes = new ArrayList<>();
+        for (MediaRoute2Info route : mRoutes) {
+            if (route.supportsControlCategory(controlCategories)) {
+                routes.add(route);
+            }
+        }
+        return routes;
     }
 
     /**
@@ -310,11 +325,8 @@ public class MediaRouter2Manager {
         }
     }
 
-    void notifyControlCategoriesChanged(String packageName, List<String> categories) {
-        for (CallbackRecord record : mCallbacks) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onControlCategoriesChanged(packageName, categories));
-        }
+    void updateControlCategories(String packageName, List<String> categories) {
+        mControlCategoryMap.put(packageName, categories);
     }
 
     /**
@@ -344,15 +356,6 @@ public class MediaRouter2Manager {
          *              It is null if the application has no selected route.
          */
         public void onRouteSelected(@NonNull String packageName, @Nullable MediaRoute2Info route) {}
-
-        /**
-         * Called when the control categories of an application is changed.
-         *
-         * @param packageName the package name of the app that changed control categories
-         * @param categories the changed categories
-         */
-        public void onControlCategoriesChanged(@NonNull String packageName,
-                @NonNull List<String> categories) {}
 
         /**
          * Called when the list of routes are changed.
@@ -389,7 +392,7 @@ public class MediaRouter2Manager {
 
         @Override
         public void notifyControlCategoriesChanged(String packageName, List<String> categories) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyControlCategoriesChanged,
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateControlCategories,
                     MediaRouter2Manager.this, packageName, categories));
         }
 

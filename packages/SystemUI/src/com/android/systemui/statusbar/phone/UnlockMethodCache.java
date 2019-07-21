@@ -107,6 +107,9 @@ public class UnlockMethodCache {
         mListeners.remove(listener);
     }
 
+    /**
+     * If there are faces enrolled and user enabled face auth on keyguard.
+     */
     public boolean isUnlockingWithFacePossible() {
         return mIsUnlockingWithFacePossible;
     }
@@ -119,15 +122,16 @@ public class UnlockMethodCache {
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean hasEnrolledFaces = mKeyguardUpdateMonitor.isUnlockWithFacePossible(user);
-        boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer ||
-                trustManaged != mTrustManaged || mIsUnlockingWithFacePossible != hasEnrolledFaces;
+        boolean isUnlockingWithFacePossible = mKeyguardUpdateMonitor.isUnlockWithFacePossible(user);
+        boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer
+                || trustManaged != mTrustManaged
+                || mIsUnlockingWithFacePossible != isUnlockingWithFacePossible;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanSkipBouncer = canSkipBouncer;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
-            mIsUnlockingWithFacePossible = hasEnrolledFaces;
+            mIsUnlockingWithFacePossible = isUnlockingWithFacePossible;
             notifyListeners();
         }
         Trace.endSection();

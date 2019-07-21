@@ -38,6 +38,7 @@ public class ThumbnailData {
     public int windowingMode;
     public int systemUiVisibility;
     public float scale;
+    public long snapshotId;
 
     public ThumbnailData() {
         thumbnail = null;
@@ -49,6 +50,7 @@ public class ThumbnailData {
         isTranslucent = false;
         windowingMode = WINDOWING_MODE_UNDEFINED;
         systemUiVisibility = 0;
+        snapshotId = 0;
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
@@ -61,5 +63,6 @@ public class ThumbnailData {
         isTranslucent = snapshot.isTranslucent();
         windowingMode = snapshot.getWindowingMode();
         systemUiVisibility = snapshot.getSystemUiVisibility();
+        snapshotId = snapshot.getId();
     }
 }

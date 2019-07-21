@@ -177,7 +177,9 @@ public class SystemServicesTestRule implements TestRule {
         final Display display = mWindowManagerService.mDisplayManager.getDisplay(DEFAULT_DISPLAY);
         // Display creation is driven by the ActivityManagerService via
         // ActivityStackSupervisor. We emulate those steps here.
-        mWindowManagerService.mRoot.createDisplayContent(display, mock(ActivityDisplay.class));
+        DisplayContent displayContent = mWindowManagerService.mRoot
+                .createDisplayContent(display, mock(ActivityDisplay.class));
+        displayContent.reconfigureDisplayLocked();
 
         mMockTracker.stopTracking();
     }

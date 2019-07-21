@@ -19,7 +19,6 @@ package android.content.pm;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 
@@ -232,7 +231,7 @@ public class UserInfo implements Parcelable {
         if (isManagedProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isSplitSystemUser()) {
+        if (UserManager.isSplitSystemUser() || UserManager.isHeadlessSystemUserMode()) {
             return id != UserHandle.USER_SYSTEM;
         } else {
             return id == UserHandle.USER_SYSTEM;

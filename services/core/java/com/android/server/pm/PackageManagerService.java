@@ -311,7 +311,6 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.permission.BasePermission;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionsState;
@@ -948,8 +947,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<>();
 
-    // TODO remove this and go through mPermissonManager directly
-    final DefaultPermissionGrantPolicy mDefaultPermissionPolicy;
     // Internal interface for permission manager
     private final PermissionManagerServiceInternal mPermissionManager;
     // Public interface for permission manager
@@ -991,15 +988,6 @@ public class PackageManagerService extends IPackageManager.Stub
         void startVerifications(int userId);
         void receiveVerificationResponse(int verificationId);
     }
-
-    @GuardedBy("mPackages")
-    private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
-
-    @GuardedBy("mPackages")
-    private PackageManagerInternal.DefaultDialerProvider mDefaultDialerProvider;
-
-    @GuardedBy("mPackages")
-    private PackageManagerInternal.DefaultHomeProvider mDefaultHomeProvider;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -1966,7 +1954,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                                setDefaultBrowserAsyncLPw(null, userId);
+                                mPermissionManager.setDefaultBrowser(null, true, true, userId);
                             }
                         }
                     }
@@ -2348,7 +2336,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPackages /*externalLock*/);
             mPermissionManagerService =
                     (IPermissionManager) ServiceManager.getService("permissionmgr");
-            mDefaultPermissionPolicy = mPermissionManager.getDefaultPermissionGrantPolicy();
             mSettings = new Settings(Environment.getDataDirectory(),
                     mPermissionManager.getPermissionSettings(), mPackages);
         }
@@ -5499,40 +5486,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "isPermissionRevokedByPolicy for user " + userId);
-        }
-
-        if (checkPermission(permission, packageName, userId)
-                == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            if (!isCallerSameApp(packageName, callingUid)) {
-                return false;
-            }
-        } else {
-            if (isInstantApp(packageName, userId)) {
-                return false;
-            }
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final int flags = mPermissionManager
-                    .getPermissionFlags(permission, packageName, Binder.getCallingUid(), userId);
-            return (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
     public String getPermissionControllerPackageName() {
         synchronized (mPackages) {
             return mRequiredPermissionControllerPackage;
@@ -5585,46 +5538,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // go through the permission manager service AIDL
             mPermissionManagerService.grantRuntimePermission(packageName, permName, userId);
         } catch (RemoteException ignore) { }
-    }
-
-    @Override
-    public boolean shouldShowRequestPermissionRationale(String permName,
-            String packageName, int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "canShowRequestPermissionRationale for user " + userId);
-        }
-
-        final int uid = getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
-        if (UserHandle.getAppId(getCallingUid()) != UserHandle.getAppId(uid)) {
-            return false;
-        }
-
-        if (checkPermission(permName, packageName, userId)
-                == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-
-        final int flags;
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            flags = mPermissionManager
-                    .getPermissionFlags(permName, packageName, Binder.getCallingUid(), userId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
-                | PackageManager.FLAG_PERMISSION_POLICY_FIXED
-                | PackageManager.FLAG_PERMISSION_USER_FIXED;
-
-        if ((flags & fixedFlags) != 0) {
-            return false;
-        }
-
-        return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
     }
 
     @Override
@@ -7286,7 +7199,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     // Browser/generic handling case.  If there's a default browser, go straight
                     // to that (but only if there is no other higher-priority match).
-                    final String defaultBrowserPackageName = getDefaultBrowserPackageName(userId);
+                    final String defaultBrowserPackageName =
+                            mPermissionManager.getDefaultBrowser(userId);
                     int maxMatchPrio = 0;
                     ResolveInfo defaultBrowserMatch = null;
                     final int numCandidates = matchAllList.size();
@@ -12826,7 +12740,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
-        enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled");
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils
+                .enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled", callingUid);
         synchronized (mPackages) {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null || !pkgSetting.isSystem()) {
@@ -12849,7 +12765,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
-        enforceSystemOrPhoneCaller("setSystemAppInstallState");
+        final int callingUid = Binder.getCallingUid();
+        PackageManagerServiceUtils
+                .enforceSystemOrPhoneCaller("setSystemAppInstallState", callingUid);
         synchronized (mPackages) {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             // The target app should always be in system
@@ -13421,7 +13339,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             final String activeLauncherPackageName = getActiveLauncherPackageName(userId);
-            final String dialerPackageName = getDefaultDialerPackageName(userId);
+            final String dialerPackageName = mPermissionManager.getDefaultDialer(userId);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
                 final String packageName = packageNames[i];
@@ -13501,19 +13419,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 userId);
 
         return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
-    }
-
-    @Nullable
-    private String getDefaultDialerPackageName(@UserIdInt int userId) {
-        PackageManagerInternal.DefaultDialerProvider provider;
-        synchronized (mPackages) {
-            provider = mDefaultDialerProvider;
-        }
-        if (provider == null) {
-            Slog.e(TAG, "mDefaultDialerProvider is null");
-            return null;
-        }
-        return provider.getDefaultDialer(userId);
     }
 
     @Override
@@ -13872,75 +13777,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return new ParceledListSlice<>(result);
         }
-    }
-
-    @Override
-    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        if (userId == UserHandle.USER_ALL) {
-            return false;
-        }
-        PackageManagerInternal.DefaultBrowserProvider provider;
-        synchronized (mPackages) {
-            provider = mDefaultBrowserProvider;
-        }
-        if (provider == null) {
-            Slog.e(TAG, "mDefaultBrowserProvider is null");
-            return false;
-        }
-        boolean successful = provider.setDefaultBrowser(packageName, userId);
-        if (!successful) {
-            return false;
-        }
-        if (packageName != null) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                        userId);
-            }
-        }
-        return true;
-    }
-
-    private void setDefaultBrowserAsyncLPw(@Nullable String packageName, @UserIdInt int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            return;
-        }
-        if (mDefaultBrowserProvider == null) {
-            Slog.e(TAG, "mDefaultBrowserProvider is null");
-            return;
-        }
-        mDefaultBrowserProvider.setDefaultBrowserAsync(packageName, userId);
-        if (packageName != null) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                        userId);
-            }
-        }
-    }
-
-    @Override
-    public String getDefaultBrowserPackageName(int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return null;
-        }
-        PackageManagerInternal.DefaultBrowserProvider provider;
-        synchronized (mPackages) {
-            provider = mDefaultBrowserProvider;
-        }
-        if (provider == null) {
-            Slog.e(TAG, "mDefaultBrowserProvider is null");
-            return null;
-        }
-        return provider.getDefaultBrowser(userId);
     }
 
     /**
@@ -16082,13 +15918,13 @@ public class PackageManagerService extends IPackageManager.Stub
                                 && compareSignatures(sharedUserSignatures,
                                         pkg.mSigningDetails.signatures)
                                         != PackageManager.SIGNATURE_MATCH) {
-                            if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 28) {
+                            if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 29) {
                                 // Mismatched signatures is an error and silently skipping system
                                 // packages will likely break the device in unforeseen ways.
-                                // However,
-                                // we allow the device to boot anyway because, prior to P,
-                                // vendors were
-                                // not expecting the platform to crash in this situation.
+                                // However, we allow the device to boot anyway because, prior to Q,
+                                // vendors were not expecting the platform to crash in this
+                                // situation.
+                                // This WILL be a hard failure on any new API levels after Q.
                                 throw new ReconcileFailure(
                                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                                         "Signature mismatch for shared user: "
@@ -19688,10 +19524,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void clearDefaultBrowserIfNeededForUser(String packageName, int userId) {
-        final String defaultBrowserPackageName = getDefaultBrowserPackageName(userId);
+        final String defaultBrowserPackageName = mPermissionManager.getDefaultBrowser(userId);
         if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
             if (packageName.equals(defaultBrowserPackageName)) {
-                setDefaultBrowserPackageName(null, userId);
+                mPermissionManager.setDefaultBrowser(null, true, true, userId);
             }
         }
     }
@@ -19719,7 +19555,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // significant refactoring to keep all default apps in the package
             // manager (cleaner but more work) or have the services provide
             // callbacks to the package manager to request a default app reset.
-            setDefaultBrowserPackageName(null, userId);
+            mPermissionManager.setDefaultBrowser(null, true, true, userId);
             resetNetworkPolicies(userId);
             synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -19972,17 +19808,14 @@ public class PackageManagerService extends IPackageManager.Stub
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
                     (parser1, userId1) -> {
-                        String defaultBrowser;
+                        final String defaultBrowser;
                         synchronized (mPackages) {
                             mSettings.readDefaultAppsLPw(parser1, userId1);
                             defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
                         }
                         if (defaultBrowser != null) {
-                            PackageManagerInternal.DefaultBrowserProvider provider;
-                            synchronized (mPackages) {
-                                provider = mDefaultBrowserProvider;
-                            }
-                            provider.setDefaultBrowser(defaultBrowser, userId1);
+                            mPermissionManager
+                                    .setDefaultBrowser(defaultBrowser, false, false, userId1);
                         }
                     });
         } catch (Exception e) {
@@ -20219,15 +20052,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         allHomeCandidates.addAll(resolveInfos);
 
-        PackageManagerInternal.DefaultHomeProvider provider;
-        synchronized (mPackages) {
-            provider = mDefaultHomeProvider;
-        }
-        if (provider == null) {
-            Slog.e(TAG, "mDefaultHomeProvider is null");
-            return null;
-        }
-        String packageName = provider.getDefaultHome(userId);
+        final String packageName = mPermissionManager.getDefaultHome(userId);
         if (packageName == null) {
             return null;
         }
@@ -20280,15 +20105,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
-        final PackageManagerInternal.DefaultHomeProvider provider;
-        synchronized (mPackages) {
-            provider = mDefaultHomeProvider;
-        }
-        if (provider == null) {
-            Slog.e(TAG, "Default home provider has not been set");
-            return false;
-        }
-        final String currentPackageName = provider.getDefaultHome(userId);
+        final String currentPackageName = mPermissionManager.getDefaultHome(userId);
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
@@ -20298,7 +20115,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // PermissionController manages default home directly.
             return false;
         }
-        provider.setDefaultHomeAsync(packageName, userId, (successful) -> {
+        mPermissionManager.setDefaultHome(currentPackageName, userId, (successful) -> {
             if (successful) {
                 postPreferredActivityChangedBroadcast(userId);
             }
@@ -20854,7 +20671,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
-                mContext.getContentResolver(), UserHandle.USER_SYSTEM);
+                mPermissionManagerService, mContext.getContentResolver(),
+                UserHandle.USER_SYSTEM);
 
         disableSkuSpecificApps();
 
@@ -20867,8 +20685,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
         }
-
-        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
 
         synchronized (mPackages) {
             // Verify that all of the preferred activity components actually
@@ -20899,27 +20715,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             mSettings.mPreferredActivities.keyAt(i));
                 }
             }
-
-            for (int userId : UserManagerService.getInstance().getUserIds()) {
-                if (!mSettings.areDefaultRuntimePermissionsGrantedLPr(userId)) {
-                    grantPermissionsUserIds = ArrayUtils.appendInt(
-                            grantPermissionsUserIds, userId);
-                }
-            }
         }
 
         sUserManager.systemReady();
-        // If we upgraded grant all default permissions before kicking off.
-        for (int userId : grantPermissionsUserIds) {
-            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-        }
-
-        if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
-            // If we did not grant default permissions, we preload from this the
-            // default permission exceptions lazily to ensure we don't hit the
-            // disk on a new user creation.
-            mDefaultPermissionPolicy.scheduleReadDefaultPermissionExceptions();
-        }
 
         // Now that we've scanned all packages, and granted any default
         // permissions, ensure permissions are updated. Beware of dragons if you
@@ -22943,11 +22741,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void onNewUserCreated(final int userId) {
-        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
-        synchronized(mPackages) {
-            // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-            mPermissionManager.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, true);
-        }
+        mPermissionManager.onNewUserCreated(userId);
     }
 
     @Override
@@ -22959,44 +22753,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             return mSettings.getVerifierDeviceIdentityLPw();
         }
-    }
-
-    @Override
-    public void setPermissionEnforced(String permission, boolean enforced) {
-        // TODO: Now that we no longer change GID for storage, this should to away.
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-                "setPermissionEnforced");
-        if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            synchronized (mPackages) {
-                if (mSettings.mReadExternalStorageEnforced == null
-                        || mSettings.mReadExternalStorageEnforced != enforced) {
-                    mSettings.mReadExternalStorageEnforced =
-                            enforced ? Boolean.TRUE : Boolean.FALSE;
-                    mSettings.writeLPr();
-                }
-            }
-            // kill any non-foreground processes so we restart them and
-            // grant/revoke the GID.
-            final IActivityManager am = ActivityManager.getService();
-            if (am != null) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    am.killProcessesBelowForeground("setPermissionEnforcement");
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("No selective enforcement for " + permission);
-        }
-    }
-
-    @Override
-    @Deprecated
-    public boolean isPermissionEnforced(String permission) {
-        // allow instant applications
-        return true;
     }
 
     @Override
@@ -23463,8 +23219,20 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean filterAppAccess(PackageParser.Package pkg, int callingUid, int userId) {
             synchronized (mPackages) {
-                return PackageManagerService.this.filterAppAccessLPr(
-                        (PackageSetting) pkg.mExtras, callingUid, userId);
+                return PackageManagerService.this
+                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
+            }
+        }
+
+        @Override
+        public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+            synchronized (mPackages) {
+                final PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return false;
+                }
+                return PackageManagerService.this
+                        .filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid, userId);
             }
         }
 
@@ -23531,7 +23299,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getKnownPackageName(int knownPackage, int userId) {
             switch(knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
-                    return getDefaultBrowserPackageName(userId);
+                    return mPermissionManager.getDefaultBrowser(userId);
                 case PackageManagerInternal.PACKAGE_INSTALLER:
                     return mRequiredInstallerPackage;
                 case PackageManagerInternal.PACKAGE_SETUP_WIZARD:
@@ -23562,37 +23330,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isResolveActivityComponent(ComponentInfo component) {
             return mResolveActivity.packageName.equals(component.packageName)
                     && mResolveActivity.name.equals(component.name);
-        }
-
-        @Override
-        public void setLocationPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionPolicy.setLocationPackagesProvider(provider);
-        }
-
-        @Override
-        public void setLocationExtraPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionPolicy.setLocationExtraPackagesProvider(provider);
-        }
-
-        @Override
-        public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionPolicy.setVoiceInteractionPackagesProvider(provider);
-        }
-
-        @Override
-        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionPolicy.setUseOpenWifiAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
-            mDefaultPermissionPolicy.setSyncAdapterPackagesProvider(provider);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
-            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
-                    packageName, userId);
         }
 
         @Override
@@ -24108,27 +23845,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
-            synchronized (mPackages) {
-                mDefaultBrowserProvider = provider;
-            }
-        }
-
-        @Override
-        public void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider) {
-            synchronized (mPackages) {
-                mDefaultDialerProvider = provider;
-            }
-        }
-
-        @Override
-        public void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider) {
-            synchronized (mPackages) {
-                mDefaultHomeProvider = provider;
-            }
-        }
-
-        @Override
         public boolean isApexPackage(String packageName) {
             return PackageManagerService.this.mApexManager.isApexPackage(packageName);
         }
@@ -24170,13 +23886,6 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_SUCCEEDED,
                         null);
-            }
-        }
-
-        @Override
-        public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
-            synchronized (mPackages) {
-                return mDefaultPermissionPolicy.wereDefaultPermissionsGrantedSinceBoot(userId);
             }
         }
 
@@ -24266,6 +23975,25 @@ public class PackageManagerService extends IPackageManager.Stub
                         && UserHandle.isSameApp(installerPackageSetting.appId, callingUid);
             }
         }
+
+        @Override
+        public boolean areDefaultRuntimePermissionsGranted(int userId) {
+            synchronized (mPackages) {
+                return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+            }
+        }
+
+        @Override
+        public void setReadExternalStorageEnforced(boolean enforced) {
+            synchronized (mPackages) {
+                if (mSettings.mReadExternalStorageEnforced != null
+                        && mSettings.mReadExternalStorageEnforced == enforced) {
+                    return;
+                }
+                mSettings.mReadExternalStorageEnforced = enforced ? Boolean.TRUE : Boolean.FALSE;
+                mSettings.writeLPr();
+            }
+        }
     }
 
     @GuardedBy("mPackages")
@@ -24334,83 +24062,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @Override
-    public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
-        enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps");
-        synchronized (mPackages) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierApps(
-                        packageNames, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    @Override
-    public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
-        enforceSystemOrPhoneCaller("grantDefaultPermissionsToEnabledImsServices");
-        synchronized (mPackages) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledImsServices(
-                        packageNames, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    @Override
-    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            String[] packageNames, int userId) {
-        enforceSystemOrPhoneCaller("grantDefaultPermissionsToEnabledTelephonyDataServices");
-        synchronized (mPackages) {
-            Binder.withCleanCallingIdentity( () -> mDefaultPermissionPolicy.
-                    grantDefaultPermissionsToEnabledTelephonyDataServices(
-                            packageNames, userId));
-        }
-    }
-
-    @Override
-    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            String[] packageNames, int userId) {
-        enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromDisabledTelephonyDataServices");
-        synchronized (mPackages) {
-            Binder.withCleanCallingIdentity( () -> mDefaultPermissionPolicy.
-                    revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-                            packageNames, userId));
-        }
-    }
-
-    @Override
-    public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
-        enforceSystemOrPhoneCaller("grantDefaultPermissionsToActiveLuiApp");
-        synchronized (mPackages) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToActiveLuiApp(
-                        packageName, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    @Override
-    public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
-        enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromLuiApps");
-        synchronized (mPackages) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mDefaultPermissionPolicy.revokeDefaultPermissionsFromLuiApps(packageNames, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
     void forEachPackage(Consumer<PackageParser.Package> actionLocked) {
         synchronized (mPackages) {
             int numPackages = mPackages.size();
@@ -24432,14 +24083,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 actionLocked.accept(pkg);
             }
-        }
-    }
-
-    private static void enforceSystemOrPhoneCaller(String tag) {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "Cannot call " + tag + " from UID " + callingUid);
         }
     }
 

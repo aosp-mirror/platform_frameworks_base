@@ -2696,6 +2696,7 @@ android.os.-$$Lambda$ThreadLocalWorkSource$IP9vRFCDG5YwbWbXAEGHH52B9IE
 android.os.-$$Lambda$Trace$2zLZ-Lc2kAXsVjw_nLYeNhqmGq0
 android.os.-$$Lambda$q1UvBdLgHRZVzc68BxdksTmbuCw
 android.os.AsyncResult
+android.os.AsyncTask
 android.os.AsyncTask$1
 android.os.AsyncTask$2
 android.os.AsyncTask$3

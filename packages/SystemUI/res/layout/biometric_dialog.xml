@@ -55,7 +55,8 @@
                     android:id="@+id/left_space"
                     android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/biometric_dialog_empty_space_description"/>
 
                     <LinearLayout
                         android:id="@+id/dialog"
@@ -177,7 +178,8 @@
                     android:id="@+id/right_space"
                     android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/biometric_dialog_empty_space_description"/>
 
             </LinearLayout>
 

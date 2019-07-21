@@ -14,9 +14,6 @@
                 },
                 {
                     "include-filter": "android.permission.cts.SharedUidPermissionsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
                 }
             ]
         },
@@ -54,6 +51,14 @@
             "options": [
                 {
                     "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
                 }
             ]
         }

@@ -33,7 +33,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -79,6 +78,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -120,10 +120,10 @@ public class VoiceInteractionManagerService extends SystemService {
         mUserManager = Preconditions.checkNotNull(
                 context.getSystemService(UserManager.class));
 
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.setVoiceInteractionPackagesProvider(
-                new PackageManagerInternal.PackagesProvider() {
+        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+                PermissionManagerServiceInternal.class);
+        permissionManagerInternal.setVoiceInteractionPackagesProvider(
+                new PermissionManagerServiceInternal.PackagesProvider() {
             @Override
             public String[] getPackages(int userId) {
                 mServiceStub.initForUser(userId);

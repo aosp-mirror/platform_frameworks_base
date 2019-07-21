@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.server.accessibility.AccessibilityManagerService.UserState;
 import com.android.server.wm.WindowManagerInternal;
@@ -196,7 +197,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             return;
         }
         try {
-            serviceInterface.init(this, mId, mOverlayWindowToken);
+            serviceInterface.init(this, mId, mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
         } catch (RemoteException re) {
             Slog.w(LOG_TAG, "Error while setting connection for service: "
                     + serviceInterface, re);

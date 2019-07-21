@@ -2550,6 +2550,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mInputFilter.onDisplayChanged();
                 }
                 UserState userState = getCurrentUserStateLocked();
+                if (displayId != Display.DEFAULT_DISPLAY) {
+                    final List<AccessibilityServiceConnection> services = userState.mBoundServices;
+                    for (int i = 0; i < services.size(); i++) {
+                        AccessibilityServiceConnection boundClient = services.get(i);
+                        boundClient.onDisplayAdded(displayId);
+                    }
+                }
                 updateMagnificationLocked(userState);
             }
         }
@@ -2565,6 +2572,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 if (mInputFilter != null) {
                     mInputFilter.onDisplayChanged();
+                }
+                UserState userState = getCurrentUserStateLocked();
+                if (displayId != Display.DEFAULT_DISPLAY) {
+                    final List<AccessibilityServiceConnection> services = userState.mBoundServices;
+                    for (int i = 0; i < services.size(); i++) {
+                        AccessibilityServiceConnection boundClient = services.get(i);
+                        boundClient.onDisplayRemoved(displayId);
+                    }
                 }
             }
             if (mMagnificationController != null) {

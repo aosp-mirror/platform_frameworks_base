@@ -1420,7 +1420,6 @@ stubs_defaults {
     libs: [
         "ext",
         "framework",
-        "voip-common",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,

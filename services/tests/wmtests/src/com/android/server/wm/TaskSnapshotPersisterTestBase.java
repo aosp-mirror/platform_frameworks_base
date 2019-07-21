@@ -45,6 +45,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
     static final File FILES_DIR = getInstrumentation().getTargetContext().getFilesDir();
+    static final long MOCK_SNAPSHOT_ID = 12345678;
 
     TaskSnapshotPersister mPersister;
     TaskSnapshotLoader mLoader;
@@ -129,7 +130,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
-            return new TaskSnapshot(new ComponentName("", ""), buffer,
+            return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT, TEST_INSETS,
                     mReducedResolution, mScale, mIsRealSnapshot,
                     mWindowingMode, mSystemUiVisibility, mIsTranslucent);

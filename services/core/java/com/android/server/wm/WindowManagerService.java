@@ -79,7 +79,6 @@ import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
@@ -1432,7 +1431,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.getCallingUid());
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
-            res = displayPolicy.prepareAddWindowLw(win, attrs);
+            res = displayPolicy.validateAddingWindowLw(attrs);
             if (res != WindowManagerGlobal.ADD_OKAY) {
                 return res;
             }
@@ -1508,6 +1507,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean imMayMove = true;
 
             win.mToken.addWindow(win);
+            displayPolicy.addWindowLw(win, attrs);
             if (type == TYPE_INPUT_METHOD) {
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
@@ -1651,6 +1651,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (display != null) {
                 displayContent = mRoot.createDisplayContent(display, null /* activityDisplay */);
+                displayContent.reconfigureDisplayLocked();
             }
         }
 
@@ -3751,7 +3752,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         layoutNeeded = true;
                     }
                     if (rotationChanged || alwaysSendConfiguration) {
-                        displayContent.postNewConfigurationToHandler();
+                        displayContent.sendNewConfiguration();
                     }
                 }
 
@@ -4421,7 +4422,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayReady = true;
             // Reconfigure all displays to make sure that forced properties and
             // DisplayWindowSettings are applied.
-            mRoot.forAllDisplays(this::reconfigureDisplayLocked);
+            mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
         }
@@ -4500,7 +4501,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
         public static final int APP_FREEZE_TIMEOUT = 17;
-        public static final int SEND_NEW_CONFIGURATION = 18;
         public static final int REPORT_WINDOWS_CHANGE = 19;
 
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
@@ -4707,23 +4707,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             mClientFreezingScreen = false;
                             mLastFinishedFreezeSource = "client-timeout";
                             stopFreezingDisplayLocked();
-                        }
-                    }
-                    break;
-                }
-
-                case SEND_NEW_CONFIGURATION: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    removeMessages(SEND_NEW_CONFIGURATION, displayContent);
-                    if (displayContent.isReady()) {
-                        displayContent.sendNewConfiguration();
-                    } else {
-                        // Message could come after display has already been removed.
-                        if (DEBUG_CONFIGURATION) {
-                            final String reason = displayContent.getParent() == null
-                                    ? "detached" : "unready";
-                            Slog.w(TAG, "Trying to send configuration to " + reason + " display="
-                                    + displayContent);
                         }
                     }
                     break;
@@ -5183,29 +5166,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
-    void reconfigureDisplayLocked(@NonNull DisplayContent displayContent) {
-        if (!displayContent.isReady()) {
-            return;
-        }
-        displayContent.configureDisplayPolicy();
-        displayContent.setLayoutNeeded();
-
-        boolean configChanged = displayContent.updateOrientationFromAppTokens();
-        final Configuration currentDisplayConfig = displayContent.getConfiguration();
-        mTempConfiguration.setTo(currentDisplayConfig);
-        displayContent.computeScreenConfiguration(mTempConfiguration);
-        configChanged |= currentDisplayConfig.diff(mTempConfiguration) != 0;
-
-        if (configChanged) {
-            displayContent.mWaitingForConfig = true;
-            startFreezingDisplayLocked(0 /* exitAnim */,
-                    0 /* enterAnim */, displayContent);
-            displayContent.postNewConfigurationToHandler();
-        }
-
-        mWindowPlacerLocked.performSurfacePlacement();
-    }
-
     @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
@@ -5235,7 +5195,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mDisplayWindowSettings.setOverscanLocked(displayInfo, left, top, right, bottom);
 
-        reconfigureDisplayLocked(displayContent);
+        displayContent.reconfigureDisplayLocked();
     }
 
     @Override
@@ -5547,7 +5507,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (configChanged) {
-            displayContent.postNewConfigurationToHandler();
+            displayContent.sendNewConfiguration();
         }
         mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
     }
@@ -6863,12 +6823,11 @@ public class WindowManagerService extends IWindowManager.Stub
             int lastWindowingMode = displayContent.getWindowingMode();
             mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
 
-            reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
 
             if (lastWindowingMode != displayContent.getWindowingMode()) {
                 // reconfigure won't detect this change in isolation because the windowing mode is
                 // already set on the display, so fire off a new config now.
-                mH.removeMessages(H.SEND_NEW_CONFIGURATION);
 
                 final long origId = Binder.clearCallingIdentity();
                 try {
@@ -6916,7 +6875,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mDisplayWindowSettings.setRemoveContentModeLocked(displayContent, mode);
 
-            reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
         }
     }
 
@@ -6955,7 +6914,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
                     shouldShow);
 
-            reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
         }
     }
 
@@ -6999,7 +6958,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
 
-            reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
         }
     }
 
@@ -7044,7 +7003,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
 
-            reconfigureDisplayLocked(displayContent);
+            displayContent.reconfigureDisplayLocked();
         }
     }
 
