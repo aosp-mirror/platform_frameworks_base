@@ -521,7 +521,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Cho phép ứng dụng này sửa đổi bộ sưu tập ảnh của bạn."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"đọc vị trí từ bộ sưu tập phương tiện"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Hãy xác minh đó là bạn"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Xác minh danh tính của bạn"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Không có phần cứng sinh trắc học"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
