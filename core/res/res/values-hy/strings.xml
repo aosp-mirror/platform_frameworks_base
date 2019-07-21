@@ -1613,7 +1613,7 @@
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Ներկառուցված էկրան"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI էկրան"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Վերածածկ #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>. <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> կմվ"</string>
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>. <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> կմչ"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", անվտանգ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Մոռացել եմ սխեման"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Սխալ սխեմա"</string>
