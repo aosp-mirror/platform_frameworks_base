@@ -100,7 +100,7 @@ public class PreferencesHelper implements RankingConfig {
     @VisibleForTesting
     static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
+    static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
 
