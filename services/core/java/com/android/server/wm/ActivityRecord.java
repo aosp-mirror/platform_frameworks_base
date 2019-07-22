@@ -319,8 +319,6 @@ final class ActivityRecord extends ConfigurationContainer {
     private ActivityState mState;    // current state we are in
     Bundle  icicle;         // last saved activity state
     PersistableBundle persistentState; // last persistently saved activity state
-    // TODO: See if this is still needed.
-    boolean frontOfTask;    // is this the root activity of its task?
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?
     boolean stopped;        // is activity pause finished?
@@ -439,7 +437,7 @@ final class ActivityRecord extends ConfigurationContainer {
                 pw.print(" userId="); pw.println(mUserId);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.println(intent.toInsecureStringWithClip());
-        pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
+        pw.print(prefix); pw.print("rootOfTask="); pw.print(isRootOfTask());
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("mActivityComponent=");
@@ -957,7 +955,6 @@ final class ActivityRecord extends ConfigurationContainer {
         resultWho = _resultWho;
         requestCode = _reqCode;
         setState(INITIALIZING, "ActivityRecord ctor");
-        frontOfTask = false;
         launchFailed = false;
         stopped = false;
         delayedResume = false;
@@ -2552,7 +2549,8 @@ final class ActivityRecord extends ConfigurationContainer {
         }
         final TaskRecord task = r.task;
         final int activityNdx = task.mActivities.indexOf(r);
-        if (activityNdx < 0 || (onlyRoot && activityNdx > task.findEffectiveRootIndex())) {
+        if (activityNdx < 0
+                || (onlyRoot && activityNdx > task.findRootIndex(true /* effectiveRoot */))) {
             return INVALID_TASK_ID;
         }
         return task.taskId;
@@ -3803,6 +3801,27 @@ final class ActivityRecord extends ConfigurationContainer {
         return display != null && this == display.getResumedActivity();
     }
 
+
+    /**
+     * Check if this is the root of the task - first activity that is not finishing, starting from
+     * the bottom of the task. If all activities are finishing - then this method will return
+     * {@code true} if the activity is at the bottom.
+     *
+     * NOTE: This is different from 'effective root' - an activity that defines the task identity.
+     */
+    boolean isRootOfTask() {
+        if (task == null) {
+            return false;
+        }
+        final ActivityRecord rootActivity = task.getRootActivity();
+        if (rootActivity != null) {
+            return this == rootActivity;
+        }
+        // No non-finishing activity found. In this case the bottom-most activity is considered to
+        // be the root.
+        return task.getChildAt(0) == this;
+    }
+
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM, "Attempted to register remote animations with non-existing app"
@@ -3846,7 +3865,7 @@ final class ActivityRecord extends ConfigurationContainer {
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
         proto.write(VISIBLE, visible);
-        proto.write(FRONT_OF_TASK, frontOfTask);
+        proto.write(FRONT_OF_TASK, isRootOfTask());
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }

@@ -1895,7 +1895,7 @@ class ActivityStack extends ConfigurationContainer {
         // last of activity of the last task the stack will be empty and must
         // be cleared immediately.
         boolean forceIdle = mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE
-                || (r.frontOfTask && mTaskHistory.size() <= 1);
+                || (r.isRootOfTask() && mTaskHistory.size() <= 1);
         if (scheduleIdle || forceIdle) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Scheduling idle now: forceIdle="
                     + forceIdle + "immediate=" + !idleDelayed);
@@ -3209,8 +3209,6 @@ class ActivityStack extends ConfigurationContainer {
             r.createAppWindowToken();
         }
 
-        task.setFrontOfTask();
-
         // The transition animation and starting window are not needed if {@code allowMoveToFront}
         // is false, because the activity won't be visible.
         if ((!isHomeOrRecentsStack() || numActivities() > 0) && allowMoveToFront) {
@@ -3322,20 +3320,17 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
-     * Perform a reset of the given task, if needed as part of launching it.
-     * Returns the new HistoryRecord at the top of the task.
-     */
-    /**
-     * Helper method for #resetTaskIfNeededLocked.
-     * We are inside of the task being reset...  we'll either finish this activity, push it out
-     * for another task, or leave it as-is.
+     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
+     * Performs a reset of the given task, if needed for new activity start.
      * @param task The task containing the Activity (taskTop) that might be reset.
-     * @param forceReset
+     * @param forceReset Flag indicating if clear task was requested
      * @return An ActivityOptions that needs to be processed.
      */
     private ActivityOptions resetTargetTaskIfNeededLocked(TaskRecord task, boolean forceReset) {
         ActivityOptions topOptions = null;
 
+        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
+        // to activities in the same chain will depend on what the end activity of the chain needs.
         int replyChainEnd = -1;
         boolean canMoveOptions = true;
 
@@ -3343,11 +3338,14 @@ class ActivityStack extends ConfigurationContainer {
         // the root, we may no longer have the task!).
         final ArrayList<ActivityRecord> activities = task.mActivities;
         final int numActivities = activities.size();
-        final int rootActivityNdx = task.findEffectiveRootIndex();
-        for (int i = numActivities - 1; i > rootActivityNdx; --i ) {
+        int lastActivityNdx = task.findRootIndex(true /* effectiveRoot */);
+        if (lastActivityNdx == -1) {
+            lastActivityNdx = 0;
+        }
+        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
             ActivityRecord target = activities.get(i);
-            if (target.frontOfTask)
-                break;
+            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
+            if (target.isRootOfTask()) break;
 
             final int flags = target.info.flags;
             final boolean finishOnTaskLaunch =
@@ -3380,12 +3378,13 @@ class ActivityStack extends ConfigurationContainer {
                 // bottom of the activity stack.  This also keeps it
                 // correctly ordered with any activities we previously
                 // moved.
+                // TODO: We should probably look for other stacks also, since corresponding task
+                // with the same affinity is unlikely to be in the same stack.
                 final TaskRecord targetTask;
                 final ActivityRecord bottom =
                         !mTaskHistory.isEmpty() && !mTaskHistory.get(0).mActivities.isEmpty() ?
                                 mTaskHistory.get(0).mActivities.get(0) : null;
-                if (bottom != null && target.taskAffinity != null
-                        && target.taskAffinity.equals(bottom.getTaskRecord().affinity)) {
+                if (bottom != null && target.taskAffinity.equals(bottom.getTaskRecord().affinity)) {
                     // If the activity currently at the bottom has the
                     // same task affinity as the one we are moving,
                     // then merge it into the same task.
@@ -3395,7 +3394,8 @@ class ActivityStack extends ConfigurationContainer {
                 } else {
                     targetTask = createTaskRecord(
                             mStackSupervisor.getNextTaskIdForUserLocked(target.mUserId),
-                            target.info, null, null, null, false);
+                            target.info, null /* intent */, null /* voiceSession */,
+                            null /* voiceInteractor */, false /* toTop */);
                     targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
                             + " out to new task " + targetTask);
@@ -3476,28 +3476,34 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
-     * Helper method for #resetTaskIfNeededLocked. Processes all of the activities in a given
-     * TaskRecord looking for an affinity with the task of resetTaskIfNeededLocked.taskTop.
+     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
+     * Processes all of the activities in a given TaskRecord looking for an affinity with the task
+     * of resetTaskIfNeededLocked.taskTop.
      * @param affinityTask The task we are looking for an affinity to.
      * @param task Task that resetTaskIfNeededLocked.taskTop belongs to.
      * @param topTaskIsHigher True if #task has already been processed by resetTaskIfNeededLocked.
-     * @param forceReset Flag passed in to resetTaskIfNeededLocked.
+     * @param forceReset Flag indicating if clear task was requested
      */
+    // TODO: Consider merging with #resetTargetTaskIfNeededLocked() above
     private int resetAffinityTaskIfNeededLocked(TaskRecord affinityTask, TaskRecord task,
             boolean topTaskIsHigher, boolean forceReset, int taskInsertionPoint) {
+        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
+        // to activities in the same chain will depend on what the end activity of the chain needs.
         int replyChainEnd = -1;
-        final int taskId = task.taskId;
         final String taskAffinity = task.affinity;
 
         final ArrayList<ActivityRecord> activities = affinityTask.mActivities;
         final int numActivities = activities.size();
-        final int rootActivityNdx = affinityTask.findEffectiveRootIndex();
 
         // Do not operate on or below the effective root Activity.
-        for (int i = numActivities - 1; i > rootActivityNdx; --i) {
+        int lastActivityNdx = affinityTask.findRootIndex(true /* effectiveRoot */);
+        if (lastActivityNdx == -1) {
+            lastActivityNdx = 0;
+        }
+        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
             ActivityRecord target = activities.get(i);
-            if (target.frontOfTask)
-                break;
+            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
+            if (target.isRootOfTask()) break;
 
             final int flags = target.info.flags;
             boolean finishOnTaskLaunch = (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
@@ -3590,11 +3596,11 @@ class ActivityStack extends ConfigurationContainer {
                 (newActivity.info.flags & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
         final TaskRecord task = taskTop.getTaskRecord();
 
-        /** False until we evaluate the TaskRecord associated with taskTop. Switches to true
-         * for remaining tasks. Used for later tasks to reparent to task. */
+        // False until we evaluate the TaskRecord associated with taskTop. Switches to true
+        // for remaining tasks. Used for later tasks to reparent to task.
         boolean taskFound = false;
 
-        /** If ActivityOptions are moved out and need to be aborted or moved to taskTop. */
+        // If ActivityOptions are moved out and need to be aborted or moved to taskTop.
         ActivityOptions topOptions = null;
 
         // Preserve the location for reparenting in the new task.
@@ -4009,7 +4015,6 @@ class ActivityStack extends ConfigurationContainer {
             final ArrayList<ActivityRecord> activities = task.mActivities;
             final int index = activities.indexOf(r);
             if (index < (activities.size() - 1)) {
-                task.setFrontOfTask();
                 if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                     // If the caller asked that this activity (and all above it)
                     // be cleared when the task is reset, don't lose that information,
@@ -4244,7 +4249,8 @@ class ActivityStack extends ConfigurationContainer {
         // of a document, unless simply finishing it will return them to the the
         // correct app behind.
         final TaskRecord task = srec.getTaskRecord();
-        if (srec.frontOfTask && task.getBaseIntent() != null && task.getBaseIntent().isDocument()) {
+        if (srec.isRootOfTask() && task.getBaseIntent() != null
+                && task.getBaseIntent().isDocument()) {
             // Okay, this activity is at the root of its task.  What to do, what to do...
             if (!inFrontOfStandardStack()) {
                 // Finishing won't return to an application, so we need to recreate.

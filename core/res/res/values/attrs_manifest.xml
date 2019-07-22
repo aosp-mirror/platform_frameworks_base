@@ -1315,7 +1315,11 @@
          it will yield the baseIntent to any activity that it launches in the same task. This
          continues until an activity is encountered which has this attribute set to false. False
          is the default. This attribute set to true also permits activity's use of the
-         TaskDescription to change labels, colors and icons in the recent task list. -->
+         TaskDescription to change labels, colors and icons in the recent task list.
+
+         <p>NOTE: Setting this flag to <code>true</code> will not change the affinity of the task,
+         which is used for intent resolution during activity launch. The task's root activity will
+         always define its affinity. -->
     <attr name="relinquishTaskIdentity" format="boolean" />
 
     <!-- Indicate that it is okay for this activity be resumed while the previous
