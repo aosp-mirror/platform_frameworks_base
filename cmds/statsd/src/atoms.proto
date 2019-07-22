@@ -5307,6 +5307,9 @@ message NetworkDnsEventReported {
     // Additional pass-through fields opaque to statsd.
     // The DNS resolver Mainline module can add new fields here without requiring an OS update.
     optional android.stats.dnsresolver.DnsQueryEvents dns_query_events = 8 [(log_mode) = MODE_BYTES];
+
+    // The sample rate of DNS stats (to statsd) is 1/sampling_rate_denom.
+    optional int32 sampling_rate_denom = 9;
 }
 
 /**
