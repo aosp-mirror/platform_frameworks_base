@@ -734,7 +734,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
-            if (r.visible || !r.stopped || !r.haveState
+            if (r.visible || !r.stopped || !r.hasSavedState()
                     || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
