@@ -50,6 +50,7 @@ import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/stats/location/location_enums.proto";
 import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
+import "frameworks/base/core/proto/android/stats/otaupdate/updateengine_enums.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -322,6 +323,8 @@ message Atom {
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
         BackGesture back_gesture_reported_reported = 224;
 
+        UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
+        UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
         PerfettoUploaded perfetto_uploaded =
@@ -6893,4 +6896,71 @@ message PerfettoUploaded {
     // UUID matching the one set inside the SystemInfo trace packet.
     optional int64 trace_uuid_lsb = 2;
     optional int64 trace_uuid_msb = 3;
+}
+
+/**
+ * Information about an OTA update attempt by update_engine.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineUpdateAttemptReported {
+    // The number of attempts for the update engine to apply a given payload.
+    optional int32 attempt_number = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_BOOTTIME; and
+    // it's increased when the system is sleeping.
+    optional int32 duration_boottime_in_minutes = 3;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_MONOTONIC_RAW;
+    // and it's not increased when the system is sleeping.
+    optional int32 duration_monotonic_in_minutes = 4;
+
+    // The size of the payload in MiBs.
+    optional int32 payload_size_mib = 5;
+
+    // The attempt result reported by the update engine for an OTA update.
+    optional android.stats.otaupdate.AttemptResult attempt_result = 6;
+
+    // The error code reported by the update engine after an OTA update attempt
+    // on A/B devices.
+    optional android.stats.otaupdate.ErrorCode error_code = 7;
+
+    // The build fingerprint of the source system. The value is read from a
+    // system property when the device takes the update. e.g.
+    // Android/aosp_sailfish/sailfish:10/QP1A.190425.004/5507117:userdebug/test-keys
+    optional string source_fingerprint = 8;
+}
+
+/**
+ * Information about all the attempts the device make before finishing the
+ * successful update.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineSuccessfulUpdateReported {
+    // The number of attempts for the update engine to apply the payload for a
+    // successful update.
+    optional int32 attempt_count = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    optional int32 payload_size_mib = 3;
+
+    // The total number of bytes downloaded by update_engine since the last
+    // successful update.
+    optional int32 total_bytes_downloaded_mib = 4;
+
+    // The ratio in percentage of the over-downloaded bytes compared to the
+    // total bytes needed to successfully install the update. e.g. 200 if we
+    // download 200MiB in total for a 100MiB package.
+    optional int32 download_overhead_percentage = 5;
+
+    // The total time in minutes for the update engine to apply the payload for a
+    // successful update.
+    optional int32 total_duration_minutes = 6;
+
+    // The number of reboot of the device during a successful update.
+    optional int32 reboot_count = 7;
 }
