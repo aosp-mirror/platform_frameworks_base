@@ -33,6 +33,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityEvent;
@@ -142,7 +144,9 @@ public class AccessibilityWindowManagerTest {
     public void startTrackingWindows_shouldEnableWindowManagerCallback() {
         // AccessibilityWindowManager#startTrackingWindows already invoked in setup
         assertTrue(mA11yWindowManager.isTrackingWindowsLocked());
-        verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(any());
+        // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
+        verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(
+                eq(Display.DEFAULT_DISPLAY), any());
     }
 
     @Test
@@ -152,7 +156,9 @@ public class AccessibilityWindowManagerTest {
 
         mA11yWindowManager.stopTrackingWindows();
         assertFalse(mA11yWindowManager.isTrackingWindowsLocked());
-        verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(any());
+        // TODO [Multi-Display] : using correct display Id to replace DEFAULT_DISPLAY
+        verify(mMockWindowManagerInternal).setWindowsForAccessibilityCallback(
+                eq(Display.DEFAULT_DISPLAY), any());
     }
 
     @Test
