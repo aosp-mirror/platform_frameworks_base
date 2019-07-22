@@ -2388,6 +2388,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLightBarController.dump(fd, pw, args);
         }
 
+        if (mUnlockMethodCache != null) {
+            mUnlockMethodCache.dump(pw);
+        }
+
         if (mKeyguardBypassController != null) {
             mKeyguardBypassController.dump(pw);
         }
