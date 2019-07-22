@@ -399,7 +399,6 @@ public final class ViewRootImpl implements ViewParent,
 
     @UnsupportedAppUsage
     final View.AttachInfo mAttachInfo;
-    InputChannel mInputChannel;
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
     @UnsupportedAppUsage
@@ -884,9 +883,10 @@ public final class ViewRootImpl implements ViewParent,
                 // manager, to make sure we do the relayout before receiving
                 // any other events from the system.
                 requestLayout();
+                InputChannel inputChannel = null;
                 if ((mWindowAttributes.inputFeatures
                         & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
-                    mInputChannel = new InputChannel();
+                    inputChannel = new InputChannel();
                 }
                 mForceDecorViewVisibility = (mWindowAttributes.privateFlags
                         & PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY) != 0;
@@ -897,14 +897,14 @@ public final class ViewRootImpl implements ViewParent,
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
-                            mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel,
+                            mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, inputChannel,
                             mTempInsets);
                     setFrame(mTmpFrame);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
                     mAttachInfo.mRootView = null;
-                    mInputChannel = null;
+                    inputChannel = null;
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     setAccessibilityFocus(null, null);
@@ -980,12 +980,12 @@ public final class ViewRootImpl implements ViewParent,
                     mInputQueueCallback =
                         ((RootViewSurfaceTaker)view).willYouTakeTheInputQueue();
                 }
-                if (mInputChannel != null) {
+                if (inputChannel != null) {
                     if (mInputQueueCallback != null) {
                         mInputQueue = new InputQueue();
                         mInputQueueCallback.onInputQueueCreated(mInputQueue);
                     }
-                    mInputEventReceiver = new WindowInputEventReceiver(mInputChannel,
+                    mInputEventReceiver = new WindowInputEventReceiver(inputChannel,
                             Looper.myLooper());
                 }
 
@@ -4386,13 +4386,6 @@ public final class ViewRootImpl implements ViewParent,
         try {
             mWindowSession.remove(mWindow);
         } catch (RemoteException e) {
-        }
-
-        // Dispose the input channel after removing the window so the Window Manager
-        // doesn't interpret the input channel being closed as an abnormal termination.
-        if (mInputChannel != null) {
-            mInputChannel.dispose();
-            mInputChannel = null;
         }
 
         mDisplayManager.unregisterDisplayListener(mDisplayListener);
