@@ -1299,7 +1299,7 @@ class WindowStateAnimator {
                     mSurfaceController.mSurfaceControl);
         }
 
-        mPostDrawTransaction.apply();
+        SurfaceControl.mergeToGlobalTransaction(mPostDrawTransaction);
         return true;
     }
 
