@@ -254,8 +254,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygten er tændt."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slukket."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er tændt."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Invertering af farver er slået fra."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Invertering af farver er slået til."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Ombytning af farver er slået fra."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Ombytning af farver er slået til."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilhotspot er slået fra."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilhotspot er slået til."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Casting af din skærm er stoppet."</string>
