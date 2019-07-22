@@ -936,6 +936,7 @@ class ScreenRotationAnimation {
             }
         }
 
+        t.setEarlyWakeup();
         setSnapshotTransform(t, mSnapshotFinalMatrix, mExitTransformation.getAlpha());
     }
 
