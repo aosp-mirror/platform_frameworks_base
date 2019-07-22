@@ -897,8 +897,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     Slog.e(TAG, "Second failure launching "
                             + r.intent.getComponent().flattenToShortString() + ", giving up", e);
                     proc.appDied();
-                    r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                            "2nd-crash", false /* oomAdj */);
+                    r.finishIfPossible("2nd-crash", false /* oomAdj */);
                     return false;
                 }
 
@@ -1347,8 +1346,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final ActivityStack stack = r.getActivityStack();
             if (stack != null) {
                 if (r.finishing) {
-                    r.finishCurrentActivityLocked(ActivityRecord.FINISH_IMMEDIATELY,
-                            false /* oomAdj */, "activityIdleInternalLocked");
+                    // TODO(b/137329632): Wait for idle of the right activity, not just any.
+                    r.destroyIfPossible("activityIdleInternalLocked");
                 } else {
                     stack.stopActivityLocked(r);
                 }

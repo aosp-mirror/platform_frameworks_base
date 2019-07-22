@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -33,7 +32,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
-import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
@@ -996,8 +994,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         homeStask.removeTask(homeTask, "testAdjustFocusedStack", REMOVE_TASK_MODE_DESTROYING);
 
         // Finish the only activity.
-        topActivity.finishActivityLocked(RESULT_CANCELED /* resultCode */, null /* resultData */,
-                "testAdjustFocusedStack", false /* oomAdj */);
+        topActivity.finishIfPossible("testAdjustFocusedStack", false /* oomAdj */);
         // Although home stack is empty, it should still be the focused stack.
         assertEquals(homeStask, mDefaultDisplay.getFocusedStack());
     }
@@ -1016,7 +1013,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         }
 
         // Home stack should not be destroyed immediately.
-        final ActivityRecord activity1 = finishCurrentActivity(homeStack);
+        final ActivityRecord activity1 = finishTopActivity(homeStack);
         assertEquals(FINISHING, activity1.getState());
     }
 
@@ -1032,25 +1029,24 @@ public class ActivityStackTests extends ActivityTestsBase {
         // There is still an activity1 in stack1 so the activity2 should be added to finishing list
         // that will be destroyed until idle.
         stack2.getTopActivity().visible = true;
-        final ActivityRecord activity2 = finishCurrentActivity(stack2);
+        final ActivityRecord activity2 = finishTopActivity(stack2);
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);
 
         // The display becomes empty. Since there is no next activity to be idle, the activity
         // should be destroyed immediately with updating configuration to restore original state.
-        final ActivityRecord activity1 = finishCurrentActivity(stack1);
+        final ActivityRecord activity1 = finishTopActivity(stack1);
         assertEquals(DESTROYING, activity1.getState());
         verify(mRootActivityContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
                 eq(display.mDisplayId), anyBoolean(), anyBoolean());
     }
 
-    private ActivityRecord finishCurrentActivity(ActivityStack stack) {
+    private ActivityRecord finishTopActivity(ActivityStack stack) {
         final ActivityRecord activity = stack.topRunningActivityLocked();
         assertNotNull(activity);
-        activity.setState(PAUSED, "finishCurrentActivity");
+        activity.setState(STOPPED, "finishTopActivity");
         activity.makeFinishingLocked();
-        activity.finishCurrentActivityLocked(ActivityRecord.FINISH_AFTER_VISIBLE,
-                false /* oomAdj */, "finishCurrentActivity");
+        activity.completeFinishing("finishTopActivity");
         return activity;
     }
 

@@ -41,7 +41,6 @@ import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_T
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.annotation.NonNull;
-import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
@@ -644,8 +643,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         for (int i = 0; i < activities.size(); i++) {
             final ActivityRecord r = activities.get(i);
             if (!r.finishing && r.isInStackLocked()) {
-                r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                        "finish-heavy", true /* oomAdj */);
+                r.finishIfPossible("finish-heavy", true /* oomAdj */);
             }
         }
     }

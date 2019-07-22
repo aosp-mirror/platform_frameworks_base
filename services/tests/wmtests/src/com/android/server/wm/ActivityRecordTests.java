@@ -26,6 +26,7 @@ import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
@@ -34,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -41,12 +43,16 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
@@ -61,6 +67,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -87,6 +94,7 @@ import android.view.RemoteAnimationTarget;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
+import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -726,12 +734,11 @@ public class ActivityRecordTests extends ActivityTestsBase {
      * incorrect state.
      */
     @Test
-    public void testFinishActivityLocked_cancelled() {
+    public void testFinishActivityIfPossible_cancelled() {
         // Mark activity as finishing
         mActivity.finishing = true;
         assertEquals("Duplicate finish request must be ignored", FINISH_RESULT_CANCELLED,
-                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
-                        false /* oomAdj */));
+                mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
         assertTrue(mActivity.isInStackLocked());
 
@@ -739,21 +746,19 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.finishing = false;
         mActivity.setTask(null);
         assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_CANCELLED,
-                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
-                        false /* oomAdj */));
+                mActivity.finishIfPossible("test", false /* oomAdj */));
         assertFalse(mActivity.finishing);
     }
 
     /**
-     * Verify that activity finish request is requested, but not executed immediately if activity is
+     * Verify that activity finish request is placed, but not executed immediately if activity is
      * not ready yet.
      */
     @Test
-    public void testFinishActivityLocked_requested() {
+    public void testFinishActivityIfPossible_requested() {
         mActivity.finishing = false;
-        assertEquals("Currently resumed activity be paused removal", FINISH_RESULT_REQUESTED,
-                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
-                        false /* oomAdj */));
+        assertEquals("Currently resumed activity must be prepared removal", FINISH_RESULT_REQUESTED,
+                mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
         assertTrue(mActivity.isInStackLocked());
 
@@ -762,8 +767,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.finishing = false;
         mActivity.setState(STOPPED, "test");
         assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REQUESTED,
-                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
-                        false /* oomAdj */));
+                mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
         assertTrue(mActivity.isInStackLocked());
     }
@@ -772,7 +776,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
      * Verify that activity finish request removes activity immediately if it's ready.
      */
     @Test
-    public void testFinishActivityLocked_removed() {
+    public void testFinishActivityIfPossible_removed() {
         // Prepare the activity record to be ready for immediate removal. It should be invisible and
         // have no process. Otherwise, request to finish it will send a message to client first.
         mActivity.setState(STOPPED, "test");
@@ -782,10 +786,292 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // this will cause NPE when updating task's process.
         mActivity.app = null;
         assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REMOVED,
-                mActivity.finishActivityLocked(0 /* resultCode */, null /* resultData */, "test",
-                        false /* oomAdj */));
+                mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
         assertFalse(mActivity.isInStackLocked());
+    }
+
+    /**
+     * Verify that resumed activity is paused due to finish request.
+     */
+    @Test
+    public void testFinishActivityIfPossible_resumedStartsPausing() {
+        mActivity.finishing = false;
+        mActivity.setState(RESUMED, "test");
+        assertEquals("Currently resumed activity must be paused before removal",
+                FINISH_RESULT_REQUESTED, mActivity.finishIfPossible("test", false /* oomAdj */));
+        assertEquals(PAUSING, mActivity.getState());
+        verify(mActivity).setVisibility(eq(false));
+        verify(mActivity.getDisplay().mDisplayContent)
+                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+    }
+
+    /**
+     * Verify that finish request will be completed immediately for non-resumed activity.
+     */
+    @Test
+    public void testFinishActivityIfPossible_nonResumedFinishCompletesImmediately() {
+        final ActivityState[] states = {INITIALIZING, STARTED, PAUSED, STOPPING, STOPPED};
+        for (ActivityState state : states) {
+            mActivity.finishing = false;
+            mActivity.setState(state, "test");
+            reset(mActivity);
+            assertEquals("Finish must be requested", FINISH_RESULT_REQUESTED,
+                    mActivity.finishIfPossible("test", false /* oomAdj */));
+            verify(mActivity).completeFinishing(anyString());
+        }
+    }
+
+    /**
+     * Verify that finishing will not be completed in PAUSING state.
+     */
+    @Test
+    public void testFinishActivityIfPossible_pausing() {
+        mActivity.finishing = false;
+        mActivity.setState(PAUSING, "test");
+        assertEquals("Finish must be requested", FINISH_RESULT_REQUESTED,
+                mActivity.finishIfPossible("test", false /* oomAdj */));
+        verify(mActivity, never()).completeFinishing(anyString());
+    }
+
+    /**
+     * Verify that finish request for resumed activity will prepare an app transition but not
+     * execute it immediately.
+     */
+    @Test
+    public void testFinishActivityIfPossible_visibleResumedPreparesAppTransition() {
+        mActivity.finishing = false;
+        mActivity.visible = true;
+        mActivity.setState(RESUMED, "test");
+        mActivity.finishIfPossible("test", false /* oomAdj */);
+
+        verify(mActivity).setVisibility(eq(false));
+        verify(mActivity.getDisplay().mDisplayContent)
+                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+        verify(mActivity.getDisplay().mDisplayContent, never()).executeAppTransition();
+    }
+
+    /**
+     * Verify that finish request for paused activity will prepare and execute an app transition.
+     */
+    @Test
+    public void testFinishActivityIfPossible_visibleNotResumedExecutesAppTransition() {
+        mActivity.finishing = false;
+        mActivity.visible = true;
+        mActivity.setState(PAUSED, "test");
+        mActivity.finishIfPossible("test", false /* oomAdj */);
+
+        verify(mActivity).setVisibility(eq(false));
+        verify(mActivity.getDisplay().mDisplayContent)
+                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+        verify(mActivity.getDisplay().mDisplayContent).executeAppTransition();
+    }
+
+    /**
+     * Verify that finish request for non-visible activity will not prepare any transitions.
+     */
+    @Test
+    public void testFinishActivityIfPossible_nonVisibleNoAppTransition() {
+        // Put an activity on top of test activity to make it invisible and prevent us from
+        // accidentally resuming the topmost one again.
+        new ActivityBuilder(mService).build();
+        mActivity.visible = false;
+        mActivity.setState(STOPPED, "test");
+
+        mActivity.finishIfPossible("test", false /* oomAdj */);
+
+        verify(mActivity.getDisplay().mDisplayContent, never())
+                .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
+    }
+
+    /**
+     * Verify that complete finish request for non-finishing activity is invalid.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testCompleteFinishing_failNotFinishing() {
+        mActivity.finishing = false;
+        mActivity.completeFinishing("test");
+    }
+
+    /**
+     * Verify that complete finish request for resumed activity is invalid.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testCompleteFinishing_failResumed() {
+        mActivity.setState(RESUMED, "test");
+        mActivity.completeFinishing("test");
+    }
+
+    /**
+     * Verify that finish request for pausing activity must be a no-op - activity will finish
+     * once it completes pausing.
+     */
+    @Test
+    public void testCompleteFinishing_pausing() {
+        mActivity.setState(PAUSING, "test");
+        mActivity.finishing = true;
+
+        assertEquals("Activity must not be removed immediately - waiting for paused",
+                mActivity, mActivity.completeFinishing("test"));
+        assertEquals(PAUSING, mActivity.getState());
+        verify(mActivity, never()).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify that complete finish request for visible activity must be delayed before the next one
+     * becomes visible.
+     */
+    @Test
+    public void testCompleteFinishing_waitForNextVisible() {
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = true;
+        topActivity.nowVisible = true;
+        topActivity.finishing = true;
+        topActivity.setState(PAUSED, "true");
+        // Mark the bottom activity as not visible, so that we will wait for it before removing
+        // the top one.
+        mActivity.visible = false;
+        mActivity.nowVisible = false;
+        mActivity.setState(STOPPED, "test");
+
+        assertEquals("Activity must not be removed immediately - waiting for next visible",
+                topActivity, topActivity.completeFinishing("test"));
+        assertEquals("Activity must be stopped to make next one visible", STOPPING,
+                topActivity.getState());
+        assertTrue("Activity must be stopped to make next one visible",
+                topActivity.mStackSupervisor.mStoppingActivities.contains(topActivity));
+        verify(topActivity, never()).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify that complete finish request for invisible activity must not be delayed.
+     */
+    @Test
+    public void testCompleteFinishing_noWaitForNextVisible_alreadyInvisible() {
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = false;
+        topActivity.nowVisible = false;
+        topActivity.finishing = true;
+        topActivity.setState(PAUSED, "true");
+        // Mark the bottom activity as not visible, so that we would wait for it before removing
+        // the top one.
+        mActivity.visible = false;
+        mActivity.nowVisible = false;
+        mActivity.setState(STOPPED, "test");
+
+        topActivity.completeFinishing("test");
+
+        verify(topActivity).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify that paused finishing activity will be added to finishing list and wait for next one
+     * to idle.
+     */
+    @Test
+    public void testCompleteFinishing_waitForIdle() {
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = true;
+        topActivity.nowVisible = true;
+        topActivity.finishing = true;
+        topActivity.setState(PAUSED, "true");
+        // Mark the bottom activity as already visible, so that there is no need to wait for it.
+        mActivity.visible = true;
+        mActivity.nowVisible = true;
+        mActivity.setState(RESUMED, "test");
+
+        topActivity.completeFinishing("test");
+
+        verify(topActivity).addToFinishingAndWaitForIdle();
+    }
+
+    /**
+     * Verify that complete finish request for visible activity must not be delayed if the next one
+     * is already visible and it's not the focused stack.
+     */
+    @Test
+    public void testCompleteFinishing_noWaitForNextVisible_stopped() {
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = false;
+        topActivity.nowVisible = false;
+        topActivity.finishing = true;
+        topActivity.setState(STOPPED, "true");
+        // Mark the bottom activity as already visible, so that there is no need to wait for it.
+        mActivity.visible = true;
+        mActivity.nowVisible = true;
+        mActivity.setState(RESUMED, "test");
+
+        topActivity.completeFinishing("test");
+
+        verify(topActivity).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify that complete finish request for visible activity must not be delayed if the next one
+     * is already visible and it's not the focused stack.
+     */
+    @Test
+    public void testCompleteFinishing_noWaitForNextVisible_nonFocusedStack() {
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = true;
+        topActivity.nowVisible = true;
+        topActivity.finishing = true;
+        topActivity.setState(PAUSED, "true");
+        // Mark the bottom activity as already visible, so that there is no need to wait for it.
+        mActivity.visible = true;
+        mActivity.nowVisible = true;
+        mActivity.setState(RESUMED, "test");
+
+        // Add another stack to become focused and make the activity there visible. This way it
+        // simulates finishing in non-focused stack in split-screen.
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        stack.getChildAt(0).getChildAt(0).nowVisible = true;
+
+        topActivity.completeFinishing("test");
+
+        verify(topActivity).destroyIfPossible(anyString());
+    }
+
+    /**
+     * Verify destroy activity request completes successfully.
+     */
+    @Test
+    public void testDestroyIfPossible() {
+        doReturn(false).when(mRootActivityContainer).resumeFocusedStacksTopActivities();
+        spyOn(mStack);
+        mActivity.destroyIfPossible("test");
+
+        assertEquals(DESTROYING, mActivity.getState());
+        assertTrue(mActivity.finishing);
+        verify(mStack).destroyActivityLocked(eq(mActivity), eq(true) /* removeFromApp */,
+                anyString());
+    }
+
+    /**
+     * Verify that complete finish request for visible activity must not destroy it immediately if
+     * it is the last running activity on a display with a home stack. We must wait for home
+     * activity to come up to avoid a black flash in this case.
+     */
+    @Test
+    public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
+        // Empty the home stack.
+        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        for (TaskRecord t : homeStack.getAllTasks()) {
+            homeStack.removeTask(t, "test", REMOVE_TASK_MODE_DESTROYING);
+        }
+        mActivity.finishing = true;
+        doReturn(false).when(mRootActivityContainer).resumeFocusedStacksTopActivities();
+        spyOn(mStack);
+
+        // Try to destroy the last activity above the home stack.
+        mActivity.destroyIfPossible("test");
+
+        // Verify that the activity was not actually destroyed, but waits for next one to come up
+        // instead.
+        verify(mStack, never()).destroyActivityLocked(eq(mActivity), eq(true) /* removeFromApp */,
+                anyString());
+        assertEquals(FINISHING, mActivity.getState());
+        assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */
