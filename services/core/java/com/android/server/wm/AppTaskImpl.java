@@ -27,7 +27,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
-import android.util.Slog;
 
 /**
  * An implementation of IAppTask, that allows an app to manage its own tasks via
@@ -97,12 +96,7 @@ class AppTaskImpl extends IAppTask.Stub {
         // Will bring task to front if it already has a root activity.
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        if (!mService.isSameApp(callingUid, callingPackage)) {
-            String msg = "Permission Denial: moveToFront() from pid="
-                    + Binder.getCallingPid() + " as package " + callingPackage;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        mService.assertPackageMatchesCallingUid(callingPackage);
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mService.mGlobalLock) {
@@ -134,6 +128,7 @@ class AppTaskImpl extends IAppTask.Stub {
     public int startActivity(IBinder whoThread, String callingPackage,
             Intent intent, String resolvedType, Bundle bOptions) {
         checkCaller();
+        mService.assertPackageMatchesCallingUid(callingPackage);
 
         int callingUser = UserHandle.getCallingUserId();
         TaskRecord tr;
