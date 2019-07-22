@@ -1646,7 +1646,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }
-                return task.getStack().finishActivityAffinityLocked(r);
+                r.finishActivityAffinity();
+                return true;
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

@@ -1416,7 +1416,7 @@ class ActivityStarter {
                 // performing operations without a window container.
                 final ActivityStack stack = mStartActivity.getActivityStack();
                 if (stack != null) {
-                    stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
+                    mStartActivity.finishActivityLocked(RESULT_CANCELED,
                             null /* intentResultData */, "startActivity", true /* oomAdj */);
                 }
 

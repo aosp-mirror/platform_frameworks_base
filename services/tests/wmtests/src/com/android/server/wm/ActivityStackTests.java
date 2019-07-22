@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -969,7 +970,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         homeStask.removeTask(homeTask, "testAdjustFocusedStack", REMOVE_TASK_MODE_DESTROYING);
 
         // Finish the only activity.
-        mStack.finishActivityLocked(topActivity, 0 /* resultCode */, null /* resultData */,
+        topActivity.finishActivityLocked(RESULT_CANCELED /* resultCode */, null /* resultData */,
                 "testAdjustFocusedStack", false /* oomAdj */);
         // Although home stack is empty, it should still be the focused stack.
         assertEquals(homeStask, mDefaultDisplay.getFocusedStack());
@@ -1014,7 +1015,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertNotNull(activity);
         activity.setState(PAUSED, "finishCurrentActivity");
         activity.makeFinishingLocked();
-        stack.finishCurrentActivityLocked(activity, ActivityStack.FINISH_AFTER_VISIBLE,
+        activity.finishCurrentActivityLocked(ActivityRecord.FINISH_AFTER_VISIBLE,
                 false /* oomAdj */, "finishCurrentActivity");
         return activity;
     }
