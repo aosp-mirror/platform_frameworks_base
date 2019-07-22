@@ -50,7 +50,6 @@ import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportManager.BugreportCallback.BugreportErrorCode;
 import android.os.BugreportParams;
-import android.os.BugreportParams.BugreportMode;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -354,7 +353,7 @@ public class BugreportProgressService extends Service {
         private final int mId;
         private final BugreportInfo mInfo;
 
-        BugreportCallbackImpl(String name, int id, @BugreportMode int bugreportType) {
+        BugreportCallbackImpl(String name, int id) {
             mId = id;
             // pid not used in this workflow, so setting default = 0
             mInfo = new BugreportInfo(mContext, mId, 0 /* pid */, name,
@@ -544,21 +543,21 @@ public class BugreportProgressService extends Service {
 
     private void startBugreportAPI(Intent intent) {
         mUsingBugreportApi = true;
-        String currentTimeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(
+        String bugreportName = "bugreport-" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(
                 new Date());
 
         // TODO(b/126862297): Make file naming same as dumpstate triggered bugreports
         ParcelFileDescriptor bugreportFd = createReadWriteFile(BUGREPORT_DIR,
-                "bugreport-" + currentTimeStamp + ".zip");
+                bugreportName + ".zip");
         if (bugreportFd == null) {
             Log.e(TAG, "Bugreport parcel file descriptor is null.");
             return;
         }
+        int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
+                BugreportParams.BUGREPORT_MODE_INTERACTIVE);
 
-        // TODO(b/126862297): Screenshot file is not needed for INTERACTIVE_BUGREPORTS
-        // Add logic to pass screenshot file only for specific bugreports.
         ParcelFileDescriptor screenshotFd = createReadWriteFile(BUGREPORT_DIR,
-                "screenshot-" + currentTimeStamp + ".png");
+                bugreportName + ".png");
         if (screenshotFd == null) {
             Log.e(TAG, "Screenshot parcel file descriptor is null.");
             // TODO(b/123617758): Delete bugreport file created above
@@ -572,16 +571,13 @@ public class BugreportProgressService extends Service {
         // Dumpstate increments PROPERTY_LAST_ID, may be racy if multiple calls
         // to dumpstate are made simultaneously.
         final int id = SystemProperties.getInt(PROPERTY_LAST_ID, 0) + 1;
-        int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
-                BugreportParams.BUGREPORT_MODE_INTERACTIVE);
         Log.i(TAG, "bugreport type = " + bugreportType
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
 
-        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl("bugreport-"
-                + currentTimeStamp, id, bugreportType);
+        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName, id);
         try {
-            mBugreportManager.startBugreport(bugreportFd, null,
+            mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
             mBugreportInfos.put(bugreportCallback.mInfo.id, bugreportCallback.mInfo);
         } catch (RuntimeException e) {
@@ -963,13 +959,19 @@ public class BugreportProgressService extends Service {
             return;
         }
         final int max = -1; // this is to log metrics for dumpstate duration.
-        final File screenshotFile = new File(BUGREPORT_DIR, info.name + ".png");
-        // TODO(b/126862297): Screenshot file is not needed for INTERACTIVE_BUGREPORTS
-        // Add logic to null check screenshot file only for specific bugreports.
+        File screenshotFile = new File(BUGREPORT_DIR, info.name + ".png");
         if (screenshotFile == null) {
             // Should never happen, an id always has a file linked to it.
             Log.wtf(TAG, "Missing file " + screenshotFile.getPath() + " does not exist.");
             return;
+        }
+        // If the screenshot file did not get populated implies this type of bugreport does not
+        // need the screenshot file; setting the file to null so that empty file doesnt get shared
+        if (screenshotFile.length() == 0) {
+            if (screenshotFile.delete()) {
+                Log.d(TAG, "screenshot file deleted successfully.");
+            }
+            screenshotFile = null;
         }
         onBugreportFinished(id, bugreportFile, screenshotFile, info.title, info.description, max);
     }
