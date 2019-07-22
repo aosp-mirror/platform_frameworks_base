@@ -128,20 +128,24 @@ public final class CompatConfig {
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
      * @param changeId The ID of the change to be overridden. Note, this call will succeed even if
-     *                 this change is not known; it will only have any affect if any code in the
+     *                 this change is not known; it will only have any effect if any code in the
      *                 platform is gated on the ID given.
      * @param packageName The app package name to override the change for.
      * @param enabled If the change should be enabled or disabled.
+     * @return {@code true} if the change existed before adding the override.
      */
-    public void addOverride(long changeId, String packageName, boolean enabled) {
+    public boolean addOverride(long changeId, String packageName, boolean enabled) {
+        boolean alreadyKnown = true;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
+                alreadyKnown = false;
                 c = new CompatChange(changeId);
                 addChange(c);
             }
             c.addPackageOverride(packageName, enabled);
         }
+        return alreadyKnown;
     }
 
     /**
@@ -151,14 +155,18 @@ public final class CompatConfig {
      *
      * @param changeId The ID of the change that was overridden.
      * @param packageName The app package name that was overridden.
+     * @return {@code true} if an override existed;
      */
-    public void removeOverride(long changeId, String packageName) {
+    public boolean removeOverride(long changeId, String packageName) {
+        boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c != null) {
+                overrideExists = true;
                 c.removePackageOverride(packageName);
             }
         }
+        return overrideExists;
     }
 
 }
