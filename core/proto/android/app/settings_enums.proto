@@ -2401,4 +2401,11 @@ enum PageId {
     // OS: Q
     // Note: Gear icon is shown next to gesture navigation preference and opens sensitivity dialog
     SETTINGS_GESTURE_NAV_BACK_SENSITIVITY_DLG = 1748;
+
+    // ---- End Q Constants, all Q constants go above this line ----
+    // OPEN: Settings > Network & Internet > Wi-Fi > Click new network
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_WIFI_CONFIGURE_NETWORK = 1800;
+
 }
