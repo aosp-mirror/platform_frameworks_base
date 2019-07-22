@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.display.whitebalance;
+package com.android.server.display.utils;
 
 import android.util.Slog;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.display.utils.RollingBuffer;
 
 import java.io.PrintWriter;
 import java.util.Arrays;

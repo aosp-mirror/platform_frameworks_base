@@ -17,6 +17,8 @@
 package com.android.server.display.whitebalance;
 
 import com.android.internal.R;
+import com.android.server.display.utils.AmbientFilter;
+import com.android.server.display.utils.AmbientFilterStubber;
 import com.google.common.collect.ImmutableList;
 
 import static org.junit.Assert.assertEquals;
@@ -132,7 +134,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
             setEstimatedBrightnessAndUpdate(controller, luxOverride);
@@ -152,7 +154,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
             setEstimatedBrightnessAndUpdate(controller,
@@ -184,7 +186,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
             float luxOverride = mix(brightness0, brightness1, t);
@@ -221,7 +223,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         setEstimatedBrightnessAndUpdate(controller, 0.0f);
         assertEquals(controller.mPendingAmbientColorTemperature,
@@ -240,7 +242,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
         setEstimatedBrightnessAndUpdate(controller, luxOverride);
@@ -258,7 +260,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
         setEstimatedBrightnessAndUpdate(controller, luxOverride);
@@ -278,7 +280,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 8000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
             setEstimatedBrightnessAndUpdate(controller,
@@ -311,7 +313,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = 6000.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
             float luxOverride = mix(brightness0, brightness1, t);
@@ -350,7 +352,7 @@ public final class AmbientLuxTest {
                     DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
             final float ambientColorTemperature = 8000.0f;
             setEstimatedColorTemperature(controller, ambientColorTemperature);
-            controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+            controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
             for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
                 setEstimatedBrightnessAndUpdate(controller, luxOverride);
@@ -370,7 +372,7 @@ public final class AmbientLuxTest {
                 DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
         final float ambientColorTemperature = -1.0f;
         setEstimatedColorTemperature(controller, ambientColorTemperature);
-        controller.mBrightnessFilter = spy(controller.mBrightnessFilter);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
             setEstimatedBrightnessAndUpdate(controller,
@@ -426,7 +428,7 @@ public final class AmbientLuxTest {
 
     private void setEstimatedColorTemperature(DisplayWhiteBalanceController controller,
                                               float ambientColorTemperature) {
-        AmbientFilter colorTemperatureFilter = spy(controller.mColorTemperatureFilter);
+        AmbientFilter colorTemperatureFilter = spy(new AmbientFilterStubber());
         controller.mColorTemperatureFilter = colorTemperatureFilter;
         when(colorTemperatureFilter.getEstimate(anyLong())).thenReturn(ambientColorTemperature);
     }
