@@ -1191,7 +1191,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final PackageInfo packageInfo;
         try {
             packageInfo = mService.mContext.getPackageManager()
-                    .getPackageInfo(callingPackage, PackageManager.GET_PERMISSIONS);
+                    .getPackageInfoAsUser(callingPackage, PackageManager.GET_PERMISSIONS,
+                            UserHandle.getUserId(callingUid));
         } catch (PackageManager.NameNotFoundException e) {
             Slog.i(TAG, "Cannot find package info for " + callingPackage);
             return ACTIVITY_RESTRICTION_NONE;
