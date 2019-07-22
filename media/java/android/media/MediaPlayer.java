@@ -246,7 +246,7 @@ import java.util.Vector;
  *         via {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)}.
  *         This callback allows applications to keep track of the buffering status
  *         while streaming audio/video.</li>
- *         <li>Calling {@link #start()} has not effect
+ *         <li>Calling {@link #start()} has no effect
  *         on a MediaPlayer object that is already in the <em>Started</em> state.</li>
  *         </ul>
  *         </li>
