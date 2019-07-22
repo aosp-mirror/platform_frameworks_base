@@ -142,4 +142,32 @@ public class CompatConfigTest {
         CompatConfig pc = new CompatConfig();
         assertThat(pc.lookupChangeId("MY_CHANGE")).isEqualTo(-1L);
     }
+
+    @Test
+    public void testSystemAppDisabledChangeEnabled() {
+        CompatConfig pc = new CompatConfig();
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true)); // disabled
+        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
+        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
+        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
+    }
+
+    @Test
+    public void testSystemAppOverrideIgnored() {
+        CompatConfig pc = new CompatConfig();
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false));
+        pc.addOverride(1234L, "system.app", false);
+        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
+        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
+        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
+    }
+
+    @Test
+    public void testSystemAppTargetSdkIgnored() {
+        CompatConfig pc = new CompatConfig();
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false));
+        ApplicationInfo sysApp = makeAppInfo("system.app", 1);
+        sysApp.flags |= ApplicationInfo.FLAG_SYSTEM;
+        assertThat(pc.isChangeEnabled(1234L, sysApp)).isTrue();
+    }
 }
