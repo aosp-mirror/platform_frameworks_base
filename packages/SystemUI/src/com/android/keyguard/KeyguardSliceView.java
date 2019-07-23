@@ -89,6 +89,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private final HashMap<View, PendingIntent> mClickActions;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
+    private final LayoutTransition mLayoutTransition;
     private Uri mKeyguardSliceUri;
     @VisibleForTesting
     TextView mTitle;
@@ -126,16 +127,16 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
 
-        LayoutTransition transition = new LayoutTransition();
-        transition.setStagger(LayoutTransition.CHANGE_APPEARING, DEFAULT_ANIM_DURATION / 2);
-        transition.setDuration(LayoutTransition.APPEARING, DEFAULT_ANIM_DURATION);
-        transition.setDuration(LayoutTransition.DISAPPEARING, DEFAULT_ANIM_DURATION / 2);
-        transition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
-        transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
-        transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.FAST_OUT_SLOW_IN);
-        transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
-        transition.setAnimateParentHierarchy(false);
-        setLayoutTransition(transition);
+        mLayoutTransition = new LayoutTransition();
+        mLayoutTransition.setStagger(LayoutTransition.CHANGE_APPEARING, DEFAULT_ANIM_DURATION / 2);
+        mLayoutTransition.setDuration(LayoutTransition.APPEARING, DEFAULT_ANIM_DURATION);
+        mLayoutTransition.setDuration(LayoutTransition.DISAPPEARING, DEFAULT_ANIM_DURATION / 2);
+        mLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+        mLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        mLayoutTransition.setInterpolator(LayoutTransition.APPEARING,
+                Interpolators.FAST_OUT_SLOW_IN);
+        mLayoutTransition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
+        mLayoutTransition.setAnimateParentHierarchy(false);
     }
 
     @Override
@@ -172,6 +173,12 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             mLiveData.removeObserver(this);
         }
         mConfigurationController.removeCallback(this);
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        setLayoutTransition(isVisible ? mLayoutTransition : null);
     }
 
     /**
@@ -419,6 +426,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
          * their desired positions.
          */
         private final Animation.AnimationListener mKeepAwakeListener;
+        private LayoutTransition mLayoutTransition;
         private float mDarkAmount;
 
         public Row(Context context) {
@@ -440,33 +448,41 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         @Override
         protected void onFinishInflate() {
-            LayoutTransition transition = new LayoutTransition();
-            transition.setDuration(DEFAULT_ANIM_DURATION);
+            mLayoutTransition = new LayoutTransition();
+            mLayoutTransition.setDuration(DEFAULT_ANIM_DURATION);
 
             PropertyValuesHolder left = PropertyValuesHolder.ofInt("left", 0, 1);
             PropertyValuesHolder right = PropertyValuesHolder.ofInt("right", 0, 1);
             ObjectAnimator changeAnimator = ObjectAnimator.ofPropertyValuesHolder((Object) null,
                     left, right);
-            transition.setAnimator(LayoutTransition.CHANGE_APPEARING, changeAnimator);
-            transition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, changeAnimator);
-            transition.setInterpolator(LayoutTransition.CHANGE_APPEARING,
+            mLayoutTransition.setAnimator(LayoutTransition.CHANGE_APPEARING, changeAnimator);
+            mLayoutTransition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, changeAnimator);
+            mLayoutTransition.setInterpolator(LayoutTransition.CHANGE_APPEARING,
                     Interpolators.ACCELERATE_DECELERATE);
-            transition.setInterpolator(LayoutTransition.CHANGE_DISAPPEARING,
+            mLayoutTransition.setInterpolator(LayoutTransition.CHANGE_DISAPPEARING,
                     Interpolators.ACCELERATE_DECELERATE);
-            transition.setStartDelay(LayoutTransition.CHANGE_APPEARING, DEFAULT_ANIM_DURATION);
-            transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, DEFAULT_ANIM_DURATION);
+            mLayoutTransition.setStartDelay(LayoutTransition.CHANGE_APPEARING,
+                    DEFAULT_ANIM_DURATION);
+            mLayoutTransition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING,
+                    DEFAULT_ANIM_DURATION);
 
             ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
-            transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
-            transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
+            mLayoutTransition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
+            mLayoutTransition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
 
             ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
-            transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
-            transition.setDuration(LayoutTransition.DISAPPEARING, DEFAULT_ANIM_DURATION / 4);
-            transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+            mLayoutTransition.setInterpolator(LayoutTransition.DISAPPEARING,
+                    Interpolators.ALPHA_OUT);
+            mLayoutTransition.setDuration(LayoutTransition.DISAPPEARING, DEFAULT_ANIM_DURATION / 4);
+            mLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
 
-            transition.setAnimateParentHierarchy(false);
-            setLayoutTransition(transition);
+            mLayoutTransition.setAnimateParentHierarchy(false);
+        }
+
+        @Override
+        public void onVisibilityAggregated(boolean isVisible) {
+            super.onVisibilityAggregated(isVisible);
+            setLayoutTransition(isVisible ? mLayoutTransition : null);
         }
 
         @Override
