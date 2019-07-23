@@ -171,15 +171,21 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
                 allowMultiple, mLooper, cls, this);
         p.loadAll();
-        mPluginMap.put(listener, p);
+        synchronized (this) {
+            mPluginMap.put(listener, p);
+        }
         startListening();
     }
 
     public void removePluginListener(PluginListener<?> listener) {
-        if (!mPluginMap.containsKey(listener)) return;
-        mPluginMap.remove(listener).destroy();
-        if (mPluginMap.size() == 0) {
-            stopListening();
+        synchronized (this) {
+            if (!mPluginMap.containsKey(listener)) {
+                return;
+            }
+            mPluginMap.remove(listener).destroy();
+            if (mPluginMap.size() == 0) {
+                stopListening();
+            }
         }
     }
 
@@ -208,8 +214,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
-            for (PluginInstanceManager manager : mPluginMap.values()) {
-                manager.loadAll();
+            synchronized (this) {
+                for (PluginInstanceManager manager : mPluginMap.values()) {
+                    manager.loadAll();
+                }
             }
         } else if (DISABLE_PLUGIN.equals(intent.getAction())) {
             Uri uri = intent.getData();
@@ -274,13 +282,15 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                     getPluginEnabler().setEnabled(componentName);
                 }
             }
-            if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                for (PluginInstanceManager manager : mPluginMap.values()) {
-                    manager.onPackageChange(pkg);
-                }
-            } else {
-                for (PluginInstanceManager manager : mPluginMap.values()) {
-                    manager.onPackageRemoved(pkg);
+            synchronized (this) {
+                if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                        manager.onPackageChange(pkg);
+                    }
+                } else {
+                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                        manager.onPackageRemoved(pkg);
+                    }
                 }
             }
         }
@@ -322,9 +332,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
-        for (int i = 0; i < mPluginMap.size(); i++) {
-            if (mPluginMap.valueAt(i).dependsOn(p, cls)) {
-                return true;
+        synchronized (this) {
+            for (int i = 0; i < mPluginMap.size(); i++) {
+                if (mPluginMap.valueAt(i).dependsOn(p, cls)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -335,10 +347,12 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("  plugin map (%d):", mPluginMap.size()));
-        for (PluginListener listener: mPluginMap.keySet()) {
-            pw.println(String.format("    %s -> %s",
-                    listener, mPluginMap.get(listener)));
+        synchronized (this) {
+            pw.println(String.format("  plugin map (%d):", mPluginMap.size()));
+            for (PluginListener listener : mPluginMap.keySet()) {
+                pw.println(String.format("    %s -> %s",
+                        listener, mPluginMap.get(listener)));
+            }
         }
     }
 
@@ -418,8 +432,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // We couldn't find any plugins involved in this crash, just to be safe
                 // disable all the plugins, so we can be sure that SysUI is running as
                 // best as possible.
-                for (PluginInstanceManager manager : mPluginMap.values()) {
-                    disabledAny |= manager.disableAll();
+                synchronized (this) {
+                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                        disabledAny |= manager.disableAll();
+                    }
                 }
             }
             if (disabledAny) {
@@ -433,9 +449,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         private boolean checkStack(Throwable throwable) {
             if (throwable == null) return false;
             boolean disabledAny = false;
-            for (StackTraceElement element : throwable.getStackTrace()) {
-                for (PluginInstanceManager manager : mPluginMap.values()) {
-                    disabledAny |= manager.checkAndDisable(element.getClassName());
+            synchronized (this) {
+                for (StackTraceElement element : throwable.getStackTrace()) {
+                    for (PluginInstanceManager manager : mPluginMap.values()) {
+                        disabledAny |= manager.checkAndDisable(element.getClassName());
+                    }
                 }
             }
             return disabledAny | checkStack(throwable.getCause());
