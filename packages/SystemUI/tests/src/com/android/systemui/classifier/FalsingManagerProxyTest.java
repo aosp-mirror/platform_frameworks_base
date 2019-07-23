@@ -56,6 +56,9 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
         mHandler = new Handler(mTestableLooper.getLooper());
         mDefaultConfigValue = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, false);
+        // In case it runs on a device where it's been set to true, set it to false by hand.
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_MANAGER_ENABLED, "false", false);
     }
 
     @After
