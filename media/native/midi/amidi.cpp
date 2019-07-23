@@ -122,7 +122,7 @@ static std::mutex openMutex; // Ensure that the device can be connected just onc
  *  - AMEDIA_ERROR_INVALID_PARAMETER
  *  AMEDIA_ERROR_UNKNOWN
  */
-static media_status_t AMIDI_API AMIDI_getDeviceInfo(const AMidiDevice *device,
+static media_status_t AMIDI_getDeviceInfo(const AMidiDevice *device,
         AMidiDeviceInfo *outDeviceInfoPtr) {
     if (device == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
@@ -142,7 +142,7 @@ static media_status_t AMIDI_API AMIDI_getDeviceInfo(const AMidiDevice *device,
     return AMEDIA_OK;
 }
 
-media_status_t AMIDI_API AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceObj,
+media_status_t AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceObj,
         AMidiDevice** devicePtrPtr)
 {
     if (j_midiDeviceObj == nullptr) {
@@ -188,7 +188,7 @@ media_status_t AMIDI_API AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceO
     return AMEDIA_OK;
 }
 
-media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *device)
+media_status_t AMidiDevice_release(const AMidiDevice *device)
 {
     if (device == nullptr || device->midiDeviceObj == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
@@ -217,21 +217,21 @@ media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *device)
     return AMEDIA_OK;
 }
 
-int32_t AMIDI_API AMidiDevice_getType(const AMidiDevice *device) {
+int32_t AMidiDevice_getType(const AMidiDevice *device) {
     if (device == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
     }
     return device->deviceInfo.type;
 }
 
-ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) {
+ssize_t AMidiDevice_getNumInputPorts(const AMidiDevice *device) {
     if (device == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
     }
     return device->deviceInfo.inputPortCount;
 }
 
-ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) {
+ssize_t AMidiDevice_getNumOutputPorts(const AMidiDevice *device) {
     if (device == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
     }
@@ -291,7 +291,7 @@ static void AMIDI_closePort(AMIDI_Port *port) {
 /*
  * Output (receiving) API
  */
-media_status_t AMIDI_API AMidiOutputPort_open(const AMidiDevice *device, int32_t portNumber,
+media_status_t AMidiOutputPort_open(const AMidiDevice *device, int32_t portNumber,
         AMidiOutputPort **outOutputPortPtr) {
     return AMIDI_openPort(device, portNumber, PORTTYPE_OUTPUT, (AMIDI_Port**)outOutputPortPtr);
 }
@@ -350,7 +350,7 @@ private:
     AMIDI_Port *mPort;
 };
 
-ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int32_t *opcodePtr,
+ssize_t AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int32_t *opcodePtr,
          uint8_t *buffer, size_t maxBytes, size_t* numBytesReceivedPtr, int64_t *timestampPtr) {
 
     if (outputPort == nullptr || buffer == nullptr) {
@@ -361,19 +361,19 @@ ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int
            numBytesReceivedPtr, timestampPtr);
 }
 
-void AMIDI_API AMidiOutputPort_close(const AMidiOutputPort *outputPort) {
+void AMidiOutputPort_close(const AMidiOutputPort *outputPort) {
     AMIDI_closePort((AMIDI_Port*)outputPort);
 }
 
 /*
  * Input (sending) API
  */
-media_status_t AMIDI_API AMidiInputPort_open(const AMidiDevice *device, int32_t portNumber,
+media_status_t AMidiInputPort_open(const AMidiDevice *device, int32_t portNumber,
         AMidiInputPort **outInputPortPtr) {
     return AMIDI_openPort(device, portNumber, PORTTYPE_INPUT, (AMIDI_Port**)outInputPortPtr);
 }
 
-void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) {
+void AMidiInputPort_close(const AMidiInputPort *inputPort) {
     AMIDI_closePort((AMIDI_Port*)inputPort);
 }
 
@@ -386,12 +386,12 @@ static ssize_t AMIDI_makeSendBuffer(
     return numBytes + AMIDI_PACKET_OVERHEAD;
 }
 
-ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uint8_t *buffer,
+ssize_t AMidiInputPort_send(const AMidiInputPort *inputPort, const uint8_t *buffer,
                             size_t numBytes) {
     return AMidiInputPort_sendWithTimestamp(inputPort, buffer, numBytes, 0);
 }
 
-ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
+ssize_t AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
         const uint8_t *data, size_t numBytes, int64_t timestamp) {
     if (inputPort == nullptr || data == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
@@ -423,7 +423,7 @@ ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPo
     return numSent;
 }
 
-media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPort) {
+media_status_t AMidiInputPort_sendFlush(const AMidiInputPort *inputPort) {
     if (inputPort == nullptr) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
     }

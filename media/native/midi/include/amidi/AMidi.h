@@ -41,8 +41,6 @@ typedef struct AMidiDevice AMidiDevice;
 typedef struct AMidiInputPort AMidiInputPort;
 typedef struct AMidiOutputPort AMidiOutputPort;
 
-#define AMIDI_API __attribute__((visibility("default")))
-
 /*
  * Message Op Codes. Used to parse MIDI data packets
  */
@@ -61,6 +59,8 @@ enum {
     AMIDI_DEVICE_TYPE_BLUETOOTH = 3 /* A MIDI device connected via BlueTooth */
 };
 
+#if __ANDROID_API__ >= 29
+
 /*
  * Device API
  */
@@ -78,7 +78,7 @@ enum {
  *    is null or already connected to a native AMidiDevice
   *  @see AMEDIA_ERROR_UNKNOWN - an unknown error occurred.
  */
-media_status_t AMIDI_API AMidiDevice_fromJava(
+media_status_t AMidiDevice_fromJava(
         JNIEnv *env, jobject midiDeviceObj, AMidiDevice **outDevicePtrPtr) __INTRODUCED_IN(29);
 
 /**
@@ -93,7 +93,7 @@ media_status_t AMIDI_API AMidiDevice_fromJava(
  *  @see AMEDIA_ERROR_INVALID_OBJECT - the JNI interface initialization to the associated java MidiDevice failed.
  *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
-media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *midiDevice) __INTRODUCED_IN(29);
+media_status_t AMidiDevice_release(const AMidiDevice *midiDevice) __INTRODUCED_IN(29);
 
 /**
  * Gets the MIDI device type.
@@ -108,7 +108,7 @@ media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *midiDevice) __IN
  *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
  *  @see AMEDIA_ERROR_UNKNOWN - Unknown error.
  */
-int32_t AMIDI_API AMidiDevice_getType(const AMidiDevice *device) __INTRODUCED_IN(29);
+int32_t AMidiDevice_getType(const AMidiDevice *device) __INTRODUCED_IN(29);
 
 /**
  * Gets the number of input (sending) ports available on the specified MIDI device.
@@ -120,7 +120,7 @@ int32_t AMIDI_API AMidiDevice_getType(const AMidiDevice *device) __INTRODUCED_IN
  *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
  *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
-ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
+ssize_t AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
 
 /**
  * Gets the number of output (receiving) ports available on the specified MIDI device.
@@ -132,7 +132,7 @@ ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTR
  *  @see AMEDIA_ERROR_INVALID_PARAMETER - the device parameter is NULL.
  *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
-ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
+ssize_t AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
 
 /*
  * API for receiving data from the Output port of a device.
@@ -150,7 +150,7 @@ ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INT
  * @return AMEDIA_OK, or a negative error code:
  *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
-media_status_t AMIDI_API AMidiOutputPort_open(const AMidiDevice *device, int32_t portNumber,
+media_status_t AMidiOutputPort_open(const AMidiDevice *device, int32_t portNumber,
                              AMidiOutputPort **outOutputPortPtr) __INTRODUCED_IN(29);
 
 /**
@@ -158,7 +158,7 @@ media_status_t AMIDI_API AMidiOutputPort_open(const AMidiDevice *device, int32_t
  *
  * @param outputPort    The native API port identifier of the port.
  */
-void AMIDI_API AMidiOutputPort_close(const AMidiOutputPort *outputPort) __INTRODUCED_IN(29);
+void AMidiOutputPort_close(const AMidiOutputPort *outputPort) __INTRODUCED_IN(29);
 
 /**
  * Receives the next pending MIDI message. To retrieve all pending messages, the client should
@@ -178,7 +178,7 @@ void AMIDI_API AMidiOutputPort_close(const AMidiOutputPort *outputPort) __INTROD
  * @return the number of messages received (either 0 or 1), or a negative error code:
  *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
-ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int32_t *opcodePtr,
+ssize_t AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int32_t *opcodePtr,
          uint8_t *buffer, size_t maxBytes, size_t* numBytesReceivedPtr, int64_t *outTimestampPtr) __INTRODUCED_IN(29);
 
 /*
@@ -197,7 +197,7 @@ ssize_t AMIDI_API AMidiOutputPort_receive(const AMidiOutputPort *outputPort, int
  * @return AMEDIA_OK, or a negative error code:
  *  @see AMEDIA_ERROR_UNKNOWN - Unknown Error.
  */
-media_status_t AMIDI_API AMidiInputPort_open(const AMidiDevice *device, int32_t portNumber,
+media_status_t AMidiInputPort_open(const AMidiDevice *device, int32_t portNumber,
                             AMidiInputPort **outInputPortPtr) __INTRODUCED_IN(29);
 
 /**
@@ -210,7 +210,7 @@ media_status_t AMIDI_API AMidiInputPort_open(const AMidiDevice *device, int32_t 
  * @return The number of bytes sent, which could be less than specified or a negative error code:
  * @see AMEDIA_ERROR_INVALID_PARAMETER - The specified port was NULL, the specified buffer was NULL.
  */
-ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uint8_t *buffer,
+ssize_t AMidiInputPort_send(const AMidiInputPort *inputPort, const uint8_t *buffer,
                    size_t numBytes) __INTRODUCED_IN(29);
 
 /**
@@ -224,7 +224,7 @@ ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uin
  * @return The number of bytes sent, which could be less than specified or a negative error code:
  * @see AMEDIA_ERROR_INVALID_PARAMETER - The specified port was NULL, the specified buffer was NULL.
  */
-ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
+ssize_t AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
         const uint8_t *buffer, size_t numBytes, int64_t timestamp) __INTRODUCED_IN(29);
 
 /**
@@ -238,14 +238,16 @@ ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPo
  * @see AMEDIA_ERROR_UNSUPPORTED - The FLUSH command couldn't
  * be sent.
  */
-media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
+media_status_t AMidiInputPort_sendFlush(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
 
 /**
  * Closes the input port.
  *
  * @param inputPort Identifies the input (sending) port to close.
  */
-void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
+void AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
+
+#endif /* __ANDROID_API__ >= 29 */
 
 #ifdef __cplusplus
 }
