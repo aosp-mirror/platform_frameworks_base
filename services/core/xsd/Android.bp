@@ -4,3 +4,11 @@ xsd_config {
     api_dir: "schema",
     package_name: "com.android.server.pm.permission.configfile",
 }
+
+
+xsd_config {
+    name: "platform-compat-config",
+    srcs: ["platform-compat-config.xsd"],
+    api_dir: "platform-compat-schema",
+    package_name: "com.android.server.compat.config",
+}
