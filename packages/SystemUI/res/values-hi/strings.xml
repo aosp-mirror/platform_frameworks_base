@@ -205,7 +205,7 @@
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"पूरी सूचनाएं देखें"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ़ करें"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करना."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS पाना."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"टेलीटाइपराइटर सक्षम."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"रिंगर कंपन (वाइब्रेशन)."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मौन."</string>
