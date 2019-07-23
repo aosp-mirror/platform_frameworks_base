@@ -35,6 +35,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
@@ -59,6 +60,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private View mOperatorNameView;
     private StatusBarStateController mStatusbarStateController;
     private KeyguardBypassController mBypassController;
+    private NotificationWakeUpCoordinator mWakeUpCoordinator;
 
     @Before
     public void setUp() throws Exception {
@@ -72,11 +74,13 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mOperatorNameView = new View(mContext);
         mStatusbarStateController = mock(StatusBarStateController.class);
         mBypassController = mock(KeyguardBypassController.class);
+        mWakeUpCoordinator = mock(NotificationWakeUpCoordinator.class);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
                 mStatusbarStateController,
                 mBypassController,
+                mWakeUpCoordinator,
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
@@ -153,6 +157,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mStatusbarStateController,
                 mBypassController,
+                mWakeUpCoordinator,
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
