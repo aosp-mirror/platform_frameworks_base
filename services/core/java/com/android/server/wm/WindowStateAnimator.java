@@ -729,12 +729,7 @@ class WindowStateAnimator {
             if (!mService.mLimitedAlphaCompositing
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
                     || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)))) {
-                //Slog.i(TAG_WM, "Applying alpha transform");
-                if (screenAnimation) {
-                    mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
-                }
-            } else {
-                //Slog.i(TAG_WM, "Not applying alpha transform");
+                mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
             }
 
             if ((DEBUG_ANIM || WindowManagerService.localLOGV)
