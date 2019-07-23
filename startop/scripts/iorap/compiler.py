@@ -27,16 +27,23 @@ import optparse
 import os
 import re
 import sys
-from typing import Iterable, Optional
+import tempfile
+from pathlib import Path
+from typing import Iterable, Optional, List
 
 from generated.TraceFile_pb2 import *
 from lib.inode2filename import Inode2Filename
 
 parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(parent_dir_name + "/trace_analyzer")
-from lib.trace2db import Trace2Db, MmFilemapAddToPageCache, RawFtraceEntry
+sys.path.append(parent_dir_name)
+from trace_analyzer.lib.trace2db import Trace2Db, MmFilemapAddToPageCache, \
+    RawFtraceEntry
+import lib.cmd_utils as cmd_utils
 
 _PAGE_SIZE = 4096 # adb shell getconf PAGESIZE ## size of a memory page in bytes.
+ANDROID_BUILD_TOP = Path(parent_dir_name).parents[3]
+TRACECONV_BIN = ANDROID_BUILD_TOP.joinpath(
+    'external/perfetto/tools/traceconv')
 
 class PageRun:
   """
@@ -190,12 +197,62 @@ def query_add_to_page_cache(trace2db: Trace2Db, trace_duration: Optional[int]):
       RawFtraceEntry.timestamp <= end_time).order_by(
       MmFilemapAddToPageCache.id).all()
 
+def transform_perfetto_trace_to_systrace(path_to_perfetto_trace: str,
+                                         path_to_tmp_systrace: str) -> None:
+  """ Transforms the systrace file from perfetto trace. """
+  cmd_utils.run_command_nofail([str(TRACECONV_BIN),
+                                'systrace',
+                                path_to_perfetto_trace,
+                                path_to_tmp_systrace])
+
+
+def run(sql_db_path:str,
+        trace_file:str,
+        trace_duration:Optional[int],
+        output_file:str,
+        inode_table:str,
+        filter:List[str]) -> int:
+  trace2db = Trace2Db(sql_db_path)
+  # Speed optimization: Skip any entries that aren't mm_filemap_add_to_pagecache.
+  trace2db.set_raw_ftrace_entry_filter(\
+      lambda entry: entry['function'] == 'mm_filemap_add_to_page_cache')
+  # TODO: parse multiple trace files here.
+  parse_count = trace2db.parse_file_into_db(trace_file)
+
+  mm_filemap_add_to_page_cache_rows = query_add_to_page_cache(trace2db,
+                                                              trace_duration)
+  print("DONE. Parsed %d entries into sql db." %(len(mm_filemap_add_to_page_cache_rows)))
+
+  page_runs = page_cache_entries_to_runs(mm_filemap_add_to_page_cache_rows)
+  print("DONE. Converted %d entries" %(len(page_runs)))
+
+  # TODO: flags to select optimizations.
+  optimized_page_runs = optimize_page_runs(page_runs)
+  print("DONE. Optimized down to %d entries" %(len(optimized_page_runs)))
+
+  print("Build protobuf...")
+  trace_file = build_protobuf(optimized_page_runs, inode_table, filter)
+
+  print("Write protobuf to file...")
+  output_file = open(output_file, 'wb')
+  output_file.write(trace_file.SerializeToString())
+  output_file.close()
+
+  print("DONE")
+
+  # TODO: Silent running mode [no output except on error] for build runs.
+
+  return 0
+
 def main(argv):
   parser = optparse.OptionParser(usage="Usage: %prog [options]", description="Compile systrace file into TraceFile.pb")
   parser.add_option('-i', dest='inode_data_file', metavar='FILE',
                     help='Read cached inode data from a file saved earlier with pagecache.py -d')
   parser.add_option('-t', dest='trace_file', metavar='FILE',
                     help='Path to systrace file (trace.html) that will be parsed')
+  parser.add_option('--perfetto-trace', dest='perfetto_trace_file',
+                    metavar='FILE',
+                    help='Path to perfetto trace that will be parsed')
 
   parser.add_option('--db', dest='sql_db', metavar='FILE',
                     help='Path to intermediate sqlite3 database [default: in-memory].')
@@ -217,54 +274,42 @@ def main(argv):
   # TODO: OptionParser should have some flags to make these mandatory.
   if not options.inode_data_file:
     parser.error("-i is required")
-  if not options.trace_file:
-    parser.error("-t is required")
+  if not options.trace_file and not options.perfetto_trace_file:
+    parser.error("one of -t or --perfetto-trace is required")
+  if options.trace_file and options.perfetto_trace_file:
+    parser.error("please enter either -t or --perfetto-trace, not both")
   if not options.output_file:
     parser.error("-o is required")
 
   if options.launch_lock:
     print("INFO: Launch lock flag (-l) enabled; filtering all events not inside launch_lock.")
 
-
   inode_table = Inode2Filename.new_from_filename(options.inode_data_file)
-
-  trace_file = open(options.trace_file)
 
   sql_db_path = ":memory:"
   if options.sql_db:
     sql_db_path = options.sql_db
 
-  trace2db = Trace2Db(sql_db_path)
-  # Speed optimization: Skip any entries that aren't mm_filemap_add_to_pagecache.
-  trace2db.set_raw_ftrace_entry_filter(\
-      lambda entry: entry['function'] == 'mm_filemap_add_to_page_cache')
-  # TODO: parse multiple trace files here.
-  parse_count = trace2db.parse_file_into_db(options.trace_file)
+  # if the input is systrace
+  if options.trace_file:
+    return run(sql_db_path,
+               options.trace_file,
+               options.trace_duration,
+               options.output_file,
+               inode_table,
+               options.filter)
 
-  mm_filemap_add_to_page_cache_rows = query_add_to_page_cache(trace2db,
-                                                              options.trace_duration)
-  print("DONE. Parsed %d entries into sql db." %(len(mm_filemap_add_to_page_cache_rows)))
-
-  page_runs = page_cache_entries_to_runs(mm_filemap_add_to_page_cache_rows)
-  print("DONE. Converted %d entries" %(len(page_runs)))
-
-  # TODO: flags to select optimizations.
-  optimized_page_runs = optimize_page_runs(page_runs)
-  print("DONE. Optimized down to %d entries" %(len(optimized_page_runs)))
-
-  print("Build protobuf...")
-  trace_file = build_protobuf(optimized_page_runs, inode_table, options.filter)
-
-  print("Write protobuf to file...")
-  output_file = open(options.output_file, 'wb')
-  output_file.write(trace_file.SerializeToString())
-  output_file.close()
-
-  print("DONE")
-
-  # TODO: Silent running mode [no output except on error] for build runs.
-
-  return 0
+  # if the input is perfetto trace
+  # TODO python 3.7 switch to using nullcontext
+  with tempfile.NamedTemporaryFile() as trace_file:
+    transform_perfetto_trace_to_systrace(options.perfetto_trace_file,
+                                         trace_file.name)
+    return run(sql_db_path,
+               options.trace_file,
+               options.trace_duration,
+               options.output_file,
+               inode_table,
+               options.filter)
 
 if __name__ == '__main__':
   print(sys.argv)
