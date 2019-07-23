@@ -184,6 +184,8 @@ public class StagingManager {
             checkDowngrade(session, activePackage, packageInfo);
             result.add(packageInfo);
         }
+        Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: ["
+                + result.stream().map(p -> p.packageName).collect(Collectors.joining(",")) + "]");
         return result;
     }
 
@@ -210,7 +212,7 @@ public class StagingManager {
             throws PackageManagerException {
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
         final long newVersionCode = newPackage.applicationInfo.longVersionCode;
-        boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
+        final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
                 session.params.installFlags, activePackage.applicationInfo.flags);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
             if (!mApexManager.abortActiveSession()) {
@@ -229,6 +231,7 @@ public class StagingManager {
     }
 
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
+        Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId);
         final boolean hasApex = sessionContainsApex(session);
         // APEX checks. For single-package sessions, check if they contain an APEX. For
         // multi-package sessions, find all the child sessions that contain an APEX.
@@ -247,6 +250,8 @@ public class StagingManager {
 
         if (sessionContainsApk(session)) {
             try {
+                Slog.d(TAG, "Running a pre-reboot verification for APKs in session "
+                        + session.sessionId + " by performing a dry-run install");
                 installApksInSession(session, /* preReboot */ true);
                 // TODO(b/118865310): abort the session on apexd.
             } catch (PackageManagerException e) {
@@ -281,6 +286,7 @@ public class StagingManager {
         // On the other hand, if the order of the calls was inverted (first call apexd, then mark
         // session as ready), then if a device gets rebooted right after the call to apexd, only
         // apex part of the train will be applied, leaving device in an inconsistent state.
+        Slog.d(TAG, "Marking session " + session.sessionId + " as ready");
         session.setStagedSessionReady();
         if (!hasApex) {
             // Session doesn't contain apex, nothing to do.
@@ -319,6 +325,7 @@ public class StagingManager {
     }
 
     private void resumeSession(@NonNull PackageInstallerSession session) {
+        Slog.d(TAG, "Resuming session " + session.sessionId);
         final boolean hasApex = sessionContainsApex(session);
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
@@ -352,9 +359,12 @@ public class StagingManager {
                         + "retry at next reboot.");
                 return;
             }
+            Slog.i(TAG, "APEX packages in session " + session.sessionId
+                    + " were successfully activated. Proceeding with APK packages, if any");
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
         try {
+            Slog.d(TAG, "Installing APK packages in session " + session.sessionId);
             installApksInSession(session, /* preReboot */ false);
         } catch (PackageManagerException e) {
             session.setStagedSessionFailed(e.error, e.getMessage());
@@ -374,6 +384,7 @@ public class StagingManager {
             return;
         }
 
+        Slog.d(TAG, "Marking session " + session.sessionId + " as applied");
         session.setStagedSessionApplied();
         if (hasApex) {
             mApexManager.markStagedSessionSuccessful(session.sessionId);
