@@ -16363,11 +16363,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     commitPackagesLocked(commitRequest);
                     success = true;
                 } finally {
-                    for (PrepareResult result : prepareResults.values()) {
-                        if (result.freezer != null) {
-                            result.freezer.close();
-                        }
-                    }
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             }
