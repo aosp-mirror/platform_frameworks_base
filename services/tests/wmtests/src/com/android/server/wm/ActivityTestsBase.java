@@ -45,9 +45,7 @@ import android.testing.DexmakerShareClassLoaderRule;
 import android.view.DisplayInfo;
 
 import com.android.server.AttributeCache;
-import com.android.server.wm.utils.MockTracker;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -70,8 +68,6 @@ class ActivityTestsBase {
     RootActivityContainer mRootActivityContainer;
     ActivityStackSupervisor mSupervisor;
 
-    private MockTracker mMockTracker;
-
     // Default package name
     static final String DEFAULT_COMPONENT_PACKAGE_NAME = "com.foo";
 
@@ -85,17 +81,9 @@ class ActivityTestsBase {
 
     @Before
     public void setUpBase() {
-        mMockTracker = new MockTracker();
-
         mService = mSystemServicesTestRule.getActivityTaskManagerService();
         mSupervisor = mService.mStackSupervisor;
         mRootActivityContainer = mService.mRootActivityContainer;
-    }
-
-    @After
-    public void tearDownBase() {
-        mMockTracker.close();
-        mMockTracker = null;
     }
 
     /** Creates a {@link TestActivityDisplay}. */

@@ -346,24 +346,28 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(sPowerManagerWrapper);
+        final WindowState.PowerManagerWrapper powerManagerWrapper =
+                mSystemServicesTestRule.getPowerManagerWrapper();
+        reset(powerManagerWrapper);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
 
-        reset(sPowerManagerWrapper);
+        reset(powerManagerWrapper);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
             boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
-        reset(sPowerManagerWrapper);
+        final WindowState.PowerManagerWrapper powerManagerWrapper =
+                mSystemServicesTestRule.getPowerManagerWrapper();
+        reset(powerManagerWrapper);
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
         } else {
-            verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.

@@ -40,7 +40,6 @@ import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 
 import static org.mockito.Mockito.mock;
 
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -52,15 +51,12 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import com.android.server.AttributeCache;
-import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -91,8 +87,6 @@ class WindowTestsBase {
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
 
-    private MockTracker mMockTracker;
-
     /**
      * Spied {@link Transaction} class than can be used to verify calls.
      */
@@ -104,24 +98,13 @@ class WindowTestsBase {
     @Rule
     public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
 
-    static WindowState.PowerManagerWrapper sPowerManagerWrapper;
-
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
-
-        sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
-    }
-
-    @AfterClass
-    public static void tearDownOnceBase() throws IOException {
-        sPowerManagerWrapper = null;
     }
 
     @Before
     public void setUpBase() {
-        mMockTracker = new MockTracker();
-
         // If @Before throws an exception, the error isn't logged. This will make sure any failures
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
@@ -205,11 +188,7 @@ class WindowTestsBase {
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;
-        } finally {
-            mMockTracker.close();
-            mMockTracker = null;
         }
-
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
@@ -331,12 +310,13 @@ class WindowTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow) {
         return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
-                mWm, mMockSession, mIWindow);
+                mWm, mMockSession, mIWindow, mSystemServicesTestRule.getPowerManagerWrapper());
     }
 
     static WindowState createWindow(WindowState parent, int type, WindowToken token,
             String name, int ownerId, boolean ownerCanAddInternalSystemWindow,
-            WindowManagerService service, Session session, IWindow iWindow) {
+            WindowManagerService service, Session session, IWindow iWindow,
+            WindowState.PowerManagerWrapper powerManagerWrapper) {
         synchronized (service.mGlobalLock) {
             final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
             attrs.setTitle(name);
@@ -344,7 +324,7 @@ class WindowTestsBase {
             final WindowState w = new WindowState(service, session, iWindow, token, parent,
                     OP_NONE,
                     0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow,
-                    sPowerManagerWrapper);
+                    powerManagerWrapper);
             // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
             // adding it to the token...
             token.addWindow(w);

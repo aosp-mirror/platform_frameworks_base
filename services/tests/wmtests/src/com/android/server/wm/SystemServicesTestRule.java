@@ -75,11 +75,11 @@ import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
-import com.android.server.wm.utils.MockTracker;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
@@ -99,24 +99,18 @@ public class SystemServicesTestRule implements TestRule {
     private final AtomicBoolean mCurrentMessagesProcessed = new AtomicBoolean(false);
 
     private Context mContext;
-    private MockTracker mMockTracker;
     private StaticMockitoSession mMockitoSession;
     ServiceThread mHandlerThread;
     private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
     private TestWindowManagerPolicy mWMPolicy;
+    private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
     SurfaceControl.Transaction mTransaction;
-
-    /** {@link MockTracker} to track mocks created by {@link SystemServicesTestRule}. */
-    private static class Tracker extends MockTracker {
-        // This empty extended class is necessary since Mockito distinguishes a listener by it
-        // class.
-    }
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -134,23 +128,17 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUp() {
-        try {
-            mMockTracker = new Tracker();
+        mMockitoSession = mockitoSession()
+                .spyStatic(LocalServices.class)
+                .mockStatic(LockGuard.class)
+                .mockStatic(Watchdog.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
 
-            mMockitoSession = mockitoSession()
-                    .spyStatic(LocalServices.class)
-                    .mockStatic(LockGuard.class)
-                    .mockStatic(Watchdog.class)
-                    .strictness(Strictness.LENIENT)
-                    .startMocking();
-
-            setUpSystemCore();
-            setUpLocalServices();
-            setUpActivityTaskManagerService();
-            setUpWindowManagerService();
-        } finally {
-            mMockTracker.stopTracking();
-        }
+        setUpSystemCore();
+        setUpLocalServices();
+        setUpActivityTaskManagerService();
+        setUpWindowManagerService();
     }
 
     private void setUpSystemCore() {
@@ -260,7 +248,9 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUpWindowManagerService() {
-        mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService);
+        mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
+        mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
+                mPowerManagerWrapper);
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new);
         spyOn(mWmService);
@@ -305,20 +295,18 @@ public class SystemServicesTestRule implements TestRule {
         DeviceConfig.removeOnPropertiesChangedListener(mWmService.mPropertiesChangedListener);
         mWmService = null;
         mWMPolicy = null;
+        mPowerManagerWrapper = null;
 
         tearDownLocalServices();
         tearDownSystemCore();
+
+        Mockito.framework().clearInlineMocks();
     }
 
     private void tearDownSystemCore() {
         if (mMockitoSession != null) {
             mMockitoSession.finishMocking();
             mMockitoSession = null;
-        }
-
-        if (mMockTracker != null) {
-            mMockTracker.close();
-            mMockTracker = null;
         }
 
         if (mHandlerThread != null) {
@@ -350,6 +338,10 @@ public class SystemServicesTestRule implements TestRule {
 
     ActivityTaskManagerService getActivityTaskManagerService() {
         return mAtmService;
+    }
+
+    WindowState.PowerManagerWrapper getPowerManagerWrapper() {
+        return mPowerManagerWrapper;
     }
 
     void cleanupWindowManagerHandlers() {

@@ -79,6 +79,7 @@ import android.view.Gravity;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
+import com.android.server.wm.utils.MockTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -186,6 +187,19 @@ public class ActivityStarterTests extends ActivityTestsBase {
         verifyStartActivityPreconditions(preconditions, 0 /*launchFlags*/, expectedResult);
     }
 
+    private void verifyStartActivityPreconditions(int preconditions, int launchFlags,
+            int expectedResult) {
+        // We track mocks created here because this is used in a single test
+        // (testStartActivityPreconditions) as a specific case, and mocks created inside it won't be
+        // used for other cases. To avoid extensive memory usage, we clean up all used mocks after
+        // each case. This is necessary because usually we only clean up mocks after a test
+        // finishes, but this test creates too many mocks that the intermediate memory usage can be
+        // ~0.8 GiB and thus very susceptible to OutOfMemoryException.
+        try (MockTracker tracker = new MockTracker()) {
+            verifyStartActivityPreconditionsUntracked(preconditions, launchFlags, expectedResult);
+        }
+    }
+
     /**
      * Excercises how the {@link ActivityStarter} reacts to various preconditions. The caller
      * provides a bitmask of all the set conditions (such as {@link #PRECONDITION_NO_CALLER_APP})
@@ -197,7 +211,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      * @param launchFlags The launch flags to be provided by the launch {@link Intent}.
      * @param expectedResult The expected result from the launch.
      */
-    private void verifyStartActivityPreconditions(int preconditions, int launchFlags,
+    private void verifyStartActivityPreconditionsUntracked(int preconditions, int launchFlags,
             int expectedResult) {
         final ActivityTaskManagerService service = mService;
         final IPackageManager packageManager = mock(IPackageManager.class);
