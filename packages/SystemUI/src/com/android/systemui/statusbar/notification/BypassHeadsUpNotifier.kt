@@ -21,6 +21,7 @@ import android.media.MediaMetadata
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -40,6 +41,7 @@ class BypassHeadsUpNotifier @Inject constructor(
         private val bypassController: KeyguardBypassController,
         private val statusBarStateController: StatusBarStateController,
         private val headsUpManager: HeadsUpManagerPhone,
+        private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
         private val mediaManager: NotificationMediaManager,
         tunerService: TunerService) : StatusBarStateController.StateListener,
         NotificationMediaManager.MediaListener {
@@ -79,9 +81,6 @@ class BypassHeadsUpNotifier @Inject constructor(
         if (!NotificationMediaManager.isPlayingState(state)) {
             newEntry = null
         }
-        if (newEntry?.isSensitive == true) {
-            newEntry = null
-        }
         currentMediaEntry = newEntry
         updateAutoHeadsUp(previous)
         updateAutoHeadsUp(currentMediaEntry)
@@ -89,7 +88,7 @@ class BypassHeadsUpNotifier @Inject constructor(
 
     private fun updateAutoHeadsUp(entry: NotificationEntry?) {
         entry?.let {
-            val autoHeadsUp = it == currentMediaEntry && canAutoHeadsUp()
+            val autoHeadsUp = it == currentMediaEntry && canAutoHeadsUp(it)
             it.isAutoHeadsUp = autoHeadsUp
             if (autoHeadsUp) {
                 headsUpManager.showNotification(it)
@@ -97,11 +96,36 @@ class BypassHeadsUpNotifier @Inject constructor(
         }
     }
 
+    /**
+     * @return {@code true} if this entry be autoHeadsUpped right now.
+     */
+    private fun canAutoHeadsUp(entry: NotificationEntry): Boolean {
+        if (!isAutoHeadsUpAllowed()) {
+            return false;
+        }
+        if (entry.isSensitive) {
+            // filter sensitive notifications
+            return false
+        }
+        if (!notificationLockscreenUserManager.shouldShowOnKeyguard(entry)) {
+            // filter notifications invisible on Keyguard
+            return false
+        }
+        if (!entryManager.notificationData.activeNotifications.contains(entry)) {
+            // filter notifications not the active list currently
+            return false
+        }
+        return true
+    }
+
     override fun onStatePostChange() {
         updateAutoHeadsUp(currentMediaEntry)
     }
 
-    private fun canAutoHeadsUp() : Boolean {
+    /**
+     * @return {@code true} if autoHeadsUp is possible right now.
+     */
+    private fun isAutoHeadsUpAllowed() : Boolean {
         if (!enabled) {
             return false
         }
