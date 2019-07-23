@@ -79,7 +79,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
@@ -97,12 +96,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -115,9 +118,13 @@ import javax.microedition.khronos.egl.EGLSurface;
 
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
+
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
     private static final int USER_OPERATION_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+
+    private static final DateTimeFormatter LOG_NAME_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT);
 
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
@@ -919,9 +926,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String process = getNextArgRequired();
         String heapFile = getNextArg();
         if (heapFile == null) {
-            final Time t = new Time();
-            t.set(System.currentTimeMillis());
-            heapFile = "/data/local/tmp/heapdump-" + t.format("%Y%m%d-%H%M%S") + ".prof";
+            LocalDateTime localDateTime = LocalDateTime.now(Clock.systemDefaultZone());
+            String logNameTimeString = LOG_NAME_TIME_FORMATTER.format(localDateTime);
+            heapFile = "/data/local/tmp/heapdump-" + logNameTimeString + ".prof";
         }
         pw.println("File: " + heapFile);
         pw.flush();
