@@ -1015,6 +1015,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void notifyAppStopped() {
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: " + this);
         mAppStopped = true;
+        // Reset the last saved PiP snap fraction on app stop.
+        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -3076,11 +3078,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     void setHidden(boolean hidden) {
         super.setHidden(hidden);
-
-        if (hidden) {
-            // Once the app window is hidden, reset the last saved PiP snap fraction
-            mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
-        }
         scheduleAnimation();
     }
 
