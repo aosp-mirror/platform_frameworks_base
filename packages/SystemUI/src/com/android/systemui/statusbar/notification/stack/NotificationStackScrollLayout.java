@@ -2549,13 +2549,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             return;
         }
-        int minTopPosition = 0;
+        int minTopPosition;
         NotificationSection lastSection = getLastVisibleSection();
         boolean onKeyguard = mStatusBarState == StatusBarState.KEYGUARD;
         if (!onKeyguard) {
             minTopPosition = (int) (mTopPadding + mStackTranslation);
         } else if (lastSection == null) {
             minTopPosition = mTopPadding;
+        } else {
+            // The first sections could be empty while there could still be elements in later
+            // sections. The position of these first few sections is determined by the position of
+            // the first visible section.
+            NotificationSection firstVisibleSection = getFirstVisibleSection();
+            firstVisibleSection.updateBounds(0 /* minTopPosition*/, 0 /* minBottomPosition */,
+                    false /* shiftPulsingWithFirst */);
+            minTopPosition = firstVisibleSection.getBounds().top;
         }
         boolean shiftPulsingWithFirst = mHeadsUpManager.getAllEntries().count() <= 1
                 && (mAmbientState.isDozing()
