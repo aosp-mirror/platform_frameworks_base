@@ -63,7 +63,7 @@ import java.lang.annotation.RetentionPolicy;
  * <h3>Creating a RenderNode</h3>
  * <pre class="prettyprint">
  *     RenderNode renderNode = new RenderNode("myRenderNode");
- *     renderNode.setLeftTopRightBottom(0, 0, 50, 50); // Set the size to 50x50
+ *     renderNode.setPosition(0, 0, 50, 50); // Set the size to 50x50
  *     RecordingCanvas canvas = renderNode.beginRecording();
  *     try {
  *         // Draw with the canvas
@@ -104,7 +104,7 @@ import java.lang.annotation.RetentionPolicy;
  * <pre class="prettyprint">
  *     private void createDisplayList() {
  *         mRenderNode = new RenderNode("MyRenderNode");
- *         mRenderNode.setLeftTopRightBottom(0, 0, width, height);
+ *         mRenderNode.setPosition(0, 0, width, height);
  *         RecordingCanvas canvas = mRenderNode.beginRecording();
  *         try {
  *             for (Bitmap b : mBitmaps) {

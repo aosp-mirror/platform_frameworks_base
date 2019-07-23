@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -892,7 +893,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         firstActivity.app = null;
 
         // second activity will be immediately removed as it has no state.
-        secondActivity.haveState = false;
+        secondActivity.setSavedState(null /* savedState */);
 
         assertEquals(2, mTask.mActivities.size());
 
@@ -908,7 +909,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         activity.mRelaunchReason = RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
         activity.launchCount = 1;
-        activity.haveState = false;
+        activity.setSavedState(null /* savedState */);
 
         mStack.handleAppDiedLocked(activity.app);
 
@@ -922,7 +923,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         activity.mRelaunchReason = RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
         activity.launchCount = 3;
-        activity.haveState = false;
+        activity.setSavedState(null /* savedState */);
 
         mStack.handleAppDiedLocked(activity.app);
 
@@ -936,7 +937,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         activity.mRelaunchReason = RELAUNCH_REASON_FREE_RESIZE;
         activity.launchCount = 1;
-        activity.haveState = false;
+        activity.setSavedState(null /* savedState */);
 
         mStack.handleAppDiedLocked(activity.app);
 
@@ -950,7 +951,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         activity.mRelaunchReason = RELAUNCH_REASON_FREE_RESIZE;
         activity.launchCount = 3;
-        activity.haveState = false;
+        activity.setSavedState(null /* savedState */);
 
         mStack.handleAppDiedLocked(activity.app);
 
@@ -969,7 +970,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         homeStask.removeTask(homeTask, "testAdjustFocusedStack", REMOVE_TASK_MODE_DESTROYING);
 
         // Finish the only activity.
-        mStack.finishActivityLocked(topActivity, 0 /* resultCode */, null /* resultData */,
+        topActivity.finishActivityLocked(RESULT_CANCELED /* resultCode */, null /* resultData */,
                 "testAdjustFocusedStack", false /* oomAdj */);
         // Although home stack is empty, it should still be the focused stack.
         assertEquals(homeStask, mDefaultDisplay.getFocusedStack());
@@ -1014,7 +1015,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertNotNull(activity);
         activity.setState(PAUSED, "finishCurrentActivity");
         activity.makeFinishingLocked();
-        stack.finishCurrentActivityLocked(activity, ActivityStack.FINISH_AFTER_VISIBLE,
+        activity.finishCurrentActivityLocked(ActivityRecord.FINISH_AFTER_VISIBLE,
                 false /* oomAdj */, "finishCurrentActivity");
         return activity;
     }

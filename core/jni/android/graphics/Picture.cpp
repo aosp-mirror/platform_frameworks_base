@@ -100,8 +100,9 @@ void Picture::draw(Canvas* canvas) {
         this->endRecording();
         SkASSERT(NULL != mPicture.get());
     }
-    if (NULL != mPicture.get()) {
-        mPicture->playback(canvas->asSkCanvas());
+
+    if (mPicture) {
+        canvas->drawPicture(*mPicture);
     }
 }
 

@@ -131,20 +131,6 @@ public:
      */
     static void setCompatibilityVersion(int apiLevel);
 
-    /**
-     *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
-     *  It is useful for testing and clients (e.g. Picture/Movie) that expect to
-     *  draw their contents into an SkCanvas.
-     *
-     *  The SkCanvas returned is *only* valid until another Canvas call is made
-     *  that would change state (e.g. matrix or clip). Clients of asSkCanvas()
-     *  are responsible for *not* persisting this pointer.
-     *
-     *  Further, the returned SkCanvas should NOT be unref'd and is valid until
-     *  this canvas is destroyed or a new bitmap is set.
-     */
-    virtual SkCanvas* asSkCanvas() = 0;
-
     virtual void setBitmap(const SkBitmap& bitmap) = 0;
 
     virtual bool isOpaque() = 0;
@@ -264,6 +250,7 @@ public:
                                const SkPaint* paint) = 0;
 
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) = 0;
+    virtual void drawPicture(const SkPicture& picture) = 0;
 
     /**
      * Specifies if the positions passed to ::drawText are absolute or relative

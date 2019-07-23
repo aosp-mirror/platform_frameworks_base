@@ -249,6 +249,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Drawable mOriginalBackgroundDrawable;
     private Drawable mLastOriginalBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
+
+    /**
+     * Temporary holder for a window background when it is set before {@link #mWindow} is
+     * initialized. It will be set as the actual background once {@link #setWindow(PhoneWindow)} is
+     * called.
+     */
+    @Nullable
+    private Drawable mPendingWindowBackground;
     private Drawable mCaptionBackgroundDrawable;
     private Drawable mUserCaptionBackgroundDrawable;
 
@@ -961,6 +969,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     public void setWindowBackground(Drawable drawable) {
+        if (mWindow == null) {
+            mPendingWindowBackground = drawable;
+            return;
+        }
         if (mOriginalBackgroundDrawable != drawable) {
             mOriginalBackgroundDrawable = drawable;
             updateBackgroundDrawable();
@@ -2002,6 +2014,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (context instanceof DecorContext) {
             DecorContext decorContext = (DecorContext) context;
             decorContext.setPhoneWindow(mWindow);
+        }
+        if (mPendingWindowBackground != null) {
+            Drawable background = mPendingWindowBackground;
+            mPendingWindowBackground = null;
+            setWindowBackground(background);
         }
     }
 

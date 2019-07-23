@@ -162,6 +162,21 @@ public final class OomAdjuster {
     private final ProcessList mProcessList;
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
+        this(service, processList, activeUids, createAdjusterThread());
+    }
+
+    private static ServiceThread createAdjusterThread() {
+        // The process group is usually critical to the response time of foreground app, so the
+        // setter should apply it as soon as possible.
+        final ServiceThread adjusterThread =
+                new ServiceThread(TAG, TOP_APP_PRIORITY_BOOST, false /* allowIo */);
+        adjusterThread.start();
+        Process.setThreadGroupAndCpuset(adjusterThread.getThreadId(), THREAD_GROUP_TOP_APP);
+        return adjusterThread;
+    }
+
+    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
+            ServiceThread adjusterThread) {
         mService = service;
         mProcessList = processList;
         mActiveUids = activeUids;
@@ -170,12 +185,6 @@ public final class OomAdjuster {
         mConstants = mService.mConstants;
         mAppCompact = new AppCompactor(mService);
 
-        // The process group is usually critical to the response time of foreground app, so the
-        // setter should apply it as soon as possible.
-        final ServiceThread adjusterThread = new ServiceThread(TAG, TOP_APP_PRIORITY_BOOST,
-                false /* allowIo */);
-        adjusterThread.start();
-        Process.setThreadGroupAndCpuset(adjusterThread.getThreadId(), THREAD_GROUP_TOP_APP);
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
             final int pid = msg.arg1;
             final int group = msg.arg2;

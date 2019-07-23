@@ -76,4 +76,13 @@ public class DecorViewTest {
         expectedBitmap.getPixels(expPixels, 0, w, 0, 0, w, h);
         assertThat(Arrays.toString(expPixels)).isEqualTo(Arrays.toString(resPixels));
     }
+
+    @Test
+    public void setBackgroundWithNoWindow() {
+        PhoneWindow phoneWindow = new PhoneWindow(mContext);
+        // Set a theme that defines a non-null value for android:background
+        mContext.setTheme(R.style.ViewDefaultBackground);
+        DecorView decorView = (DecorView) phoneWindow.getDecorView();
+        assertThat(decorView.getBackground()).isNotNull();
+    }
 }

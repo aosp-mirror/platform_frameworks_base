@@ -46,8 +46,6 @@ public:
 
     virtual ~SkiaCanvas();
 
-    virtual SkCanvas* asSkCanvas() override { return mCanvas; }
-
     virtual void resetRecording(int width, int height,
                                 uirenderer::RenderNode* renderNode) override {
         LOG_ALWAYS_FATAL("SkiaCanvas cannot be reset as a recording canvas");
@@ -155,9 +153,11 @@ public:
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor,
                                     uirenderer::GlFunctorLifecycleListener* listener) override;
+    virtual void drawPicture(const SkPicture& picture) override;
 
 protected:
     SkiaCanvas();
+    SkCanvas* asSkCanvas() { return mCanvas; }
     void reset(SkCanvas* skiaCanvas);
     void drawDrawable(SkDrawable* drawable) { mCanvas->drawDrawable(drawable); }
 

@@ -78,7 +78,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
     // Playback to a software sRGB canvas.  The result should be fully red.
-    canvas.asSkCanvas()->drawPicture(picture);
+    canvas.drawPicture(*picture);
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 }
 
