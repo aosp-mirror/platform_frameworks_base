@@ -890,8 +890,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     Slog.e(TAG, "Second failure launching "
                             + r.intent.getComponent().flattenToShortString() + ", giving up", e);
                     proc.appDied();
-                    stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                            "2nd-crash", false);
+                    r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                            "2nd-crash", false /* oomAdj */);
                     return false;
                 }
 

@@ -163,6 +163,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -1630,22 +1631,52 @@ final class ActivityRecord extends ConfigurationContainer {
         setSavedState(null /* savedState */);
     }
 
+    /** Activity finish request was not executed. */
+    static final int FINISH_RESULT_CANCELLED = 0;
+    /** Activity finish was requested, activity will be fully removed later. */
+    static final int FINISH_RESULT_REQUESTED = 1;
+    /** Activity finish was requested, activity was removed from history. */
+    static final int FINISH_RESULT_REMOVED = 2;
+
+    /** Definition of possible results for activity finish request. */
+    @IntDef(prefix = { "FINISH_RESULT_" }, value = {
+            FINISH_RESULT_CANCELLED,
+            FINISH_RESULT_REQUESTED,
+            FINISH_RESULT_REMOVED,
+    })
+    @interface FinishRequest {}
+
     /**
      * See {@link #finishActivityLocked(int, Intent, String, boolean, boolean)}
      */
-    boolean finishActivityLocked(int resultCode, Intent resultData, String reason, boolean oomAdj) {
+    @FinishRequest int finishActivityLocked(int resultCode, Intent resultData, String reason,
+            boolean oomAdj) {
         return finishActivityLocked(resultCode, resultData, reason, oomAdj, !PAUSE_IMMEDIATELY);
     }
 
     /**
-     * @return Returns true if this activity has been removed from the history
-     * list, or false if it is still in the list and will be removed later.
+     * @return One of {@link FinishRequest} values:
+     * {@link #FINISH_RESULT_REMOVED} if this activity has been removed from the history list.
+     * {@link #FINISH_RESULT_REQUESTED} if removal process was started, but it is still in the list
+     * and will be removed from history later.
+     * {@link #FINISH_RESULT_CANCELLED} if activity is already finishing or in invalid state and the
+     * request to finish it was not ignored.
      */
-    boolean finishActivityLocked(int resultCode, Intent resultData, String reason, boolean oomAdj,
-            boolean pauseImmediately) {
+    @FinishRequest int finishActivityLocked(int resultCode, Intent resultData, String reason,
+            boolean oomAdj, boolean pauseImmediately) {
+        if (DEBUG_RESULTS || DEBUG_STATES) {
+            Slog.v(TAG_STATES, "Finishing activity r=" + this + ", result=" + resultCode
+                    + ", data=" + resultData + ", reason=" + reason);
+        }
+
         if (finishing) {
-            Slog.w(TAG, "Duplicate finish request for " + this);
-            return false;
+            Slog.w(TAG, "Duplicate finish request for r=" + this);
+            return FINISH_RESULT_CANCELLED;
+        }
+
+        if (!isInStackLocked()) {
+            Slog.w(TAG, "Finish request when not in stack for r=" + this);
+            return FINISH_RESULT_CANCELLED;
         }
 
         mAtmService.mWindowManager.deferSurfaceLayout();
@@ -1737,12 +1768,12 @@ final class ActivityRecord extends ConfigurationContainer {
                         taskOverlay.prepareActivityHideTransitionAnimation(transit);
                     }
                 }
-                return removedActivity;
+                return removedActivity ? FINISH_RESULT_REMOVED : FINISH_RESULT_REQUESTED;
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + this);
             }
 
-            return false;
+            return FINISH_RESULT_REQUESTED;
         } finally {
             mAtmService.mWindowManager.continueSurfaceLayout();
         }
