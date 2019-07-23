@@ -217,7 +217,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mKeyguardMonitor.removeCallback(mKeyguardMonitorCallback);
-        mWakeUpCoordinator.removeFullyHiddenChangedListener(this);
+        mWakeUpCoordinator.removeListener(this);
         mUnlockMethodCache.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
