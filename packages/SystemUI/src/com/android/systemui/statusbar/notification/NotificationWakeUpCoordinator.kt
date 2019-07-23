@@ -64,7 +64,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mVisibilityAnimator: ObjectAnimator? = null
     private var mVisibilityAmount = 0.0f
     private var mLinearVisibilityAmount = 0.0f
-    private var mWakingUp = false
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
     private val mDozeParameters: DozeParameters
     private var pulseExpanding: Boolean = false
@@ -72,6 +71,25 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var state: Int = StatusBarState.KEYGUARD
 
     var fullyAwake: Boolean = false
+
+    var wakingUp = false
+        set(value) {
+            field = value
+            willWakeUp = false
+            if (value) {
+                if (mNotificationsVisible && !mNotificationsVisibleForExpansion
+                        && !bypassController.bypassEnabled) {
+                    // We're waking up while pulsing, let's make sure the animation looks nice
+                    mStackScroller.wakeUpFromPulse();
+                }
+                if (bypassController.bypassEnabled && !mNotificationsVisible) {
+                    // Let's make sure our huns become visible once we are waking up in case
+                    // they were blocked by the proximity sensor
+                    updateNotificationVisibility(animate = shouldAnimateVisibility(),
+                            increaseSpeed = false)
+                }
+            }
+        }
 
     var willWakeUp = false
         set(value) {
@@ -112,7 +130,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
             var canShow = pulsing
             if (bypassController.bypassEnabled) {
                 // We also allow pulsing on the lock screen!
-                canShow = canShow || (mWakingUp || willWakeUp || fullyAwake)
+                canShow = canShow || (wakingUp || willWakeUp || fullyAwake)
                         && statusBarStateController.state == StatusBarState.KEYGUARD
             }
             return canShow
@@ -160,7 +178,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         wakeUpListeners.add(listener);
     }
 
-    fun removeFullyHiddenChangedListener(listener: WakeUpListener) {
+    fun removeListener(listener: WakeUpListener) {
         wakeUpListeners.remove(listener);
     }
 
@@ -169,7 +187,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         var visible = mNotificationsVisibleForExpansion || mHeadsUpManagerPhone.hasNotifications()
         visible = visible && canShowPulsingHuns
 
-        if (!visible && mNotificationsVisible && (mWakingUp || willWakeUp) && mDozeAmount != 0.0f) {
+        if (!visible && mNotificationsVisible && (wakingUp || willWakeUp) && mDozeAmount != 0.0f) {
             // let's not make notifications invisible while waking up, otherwise the animation
             // is strange
             return;
@@ -307,16 +325,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
         return if (bypassController.bypassEnabled) 0.0f else overflow
     }
 
-    fun setWakingUp(wakingUp: Boolean) {
-        willWakeUp = false
-        mWakingUp = wakingUp
-        if (wakingUp && mNotificationsVisible && !mNotificationsVisibleForExpansion
-                && !bypassController.bypassEnabled) {
-            // We're waking up while pulsing, let's make sure the animation looks nice
-            mStackScroller.wakeUpFromPulse();
-        }
-    }
-
     override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
         var animate = shouldAnimateVisibility()
         if (!isHeadsUp) {
@@ -325,7 +333,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
                     animate = false
-                } else if (!mWakingUp && !willWakeUp){
+                } else if (!wakingUp && !willWakeUp){
                     // TODO: look that this is done properly and not by anyone else
                     entry.setHeadsUpAnimatingAway(true)
                     mEntrySetToClearWhenFinished.add(entry)
