@@ -259,6 +259,8 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
             which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[stack")) {
             which_heap = HEAP_STACK;
+        } else if (base::StartsWith(name, "[anon:stack_and_tls:")) {
+            which_heap = HEAP_STACK;
         } else if (base::EndsWith(name, ".so")) {
             which_heap = HEAP_SO;
             is_swappable = true;
