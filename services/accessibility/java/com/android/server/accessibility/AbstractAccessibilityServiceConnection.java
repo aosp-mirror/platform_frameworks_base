@@ -396,7 +396,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
                 return null;
             }
-            AccessibilityWindowInfo window = mA11yWindowManager.findA11yWindowInfoById(windowId);
+            AccessibilityWindowInfo window =
+                    mA11yWindowManager.findA11yWindowInfoByIdLocked(windowId);
             if (window != null) {
                 AccessibilityWindowInfo windowClone = AccessibilityWindowInfo.obtain(window);
                 windowClone.setConnectionId(mId);
@@ -1356,11 +1357,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     || (action == ACTION_CLEAR_ACCESSIBILITY_FOCUS);
             if (!isA11yFocusAction) {
                 final WindowInfo windowInfo =
-                        mA11yWindowManager.findWindowInfoById(resolvedWindowId);
+                        mA11yWindowManager.findWindowInfoByIdLocked(resolvedWindowId);
                 if (windowInfo != null) activityToken = windowInfo.activityToken;
             }
             final AccessibilityWindowInfo a11yWindowInfo =
-                    mA11yWindowManager.findA11yWindowInfoById(resolvedWindowId);
+                    mA11yWindowManager.findA11yWindowInfoByIdLocked(resolvedWindowId);
             if (a11yWindowInfo != null && a11yWindowInfo.isInPictureInPictureMode()
                     && mA11yWindowManager.getPictureInPictureActionReplacingConnection() != null
                     && !isA11yFocusAction) {
@@ -1413,11 +1414,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int interactionId, int interrogatingPid, long interrogatingTid) {
         final RemoteAccessibilityConnection pipActionReplacingConnection =
                 mA11yWindowManager.getPictureInPictureActionReplacingConnection();
-        final AccessibilityWindowInfo windowInfo =
-                mA11yWindowManager.findA11yWindowInfoById(resolvedWindowId);
-        if ((windowInfo == null) || !windowInfo.isInPictureInPictureMode()
+        synchronized (mLock) {
+            final AccessibilityWindowInfo windowInfo =
+                    mA11yWindowManager.findA11yWindowInfoByIdLocked(resolvedWindowId);
+            if ((windowInfo == null) || !windowInfo.isInPictureInPictureMode()
                 || (pipActionReplacingConnection == null)) {
-            return originalCallback;
+                return originalCallback;
+            }
         }
         return new ActionReplacingCallback(originalCallback,
                 pipActionReplacingConnection.getRemote(), interactionId,

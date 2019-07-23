@@ -179,9 +179,9 @@ public class AbstractAccessibilityServiceConnectionTest {
         addA11yWindowInfo(mA11yWindowInfos, WINDOWID, false);
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true);
         when(mMockA11yWindowManager.getWindowListLocked()).thenReturn(mA11yWindowInfos);
-        when(mMockA11yWindowManager.findA11yWindowInfoById(WINDOWID))
+        when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(mA11yWindowInfos.get(0));
-        when(mMockA11yWindowManager.findA11yWindowInfoById(PIP_WINDOWID))
+        when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(PIP_WINDOWID))
                 .thenReturn(mA11yWindowInfos.get(1));
         final RemoteAccessibilityConnection conn = getRemoteA11yConnection(
                 WINDOWID, mMockIA11yInteractionConnection, PACKAGE_NAME1);

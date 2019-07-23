@@ -541,7 +541,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (event.getWindowId() ==
                 AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID) {
                 // The replacer window isn't shown to services. Move its events into the pip.
-                AccessibilityWindowInfo pip = mA11yWindowManager.getPictureInPictureWindow();
+                AccessibilityWindowInfo pip = mA11yWindowManager.getPictureInPictureWindowLocked();
                 if (pip != null) {
                     int pipId = pip.getId();
                     event.setWindowId(pipId);
@@ -770,7 +770,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (resolvedUserId != mCurrentUserId) {
                 return null;
             }
-            if (mA11yWindowManager.findA11yWindowInfoById(windowId) == null) {
+            if (mA11yWindowManager.findA11yWindowInfoByIdLocked(windowId) == null) {
                 return null;
             }
             return mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(userId, windowId);

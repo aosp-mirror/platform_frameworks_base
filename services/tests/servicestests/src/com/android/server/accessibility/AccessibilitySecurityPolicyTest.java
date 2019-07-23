@@ -166,7 +166,7 @@ public class AccessibilitySecurityPolicyTest {
     public void canDispatchAccessibilityEvent_otherEvents_windowIdExist_returnTrue() {
         when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
                 .thenReturn(WINDOWID2);
-        when(mMockA11yWindowManager.findA11yWindowInfoById(WINDOWID))
+        when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(AccessibilityWindowInfo.obtain());
         for (int i = 0; i < OTHER_EVENTS.length; i++) {
             final AccessibilityEvent event = AccessibilityEvent.obtain(OTHER_EVENTS[i]);
@@ -287,7 +287,7 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
         when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
                 .thenReturn(WINDOWID2);
-        when(mMockA11yWindowManager.findA11yWindowInfoById(WINDOWID))
+        when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(AccessibilityWindowInfo.obtain());
 
         assertTrue(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(UserHandle.USER_SYSTEM,
