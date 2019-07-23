@@ -19,6 +19,7 @@ package com.android.server.locksettings.recoverablekeystore;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.security.GateKeeper;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
@@ -437,25 +438,31 @@ public class PlatformKeyManager {
         // so it may live in memory for some time.
         SecretKey secretKey = generateAesKey();
 
-        long secureUserId = getGateKeeperService().getSecureUserId(userId);
-        // TODO(b/124095438): Propagate this failure instead of silently failing.
-        if (secureUserId == GateKeeper.INVALID_SECURE_USER_ID) {
-            Log.e(TAG, "No SID available for user " + userId);
-            return;
-        }
-
-        // Store decryption key first since it is more likely to fail.
-        mKeyStore.setEntry(
-                decryptAlias,
-                new KeyStore.SecretKeyEntry(secretKey),
+        KeyProtection.Builder decryptionKeyProtection =
                 new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                     .setUserAuthenticationRequired(true)
                     .setUserAuthenticationValidityDurationSeconds(
                             USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
+        if (userId != UserHandle.USER_SYSTEM) {
+            // Bind decryption key to secondary profile lock screen secret.
+            long secureUserId = getGateKeeperService().getSecureUserId(userId);
+            // TODO(b/124095438): Propagate this failure instead of silently failing.
+            if (secureUserId == GateKeeper.INVALID_SECURE_USER_ID) {
+                Log.e(TAG, "No SID available for user " + userId);
+                return;
+            }
+            decryptionKeyProtection
                     .setBoundToSpecificSecureUserId(secureUserId)
-                    .build());
+                    // Ignore caller uid which always belongs to the primary profile.
+                    .setCriticalToDeviceEncryption(true);
+        }
+        // Store decryption key first since it is more likely to fail.
+        mKeyStore.setEntry(
+                decryptAlias,
+                new KeyStore.SecretKeyEntry(secretKey),
+                decryptionKeyProtection.build());
         mKeyStore.setEntry(
                 encryptAlias,
                 new KeyStore.SecretKeyEntry(secretKey),
