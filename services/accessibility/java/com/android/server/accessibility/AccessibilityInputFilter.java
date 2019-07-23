@@ -29,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 

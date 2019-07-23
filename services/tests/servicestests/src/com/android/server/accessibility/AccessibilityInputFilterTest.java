@@ -47,6 +47,8 @@ import android.view.MotionEvent;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.gestures.TouchExplorer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
