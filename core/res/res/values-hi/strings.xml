@@ -339,21 +339,21 @@
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"फ़ोन कॉल का जवाब दें"</string>
     <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"ऐप्लिकेशन को किसी इनकमिंग फ़ोन कॉल का जवाब देने देती है."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"मैसेज (एसएमएस) पाएं"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"ऐप को मैसेज (एसएमएस) को प्राप्‍त और संसाधित करने देता है. इसका अर्थ है कि ऐप आपके डिवाइस पर भेजे गए संदेशों की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"एप्लिकेशन को मैसेज (एसएमएस) पाने और प्रोसेस करने देता है. इसका मतलब है कि एप्लिकेशन आपके डिवाइस पर भेजे गए मैसेज की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"मैसेज (एमएमएस) पाएं"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ऐप को मल्टीमीडिया मैसेज (एमएमएस) को पाने और उन पर कार्रवाई करने देता है. इसका मतलब है कि ऐप आपके डिवाइस पर भेजे गए मैसेज की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ें"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ऐप को, वो सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ने देता है जो आपके डिवाइस को मिले हैं. सेल ब्रॉडकास्ट (CBC) अलर्ट कुछ स्थानों (लोकेशन) पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए दिए जाते हैं. आपातकालीन सेल ब्रॉडकास्ट (CBC) मिलने पर, धोखा देने वाले ऐप आपके डिवाइस के परफ़ॉर्मेंस या कार्यवाही में दखल दे सकते हैं."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता-प्राप्त फ़ीड पढ़ें"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ऐप्स को वर्तमान में समन्वयित फ़ीड के बारे में विवरण प्राप्त करने देता है."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता वाली फ़ीड पढ़ें"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"एप्‍लिकेशन को मौजूदा समय में सिंक फ़ीड के बारे में जानकारी देता है."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"मैसेज (एमएमएस) भेजें और देखें"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ऐप को मैसेज (एसएमएस) भेजने देता है. इसकी वजह से उम्मीद से ज़्यादा शुल्‍क लग सकते हैं. धोखा देने वाले ऐप आपकी पुष्टि के बिना मैसेज भेजकर आपका पैसा खर्च करवा सकते हैं."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"अपने मैसेज (एसएमएस या एमएमएस) पढ़ें"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"यह ऐप आपके टैबलेट पर सहेजे गए सभी मैसेज (एसएमएस) पढ़ सकता है."</string>
     <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"यह ऐप आपके टीवी पर सहेजे गए सभी मैसेज (एसएमएस) पढ़ सकता है."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"यह ऐप आपके फ़ोन पर सहेजे गए सभी मैसेज (एसएमएस) पढ़ सकता है."</string>
-    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"लेख संदेश (WAP) प्राप्त करें"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ऐप्स  को WAP संदेशों को प्राप्‍त और संसाधित करने देता है. इस अनुमति में आपको भेजे गए संदेशों की निगरानी आपको दिखाए बिना करने और हटाने की क्षमता शामिल है."</string>
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"टेक्सट मैसेज (WAP) पाएं"</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"एप्लिकेशन को WAP मैसेज पाने और प्रोसेस करने देता है. इस अनुमति में आपको भेजे गए मैसेज की निगरानी आपको दिए एप्लिकेशन को दिखाए बिना करने और हटाने की क्षमता शामिल है."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चल रहे ऐप्स पुनर्प्राप्त करें"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ऐप को माजूदा समय में और हाल ही में चल रही कार्रवाइयों के बारे में जानकारी निकालने देता है. इससे ऐप डिवाइस पर इस्तेमाल किए गए ऐप के बारे में जानकारी खोज सकता है."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफ़ाइल और डिवाइस स्‍वामियों को प्रबंधित करें"</string>
@@ -467,9 +467,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"ऐप को टीवी का समय क्षेत्र बदलने देती है."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ऐप्स को टैबलेट का समय क्षेत्र बदलने देता है."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"डिवाइस पर खाते ढूंढें"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ऐप्स  को टैबलेट द्वारा ज्ञात खातों की सूची प्राप्‍त करने देता है. इसमें वे खाते शामिल हो सकते हैं जिन्‍हें   इंस्‍टॉल किए गए ऐप्स  ने बनाया है."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"एप्लिकेशन को टैबलेट से ज्ञात खातों की सूची पाने देता है. इसमें वे खाते शामिल हो सकते हैं जिन्‍हें इंस्‍टॉल किए गए एप्लिकेशन ने बनाया है."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"ऐप को टीवी द्वारा ज्ञात खातों की सूची प्राप्‍त करने देती है. इसमें   इंस्‍टॉल किए गए ऐप्‍लिकेशन के द्वारा बनाए गए खाते शामिल हो सकते हैं."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ऐप्स  को फ़ोन द्वारा ज्ञात खातों की सूची प्राप्‍त करने देता है. इसमें वे खाते शामिल हो सकते हैं जिन्‍हें   इंस्‍टॉल किए गए ऐप्स  ने बनाया है."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"एप्लिकेशन को फ़ोन से ज्ञात खातों की सूची पाने देता है. इसमें वे खाते शामिल हो सकते हैं जिन्‍हें इंस्‍टॉल किए गए एप्लिकेशन ने बनाया है."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क कनेक्‍शन देखें"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ऐप को नेटवर्क कनेक्‍शन के बारे में जानकारी देखने देता है, जैसे कौन से नेटवर्क मौजूद हैं और कनेक्‍ट हैं."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"नेटवर्क को पूरी तरह इस्तेमाल करें"</string>
@@ -483,9 +483,9 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाई-फ़ाई  से कनेक्‍ट और डिस्‍कनेक्‍ट करें"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ऐप्स  को वाई-फ़ाई  पहुंच बिंदुओं से कनेक्ट और डिसकनेक्ट करने और वाई-फ़ाई  नेटवर्क के लिए डिवाइस कॉन्फ़िगरेशन में परिवर्तन करने देता है."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाई-फ़ाई मल्‍टीकास्‍ट पाने को अनुमति दें"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टैबलेट पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"एप्लिकेशन को वाई-फ़ाई नेटवर्क पर मल्टीकास्ट पते के इस्तेमाल से सिर्फ़ आपके टैबलेट पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट पाने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का इस्तेमाल करता है."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ऐप को मल्‍टीकास्‍ट पतों का उपयोग करके ना केवल आपके टीवी को, बल्‍कि वाई-फ़ाई पर मौजूद सभी डिवाइसों को पैकेट भेजने और प्राप्‍त करने देती है. इसमें गैर-मल्‍टीकास्‍ट मोड की अपेक्षा ज़्यादा पावर का उपयोग होता है."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"एप्लिकेशन को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के इस्तेमाल से सिर्फ़ आपके फ़ोन पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट पाने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का इस्तेमाल करता है."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग पर पहुंचें"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"किसी ऐप्स को स्‍थानीय ब्लूटूथ टैबलेट कॉन्‍फ़िगर करने की और रिमोट डिवाइस के साथ खोजने और युग्‍मित करने देता है."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ऐप को स्‍थानीय ब्‍लूटूथ टीवी कॉन्‍फ़िगर करने देती है और दूरस्‍थ डिवाइसों को खोजने और उनसे युग्‍मित करने देती है."</string>
@@ -603,8 +603,8 @@
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"ऐप्‍लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री पढ़ने देती है."</string>
     <string name="permlab_sdcardWrite" msgid="9220937740184960897">"आपकी शेयर की गई मेमोरी की सामग्री में बदलाव करना या उसे मिटाना"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"ऐप्लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री लिखने देती है."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करें/प्राप्‍त करें"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"ऐप्स को SIP कॉल करने और प्राप्‍त करने देती है."</string>
+    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करें/पाएं"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"ऐप्लिकेशन को SIP कॉल करने और पाने देता है."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"नए टेलिकॉम सिम कनेक्‍शन रजिस्टर करें"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"ऐप को नए टेलिकॉम सिम कनेक्‍शन पंजीकृत करने देती है."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"नए टेलिकॉम कनेक्‍शन रजिस्टर करें"</string>
