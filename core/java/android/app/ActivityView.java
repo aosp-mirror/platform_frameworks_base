@@ -386,9 +386,15 @@ public class ActivityView extends ViewGroup {
 
                 // Also report this geometry information to InputMethodManagerService.
                 // TODO(b/115693908): Unify this logic into the above WMS-based one.
+                // TODO(b/138175283): Address the location update when the host of this view is
+                //  moving.
                 final Matrix matrix = new Matrix();
+                final int[] locationOnScreen = new int[2];
+                getLocationOnScreen(locationOnScreen);
+                final int dx = locationOnScreen[0];
+                final int dy = locationOnScreen[1];
                 matrix.set(getMatrix());
-                matrix.postTranslate(x, y);
+                matrix.postTranslate(dx, dy);
                 mContext.getSystemService(InputMethodManager.class)
                         .reportActivityView(displayId, matrix);
             }
