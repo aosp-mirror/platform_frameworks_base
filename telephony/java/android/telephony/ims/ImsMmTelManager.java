@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -375,6 +376,13 @@ public class ImsMmTelManager {
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -390,8 +398,6 @@ public class ImsMmTelManager {
      * @param c The {@link RegistrationCallback} to be removed.
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
-     * @throws IllegalArgumentException if the subscription ID associated with this callback is
-     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c) {
@@ -445,6 +451,13 @@ public class ImsMmTelManager {
         c.setExecutor(executor);
         try {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }  catch (IllegalStateException e) {
@@ -460,8 +473,6 @@ public class ImsMmTelManager {
      * inactive subscription, it will result in a no-op.
      * @param c The MmTel {@link CapabilityCallback} to be removed.
      * @see #registerMmTelCapabilityCallback(Executor, CapabilityCallback)
-     * @throws IllegalArgumentException if the subscription ID associated with this callback is
-     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterMmTelCapabilityCallback(@NonNull CapabilityCallback c) {
@@ -482,12 +493,9 @@ public class ImsMmTelManager {
      * be enabled as long as the carrier has provisioned these services for the specified
      * subscription. Other IMS services (SMS/UT) are not affected by this user setting and depend on
      * carrier requirements.
-     *
-     * Modifying this value may also trigger an IMS registration or deregistration, depending on
-     * whether or not the new value is enabled or disabled.
-     *
+     * <p>
      * Note: If the carrier configuration for advanced calling is not editable or hidden, this
-     * method will do nothing and will instead always use the default value.
+     * method will always return the default value.
      *
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_EDITABLE_ENHANCED_4G_LTE_BOOL
@@ -495,12 +503,21 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
      * @see #setAdvancedCallingSettingEnabled(boolean)
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isAdvancedCallingSettingEnabled() {
         try {
             return getITelephony().isAdvancedCallingSettingEnabled(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -526,12 +543,20 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
      * @see #isAdvancedCallingSettingEnabled()
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setAdvancedCallingSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setAdvancedCallingSettingEnabled(mSubId, isEnabled);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -597,6 +622,9 @@ public class ImsMmTelManager {
 
     /**
      * The user's setting for whether or not they have enabled the "Video Calling" setting.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user’s “Video Calling” setting is currently enabled.
      * @see #setVtSettingEnabled(boolean)
      */
@@ -604,6 +632,13 @@ public class ImsMmTelManager {
     public boolean isVtSettingEnabled() {
         try {
             return getITelephony().isVtSettingEnabled(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -611,13 +646,22 @@ public class ImsMmTelManager {
 
     /**
      * Change the user's setting for Video Telephony and enable the Video Telephony capability.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #isVtSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVtSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVtSettingEnabled(mSubId, isEnabled);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -625,12 +669,22 @@ public class ImsMmTelManager {
 
     /**
      * @return true if the user's setting for Voice over WiFi is enabled and false if it is not.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiSettingEnabled() {
         try {
             return getITelephony().isVoWiFiSettingEnabled(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -638,6 +692,9 @@ public class ImsMmTelManager {
 
     /**
      * Sets the user's setting for whether or not Voice over WiFi is enabled.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @param isEnabled true if the user's setting for Voice over WiFi is enabled, false otherwise=
      * @see #isVoWiFiSettingEnabled()
      */
@@ -645,13 +702,23 @@ public class ImsMmTelManager {
     public void setVoWiFiSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVoWiFiSettingEnabled(mSubId, isEnabled);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
+     * Returns the user's voice over WiFi roaming setting associated with the current subscription.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
@@ -660,6 +727,13 @@ public class ImsMmTelManager {
     public boolean isVoWiFiRoamingSettingEnabled() {
         try {
             return getITelephony().isVoWiFiRoamingSettingEnabled(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -667,15 +741,24 @@ public class ImsMmTelManager {
 
     /**
      * Change the user's setting for Voice over WiFi while roaming.
+     *
      * @param isEnabled true if the user's setting for Voice over WiFi while roaming is enabled,
      *     false otherwise.
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #isVoWiFiRoamingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVoWiFiRoamingSettingEnabled(mSubId, isEnabled);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -691,19 +774,31 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiNonPersistent(boolean isCapable, int mode) {
         try {
             getITelephony().setVoWiFiNonPersistent(mSubId, isCapable, mode);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
+     * Returns the user's voice over WiFi Roaming mode setting associated with the device.
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return The Voice over WiFi Mode preference set by the user, which can be one of the
      * following:
      * - {@link #WIFI_MODE_WIFI_ONLY}
@@ -715,6 +810,13 @@ public class ImsMmTelManager {
     public @WiFiCallingMode int getVoWiFiModeSetting() {
         try {
             return getITelephony().getVoWiFiModeSetting(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -727,13 +829,21 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #getVoWiFiModeSetting()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiModeSetting(@WiFiCallingMode int mode) {
         try {
             getITelephony().setVoWiFiModeSetting(mSubId, mode);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -748,12 +858,21 @@ public class ImsMmTelManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
         try {
             return getITelephony().getVoWiFiRoamingModeSetting(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -768,13 +887,21 @@ public class ImsMmTelManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #getVoWiFiRoamingModeSetting()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingModeSetting(@WiFiCallingMode int mode) {
         try {
             getITelephony().setVoWiFiRoamingModeSetting(mSubId, mode);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -787,13 +914,21 @@ public class ImsMmTelManager {
      * {@link android.provider.Settings.Secure#RTT_CALLING_MODE}, which is the global user setting
      * for RTT. That value is enabled/disabled separately by the user through the Accessibility
      * settings.
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRttCapabilitySetting(boolean isEnabled) {
         try {
             getITelephony().setRttCapabilitySetting(mSubId, isEnabled);
-            return;
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -801,6 +936,9 @@ public class ImsMmTelManager {
 
     /**
      * @return true if TTY over VoLTE is supported
+     *
+     * @throws IllegalArgumentException if the subscription associated with this operation is not
+     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see android.telecom.TelecomManager#getCurrentTtyMode
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
@@ -808,6 +946,13 @@ public class ImsMmTelManager {
     boolean isTtyOverVolteEnabled() {
         try {
             return getITelephony().isTtyOverVolteEnabled(mSubId);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
+                // Rethrow as runtime error to keep API compatible.
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
