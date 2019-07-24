@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 
 import javax.inject.Inject
@@ -40,7 +41,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
         private val mHeadsUpManagerPhone: HeadsUpManagerPhone,
         private val statusBarStateController: StatusBarStateController,
         private val bypassController: KeyguardBypassController)
-    : OnHeadsUpChangedListener, StatusBarStateController.StateListener {
+    : OnHeadsUpChangedListener, StatusBarStateController.StateListener,
+        PanelExpansionListener {
 
     private val mNotificationVisibility
             = object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
@@ -98,7 +100,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
             }
         }
 
+    private var collapsedEnoughToHide: Boolean = false
     lateinit var iconAreaController : NotificationIconAreaController
+
     var pulsing: Boolean = false
         set(value) {
             field = value
@@ -120,7 +124,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 }
             }
         }
-
     /**
      * True if we can show pulsing heads up notifications
      */
@@ -132,6 +135,10 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 // We also allow pulsing on the lock screen!
                 canShow = canShow || (wakingUp || willWakeUp || fullyAwake)
                         && statusBarStateController.state == StatusBarState.KEYGUARD
+                // We want to hide the notifications when collapsed too much
+                if (collapsedEnoughToHide) {
+                    canShow = false
+                }
             }
             return canShow
         }
@@ -245,6 +252,18 @@ class NotificationWakeUpCoordinator @Inject constructor(
             setNotificationsVisible(visible = false, increaseSpeed = false, animate = true)
         }
         this.state = newState
+    }
+
+    override fun onPanelExpansionChanged(expansion: Float, tracking: Boolean) {
+        val collapsedEnough = expansion <= 0.9f
+        if (collapsedEnough != this.collapsedEnoughToHide) {
+            val couldShowPulsingHuns = canShowPulsingHuns;
+            this.collapsedEnoughToHide = collapsedEnough
+            if (couldShowPulsingHuns && !canShowPulsingHuns) {
+                updateNotificationVisibility(animate = true, increaseSpeed = true)
+                mHeadsUpManagerPhone.releaseAllImmediately()
+            }
+        }
     }
 
     private fun updateDozeAmountIfBypass(): Boolean {
