@@ -63,7 +63,7 @@ class BypassHeadsUpNotifier @Inject constructor(
                     enabled = Settings.Secure.getIntForUser(
                             context.contentResolver,
                             Settings.Secure.SHOW_MEDIA_WHEN_BYPASSING,
-                            1 /* default */,
+                            0 /* default */,
                             KeyguardUpdateMonitor.getCurrentUser()) != 0
                 }, Settings.Secure.SHOW_MEDIA_WHEN_BYPASSING)
     }
