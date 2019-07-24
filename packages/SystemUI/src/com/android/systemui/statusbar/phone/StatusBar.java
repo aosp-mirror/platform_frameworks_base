@@ -815,6 +815,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
         mNotificationPanel.setOnReinflationListener(mNotificationIconAreaController::initAodIcons);
+        mNotificationPanel.addExpansionListener(mWakeUpCoordinator);
 
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
