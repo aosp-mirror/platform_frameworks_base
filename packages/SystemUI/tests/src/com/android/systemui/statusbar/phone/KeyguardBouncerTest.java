@@ -394,4 +394,15 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     public void testRegisterUpdateMonitorCallback() {
         verify(mKeyguardUpdateMonitor).registerCallback(any());
     }
+
+    @Test
+    public void testInTransit_whenTranslation() {
+        mBouncer.show(true);
+        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+        assertThat(mBouncer.inTransit()).isFalse();
+        mBouncer.setExpansion(0.5f);
+        assertThat(mBouncer.inTransit()).isTrue();
+        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
+        assertThat(mBouncer.inTransit()).isFalse();
+    }
 }
