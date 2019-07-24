@@ -349,7 +349,7 @@ public class NotificationContentInflater {
         }
 
         if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
-            result.newPublicView = builder.makePublicContentView();
+            result.newPublicView = builder.makePublicContentView(isLowPriority);
         }
 
         result.packageContext = packageContext;
