@@ -177,4 +177,40 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(new Long[] { 1L, 2L, 3L, 4L },
                 concatElements(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
     }
+
+    public void testConcatElements_threeWay() {
+        String[] array1 = { "1", "2" };
+        String[] array2 = { "3", "4" };
+        String[] array3 = { "5", "6" };
+        String[] expectation = {"1", "2", "3", "4", "5", "6"};
+
+        String[] concatResult = ArrayUtils.concatElements(String.class, array1, array2, array3);
+        assertArrayEquals(expectation, concatResult);
+    }
+
+
+    public void testConcatElements_threeWayWithNull() {
+        String[] array1 = { "1", "2" };
+        String[] array2 = null;
+        String[] array3 = { "5", "6" };
+        String[] expectation = {"1", "2", "5", "6"};
+
+        String[] concatResult = ArrayUtils.concatElements(String.class, array1, array2, array3);
+        assertArrayEquals(expectation, concatResult);
+    }
+
+    public void testConcatElements_zeroElements() {
+        String[] expectation = new String[0];
+
+        String[] concatResult = ArrayUtils.concatElements(String.class);
+        assertArrayEquals(expectation, concatResult);
+    }
+
+    public void testConcatElements_oneNullElement() {
+        String[] expectation = new String[0];
+
+        String[] concatResult = ArrayUtils.concatElements(String.class, null);
+        assertArrayEquals(expectation, concatResult);
+    }
+
 }
