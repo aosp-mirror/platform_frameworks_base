@@ -22,6 +22,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_H
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
@@ -719,6 +720,8 @@ public class NavigationBarView extends FrameLayout implements
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0, displayId);
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_HOME_DISABLED,
                 (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0, displayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SEARCH_DISABLED,
+                (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0, displayId);
         if (mPanelView != null) {
             mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                     mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
