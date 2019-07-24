@@ -96,6 +96,8 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.ArrayUtils.emptyIfNull;
+import static com.android.internal.util.ArrayUtils.filter;
 import static com.android.server.pm.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -249,7 +251,6 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
-import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -385,6 +386,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -19261,6 +19263,18 @@ public class PackageManagerService extends IPackageManager.Stub
         return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
     }
 
+    private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
+        return emptyIfNull(filter(pkgNames, String[]::new, mIsSystemPackage), String.class);
+    }
+
+    private Predicate<String> mIsSystemPackage = (pkgName) -> {
+        if ("android".equals(pkgName)) {
+            return true;
+        }
+        AndroidPackage pkg = mPackages.get(pkgName);
+        return pkg != null && pkg.isSystem();
+    };
+
     @Override
     public String getSystemCaptionsServicePackageName() {
         String flattenedSystemCaptionsServiceComponentName =
@@ -22539,7 +22553,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
-            switch (knownPackage) {
+            return dropNonSystemPackages(getKnownPackageNamesInternal(knownPackage, userId));
+        }
+
+        private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
+            switch(knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
                     return new String[]{mPermissionManager.getDefaultBrowser(userId)};
                 case PackageManagerInternal.PACKAGE_INSTALLER:
@@ -22566,6 +22584,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mAppPredictionServicePackage);
                 case PackageManagerInternal.PACKAGE_TELEPHONY:
                     return filterOnlySystemPackages(mTelephonyPackages);
+                case PackageManagerInternal.PACKAGE_COMPANION:
+                    return filterOnlySystemPackages("com.android.companiondevicemanager");
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

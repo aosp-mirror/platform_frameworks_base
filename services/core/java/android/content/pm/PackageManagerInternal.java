@@ -63,6 +63,9 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     public static final int PACKAGE_APP_PREDICTOR = 11;
     public static final int PACKAGE_TELEPHONY = 12;
+    public static final int PACKAGE_WIFI = 13;
+    public static final int PACKAGE_COMPANION = 14;
+
     @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
@@ -77,6 +80,8 @@ public abstract class PackageManagerInternal {
         PACKAGE_INCIDENT_REPORT_APPROVER,
         PACKAGE_APP_PREDICTOR,
         PACKAGE_TELEPHONY,
+        PACKAGE_WIFI,
+        PACKAGE_COMPANION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}

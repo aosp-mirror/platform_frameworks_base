@@ -15,5 +15,6 @@
 android_app {
     name: "CompanionDeviceManager",
     srcs: ["src/**/*.java"],
+
     platform_apis: true,
 }
