@@ -47,7 +47,7 @@ class KeyguardBypassController {
      * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
      */
     var bypassEnabled: Boolean = false
-        get() = field && unlockMethodCache.isUnlockingWithFacePossible
+        get() = field && unlockMethodCache.isFaceAuthEnabled
         private set
 
     var bouncerShowing: Boolean = false
