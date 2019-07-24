@@ -1608,13 +1608,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) Log.d(TAG, "reportGnssServiceDied");
         mHandler.post(() -> {
             setupNativeGnssService(/* reinitializeGnssServiceHandle = */ true);
+            // resend configuration into the restarted HAL service.
+            reloadGpsProperties();
             if (isGpsEnabled()) {
                 setGpsEnabled(false);
-
                 updateEnabled();
-
-                // resend configuration into the restarted HAL service.
-                reloadGpsProperties();
             }
         });
     }
