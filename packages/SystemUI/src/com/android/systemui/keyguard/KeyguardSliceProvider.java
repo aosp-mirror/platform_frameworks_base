@@ -52,6 +52,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -125,6 +126,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
+    private int mStatusBarState;
     private boolean mMediaIsVisible;
 
     /**
@@ -227,7 +229,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected boolean needsMediaLocked() {
-        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && mDozing;
+        // Show header if music is playing and the status bar is in the shade state. This way, an
+        // animation isn't necessary when pressing power and transitioning to AOD.
+        boolean keepWhenShade = mStatusBarState == StatusBarState.SHADE && mMediaIsVisible;
+        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && (mDozing || keepWhenShade);
     }
 
     protected void addMediaLocked(ListBuilder listBuilder) {
@@ -454,7 +459,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
         synchronized (this) {
             boolean nextVisible = !mMediaInvisibleStates.contains(state);
             mHandler.removeCallbacksAndMessages(mMediaToken);
-            if (mMediaIsVisible && !nextVisible) {
+            if (mMediaIsVisible && !nextVisible && mStatusBarState != StatusBarState.SHADE) {
                 // We need to delay this event for a few millis when stopping to avoid jank in the
                 // animation. The media app might not send its update when buffering, and the slice
                 // would end up without a header for 0.5 second.
@@ -511,5 +516,14 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public void onStateChanged(int newState) {
+        final boolean notify;
+        synchronized (this) {
+            boolean needsMedia = needsMediaLocked();
+            mStatusBarState = newState;
+            notify = needsMedia != needsMediaLocked();
+        }
+        if (notify) {
+            notifyChange();
+        }
     }
 }

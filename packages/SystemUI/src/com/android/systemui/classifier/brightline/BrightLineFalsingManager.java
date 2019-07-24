@@ -309,6 +309,11 @@ public class BrightLineFalsingManager implements FalsingManager {
     public void dump(PrintWriter printWriter) {
     }
 
+    @Override
+    public void cleanup() {
+        unregisterSensors();
+    }
+
     static void logDebug(String msg) {
         logDebug(msg, null);
     }
