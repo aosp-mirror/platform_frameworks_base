@@ -282,10 +282,10 @@ public abstract class BiometricServiceBase extends SystemService
         public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
-                final int[] disabledFeatures) {
+                final int[] disabledFeatures, int timeoutSec) {
             super(context, getConstants(), daemon, halDeviceId, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
-                    disabledFeatures);
+                    disabledFeatures, timeoutSec);
         }
 
         @Override
