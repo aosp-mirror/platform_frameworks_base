@@ -7455,6 +7455,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         .removeNonHighRefreshRatePackage(packageName));
             }
         }
+
+        @Override
+        public boolean isTouchableDisplay(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                final Configuration configuration =
+                        displayContent != null ? displayContent.getConfiguration() : null;
+                return configuration != null
+                        && configuration.touchscreen == Configuration.TOUCHSCREEN_FINGER;
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
