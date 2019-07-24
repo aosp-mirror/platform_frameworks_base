@@ -19,6 +19,7 @@ java_library_static {
         ":vold_aidl",
         ":gsiservice_aidl",
         ":mediaupdateservice_aidl",
+        ":platform-compat-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
