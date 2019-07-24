@@ -672,7 +672,11 @@ public class StackAnimationController extends
     }
 
     @Override
-    void onChildReordered(View child, int oldIndex, int newIndex) {}
+    void onChildReordered(View child, int oldIndex, int newIndex) {
+        if (isStackPositionSet()) {
+            setStackPosition(mStackPosition);
+        }
+    }
 
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
