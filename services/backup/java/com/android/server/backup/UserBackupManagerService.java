@@ -166,6 +166,53 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
 public class UserBackupManagerService {
+    /**
+     * Wrapper over {@link PowerManager.WakeLock} to prevent double-free exceptions on release()
+     * after quit().
+     */
+    public static class BackupWakeLock {
+        private final PowerManager.WakeLock mPowerManagerWakeLock;
+        private boolean mHasQuit = false;
+
+        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock) {
+            mPowerManagerWakeLock = powerManagerWakeLock;
+        }
+
+        /** Acquires the {@link PowerManager.WakeLock} if hasn't been quit. */
+        public synchronized void acquire() {
+            if (mHasQuit) {
+                Slog.v(TAG, "Ignore wakelock acquire after quit: " + mPowerManagerWakeLock.getTag());
+                return;
+            }
+            mPowerManagerWakeLock.acquire();
+        }
+
+        /** Releases the {@link PowerManager.WakeLock} if hasn't been quit. */
+        public synchronized void release() {
+            if (mHasQuit) {
+                Slog.v(TAG, "Ignore wakelock release after quit: " + mPowerManagerWakeLock.getTag());
+                return;
+            }
+            mPowerManagerWakeLock.release();
+        }
+
+        /**
+         * Returns true if the {@link PowerManager.WakeLock} has been acquired but not yet released.
+         */
+        public synchronized boolean isHeld() {
+            return mPowerManagerWakeLock.isHeld();
+        }
+
+        /** Release the {@link PowerManager.WakeLock} till it isn't held. */
+        public synchronized void quit() {
+            while (mPowerManagerWakeLock.isHeld()) {
+                Slog.v(TAG, "Releasing wakelock: " + mPowerManagerWakeLock.getTag());
+                mPowerManagerWakeLock.release();
+            }
+            mHasQuit = true;
+        }
+    }
+
     // Persistently track the need to do a full init.
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
 
@@ -252,7 +299,6 @@ public class UserBackupManagerService {
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
-    private final HandlerThread mUserBackupThread;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -263,7 +309,7 @@ public class UserBackupManagerService {
     private final AlarmManager mAlarmManager;
     private final IStorageManager mStorageManager;
     private final BackupManagerConstants mConstants;
-    private final PowerManager.WakeLock mWakelock;
+    private final BackupWakeLock mWakelock;
     private final BackupHandler mBackupHandler;
 
     private final IBackupManager mBackupManagerBinder;
@@ -487,8 +533,7 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters.start();
 
         checkNotNull(userBackupThread, "userBackupThread cannot be null");
-        mUserBackupThread = userBackupThread;
-        mBackupHandler = new BackupHandler(this, userBackupThread.getLooper());
+        mBackupHandler = new BackupHandler(this, userBackupThread);
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
@@ -588,7 +633,10 @@ public class UserBackupManagerService {
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
 
         // Power management
-        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*-" + userId);
+        mWakelock = new BackupWakeLock(
+                mPowerManager.newWakeLock(
+                        PowerManager.PARTIAL_WAKE_LOCK,
+                        "*backup*-" + userId + "-" + userBackupThread.getThreadId()));
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -608,7 +656,7 @@ public class UserBackupManagerService {
         mContext.unregisterReceiver(mRunBackupReceiver);
         mContext.unregisterReceiver(mRunInitReceiver);
         mContext.unregisterReceiver(mPackageTrackingReceiver);
-        mUserBackupThread.quit();
+        mBackupHandler.stop();
     }
 
     public @UserIdInt int getUserId() {
@@ -668,7 +716,7 @@ public class UserBackupManagerService {
         mSetupComplete = setupComplete;
     }
 
-    public PowerManager.WakeLock getWakelock() {
+    public BackupWakeLock getWakelock() {
         return mWakelock;
     }
 
@@ -679,7 +727,7 @@ public class UserBackupManagerService {
     @VisibleForTesting
     public void setWorkSource(@Nullable WorkSource workSource) {
         // TODO: This is for testing, unfortunately WakeLock is final and WorkSource is not exposed
-        mWakelock.setWorkSource(workSource);
+        mWakelock.mPowerManagerWakeLock.setWorkSource(workSource);
     }
 
     public Handler getBackupHandler() {
