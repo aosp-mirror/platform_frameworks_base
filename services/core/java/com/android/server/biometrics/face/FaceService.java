@@ -329,6 +329,7 @@ public class FaceService extends BiometricServiceBase {
      * Receives the incoming binder calls from FaceManager.
      */
     private final class FaceServiceWrapper extends IFaceService.Stub {
+        private static final int ENROLL_TIMEOUT_SEC = 75;
 
         /**
          * The following methods contain common code which is shared in biometrics/common.
@@ -368,7 +369,8 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId,
-                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures) {
+                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures,
+                    ENROLL_TIMEOUT_SEC) {
 
                 @Override
                 public int[] getAcquireIgnorelist() {
