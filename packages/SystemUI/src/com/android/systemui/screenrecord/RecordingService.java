@@ -22,6 +22,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -48,6 +50,7 @@ import com.android.systemui.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -158,19 +161,34 @@ public class RecordingService extends Service {
             case ACTION_STOP:
                 stopRecording();
 
-                // Move temp file to user directory
-                File recordDir = new File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-                        RECORD_DIR);
-                recordDir.mkdirs();
-
                 String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
                         .format(new Date());
-                Path path = new File(recordDir, fileName).toPath();
 
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Video.Media.DISPLAY_NAME, fileName);
+                values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+                values.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis());
+                values.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
+
+                ContentResolver resolver = getContentResolver();
+                Uri collectionUri = MediaStore.Video.Media.getContentUri(
+                        MediaStore.VOLUME_EXTERNAL_PRIMARY);
+                Uri itemUri = resolver.insert(collectionUri, values);
+
+                File recordDir = new File(getExternalFilesDir(Environment.DIRECTORY_MOVIES),
+                        RECORD_DIR);
+                recordDir.mkdirs();
+                Path path = new File(recordDir, fileName).toPath();
                 try {
+                    // Move file out of temp directory
                     Files.move(mTempFile.toPath(), path);
-                    Notification notification = createSaveNotification(path);
+
+                    // Add to the mediastore
+                    OutputStream os = resolver.openOutputStream(itemUri, "w");
+                    Files.copy(path, os);
+                    os.close();
+
+                    Notification notification = createSaveNotification(itemUri, path);
                     notificationManager.notify(NOTIFICATION_ID, notification);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -352,13 +370,12 @@ public class RecordingService extends Service {
         notificationManager.notify(NOTIFICATION_ID, mRecordingNotificationBuilder.build());
     }
 
-    private Notification createSaveNotification(Path path) {
-        Uri saveUri = FileProvider.getUriForFile(this, FILE_PROVIDER, path.toFile());
-        Log.d(TAG, "Screen recording saved to " + path.toString());
+    private Notification createSaveNotification(Uri uri, Path path) {
+        Log.d(TAG, "Screen recording saved to " + uri.toString() + ", " + path.toString());
 
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                .setDataAndType(saveUri, "video/mp4");
+                .setDataAndType(uri, "video/mp4");
 
         Notification.Action shareAction = new Notification.Action.Builder(
                 Icon.createWithResource(this, R.drawable.ic_android),
@@ -366,7 +383,7 @@ public class RecordingService extends Service {
                 PendingIntent.getService(
                         this,
                         REQUEST_CODE,
-                        getShareIntent(this, path.toString()),
+                        getShareIntent(this, uri.toString()),
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .build();
 
@@ -376,7 +393,7 @@ public class RecordingService extends Service {
                 PendingIntent.getService(
                         this,
                         REQUEST_CODE,
-                        getDeleteIntent(this, path.toString()),
+                        getDeleteIntent(this, uri.toString()),
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .build();
 
