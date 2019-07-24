@@ -8534,7 +8534,10 @@ public class Notification implements Parcelable
          * If set and the app creating the bubble is in the foreground, the bubble will be posted
          * in its expanded state, with the contents of {@link #getIntent()} in a floating window.
          *
-         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble.</p>
@@ -8547,7 +8550,10 @@ public class Notification implements Parcelable
          * If set and the app posting the bubble is in the foreground, the bubble will
          * be posted <b>without</b> the associated notification in the notification shade.
          *
-         * <p>If the app posting the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble, or if the user has seen the content in the notification and the
@@ -8801,6 +8807,8 @@ public class Notification implements Parcelable
              * {@link #getIntent()} in a floating window).
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
@@ -8819,6 +8827,8 @@ public class Notification implements Parcelable
              * the notification shade.
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
