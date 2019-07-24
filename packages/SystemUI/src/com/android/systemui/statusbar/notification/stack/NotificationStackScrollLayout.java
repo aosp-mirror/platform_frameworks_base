@@ -500,6 +500,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
+    private boolean mWillExpand;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -2549,13 +2550,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             return;
         }
-        int minTopPosition = 0;
+        int minTopPosition;
         NotificationSection lastSection = getLastVisibleSection();
         boolean onKeyguard = mStatusBarState == StatusBarState.KEYGUARD;
         if (!onKeyguard) {
             minTopPosition = (int) (mTopPadding + mStackTranslation);
         } else if (lastSection == null) {
             minTopPosition = mTopPadding;
+        } else {
+            // The first sections could be empty while there could still be elements in later
+            // sections. The position of these first few sections is determined by the position of
+            // the first visible section.
+            NotificationSection firstVisibleSection = getFirstVisibleSection();
+            firstVisibleSection.updateBounds(0 /* minTopPosition*/, 0 /* minBottomPosition */,
+                    false /* shiftPulsingWithFirst */);
+            minTopPosition = firstVisibleSection.getBounds().top;
         }
         boolean shiftPulsingWithFirst = mHeadsUpManager.getAllEntries().count() <= 1
                 && (mAmbientState.isDozing()
@@ -4398,6 +4407,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStateAnimator.setShadeExpanded(isExpanded);
         mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
+            mWillExpand = false;
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
                 mExpandHelper.cancelImmediately();
@@ -5047,7 +5057,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
-            if (!mIsExpanded && !isHeadsUp) {
+            if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
                 row.setHeadsUpAnimatingAway(true);
             }
             requestChildrenUpdate();
@@ -5066,6 +5076,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);
         requestChildrenUpdate();
+    }
+
+    @Override
+    public void setWillExpand(boolean willExpand) {
+        mWillExpand = willExpand;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

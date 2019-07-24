@@ -28,6 +28,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -51,7 +52,7 @@ public class UnlockMethodCache {
     private boolean mTrustManaged;
     private boolean mTrusted;
     private boolean mDebugUnlocked = false;
-    private boolean mIsUnlockingWithFacePossible;
+    private boolean mFaceAuthEnabled;
 
     private UnlockMethodCache(Context ctx) {
         mLockPatternUtils = new LockPatternUtils(ctx);
@@ -110,8 +111,8 @@ public class UnlockMethodCache {
     /**
      * If there are faces enrolled and user enabled face auth on keyguard.
      */
-    public boolean isUnlockingWithFacePossible() {
-        return mIsUnlockingWithFacePossible;
+    public boolean isFaceAuthEnabled() {
+        return mFaceAuthEnabled;
     }
 
     private void update(boolean updateAlways) {
@@ -122,16 +123,16 @@ public class UnlockMethodCache {
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean isUnlockingWithFacePossible = mKeyguardUpdateMonitor.isUnlockWithFacePossible(user);
+        boolean faceAuthEnabled = mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(user);
         boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer
                 || trustManaged != mTrustManaged
-                || mIsUnlockingWithFacePossible != isUnlockingWithFacePossible;
+                || mFaceAuthEnabled != faceAuthEnabled;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanSkipBouncer = canSkipBouncer;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
-            mIsUnlockingWithFacePossible = isUnlockingWithFacePossible;
+            mFaceAuthEnabled = faceAuthEnabled;
             notifyListeners();
         }
         Trace.endSection();
@@ -141,6 +142,16 @@ public class UnlockMethodCache {
         for (OnUnlockMethodChangedListener listener : mListeners) {
             listener.onUnlockMethodStateChanged();
         }
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("UnlockMethodCache");
+        pw.println("  mSecure: " + mSecure);
+        pw.println("  mCanSkipBouncer: " + mCanSkipBouncer);
+        pw.println("  mTrustManaged: " + mTrustManaged);
+        pw.println("  mTrusted: " + mTrusted);
+        pw.println("  mDebugUnlocked: " + mDebugUnlocked);
+        pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
     }
 
     private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
