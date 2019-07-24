@@ -64,12 +64,13 @@ public class CustomScrollView extends ScrollView {
             return;
         }
 
+        mWidth = MeasureSpec.getSize(widthMeasureSpec);
         calculateDimensions();
         setMeasuredDimension(mWidth, mHeight);
     }
 
     private void calculateDimensions() {
-        if (mWidth != -1) return;
+        if (mHeight != -1) return;
 
         final TypedValue typedValue = new TypedValue();
         final Point point = new Point();
@@ -81,7 +82,6 @@ public class CustomScrollView extends ScrollView {
         final int childHeight = child.getMeasuredHeight();
         final int maxHeight = (int) typedValue.getFraction(point.y, point.y);
 
-        mWidth = point.x;
         mHeight = Math.min(childHeight, maxHeight);
         if (sDebug) {
             Slog.d(TAG, "calculateDimensions(): maxHeight=" + maxHeight

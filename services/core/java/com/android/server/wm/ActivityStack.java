@@ -58,6 +58,8 @@ import static com.android.server.wm.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityRecord.FINISH_AFTER_VISIBLE;
 import static com.android.server.wm.ActivityRecord.FINISH_IMMEDIATELY;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -1151,13 +1153,6 @@ class ActivityStack extends ConfigurationContainer {
             return mTaskHistory.get(size - 1);
         }
         return null;
-    }
-
-    private TaskRecord bottomTask() {
-        if (mTaskHistory.isEmpty()) {
-            return null;
-        }
-        return mTaskHistory.get(0);
     }
 
     TaskRecord taskForIdLocked(int id) {
@@ -2787,8 +2782,8 @@ class ActivityStack extends ConfigurationContainer {
                 !mLastNoHistoryActivity.finishing) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
-            requestFinishActivityLocked(mLastNoHistoryActivity.appToken, Activity.RESULT_CANCELED,
-                    null, "resume-no-history", false);
+            mLastNoHistoryActivity.finishActivityLocked(Activity.RESULT_CANCELED,
+                    null /* resultData */, "resume-no-history", false /* oomAdj */);
             mLastNoHistoryActivity = null;
         }
 
@@ -3023,8 +3018,8 @@ class ActivityStack extends ConfigurationContainer {
                 // If any exception gets thrown, toss away this
                 // activity and try the next one.
                 Slog.w(TAG, "Exception thrown during resume of " + next, e);
-                requestFinishActivityLocked(next.appToken, Activity.RESULT_CANCELED, null,
-                        "resume-exception", true);
+                next.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                        "resume-exception", true /* oomAdj */);
                 return true;
             }
         } else {
@@ -3452,7 +3447,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (DEBUG_TASKS) Slog.w(TAG_TASKS,
                             "resetTaskIntendedTask: calling finishActivity on " + p);
                     if (p.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
-                            "reset-task", false /* oomAdj */)) {
+                            "reset-task", false /* oomAdj */) == FINISH_RESULT_REMOVED) {
                         end--;
                         srcPos--;
                     }
@@ -3760,10 +3755,9 @@ class ActivityStack extends ConfigurationContainer {
             if (!r.finishing) {
                 if (!shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
-                    if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                            "stop-no-history", false)) {
-                        // If {@link requestFinishActivityLocked} returns {@code true},
-                        // {@link adjustFocusedActivityStack} would have been already called.
+                    if (r.finishActivityLocked(Activity.RESULT_CANCELED, null /* resultData */,
+                            "stop-no-history", false /* oomAdj */) != FINISH_RESULT_CANCELLED) {
+                        // {@link adjustFocusedActivityStack} must have been already called.
                         r.resumeKeyDispatchingLocked();
                         return;
                     }
@@ -3812,25 +3806,7 @@ class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    /**
-     * @return Returns true if the activity is being finished, false if for
-     * some reason it is being left as-is.
-     */
-    final boolean requestFinishActivityLocked(IBinder token, int resultCode,
-            Intent resultData, String reason, boolean oomAdj) {
-        ActivityRecord r = isInStackLocked(token);
-        if (DEBUG_RESULTS || DEBUG_STATES) Slog.v(TAG_STATES,
-                "Finishing activity token=" + token + " r="
-                + ", result=" + resultCode + ", data=" + resultData
-                + ", reason=" + reason);
-        if (r == null) {
-            return false;
-        }
-
-        r.finishActivityLocked(resultCode, resultData, reason, oomAdj);
-        return true;
-    }
-
+    /** Finish all activities that were started for result from the specified activity. */
     final void finishSubActivityLocked(ActivityRecord self, String resultWho, int requestCode) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
@@ -4052,8 +4028,8 @@ class ActivityStack extends ConfigurationContainer {
         }
         final long origId = Binder.clearCallingIdentity();
         for (int i = start; i > finishTo; i--) {
-            ActivityRecord r = activities.get(i);
-            requestFinishActivityLocked(r.appToken, resultCode, resultData, "navigate-up", true);
+            final ActivityRecord r = activities.get(i);
+            r.finishActivityLocked(resultCode, resultData, "navigate-up", true /* oomAdj */);
             // Only return the supplied result for the first activity finished
             resultCode = Activity.RESULT_CANCELED;
             resultData = null;
@@ -4090,8 +4066,8 @@ class ActivityStack extends ConfigurationContainer {
                 } catch (RemoteException e) {
                     foundParentInTask = false;
                 }
-                requestFinishActivityLocked(parent.appToken, resultCode,
-                        resultData, "navigate-top", true);
+                parent.finishActivityLocked(resultCode, resultData, "navigate-top",
+                        true /* oomAdj */);
             }
         }
         Binder.restoreCallingIdentity(origId);

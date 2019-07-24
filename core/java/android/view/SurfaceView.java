@@ -96,7 +96,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * artifacts may occur on previous versions of the platform when its window is
  * positioned asynchronously.</p>
  */
-public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallback {
+public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCallback {
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_POSITION = false;
@@ -227,9 +227,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         mRequestedVisible = mViewVisibility && mWindowVisibility && !mWindowStopped;
     }
 
-    /** @hide */
-    @Override
-    public void windowStopped(boolean stopped) {
+    private void setWindowStopped(boolean stopped) {
         mWindowStopped = stopped;
         updateRequestedVisibility();
         updateSurface();
@@ -239,7 +237,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        getViewRootImpl().addWindowStoppedCallback(this);
+        getViewRootImpl().addSurfaceChangedCallback(this);
         mWindowStopped = false;
 
         mViewVisibility = getVisibility() == VISIBLE;
@@ -459,7 +457,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         // the lifecycle. Instead of attaching it to a view, he/she can just pass
         // the SurfaceHolder forward, most live wallpapers do it.
         if (viewRoot != null) {
-            viewRoot.removeWindowStoppedCallback(this);
+            viewRoot.removeSurfaceChangedCallback(this);
         }
 
         mAttachedToWindow = false;
@@ -1348,5 +1346,34 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
      */
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
+    }
+
+    /**
+     * Set window stopped to false and update surface visibility when ViewRootImpl surface is
+     * created.
+     * @hide
+     */
+    @Override
+    public void surfaceCreated(SurfaceControl.Transaction t) {
+        setWindowStopped(false);
+    }
+
+    /**
+     * Set window stopped to true and update surface visibility when ViewRootImpl surface is
+     * destroyed.
+     * @hide
+     */
+    @Override
+    public void surfaceDestroyed() {
+        setWindowStopped(true);
+    }
+
+    /**
+     * Called when a valid ViewRootImpl surface is replaced by another valid surface.
+     * @hide
+     */
+    @Override
+    public void surfaceReplaced(SurfaceControl.Transaction t) {
+
     }
 }

@@ -84,6 +84,7 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PRE
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
+import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -1560,13 +1561,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
                 return true;
             }
             // Keep track of the root activity of the task before we finish it
             final TaskRecord tr = r.getTaskRecord();
-            ActivityRecord rootR = tr.getRootActivity();
+            final ActivityRecord rootR = tr.getRootActivity();
             if (rootR == null) {
                 Slog.w(TAG, "Finishing task with all activities already finished");
             }
@@ -1616,7 +1617,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
-                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false,
+                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false /* killProcess */,
                             finishWithRootActivity, "finish-activity");
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
@@ -1624,8 +1625,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    res = tr.getStack().requestFinishActivityLocked(token, resultCode,
-                            resultData, "app-request", true);
+                    res = r.finishActivityLocked(resultCode, resultData, "app-request",
+                            true /* oomAdj */) != FINISH_RESULT_CANCELLED;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
                     }
@@ -1649,7 +1650,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
                 // can finish.
-                final TaskRecord task = r.getTaskRecord();
                 if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }

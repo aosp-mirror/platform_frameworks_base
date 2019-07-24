@@ -63,6 +63,10 @@
 
 #include "BootAnimation.h"
 
+#define ANIM_PATH_MAX 255
+#define STR(x)   #x
+#define STRTO(x) STR(x)
+
 namespace android {
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
@@ -96,7 +100,7 @@ static constexpr size_t FONT_NUM_ROWS = FONT_NUM_CHARS / FONT_NUM_COLS;
 static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
-static const int ANIM_ENTRY_NAME_MAX = 256;
+static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
 
 // ---------------------------------------------------------------------------
@@ -694,7 +698,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
             animation.width = width;
             animation.height = height;
             animation.fps = fps;
-        } else if (sscanf(l, " %c %d %d %s #%6s %16s %16s",
+        } else if (sscanf(l, " %c %d %d %" STRTO(ANIM_PATH_MAX) "s #%6s %16s %16s",
                           &pathType, &count, &pause, path, color, clockPos1, clockPos2) >= 4) {
             //SLOGD("> type=%c, count=%d, pause=%d, path=%s, color=%s, clockPos1=%s, clockPos2=%s",
             //    pathType, count, pause, path, color, clockPos1, clockPos2);

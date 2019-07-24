@@ -41,7 +41,6 @@
 #include <utils/Looper.h>
 #include <utils/threads.h>
 #include <utils/Trace.h>
-#include <utils/SortedVector.h>
 
 #include <binder/IServiceManager.h>
 
@@ -307,7 +306,7 @@ private:
         wp<PointerController> pointerController;
 
         // Input devices to be disabled
-        SortedVector<int32_t> disabledInputDevices;
+        std::set<int32_t> disabledInputDevices;
 
         // Associated Pointer controller display.
         int32_t pointerDisplayId;
@@ -898,13 +897,13 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ssize_t index = mLocked.disabledInputDevices.indexOf(deviceId);
-        bool currentlyEnabled = index < 0;
+        auto it = mLocked.disabledInputDevices.find(deviceId);
+        bool currentlyEnabled = it == mLocked.disabledInputDevices.end();
         if (!enabled && currentlyEnabled) {
-            mLocked.disabledInputDevices.add(deviceId);
+            mLocked.disabledInputDevices.insert(deviceId);
         }
         if (enabled && !currentlyEnabled) {
-            mLocked.disabledInputDevices.remove(deviceId);
+            mLocked.disabledInputDevices.erase(deviceId);
         }
     } // release lock
 

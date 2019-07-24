@@ -454,6 +454,11 @@ public class NotificationPanelView extends PanelView implements
         mPulseExpansionHandler.setUp(mNotificationStackScroller, this, mShadeController);
         mWakeUpCoordinator.addListener(new NotificationWakeUpCoordinator.WakeUpListener() {
             @Override
+            public void onFullyHiddenChanged(boolean isFullyHidden) {
+                updateKeyguardStatusBarForHeadsUp();
+            }
+
+            @Override
             public void onPulseExpansionChanged(boolean expandingChanged) {
                 if (mKeyguardBypassController.getBypassEnabled()) {
                     // Position the notifications while dragging down while pulsing

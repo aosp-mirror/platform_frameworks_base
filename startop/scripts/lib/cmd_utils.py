@@ -26,6 +26,18 @@ import lib.print_utils as print_utils
 TIMEOUT = 50
 SIMULATE = False
 
+def run_command_nofail(cmd: List[str], **kwargs) -> None:
+  """Runs cmd list with default timeout.
+
+     Throws exception if the execution fails.
+  """
+  my_kwargs = {"timeout": TIMEOUT, "shell": False, "simulate": False}
+  my_kwargs.update(kwargs)
+  passed, out = execute_arbitrary_command(cmd, **my_kwargs)
+  if not passed:
+    raise RuntimeError(
+      "Failed to execute %s (kwargs=%s), output=%s" % (cmd, kwargs, out))
+
 def run_adb_shell_command(cmd: str) -> Tuple[bool, str]:
   """Runs command using adb shell.
 
