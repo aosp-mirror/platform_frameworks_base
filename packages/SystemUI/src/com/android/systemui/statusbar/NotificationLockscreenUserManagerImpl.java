@@ -33,7 +33,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -302,7 +301,7 @@ public class NotificationLockscreenUserManagerImpl implements
                         Notification.VISIBILITY_SECRET;
     }
 
-    public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
+    public boolean shouldShowOnKeyguard(NotificationEntry entry) {
         if (getEntryManager() == null) {
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return false;
@@ -310,10 +309,10 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean exceedsPriorityThreshold;
         if (NotificationUtils.useNewInterruptionModel(mContext)
                 && hideSilentNotificationsOnLockscreen()) {
-            exceedsPriorityThreshold = getEntryManager().getNotificationData().isHighPriority(sbn);
+            exceedsPriorityThreshold = entry.isTopBucket();
         } else {
             exceedsPriorityThreshold =
-                    !getEntryManager().getNotificationData().isAmbient(sbn.getKey());
+                    !getEntryManager().getNotificationData().isAmbient(entry.key);
         }
         return mShowLockscreenNotifications && exceedsPriorityThreshold;
     }
