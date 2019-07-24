@@ -17,29 +17,32 @@
 package com.android.systemui.shared.system;
 
 import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 
-public class RecentTaskInfoCompat {
+public class TaskInfoCompat {
 
-    private ActivityManager.RecentTaskInfo mInfo;
-
-    public RecentTaskInfoCompat(ActivityManager.RecentTaskInfo info) {
-        mInfo = info;
+    public static int getUserId(TaskInfo info) {
+        return info.userId;
     }
 
-    public int getUserId() {
-        return mInfo.userId;
+    public static int getActivityType(TaskInfo info) {
+        return info.configuration.windowConfiguration.getActivityType();
     }
 
-    public boolean supportsSplitScreenMultiWindow() {
-        return mInfo.supportsSplitScreenMultiWindow;
+    public static int getWindowingMode(TaskInfo info) {
+        return info.configuration.windowConfiguration.getWindowingMode();
     }
 
-    public ComponentName getTopActivity() {
-        return mInfo.topActivity;
+    public static boolean supportsSplitScreenMultiWindow(TaskInfo info) {
+        return info.supportsSplitScreenMultiWindow;
     }
 
-    public ActivityManager.TaskDescription getTaskDescription() {
-        return mInfo.taskDescription;
+    public static ComponentName getTopActivity(TaskInfo info) {
+        return info.topActivity;
+    }
+
+    public static ActivityManager.TaskDescription getTaskDescription(TaskInfo info) {
+        return info.taskDescription;
     }
 }
