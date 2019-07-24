@@ -1560,9 +1560,15 @@ public class NotificationPanelView extends PanelView implements
         anim.setStartDelay(mKeyguardMonitor.isKeyguardFadingAway()
                 ? mKeyguardMonitor.getKeyguardFadingAwayDelay()
                 : 0);
-        anim.setDuration(mKeyguardMonitor.isKeyguardFadingAway()
-                ? mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2
-                : StackStateAnimator.ANIMATION_DURATION_STANDARD);
+
+        long duration;
+        if (mKeyguardMonitor.isKeyguardFadingAway()) {
+            duration = mKeyguardMonitor.getShortenedFadingAwayDuration();
+        } else {
+            duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
+        }
+        anim.setDuration(duration);
+
         anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1605,7 +1611,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardBottomArea.animate()
                     .alpha(0f)
                     .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
-                    .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2)
+                    .setDuration(mKeyguardMonitor.getShortenedFadingAwayDuration())
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .withEndAction(mAnimateKeyguardBottomAreaInvisibleEndRunnable)
                     .start();
@@ -1634,7 +1640,7 @@ public class NotificationPanelView extends PanelView implements
             if (keyguardFadingAway) {
                 mKeyguardStatusView.animate()
                         .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
-                        .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2)
+                        .setDuration(mKeyguardMonitor.getShortenedFadingAwayDuration())
                         .start();
             }
         } else if (mBarState == StatusBarState.SHADE_LOCKED
