@@ -5437,10 +5437,11 @@ public class Notification implements Parcelable
         /**
          * Construct a RemoteViews for the display in public contexts like on the lockscreen.
          *
+         * @param isLowPriority is this notification low priority
          * @hide
          */
         @UnsupportedAppUsage
-        public RemoteViews makePublicContentView() {
+        public RemoteViews makePublicContentView(boolean isLowPriority) {
             if (mN.publicVersion != null) {
                 final Builder builder = recoverBuilder(mContext, mN.publicVersion);
                 return builder.createContentView();
@@ -5467,7 +5468,11 @@ public class Notification implements Parcelable
             }
             mN.extras = publicExtras;
             RemoteViews view;
-            view = makeNotificationHeader();
+            StandardTemplateParams params = mParams.reset().fillTextsFrom(this);
+            if (isLowPriority) {
+                params.forceDefaultColor();
+            }
+            view = makeNotificationHeader(params);
             view.setBoolean(R.id.notification_header, "setExpandOnlyOnButton", true);
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
