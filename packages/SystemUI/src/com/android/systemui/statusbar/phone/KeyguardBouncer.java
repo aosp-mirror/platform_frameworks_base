@@ -207,14 +207,12 @@ public class KeyguardBouncer {
      * @see #onFullyShown()
      */
     private void onFullyHidden() {
-        if (!mShowingSoon) {
-            cancelShowRunnable();
-            if (mRoot != null) {
-                mRoot.setVisibility(View.INVISIBLE);
-            }
-            mFalsingManager.onBouncerHidden();
-            DejankUtils.postAfterTraversal(mResetRunnable);
+        cancelShowRunnable();
+        if (mRoot != null) {
+            mRoot.setVisibility(View.INVISIBLE);
         }
+        mFalsingManager.onBouncerHidden();
+        DejankUtils.postAfterTraversal(mResetRunnable);
     }
 
     private final Runnable mShowRunnable = new Runnable() {
