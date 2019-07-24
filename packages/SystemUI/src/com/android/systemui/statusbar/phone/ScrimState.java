@@ -129,7 +129,10 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0f;
             mCurrentBehindTint = Color.BLACK;
+            mCurrentInFrontTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
+            mAnimationDuration = mWakeLockScreenSensorActive
+                    ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
         }
 
         @Override
