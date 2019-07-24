@@ -271,15 +271,6 @@ public class StackAnimationController extends
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 /* destination */ null);
 
-        setEndActionForMultipleProperties(
-                () -> {
-                    mRestingStackPosition = new PointF();
-                    mRestingStackPosition.set(mStackPosition);
-                    removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
-                    removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
-                },
-                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-
         // If we're flinging now, there's no more touch event to catch up to.
         mFirstBubbleSpringingToTouch = false;
         mIsMovingFromFlinging = true;
@@ -368,6 +359,9 @@ public class StackAnimationController extends
 
                 .addEndListener((animation, canceled, endValue, endVelocity) -> {
                     if (!canceled) {
+                        mRestingStackPosition = new PointF();
+                        mRestingStackPosition.set(mStackPosition);
+
                         springFirstBubbleWithStackFollowing(property, spring, endVelocity,
                                 finalPosition != null
                                         ? finalPosition
@@ -664,10 +658,6 @@ public class StackAnimationController extends
 
         if (mLayout.getChildCount() > 0) {
             animationForChildAtIndex(0).translationX(mStackPosition.x).start();
-        } else {
-            // Set the start position back to the default since we're out of bubbles. New bubbles
-            // will then animate in from the start position.
-            mStackPosition = getDefaultStartPosition();
         }
     }
 
