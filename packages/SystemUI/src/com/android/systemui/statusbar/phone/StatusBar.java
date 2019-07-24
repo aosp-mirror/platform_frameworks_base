@@ -1806,6 +1806,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 }
                 mNotificationPanel.expand(true /* animate */);
+                ((NotificationListContainer) mStackScroller).setWillExpand(true);
+                mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
                 mNotificationPanel.flingSettings(0 /* velocity */,
@@ -1943,7 +1945,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (start) {
             mNotificationPanel.startWaitingForOpenPanelGesture();
-            setPanelExpanded(true);
         } else {
             mNotificationPanel.stopWaitingForOpenPanelGesture(velocity);
         }
