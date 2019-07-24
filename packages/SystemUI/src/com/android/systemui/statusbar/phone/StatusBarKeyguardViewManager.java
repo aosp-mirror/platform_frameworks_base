@@ -70,7 +70,7 @@ import java.util.ArrayList;
  */
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
-        NotificationPanelView.PanelExpansionListener, NavigationModeController.ModeChangedListener {
+        PanelExpansionListener, NavigationModeController.ModeChangedListener {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -223,7 +223,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
                 mExpansionCallback, falsingManager);
         mNotificationPanelView = notificationPanelView;
-        notificationPanelView.setExpansionListener(this);
+        notificationPanelView.addExpansionListener(this);
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
     }
