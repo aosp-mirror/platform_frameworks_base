@@ -269,7 +269,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
      */
     private void updateBiometricRetry() {
         SecurityMode securityMode = getSecurityMode();
-        mSwipeUpToRetry = mUnlockMethodCache.isUnlockingWithFacePossible()
+        mSwipeUpToRetry = mUnlockMethodCache.isFaceAuthEnabled()
                 && securityMode != SecurityMode.SimPin
                 && securityMode != SecurityMode.SimPuk
                 && securityMode != SecurityMode.None;

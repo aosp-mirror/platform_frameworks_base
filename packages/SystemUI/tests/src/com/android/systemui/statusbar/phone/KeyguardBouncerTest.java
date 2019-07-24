@@ -379,7 +379,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Test
     public void testShow_delaysIfFaceAuthIsRunning() {
-        when(mUnlockMethodCache.isUnlockingWithFacePossible()).thenReturn(true);
+        when(mUnlockMethodCache.isFaceAuthEnabled()).thenReturn(true);
         mBouncer.show(true /* reset */);
 
         ArgumentCaptor<Runnable> showRunnable = ArgumentCaptor.forClass(Runnable.class);
