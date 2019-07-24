@@ -606,4 +606,37 @@ final class UsageStatsProto {
 
         proto.flush();
     }
+
+    // TODO: move to UsageStatsProtoV2
+    static void readPendingEvents(InputStream in, List<UsageEvents.Event> events)
+            throws IOException {
+        final ProtoInputStream proto = new ProtoInputStream(in);
+        final List<String> stringPool = new ArrayList<>();
+        final IntervalStats tmpStatsObj = new IntervalStats();
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) IntervalStatsProto.PENDING_EVENTS:
+                    loadEvent(proto, IntervalStatsProto.PENDING_EVENTS, tmpStatsObj, stringPool);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    final int eventCount = tmpStatsObj.events.size();
+                    for (int i = 0; i < eventCount; i++) {
+                        events.add(tmpStatsObj.events.get(i));
+                    }
+                    return;
+            }
+        }
+    }
+
+    // TODO: move to UsageStatsProtoV2
+    static void writePendingEvents(OutputStream out, List<UsageEvents.Event> events)
+            throws IOException {
+        final ProtoOutputStream proto = new ProtoOutputStream(out);
+        final IntervalStats tmpStatsObj = new IntervalStats();
+        final int eventCount = events.size();
+        for (int i = 0; i < eventCount; i++) {
+            writeEvent(proto, IntervalStatsProto.PENDING_EVENTS, tmpStatsObj, events.get(i));
+        }
+        proto.flush();
+    }
 }

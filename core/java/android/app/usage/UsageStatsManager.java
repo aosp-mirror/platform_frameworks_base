@@ -31,6 +31,7 @@ import android.content.pm.ParceledListSlice;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 
 import java.lang.annotation.Retention;
@@ -290,6 +291,9 @@ public final class UsageStatsManager {
      * </p>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -324,6 +328,9 @@ public final class UsageStatsManager {
      * the specified interval. The results are ordered as in
      * {@link #queryUsageStats(int, long, long)}.
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -362,6 +369,9 @@ public final class UsageStatsManager {
      * </ul>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -395,6 +405,9 @@ public final class UsageStatsManager {
      * Query for events in the given time range. Events are only kept by the system for a few
      * days.
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      *                 Defined in terms of "Unix time", see
@@ -418,6 +431,9 @@ public final class UsageStatsManager {
 
     /**
      * Like {@link #queryEvents(long, long)}, but only returns events for the calling package.
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      *                 Defined in terms of "Unix time", see

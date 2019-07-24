@@ -34,7 +34,10 @@ import static org.junit.Assert.fail;
 
 import android.app.usage.UsageEvents.Event;
 import android.os.Parcel;
+import android.os.UserHandle;
+import android.support.test.uiautomator.UiDevice;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -118,6 +121,15 @@ public class UsageStatsTest {
         left.add(right);
 
         assertEquals(left.getTotalTimeInForeground(), 11);
+    }
+
+    @Test
+    public void testDataIsInCe() throws Exception {
+        final int userId = UserHandle.myUserId();
+        final String expectedPath = "/data/system_ce/" + userId + "/usagestats";
+        final String actualPath = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                .executeShellCommand("dumpsys usagestats stats-directory " + userId).trim();
+        assertEquals(expectedPath, actualPath);
     }
 
     @Test
