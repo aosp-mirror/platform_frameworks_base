@@ -16,7 +16,13 @@
 
 package com.android.systemui.classifier.brightline;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE;
+
 import android.graphics.Point;
+import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -37,8 +43,34 @@ class ZigZagClassifier extends FalsingClassifier {
     private static final float MAX_X_SECONDARY_DEVIANCE = .3f;
     private static final float MAX_Y_SECONDARY_DEVIANCE = .3f;
 
+    private final float mMaxXPrimaryDeviance;
+    private final float mMaxYPrimaryDeviance;
+    private final float mMaxXSecondaryDeviance;
+    private final float mMaxYSecondaryDeviance;
+
     ZigZagClassifier(FalsingDataProvider dataProvider) {
         super(dataProvider);
+
+        mMaxXPrimaryDeviance = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE,
+                MAX_X_PRIMARY_DEVIANCE);
+
+        mMaxYPrimaryDeviance = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE,
+                MAX_Y_PRIMARY_DEVIANCE);
+
+        mMaxXSecondaryDeviance = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE,
+                MAX_X_SECONDARY_DEVIANCE);
+
+        mMaxYSecondaryDeviance = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE,
+                MAX_Y_SECONDARY_DEVIANCE);
+
     }
 
     @Override
@@ -98,11 +130,11 @@ class ZigZagClassifier extends FalsingClassifier {
         float maxXDeviance;
         float maxYDeviance;
         if (actualDx > actualDy) {
-            maxXDeviance = MAX_X_PRIMARY_DEVIANCE * totalDistanceIn * getXdpi();
-            maxYDeviance = MAX_Y_SECONDARY_DEVIANCE * totalDistanceIn * getYdpi();
+            maxXDeviance = mMaxXPrimaryDeviance * totalDistanceIn * getXdpi();
+            maxYDeviance = mMaxYSecondaryDeviance * totalDistanceIn * getYdpi();
         } else {
-            maxXDeviance = MAX_X_SECONDARY_DEVIANCE * totalDistanceIn * getXdpi();
-            maxYDeviance = MAX_Y_PRIMARY_DEVIANCE * totalDistanceIn * getYdpi();
+            maxXDeviance = mMaxXSecondaryDeviance * totalDistanceIn * getXdpi();
+            maxYDeviance = mMaxYPrimaryDeviance * totalDistanceIn * getYdpi();
         }
 
         logDebug("Straightness Deviance: (" + devianceX + "," + devianceY + ") vs "
