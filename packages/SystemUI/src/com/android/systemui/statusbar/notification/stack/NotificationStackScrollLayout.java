@@ -500,6 +500,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
+    private boolean mWillExpand;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -4406,6 +4407,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStateAnimator.setShadeExpanded(isExpanded);
         mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
+            mWillExpand = false;
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
                 mExpandHelper.cancelImmediately();
@@ -5055,7 +5057,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
-            if (!mIsExpanded && !isHeadsUp) {
+            if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
                 row.setHeadsUpAnimatingAway(true);
             }
             requestChildrenUpdate();
@@ -5074,6 +5076,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);
         requestChildrenUpdate();
+    }
+
+    @Override
+    public void setWillExpand(boolean willExpand) {
+        mWillExpand = willExpand;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
