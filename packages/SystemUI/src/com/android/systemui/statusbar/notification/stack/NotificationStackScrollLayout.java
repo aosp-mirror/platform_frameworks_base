@@ -5683,6 +5683,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             // The bottom might change because we're using the final actual height of the view
             mAnimateBottomOnLayout = true;
         }
+        // Let's update the footer once the notifications have been updated (in the next frame)
+        post(this::updateFooter);
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {
