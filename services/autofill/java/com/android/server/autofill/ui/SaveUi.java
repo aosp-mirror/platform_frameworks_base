@@ -40,6 +40,10 @@ import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -60,11 +64,14 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Autofill Save Prompt
@@ -158,6 +165,7 @@ final class SaveUi {
     private final ComponentName mComponentName;
     private final boolean mCompatMode;
     private final int mThemeId;
+    private final int mType;
 
     private boolean mDestroyed;
 
@@ -179,8 +187,17 @@ final class SaveUi {
         context = new ContextThemeWrapper(context, mThemeId) {
             @Override
             public void startActivity(Intent intent) {
+                if (intent.resolveActivity(getPackageManager()) == null) {
+                    return;
+                }
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
+
                 PendingIntent p = PendingIntent.getActivity(this, 0, intent, 0);
-                mListener.startIntentSender(p.getIntentSender(), intent);
+                if (sDebug) {
+                    Slog.d(TAG, "startActivity add save UI restored with intent=" + intent);
+                }
+                // Apply restore mechanism
+                startIntentSenderWithRestore(p, intent);
             }
         };
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -189,12 +206,12 @@ final class SaveUi {
         final TextView titleView = view.findViewById(R.id.autofill_save_title);
 
         final ArraySet<String> types = new ArraySet<>(3);
-        final int type = info.getType();
+        mType = info.getType();
 
-        if ((type & SaveInfo.SAVE_DATA_TYPE_PASSWORD) != 0) {
+        if ((mType & SaveInfo.SAVE_DATA_TYPE_PASSWORD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_password));
         }
-        if ((type & SaveInfo.SAVE_DATA_TYPE_ADDRESS) != 0) {
+        if ((mType & SaveInfo.SAVE_DATA_TYPE_ADDRESS) != 0) {
             types.add(context.getString(R.string.autofill_save_type_address));
         }
 
@@ -202,20 +219,20 @@ final class SaveUi {
         final int cardTypeMask = SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD
                         | SaveInfo.SAVE_DATA_TYPE_DEBIT_CARD
                         | SaveInfo.SAVE_DATA_TYPE_PAYMENT_CARD;
-        final int count = Integer.bitCount(type & cardTypeMask);
-        if (count > 1 || (type & SaveInfo.SAVE_DATA_TYPE_GENERIC_CARD) != 0) {
+        final int count = Integer.bitCount(mType & cardTypeMask);
+        if (count > 1 || (mType & SaveInfo.SAVE_DATA_TYPE_GENERIC_CARD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_generic_card));
-        } else if ((type & SaveInfo.SAVE_DATA_TYPE_PAYMENT_CARD) != 0) {
+        } else if ((mType & SaveInfo.SAVE_DATA_TYPE_PAYMENT_CARD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_payment_card));
-        } else if ((type & SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD) != 0) {
+        } else if ((mType & SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_credit_card));
-        } else if ((type & SaveInfo.SAVE_DATA_TYPE_DEBIT_CARD) != 0) {
+        } else if ((mType & SaveInfo.SAVE_DATA_TYPE_DEBIT_CARD) != 0) {
             types.add(context.getString(R.string.autofill_save_type_debit_card));
         }
-        if ((type & SaveInfo.SAVE_DATA_TYPE_USERNAME) != 0) {
+        if ((mType & SaveInfo.SAVE_DATA_TYPE_USERNAME) != 0) {
             types.add(context.getString(R.string.autofill_save_type_username));
         }
-        if ((type & SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS) != 0) {
+        if ((mType & SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS) != 0) {
             types.add(context.getString(R.string.autofill_save_type_email_address));
         }
 
@@ -257,11 +274,12 @@ final class SaveUi {
         } else {
             mSubTitle = info.getDescription();
             if (mSubTitle != null) {
-                writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE, type);
+                writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE);
                 final ViewGroup subtitleContainer =
                         view.findViewById(R.id.autofill_save_custom_subtitle);
                 final TextView subtitleView = new TextView(context);
                 subtitleView.setText(mSubTitle);
+                applyMovementMethodIfNeed(subtitleView);
                 subtitleContainer.addView(subtitleView,
                         new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -318,8 +336,7 @@ final class SaveUi {
         if (customDescription == null) {
             return false;
         }
-        final int type = info.getType();
-        writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
+        writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION);
 
         final RemoteViews template = customDescription.getPresentation();
         if (template == null) {
@@ -342,26 +359,15 @@ final class SaveUi {
 
         final RemoteViews.OnClickHandler handler = (view, pendingIntent, response) -> {
             Intent intent = response.getLaunchOptions(view).first;
-            final LogMaker log =
-                    newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
-            // We need to hide the Save UI before launching the pending intent, and
-            // restore back it once the activity is finished, and that's achieved by
-            // adding a custom extra in the activity intent.
             final boolean isValid = isValidLink(pendingIntent, intent);
             if (!isValid) {
+                final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, mType);
                 log.setType(MetricsEvent.TYPE_UNKNOWN);
                 mMetricsLogger.write(log);
                 return false;
             }
-            if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
-            final IBinder token = mPendingUi.getToken();
-            intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-            mListener.startIntentSender(pendingIntent.getIntentSender(), intent);
-            mPendingUi.setState(PendingUi.STATE_PENDING);
-            if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-            hide();
-            log.setType(MetricsEvent.TYPE_OPEN);
-            mMetricsLogger.write(log);
+
+            startIntentSenderWithRestore(pendingIntent, intent);
             return true;
         };
 
@@ -442,6 +448,8 @@ final class SaveUi {
                 }
             }
 
+            applyTextViewStyle(customSubtitleView);
+
             // Finally, add the custom description to the save UI.
             final ViewGroup subtitleContainer =
                     saveUiView.findViewById(R.id.autofill_save_custom_subtitle);
@@ -455,6 +463,60 @@ final class SaveUi {
             Slog.e(TAG, "Error applying custom description. ", e);
         }
         return false;
+    }
+
+    private void startIntentSenderWithRestore(@NonNull PendingIntent pendingIntent,
+            @NonNull Intent intent) {
+        if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+
+        // We need to hide the Save UI before launching the pending intent, and
+        // restore back it once the activity is finished, and that's achieved by
+        // adding a custom extra in the activity intent.
+        final IBinder token = mPendingUi.getToken();
+        intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+
+        mListener.startIntentSender(pendingIntent.getIntentSender(), intent);
+        mPendingUi.setState(PendingUi.STATE_PENDING);
+
+        if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+        hide();
+
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, mType);
+        log.setType(MetricsEvent.TYPE_OPEN);
+        mMetricsLogger.write(log);
+    }
+
+    private void applyTextViewStyle(@NonNull View rootView) {
+        final List<TextView> textViews = new ArrayList<>();
+        final Predicate<View> predicate = (view) -> {
+            if (view instanceof TextView) {
+                // Collects TextViews
+                textViews.add((TextView) view);
+            }
+            return false;
+        };
+
+        // Traverses all TextViews, enables movement method if the TextView contains URLSpan
+        rootView.findViewByPredicate(predicate);
+        final int size = textViews.size();
+        for (int i = 0; i < size; i++) {
+            applyMovementMethodIfNeed(textViews.get(i));
+        }
+    }
+
+    private void applyMovementMethodIfNeed(@NonNull TextView textView) {
+        final CharSequence message = textView.getText();
+        if (TextUtils.isEmpty(message)) {
+            return;
+        }
+
+        final SpannableStringBuilder ssb = new SpannableStringBuilder(message);
+        final ClickableSpan[] spans = ssb.getSpans(0, ssb.length(), ClickableSpan.class);
+        if (ArrayUtils.isEmpty(spans)) {
+            return;
+        }
+
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
@@ -506,8 +568,8 @@ final class SaveUi {
                 mPendingUi.sessionId, mCompatMode);
     }
 
-    private void writeLog(int category, int saveType) {
-        mMetricsLogger.write(newLogMaker(category, saveType));
+    private void writeLog(int category) {
+        mMetricsLogger.write(newLogMaker(category, mType));
     }
 
     /**
