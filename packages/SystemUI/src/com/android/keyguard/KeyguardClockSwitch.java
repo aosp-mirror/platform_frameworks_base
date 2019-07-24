@@ -540,6 +540,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         @Override
         public Animator onAppear(ViewGroup sceneRoot, View view, TransitionValues startValues,
                 TransitionValues endValues) {
+            if (!sceneRoot.isShown()) {
+                return null;
+            }
             final float cutoff = mCutoff;
             final int startVisibility = View.INVISIBLE;
             final int endVisibility = (int) endValues.values.get(PROPNAME_VISIBILITY);
@@ -552,6 +555,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         @Override
         public Animator onDisappear(ViewGroup sceneRoot, View view, TransitionValues startValues,
                 TransitionValues endValues) {
+            if (!sceneRoot.isShown()) {
+                return null;
+            }
             final float cutoff = 1f - mCutoff;
             final int startVisibility = View.VISIBLE;
             final int endVisibility = (int) endValues.values.get(PROPNAME_VISIBILITY);
