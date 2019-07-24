@@ -2477,7 +2477,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // transformed the task.
         final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
         if (controller != null && controller.isAnimatingTask(getTask())
-                && controller.shouldCancelWithDeferredScreenshot()) {
+                && controller.shouldDeferCancelUntilNextTransition()) {
             return false;
         }
 
