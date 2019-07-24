@@ -126,6 +126,17 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
             "android.bluetooth.headsetclient.profile.action.RESULT";
 
     /**
+     * Intent that notifies about vendor specific event arrival. Events not defined in
+     * HFP spec will be matched with supported vendor event list and this intent will
+     * be broadcasted upon a match. Supported vendor events are of format of
+     * of "+eventCode" or "+eventCode=xxxx" or "+eventCode:=xxxx".
+     * Vendor event can be a response to an vendor specific command or unsolicited.
+     *
+     */
+    public static final String ACTION_VENDOR_SPECIFIC_HEADSETCLIENT_EVENT =
+            "android.bluetooth.headsetclient.profile.action.VENDOR_SPECIFIC_EVENT";
+
+    /**
      * Intent that notifies about the number attached to the last voice tag
      * recorded on AG.
      *
@@ -242,6 +253,28 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public static final String EXTRA_CME_CODE =
             "android.bluetooth.headsetclient.extra.CME_CODE";
+
+    /**
+     * Extra for VENDOR_SPECIFIC_HEADSETCLIENT_EVENT intent that
+     * indicates vendor ID.
+     */
+    public static final String EXTRA_VENDOR_ID =
+            "android.bluetooth.headsetclient.extra.VENDOR_ID";
+
+     /**
+     * Extra for VENDOR_SPECIFIC_HEADSETCLIENT_EVENT intent that
+     * indicates vendor event code.
+     */
+    public static final String EXTRA_VENDOR_EVENT_CODE =
+            "android.bluetooth.headsetclient.extra.VENDOR_EVENT_CODE";
+
+     /**
+     * Extra for VENDOR_SPECIFIC_HEADSETCLIENT_EVENT intent that
+     * contains full vendor event including event code and full arguments.
+     */
+    public static final String EXTRA_VENDOR_EVENT_FULL_ARGS =
+            "android.bluetooth.headsetclient.extra.VENDOR_EVENT_FULL_ARGS";
+
 
     /* Extras for AG_FEATURES, extras type is boolean */
     // TODO verify if all of those are actually useful
@@ -579,6 +612,31 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.startVoiceRecognition(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * Send vendor specific AT command.
+     *
+     * @param device remote device
+     * @param vendorId vendor number by Bluetooth SIG
+     * @param atCommand command to be sent. It start with + prefix and only one command at one time.
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise.
+     */
+    public boolean sendVendorAtCommand(BluetoothDevice device, int vendorId,
+                                             String atCommand) {
+        if (DBG) log("sendVendorSpecificCommand()");
+        final IBluetoothHeadsetClient service =
+                getService();
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return service.sendVendorAtCommand(device, vendorId, atCommand);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
