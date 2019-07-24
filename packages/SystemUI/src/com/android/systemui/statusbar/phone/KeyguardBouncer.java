@@ -170,7 +170,7 @@ public class KeyguardBouncer {
 
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
-        if (mUnlockMethodCache.isUnlockingWithFacePossible() && !needsFullscreenBouncer()
+        if (mUnlockMethodCache.isFaceAuthEnabled() && !needsFullscreenBouncer()
                 && !mKeyguardUpdateMonitor.userNeedsStrongAuth()) {
             mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
         } else {
