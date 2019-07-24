@@ -263,6 +263,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     when(notifRow.getVisibility()).thenReturn(View.VISIBLE);
                     when(notifRow.getEntry().isHighPriority())
                             .thenReturn(children[i] == ChildType.HIPRI);
+                    when(notifRow.getEntry().isTopBucket())
+                            .thenReturn(children[i] == ChildType.HIPRI);
                     when(notifRow.getParent()).thenReturn(mNssl);
                     child = notifRow;
                     break;
