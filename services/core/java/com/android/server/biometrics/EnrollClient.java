@@ -31,11 +31,11 @@ import java.util.Arrays;
  * A class to keep track of the enrollment state for a given client.
  */
 public abstract class EnrollClient extends ClientMonitor {
-    private static final long MS_PER_SEC = 1000;
-    private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
     private final int[] mDisabledFeatures;
+    private final int mTimeoutSec;
+
     private long mEnrollmentStartTimeMs;
 
     public abstract boolean shouldVibrate();
@@ -44,12 +44,13 @@ public abstract class EnrollClient extends ClientMonitor {
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
-            final int[] disabledFeatures) {
+            final int[] disabledFeatures, int timeoutSec) {
         super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
+        mTimeoutSec = timeoutSec;
     }
 
     @Override
@@ -94,14 +95,13 @@ public abstract class EnrollClient extends ClientMonitor {
     @Override
     public int start() {
         mEnrollmentStartTimeMs = System.currentTimeMillis();
-        final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
         try {
             final ArrayList<Integer> disabledFeatures = new ArrayList<>();
             for (int i = 0; i < mDisabledFeatures.length; i++) {
                 disabledFeatures.add(mDisabledFeatures[i]);
             }
 
-            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), timeout,
+            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), mTimeoutSec,
                     disabledFeatures);
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
